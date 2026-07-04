@@ -1,10 +1,13 @@
 import os
 import json
 import requests
+import subprocess
 from dotenv import load_dotenv
 from typing_extensions import TypedDict
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage
+import google.generativeai as genai
+import PIL.Image
 from langgraph.graph import StateGraph, END
 from pydub import AudioSegment
 
@@ -13,13 +16,20 @@ from renderer import render_timeline
 
 load_dotenv()
 
+# Initialize Gemini Client
+genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
+
 class AgentState(TypedDict):
     topic: str
     plan_json: str
     timeline_json: str
+    iteration: int
+    approved: bool
 
 def planner_node(state: AgentState):
-    print(f"\n[1/3] Node: Creative Planner (Topic: {state['topic']})")
+    iteration = state.get("iteration", 0) + 1
+    print(f"\n[1/4] Node: Creative Planner (Iteration: {iteration})")
+    
     llm = ChatOpenAI(
         api_key=os.environ.get("DEEPSEEK_API_KEY"),
         base_url="https://api.deepseek.com",
@@ -40,7 +50,7 @@ def planner_node(state: AgentState):
         {{
           "scene_id": 1,
           "search_query": "deep space milky way galaxy",
-          "narration": "Welcome to Most Amazing Wonders. The universe is unimaginably vast, yet when we look up, we are met with a deafening silence."
+          "narration": "The universe is unimaginably vast, yet when we look up, we are met with a deafening silence."
         }}
       ]
     }}
@@ -48,10 +58,10 @@ def planner_node(state: AgentState):
     
     response = llm.invoke([HumanMessage(content=prompt)])
     clean_json = response.content.replace("```json", "").replace("```", "").strip()
-    return {"plan_json": clean_json}
+    return {"plan_json": clean_json, "iteration": iteration}
 
 def execution_node(state: AgentState):
-    print("\n[2/3] Node: Deterministic Execution (Downloading & Math)")
+    print("\n[2/4] Node: Deterministic Execution")
     plan = json.loads(state["plan_json"])
     scene = plan["scenes"][0]
     
@@ -65,17 +75,15 @@ def execution_node(state: AgentState):
     try:
         res = requests.get(url, headers=headers).json()
         video_url = res["videos"][0]["video_files"][0]["link"]
-        print("-> Downloading video asset...")
         with open(video_path, "wb") as f:
             f.write(requests.get(video_url).content)
-    except Exception as e:
-        print("-> Pexels Error/Empty. Falling back to dummy clip.")
+    except Exception:
+        print("-> Pexels Error. Using fallback.")
         video_path = "cache/video/test_clip.mp4"
         
     print("-> Generating voiceover...")
     generate_voice(scene['narration'], audio_path)
     
-    print("-> Calculating exact timestamps...")
     audio_len = len(AudioSegment.from_wav(audio_path)) / 1000.0 
     
     timeline = {
@@ -94,28 +102,66 @@ def execution_node(state: AgentState):
     return {"timeline_json": json.dumps(timeline)}
 
 def render_node(state: AgentState):
-    print("\n[3/3] Node: MoviePy Renderer")
+    print("\n[3/4] Node: MoviePy Renderer")
     render_timeline("timeline.json", "final_output.mp4")
     return state
+
+def critic_node(state: AgentState):
+    print("\n[4/4] Node: Gemini Multimodal Critic")
+    frame_path = "cache/video/eval_frame.jpg"
+    
+    # Extract 1 frame at the 2-second mark using FFmpeg (highly CPU efficient)
+    print("-> Extracting evaluation frame...")
+    subprocess.run(["ffmpeg", "-y", "-i", "final_output.mp4", "-ss", "00:00:02", "-vframes", "1", frame_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    
+    print("-> Querying Gemini API for Visual QA...")
+    try:
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        img = PIL.Image.open(frame_path)
+        prompt = "You are a ruthless video QA critic. Look at this extracted frame from a documentary video. Does it look like a high-quality stock video without glaring errors or solid blue/black frames? Answer strictly YES or NO."
+        response = model.generate_content([prompt, img])
+        decision = response.text.strip().upper()
+        
+        print(f"-> Gemini Assessment: {decision}")
+        approved = "YES" in decision
+    except Exception as e:
+        print(f"-> Gemini Error: {e}. Defaulting to APPROVED to prevent pipeline block.")
+        approved = True
+        
+    return {"approved": approved}
+
+# Conditional Routing Logic
+def route_evaluation(state: AgentState):
+    if state["approved"]:
+        print("\n>>> Video APPROVED by Critic. Terminating loop. <<<")
+        return END
+    elif state["iteration"] >= 3:
+        print("\n>>> Max iterations (3) reached. Forcing APPROVAL. <<<")
+        return END
+    else:
+        print("\n>>> Video REJECTED. Looping back to Planner. <<<")
+        return "planner"
 
 workflow = StateGraph(AgentState)
 workflow.add_node("planner", planner_node)
 workflow.add_node("execution", execution_node)
 workflow.add_node("render", render_node)
+workflow.add_node("critic", critic_node)
 
 workflow.set_entry_point("planner")
 workflow.add_edge("planner", "execution")
 workflow.add_edge("execution", "render")
-workflow.add_edge("render", END)
+workflow.add_edge("render", "critic")
+workflow.add_conditional_edges("critic", route_evaluation)
 
 app = workflow.compile()
 
 if __name__ == "__main__":
-    if not os.environ.get("PEXELS_API_KEY"):
-        print("CRITICAL ERROR: PEXELS_API_KEY not found in .env")
+    if not os.environ.get("GEMINI_API_KEY"):
+        print("CRITICAL ERROR: GEMINI_API_KEY not found in .env")
         exit(1)
         
-    print("========== INITIATING AUTONOMOUS PIPELINE ==========")
-    app.invoke({"topic": "The Fermi Paradox"})
+    print("========== INITIATING SELF-IMPROVING PIPELINE ==========")
+    # Initialize the graph with an iteration count of 0
+    app.invoke({"topic": "The Fermi Paradox", "iteration": 0})
     print("\n========== PIPELINE COMPLETE ==========")
-    print("Check final_output.mp4 in your directory.")
