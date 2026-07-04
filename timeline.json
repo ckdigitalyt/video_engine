@@ -1,22 +1,25 @@
 {
   "render_settings": {
-    "resolution": [1920, 1080],
+    "resolution": [
+      1920,
+      1080
+    ],
     "fps": 30
   },
   "audio_timeline": [
     {
       "track": "voice",
-      "file": "cache/audio/test_audio.wav",
+      "file": "cache/audio/scene_1.wav",
       "start_time": 0.0,
-      "end_time": 5.0
+      "end_time": 9.216
     }
   ],
   "video_timeline": [
     {
       "layer": 1,
-      "file": "cache/video/test_clip.mp4",
+      "file": "cache/video/scene_1.mp4",
       "start_time": 0.0,
-      "end_time": 5.0,
+      "end_time": 9.216,
       "transition_out": "none"
     }
   ]
