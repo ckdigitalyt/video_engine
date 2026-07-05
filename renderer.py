@@ -5,23 +5,24 @@ def render_timeline(json_path, output_path):
     with open(json_path, 'r') as f:
         timeline = json.load(f)
 
+    target_res = tuple(timeline['render_settings']['resolution'])
+
     audio_clips = []
     for audio in timeline['audio_timeline']:
-        clip = AudioFileClip(audio['file'])
-        clip = clip.set_start(audio['start_time'])
+        clip = AudioFileClip(audio['file']).set_start(audio['start_time'])
         audio_clips.append(clip)
 
     video_clips = []
     for video in timeline['video_timeline']:
-        clip = VideoFileClip(video['file'])
+        # Enforce the resolution contract on the incoming asset
+        clip = VideoFileClip(video['file']).resize(newsize=target_res)
         clip = clip.set_start(video['start_time']).set_end(video['end_time'])
         video_clips.append(clip)
 
     final_audio = CompositeAudioClip(audio_clips)
-    final_video = CompositeVideoClip(video_clips, size=tuple(timeline['render_settings']['resolution']))
-    final_video = final_video.set_audio(final_audio)
+    final_video = CompositeVideoClip(video_clips, size=target_res).set_audio(final_audio)
 
-    print(f"Rendering {output_path} on CPU... This will take time.")
+    print(f"Rendering {output_path} on CPU...")
     final_video.write_videofile(
         output_path, 
         fps=timeline['render_settings']['fps'], 
