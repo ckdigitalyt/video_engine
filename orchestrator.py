@@ -118,7 +118,7 @@ def critic_node(state: AgentState):
     try:
         model = genai.GenerativeModel('gemini-1.5-flash')
         img = PIL.Image.open(frame_path)
-        prompt = "You are a ruthless video QA critic. Look at this extracted frame from a documentary video. Does it look like a high-quality stock video without glaring errors or solid blue/black frames? Answer strictly YES or NO."
+        prompt = "You are a ruthless video QA critic. Analyze this extracted frame. You MUST REJECT it (Answer NO) if you see ANY of the following: 1. Large black borders, letterboxing, or pillarboxing. 2. The video not filling the entire frame. 3. Solid blue or black error frames. If the image perfectly fills the screen and looks cinematic, answer YES."
         response = model.generate_content([prompt, img])
         decision = response.text.strip().upper()
         
