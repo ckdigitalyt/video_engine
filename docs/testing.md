@@ -53,7 +53,7 @@ All 7 test files avoid calling real services:
 | Service | Mock Strategy |
 |---------|---------------|
 | **DeepSeek** (ChatOpenAI) | `mock_deepseek_llm` fixture patches `langchain_openai.ChatOpenAI` |
-| **Gemini** (GenerativeModel) | `mock_gemini_llm` fixture patches `google.generativeai.GenerativeModel` |
+| **Gemini** (google.genai.Client) | `mock_gemini_llm` fixture patches `google.genai.Client` |
 | **Pexels** (requests.get) | `mock_pexels_api` fixture patches `requests.get` with canned JSON |
 | **Kokoro** (ONNX infer) | `mock_kokoro_tts` fixture patches `kokoro_onnx.Kokoro` + `soundfile.write` |
 | **MoviePy** (encoding) | Mocked at `VideoFileClip`/`AudioFileClip`/`CompositeVideoClip` level |
@@ -72,7 +72,7 @@ Shared fixtures available to every test:
 | `mock_env_api_keys` | Sets fake `DEEPSEEK_API_KEY`, `GEMINI_API_KEY`, `PEXELS_API_KEY` |
 | `mock_pexels_api` | Patches `requests.get` for Pexels search responses |
 | `mock_deepseek_llm` | Patches `ChatOpenAI` for DeepSeek text responses |
-| `mock_gemini_llm` | Patches `GenerativeModel` for Gemini critic responses |
+| `mock_gemini_llm` | Patches `genai.Client` for Gemini critic responses |
 | `mock_kokoro_tts` | Patches `Kokoro` + `sf.write` for TTS generation |
 
 ## Writing Tests
