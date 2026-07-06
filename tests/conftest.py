@@ -31,7 +31,7 @@ def tmp_project(tmp_path: Path) -> Generator[Path, None, None]:
     # Minimal config stub so load_config() returns something useful
     min_config = {
         "models.yaml": "llm:\n  deepseek:\n    model: deepseek-chat\n    max_tokens: 1000\n    temperature: 0.7\n  gemini:\n    model: models/gemini-2.5-flash-lite\n",
-        "render.yaml": "render:\n  resolution:\n    width: 1920\n    height: 1080\n  fps: 30\n  codec: libx264\n  audio_codec: aac\n  threads: 4\n  preset: fast\noutput:\n  default: final_output.mp4\n",
+        "render.yaml": "render:\n  resolution:\n    width: 1920\n    height: 1080\n  fps: 30\n  codec: libx264\n  audio_codec: aac\n  threads: 4\n  preset: fast\nsubtitles:\n  enabled: true\n  font_size: 28\n  bottom_margin: 80\n  color: \"#FFFFFF\"\n  outline: \"#000000\"\n  shadow: \"#000000\"\n  max_words_per_line: 4\n  animation: fade\n  min_silence_ms: 200\n  silence_thresh: -40\noutput:\n  default: final_output.mp4\n",
         "pipeline.yaml": "pipeline:\n  max_iterations: 3\n  cache:\n    video: cache/video\n    audio: cache/audio\n  fallback:\n    video: cache/video/none.mp4\n  output:\n    default: final_output.mp4\n  cache_db: cache/asset_cache.db\n  cache_max_size_mb: 500\n  memory:\n    db_path: cache/memory.db\n    retention_days: 90\n    max_execution_logs: 1000\n    cleanup_interval_runs: 10\n  critic:\n    frame_extraction_ss: \"00:00:02\"\n    eval_frame: cache/video/eval_frame.jpg\n",
         "providers.yaml": "providers:\n  pexels:\n    base_url: https://api.pexels.com/videos/search\n    per_page: 5\n    orientation: landscape\n    reuse:\n      enabled: true\n      similarity_threshold: 0.45\n      max_candidates: 5\n  deepseek:\n    base_url: https://api.deepseek.com\n",
         "voices.yaml": "voices:\n  kokoro:\n    model: kokoro-v0_19.onnx\n    voices_bin: voices.bin\n    default_voice: bm_george\n    speed: 1.0\n    language: en-gb\n  mixing:\n    ducking_db: -12\n    tail_ms: 2000\n    fade_in_ms: 3000\n    fade_out_ms: 3000\n    music_volume_db: 0.0\n    background_music: cache/music/cinematic.mp3\n",
@@ -191,3 +191,19 @@ def mock_kokoro_tts() -> Generator[MagicMock, None, None]:
         engine_instance.create.return_value = ([0] * 44100, 44100)
         mock_kokoro.return_value = engine_instance
         yield mock_kokoro
+
+
+@pytest.fixture
+def mock_subtitle_wav(tmp_path: Path) -> Path:
+    """Create a minimal valid WAV file for subtitle timing tests."""
+    import wave, struct
+    path = tmp_path / "narration.wav"
+    sample_rate = 44100
+    num_samples = int(sample_rate * 0.5)  # 0.5 s
+    with wave.open(str(path), "wb") as wf:
+        wf.setnchannels(1)
+        wf.setsampwidth(2)
+        wf.setframerate(sample_rate)
+        for _ in range(num_samples):
+            wf.writeframes(struct.pack("<h", 5000))
+    return path

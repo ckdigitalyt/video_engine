@@ -21,6 +21,21 @@ render:
   # FFmpeg preset (fast, medium, slow, etc.)
   preset: "fast"
 
+# Subtitles configuration (word-level, animated)
+subtitles:
+  enabled: true
+  font: "Arial"
+  font_size: 28
+  color: "#FFFFFF"
+  outline: "#000000"
+  shadow: "#000000"
+  bottom_margin: 80
+  max_words_per_line: 4
+  animation: "fade"  # static | fade | karaoke | pop
+  # Silence detection tuning for word-timing estimation
+  min_silence_ms: 200
+  silence_thresh: -40
+
 output:
   # Default output filename when none is specified
   default: "final_output.mp4"
