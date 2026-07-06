@@ -5,13 +5,15 @@ from dotenv import load_dotenv
 from typing_extensions import TypedDict
 from langgraph.graph import StateGraph, END
 
+from google.api_core.exceptions import NotFound, ResourceExhausted, PermissionDenied, InvalidArgument
+
 from audio_engine import generate_voice
 from renderer import render_timeline
 from src.utils.config import get_config
 from src.providers import DeepSeekProvider, GeminiProvider, PexelsProvider
 from src.renderer.timeline_builder import TimelineBuilder
 from src.memory.memory_manager import MemoryManager
-from src.models import Scene, SceneAsset
+from src.models import Scene, SceneAsset, CriticResult
 
 load_dotenv()
 
@@ -32,6 +34,7 @@ class AgentState(TypedDict):
     timeline_json: str
     iteration: int
     approved: bool
+    critic_result: str  # JSON-serialized CriticResult
 
 
 def planner_node(state: AgentState):
@@ -143,12 +146,56 @@ def critic_node(state: AgentState):
         decision = gemini.generate_text(prompt, image_path=frame_path).upper()
 
         print(f"-> Gemini Assessment: {decision}")
-        approved = "YES" in decision
-    except Exception as e:
-        print(f"-> Gemini Error: {e}. Defaulting to APPROVED to prevent pipeline block.")
-        approved = True
+        # Parse the decision — must contain YES for approval
+        if "YES" in decision:
+            approved = True
+            reason = "Frame passed visual QA (YES detected)"
+        else:
+            approved = False
+            reason = f"Frame rejected: {decision[:200]}"
 
-    return {"approved": approved}
+        result = CriticResult(approved=approved, decision=decision, error=None)
+
+    except NotFound as e:
+        print(f"✗ CRITICAL CONFIG ERROR: Gemini model not found: {e}")
+        print("  -> Update 'llm.gemini.model' in configs/models.yaml to a supported model.")
+        print("  -> Defaulting to APPROVED to unblock pipeline.")
+        approved = True
+        result = CriticResult(approved=False, error=f"Configuration error: model not found — {e}")
+
+    except ResourceExhausted as e:
+        print(f"✗ GEMINI QUOTA EXHAUSTED: {e}")
+        print("  -> Free-tier quota may be depleted. Wait or upgrade.")
+        print("  -> Defaulting to APPROVED to unblock pipeline.")
+        approved = True
+        result = CriticResult(approved=False, error=f"Resource exhausted (quota): {e}")
+
+    except PermissionDenied as e:
+        print(f"✗ GEMINI AUTH ERROR: Invalid or missing GEMINI_API_KEY")
+        print("  -> Check .env file and GEMINI_API_KEY value.")
+        print("  -> Defaulting to APPROVED to unblock pipeline.")
+        approved = True
+        result = CriticResult(approved=False, error=f"Authentication error: {e}")
+
+    except InvalidArgument as e:
+        print(f"✗ GEMINI ARGUMENT ERROR: Invalid configuration: {e}")
+        print("  -> Check model name and parameters in configs/models.yaml.")
+        print("  -> Defaulting to APPROVED to unblock pipeline.")
+        approved = True
+        result = CriticResult(approved=False, error=f"Invalid argument: {e}")
+
+    except Exception as e:
+        print(f"✗ GEMINI UNKNOWN ERROR: {e}")
+        print("  -> Defaulting to APPROVED to prevent pipeline block.")
+        approved = True
+        result = CriticResult(approved=False, error=f"Unknown error: {e}")
+
+    print(f"-> CriticResult: approved={result.approved}, error={result.error}")
+    return {"approved": approved, "critic_result": json.dumps({
+        "approved": result.approved,
+        "decision": result.decision,
+        "error": result.error,
+    })}
 
 
 # Conditional Routing Logic

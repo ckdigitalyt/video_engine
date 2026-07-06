@@ -55,7 +55,7 @@ When `image_path` is provided, the image is loaded with PIL and sent alongside t
 
 | Config key | Default |
 |------------|---------|
-| `llm.gemini.model` | `"gemini-1.5-flash"` |
+| `llm.gemini.model` | `"models/gemini-2.5-flash-lite"` |
 
 **Environment:** `GEMINI_API_KEY`
 
