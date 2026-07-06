@@ -1,119 +1,186 @@
-# Planner Module
+# Story Planning Engine
 
-The **Creative Planner** is the first node in the video_engine pipeline. It
-generates a structured, multi-scene script from a topic string using a
-large language model (DeepSeek by default).
+## Overview
 
----
+The Story Planning Engine upgrades video planning from independent scene
+generation to **structured storytelling**.
 
-## Planning Strategy
+Instead of asking the LLM to produce scenes directly, the engine works in
+**two phases**:
 
-The planner follows a **director-agent** pattern: it receives a topic and
-produces a complete storyboard covering the introduction, body, and
-conclusion.  No iterative refinement is performed at this stage — that's
-handled by the critic loop.
+1. **Outline Generation** — Creates a narrative arc aligned to a story template.
+2. **Scene Expansion** — Produces rich, continuity-aware scene descriptions
+   from the outline.
 
-The prompt instructs the LLM to:
-
-1. **Scope the topic** — determine depth, complexity, and number of scenes.
-2. **Generate 8–15 scenes** depending on topic length and richness.
-3. **Assign unique search queries** for visual asset retrieval.
-4. **Write narration** that fits within `estimated_duration` at ~3 words/second.
-5. **Enforce logical progression** — open with a hook, develop the
-   argument, conclude decisively.
-6. **Avoid duplicates** — no repeated scenes, titles, queries, or
-   narration.
+This produces videos with a clear **beginning, middle, and ending**, better
+pacing, reduced repetition, and search queries optimised for stock footage.
 
 ---
 
-## Scene Ordering
+## Architecture
 
-Scenes are ordered by `scene_id` (1-indexed).  The planner is given a
-single constraint: the sequence must feel natural from start to finish.
-No reordering is performed downstream — the Timeline Builder consumes
-scenes sorted by `scene_id`.
+```
+┌─────────────────────────────────────────────────────┐
+│                    StoryPlanner                      │
+│  ┌─────────────┐          ┌──────────────────────┐  │
+│  │ Phase 1     │  outline  │  Phase 2             │  │
+│  │ Outline     │──────────▶│  Scene Generation    │──┼──▶ plan_json
+│  │ Generation  │  JSON     │  (from outline)      │  │
+│  └─────────────┘          └──────────────────────┘  │
+│         │                           ▲                │
+│         │ uses                      │ uses           │
+│         ▼                           │                │
+│  ┌─────────────┐                    │                │
+│  │  StoryTemplate / LLMProvider     │                │
+│  └─────────────┘────────────────────┘                │
+└─────────────────────────────────────────────────────┘
+```
 
-A typical arc:
+### Provider Independence
 
-| Position | Purpose                   |
-|----------|---------------------------|
-| 1–2      | Hook / establish stakes   |
-| 3–10     | Develop the argument      |
-| 11–15    | Conclusion / call to action |
-
----
-
-## Duration Estimation
-
-Each scene carries an `estimated_duration` field (seconds).  The planner
-calculates this based on narration word count (~3 words/second).  The
-actual timeline duration is determined later by measuring the generated
-audio file with pydub, so `estimated_duration` is an approximate guide for
-the planner, not a hard constraint.
-
----
-
-## Search-Query Generation
-
-Each scene receives a unique `search_query` for the Pexels video search API.
-The planner is instructed to:
-
-- Vary queries so that the same footage is not returned for different
-  scenes.
-- Use descriptive, visually-rich terms (e.g. `"Fermi Paradox illustration
-  aliens"` rather than `"space"`).
-- Avoid queries that could return unrelated or low-quality results.
-
-The PexelsProvider caches results by `(provider, search_query)` in the
-AssetCache, so re-running the same plan on the same topic reuses assets.
+The `StoryPlanner` depends only on the `LLMProvider` interface (not
+DeepSeek or Gemini directly). Any provider implementing `generate_json()`
+works.
 
 ---
 
-## Output Format
+## Story Templates
 
-The planner returns a JSON object matching this schema:
+Templates define the **narrative role of each scene** in the video.
+
+### Built-in templates
+
+| Template | Roles | Use case |
+|----------|-------|----------|
+| `documentary` | Hook → Context → Exploration → Climax → Conclusion | General documentaries |
+| `problem_resolution` | Problem → Investigation → Resolution | Explainer / problem-solution content |
+| `timeline` | Opening → Event 1 → Event 2 → Event 3 → Closing | Historical / chronological stories |
+| `listicle` | Intro → Point 1 → Point 2 → Point 3 → Outro | Top-N, list-based content |
+
+### Custom templates
+
+Add new templates in `configs/planner.yaml`:
+
+```yaml
+planner:
+  story_templates:
+    my_custom_template:
+      roles:
+        - "Teaser — A hook that hints at the conclusion"
+        - "Backstory — The context needed to understand"
+        - "Reveal — The key insight or discovery"
+        - "Impact — What this means going forward"
+      description: "Custom template with a teaser → reveal structure."
+```
+
+---
+
+## Configuration
+
+All planning behaviour is governed by `configs/planner.yaml`:
+
+```yaml
+planner:
+  story_template: "documentary"        # Active template
+  target_scene_count: 10               # Minimum scenes (may expand to 15)
+  target_duration: 120                 # Target video length (seconds)
+  words_per_second: 3                  # Narration pace
+  narration_style: "informative but conversational"
+  search_query_style: "descriptive, landscape stock footage terms"
+```
+
+---
+
+## Outline Generation (Phase 1)
+
+The outline prompt instructs the LLM to produce a **narrative framework**
+before any scene details. Each outline item specifies:
+
+- **Role** — The narrative purpose (e.g. "Hook", "Climax")
+- **Purpose** — What this scene uniquely contributes
+- **Continuity** — How it connects to surrounding scenes
+- **Visual Style** — Type of stock footage suitable
+
+### Example output
 
 ```json
 {
+  "narrative_arc": "Explores the vastness of space and the silence of the cosmos.",
   "scenes": [
     {
-      "scene_id": 1,
-      "title": "The Vast Cosmos",
-      "search_query": "deep space milky way galaxy",
-      "narration": "The universe is unimaginably vast...",
-      "estimated_duration": 10
+      "role": "Hook",
+      "purpose": "Grab viewer attention with a startling fact about cosmic silence.",
+      "continuity": "Opens the video — no prior context needed.",
+      "visual_style": "Deep space wide shot with stars and galaxies"
+    },
+    {
+      "role": "Context",
+      "purpose": "Explain the Drake Equation and why we expect alien life.",
+      "continuity": "Builds on the hook by giving scientific background.",
+      "visual_style": "Animated equation overlay with celestial background"
     }
   ]
 }
 ```
 
-This is stored as `plan_json` in the AgentState and consumed by the
-execution node.
+---
+
+## Scene Generation (Phase 2)
+
+The scene prompt includes:
+
+- The full narrative outline as context
+- The topic and target parameters
+- Narration style and search query style instructions
+- The exact schema required
+
+Scenes produced by Phase 2 follow the same schema as before, so the
+execution node in `orchestrator.py` works unchanged.
 
 ---
 
-## Validation
+## Orchestrator Integration
 
-The planner output is **not explicitly validated** beyond what the LLM
-produces.  Downstream validation occurs in the:
+The orchestrator's `planner_node` now uses `StoryPlanner` instead of a
+raw prompt:
 
-- **Timeline Builder** — checks file existence, monotonic timestamps,
-  no overlapping clips, matching audio/video durations.
-- **Critic** — validates the rendered video frame-by-frame and can reject
-  and re-trigger the planner.
+```python
+def planner_node(state: AgentState):
+    iteration = state.get("iteration", 0) + 1
+    planner = StoryPlanner(provider=deepseek)
+    content = planner.generate_plan(state["topic"])
+    return {"plan_json": content, "iteration": iteration}
+```
+
+No other nodes (execution, render, critic) needed changes.
 
 ---
 
-## Future Research-Agent Integration
+## Testing
 
-Future iterations may replace the single LLM call with a **research-agent
-pattern**:
+| Area | What it verifies |
+|------|-----------------|
+| **Templates** | All built-in templates loaded, correct role counts, fallback for unknown |
+| **Outline** | JSON structure, topic in prompt, template roles in prompt, target scene count |
+| **Scene phase** | Outline context passed, narration style, output structure |
+| **Full pipeline** | Both phases called, returns valid JSON, works with all templates |
+| **Config** | All planner keys present in YAML, proper default values |
+| **Edge cases** | Empty topic, zero target, no-scene outline, long duration |
 
-1. **Research agent** gathers facts, quotes, and references about the
-   topic using web search.
-2. **Planner** receives the research summary and produces a richer,
-   factually-grounded script.
-3. **Fact-checker** validates claims before rendering.
+---
 
-This would require no changes to the execution, renderer, or critic nodes —
-the planner's output schema is the only interface contract.
+## Extension Points
+
+### New story templates
+Add entries to `configs/planner.yaml` under `planner.story_templates`.
+
+### Custom narration styles
+Change `planner.narration_style` in YAML — will be injected into prompts.
+
+### Search query optimisation
+Modify `planner.search_query_style` to tune stock footage results.
+
+### Embedding-based outline selection (future)
+The template system is config-driven and can support dynamic template
+selection via cosine similarity between topic embeddings and template
+descriptions without changing the public API.

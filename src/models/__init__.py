@@ -212,3 +212,23 @@ class UploadJob:
     privacy_status: str = "public"
     channel_id: str = ""
     status: str = "pending"
+
+
+# ── Story planning models ────────────────────────────────────────────────────
+
+@dataclass
+class OutlineScene:
+    """A single scene in a narrative outline."""
+
+    role: str = ""
+    purpose: str = ""
+    continuity: str = ""
+    visual_style: str = ""
+
+
+@dataclass
+class StoryOutline:
+    """Complete narrative outline for a video project."""
+
+    narrative_arc: str = ""
+    scenes: list[OutlineScene] = field(default_factory=list)

@@ -14,6 +14,7 @@ from src.renderer.moviepy_renderer import MoviePyRenderer
 from src.utils.config import get_config
 from src.providers import DeepSeekProvider, GeminiProvider, PexelsProvider
 from src.assets.asset_library import AssetLibrary
+from src.planner import StoryPlanner
 from src.renderer.timeline_builder import TimelineBuilder
 from src.memory.memory_manager import MemoryManager
 from src.models import Scene, SceneAsset, CriticResult
@@ -49,40 +50,10 @@ class AgentState(TypedDict):
 
 def planner_node(state: AgentState):
     iteration = state.get("iteration", 0) + 1
-    print(f"\n[1/4] Node: Creative Planner (Iteration: {iteration})")
+    print(f"\n[1/4] Node: Story Planning Engine (Iteration: {iteration})")
 
-    prompt = f"""
-    You are the Director Agent for a YouTube documentary channel.
-    Topic: "{state['topic']}"
-
-    Create a multi-scene short documentary script with 8 to 15 scenes.
-    Output ONLY a raw, valid JSON object. Do not use markdown.
-
-    Exact Schema Required:
-    {{
-      "scenes": [
-        {{
-          "scene_id": 1,
-          "title": "The Vast Cosmos",
-          "search_query": "deep space milky way galaxy",
-          "narration": "The universe is unimaginably vast, yet when we look up, we are met with a deafening silence.",
-          "estimated_duration": 10
-        }}
-      ]
-    }}
-
-    Rules:
-    1. Number of scenes must be between 8 and 15, scaled to topic depth.
-    2. Each scene_id starts at 1 and increments by 1.
-    3. Narration text must be roughly 3 words per second of estimated_duration.
-       Example: estimated_duration 10 → narration ≈ 30 words.
-    4. search_query must be unique across all scenes.
-    5. Ensure logical progression — open strongly, develop the argument, conclude.
-    6. No duplicated scenes, titles, or narration.
-    7. Smooth narrative transitions between consecutive scenes.
-    """
-
-    content = deepseek.generate_json(prompt)
+    planner = StoryPlanner(provider=deepseek)
+    content = planner.generate_plan(state["topic"])
     return {"plan_json": content, "iteration": iteration}
 
 

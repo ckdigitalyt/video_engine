@@ -26,6 +26,7 @@ _CONFIG_FILES = [
     "providers.yaml",
     "voices.yaml",
     "logging.yaml",
+    "planner.yaml",
 ]
 
 _cache = None
