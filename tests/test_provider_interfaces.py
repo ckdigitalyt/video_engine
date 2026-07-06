@@ -91,6 +91,7 @@ class TestGeminiProvider:
         provider = GeminiProvider()
         result = provider.generate_text("Hello")
         assert isinstance(result, str)
+        # The mock should stub response.text = "APPROVED"
         assert result == "APPROVED"
 
     def test_generate_text_with_image_path(self, mock_gemini_llm: MagicMock, tmp_path: Path) -> None:
@@ -102,16 +103,17 @@ class TestGeminiProvider:
         provider = GeminiProvider()
         result = provider.generate_text("Describe", image_path=str(img))
         assert result == "APPROVED"
-        # The mock's generate_content should have been called
-        assert mock_gemini_llm.return_value.generate_content.called
+        # The mock's models.generate_content should have been called
+        assert mock_gemini_llm.return_value.models.generate_content.called
 
     def test_generate_text_without_image(self, mock_gemini_llm: MagicMock) -> None:
         """No image → only text prompt is sent."""
         provider = GeminiProvider()
         provider.generate_text("Hello")
-        call_args = mock_gemini_llm.return_value.generate_content.call_args[0][0]
-        assert isinstance(call_args, list)
-        assert len(call_args) == 1  # only prompt text
+        call_kwargs = mock_gemini_llm.return_value.models.generate_content.call_args[1]
+        contents = call_kwargs["contents"]
+        assert isinstance(contents, list)
+        assert len(contents) == 1  # only prompt text
 
     def test_instantiation_without_env_key(self, monkeypatch: pytest.MonkeyPatch, mock_gemini_llm: MagicMock) -> None:
         monkeypatch.delenv("GEMINI_API_KEY", raising=False)
@@ -220,7 +222,7 @@ class TestErrorHandling:
 
     def test_gemini_api_error(self, mock_gemini_llm: MagicMock) -> None:
         """API errors should propagate from the provider layer."""
-        mock_gemini_llm.return_value.generate_content.side_effect = Exception("API Error")
+        mock_gemini_llm.return_value.models.generate_content.side_effect = Exception("API Error")
         provider = GeminiProvider()
         with pytest.raises(Exception):
             provider.generate_text("test")

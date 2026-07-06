@@ -13,7 +13,7 @@ from typing import Optional
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage
 
-import google.generativeai as genai
+from google import genai
 import PIL.Image
 
 from src.utils.config import get_config
@@ -67,9 +67,9 @@ class GeminiProvider(LLMProvider):
     """LLM provider backed by Google Gemini (used for multimodal critic)."""
 
     def __init__(self):
-        genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
-        model_name = get_config("llm.gemini.model", "gemini-1.5-flash")
-        self._model = genai.GenerativeModel(model_name)
+        api_key = os.environ.get("GEMINI_API_KEY")
+        self._client = genai.Client(api_key=api_key)
+        self._model_name = get_config("llm.gemini.model", "gemini-1.5-flash")
 
     def generate_text(self, prompt: str, image_path: Optional[str] = None, **kwargs) -> str:
         if image_path and os.path.exists(image_path):
@@ -78,5 +78,8 @@ class GeminiProvider(LLMProvider):
         else:
             contents = [prompt]
 
-        response = self._model.generate_content(contents)
+        response = self._client.models.generate_content(
+            model=self._model_name,
+            contents=contents,
+        )
         return response.text.strip()

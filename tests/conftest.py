@@ -170,11 +170,13 @@ def mock_deepseek_llm() -> Generator[MagicMock, None, None]:
 
 @pytest.fixture
 def mock_gemini_llm() -> Generator[MagicMock, None, None]:
-    """Mock the Gemini GenerativeModel."""
-    with patch("src.providers.llm_provider.genai.GenerativeModel") as mock:
-        instance = MagicMock()
-        instance.generate_content.return_value.text = "APPROVED"
-        mock.return_value = instance
+    """Mock the Gemini client (google.genai SDK)."""
+    with patch("src.providers.llm_provider.genai.Client") as mock:
+        client_instance = MagicMock()
+        response = MagicMock()
+        response.text = "APPROVED"
+        client_instance.models.generate_content.return_value = response
+        mock.return_value = client_instance
         yield mock
 
 

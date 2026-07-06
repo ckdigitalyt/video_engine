@@ -50,8 +50,10 @@ Planner node for script generation.
 
 ### GeminiProvider
 
-Wraps `google.generativeai.GenerativeModel` for multimodal frame analysis in the Critic node.
-When `image_path` is provided, the image is loaded with PIL and sent alongside the prompt.
+Wraps `google.genai.Client` for multimodal frame analysis in the Critic node.
+When `image_path` is provided, the image is loaded with PIL and sent as a content part.
+
+Internally calls `client.models.generate_content()` with the configured model name.
 
 | Config key | Default |
 |------------|---------|
