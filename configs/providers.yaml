@@ -17,3 +17,9 @@ providers:
       hd_bonus_weight: 0.20
     # Orientation filter for video search
     orientation: "landscape"
+
+    # Reusable asset library (local-first lookup)
+    reuse:
+      enabled: true
+      similarity_threshold: 0.45
+      max_candidates: 5
