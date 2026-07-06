@@ -4,6 +4,9 @@ moviepy_renderer.py — Concrete MoviePy-based renderer implementation.
 Applies the Pillow/MoviePy compatibility shim at module import time,
 then provides the ``MoviePyRenderer`` class implementing the ``Renderer``
 interface defined in ``src.renderer``.
+
+Supports optional cinematic motion effects (Ken Burns) and configurable
+scene transitions via the ``MotionEngine`` and ``TransitionEngine``.
 """
 
 # ── Compatibility shim ──────────────────────────────────────────────────
@@ -15,16 +18,19 @@ if not hasattr(PIL.Image, "ANTIALIAS"):
     PIL.Image.ANTIALIAS = PIL.Image.LANCZOS
 
 import json
-from typing import Optional
+from typing import Any, Optional
 
 from moviepy.editor import (
     AudioFileClip,
+    ColorClip,
     CompositeAudioClip,
     CompositeVideoClip,
     TextClip,
     VideoFileClip,
 )
+from moviepy.video.fx.resize import resize
 
+from src.effects import MotionEngine, TransitionEngine
 from src.models import RenderSettings, Timeline, TimelineTrack
 from src.renderer import Renderer
 from src.utils.config import get_config
@@ -66,6 +72,81 @@ def parse_timeline(raw: dict) -> Timeline:
     )
 
 
+# ── Motion helper ──────────────────────────────────────────────────────────
+
+
+def _apply_motion(
+    clip: VideoFileClip,
+    motion: dict[str, Any],
+    target_res: tuple[int, int],
+) -> VideoFileClip:
+    """Apply a Ken Burns motion descriptor to a clip.
+
+    Uses time-dependent ``resize`` and ``set_position`` to create
+    smooth zoom/pan effects.
+    """
+    mtype = motion.get("type", "none")
+    if mtype == "none":
+        return clip.resize(newsize=target_res)
+
+    zoom_start = motion.get("zoom_start", 1.0)
+    zoom_end = motion.get("zoom_end", 1.0)
+    pan_x = motion.get("pan_x", 0)
+    pan_y = motion.get("pan_y", 0)
+
+    dur = clip.duration
+    if dur <= 0:
+        return clip.resize(newsize=target_res)
+
+    # Base resize to fill the frame
+    clip = clip.resize(newsize=target_res)
+
+    # Time-dependent zoom (linerp between zoom_start and zoom_end)
+    def _zoom(t: float) -> float:
+        progress = t / dur if dur > 0 else 0
+        return zoom_start + (zoom_end - zoom_start) * progress
+
+    clip = clip.resize(lambda t: _zoom(t))
+
+    # Time-dependent pan
+    def _pos(t: float) -> tuple[int, int]:
+        progress = t / dur if dur > 0 else 0
+        x = int(pan_x * progress)
+        y = int(pan_y * progress)
+        return (x, y)
+
+    clip = clip.set_position(_pos)
+    return clip
+
+
+# ── Transition helper ─────────────────────────────────────────────────────
+
+
+def _apply_transition(
+    clip: VideoFileClip,
+    transition: dict[str, Any],
+    dur: float,
+) -> VideoFileClip:
+    """Apply a transition effect to a single clip.
+
+    *cut* — no effect.
+    *fade* — fade in at the start.
+    *crossfade* — crossfade in (caller must overlap adjacent clips).
+    *dip_to_black*, *dissolve*, *zoom* — fade in (simplified using crossfadein).
+    """
+    ttype = transition.get("type", "cut")
+    tdur = transition.get("duration", dur)
+
+    if ttype == "cut" or tdur <= 0:
+        return clip
+
+    if ttype == "fade":
+        return clip.fadein(tdur).fadeout(tdur)
+
+    # crossfade / dissolve / dip_to_black / zoom all use crossfade
+    return clip.crossfadein(tdur)
+
+
 # ── Renderer implementation ──────────────────────────────────────────────
 
 
@@ -73,7 +154,8 @@ class MoviePyRenderer(Renderer):
     """MoviePy-based renderer.
 
     Decodes audio/video clips using MoviePy (which wraps FFmpeg), composites
-    them, and encodes the final output via ``write_videofile``.
+    them, optionally applies cinematic motion and transitions, and encodes
+    the final output via ``write_videofile``.
     """
 
     def render(
@@ -97,18 +179,69 @@ class MoviePyRenderer(Renderer):
         timeline = parse_timeline(raw)
         target_res = tuple(timeline.render_settings.resolution)
 
+        # ── Audio clips ────────────────────────────────────────────────
         audio_clips = []
         for track in timeline.audio_timeline:
             clip = AudioFileClip(track.file).set_start(track.start_time)
             audio_clips.append(clip)
 
-        video_clips = []
-        for track in timeline.video_timeline:
-            clip = VideoFileClip(track.file).resize(newsize=target_res)
-            clip = clip.set_start(track.start_time).set_end(track.end_time)
+        # ── Video clips with motion + transitions ──────────────────────
+        video_tracks = timeline.video_timeline
+        video_clips: list = []
+
+        motion_enabled = get_config("effects.motion.enabled", True)
+        trans_enabled = get_config("effects.transitions.enabled", True)
+
+        # Generate motion and transition descriptors
+        motion_engine = MotionEngine()
+        transition_engine = TransitionEngine()
+        motion_descriptors = motion_engine.generate(len(video_tracks))
+        transition_descriptors = transition_engine.generate(len(video_tracks))
+
+        for i, track in enumerate(video_tracks):
+            clip = VideoFileClip(track.file)
+
+            # ── Apply motion ───────────────────────────────────────────
+            clip = _apply_motion(clip, motion_descriptors[i], target_res)
+
+            # ── Apply transitions (adjust timing for overlap) ──────────
+            trans = transition_descriptors[i]
+            tdur = trans.get("duration", 0.0)
+
+            if trans["type"] != "cut" and tdur > 0 and i > 0:
+                # Overlap with previous clip: shift start earlier by tdur
+                start = track.start_time - tdur
+                end = track.end_time
+                # Ensure we don't start before time 0
+                start = max(0.0, start)
+                clip = clip.set_start(start).set_end(end)
+                clip = _apply_transition(clip, trans, tdur)
+            else:
+                clip = clip.set_start(track.start_time).set_end(track.end_time)
+
             video_clips.append(clip)
 
-        # ── Subtitle overlay ──────────────────────────────────────────────
+        # ── Add transition bridge clips for fade/dip_to_black ────────
+        if trans_enabled:
+            for i, trans in enumerate(transition_descriptors):
+                if i == 0:
+                    continue
+                tdur = trans.get("duration", 0.0)
+                ttype = trans.get("type", "cut")
+                if tdur > 0 and ttype in ("dip_to_black", "fade"):
+                    black = ColorClip(size=target_res, color=[0, 0, 0]).set_duration(tdur)
+                    prev_end = video_tracks[i - 1].end_time
+                    black = black.set_start(prev_end)
+                    video_clips.append(black)
+                elif tdur > 0 and ttype == "dissolve":
+                    # Dissolve is handled by crossfadein on clip above;
+                    # no extra bridge needed, but we add a half-opacity overlay
+                    prev_end = video_tracks[i - 1].end_time
+                    overlay = ColorClip(size=target_res, color=[0, 0, 0]).set_duration(tdur)
+                    overlay = overlay.set_start(prev_end).set_opacity(0.5)
+                    video_clips.append(overlay)
+
+        # ── Subtitle overlay ──────────────────────────────────────────
         subtitle_enabled = get_config("subtitles.enabled", True)
         if subtitles and subtitle_enabled:
             print(f"-> Adding {len(subtitles)} animated subtitle clips...")
@@ -127,12 +260,10 @@ class MoviePyRenderer(Renderer):
                     stroke_width=1,
                     method="label",
                 )
-                # Align at bottom centre
                 txt_clip = txt_clip.set_position(
                     ("center", target_res[1] - sub.get("bottom_margin", 80))
                 ).set_start(start_sec).set_duration(dur)
 
-                # Apply fade animation
                 fade_in = sub.get("fade_in_ms", 0)
                 fade_out = sub.get("fade_out_ms", 0)
                 if fade_in > 0:
@@ -142,6 +273,7 @@ class MoviePyRenderer(Renderer):
 
                 video_clips.append(txt_clip)
 
+        # ── Composite ──────────────────────────────────────────────────
         if audio_clips:
             final_audio = CompositeAudioClip(audio_clips)
             final_video = CompositeVideoClip(video_clips, size=target_res).set_audio(final_audio)
