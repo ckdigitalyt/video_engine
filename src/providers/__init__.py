@@ -9,11 +9,16 @@ Exported symbols:
 - PexelsProvider
 - TTSProvider (ABC)
 - KokoroProvider
+- StubAssetProvider
+- NasaMediaProvider
+- PixabayProvider
+- WikimediaCommonsProvider
 """
 
 from .llm_provider import LLMProvider, DeepSeekProvider, GeminiProvider
 from .asset_provider import AssetProvider, PexelsProvider
 from .tts_provider import TTSProvider, KokoroProvider
+from .stubs import StubAssetProvider, NasaMediaProvider, PixabayProvider, WikimediaCommonsProvider
 
 __all__ = [
     "LLMProvider",
@@ -23,4 +28,8 @@ __all__ = [
     "PexelsProvider",
     "TTSProvider",
     "KokoroProvider",
+    "StubAssetProvider",
+    "NasaMediaProvider",
+    "PixabayProvider",
+    "WikimediaCommonsProvider",
 ]

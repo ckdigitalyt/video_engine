@@ -23,7 +23,7 @@ render:
 
 # Subtitles configuration (word-level, animated)
 subtitles:
-  enabled: true
+  enabled: false
   font: "Arial"
   font_size: 28
   color: "#FFFFFF"
