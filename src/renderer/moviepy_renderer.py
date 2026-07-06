@@ -15,11 +15,13 @@ if not hasattr(PIL.Image, "ANTIALIAS"):
     PIL.Image.ANTIALIAS = PIL.Image.LANCZOS
 
 import json
+from typing import Optional
 
 from moviepy.editor import (
     AudioFileClip,
     CompositeAudioClip,
     CompositeVideoClip,
+    TextClip,
     VideoFileClip,
 )
 
@@ -74,12 +76,20 @@ class MoviePyRenderer(Renderer):
     them, and encodes the final output via ``write_videofile``.
     """
 
-    def render(self, timeline_path: str, output_path: str) -> None:
+    def render(
+        self,
+        timeline_path: str,
+        output_path: str,
+        subtitles: Optional[list[dict]] = None,
+    ) -> None:
         """Render a timeline JSON file to a video file.
 
         Args:
             timeline_path: Absolute or relative path to ``timeline.json``.
             output_path: Destination path for the final ``.mp4``.
+            subtitles: Optional list of word-timing dicts from the
+                SubtitleEngine.  When provided, animated subtitle
+                clips are composited onto the final video.
         """
         with open(timeline_path, "r") as f:
             raw = json.load(f)
@@ -98,8 +108,45 @@ class MoviePyRenderer(Renderer):
             clip = clip.set_start(track.start_time).set_end(track.end_time)
             video_clips.append(clip)
 
-        final_audio = CompositeAudioClip(audio_clips)
-        final_video = CompositeVideoClip(video_clips, size=target_res).set_audio(final_audio)
+        # ── Subtitle overlay ──────────────────────────────────────────────
+        subtitle_enabled = get_config("subtitles.enabled", True)
+        if subtitles and subtitle_enabled:
+            print(f"-> Adding {len(subtitles)} animated subtitle clips...")
+            for sub in subtitles:
+                start_sec = sub["start_ms"] / 1000.0
+                end_sec = sub["end_ms"] / 1000.0
+                dur = end_sec - start_sec
+                if dur <= 0:
+                    continue
+
+                txt_clip = TextClip(
+                    txt=sub.get("text", ""),
+                    fontsize=sub.get("font_size", 28),
+                    color=sub.get("color", "#FFFFFF"),
+                    stroke_color=sub.get("outline", "#000000"),
+                    stroke_width=1,
+                    method="label",
+                )
+                # Align at bottom centre
+                txt_clip = txt_clip.set_position(
+                    ("center", target_res[1] - sub.get("bottom_margin", 80))
+                ).set_start(start_sec).set_duration(dur)
+
+                # Apply fade animation
+                fade_in = sub.get("fade_in_ms", 0)
+                fade_out = sub.get("fade_out_ms", 0)
+                if fade_in > 0:
+                    txt_clip = txt_clip.crossfadein(fade_in / 1000.0)
+                if fade_out > 0:
+                    txt_clip = txt_clip.crossfadeout(fade_out / 1000.0)
+
+                video_clips.append(txt_clip)
+
+        if audio_clips:
+            final_audio = CompositeAudioClip(audio_clips)
+            final_video = CompositeVideoClip(video_clips, size=target_res).set_audio(final_audio)
+        else:
+            final_video = CompositeVideoClip(video_clips, size=target_res)
 
         print(f"Rendering {output_path} on CPU...")
         final_video.write_videofile(

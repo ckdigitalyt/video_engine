@@ -256,7 +256,8 @@ class TestBackwardCompat:
                patch.object(mpr_mod, "CompositeAudioClip") as mock_cac:
             render_timeline(str(tl_path), str(tmp_path / "out.mp4"))
 
-        assert mock_cvc.return_value.set_audio.return_value.write_videofile.called
+        # No audio entries → write_videofile on CVC directly (no set_audio)
+        assert mock_cvc.return_value.write_videofile.called
 
     def test_renderer_module_exports_class(self) -> None:
         from renderer import MoviePyRenderer

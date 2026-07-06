@@ -44,6 +44,7 @@ class AgentState(TypedDict):
     iteration: int
     approved: bool
     critic_result: str  # JSON-serialized CriticResult
+    subtitle_timeline: list  # Per-word subtitle clips from SubtitleEngine
 
 
 def planner_node(state: AgentState):
@@ -121,6 +122,7 @@ def execution_node(state: AgentState):
 
         print(f"  Scene {scene.scene_id}: generating voiceover...")
         generate_voice(scene.narration, audio_path)
+        scene_narrations.append((scene.scene_id, scene.narration, audio_path))
 
         scene_assets.append(SceneAsset(
             scene_id=scene.scene_id,
@@ -149,16 +151,38 @@ def execution_node(state: AgentState):
     else:
         print(f"-> No background music found at {background_music_path}. Using voice only.")
 
+    # ── Subtitle generation ──────────────────────────────────────────
+    subtitle_timeline: list[dict] = []
+    if subtitle_engine._enabled:
+        print(f"-> Generating subtitles for {len(scene_narrations)} scenes...")
+        for sid, narration_text, audio_path in scene_narrations:
+            if os.path.exists(audio_path):
+                word_timing = subtitle_engine.generate(
+                    audio_path,
+                    narration_text,
+                    resolution=(1920, 1080),
+                )
+                renderer_clips = subtitle_engine.to_renderer_clips(word_timing)
+                subtitle_timeline.extend(renderer_clips)
+        print(f"-> {len(subtitle_timeline)} subtitle clips generated")
+    else:
+        print("-> Subtitles disabled")
+
     # Build timeline using TimelineBuilder
     builder = TimelineBuilder()
     timeline_json = builder.build_and_write(scene_assets)
 
-    return {"timeline_json": timeline_json}
+    return {"timeline_json": timeline_json, "subtitle_timeline": subtitle_timeline}
 
 
 def render_node(state: AgentState):
     print("\n[3/4] Node: MoviePy Renderer")
-    renderer.render("timeline.json", get_config("pipeline.output.default", "final_output.mp4"))
+    subtitle_timeline = state.get("subtitle_timeline", [])
+    renderer.render(
+        "timeline.json",
+        get_config("pipeline.output.default", "final_output.mp4"),
+        subtitles=subtitle_timeline if subtitle_timeline else None,
+    )
     return state
 
 
