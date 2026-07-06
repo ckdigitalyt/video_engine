@@ -148,6 +148,7 @@ class TestPexelsProvider:
         monkeypatch.setattr("src.providers.asset_provider.requests.get", mock_get)
 
         provider = PexelsProvider()
+        provider._last_query = "space"  # set so download can call cache.touch
         result = provider.download("https://url/v.mp4", str(f))
         assert result == str(f)
         mock_get.assert_not_called()  # no HTTP request
@@ -160,6 +161,7 @@ class TestPexelsProvider:
         monkeypatch.setattr("src.providers.asset_provider.requests.get", lambda url, **kw: mock_resp)
 
         provider = PexelsProvider()
+        provider._last_query = "space"
         result = provider.download("https://url/v.mp4", str(f))
         assert result == str(f)
         assert f.exists()
@@ -212,8 +214,9 @@ class TestErrorHandling:
             raise requests.exceptions.ConnectionError("DNS failure")
         monkeypatch.setattr("src.providers.asset_provider.requests.get", _raise)
         provider = PexelsProvider()
+        # Use a query guaranteed not to be in the shared cache
         with pytest.raises(requests.exceptions.ConnectionError):
-            provider.search("space")
+            provider.search("__network_error_test__")
 
     def test_gemini_api_error(self, mock_gemini_llm: MagicMock) -> None:
         """API errors should propagate from the provider layer."""

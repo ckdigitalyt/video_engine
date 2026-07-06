@@ -74,7 +74,7 @@ class TestLookup:
     def test_miss_on_missing_file(self, cache: AssetCache) -> None:
         """Registered entry whose local file has been deleted should be a miss."""
         cache.register("p", "q", "https://url")
-        cache.update_local_path("https://url", "/tmp/_no_such_file_xyz")
+        cache.update_local_path("p", "q", "https://url", "/tmp/_no_such_file_xyz")
         assert cache.lookup("p", "q") is None
 
     def test_hit(self, cache: AssetCache, tmp_path: Path) -> None:
@@ -137,7 +137,7 @@ class TestUpdateLocalPath:
         cache.register("p", "q", "https://url")
         f = tmp_path / "updated.mp4"
         f.write_bytes(b"data")
-        cache.update_local_path("https://url", str(f))
+        cache.update_local_path("p", "q", "https://url", str(f))
         cur = cache._conn.execute(
             "SELECT local_path, use_count FROM assets WHERE provider='p' AND search_query='q'"
         )
@@ -147,7 +147,32 @@ class TestUpdateLocalPath:
 
     def test_update_nonexistent_url(self, cache: AssetCache) -> None:
         """Should not error (no rows matched)."""
-        cache.update_local_path("https://no-such-url", "/tmp/fake.mp4")  # should be no-op
+        cache.update_local_path("p", "no-such", "https://no-such-url", "/tmp/fake.mp4")  # should be no-op
+
+    def test_update_does_not_collide_on_same_url(self, cache: AssetCache, tmp_path: Path) -> None:
+        """
+        Regression: two queries returning the same remote URL must get
+        distinct local_path values.  update_local_path uses the full
+        primary key (provider, search_query), not the URL.
+        """
+        f1 = tmp_path / "scene_a.mp4"
+        f2 = tmp_path / "scene_b.mp4"
+        f1.write_bytes(b"content_a")
+        f2.write_bytes(b"content_b")
+        shared_url = "https://pexels.com/same-video.mp4"
+
+        cache.register("pexels", "query a", shared_url)
+        cache.register("pexels", "query b", shared_url)
+        cache.update_local_path("pexels", "query a", shared_url, str(f1))
+        cache.update_local_path("pexels", "query b", shared_url, str(f2))
+
+        r1 = cache.lookup("pexels", "query a")
+        r2 = cache.lookup("pexels", "query b")
+        assert r1 is not None
+        assert r2 is not None
+        assert r1["local_path"] == str(f1)
+        assert r2["local_path"] == str(f2)
+        assert r1["local_path"] != r2["local_path"]
 
 
 # ── touch ───────────────────────────────────────────────────────────────────
@@ -158,11 +183,25 @@ class TestTouch:
         f = tmp_path / "touched.mp4"
         f.write_bytes(b"data")
         cache.register("p", "q", "https://url", local_path=str(f))
-        cache.touch(str(f))
+        cache.touch("p", "q")
         cur = cache._conn.execute(
-            "SELECT use_count FROM assets WHERE local_path=?", (str(f),)
+            "SELECT use_count FROM assets WHERE provider='p' AND search_query='q'"
         )
         assert cur.fetchone()["use_count"] == 2
+
+    def test_touch_does_not_leak_between_queries(self, cache: AssetCache, tmp_path: Path) -> None:
+        """Regression: touch must only affect the targeted (provider, query) row."""
+        f = tmp_path / "shared.mp4"
+        f.write_bytes(b"data")
+        cache.register("pexels", "cat", "https://url/1", local_path=str(f))
+        cache.register("pexels", "dog", "https://url/2", local_path=str(f))
+        cache.touch("pexels", "cat")
+        cur = cache._conn.execute(
+            "SELECT search_query, use_count FROM assets WHERE provider='pexels' ORDER BY search_query"
+        )
+        rows = cur.fetchall()
+        assert rows[0]["use_count"] == 2  # cat touched
+        assert rows[1]["use_count"] == 1  # dog NOT touched
 
 
 # ── Cleanup ────────────────────────────────────────────────────────────────

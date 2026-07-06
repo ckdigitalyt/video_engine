@@ -80,23 +80,31 @@ class AssetCache:
         )
         self._conn.commit()
 
-    def update_local_path(self, asset_url: str, local_path: str) -> None:
+    def update_local_path(self, provider: str, query: str, asset_url: str, local_path: str) -> None:
         """
-        Set the local_path for a row identified by its remote URL.
+        Set the local_path for the row identified by the primary key
+        ``(provider, search_query)``.
 
         Called from download() after the file has been written to disk.
+        Uses the full primary key so that different queries returning the
+        same remote URL each get their own local_path.
         """
         self._conn.execute(
-            "UPDATE assets SET local_path=?, use_count=use_count+1, last_used=? WHERE asset_url=?",
-            (local_path, time.time(), asset_url),
+            """UPDATE assets
+               SET local_path=?, use_count=use_count+1, last_used=?
+               WHERE provider=? AND search_query=?""",
+            (local_path, time.time(), provider, query),
         )
         self._conn.commit()
 
-    def touch(self, local_path: str) -> None:
-        """Increment use_count and refresh last_used for the asset at *local_path*."""
+    def touch(self, provider: str, query: str) -> None:
+        """
+        Increment use_count and refresh last_used for the asset identified
+        by its primary key ``(provider, search_query)``.
+        """
         self._conn.execute(
-            "UPDATE assets SET use_count=use_count+1, last_used=? WHERE local_path=?",
-            (time.time(), local_path),
+            "UPDATE assets SET use_count=use_count+1, last_used=? WHERE provider=? AND search_query=?",
+            (time.time(), provider, query),
         )
         self._conn.commit()
 
