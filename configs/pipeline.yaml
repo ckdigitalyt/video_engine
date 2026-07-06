@@ -18,6 +18,10 @@ pipeline:
   output:
     default: "final_output.mp4"
 
+  # Managed SQLite asset cache
+  cache_db: "cache/asset_cache.db"
+  cache_max_size_mb: 500
+
   # Critic evaluation settings
   critic:
     # FFmpeg seek timestamp for frame extraction
