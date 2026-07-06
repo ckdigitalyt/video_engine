@@ -1,0 +1,14 @@
+# providers.yaml — External API provider configuration
+
+providers:
+  deepseek:
+    # DeepSeek API base URL
+    base_url: "https://api.deepseek.com"
+
+  pexels:
+    # Pexels video search API endpoint
+    base_url: "https://api.pexels.com/videos/search"
+    # Results per page
+    per_page: 5
+    # Orientation filter for video search
+    orientation: "landscape"

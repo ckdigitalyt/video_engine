@@ -1,0 +1,26 @@
+# pipeline.yaml — Orchestration and pipeline behaviour settings
+
+pipeline:
+  # Maximum number of planner/review iterations before forced approval
+  max_iterations: 3
+
+  # Local cache directories for intermediate assets
+  cache:
+    video: "cache/video"
+    audio: "cache/audio"
+    music: "cache/music"
+
+  # Fallback video asset used when Pexels download fails
+  fallback:
+    video: "cache/video/test_clip.mp4"
+
+  # Default output video file
+  output:
+    default: "final_output.mp4"
+
+  # Critic evaluation settings
+  critic:
+    # FFmpeg seek timestamp for frame extraction
+    frame_extraction_ss: "00:00:02"
+    # Path for the extracted evaluation frame
+    eval_frame: "cache/video/eval_frame.jpg"

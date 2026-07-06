@@ -1,5 +1,6 @@
 import json
 from moviepy.editor import VideoFileClip, AudioFileClip, CompositeVideoClip, CompositeAudioClip
+from src.utils.config import get_config
 
 def render_timeline(json_path, output_path):
     with open(json_path, 'r') as f:
@@ -26,10 +27,10 @@ def render_timeline(json_path, output_path):
     final_video.write_videofile(
         output_path, 
         fps=timeline['render_settings']['fps'], 
-        codec="libx264", 
-        audio_codec="aac",
-        threads=4,
-        preset="fast"
+        codec=get_config("render.codec", "libx264"), 
+        audio_codec=get_config("render.audio_codec", "aac"),
+        threads=get_config("render.threads", 4),
+        preset=get_config("render.preset", "fast")
     )
 
 if __name__ == "__main__":
