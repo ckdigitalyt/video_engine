@@ -10,7 +10,6 @@ import requests
 from abc import ABC, abstractmethod
 
 from src.utils.config import get_config
-from src.assets.asset_cache import AssetCache
 
 
 # ── Abstract base ──────────────────────────────────────────────────────────
@@ -43,12 +42,13 @@ class PexelsProvider(AssetProvider):
     """Asset provider backed by the Pexels video API, with SQLite cache
     and deterministic asset quality scoring."""
 
-    def __init__(self, cache: AssetCache | None = None):
+    def __init__(self, cache=None):
+        from src.assets.asset_cache import AssetCache as _AC
         self._api_key = os.environ.get("PEXELS_API_KEY")
         self._base_url = get_config("providers.pexels.base_url", "https://api.pexels.com/videos/search")
         self._per_page = get_config("providers.pexels.per_page", 10)
         self._orientation = get_config("providers.pexels.orientation", "landscape")
-        self._cache = cache or AssetCache()
+        self._cache = cache or _AC()
         self._last_query: str | None = None
 
     # ── Public API ─────────────────────────────────────────────────────
@@ -181,3 +181,174 @@ class PexelsProvider(AssetProvider):
             scored.append((video, round(total, 4)))
 
         return scored
+
+
+# ── Pixabay ────────────────────────────────────────────────────────────
+
+class PixabayProvider(AssetProvider):
+    """Asset provider backed by the Pixabay video API, with SQLite cache
+    and the same deterministic asset quality scoring as Pexels.
+
+    Pixabay video API documentation:
+        https://pixabay.com/api/docs/#api_videos_search
+
+    Requires the ``PIXABAY_API_KEY`` environment variable.
+    When the key is absent the provider silently falls back to empty
+    results (so the AssetRouter can continue to the next provider).
+    """
+
+    def __init__(self, cache=None):
+        from src.assets.asset_cache import AssetCache as _AC
+        self._api_key = os.environ.get("PIXABAY_API_KEY", "")
+        self._base_url = get_config(
+            "providers.pixabay.base_url",
+            "https://pixabay.com/api/videos",
+        )
+        self._per_page = get_config("providers.pixabay.per_page", 10)
+        self._orientation = get_config("providers.pixabay.orientation", "horizontal")
+        self._safesearch = get_config("providers.pixabay.safesearch", "true")
+        self._min_width = get_config("providers.pixabay.min_width", 1920)
+        self._cache = cache or _AC()
+        self._last_query: str | None = None
+
+    # ── Public API ─────────────────────────────────────────────────────
+
+    def search(self, query: str, **kwargs) -> list:
+        """Search Pixabay for *query*, normalise results to the internal
+        asset model, score candidates, and return results sorted by
+        quality (best first).
+
+        Accepts optional ``target_duration`` (in seconds) via kwargs.
+        Returns an empty list when the API key is missing, the query
+        is empty, or no results are found.
+        """
+        if not self._api_key:
+            print("-> Pixabay: no API key configured — skipping.")
+            return []
+
+        if not query:
+            return []
+
+        target_duration = kwargs.get("target_duration")
+
+        # ── Check cache first ──────────────────────────────────────────
+        cached = self._cache.lookup("pixabay", query)
+        if cached is not None:
+            print(f"-> Pixabay Cache HIT: '{query}' → {cached['local_path']}")
+            return [{"video_files": [{"link": cached["asset_url"]}]}]
+
+        print(f"-> Pixabay Cache MISS: '{query}' — calling Pixabay API")
+        params = {
+            "key": self._api_key,
+            "q": query,
+            "per_page": self._per_page,
+            "orientation": self._orientation,
+            "safesearch": self._safesearch,
+            "min_width": self._min_width,
+        }
+        try:
+            res = requests.get(self._base_url, params=params).json()
+        except Exception as e:
+            print(f"-> Pixabay API request failed: {e}")
+            return []
+
+        hits = res.get("hits", [])
+        if not hits:
+            return []
+
+        # ── Normalise to internal asset model ──────────────────────────
+        normalised = [_normalise_pixabay_hit(hit) for hit in hits]
+
+        # ── Score and sort candidates ──────────────────────────────────
+        scored = PexelsProvider._score_candidates(normalised, target_duration)
+        scored.sort(key=lambda x: x[1], reverse=True)
+        sorted_results = [item for item, _ in scored]
+
+        # Log scores for transparency
+        for i, (item, score) in enumerate(scored):
+            dur = item.get("duration", 0)
+            w, h = item.get("width", 0), item.get("height", 0)
+            label = f"  Pixabay Candidate {i+1}: id={item['id']} {w}x{h} dur={dur}s score={score:.3f}"
+            if i == 0:
+                label += " ← SELECTED"
+            print(label)
+
+        # Pre-register best result in cache
+        best_url = sorted_results[0]["video_files"][0]["link"]
+        self._cache.register("pixabay", query, best_url)
+        self._last_query = query
+
+        return sorted_results
+
+    def download(self, url: str, output_path: str) -> str:
+        # ── Skip download if file already exists ───────────────────────
+        if os.path.exists(output_path):
+            print(f"-> Already on disk: {output_path}")
+            if self._last_query:
+                self._cache.touch("pixabay", self._last_query)
+            return output_path
+
+        # ── Download ───────────────────────────────────────────────────
+        print("-> Downloading from Pixabay…")
+        resp = requests.get(url)
+        with open(output_path, "wb") as f:
+            f.write(resp.content)
+
+        if self._last_query:
+            self._cache.update_local_path("pixabay", self._last_query, url, output_path)
+        print(f"-> Saved: {output_path}")
+
+        return output_path
+
+
+# ── Normalisation helper ───────────────────────────────────────────────
+
+
+def _normalise_pixabay_hit(hit: dict) -> dict:
+    """Convert a raw Pixabay API hit dict to the internal asset model
+    used by ``PexelsProvider._score_candidates``.
+
+    The normalised dict has the same top-level keys as a Pexels result
+    (``id``, ``width``, ``height``, ``duration``, ``video_files``) so
+    that the rest of the pipeline treats them identically.
+    """
+    # Determine video quality tiers present in this hit
+    videos = hit.get("videos", {})
+    video_files = []
+
+    # Pixabay returns videos in multiple quality tiers
+    for quality_key, quality_label in [
+        ("large", "hd"),
+        ("medium", "sd"),
+        ("small", "sd"),
+    ]:
+        entry = videos.get(quality_key)
+        if entry and entry.get("url"):
+            video_files.append({
+                "link": entry["url"],
+                "quality": quality_label,
+                "width": entry.get("width", 0),
+                "height": entry.get("height", 0),
+                "file_size": entry.get("size", 0),
+            })
+
+    # Use the largest available video for top-level dimensions
+    best_video = videos.get("large") or videos.get("medium") or videos.get("small")
+    width = (best_video or {}).get("width", 0) or 0
+    height = (best_video or {}).get("height", 0) or 0
+    duration = hit.get("duration", 0) or 0
+
+    return {
+        "id": hit.get("id", 0),
+        "width": int(width),
+        "height": int(height),
+        "duration": duration,
+        "video_files": video_files,
+        # Preserve original metadata for debugging
+        "_raw": {
+            "tags": hit.get("tags", ""),
+            "views": hit.get("views", 0),
+            "downloads": hit.get("downloads", 0),
+            "user": hit.get("user", ""),
+        },
+    }

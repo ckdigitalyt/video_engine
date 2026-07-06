@@ -24,6 +24,19 @@ providers:
       similarity_threshold: 0.45
       max_candidates: 5
 
+  pixabay:
+    # Pixabay video search API endpoint
+    base_url: "https://pixabay.com/api/videos"
+    # Results per page
+    per_page: 10
+    # Orientation filter: "horizontal", "vertical", or "all"
+    orientation: "horizontal"
+    # Minimum video width (px) — filters out low-res content
+    min_width: 1920
+    # Safe search: "true" or "false"
+    safesearch: "true"
+    # Scoring uses the same weights as pexels (shared via PexelsProvider._score_candidates)
+
 # ── Topic-aware asset routing ──────────────────────────────────────────────
 # The AssetRouter uses this table to determine which provider(s) to try for
 # a given topic category.  Providers are tried in order; the first non-empty
