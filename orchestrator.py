@@ -11,6 +11,7 @@ from src.utils.config import get_config
 from src.providers import DeepSeekProvider, GeminiProvider, PexelsProvider
 from src.renderer.timeline_builder import TimelineBuilder
 from src.memory.memory_manager import MemoryManager
+from src.models import Scene, SceneAsset
 
 load_dotenv()
 
@@ -63,15 +64,21 @@ def planner_node(state: AgentState):
 def execution_node(state: AgentState):
     print("\n[2/4] Node: Deterministic Execution")
     plan = json.loads(state["plan_json"])
-    scene = plan["scenes"][0]
+    scene_data = plan["scenes"][0]
 
-    video_path = f"{cache_video}/scene_{scene['scene_id']}.mp4"
-    audio_path = f"{cache_audio}/scene_{scene['scene_id']}.wav"
+    scene = Scene(
+        scene_id=scene_data["scene_id"],
+        search_query=scene_data["search_query"],
+        narration=scene_data["narration"],
+    )
 
-    print(f"-> Searching Pexels for: '{scene['search_query']}'")
+    video_path = f"{cache_video}/scene_{scene.scene_id}.mp4"
+    audio_path = f"{cache_audio}/scene_{scene.scene_id}.wav"
+
+    print(f"-> Searching Pexels for: '{scene.search_query}'")
     result = []
     try:
-        videos = pexels.search(scene["search_query"])
+        videos = pexels.search(scene.search_query)
         if videos:
             video_url = videos[0]["video_files"][0]["link"]
             pexels.download(video_url, video_path)
@@ -84,17 +91,16 @@ def execution_node(state: AgentState):
         video_path = fallback_video
 
     print("-> Generating voiceover...")
-    generate_voice(scene['narration'], audio_path)
+    generate_voice(scene.narration, audio_path)
 
     # Build timeline using TimelineBuilder
+    scene_asset = SceneAsset(
+        scene_id=scene.scene_id,
+        video_path=video_path,
+        audio_path=audio_path,
+    )
     builder = TimelineBuilder()
-    timeline_json = builder.build_and_write([
-        {
-            "scene_id": scene["scene_id"],
-            "video_path": video_path,
-            "audio_path": audio_path,
-        }
-    ])
+    timeline_json = builder.build_and_write([scene_asset])
 
     return {"timeline_json": timeline_json}
 
