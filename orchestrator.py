@@ -8,7 +8,8 @@ from langgraph.graph import StateGraph, END
 from google.api_core.exceptions import NotFound, ResourceExhausted, PermissionDenied, InvalidArgument
 
 from audio_engine import generate_voice
-from renderer import render_timeline
+from src.renderer import Renderer
+from src.renderer.moviepy_renderer import MoviePyRenderer
 from src.utils.config import get_config
 from src.providers import DeepSeekProvider, GeminiProvider, PexelsProvider
 from src.renderer.timeline_builder import TimelineBuilder
@@ -22,6 +23,7 @@ load_dotenv()
 deepseek = DeepSeekProvider()
 pexels = PexelsProvider()
 gemini = GeminiProvider()
+renderer: Renderer = MoviePyRenderer()
 
 cache_video = get_config("pipeline.cache.video", "cache/video")
 cache_audio = get_config("pipeline.cache.audio", "cache/audio")
@@ -128,7 +130,7 @@ def execution_node(state: AgentState):
 
 def render_node(state: AgentState):
     print("\n[3/4] Node: MoviePy Renderer")
-    render_timeline("timeline.json", get_config("pipeline.output.default", "final_output.mp4"))
+    renderer.render("timeline.json", get_config("pipeline.output.default", "final_output.mp4"))
     return state
 
 

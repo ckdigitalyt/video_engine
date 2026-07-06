@@ -1,9 +1,13 @@
 """
-test_renderer.py — Tests for the renderer (renderer.py).
+test_renderer.py — Tests for the renderer layer.
 
-Verifies timeline parsing, render validation, invalid timeline detection,
-and the Pillow/MoviePy compatibility shim.
-Does NOT call MoviePy's write_videofile (no GPU / FFmpeg encode).
+Verifies:
+- The Renderer abstract interface
+- The MoviePyRenderer concrete implementation
+- Timeline parsing
+- Render dispatch (no real encoding)
+- Invalid timeline detection
+- Pillow / MoviePy compatibility shim
 """
 
 import json
@@ -13,19 +17,44 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-import pytest
+
+# ── Renderer interface ─────────────────────────────────────────────────────
+
+
+class TestRendererInterface:
+    """Verify the Renderer ABC enforces the contract."""
+
+    def test_abstract_class_cannot_be_instantiated(self) -> None:
+        from src.renderer import Renderer
+        with pytest.raises(TypeError):
+            Renderer()  # type: ignore
+
+    def test_abstract_method_defined(self) -> None:
+        from src.renderer import Renderer
+        assert hasattr(Renderer, "render")
+        assert callable(Renderer.render)
+
+    def test_moviepy_renderer_is_subclass(self) -> None:
+        from src.renderer import Renderer
+        from src.renderer.moviepy_renderer import MoviePyRenderer
+        assert issubclass(MoviePyRenderer, Renderer)
+
+    def test_moviepy_renderer_implements_render(self) -> None:
+        from src.renderer.moviepy_renderer import MoviePyRenderer
+        r = MoviePyRenderer()
+        assert hasattr(r, "render")
+        assert callable(r.render)
 
 
 # ── Timeline parsing ───────────────────────────────────────────────────────
 
 
 class TestParseTimeline:
-    """Tests for the ``_parse_timeline`` function in renderer.py."""
+    """Tests for the ``parse_timeline`` function in moviepy_renderer."""
 
     def _parse(self, raw: dict):
-        """Import and call _parse_timeline from the real renderer module."""
-        from renderer import _parse_timeline
-        return _parse_timeline(raw)
+        from src.renderer.moviepy_renderer import parse_timeline
+        return parse_timeline(raw)
 
     def test_parse_minimal(self) -> None:
         """Minimal valid timeline should produce a Timeline with defaults."""
@@ -98,16 +127,27 @@ class TestParseTimeline:
         assert tl.video_timeline[0].layer == 1
         assert tl.video_timeline[0].transition_out == "none"
 
+    # ── Backward compat: module-level function still works ────────────
 
-# ── Renderer compatibility shim ────────────────────────────────────────────
+    def test_backward_compat_parse_timeline(self) -> None:
+        """The ``_parse_timeline`` name must remain accessible from renderer module."""
+        from renderer import _parse_timeline
+        raw = {
+            "render_settings": {"resolution": [1920, 1080], "fps": 30},
+            "audio_timeline": [],
+            "video_timeline": [],
+        }
+        tl = _parse_timeline(raw)
+        assert tl.render_settings.fps == 30
+
+
+# ── Compatibility shim ─────────────────────────────────────────────────────
 
 
 class TestCompatibilityShim:
-    """Verify the Pillow ANTIALIAS shim at the top of renderer.py."""
+    """Verify the Pillow ANTIALIAS shim in moviepy_renderer."""
 
     def test_antialias_alias_exists(self) -> None:
-        """The ANTIALIAS compatibility shim should alias LANCZOS."""
-        # The shim runs at import time in renderer.py; test its logic directly
         import PIL.Image
         if not hasattr(PIL.Image, "ANTIALIAS"):
             PIL.Image.ANTIALIAS = PIL.Image.LANCZOS
@@ -115,23 +155,22 @@ class TestCompatibilityShim:
         assert PIL.Image.ANTIALIAS == PIL.Image.LANCZOS
 
     def test_antialias_already_exists(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        """If Pillow already has ANTIALIAS, the shim should not overwrite it."""
         import PIL.Image
         monkeypatch.setattr(PIL.Image, "ANTIALIAS", PIL.Image.BICUBIC, raising=False)
-        import renderer  # noqa: F401
+        # Importing the module should not overwrite if already set
+        from src.renderer import moviepy_renderer  # noqa: F401
         assert PIL.Image.ANTIALIAS == PIL.Image.BICUBIC  # unchanged
 
 
-# ── Render timeline (no-op) ────────────────────────────────────────────────
+# ── MoviePyRenderer.render (no real encoding) ──────────────────────────────
 
 
-class TestRenderTimeline:
-    """Verify render_timeline dispatches correctly (no real encoding)."""
+class TestMoviePyRenderer:
+    """Verify MoviePyRenderer dispatches correctly (all MoviePy classes mocked)."""
 
     def test_render_dispatches(self, tmp_path: Path) -> None:
-        """render_timeline reads timeline.json and calls write_videofile."""
-        import importlib
-        import renderer as _renderer_before  # noqa: ensure loaded
+        """MoviePyRenderer.render reads timeline.json and calls write_videofile."""
+        from src.renderer import moviepy_renderer as mpr_mod
 
         tl_data = {
             "render_settings": {"resolution": [1920, 1080], "fps": 30},
@@ -146,37 +185,36 @@ class TestRenderTimeline:
         tl_path.write_text(json.dumps(tl_data))
         out_path = str(tmp_path / "out.mp4")
 
-        with patch.object(_renderer_before, "VideoFileClip") as mock_vfc, \
-               patch.object(_renderer_before, "AudioFileClip") as mock_afc, \
-               patch.object(_renderer_before, "CompositeVideoClip") as mock_cvc, \
-               patch.object(_renderer_before, "CompositeAudioClip") as mock_cac:
-            _renderer_before.render_timeline(str(tl_path), out_path)
+        with patch.object(mpr_mod, "VideoFileClip") as mock_vfc, \
+               patch.object(mpr_mod, "AudioFileClip") as mock_afc, \
+               patch.object(mpr_mod, "CompositeVideoClip") as mock_cvc, \
+               patch.object(mpr_mod, "CompositeAudioClip") as mock_cac:
+            r = mpr_mod.MoviePyRenderer()
+            r.render(str(tl_path), out_path)
 
         # Verify that write_videofile was called on the composite
-        # CompositeVideoClip(...).set_audio(...).write_videofile(...)
         assert mock_cvc.return_value.set_audio.return_value.write_videofile.called
 
-
-# ── Invalid timeline detection ─────────────────────────────────────────────
-
-
-class TestInvalidTimeline:
-    def test_no_json_file(self, tmp_path: Path) -> None:
+    def test_render_no_json_file(self, tmp_path: Path) -> None:
         """A missing timeline file should raise FileNotFoundError."""
-        from renderer import render_timeline
+        from src.renderer.moviepy_renderer import MoviePyRenderer
+        r = MoviePyRenderer()
         with pytest.raises(FileNotFoundError):
-            render_timeline(str(tmp_path / "no_such_file.json"), "out.mp4")
+            r.render(str(tmp_path / "no_such_file.json"), "out.mp4")
 
-    def test_corrupted_json(self, tmp_path: Path) -> None:
+    def test_render_corrupted_json(self, tmp_path: Path) -> None:
         """Invalid JSON should raise json.JSONDecodeError."""
         bad = tmp_path / "bad.json"
         bad.write_text("{corrupted: json")
-        from renderer import render_timeline
+        from src.renderer.moviepy_renderer import MoviePyRenderer
+        r = MoviePyRenderer()
         with pytest.raises(json.JSONDecodeError):
-            render_timeline(str(bad), "out.mp4")
+            r.render(str(bad), "out.mp4")
 
-    def test_missing_audio_file_logged(self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-        """Missing audio files should cause a FileNotFoundError or MoviePy error."""
+    def test_render_missing_audio_file(self, tmp_path: Path) -> None:
+        """Missing audio files should propagate the MoviePy error."""
+        from src.renderer import moviepy_renderer as mpr_mod
+
         tl_data = {
             "render_settings": {"resolution": [1920, 1080], "fps": 30},
             "audio_timeline": [
@@ -187,9 +225,40 @@ class TestInvalidTimeline:
         tl_path = tmp_path / "tl_missing_audio.json"
         tl_path.write_text(json.dumps(tl_data))
 
-        # MoviePy's AudioFileClip will raise OSError or FileNotFoundError
-        with patch("renderer.AudioFileClip") as mock:
+        with patch.object(mpr_mod, "AudioFileClip") as mock:
             mock.side_effect = FileNotFoundError("No such file")
-            from renderer import render_timeline
+            r = mpr_mod.MoviePyRenderer()
             with pytest.raises(FileNotFoundError):
-                render_timeline(str(tl_path), "out.mp4")
+                r.render(str(tl_path), "out.mp4")
+
+
+# ── Backward compat: module-level render_timeline ─────────────────────────
+
+
+class TestBackwardCompat:
+    """The old module-level ``render_timeline`` function must still work."""
+
+    def test_render_timeline_still_callable(self, tmp_path: Path) -> None:
+        from renderer import render_timeline
+        from src.renderer import moviepy_renderer as mpr_mod
+
+        tl_data = {
+            "render_settings": {"resolution": [1920, 1080], "fps": 30},
+            "audio_timeline": [],
+            "video_timeline": [],
+        }
+        tl_path = tmp_path / "tl.json"
+        tl_path.write_text(json.dumps(tl_data))
+
+        with patch.object(mpr_mod, "VideoFileClip") as mock_vfc, \
+               patch.object(mpr_mod, "AudioFileClip") as mock_afc, \
+               patch.object(mpr_mod, "CompositeVideoClip") as mock_cvc, \
+               patch.object(mpr_mod, "CompositeAudioClip") as mock_cac:
+            render_timeline(str(tl_path), str(tmp_path / "out.mp4"))
+
+        assert mock_cvc.return_value.set_audio.return_value.write_videofile.called
+
+    def test_renderer_module_exports_class(self) -> None:
+        from renderer import MoviePyRenderer
+        from src.renderer.moviepy_renderer import MoviePyRenderer as Base
+        assert MoviePyRenderer is Base
