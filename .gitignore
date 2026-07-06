@@ -7,3 +7,7 @@ __pycache__/
 venv/
 *.onnx
 voices.bin
+
+# Build artifacts
+timeline.json
+.coverage
