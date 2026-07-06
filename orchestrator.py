@@ -4,12 +4,12 @@ import subprocess
 from dotenv import load_dotenv
 from typing_extensions import TypedDict
 from langgraph.graph import StateGraph, END
-from pydub import AudioSegment
 
 from audio_engine import generate_voice
 from renderer import render_timeline
 from src.utils.config import get_config
 from src.providers import DeepSeekProvider, GeminiProvider, PexelsProvider
+from src.renderer.timeline_builder import TimelineBuilder
 
 load_dotenv()
 
@@ -85,28 +85,17 @@ def execution_node(state: AgentState):
     print("-> Generating voiceover...")
     generate_voice(scene['narration'], audio_path)
 
-    audio_len = len(AudioSegment.from_wav(audio_path)) / 1000.0
+    # Build timeline using TimelineBuilder
+    builder = TimelineBuilder()
+    timeline_json = builder.build_and_write([
+        {
+            "scene_id": scene["scene_id"],
+            "video_path": video_path,
+            "audio_path": audio_path,
+        }
+    ])
 
-    timeline = {
-      "render_settings": {
-          "resolution": [
-              get_config("render.resolution.width", 1920),
-              get_config("render.resolution.height", 1080)
-          ],
-          "fps": get_config("render.fps", 30)
-      },
-      "audio_timeline": [
-        {"track": "voice", "file": audio_path, "start_time": 0.0, "end_time": audio_len}
-      ],
-      "video_timeline": [
-        {"layer": 1, "file": video_path, "start_time": 0.0, "end_time": audio_len, "transition_out": "none"}
-      ]
-    }
-
-    with open("timeline.json", "w") as f:
-        json.dump(timeline, f, indent=2)
-
-    return {"timeline_json": json.dumps(timeline)}
+    return {"timeline_json": timeline_json}
 
 
 def render_node(state: AgentState):
