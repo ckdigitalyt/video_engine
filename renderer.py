@@ -1,4 +1,17 @@
 import json
+
+# ── Pillow / MoviePy compatibility shim ──────────────────────────────────
+# Pillow >= 11 removed the deprecated Image.ANTIALIAS constant.
+# MoviePy 1.0.3 still references it in video/fx/resize.py.
+# We alias the current LANCZOS resampling filter so MoviePy works unchanged
+# with the latest Pillow.  This shim must run before any moviepy import.
+#
+# Future: upgrade to MoviePy >= 2.x which has a completely refactored API
+# and no longer depends on PIL.Image.ANTIALIAS.
+import PIL.Image
+if not hasattr(PIL.Image, "ANTIALIAS"):
+    PIL.Image.ANTIALIAS = PIL.Image.LANCZOS
+
 from moviepy.editor import VideoFileClip, AudioFileClip, CompositeVideoClip, CompositeAudioClip
 from src.utils.config import get_config
 
