@@ -1,13 +1,14 @@
 import os
 import json
 import subprocess
+from pathlib import Path
 from dotenv import load_dotenv
 from typing_extensions import TypedDict
 from langgraph.graph import StateGraph, END
 
 from google.api_core.exceptions import NotFound, ResourceExhausted, PermissionDenied, InvalidArgument
 
-from audio_engine import generate_voice
+from audio_engine import generate_voice, mix_audio
 from src.renderer import Renderer
 from src.renderer.moviepy_renderer import MoviePyRenderer
 from src.utils.config import get_config
@@ -27,7 +28,12 @@ renderer: Renderer = MoviePyRenderer()
 
 cache_video = get_config("pipeline.cache.video", "cache/video")
 cache_audio = get_config("pipeline.cache.audio", "cache/audio")
+cache_music = get_config("pipeline.cache.music", "cache/music")
 fallback_video = get_config("pipeline.fallback.video", "cache/video/test_clip.mp4")
+background_music_path = os.path.join(
+    cache_music,
+    os.path.basename(get_config("voices.mixing.background_music", "cinematic.mp3")),
+)
 
 
 class AgentState(TypedDict):
@@ -120,6 +126,27 @@ def execution_node(state: AgentState):
             video_path=video_path,
             audio_path=audio_path,
         ))
+
+    # ── Background music mixing ───────────────────────────────────────
+    fade_in = get_config("voices.mixing.fade_in_ms", 3000)
+    fade_out = get_config("voices.mixing.fade_out_ms", 3000)
+    music_volume = get_config("voices.mixing.music_volume_db", 0.0)
+
+    if os.path.exists(background_music_path):
+        print(f"-> Mixing scenes with background music: {background_music_path}")
+        for asset in scene_assets:
+            mixed_path = asset.audio_path.replace(".wav", "_mixed.wav")
+            mix_audio(
+                asset.audio_path,
+                background_music_path,
+                mixed_path,
+                fade_in_ms=fade_in,
+                fade_out_ms=fade_out,
+                music_volume_db=music_volume,
+            )
+            asset.audio_path = mixed_path
+    else:
+        print(f"-> No background music found at {background_music_path}. Using voice only.")
 
     # Build timeline using TimelineBuilder
     builder = TimelineBuilder()

@@ -34,7 +34,7 @@ def tmp_project(tmp_path: Path) -> Generator[Path, None, None]:
         "render.yaml": "render:\n  resolution:\n    width: 1920\n    height: 1080\n  fps: 30\n  codec: libx264\n  audio_codec: aac\n  threads: 4\n  preset: fast\noutput:\n  default: final_output.mp4\n",
         "pipeline.yaml": "pipeline:\n  max_iterations: 3\n  cache:\n    video: cache/video\n    audio: cache/audio\n  fallback:\n    video: cache/video/none.mp4\n  output:\n    default: final_output.mp4\n  cache_db: cache/asset_cache.db\n  cache_max_size_mb: 500\n  memory:\n    db_path: cache/memory.db\n    retention_days: 90\n    max_execution_logs: 1000\n    cleanup_interval_runs: 10\n  critic:\n    frame_extraction_ss: \"00:00:02\"\n    eval_frame: cache/video/eval_frame.jpg\n",
         "providers.yaml": "providers:\n  pexels:\n    base_url: https://api.pexels.com/videos/search\n    per_page: 5\n    orientation: landscape\n  deepseek:\n    base_url: https://api.deepseek.com\n",
-        "voices.yaml": "voices:\n  kokoro:\n    model: kokoro-v0_19.onnx\n    voices_bin: voices.bin\n    default_voice: bm_george\n    speed: 1.0\n    language: en-gb\n",
+        "voices.yaml": "voices:\n  kokoro:\n    model: kokoro-v0_19.onnx\n    voices_bin: voices.bin\n    default_voice: bm_george\n    speed: 1.0\n    language: en-gb\n  mixing:\n    ducking_db: -12\n    tail_ms: 2000\n    fade_in_ms: 3000\n    fade_out_ms: 3000\n    music_volume_db: 0.0\n    background_music: cache/music/cinematic.mp3\n",
         "logging.yaml": "logging:\n  level: INFO\n  file: logs/video_engine.log\n  format: \"%(asctime)s - %(name)s - %(levelname)s - %(message)s\"\n",
     }
     for name, content in min_config.items():
@@ -99,6 +99,29 @@ def short_video(tmp_path: Path) -> Generator[Path, None, None]:
     yield path
     if path.exists():
         path.unlink()
+
+
+# ── Audio mixing fixtures ──────────────────────────────────────────────────
+
+
+@pytest.fixture
+def mock_music_file(tmp_path: Path) -> Path:
+    """Create a tiny valid MP3 file for background music tests."""
+    from pydub import AudioSegment
+    path = tmp_path / "bg_music.mp3"
+    seg = AudioSegment.silent(duration=1000, frame_rate=44100)
+    seg.export(str(path), format="mp3")
+    return path
+
+
+@pytest.fixture
+def mock_voice_wav(tmp_path: Path) -> Path:
+    """Create a tiny valid WAV file (0.2 sec, silence)."""
+    from pydub import AudioSegment
+    path = tmp_path / "voice.wav"
+    seg = AudioSegment.silent(duration=200, frame_rate=44100)
+    seg.export(str(path), format="wav")
+    return path
 
 
 # ── External-API mocks ─────────────────────────────────────────────────────

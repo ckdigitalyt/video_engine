@@ -11,7 +11,25 @@ def generate_voice(text, output_path):
     _tts_provider.generate_voice(text, output_path)
 
 
-def mix_audio(voice_path, music_path, output_path):
+def mix_audio(
+    voice_path: str,
+    music_path: str,
+    output_path: str,
+    fade_in_ms: int = 3000,
+    fade_out_ms: int = 3000,
+    music_volume_db: float = 0.0,
+) -> None:
+    """Mix a voiceover WAV with background music.
+
+    Args:
+        voice_path: Path to the voiceover WAV file.
+        music_path: Path to the background music file.
+        output_path: Destination path for the mixed WAV.
+        fade_in_ms: Fade-in duration for background music (ms).
+        fade_out_ms: Fade-out duration for background music (ms).
+        music_volume_db: Additional gain applied to the music track
+            before ducking (positive = louder, negative = quieter).
+    """
     print("Applying dynamic ducking and mixing...")
     voice = AudioSegment.from_wav(voice_path)
     tail_ms = get_config("voices.mixing.tail_ms", 2000)
@@ -24,16 +42,31 @@ def mix_audio(voice_path, music_path, output_path):
         # Create a dummy silent track for testing if missing
         music = AudioSegment.silent(duration=len(voice) + tail_ms)
 
-    # Loop background music if it is shorter than the voice clip
-    if len(music) < len(voice):
-        music = music * (len(voice) // len(music) + 1)
+    # Loop background music to cover voice + tail
+    target_len = len(voice) + tail_ms
+    if len(music) < target_len:
+        repeats = target_len // len(music) + 1
+        music = music * repeats
 
-    music = music[:len(voice) + tail_ms]  # Add a 2-second tail
-    ducked_music = music - ducking_db  # Drop background music by 12 decibels
+    music = music[:target_len]  # Trim to target length
+
+    # Apply music volume adjustment (positive = boost, negative = cut)
+    if music_volume_db:
+        music = music + music_volume_db
+
+    # Apply fade in / out to the music bed
+    if fade_in_ms > 0:
+        music = music.fade_in(fade_in_ms)
+    if fade_out_ms > 0:
+        music = music.fade_out(fade_out_ms)
+
+    ducked_music = music - abs(ducking_db)  # Drop background music
 
     mixed = ducked_music.overlay(voice, position=0)
     mixed.export(output_path, format="wav")
     print(f"Final mixed audio saved to {output_path}")
+
+
 
 
 if __name__ == "__main__":
