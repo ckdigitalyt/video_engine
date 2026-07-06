@@ -18,7 +18,11 @@ Exported symbols:
 from .llm_provider import LLMProvider, DeepSeekProvider, GeminiProvider
 from .asset_provider import AssetProvider, PexelsProvider, PixabayProvider
 from .tts_provider import TTSProvider, KokoroProvider
-from .stubs import StubAssetProvider, NasaMediaProvider, WikimediaCommonsProvider
+from .asset_provider import AssetProvider, PexelsProvider, PixabayProvider, NasaMediaProvider, WikimediaCommonsProvider
+
+# StubAssetProvider is no longer used — all providers are real implementations.
+# Keep a reference for backward compatibility.
+StubAssetProvider = AssetProvider
 
 __all__ = [
     "LLMProvider",
@@ -27,9 +31,9 @@ __all__ = [
     "AssetProvider",
     "PexelsProvider",
     "PixabayProvider",
+    "NasaMediaProvider",
+    "WikimediaCommonsProvider",
     "TTSProvider",
     "KokoroProvider",
     "StubAssetProvider",
-    "NasaMediaProvider",
-    "WikimediaCommonsProvider",
 ]

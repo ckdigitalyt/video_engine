@@ -17,8 +17,13 @@ from typing import Optional
 
 from src.assets.topic_classifier import TopicClassifier
 from src.assets.asset_library import AssetLibrary
-from src.providers.asset_provider import AssetProvider, PexelsProvider, PixabayProvider
-from src.providers.stubs import NasaMediaProvider, WikimediaCommonsProvider
+from src.providers.asset_provider import (
+    AssetProvider,
+    PexelsProvider,
+    PixabayProvider,
+    NasaMediaProvider,
+    WikimediaCommonsProvider,
+)
 from src.utils.config import get_config
 
 
@@ -129,10 +134,8 @@ class AssetRouter:
             if provider is None:
                 continue
 
-            # Skip stubs silently (they log themselves)
-            if provider.__class__.__name__.endswith("StubAssetProvider") or \
-               type(provider).__module__.endswith("stubs"):
-                provider.search(query, **kwargs)  # let it log the skip
+            # Skip providers that are not functional (auto-detect via API key)
+            if not self._is_provider_ready(provider, provider_name):
                 continue
 
             try:
@@ -223,13 +226,12 @@ class AssetRouter:
                 if provider is None:
                     continue
 
-                # Skip stubs
-                if provider.__class__.__name__.endswith("StubAssetProvider") or \
-                   type(provider).__module__.endswith("stubs"):
-                    provider.search(query, **kwargs)
-                    entry["tried_providers"].append(
-                        {"provider": provider_name, "status": "stub_skipped"}
-                    )
+                # Skip providers that are not functional
+                if not self._is_provider_ready(provider, provider_name):
+                    entry["tried_providers"].append({
+                        "provider": provider_name,
+                        "status": "not_ready",
+                    })
                     continue
 
                 try:
@@ -404,6 +406,33 @@ class AssetRouter:
             "nasa": AssetLibrary(provider=NasaMediaProvider()),
             "wikimedia": AssetLibrary(provider=WikimediaCommonsProvider()),
         }
+
+    @staticmethod
+    def _is_provider_ready(provider: AssetProvider, name: str) -> bool:
+        """Check if a provider is ready for use (not stubbed, API key present).
+
+        Real providers that are missing their API key are silently skipped
+        so the router can fall back to the next provider in the chain.
+        """
+        import os
+
+        # Check API key requirements
+        required_keys = {
+            "pixabay": "PIXABAY_API_KEY",
+            "nasa": "NASA_API_KEY",
+            "pexels": "PEXELS_API_KEY",
+        }
+
+        if name in required_keys:
+            key = os.environ.get(required_keys[name], "")
+            if not key or key == "":
+                return False
+
+        if name == "wikimedia":
+            # Wikimedia requires no API key — always ready
+            return True
+
+        return True
 
     @staticmethod
     def _load_routes() -> dict[str, list[str]]:

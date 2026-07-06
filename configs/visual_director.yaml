@@ -1,0 +1,37 @@
+# visual_director.yaml — Closed-loop Visual Director Configuration
+#
+# Controls the director-driven, self-correcting pipeline that replaces
+# the linear retrieval flow with a quality-gated, retry-capable system.
+
+visual_director:
+
+  # ── Maximum retries ──────────────────────────────────────────────────
+  max_retries_per_scene: 3
+  max_scene_regenerations: 2
+
+  # ── Quality Gates ────────────────────────────────────────────────────
+  quality_gates:
+    # Hard semantic threshold: assets below this score are REJECTED
+    semantic_threshold: 0.75
+    # Prevent asset URL reuse within this many scenes
+    reuse_window: 5
+    # Penalty applied for asset URL reuse in quality gate scoring
+    reuse_penalty: 0.3
+    # URL similarity threshold for duplicate detection (1.0 = identical)
+    duplicate_threshold: 0.85
+
+  # ── Aesthetic Consistency Agent ──────────────────────────────────────
+  aesthetic_agent:
+    enabled: true
+    # Number of recent scenes to check for style transitions
+    window_size: 3
+
+  # ── Aesthetic Mapping (category → visual style) ────────────────────
+  aesthetic_mapping:
+    Space: "space"
+    History: "archival"
+    Science: "photorealistic"
+    Nature: "photorealistic"
+    Technology: "cinematic"
+    Finance: "educational"
+    General: "documentary"
