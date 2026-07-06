@@ -1,0 +1,9 @@
+# logging.yaml — Logging configuration
+
+logging:
+  # Root logger level
+  level: "INFO"
+  # Log file path
+  file: "logs/video_engine.log"
+  # Log message format
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"

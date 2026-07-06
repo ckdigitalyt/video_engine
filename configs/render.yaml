@@ -1,0 +1,26 @@
+# render.yaml — MoviePy / FFmpeg rendering settings
+
+render:
+  # Output video resolution (width x height)
+  resolution:
+    width: 1920
+    height: 1080
+
+  # Frames per second
+  fps: 30
+
+  # Video codec (FFmpeg codec string)
+  codec: "libx264"
+
+  # Audio codec
+  audio_codec: "aac"
+
+  # Number of CPU threads for encoding
+  threads: 4
+
+  # FFmpeg preset (fast, medium, slow, etc.)
+  preset: "fast"
+
+output:
+  # Default output filename when none is specified
+  default: "final_output.mp4"

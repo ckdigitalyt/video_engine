@@ -1,0 +1,22 @@
+# voices.yaml — TTS (Kokoro) and audio mixing settings
+
+voices:
+  kokoro:
+    # Kokoro ONNX model file
+    model: "kokoro-v0_19.onnx"
+    # Kokoro voices binary
+    voices_bin: "voices.bin"
+    # Default voice identifier
+    default_voice: "bm_george"
+    # Speech speed multiplier (1.0 = normal)
+    speed: 1.0
+    # Language / accent tag
+    language: "en-gb"
+
+  mixing:
+    # Decibel reduction for background music ducking
+    ducking_db: -12
+    # Tail silence (ms) appended after voice clip
+    tail_ms: 2000
+    # Default background music file
+    background_music: "cache/music/cinematic.mp3"

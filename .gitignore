@@ -6,4 +6,4 @@ __pycache__/
 *.mp3
 venv/
 *.onnx
-voices.*
+voices.bin
