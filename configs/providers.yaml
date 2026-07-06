@@ -8,7 +8,12 @@ providers:
   pexels:
     # Pexels video search API endpoint
     base_url: "https://api.pexels.com/videos/search"
-    # Results per page
-    per_page: 5
+    # Results per page (asset scoring evaluates up to this many candidates)
+    per_page: 10
+    # Weighting for deterministic asset quality scoring
+    scoring:
+      resolution_weight: 0.40
+      duration_match_weight: 0.40
+      hd_bonus_weight: 0.20
     # Orientation filter for video search
     orientation: "landscape"
