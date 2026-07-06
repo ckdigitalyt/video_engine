@@ -1,0 +1,56 @@
+# planner.yaml — Story planning configuration
+
+planner:
+  # Default story template
+  story_template: "documentary"
+
+  # Target number of scenes (may expand to 15)
+  target_scene_count: 10
+
+  # Target video duration in seconds
+  target_duration: 120
+
+  # Narration pace (words per second of estimated_duration)
+  words_per_second: 3
+
+  # Narration tone/style
+  narration_style: "informative but conversational"
+
+  # Search query style for stock footage
+  search_query_style: "descriptive, landscape stock footage terms"
+
+  # Available story templates — each defines scene roles
+  story_templates:
+    documentary:
+      roles:
+        - "Hook — Open with a compelling question or startling fact"
+        - "Context — Provide background and set the stage"
+        - "Exploration — Dive deeper with evidence and examples"
+        - "Climax — Present the core revelation or key insight"
+        - "Conclusion — Summarise and leave the audience thinking"
+      description: "Classic documentary arc: hook → context → exploration → climax → conclusion."
+
+    problem_resolution:
+      roles:
+        - "Problem — State the problem clearly"
+        - "Investigation — Explore causes and contributing factors"
+        - "Resolution — Present solutions or outcomes"
+      description: "Problem-solution structure: problem → investigation → resolution."
+
+    timeline:
+      roles:
+        - "Opening — Set the scene and time period"
+        - "Event 1 — First major development"
+        - "Event 2 — Escalation or turning point"
+        - "Event 3 — Peak or resolution point"
+        - "Closing — Reflect on the story"
+      description: "Chronological story: opening → escalating events → closing."
+
+    listicle:
+      roles:
+        - "Intro — Hook the audience with a promise"
+        - "Point 1 — First key insight or example"
+        - "Point 2 — Second key insight or example"
+        - "Point 3 — Third key insight or example"
+        - "Outro — Recap and call to action"
+      description: "Enumeration format: intro → points → outro."
