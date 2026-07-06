@@ -14,7 +14,7 @@ modules load their settings through the `src.utils.config` loader (see
 | `llm.deepseek.model` | `"deepseek-chat"` | DeepSeek Chat model identifier |
 | `llm.deepseek.max_tokens` | `1000` | Maximum tokens per LLM call |
 | `llm.deepseek.temperature` | `0.7` | Generation temperature |
-| `llm.gemini.model` | `"gemini-1.5-flash"` | Gemini model identifier for the critic |
+| `llm.gemini.model` | `"models/gemini-2.5-flash-lite"` | Gemini model identifier for the critic |
 
 ---
 
