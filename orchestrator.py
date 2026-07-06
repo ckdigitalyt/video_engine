@@ -10,6 +10,7 @@ from renderer import render_timeline
 from src.utils.config import get_config
 from src.providers import DeepSeekProvider, GeminiProvider, PexelsProvider
 from src.renderer.timeline_builder import TimelineBuilder
+from src.memory.memory_manager import MemoryManager
 
 load_dotenv()
 
@@ -154,12 +155,29 @@ workflow.add_conditional_edges("critic", route_evaluation)
 
 app = workflow.compile()
 
+# ── Memory ─────────────────────────────────────────────────────────────────
+
+memory = MemoryManager(get_config("pipeline.memory.db_path", "cache/memory.db"))
+
 if __name__ == "__main__":
     if not os.environ.get("GEMINI_API_KEY"):
         print("CRITICAL ERROR: GEMINI_API_KEY not found in .env")
         exit(1)
 
     print("========== INITIATING SELF-IMPROVING PIPELINE ==========")
+
+    # Initialize memory tables
+    memory.initialize()
+
+    # Apply retention / cleanup policy
+    cleaned = memory.cleanup(
+        retention_days=get_config("pipeline.memory.retention_days", 90),
+        max_exec_logs=get_config("pipeline.memory.max_execution_logs", 1000),
+    )
+    for table, count in cleaned.items():
+        if count:
+            print(f"[memory] Cleaned {count} rows from {table}")
+
     # Initialize the graph with an iteration count of 0
     app.invoke({"topic": "The Fermi Paradox", "iteration": 0})
     print("\n========== PIPELINE COMPLETE ==========")
