@@ -95,9 +95,10 @@ def execution_node(state: AgentState):
         audio_path = f"{cache_audio}/scene_{scene.scene_id}.wav"
 
         print(f"  Scene {scene.scene_id}: searching '{scene.search_query}'")
+        target_dur = scene_data.get("estimated_duration")
         result = []
         try:
-            videos = pexels.search(scene.search_query)
+            videos = pexels.search(scene.search_query, target_duration=target_dur)
             if videos:
                 video_url = videos[0]["video_files"][0]["link"]
                 pexels.download(video_url, video_path)
