@@ -63,128 +63,39 @@ def planner_node(state: AgentState):
 
 
 def execution_node(state: AgentState):
-    print("\n[2/4] Node: Deterministic Execution")
+    print("\n[2/4] Node: Visual Director Execution")
     plan = json.loads(state["plan_json"])
     scenes_data = plan["scenes"]
     print(f"-> Planner produced {len(scenes_data)} scenes")
 
-    # Create topic-aware asset router for this execution
-    topic = state["topic"]
-    router = AssetRouter.for_topic(topic)
+    # ── Create the closed-loop Visual Director ─────────────────────────
+    from src.director.director import VisualDirector
 
-    # Create search planner for multi-query search
-    search_planner = SearchPlanner(provider=deepseek)
+    director = VisualDirector(
+        topic=state["topic"],
+        llm_provider=deepseek,
+        scene_data=scenes_data,
+    )
 
-        # Create semantic validator
-    semantic_validator = SemanticValidator(provider=deepseek)
+    # Run the director's quality-gated pipeline
+    direct_results = director.run()
 
+    # Convert director results to SceneAsset and narration lists
     scene_assets: list[SceneAsset] = []
     scene_narrations: list[tuple[int, str, str]] = []
 
-    for scene_data in scenes_data:
-        scene = Scene(
-            scene_id=scene_data["scene_id"],
-            search_query=scene_data["search_query"],
-            narration=scene_data["narration"],
-        )
-
-        video_path = f"{cache_video}/scene_{scene.scene_id}.mp4"
-        audio_path = f"{cache_audio}/scene_{scene.scene_id}.wav"
-
-        print(f"\n  Scene {scene.scene_id}: '{scene.search_query}'")
-        target_dur = scene_data.get("estimated_duration")
-
-        # ── Generate diverse search queries ────────────────────────────
-        print(f"    -> Generating search queries...")
-        queries = search_planner.generate_queries(
-            narration=scene.narration,
-            title=scene_data.get("scene_title", ""),
-            topic=topic,
-            purpose=scene_data.get("purpose", "general"),
-        )
-
-        # Log generated queries
-        for i, q in enumerate(queries, 1):
-            print(f"    Query {i}: {q}")
-
-        # ── Execute multi-query search with semantic validation ─────
-        result = []
-        try:
-            mq_result = router.multi_query_search(
-                queries,
-                min_acceptable_score=search_planner.min_acceptable_score,
-                max_attempts=search_planner.max_provider_attempts,
-                diversity_weighting=search_planner.diversity_weighting,
-                target_duration=target_dur,
-            )
-
-            videos = mq_result.get("assets", [])
-            selected_query = mq_result.get("selected_query", "")
-            selected_provider = mq_result.get("provider_name", "")
-            selected_score = mq_result.get("selected_score", -1.0)
-            query_log = mq_result.get("query_log", [])
-
-            # Log per-query results
-            print(f"    Queries tried: {len(query_log)}")
-            for log_entry in query_log:
-                q = log_entry.get("query", "")
-                providers = log_entry.get("tried_providers", [])
-                provs = ", ".join(f"{p['provider']}:{p.get('status','?')}" for p in providers)
-                score = log_entry.get("score", "-")
-                print(f"      - '{q}' [{provs}] score={score}")
-
-            # ── Semantic validation ────────────────────────────────────
-            if videos:
-                best_asset = videos[0]
-                sem_score = semantic_validator.score(
-                    narration=scene.narration,
-                    query=selected_query,
-                    asset=best_asset,
-                )
-                print(f"    Semantic score: {sem_score:.3f} (threshold: {semantic_validator._threshold})")
-
-                if not semantic_validator.is_acceptable(sem_score):
-                    print(f"    -> Semantic validation FAILED. Using anyway (best available).")
-
-            print(f"    Selected provider: {selected_provider}")
-            print(f"    Selected query: {selected_query}")
-            print(f"    Combined score: {selected_score:.3f}")
-
-            # Also update the scene's search query for the timeline
-            scene.search_query = selected_query or scene.search_query
-
-            if videos:
-                video_url = videos[0]["video_files"][0]["link"]
-                router.download(video_url, video_path)
-                result = [video_path]
-        except Exception as e:
-            print(f"    -> Multi-query search error: {e}")
-
-        if not result:
-            print("    -> All providers exhausted. Using fallback.")
-            video_path = fallback_video
-
-        print(f"  Scene {scene.scene_id}: generating voiceover...")
-        generate_voice(scene.narration, audio_path)
-
-        # ── Duration verification ──────────────────────────────────────
-        audio_dur = get_media_duration(audio_path)
-        if audio_dur > 0 and os.path.exists(video_path):
-            adjusted_path = ensure_video_duration(
-                video_path, audio_dur,
-                output_path=video_path.replace(".mp4", "_dur.mp4"),
-            )
-            if adjusted_path != video_path:
-                # Replace the original with the adjusted version
-                os.replace(adjusted_path, video_path)
-
-        scene_narrations.append((scene.scene_id, scene.narration, audio_path))
+    for result in direct_results:
+        scene_id = result["scene_id"]
+        video_path = result["video_path"]
+        audio_path = result["audio_path"]
+        narration = result["narration"]
 
         scene_assets.append(SceneAsset(
-            scene_id=scene.scene_id,
+            scene_id=scene_id,
             video_path=video_path,
             audio_path=audio_path,
         ))
+        scene_narrations.append((scene_id, narration, audio_path))
 
     # ── Background music mixing ───────────────────────────────────────
     fade_in = get_config("voices.mixing.fade_in_ms", 3000)
@@ -271,35 +182,47 @@ def critic_node(state: AgentState):
     except NotFound as e:
         print(f"✗ CRITICAL CONFIG ERROR: Gemini model not found: {e}")
         print("  -> Update 'llm.gemini.model' in configs/models.yaml to a supported model.")
-        print("  -> Defaulting to APPROVED to unblock pipeline.")
-        approved = True
+        print("  -> FAIL CLOSED: marking render as pending review. Pipeline will NOT auto-approve.")
+        approved = False
         result = CriticResult(approved=False, error=f"Configuration error: model not found — {e}")
 
     except ResourceExhausted as e:
         print(f"✗ GEMINI QUOTA EXHAUSTED: {e}")
-        print("  -> Free-tier quota may be depleted. Wait or upgrade.")
-        print("  -> Defaulting to APPROVED to unblock pipeline.")
-        approved = True
-        result = CriticResult(approved=False, error=f"Resource exhausted (quota): {e}")
+        print("  -> Retrying with exponential backoff...")
+        import time as _time
+        for backoff in [2, 4, 8]:
+            _time.sleep(backoff)
+            try:
+                decision = gemini.generate_text(prompt, image_path=frame_path).upper()
+                if "YES" in decision:
+                    approved = True
+                    result = CriticResult(approved=True, decision=decision, error=None)
+                    break
+            except Exception:
+                continue
+        else:
+            print("  -> All retries exhausted. FAIL CLOSED: marking as pending review.")
+            approved = False
+            result = CriticResult(approved=False, error=f"Resource exhausted (quota): {e}")
 
     except PermissionDenied as e:
         print(f"✗ GEMINI AUTH ERROR: Invalid or missing GEMINI_API_KEY")
-        print("  -> Check .env file and GEMINI_API_KEY value.")
-        print("  -> Defaulting to APPROVED to unblock pipeline.")
-        approved = True
+        print("  -> FAIL CLOSED: cannot evaluate without valid credentials.")
+        print("  -> Marking render as pending manual review.")
+        approved = False
         result = CriticResult(approved=False, error=f"Authentication error: {e}")
 
     except InvalidArgument as e:
         print(f"✗ GEMINI ARGUMENT ERROR: Invalid configuration: {e}")
         print("  -> Check model name and parameters in configs/models.yaml.")
-        print("  -> Defaulting to APPROVED to unblock pipeline.")
-        approved = True
+        print("  -> FAIL CLOSED: marking as pending review.")
+        approved = False
         result = CriticResult(approved=False, error=f"Invalid argument: {e}")
 
     except Exception as e:
         print(f"✗ GEMINI UNKNOWN ERROR: {e}")
-        print("  -> Defaulting to APPROVED to prevent pipeline block.")
-        approved = True
+        print("  -> FAIL CLOSED: marking as pending review. Pipeline will NOT auto-approve.")
+        approved = False
         result = CriticResult(approved=False, error=f"Unknown error: {e}")
 
     print(f"-> CriticResult: approved={result.approved}, error={result.error}")

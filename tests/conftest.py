@@ -144,7 +144,15 @@ def mock_env_api_keys(monkeypatch: pytest.MonkeyPatch) -> None:
 
 @pytest.fixture
 def mock_pexels_api(monkeypatch: pytest.MonkeyPatch) -> MagicMock:
-    """Mock the ``requests.get`` call inside PexelsProvider.search()."""
+    """Mock the ``requests.get`` call inside PexelsProvider.search().
+
+    Also sets realistic-looking API keys so that ``_is_provider_ready``
+    doesn't skip providers during testing.
+    """
+    monkeypatch.setenv("PEXELS_API_KEY", "test_pexels_key_12345")
+    monkeypatch.setenv("PIXABAY_API_KEY", "test_pixabay_key_12345")
+    monkeypatch.setenv("NASA_API_KEY", "test_nasa_key_12345")
+
     mock = MagicMock()
     mock.return_value.json.return_value = {
         "videos": [
@@ -163,7 +171,12 @@ def mock_pexels_api(monkeypatch: pytest.MonkeyPatch) -> MagicMock:
 
 @pytest.fixture
 def mock_pixabay_api(monkeypatch: pytest.MonkeyPatch) -> MagicMock:
-    """Mock the ``requests.get`` call inside PixabayProvider.search()."""
+    """Mock the ``requests.get`` call inside PixabayProvider.search().
+
+    Also sets realistic-looking API keys for _is_provider_ready checks.
+    """
+    monkeypatch.setenv("PIXABAY_API_KEY", "test_pixabay_key_12345")
+    monkeypatch.setenv("NASA_API_KEY", "test_nasa_key_12345")
     mock = MagicMock()
     mock.return_value.json.return_value = {
         "hits": [

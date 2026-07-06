@@ -288,7 +288,7 @@ class TestMultiQuerySearch:
 
         router = AssetRouter.for_topic("General")
         # Replace providers with empty stub
-        from src.providers.stubs import NasaMediaProvider
+        from src.providers.asset_provider import NasaMediaProvider
         from src.providers.asset_provider import PixabayProvider, PexelsProvider
         from src.assets.asset_library import AssetLibrary
 

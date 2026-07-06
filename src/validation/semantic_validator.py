@@ -54,8 +54,9 @@ class SemanticValidator:
         self._enabled = enabled if enabled is not None else get_config(
             "semantic_validation.enabled", True
         )
+        # Authoritative threshold: hard reject below this score
         self._threshold = threshold if threshold is not None else get_config(
-            "semantic_validation.threshold", 0.5
+            "visual_director.quality_gates.semantic_threshold", 0.75
         )
         self._max_attempts = max_attempts if max_attempts is not None else get_config(
             "semantic_validation.max_attempts", 5
@@ -85,7 +86,11 @@ class SemanticValidator:
         return self._score_fallback(narration, query, tags)
 
     def is_acceptable(self, score: float) -> bool:
-        """Return *True* when *score* meets the configured threshold."""
+        """Return *True* when *score* meets the configured threshold.
+
+        This is an authoritative gate: *False* means the asset MUST be
+        rejected and an alternative MUST be found.
+        """
         return score >= self._threshold
 
     # ── LLM-based scoring ──────────────────────────────────────────────

@@ -1,41 +1,34 @@
-# visual_quality.yaml — Visual Quality V1 Configuration
-
-# ── Semantic Asset Validation ──────────────────────────────────────────────
+# visual_quality.yaml — Visual Quality Configuration (V1+)
+#
+# Semantic validation is now authoritative (threshold >= 0.75).
+# The Visual Director handles retry/regeneration when gates fail.
 
 semantic_validation:
   enabled: true
-  # Minimum semantic relevance score (0-1) to accept an asset
-  threshold: 0.5
-  # Maximum retry attempts across all queries for a single scene
+  # HARD quality gate — assets below this score are REJECTED
+  threshold: 0.75
+  # Maximum retries across all queries for a single scene
   max_attempts: 5
 
 # ── Video Duration Verification ──────────────────────────────────────────
 
 duration_verification:
   enabled: true
-  # Max factor to slow a video to cover audio duration (e.g. 1.5 = 50% slower)
   max_speed_change: 1.5
-  # Prefer looping over slowing when video < audio
   prefer_loop: true
 
 # ── Clip Diversity ─────────────────────────────────────────────────────────
 
 clip_diversity:
   enabled: true
-  # Penalty applied when the same asset id is reused in the last N scenes
   recent_window: 5
-  # Penalty amount subtracted from similarity score for repeated assets
   repeat_penalty: 0.3
-  # Penalty for same query reused (lighter penalty)
   query_repeat_penalty: 0.15
 
 # ── Smart Transitions ──────────────────────────────────────────────────────
 
 smart_transitions:
   enabled: true
-  # When topic category stays the same -> "cut"
-  # When visual similarity is detected -> "dissolve"
-  # When a new scene/topic is introduced -> "fade"
   same_topic_default: "cut"
   same_provider_default: "dissolve"
   new_idea_default: "fade"
