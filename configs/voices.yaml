@@ -18,5 +18,11 @@ voices:
     ducking_db: -12
     # Tail silence (ms) appended after voice clip
     tail_ms: 2000
+    # Fade-in duration for background music (ms)
+    fade_in_ms: 3000
+    # Fade-out duration for background music (ms)
+    fade_out_ms: 3000
+    # Additional gain applied to music before ducking (dB)
+    music_volume_db: 0.0
     # Default background music file
     background_music: "cache/music/cinematic.mp3"

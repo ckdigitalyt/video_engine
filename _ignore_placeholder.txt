@@ -1,0 +1,1 @@
+Git status report placeholder - checking via exec
