@@ -1,0 +1,21 @@
+# evaluator.yaml — Evaluation & benchmark framework configuration
+
+evaluator:
+  # Directory for generated report files
+  output_dir: "eval_reports"
+
+  # Which report formats to generate by default
+  default_formats:
+    - json
+    - csv
+    - md
+
+  # Metrics to include (all enabled by default)
+  metrics:
+    performance: true       # timing for planning, execution, render, critic
+    assets: true            # cache hits/misses, library reuse, downloads
+    scenes: true            # scene count, narration words, query stats
+    subtitles: true         # subtitle word/clip counts
+    effects: true           # motion types, transition types
+    output: true            # resolution, fps, duration, file size
+    critic: true            # approval status, iteration count
