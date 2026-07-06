@@ -42,7 +42,7 @@ def planner_node(state: AgentState):
     You are the Director Agent for a YouTube documentary channel.
     Topic: "{state['topic']}"
 
-    Create a 1-scene short script.
+    Create a multi-scene short documentary script with 8 to 15 scenes.
     Output ONLY a raw, valid JSON object. Do not use markdown.
 
     Exact Schema Required:
@@ -50,11 +50,23 @@ def planner_node(state: AgentState):
       "scenes": [
         {{
           "scene_id": 1,
+          "title": "The Vast Cosmos",
           "search_query": "deep space milky way galaxy",
-          "narration": "The universe is unimaginably vast, yet when we look up, we are met with a deafening silence."
+          "narration": "The universe is unimaginably vast, yet when we look up, we are met with a deafening silence.",
+          "estimated_duration": 10
         }}
       ]
     }}
+
+    Rules:
+    1. Number of scenes must be between 8 and 15, scaled to topic depth.
+    2. Each scene_id starts at 1 and increments by 1.
+    3. Narration text must be roughly 3 words per second of estimated_duration.
+       Example: estimated_duration 10 → narration ≈ 30 words.
+    4. search_query must be unique across all scenes.
+    5. Ensure logical progression — open strongly, develop the argument, conclude.
+    6. No duplicated scenes, titles, or narration.
+    7. Smooth narrative transitions between consecutive scenes.
     """
 
     content = deepseek.generate_json(prompt)
@@ -64,43 +76,48 @@ def planner_node(state: AgentState):
 def execution_node(state: AgentState):
     print("\n[2/4] Node: Deterministic Execution")
     plan = json.loads(state["plan_json"])
-    scene_data = plan["scenes"][0]
+    scenes_data = plan["scenes"]
+    print(f"-> Planner produced {len(scenes_data)} scenes")
 
-    scene = Scene(
-        scene_id=scene_data["scene_id"],
-        search_query=scene_data["search_query"],
-        narration=scene_data["narration"],
-    )
+    scene_assets: list[SceneAsset] = []
 
-    video_path = f"{cache_video}/scene_{scene.scene_id}.mp4"
-    audio_path = f"{cache_audio}/scene_{scene.scene_id}.wav"
+    for scene_data in scenes_data:
+        scene = Scene(
+            scene_id=scene_data["scene_id"],
+            search_query=scene_data["search_query"],
+            narration=scene_data["narration"],
+        )
 
-    print(f"-> Searching Pexels for: '{scene.search_query}'")
-    result = []
-    try:
-        videos = pexels.search(scene.search_query)
-        if videos:
-            video_url = videos[0]["video_files"][0]["link"]
-            pexels.download(video_url, video_path)
-            result = [video_path]
-    except Exception:
-        pass
+        video_path = f"{cache_video}/scene_{scene.scene_id}.mp4"
+        audio_path = f"{cache_audio}/scene_{scene.scene_id}.wav"
 
-    if not result:
-        print("-> Pexels Error. Using fallback.")
-        video_path = fallback_video
+        print(f"  Scene {scene.scene_id}: searching '{scene.search_query}'")
+        result = []
+        try:
+            videos = pexels.search(scene.search_query)
+            if videos:
+                video_url = videos[0]["video_files"][0]["link"]
+                pexels.download(video_url, video_path)
+                result = [video_path]
+        except Exception:
+            pass
 
-    print("-> Generating voiceover...")
-    generate_voice(scene.narration, audio_path)
+        if not result:
+            print("    -> Pexels Error. Using fallback.")
+            video_path = fallback_video
+
+        print(f"  Scene {scene.scene_id}: generating voiceover...")
+        generate_voice(scene.narration, audio_path)
+
+        scene_assets.append(SceneAsset(
+            scene_id=scene.scene_id,
+            video_path=video_path,
+            audio_path=audio_path,
+        ))
 
     # Build timeline using TimelineBuilder
-    scene_asset = SceneAsset(
-        scene_id=scene.scene_id,
-        video_path=video_path,
-        audio_path=audio_path,
-    )
     builder = TimelineBuilder()
-    timeline_json = builder.build_and_write([scene_asset])
+    timeline_json = builder.build_and_write(scene_assets)
 
     return {"timeline_json": timeline_json}
 
