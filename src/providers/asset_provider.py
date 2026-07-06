@@ -352,3 +352,268 @@ def _normalise_pixabay_hit(hit: dict) -> dict:
             "user": hit.get("user", ""),
         },
     }
+
+
+# ── NASA Image and Video Library ───────────────────────────────────────
+
+class NasaMediaProvider(AssetProvider):
+    """Asset provider backed by the NASA Image and Video Library API.
+
+    NASA API: https://images-api.nasa.gov
+    Documentation: https://api.nasa.gov/
+
+    Returns video assets from NASA's public media library.
+    Requires the ``NASA_API_KEY`` environment variable (use "DEMO_KEY"
+    for limited access).
+    """
+
+    def __init__(self):
+        from src.assets.asset_cache import AssetCache as _AC
+        self._api_key = os.environ.get("NASA_API_KEY", "DEMO_KEY")
+        self._base_url = "https://images-api.nasa.gov/search"
+        self._media_type = "video"
+        self._cache = _AC()
+        self._last_query: str | None = None
+
+    def search(self, query: str, **kwargs) -> list:
+        """Search NASA media library for *query*.
+
+        Returns normalised result dicts matching the internal asset model
+        (same ``video_files`` structure as Pexels).
+        """
+        if not query:
+            return []
+
+        cached = self._cache.lookup("nasa", query)
+        if cached is not None:
+            print(f"-> NASA Cache HIT: '{query}'")
+            return [{"video_files": [{"link": cached["asset_url"]}]}]
+
+        print(f"-> NASA Cache MISS: '{query}' — calling NASA API")
+        params = {
+            "q": query,
+            "media_type": self._media_type,
+            "page": 1,
+            "page_size": 10,
+        }
+        try:
+            res = requests.get(self._base_url, params=params).json()
+        except Exception as e:
+            print(f"-> NASA API request failed: {e}")
+            return []
+
+        items = res.get("collection", {}).get("items", [])
+        results = _normalise_nasa_items(items)
+
+        if not results:
+            return results
+
+        # Pre-register best result in cache
+        best_url = results[0]["video_files"][0]["link"]
+        self._cache.register("nasa", query, best_url)
+        self._last_query = query
+
+        for i, item in enumerate(results[:5]):
+            dur = item.get("duration", 0)
+            w, h = item.get("width", 0), item.get("height", 0)
+            print(f"  NASA Candidate {i+1}: id={item['id']} {w}x{h} dur={dur}s")
+
+        return results
+
+    def download(self, url: str, output_path: str) -> str:
+        if os.path.exists(output_path):
+            print(f"-> Already on disk: {output_path}")
+            if self._last_query:
+                self._cache.touch("nasa", self._last_query)
+            return output_path
+
+        print("-> Downloading from NASA…")
+        resp = requests.get(url, stream=True)
+        with open(output_path, "wb") as f:
+            for chunk in resp.iter_content(chunk_size=8192):
+                f.write(chunk)
+
+        if self._last_query:
+            self._cache.update_local_path("nasa", self._last_query, url, output_path)
+        print(f"-> Saved: {output_path}")
+        return output_path
+
+
+def _normalise_nasa_items(items: list) -> list:
+    """Convert NASA API items to the internal asset model."""
+    results = []
+    for item in items:
+        data_list = item.get("data", [])
+        if not data_list:
+            continue
+        data = data_list[0]
+
+        links = item.get("links", [])
+        if not links:
+            continue
+
+        nasa_id = data.get("nasa_id", "")
+        title = data.get("title", "")
+        description = data.get("description", "")
+        date_created = data.get("date_created", "")
+
+        video_files = []
+        for link in links:
+            href = link.get("href", "")
+            if not href:
+                continue
+            video_files.append({
+                "link": href,
+                "quality": "sd",
+                "width": 0,
+                "height": 0,
+                "file_size": 0,
+            })
+
+        results.append({
+            "id": nasa_id,
+            "width": 1920,
+            "height": 1080,
+            "duration": 30.0,
+            "video_files": video_files,
+            "_raw": {
+                "title": title,
+                "description": description,
+                "date_created": date_created,
+                "nasa_id": nasa_id,
+            },
+        })
+    return results
+
+
+# ── Wikimedia Commons ──────────────────────────────────────────────────
+
+class WikimediaCommonsProvider(AssetProvider):
+    """Asset provider backed by the Wikimedia Commons API.
+
+    Returns images from Wikimedia Commons.  For history category, these
+    are typically public-domain historical images rendered with Ken Burns
+    effects.
+
+    API: https://commons.wikimedia.org/w/api.php
+    """
+
+    def __init__(self):
+        from src.assets.asset_cache import AssetCache as _AC
+        self._base_url = "https://commons.wikimedia.org/w/api.php"
+        self._cache = _AC()
+        self._last_query: str | None = None
+        # Force image mode for Wikimedia
+        self._image_mode = True
+
+    def search(self, query: str, **kwargs) -> list:
+        """Search Wikimedia Commons for images matching *query*.
+
+        Returns normalised result dicts with a single ``video_files``
+        entry that points to the image URL.  The renderer will apply
+        Ken Burns motion to still images.
+        """
+        if not query:
+            return []
+
+        cached = self._cache.lookup("wikimedia", query)
+        if cached is not None:
+            print(f"-> Wikimedia Cache HIT: '{query}'")
+            return [{"_image": True, "video_files": [{"link": cached["asset_url"]}]}]
+
+        print(f"-> Wikimedia Cache MISS: '{query}' — calling Wikimedia API")
+        params = {
+            "action": "query",
+            "format": "json",
+            "list": "search",
+            "srsearch": query,
+            "srnamespace": 6,
+            "srlimit": 10,
+            "srprop": "size|timestamp",
+        }
+        try:
+            res = requests.get(self._base_url, params=params).json()
+        except Exception as e:
+            print(f"-> Wikimedia API request failed: {e}")
+            return []
+
+        query_results = res.get("query", {}).get("search", [])
+        if not query_results:
+            return []
+
+        # Get image info URLs for the found pages
+        page_ids = [str(r["pageid"]) for r in query_results[:10]]
+        info_params = {
+            "action": "query",
+            "format": "json",
+            "pageids": "|".join(page_ids),
+            "prop": "imageinfo",
+            "iiprop": "url|size|mime",
+            "iiurlwidth": 1920,
+        }
+        try:
+            info_res = requests.get(self._base_url, params=info_params).json()
+        except Exception as e:
+            print(f"-> Wikimedia image info request failed: {e}")
+            return []
+
+        pages = info_res.get("query", {}).get("pages", {})
+        results = []
+        for page_id_str, page_data in pages.items():
+            image_info = page_data.get("imageinfo", [])
+            if not image_info:
+                continue
+            info = image_info[0]
+            url = info.get("url", "")
+            thumb_url = info.get("thumburl", url)
+
+            results.append({
+                "id": page_id_str,
+                "_image": True,
+                "width": info.get("width", 0) or 1920,
+                "height": info.get("height", 0) or 1080,
+                "duration": 10.0,
+                "video_files": [{
+                    "link": url,
+                    "quality": "hd",
+                    "width": info.get("width", 0) or 1920,
+                    "height": info.get("height", 0) or 1080,
+                    "file_size": info.get("size", 0),
+                }],
+                "_raw": {
+                    "thumb_url": thumb_url,
+                    "mime": info.get("mime", ""),
+                    "page_title": page_data.get("title", ""),
+                },
+            })
+
+        if not results:
+            return results
+
+        best_url = results[0]["video_files"][0]["link"]
+        self._cache.register("wikimedia", query, best_url)
+        self._last_query = query
+
+        for i, item in enumerate(results[:5]):
+            w, h = item.get("width", 0), item.get("height", 0)
+            print(f"  Wikimedia Candidate {i+1}: id={item['id']} {w}x{h}")
+
+        return results
+
+    def download(self, url: str, output_path: str) -> str:
+        if os.path.exists(output_path):
+            print(f"-> Already on disk: {output_path}")
+            if self._last_query:
+                self._cache.touch("wikimedia", self._last_query)
+            return output_path
+
+        print("-> Downloading from Wikimedia…")
+        resp = requests.get(url, stream=True)
+        with open(output_path, "wb") as f:
+            for chunk in resp.iter_content(chunk_size=8192):
+                f.write(chunk)
+
+        if self._last_query:
+            self._cache.update_local_path("wikimedia", self._last_query, url, output_path)
+        print(f"-> Saved: {output_path}")
+        return output_path

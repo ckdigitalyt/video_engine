@@ -12,9 +12,11 @@ from audio_engine import generate_voice, mix_audio
 from src.renderer import Renderer
 from src.renderer.moviepy_renderer import MoviePyRenderer
 from src.utils.config import get_config
+from src.utils.duration import ensure_video_duration, get_media_duration
 from src.providers import DeepSeekProvider, GeminiProvider
 from src.assets import AssetRouter
 from src.assets.search_planner import SearchPlanner
+from src.validation.semantic_validator import SemanticValidator
 from src.planner import StoryPlanner
 from src.renderer.timeline_builder import TimelineBuilder
 from src.memory.memory_manager import MemoryManager
@@ -73,6 +75,9 @@ def execution_node(state: AgentState):
     # Create search planner for multi-query search
     search_planner = SearchPlanner(provider=deepseek)
 
+        # Create semantic validator
+    semantic_validator = SemanticValidator(provider=deepseek)
+
     scene_assets: list[SceneAsset] = []
     scene_narrations: list[tuple[int, str, str]] = []
 
@@ -102,7 +107,7 @@ def execution_node(state: AgentState):
         for i, q in enumerate(queries, 1):
             print(f"    Query {i}: {q}")
 
-        # ── Execute multi-query search ────────────────────────────────
+        # ── Execute multi-query search with semantic validation ─────
         result = []
         try:
             mq_result = router.multi_query_search(
@@ -123,15 +128,27 @@ def execution_node(state: AgentState):
             print(f"    Queries tried: {len(query_log)}")
             for log_entry in query_log:
                 q = log_entry.get("query", "")
-                status = log_entry.get("status", "attempted")
                 providers = log_entry.get("tried_providers", [])
                 provs = ", ".join(f"{p['provider']}:{p.get('status','?')}" for p in providers)
                 score = log_entry.get("score", "-")
                 print(f"      - '{q}' [{provs}] score={score}")
 
+            # ── Semantic validation ────────────────────────────────────
+            if videos:
+                best_asset = videos[0]
+                sem_score = semantic_validator.score(
+                    narration=scene.narration,
+                    query=selected_query,
+                    asset=best_asset,
+                )
+                print(f"    Semantic score: {sem_score:.3f} (threshold: {semantic_validator._threshold})")
+
+                if not semantic_validator.is_acceptable(sem_score):
+                    print(f"    -> Semantic validation FAILED. Using anyway (best available).")
+
             print(f"    Selected provider: {selected_provider}")
             print(f"    Selected query: {selected_query}")
-            print(f"    Reason: score={selected_score:.3f}")
+            print(f"    Combined score: {selected_score:.3f}")
 
             # Also update the scene's search query for the timeline
             scene.search_query = selected_query or scene.search_query
@@ -149,6 +166,18 @@ def execution_node(state: AgentState):
 
         print(f"  Scene {scene.scene_id}: generating voiceover...")
         generate_voice(scene.narration, audio_path)
+
+        # ── Duration verification ──────────────────────────────────────
+        audio_dur = get_media_duration(audio_path)
+        if audio_dur > 0 and os.path.exists(video_path):
+            adjusted_path = ensure_video_duration(
+                video_path, audio_dur,
+                output_path=video_path.replace(".mp4", "_dur.mp4"),
+            )
+            if adjusted_path != video_path:
+                # Replace the original with the adjusted version
+                os.replace(adjusted_path, video_path)
+
         scene_narrations.append((scene.scene_id, scene.narration, audio_path))
 
         scene_assets.append(SceneAsset(

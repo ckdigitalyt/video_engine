@@ -401,8 +401,8 @@ class AssetRouter:
         return {
             "pexels": AssetLibrary(provider=PexelsProvider()),
             "pixabay": AssetLibrary(provider=PixabayProvider()),
-            "nasa": NasaMediaProvider(),
-            "wikimedia": WikimediaCommonsProvider(),
+            "nasa": AssetLibrary(provider=NasaMediaProvider()),
+            "wikimedia": AssetLibrary(provider=WikimediaCommonsProvider()),
         }
 
     @staticmethod
