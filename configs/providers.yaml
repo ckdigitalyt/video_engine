@@ -23,3 +23,176 @@ providers:
       enabled: true
       similarity_threshold: 0.45
       max_candidates: 5
+
+# ── Topic-aware asset routing ──────────────────────────────────────────────
+# The AssetRouter uses this table to determine which provider(s) to try for
+# a given topic category.  Providers are tried in order; the first non-empty
+# result wins.
+#
+# To add a new provider:
+# 1. Implement the AssetProvider interface.
+# 2. Add the provider name to the appropriate category routes below.
+# 3. Instantiate it in AssetRouter._default_providers().
+#
+# Category keywords are used by the TopicClassifier to map a video topic
+# string (e.g. "The Fermi Paradox") to a category name.
+
+asset_routing:
+  # Provider priority per category (first provider with results wins)
+  routes:
+    Space:      [nasa, pixabay, pexels]
+    History:    [wikimedia, pixabay, pexels]
+    Science:    [nasa, pixabay, pexels]
+    Nature:     [pixabay, pexels]
+    Technology: [pixabay, pexels]
+    Finance:    [pixabay, pexels]
+    General:    [pixabay, pexels]
+
+  # Category keyword definitions for the TopicClassifier
+  keywords:
+    Space:
+      - space
+      - astronomy
+      - astronaut
+      - nasa
+      - planet
+      - star
+      - galaxy
+      - universe
+      - cosmos
+      - telescope
+      - orbit
+      - satellite
+      - solar
+      - mars
+      - moon
+      - alien
+      - ufo
+      - extraterrestrial
+      - rocket
+      - launch
+      - nebula
+      - asteroid
+      - comet
+      - stellar
+      - fermi
+      - paradox
+      - cosmic
+      - interstellar
+      - celestial
+      - constellation
+      - lunar
+      - meteor
+      - observatory
+      - sputnik
+      - voyager
+      - hubble
+      - spacecraft
+      - spaceflight
+      - spacewalk
+      - black hole
+      - quasar
+    History:
+      - history
+      - ancient
+      - empire
+      - war
+      - revolution
+      - medieval
+      - roman
+      - greek
+      - egyptian
+      - civilization
+      - king
+      - queen
+      - battle
+      - century
+      - historical
+      - archaeology
+      - ruins
+      - renaissance
+      - colony
+      - dynasty
+      - monarch
+      - conquest
+    Science:
+      - science
+      - physics
+      - chemistry
+      - biology
+      - experiment
+      - laboratory
+      - research
+      - discovery
+      - dna
+      - genetics
+      - quantum
+      - particle
+      - energy
+      - element
+      - molecule
+      - scientist
+      - theory
+      - evolution
+      - microscope
+    Technology:
+      - technology
+      - computer
+      - ai
+      - programming
+      - software
+      - internet
+      - robot
+      - digital
+      - startup
+      - innovation
+      - cyber
+      - blockchain
+      - code
+      - algorithm
+      - machine learning
+      - artificial intelligence
+      - data
+      - network
+      - processor
+    Nature:
+      - nature
+      - animal
+      - wildlife
+      - ocean
+      - forest
+      - mountain
+      - river
+      - climate
+      - weather
+      - environment
+      - planet earth
+      - ecosystem
+      - bird
+      - fish
+      - plant
+      - garden
+      - landscape
+      - sea
+      - rainforest
+      - desert
+      - coral
+      - conservation
+    Finance:
+      - finance
+      - money
+      - economy
+      - bank
+      - stock
+      - investment
+      - wealth
+      - crypto
+      - market
+      - trading
+      - budget
+      - fund
+      - financial
+      - business
+      - entrepreneur
+      - recession
+      - inflation

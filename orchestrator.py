@@ -12,21 +12,22 @@ from audio_engine import generate_voice, mix_audio
 from src.renderer import Renderer
 from src.renderer.moviepy_renderer import MoviePyRenderer
 from src.utils.config import get_config
-from src.providers import DeepSeekProvider, GeminiProvider, PexelsProvider
-from src.assets.asset_library import AssetLibrary
+from src.providers import DeepSeekProvider, GeminiProvider
+from src.assets import AssetRouter
 from src.planner import StoryPlanner
 from src.renderer.timeline_builder import TimelineBuilder
 from src.memory.memory_manager import MemoryManager
 from src.models import Scene, SceneAsset, CriticResult
+from src.subtitles.engine import SubtitleEngine
 
 load_dotenv()
 
 # ── Providers ──────────────────────────────────────────────────────────────
 
 deepseek = DeepSeekProvider()
-pexels = AssetLibrary(provider=PexelsProvider())
 gemini = GeminiProvider()
 renderer: Renderer = MoviePyRenderer()
+subtitle_engine = SubtitleEngine()
 
 cache_video = get_config("pipeline.cache.video", "cache/video")
 cache_audio = get_config("pipeline.cache.audio", "cache/audio")
@@ -64,6 +65,10 @@ def execution_node(state: AgentState):
     scenes_data = plan["scenes"]
     print(f"-> Planner produced {len(scenes_data)} scenes")
 
+    # Create topic-aware asset router for this execution
+    topic = state["topic"]
+    router = AssetRouter.for_topic(topic)
+
     scene_assets: list[SceneAsset] = []
     scene_narrations: list[tuple[int, str, str]] = []
 
@@ -81,16 +86,16 @@ def execution_node(state: AgentState):
         target_dur = scene_data.get("estimated_duration")
         result = []
         try:
-            videos = pexels.search(scene.search_query, target_duration=target_dur)
+            videos = router.search(scene.search_query, target_duration=target_dur)
             if videos:
                 video_url = videos[0]["video_files"][0]["link"]
-                pexels.download(video_url, video_path)
+                router.download(video_url, video_path)
                 result = [video_path]
         except Exception:
             pass
 
         if not result:
-            print("    -> Pexels Error. Using fallback.")
+            print("    -> All providers exhausted. Using fallback.")
             video_path = fallback_video
 
         print(f"  Scene {scene.scene_id}: generating voiceover...")
