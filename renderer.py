@@ -1,87 +1,25 @@
-import json
+"""
+renderer.py — Backward-compatible module-level interface.
 
-# ── Pillow / MoviePy compatibility shim ──────────────────────────────────
-# Pillow >= 11 removed the deprecated Image.ANTIALIAS constant.
-# MoviePy 1.0.3 still references it in video/fx/resize.py.
-# We alias the current LANCZOS resampling filter so MoviePy works unchanged
-# with the latest Pillow.  This shim must run before any moviepy import.
-#
-# Future: upgrade to MoviePy >= 2.x which has a completely refactored API
-# and no longer depends on PIL.Image.ANTIALIAS.
-import PIL.Image
-if not hasattr(PIL.Image, "ANTIALIAS"):
-    PIL.Image.ANTIALIAS = PIL.Image.LANCZOS
+Re-exports ``MoviePyRenderer`` and its ``render()`` / ``parse_timeline()``
+as module-level functions so existing imports and patches continue to work.
 
-from moviepy.editor import VideoFileClip, AudioFileClip, CompositeVideoClip, CompositeAudioClip
-from src.utils.config import get_config
-from src.models import Timeline, TimelineTrack, RenderSettings
+New code should import ``MoviePyRenderer`` from ``src.renderer.moviepy_renderer``
+and use it via the ``Renderer`` ABC from ``src.renderer``.
+"""
 
+# The compatibility shim runs in src/renderer/moviepy_renderer at import time;
+# re-importing it here is safe (module caching means it runs exactly once).
 
-def _parse_timeline(raw: dict) -> Timeline:
-    """Convert a raw dict (from timeline.json) into a typed Timeline model."""
-    rs = raw.get("render_settings", {})
-    render_settings = RenderSettings(
-        resolution=rs.get("resolution", [1920, 1080]),
-        fps=rs.get("fps", 30),
-    )
-    audio_timeline = [
-        TimelineTrack(
-            track=a.get("track", "voice"),
-            file=a["file"],
-            start_time=a.get("start_time", 0.0),
-            end_time=a.get("end_time", 0.0),
-        )
-        for a in raw.get("audio_timeline", [])
-    ]
-    video_timeline = [
-        TimelineTrack(
-            layer=v.get("layer", 1),
-            file=v["file"],
-            start_time=v.get("start_time", 0.0),
-            end_time=v.get("end_time", 0.0),
-            transition_out=v.get("transition_out", "none"),
-        )
-        for v in raw.get("video_timeline", [])
-    ]
-    return Timeline(
-        render_settings=render_settings,
-        audio_timeline=audio_timeline,
-        video_timeline=video_timeline,
-    )
+from src.renderer.moviepy_renderer import MoviePyRenderer, parse_timeline
 
+# Module-level backward-compat references ----------------------------------
 
-def render_timeline(json_path, output_path):
-    with open(json_path, 'r') as f:
-        raw = json.load(f)
+_parse_timeline = parse_timeline
 
-    timeline = _parse_timeline(raw)
-    target_res = tuple(timeline.render_settings.resolution)
+_renderer: MoviePyRenderer = MoviePyRenderer()
+render_timeline = _renderer.render
 
-    audio_clips = []
-    for track in timeline.audio_timeline:
-        clip = AudioFileClip(track.file).set_start(track.start_time)
-        audio_clips.append(clip)
-
-    video_clips = []
-    for track in timeline.video_timeline:
-        # Enforce the resolution contract on the incoming asset
-        clip = VideoFileClip(track.file).resize(newsize=target_res)
-        clip = clip.set_start(track.start_time).set_end(track.end_time)
-        video_clips.append(clip)
-
-    final_audio = CompositeAudioClip(audio_clips)
-    final_video = CompositeVideoClip(video_clips, size=target_res).set_audio(final_audio)
-
-    print(f"Rendering {output_path} on CPU...")
-    final_video.write_videofile(
-        output_path,
-        fps=timeline.render_settings.fps,
-        codec=get_config("render.codec", "libx264"),
-        audio_codec=get_config("render.audio_codec", "aac"),
-        threads=get_config("render.threads", 4),
-        preset=get_config("render.preset", "fast"),
-    )
-
-
-if __name__ == "__main__":
-    render_timeline("timeline.json", "output_test.mp4")
+# Re-export the class so callers can type-annotate with ``MoviePyRenderer``
+# or instantiate their own instance.
+__all__ = ["MoviePyRenderer", "_parse_timeline", "parse_timeline", "render_timeline"]
