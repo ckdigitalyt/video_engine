@@ -13,6 +13,7 @@ from src.renderer import Renderer
 from src.renderer.moviepy_renderer import MoviePyRenderer
 from src.utils.config import get_config
 from src.providers import DeepSeekProvider, GeminiProvider, PexelsProvider
+from src.assets.asset_library import AssetLibrary
 from src.renderer.timeline_builder import TimelineBuilder
 from src.memory.memory_manager import MemoryManager
 from src.models import Scene, SceneAsset, CriticResult
@@ -22,7 +23,7 @@ load_dotenv()
 # ── Providers ──────────────────────────────────────────────────────────────
 
 deepseek = DeepSeekProvider()
-pexels = PexelsProvider()
+pexels = AssetLibrary(provider=PexelsProvider())
 gemini = GeminiProvider()
 renderer: Renderer = MoviePyRenderer()
 

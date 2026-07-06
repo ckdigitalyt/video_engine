@@ -13,7 +13,7 @@ mock during testing, or add new backends.
 | Interface | Methods | Concrete |
 |-----------|---------|----------|
 | `LLMProvider` | `generate_text()`, `generate_json()` | `DeepSeekProvider`, `GeminiProvider` |
-| `AssetProvider` | `search()`, `download()` | `PexelsProvider` |
+| `AssetProvider` | `search()`, `download()` | `PexelsProvider` (wrapped by `AssetLibrary`) |
 | `TTSProvider` | `generate_voice()` | `KokoroProvider` |
 
 All interfaces live in `src/providers/`.
