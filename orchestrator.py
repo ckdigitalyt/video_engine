@@ -40,6 +40,7 @@ background_music_path = os.path.join(
 
 class AgentState(TypedDict):
     topic: str
+    output_path: str
     plan_json: str
     timeline_json: str
     iteration: int
@@ -64,6 +65,7 @@ def execution_node(state: AgentState):
     print(f"-> Planner produced {len(scenes_data)} scenes")
 
     scene_assets: list[SceneAsset] = []
+    scene_narrations: list[tuple[int, str, str]] = []
 
     for scene_data in scenes_data:
         scene = Scene(
@@ -149,9 +151,10 @@ def execution_node(state: AgentState):
 def render_node(state: AgentState):
     print("\n[3/4] Node: MoviePy Renderer")
     subtitle_timeline = state.get("subtitle_timeline", [])
+    output_path = state.get("output_path") or get_config("pipeline.output.default", "final_output.mp4")
     renderer.render(
         "timeline.json",
-        get_config("pipeline.output.default", "final_output.mp4"),
+        output_path,
         subtitles=subtitle_timeline if subtitle_timeline else None,
     )
     return state
@@ -163,7 +166,7 @@ def critic_node(state: AgentState):
 
     # Extract 1 frame at the 2-second mark using FFmpeg (highly CPU efficient)
     print("-> Extracting evaluation frame...")
-    output_file = get_config("pipeline.output.default", "final_output.mp4")
+    output_file = state.get("output_path") or get_config("pipeline.output.default", "final_output.mp4")
     subprocess.run(["ffmpeg", "-y", "-i", output_file, "-ss", get_config("pipeline.critic.frame_extraction_ss", "00:00:02"), "-vframes", "1", frame_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
     print("-> Querying Gemini API for Visual QA...")
@@ -256,11 +259,21 @@ app = workflow.compile()
 memory = MemoryManager(get_config("pipeline.memory.db_path", "cache/memory.db"))
 
 if __name__ == "__main__":
+    import argparse
+
     if not os.environ.get("GEMINI_API_KEY"):
         print("CRITICAL ERROR: GEMINI_API_KEY not found in .env")
         exit(1)
 
-    print("========== INITIATING SELF-IMPROVING PIPELINE ==========")
+    parser = argparse.ArgumentParser(description="Run the video generation pipeline")
+    parser.add_argument("--topic", default="The Fermi Paradox", help="Video topic")
+    parser.add_argument("--output", default=None, help="Output video path")
+    args = parser.parse_args()
+
+    print(f"========== INITIATING SELF-IMPROVING PIPELINE ==========")
+    print(f"Topic: {args.topic}")
+    if args.output:
+        print(f"Output: {args.output}")
 
     # Initialize memory tables
     memory.initialize()
@@ -274,6 +287,16 @@ if __name__ == "__main__":
         if count:
             print(f"[memory] Cleaned {count} rows from {table}")
 
-    # Initialize the graph with an iteration count of 0
-    app.invoke({"topic": "The Fermi Paradox", "iteration": 0})
+    # Initialize the graph
+    initial_state: AgentState = {
+        "topic": args.topic,
+        "output_path": args.output or "final_output.mp4",
+        "plan_json": "",
+        "timeline_json": "",
+        "iteration": 0,
+        "approved": False,
+        "critic_result": "",
+        "subtitle_timeline": [],
+    }
+    app.invoke(initial_state)
     print("\n========== PIPELINE COMPLETE ==========")
