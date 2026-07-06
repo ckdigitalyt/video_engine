@@ -1,0 +1,16 @@
+# search_planner.yaml — Multi-Query Search Planner Configuration
+
+search_planner:
+  # Number of search queries to generate per scene
+  num_queries: 7
+
+  # Minimum quality score (0-1) for a result to stop searching further queries
+  # Higher = more selective, may fall back to Pexels more often
+  min_acceptable_score: 0.75
+
+  # Maximum total provider API calls across all queries for a single scene
+  max_provider_attempts: 15
+
+  # Weight for visual diversity bonus when multi-query results are merged
+  # 0.0 = pure quality, 1.0 = pure diversity
+  diversity_weighting: 0.2
