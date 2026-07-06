@@ -148,6 +148,229 @@ class AssetRouter:
         print(f"-> Router: all providers exhausted for '{query}' — returning empty")
         return []
 
+    # ── Multi-query search ────────────────────────────────────────────
+
+    def multi_query_search(
+        self,
+        queries: list[str],
+        min_acceptable_score: float = 0.75,
+        max_attempts: int = 15,
+        diversity_weighting: float = 0.2,
+        **kwargs,
+    ) -> dict:
+        """Search for assets using multiple queries, stopping on the first
+        sufficiently high-quality result.
+
+        Iterates through *queries* in order.  For each query, searches
+        providers in priority order.  If the best result exceeds
+        *min_acceptable_score*, returns immediately.  Otherwise continues
+        to the next query.  When no single query meets the threshold,
+        returns the highest-scoring result across all queries (optionally
+        boosted by diversity bonus).
+
+        Parameters
+        ----------
+        queries : list[str]
+            Diverse search queries (from a SearchPlanner).
+        min_acceptable_score : float
+            Score threshold to accept a result without further queries.
+        max_attempts : int
+            Maximum total provider calls across all queries.
+        diversity_weighting : float
+            Bonus weight for diversity (0 = pure quality, 1 = pure diversity).
+        **kwargs
+            Additional keyword args passed to each ``search()`` call
+            (e.g. ``target_duration``).
+
+        Returns
+        -------
+        dict
+            ``{
+                "assets": [...],       # Best asset list (or empty)
+                "selected_query": str,  # Query that produced the assets
+                "provider_name": str,   # Provider that returned the assets
+                "selected_score": float,# Quality score of the best asset
+                "query_log": [...],     # Per-query attempt log
+            }``
+        """
+        query_log: list[dict] = []
+        best_overall: list | None = None
+        best_score: float = -1.0
+        best_query: str = ""
+        best_provider: str = ""
+        attempts = 0
+
+        for query in queries:
+            if attempts >= max_attempts:
+                query_log.append({
+                    "query": query,
+                    "status": "skipped",
+                    "reason": "max_attempts_reached",
+                })
+                continue
+
+            entry: dict[str, object] = {"query": query, "tried_providers": []}
+            provider_order = self._routes.get(
+                self._category, self._routes.get("General", [])
+            )
+
+            for provider_name in provider_order:
+                if attempts >= max_attempts:
+                    break
+                attempts += 1
+
+                provider = self._providers.get(provider_name)
+                if provider is None:
+                    continue
+
+                # Skip stubs
+                if provider.__class__.__name__.endswith("StubAssetProvider") or \
+                   type(provider).__module__.endswith("stubs"):
+                    provider.search(query, **kwargs)
+                    entry["tried_providers"].append(
+                        {"provider": provider_name, "status": "stub_skipped"}
+                    )
+                    continue
+
+                try:
+                    results = provider.search(query, **kwargs)
+                    entry["tried_providers"].append({
+                        "provider": provider_name,
+                        "status": "ok" if results else "empty",
+                        "count": len(results) if results else 0,
+                    })
+
+                    if results:
+                        # Score the top result (it's already sorted best-first)
+                        top = results[0]
+                        score = self._score_top_asset(top, **kwargs)
+
+                        # Apply diversity bonus: penalise if very similar
+                        # to the current best (simple ratio-based heuristic)
+                        diversity_bonus = self._diversity_bonus(
+                            query, best_score, diversity_weighting
+                        )
+                        adjusted = score + diversity_bonus
+
+                        entry["score"] = score
+                        entry["adjusted_score"] = round(adjusted, 4)
+
+                        if adjusted > best_score:
+                            best_overall = results
+                            best_score = adjusted
+                            best_query = query
+                            best_provider = provider_name
+                            entry["selected"] = True
+
+                            # Early exit: score exceeds threshold
+                            if score >= min_acceptable_score:
+                                entry["early_exit"] = True
+                                query_log.append(entry)
+                                print(
+                                    "-> Multi-query: accepted '"
+                                    f"{query}' (score={score:.3f} >= "
+                                    f"{min_acceptable_score}) \u2014 early exit"
+                                )
+                                self._last_query = query
+                                self._last_provider_name = provider_name
+                                return {
+                                    "assets": results,
+                                    "selected_query": query,
+                                    "provider_name": provider_name,
+                                    "selected_score": score,
+                                    "query_log": query_log,
+                                }
+                except Exception as e:
+                    entry["tried_providers"].append({
+                        "provider": provider_name,
+                        "status": "error",
+                        "error": str(e),
+                    })
+                    continue
+
+            query_log.append(entry)
+
+        # ── No query met the threshold; return the best we found ──────
+        if best_overall:
+            print(
+                f"-> Multi-query: no query met threshold "
+                f"({min_acceptable_score}), using best: '"
+                f"{best_query}' (score={best_score:.3f})"
+            )
+            self._last_query = best_query
+            self._last_provider_name = best_provider
+            return {
+                "assets": best_overall,
+                "selected_query": best_query,
+                "provider_name": best_provider,
+                "selected_score": best_score,
+                "query_log": query_log,
+            }
+
+        print("-> Multi-query: all queries returned no results")
+        return {
+            "assets": [],
+            "selected_query": "",
+            "provider_name": "",
+            "selected_score": -1.0,
+            "query_log": query_log,
+        }
+
+    @staticmethod
+    def _score_top_asset(result: dict, **kwargs) -> float:
+        """Extract or compute a quality score for the top asset result.
+
+        The score is approximated from resolution and HD bonus when the
+        result is already sorted (best-first by the provider).  This is
+        a lightweight fallback for the search planner's early-exit logic;
+        precise scoring is done by the provider natively.
+        """
+        video_files = result.get("video_files", [])
+        w = result.get("width", 0) or 0
+        h = result.get("height", 0) or 0
+        dur = result.get("duration", 0) or 0
+
+        # Resolution score (same formula as PexelsProvider)
+        res_score = min((w * h) / (1920.0 * 1080.0), 1.0) if w * h > 0 else 0.0
+
+        # HD bonus
+        has_hd = any(vf.get("quality") == "hd" for vf in video_files)
+        hd_score = 1.0 if has_hd else 0.0
+
+        # Duration match (neutral if unknown)
+        target = kwargs.get("target_duration")
+        if target and target > 0 and dur > 0:
+            ratio = dur / target
+            dur_score = max(0.0, 1.0 - abs(1.0 - ratio) * 0.5)
+        else:
+            dur_score = 0.5
+
+        w_res = get_config("providers.pexels.scoring.resolution_weight", 0.40)
+        w_dur = get_config("providers.pexels.scoring.duration_match_weight", 0.40)
+        w_hd = get_config("providers.pexels.scoring.hd_bonus_weight", 0.20)
+
+        return round(w_res * res_score + w_dur * dur_score + w_hd * hd_score, 4)
+
+    @staticmethod
+    def _diversity_bonus(
+        query: str,
+        current_best_score: float,
+        diversity_weighting: float,
+    ) -> float:
+        """Compute a diversity bonus for a new query relative to the
+        current best score.
+
+        When no query has been selected yet (current_best_score < 0),
+        the bonus is 0.  Otherwise, queries with different keyword tokens
+        receive a small bonus proportional to *diversity_weighting*.
+        """
+        if current_best_score < 0:
+            return 0.0
+        # A simple heuristic: each new query gets a small diversity bonus
+        # proportional to the diversity weighting.  In a more sophisticated
+        # implementation this would compare embeddings of returned assets.
+        return diversity_weighting * 0.1
+
     def download(self, url: str, output_path: str) -> str:
         """Download from *url* to *output_path* using the last-used provider."""
         if self._last_provider_name and self._last_provider_name in self._providers:

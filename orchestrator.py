@@ -14,6 +14,7 @@ from src.renderer.moviepy_renderer import MoviePyRenderer
 from src.utils.config import get_config
 from src.providers import DeepSeekProvider, GeminiProvider
 from src.assets import AssetRouter
+from src.assets.search_planner import SearchPlanner
 from src.planner import StoryPlanner
 from src.renderer.timeline_builder import TimelineBuilder
 from src.memory.memory_manager import MemoryManager
@@ -69,6 +70,9 @@ def execution_node(state: AgentState):
     topic = state["topic"]
     router = AssetRouter.for_topic(topic)
 
+    # Create search planner for multi-query search
+    search_planner = SearchPlanner(provider=deepseek)
+
     scene_assets: list[SceneAsset] = []
     scene_narrations: list[tuple[int, str, str]] = []
 
@@ -82,17 +86,62 @@ def execution_node(state: AgentState):
         video_path = f"{cache_video}/scene_{scene.scene_id}.mp4"
         audio_path = f"{cache_audio}/scene_{scene.scene_id}.wav"
 
-        print(f"  Scene {scene.scene_id}: searching '{scene.search_query}'")
+        print(f"\n  Scene {scene.scene_id}: '{scene.search_query}'")
         target_dur = scene_data.get("estimated_duration")
+
+        # ── Generate diverse search queries ────────────────────────────
+        print(f"    -> Generating search queries...")
+        queries = search_planner.generate_queries(
+            narration=scene.narration,
+            title=scene_data.get("scene_title", ""),
+            topic=topic,
+            purpose=scene_data.get("purpose", "general"),
+        )
+
+        # Log generated queries
+        for i, q in enumerate(queries, 1):
+            print(f"    Query {i}: {q}")
+
+        # ── Execute multi-query search ────────────────────────────────
         result = []
         try:
-            videos = router.search(scene.search_query, target_duration=target_dur)
+            mq_result = router.multi_query_search(
+                queries,
+                min_acceptable_score=search_planner.min_acceptable_score,
+                max_attempts=search_planner.max_provider_attempts,
+                diversity_weighting=search_planner.diversity_weighting,
+                target_duration=target_dur,
+            )
+
+            videos = mq_result.get("assets", [])
+            selected_query = mq_result.get("selected_query", "")
+            selected_provider = mq_result.get("provider_name", "")
+            selected_score = mq_result.get("selected_score", -1.0)
+            query_log = mq_result.get("query_log", [])
+
+            # Log per-query results
+            print(f"    Queries tried: {len(query_log)}")
+            for log_entry in query_log:
+                q = log_entry.get("query", "")
+                status = log_entry.get("status", "attempted")
+                providers = log_entry.get("tried_providers", [])
+                provs = ", ".join(f"{p['provider']}:{p.get('status','?')}" for p in providers)
+                score = log_entry.get("score", "-")
+                print(f"      - '{q}' [{provs}] score={score}")
+
+            print(f"    Selected provider: {selected_provider}")
+            print(f"    Selected query: {selected_query}")
+            print(f"    Reason: score={selected_score:.3f}")
+
+            # Also update the scene's search query for the timeline
+            scene.search_query = selected_query or scene.search_query
+
             if videos:
                 video_url = videos[0]["video_files"][0]["link"]
                 router.download(video_url, video_path)
                 result = [video_path]
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"    -> Multi-query search error: {e}")
 
         if not result:
             print("    -> All providers exhausted. Using fallback.")
