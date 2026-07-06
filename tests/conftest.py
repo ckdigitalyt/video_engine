@@ -139,6 +139,7 @@ def mock_env_api_keys(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("DEEPSEEK_API_KEY", "sk-test-deepseek-key")
     monkeypatch.setenv("GEMINI_API_KEY", "test-gemini-key")
     monkeypatch.setenv("PEXELS_API_KEY", "test-pexels-key")
+    monkeypatch.setenv("PIXABAY_API_KEY", "test-pixabay-key")
 
 
 @pytest.fixture
@@ -152,6 +153,47 @@ def mock_pexels_api(monkeypatch: pytest.MonkeyPatch) -> MagicMock:
                 "video_files": [
                     {"link": "https://test.pexels.com/video.mp4", "quality": "hd"}
                 ],
+            }
+        ]
+    }
+    import src.providers.asset_provider
+    monkeypatch.setattr(src.providers.asset_provider.requests, "get", mock)
+    return mock
+
+
+@pytest.fixture
+def mock_pixabay_api(monkeypatch: pytest.MonkeyPatch) -> MagicMock:
+    """Mock the ``requests.get`` call inside PixabayProvider.search()."""
+    mock = MagicMock()
+    mock.return_value.json.return_value = {
+        "hits": [
+            {
+                "id": 999,
+                "duration": 8,
+                "tags": "nature, forest, trees",
+                "views": 5000,
+                "downloads": 200,
+                "user": "testuser",
+                "videos": {
+                    "large": {
+                        "url": "https://test.pixabay.com/video_large.mp4",
+                        "width": 1920,
+                        "height": 1080,
+                        "size": 3000000,
+                    },
+                    "medium": {
+                        "url": "https://test.pixabay.com/video_medium.mp4",
+                        "width": 1280,
+                        "height": 720,
+                        "size": 1500000,
+                    },
+                    "small": {
+                        "url": "https://test.pixabay.com/video_small.mp4",
+                        "width": 640,
+                        "height": 360,
+                        "size": 500000,
+                    },
+                },
             }
         ]
     }

@@ -21,11 +21,10 @@ from typing import Any
 
 from src.assets.topic_classifier import TopicClassifier, _DEFAULT_CATEGORIES
 from src.assets.asset_router import AssetRouter, _DEFAULT_ROUTES
-from src.providers.asset_provider import AssetProvider, PexelsProvider
+from src.providers.asset_provider import AssetProvider, PexelsProvider, PixabayProvider
 from src.providers.stubs import (
     StubAssetProvider,
     NasaMediaProvider,
-    PixabayProvider,
     WikimediaCommonsProvider,
 )
 from src.assets.asset_library import AssetLibrary
@@ -124,7 +123,6 @@ class TestStubProviders:
 
     @pytest.mark.parametrize("stub_cls", [
         NasaMediaProvider,
-        PixabayProvider,
         WikimediaCommonsProvider,
     ])
     def test_interface_compliance(self, stub_cls: type) -> None:
@@ -137,26 +135,25 @@ class TestStubProviders:
 
     @pytest.mark.parametrize("stub_cls,expected_name", [
         (NasaMediaProvider, "nasa"),
-        (PixabayProvider, "pixabay"),
         (WikimediaCommonsProvider, "wikimedia"),
     ])
     def test_provider_name(self, stub_cls: type, expected_name: str) -> None:
         assert stub_cls.PROVIDER_NAME == expected_name
 
-    def test_search_returns_empty_list(self) -> None:
+    def test_stub_search_returns_empty_list(self) -> None:
         provider = NasaMediaProvider()
         results = provider.search("milky way")
         assert isinstance(results, list)
         assert len(results) == 0
 
-    def test_download_raises_not_implemented(self) -> None:
-        provider = PixabayProvider()
+    def test_stub_download_raises_not_implemented(self) -> None:
+        provider = WikimediaCommonsProvider()
         with pytest.raises(NotImplementedError):
             provider.download("https://example.com/video.mp4", "/tmp/out.mp4")
 
-    def test_instantiation_no_api_key_needed(self) -> None:
+    def test_stub_instantiation_no_api_key_needed(self) -> None:
         """Stubs don't require API keys."""
-        for stub in (NasaMediaProvider(), PixabayProvider(), WikimediaCommonsProvider()):
+        for stub in (NasaMediaProvider(), WikimediaCommonsProvider()):
             assert stub is not None
 
 

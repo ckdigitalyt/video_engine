@@ -11,6 +11,9 @@ When adding a real provider:
 2. Replace ``search()`` with a real API call.
 3. Replace ``download()`` with a real download implementation.
 4. Register the provider in the routing table in ``configs/providers.yaml``.
+
+Note: ``PixabayProvider`` was historically a stub but is now a fully
+functional provider implemented in ``asset_provider.py``.
 """
 
 from src.providers.asset_provider import AssetProvider
@@ -42,14 +45,6 @@ class NasaMediaProvider(StubAssetProvider):
     Future implementation: https://images-api.nasa.gov
     """
     PROVIDER_NAME = "nasa"
-
-
-class PixabayProvider(StubAssetProvider):
-    """Stub for Pixabay video API.
-
-    Future implementation: https://pixabay.com/api/videos/
-    """
-    PROVIDER_NAME = "pixabay"
 
 
 class WikimediaCommonsProvider(StubAssetProvider):

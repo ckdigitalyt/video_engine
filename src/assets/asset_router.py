@@ -17,8 +17,8 @@ from typing import Optional
 
 from src.assets.topic_classifier import TopicClassifier
 from src.assets.asset_library import AssetLibrary
-from src.providers.asset_provider import AssetProvider, PexelsProvider
-from src.providers.stubs import NasaMediaProvider, PixabayProvider, WikimediaCommonsProvider
+from src.providers.asset_provider import AssetProvider, PexelsProvider, PixabayProvider
+from src.providers.stubs import NasaMediaProvider, WikimediaCommonsProvider
 from src.utils.config import get_config
 
 
@@ -172,12 +172,12 @@ class AssetRouter:
     def _default_providers() -> dict[str, AssetProvider]:
         """Build the default provider registry.
 
-        Pexels is wrapped in ``AssetLibrary`` for local-first caching.
-        Stub providers are instantiated as-is.
+        Real providers (Pexels, Pixabay) are wrapped in ``AssetLibrary``
+        for local-first caching.  Stub providers are instantiated as-is.
         """
         return {
             "pexels": AssetLibrary(provider=PexelsProvider()),
-            "pixabay": PixabayProvider(),
+            "pixabay": AssetLibrary(provider=PixabayProvider()),
             "nasa": NasaMediaProvider(),
             "wikimedia": WikimediaCommonsProvider(),
         }
