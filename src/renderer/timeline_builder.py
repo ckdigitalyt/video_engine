@@ -14,10 +14,11 @@ The builder enforces:
 
 import json
 import os
-from typing import Any
+from typing import Any, Union
 
 from pydub import AudioSegment
 from src.utils.config import get_config
+from src.models import SceneAsset
 
 
 class TimelineBuilder:
@@ -34,13 +35,13 @@ class TimelineBuilder:
 
     def build_and_write(
         self,
-        scenes: list[dict[str, Any]],
+        scenes: Union[list[dict[str, Any]], list[SceneAsset]],
         output_path: str = "timeline.json",
     ) -> str:
         """
         Build a validated timeline from *scenes* and write it to *output_path*.
 
-        *scenes* is a list of dicts, each with:
+        *scenes* is a list of :class:`SceneAsset` objects or dicts, each with:
 
             {"scene_id": int, "video_path": str, "audio_path": str}
 
@@ -127,17 +128,31 @@ class TimelineBuilder:
 
     # ── Internal helpers ───────────────────────────────────────────────────
 
-    def _build(self, scenes: list[dict[str, Any]]) -> dict:
+    @staticmethod
+    def _to_asset_dict(scene: Union[dict[str, Any], SceneAsset]) -> dict[str, Any]:
+        """Normalize a SceneAsset or raw dict to a dict with scene_id/video_path/audio_path."""
+        if isinstance(scene, SceneAsset):
+            return {
+                "scene_id": scene.scene_id,
+                "video_path": scene.video_path,
+                "audio_path": scene.audio_path,
+            }
+        return scene
+
+    def _build(self, scenes: Union[list[dict[str, Any]], list[SceneAsset]]) -> dict:
         """Internal: produce a raw timeline dict from scenes (no validation)."""
         audio_timeline: list[dict] = []
         video_timeline: list[dict] = []
 
-        # Scenes are ordered by scene_id
+        # Normalise all entries to dicts and order by scene_id
+        scene_dicts = [self._to_asset_dict(s) for s in scenes]
+        scene_dicts.sort(key=lambda s: s["scene_id"])
+
         current_time: float = 0.0
 
-        for scene in sorted(scenes, key=lambda s: s["scene_id"]):
-            audio_path = scene["audio_path"]
-            video_path = scene["video_path"]
+        for sd in scene_dicts:
+            audio_path = sd["audio_path"]
+            video_path = sd["video_path"]
 
             # Determine exact audio duration
             audio_len = self._get_audio_duration(audio_path)

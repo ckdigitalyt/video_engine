@@ -14,23 +14,59 @@ if not hasattr(PIL.Image, "ANTIALIAS"):
 
 from moviepy.editor import VideoFileClip, AudioFileClip, CompositeVideoClip, CompositeAudioClip
 from src.utils.config import get_config
+from src.models import Timeline, TimelineTrack, RenderSettings
+
+
+def _parse_timeline(raw: dict) -> Timeline:
+    """Convert a raw dict (from timeline.json) into a typed Timeline model."""
+    rs = raw.get("render_settings", {})
+    render_settings = RenderSettings(
+        resolution=rs.get("resolution", [1920, 1080]),
+        fps=rs.get("fps", 30),
+    )
+    audio_timeline = [
+        TimelineTrack(
+            track=a.get("track", "voice"),
+            file=a["file"],
+            start_time=a.get("start_time", 0.0),
+            end_time=a.get("end_time", 0.0),
+        )
+        for a in raw.get("audio_timeline", [])
+    ]
+    video_timeline = [
+        TimelineTrack(
+            layer=v.get("layer", 1),
+            file=v["file"],
+            start_time=v.get("start_time", 0.0),
+            end_time=v.get("end_time", 0.0),
+            transition_out=v.get("transition_out", "none"),
+        )
+        for v in raw.get("video_timeline", [])
+    ]
+    return Timeline(
+        render_settings=render_settings,
+        audio_timeline=audio_timeline,
+        video_timeline=video_timeline,
+    )
+
 
 def render_timeline(json_path, output_path):
     with open(json_path, 'r') as f:
-        timeline = json.load(f)
+        raw = json.load(f)
 
-    target_res = tuple(timeline['render_settings']['resolution'])
+    timeline = _parse_timeline(raw)
+    target_res = tuple(timeline.render_settings.resolution)
 
     audio_clips = []
-    for audio in timeline['audio_timeline']:
-        clip = AudioFileClip(audio['file']).set_start(audio['start_time'])
+    for track in timeline.audio_timeline:
+        clip = AudioFileClip(track.file).set_start(track.start_time)
         audio_clips.append(clip)
 
     video_clips = []
-    for video in timeline['video_timeline']:
+    for track in timeline.video_timeline:
         # Enforce the resolution contract on the incoming asset
-        clip = VideoFileClip(video['file']).resize(newsize=target_res)
-        clip = clip.set_start(video['start_time']).set_end(video['end_time'])
+        clip = VideoFileClip(track.file).resize(newsize=target_res)
+        clip = clip.set_start(track.start_time).set_end(track.end_time)
         video_clips.append(clip)
 
     final_audio = CompositeAudioClip(audio_clips)
@@ -38,13 +74,14 @@ def render_timeline(json_path, output_path):
 
     print(f"Rendering {output_path} on CPU...")
     final_video.write_videofile(
-        output_path, 
-        fps=timeline['render_settings']['fps'], 
-        codec=get_config("render.codec", "libx264"), 
+        output_path,
+        fps=timeline.render_settings.fps,
+        codec=get_config("render.codec", "libx264"),
         audio_codec=get_config("render.audio_codec", "aac"),
         threads=get_config("render.threads", 4),
-        preset=get_config("render.preset", "fast")
+        preset=get_config("render.preset", "fast"),
     )
+
 
 if __name__ == "__main__":
     render_timeline("timeline.json", "output_test.mp4")
