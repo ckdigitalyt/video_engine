@@ -187,8 +187,13 @@ class TestMoviePyRenderer:
 
         with patch.object(mpr_mod, "VideoFileClip") as mock_vfc, \
                patch.object(mpr_mod, "AudioFileClip") as mock_afc, \
+               patch.object(mpr_mod, "ColorClip") as mock_cc, \
                patch.object(mpr_mod, "CompositeVideoClip") as mock_cvc, \
                patch.object(mpr_mod, "CompositeAudioClip") as mock_cac:
+            # Mock clip must expose a numeric duration (used by _apply_motion)
+            mock_vfc.return_value.duration = 5.0
+            # Mock AudioFileClip must also expose duration
+            mock_afc.return_value.duration = 5.0
             r = mpr_mod.MoviePyRenderer()
             r.render(str(tl_path), out_path)
 
@@ -252,8 +257,10 @@ class TestBackwardCompat:
 
         with patch.object(mpr_mod, "VideoFileClip") as mock_vfc, \
                patch.object(mpr_mod, "AudioFileClip") as mock_afc, \
+               patch.object(mpr_mod, "ColorClip") as mock_cc, \
                patch.object(mpr_mod, "CompositeVideoClip") as mock_cvc, \
                patch.object(mpr_mod, "CompositeAudioClip") as mock_cac:
+            mock_vfc.return_value.duration = 5.0
             render_timeline(str(tl_path), str(tmp_path / "out.mp4"))
 
         # No audio entries → write_videofile on CVC directly (no set_audio)
