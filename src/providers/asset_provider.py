@@ -49,6 +49,7 @@ class PexelsProvider(AssetProvider):
         self._per_page = get_config("providers.pexels.per_page", 10)
         self._orientation = get_config("providers.pexels.orientation", "landscape")
         self._cache = cache or AssetCache()
+        self._last_query: str | None = None
 
     # ── Public API ─────────────────────────────────────────────────────
 
@@ -94,6 +95,7 @@ class PexelsProvider(AssetProvider):
         # (e.g. on a re-run of the same query) finds it, even before download.
         best_url = sorted_results[0]["video_files"][0]["link"]
         self._cache.register("pexels", query, best_url)
+        self._last_query = query
 
         return sorted_results
 
@@ -101,7 +103,8 @@ class PexelsProvider(AssetProvider):
         # ── Skip download if file already exists ───────────────────────
         if os.path.exists(output_path):
             print(f"-> Already on disk: {output_path}")
-            self._cache.touch(output_path)
+            if self._last_query:
+                self._cache.touch("pexels", self._last_query)
             return output_path
 
         # ── Download ───────────────────────────────────────────────────
@@ -111,7 +114,10 @@ class PexelsProvider(AssetProvider):
             f.write(resp.content)
 
         # Update cache with the local path so future lookups resolve fully
-        self._cache.update_local_path(url, output_path)
+        # Uses the full primary key (provider, search_query) to prevent
+        # collisions when different queries share the same Pexels video URL.
+        if self._last_query:
+            self._cache.update_local_path("pexels", self._last_query, url, output_path)
         print(f"-> Saved: {output_path}")
 
         return output_path
