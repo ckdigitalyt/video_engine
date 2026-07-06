@@ -60,13 +60,15 @@ def fake_provider() -> FakeProvider:
 
 @pytest.fixture
 def library(fake_provider: FakeProvider, cache: AssetCache) -> AssetLibrary:
-    """AssetLibrary wired to FakeProvider, reuse enabled, low threshold."""
+    """AssetLibrary wired to FakeProvider, reuse enabled, low threshold.
+    Diversity is disabled so existing core-reuse tests remain valid."""
     return AssetLibrary(
         provider=fake_provider,
         cache=cache,
         enabled=True,
         threshold=0.3,
         max_candidates=5,
+        diversity_enabled=False,
     )
 
 

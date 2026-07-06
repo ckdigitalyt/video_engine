@@ -69,6 +69,22 @@ class EvalSnapshot:
     num_transitions_non_cut: int = 0
     motion_types_used: list[str] = field(default_factory=list)
 
+    # Visual Quality V1 metrics
+    semantic_score_avg: float = 0.0
+    semantic_scores: list[float] = field(default_factory=list)
+    asset_diversity_penalties_applied: int = 0
+    provider_usage: dict[str, int] = field(default_factory=dict)
+    asset_reuse_percentage: float = 0.0
+    avg_clip_length_s: float = 0.0
+    avg_transition_duration_s: float = 0.0
+    duration_adjustments: int = 0  # loops + slows applied
+
+    # Provider usage breakdown
+    pexels_calls: int = 0
+    pixabay_calls: int = 0
+    nasa_calls: int = 0
+    wikimedia_calls: int = 0
+
     # Custom tags
     tags: dict[str, Any] = field(default_factory=dict)
 
@@ -149,6 +165,12 @@ class MetricsCollector:
         num_transitions: int = 0,
         motion_types: Optional[list[str]] = None,
         tags: Optional[dict[str, Any]] = None,
+        semantic_scores: Optional[list[float]] = None,
+        diversity_penalties: int = 0,
+        provider_usage: Optional[dict[str, int]] = None,
+        clip_lengths: Optional[list[float]] = None,
+        transition_durations: Optional[list[float]] = None,
+        duration_adjustments: int = 0,
     ) -> EvalSnapshot:
         """Build and return an ``EvalSnapshot`` from currently collected data."""
         sq = search_query_lengths or []
@@ -193,6 +215,34 @@ class MetricsCollector:
             iteration_count=iterations,
             num_transitions_non_cut=num_transitions,
             motion_types_used=motion_types or [],
+            semantic_score_avg=(
+                round(sum(semantic_scores) / len(semantic_scores), 3)
+                if semantic_scores else 0.0
+            ),
+            semantic_scores=semantic_scores or [],
+            asset_diversity_penalties_applied=diversity_penalties,
+            provider_usage=provider_usage or {},
+            asset_reuse_percentage=(
+                round(
+                    self._timers.get("_reuses", 0)
+                    / max(
+                        self._timers.get("_reuses", 0)
+                        + self._timers.get("_downloads", 1),
+                        1,
+                    )
+                    * 100,
+                    1,
+                )
+            ),
+            avg_clip_length_s=(
+                round(sum(clip_lengths) / len(clip_lengths), 1)
+                if clip_lengths else 0.0
+            ),
+            avg_transition_duration_s=(
+                round(sum(transition_durations) / len(transition_durations), 2)
+                if transition_durations else 0.0
+            ),
+            duration_adjustments=duration_adjustments,
             tags=tags or {},
         )
 

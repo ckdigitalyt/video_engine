@@ -149,8 +149,8 @@ class TestTransitionEngine:
         assert te1.generate(10) == te2.generate(10)
 
     def test_different_seed_different(self) -> None:
-        te1 = TransitionEngine(enabled=True, duration=0.5, seed=42)
-        te2 = TransitionEngine(enabled=True, duration=0.5, seed=99)
+        te1 = TransitionEngine(enabled=True, duration=0.5, seed=42, smart_enabled=False)
+        te2 = TransitionEngine(enabled=True, duration=0.5, seed=99, smart_enabled=False)
         assert te1.generate(10) != te2.generate(10)
 
     def test_non_cut_transitions_have_duration(self) -> None:
@@ -210,7 +210,7 @@ class TestEdgeCases:
 
     def test_transition_zero_duration(self) -> None:
         """Zero transition duration should result in all cuts."""
-        te = TransitionEngine(enabled=True, duration=0.0, seed=42)
+        te = TransitionEngine(enabled=True, duration=0.0, seed=42, smart_enabled=False)
         for desc in te.generate(10):
             assert desc["type"] == "cut"
             assert desc["duration"] == 0.0

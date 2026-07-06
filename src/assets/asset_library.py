@@ -6,6 +6,9 @@ previously downloaded assets.  If a sufficiently similar asset already
 exists, it is reused instead of making a new API call, which reduces
 external API usage, speeds up rendering, and improves visual consistency.
 
+Supports clip diversity: recently used assets are penalised to avoid
+reusing the same clip repeatedly within a short window.
+
 Similarity is currently based on keyword overlap (Jaccard index of
 normalised query tokens).  The design allows embeddings/vector search to
 be added later without changing the public interface.
@@ -35,12 +38,18 @@ class AssetLibrary:
         When *False*, every call bypasses local lookup and goes straight
         to the provider.  Useful for testing or debugging.
     threshold : float
-        Minimum Jaccard similarity (0–1) required for a cached entry to
+        Minimum Jaccard similarity (0-1) required for a cached entry to
         be considered a match.  0.5 means at least half the tokens must
         overlap.
     max_candidates : int
         Maximum number of cached candidates to consider when scoring
         potential matches.  Sorted by similarity, descending.
+    diversity_enabled : bool
+        Whether to apply repeat penalties for clip diversity.
+    recent_window : int
+        Number of recent queries to track for repeat penalties.
+    repeat_penalty : float
+        Amount subtracted from similarity score for repeated asset urls.
     """
 
     def __init__(
@@ -50,6 +59,9 @@ class AssetLibrary:
         enabled: Optional[bool] = None,
         threshold: Optional[float] = None,
         max_candidates: Optional[int] = None,
+        diversity_enabled: Optional[bool] = None,
+        recent_window: Optional[int] = None,
+        repeat_penalty: Optional[float] = None,
     ):
         self._provider = provider
         self._cache = cache or AssetCache()
@@ -64,9 +76,23 @@ class AssetLibrary:
         self._max_candidates = max_candidates if max_candidates is not None else get_config(
             "providers.pexels.reuse.max_candidates", 5
         )
+        self._diversity_enabled = diversity_enabled if diversity_enabled is not None else get_config(
+            "clip_diversity.enabled", True
+        )
+        self._recent_window = recent_window if recent_window is not None else get_config(
+            "clip_diversity.recent_window", 5
+        )
+        self._repeat_penalty = repeat_penalty if repeat_penalty is not None else get_config(
+            "clip_diversity.repeat_penalty", 0.3
+        )
+        self._query_repeat_penalty = get_config("clip_diversity.query_repeat_penalty", 0.15)
 
         # Track the last query for download-time indexing
         self._last_query: str | None = None
+
+        # Track recently used assets for diversity
+        self._recent_asset_urls: list[str] = []
+        self._recent_queries: list[str] = []
 
     # ── Public API ─────────────────────────────────────────────────────
 
@@ -75,20 +101,38 @@ class AssetLibrary:
         Search for assets matching *query*.
 
         1. If reuse is enabled, look up similar queries in the local index.
-        2. On a high-similarity hit, return the cached result without
-           calling the external provider.
-        3. Otherwise delegate to the backing provider.
+        2. On a hit, check clip diversity (penalise recently-used assets).
+        3. If diverse enough, return the cached result.
+        4. Otherwise delegate to the backing provider and track results.
         """
         self._last_query = query
 
         if self._enabled:
             match = self._lookup_similar(query)
             if match is not None:
-                print(f"-> AssetLibrary REUSE: '{query}' similar to '{match['query']}' → {match['local_path']}")
+                # ── Diversity check ────────────────────────────────────
+                if self._diversity_enabled:
+                    penalty = self._compute_diversity_penalty(
+                        query, match.get("asset_url", "")
+                    )
+                    if penalty > 0:
+                        print(f"-> AssetLibrary diversity: penalty={penalty:.2f} "
+                              f"for '{match['query']}' — skipping reuse")
+                        results = self._provider.search(query, **kwargs)
+                        self._track_used(results, query)
+                        return results
+
+                print(f"-> AssetLibrary REUSE: '{query}' similar to "
+                      f"'{match['query']}' -> {match['local_path']}")
+                self._recent_asset_urls.append(match["asset_url"])
+                self._recent_queries.append(query)
+                self._trim_window()
                 return [{"video_files": [{"link": match["asset_url"]}]}]
 
         # Delegate to provider (cache miss or reuse disabled)
-        return self._provider.search(query, **kwargs)
+        results = self._provider.search(query, **kwargs)
+        self._track_used(results, query)
+        return results
 
     def download(self, url: str, output_path: str) -> str:
         """
@@ -103,6 +147,45 @@ class AssetLibrary:
             self._index_asset(self._last_query, url, local_path)
 
         return local_path
+
+    # ── Diversity helpers ──────────────────────────────────────────────
+
+    def _compute_diversity_penalty(self, query: str, asset_url: str) -> float:
+        """Compute a diversity penalty for a potential reuse.
+
+        Returns a penalty in [0, 1] where higher means more similar to
+        recently used assets.
+        """
+        if not self._diversity_enabled:
+            return 0.0
+
+        # Penalty for same asset URL reused recently
+        for recent_url in self._recent_asset_urls:
+            if recent_url == asset_url:
+                return self._repeat_penalty
+
+        # Smaller penalty for same search query
+        for recent_query in self._recent_queries:
+            if recent_query.lower() == query.lower():
+                return self._query_repeat_penalty
+
+        return 0.0
+
+    def _track_used(self, results: list, query: str) -> None:
+        """Track assets from provider results for diversity checks."""
+        if not self._diversity_enabled or not results:
+            return
+        first_url = results[0].get("video_files", [{}])[0].get("link", "")
+        if first_url:
+            self._recent_asset_urls.append(first_url)
+            self._recent_queries.append(query)
+            self._trim_window()
+
+    def _trim_window(self) -> None:
+        """Keep recent tracking within configured window size."""
+        while len(self._recent_asset_urls) > self._recent_window:
+            self._recent_asset_urls.pop(0)
+            self._recent_queries.pop(0)
 
     # ── Similarity matching ─────────────────────────────────────────────
 
