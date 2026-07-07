@@ -143,12 +143,14 @@ class TestFullPlanner:
         # Should call generate_json at least twice (outline + scenes)
         assert mock_llm.generate_json.call_count >= 2
 
-    def test_generate_plan_returns_plan_json(self, mock_llm: MagicMock) -> None:
-        """The final output should be a valid JSON string with scenes."""
+    def test_generate_plan_returns_scene_list(self, mock_llm: MagicMock) -> None:
+        """The final output should be a list of Scene objects."""
+        from src.models.schemas import Scene
         planner = StoryPlanner(provider=mock_llm, template_name="documentary")
         result = planner.generate_plan("Test Topic")
-        assert isinstance(result, str)
+        assert isinstance(result, list)
         assert len(result) > 0
+        assert all(isinstance(s, Scene) for s in result)
 
     def test_constructor_defaults(self) -> None:
         """StoryPlanner should work with default parameters."""

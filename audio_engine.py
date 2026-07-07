@@ -1,4 +1,6 @@
 import os
+from typing import Optional
+
 from pydub import AudioSegment
 from src.utils.config import get_config
 from src.providers import KokoroProvider
@@ -7,7 +9,7 @@ from src.providers import KokoroProvider
 _tts_provider = KokoroProvider()
 
 
-def generate_voice(text, output_path):
+def generate_voice(text: str, output_path: str) -> None:
     _tts_provider.generate_voice(text, output_path)
 
 

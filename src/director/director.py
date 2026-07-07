@@ -23,6 +23,17 @@ import os
 from typing import Any, Optional
 
 from src.assets.asset_router import AssetRouter
+from src.models.schemas import (
+    AssetPlan,
+    AudioPlan,
+    EditingPlan,
+    PipelineState,
+    ProviderType,
+    Scene,
+    SceneNarration,
+    SearchPlan,
+    VisualPlan,
+)
 from src.providers.llm_provider import LLMProvider
 from src.planner import StoryPlanner
 from src.utils.config import get_config
@@ -45,15 +56,15 @@ class VisualDirector:
         The video topic string.
     llm_provider : LLMProvider | None
         LLM used for concept planning and semantic validation.
-    scene_data : list[dict]
-        Scene data from the StoryPlanner (scenes list).
+    scene_data : list[dict] | list[Scene]
+        Scene data from the StoryPlanner (scenes list or Scene objects).
     """
 
     def __init__(
         self,
         topic: str,
         llm_provider: Optional[LLMProvider] = None,
-        scene_data: Optional[list[dict]] = None,
+        scene_data: Optional[list] = None,
     ):
         self._topic = topic
         self._llm_provider = llm_provider
@@ -112,15 +123,13 @@ class VisualDirector:
     def results(self) -> dict:
         return self._results
 
-    def run(self) -> list[dict]:
+    def run(self) -> list[Scene]:
         """Execute the closed-loop director pipeline for all scenes.
 
-        Returns a list of scene asset dicts with keys:
-            scene_id, video_path, audio_path, narration, provider, query,
-            semantic_score, aesthetic_style
+        Returns a list of Scene objects with asset plans populated.
         """
         scene_assets: list[dict] = []
-        accepted_scenes: list[dict] = []
+        accepted_scenes: list[Scene] = []
 
         print(f"\n{'='*60}")
         print(f"  Visual Director: {self._style.describe()}")
@@ -128,30 +137,35 @@ class VisualDirector:
         print(f"{'='*60}\n")
 
         for scene_data in self._scene_data:
-            scene_id = scene_data["scene_id"]
-            narration = scene_data["narration"]
-            search_query = scene_data.get("search_query", "")
-            scene_title = scene_data.get("scene_title", "")
-            purpose = scene_data.get("purpose", "general")
+            if isinstance(scene_data, Scene):
+                scene = scene_data
+            else:
+                # Coerce dict to Scene object
+                scene = self._dict_to_scene(scene_data)
+
+            scene_id = scene.scene_id
+            narration = scene.narration.spoken_narration
+            scene_title = scene.title
 
             print(f"\n{'─'*50}")
-            print(f"  Scene {scene_id}: {scene_title or search_query}")
+            print(f"  Scene {scene_id}: {scene_title}")
             print(f"{'─'*50}")
 
             result = self._process_scene(
                 scene_id=scene_id,
                 narration=narration,
-                search_query=search_query,
+                search_query=scene_data.get("search_query", ""),
                 scene_title=scene_title,
-                purpose=purpose,
-                target_duration=scene_data.get("estimated_duration"),
+                purpose=scene_data.get("purpose", "general"),
+                target_duration=scene.expected_duration,
                 accepted_scenes=accepted_scenes,
+                scene=scene,
             )
 
             self._results["scene_results"].append(result)
             scene_assets.append(result)
             # Track scenes that succeeded so they can be reused by FallbackDirector
-            accepted_scenes.append(result)
+            accepted_scenes.append(scene)
 
         print(f"\n{'='*50}")
         print(f"  Director Results:")
@@ -161,7 +175,52 @@ class VisualDirector:
         print(f"    Fallbacks: {self._results['total_fallbacks']}")
         print(f"{'='*50}\n")
 
-        return scene_assets
+        return accepted_scenes
+
+    # ── Dict-to-Scene helper ───────────────────────────────────────────
+
+    def _dict_to_scene(self, d: dict) -> Scene:
+        """Coerce a dict into a Scene object."""
+        return Scene(
+            scene_id=d.get("scene_id", 0),
+            title=d.get("title", d.get("scene_title", f"Scene {d.get('scene_id', 0)}")),
+            expected_duration=d.get("estimated_duration", d.get("expected_duration", 12.0)),
+            topic=self._topic,
+            narration=SceneNarration(
+                spoken_narration=d.get("narration", ""),
+            ),
+            search_plan=SearchPlan(
+                asset_search_queries=["general"],
+                primary_topic=self._topic,
+            ),
+            visual_plan=VisualPlan(),
+            editing_plan=EditingPlan(),
+        )
+
+    # ── Build AssetPlan from result ────────────────────────────────────
+
+    def _build_asset_plan(
+        self,
+        provider: str,
+        video_path: str,
+        video_url: str,
+        query_used: str,
+        tech_score: float,
+        sem_score: float,
+        ast_style: str,
+    ) -> AssetPlan:
+        """Build an AssetPlan from processing results."""
+        return AssetPlan(
+            provider=ProviderType(provider),
+            filepath=video_path,
+            video_url=video_url,
+            query_used=query_used,
+            score=(tech_score + sem_score) / 2 if tech_score >= 0 and sem_score >= 0 else 0.0,
+            semantic_score=sem_score,
+            technical_score=tech_score,
+            aesthetic_style=ast_style,
+            duration=get_media_duration(video_path) if os.path.exists(video_path) else 0.0,
+        )
 
     # ── Single scene processing ────────────────────────────────────────
 
@@ -173,11 +232,13 @@ class VisualDirector:
         scene_title: str = "",
         purpose: str = "general",
         target_duration: Optional[float] = None,
-        accepted_scenes: Optional[list[dict]] = None,
+        accepted_scenes: Optional[list[Scene]] = None,
+        scene: Optional[Scene] = None,
     ) -> dict:
         """Process a single scene with full retry loop.
 
         Returns a result dict with all metadata about the selected asset.
+        The Scene object (if provided) is also populated with the AssetPlan.
         """
         max_retries = get_config("visual_director.max_retries_per_scene", 3)
         max_regenerations = get_config("visual_director.max_scene_regenerations", 2)
@@ -235,22 +296,36 @@ class VisualDirector:
                     continue
 
                 best_asset = videos[0]
+                # Convert raw router dict to AssetPlan for typed processing
+                vf = best_asset.get("video_files", [{}])
+                vf_link = vf[0].get("link", "") if isinstance(vf, list) and vf else ""
+                best_asset_plan = AssetPlan(
+                    provider=ProviderType(selected_provider),
+                    filepath="",
+                    video_url=vf_link,
+                    query_used=selected_query[0] if isinstance(selected_query, list) else selected_query,
+                    score=technical_score if technical_score >= 0 else 0.5,
+                    semantic_score=0.5,
+                    technical_score=technical_score if technical_score >= 0 else 0.5,
+                    aesthetic_style="real_stock",
+                    duration=best_asset.get("duration", 0.0),
+                )
 
                 # ── Semantic Validation ────────────────────────────────
                 sem_score = self._semantic_validator.score(
                     narration=current_narration,
                     query=selected_query,
-                    asset=best_asset,
+                    asset=best_asset_plan,
                 )
                 print(f"    Semantic score: {sem_score:.3f} (threshold: {self._semantic_validator._threshold})")
 
+                # Update AssetPlan with the validated semantic score
+                best_asset_plan.semantic_score = sem_score
+
                 # ── Quality Gates ──────────────────────────────────────
                 gate_passed, gate_reason, gate_details = self._quality_gates.check_all(
-                    asset=best_asset,
-                    provider=selected_provider,
-                    query=selected_query,
+                    asset=best_asset_plan,
                     category=self._router.category,
-                    semantic_score=sem_score,
                 )
 
                 # Log per-gate details
@@ -274,9 +349,10 @@ class VisualDirector:
                 video_url = best_asset["video_files"][0]["link"]
                 self._router.download(video_url, video_path)
 
-                # Generate voiceover
+                # Generate voiceover — TTS receives ONLY narration text
                 print(f"    Generating voiceover...")
-                generate_voice(current_narration, audio_path)
+                tts_input = scene.narration.spoken_narration if scene else current_narration
+                generate_voice(tts_input, audio_path)
 
                 # Duration verification
                 audio_dur = get_media_duration(audio_path)
@@ -291,6 +367,19 @@ class VisualDirector:
                 # Determine aesthetic style from the agent's history
                 aesthetic_styles = self._aesthetic_agent.history
                 current_style = aesthetic_styles[-1] if aesthetic_styles else "real_stock"
+
+                # Build AssetPlan and attach to the Scene
+                asset_plan = self._build_asset_plan(
+                    provider=selected_provider,
+                    video_path=video_path,
+                    video_url=video_url,
+                    query_used=selected_query[0] if isinstance(selected_query, list) else selected_query,
+                    tech_score=technical_score,
+                    sem_score=sem_score,
+                    ast_style=current_style,
+                )
+                if scene is not None:
+                    scene.asset_plan = asset_plan
 
                 return {
                     "scene_id": scene_id,
@@ -331,14 +420,14 @@ class VisualDirector:
             accepted_scenes=accepted_scenes or [],
         )
 
-        if fallback_asset and fallback_asset.get("video_path"):
-            video_path = fallback_asset["video_path"]
-            provider = fallback_asset.get("provider", "fallback")
-            query_str = fallback_asset.get("query", "")
-            tech_score = fallback_asset.get("technical_score", 0.0)
-            sem_score = fallback_asset.get("semantic_score", 0.0)
-            ast_style = fallback_asset.get("aesthetic_style", "fallback")
-            vid_url = fallback_asset.get("video_url", "")
+        if fallback_asset and fallback_asset.filepath:
+            video_path = fallback_asset.filepath
+            provider = fallback_asset.provider.value
+            query_str = fallback_asset.query_used
+            tech_score = fallback_asset.technical_score
+            sem_score = fallback_asset.semantic_score
+            ast_style = fallback_asset.aesthetic_style
+            vid_url = fallback_asset.video_url
             print(f"    -> FallbackDirector produced: {provider}/{query_str}")
         else:
             # Absolute last resort — this should never be reached because
@@ -365,6 +454,19 @@ class VisualDirector:
                 ], capture_output=True, timeout=30)
             except Exception:
                 pass
+
+        # Build AssetPlan for fallback/emergency and attach to Scene
+        asset_plan = self._build_asset_plan(
+            provider=provider,
+            video_path=video_path,
+            video_url=vid_url,
+            query_used=query_str,
+            tech_score=tech_score,
+            sem_score=sem_score,
+            ast_style=ast_style,
+        )
+        if scene is not None:
+            scene.asset_plan = asset_plan
 
         return {
             "scene_id": scene_id,

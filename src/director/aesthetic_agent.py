@@ -25,6 +25,7 @@ from __future__ import annotations
 import re
 from typing import Optional
 
+from src.models.schemas import AssetPlan, ProviderType
 from src.utils.config import get_config
 from src.director.visual_style import VisualStyle
 
@@ -32,7 +33,7 @@ from src.director.visual_style import VisualStyle
 # ── Style classification ───────────────────────────────────────────────
 
 def _classify_style(
-    asset: dict,
+    asset: AssetPlan,
     provider: str,
     query: str,
     category: str,
@@ -50,21 +51,8 @@ def _classify_style(
     if provider == "nasa":
         return "space_photo"
 
-    # Check asset metadata
-    raw = asset.get("_raw", {})
-
-    # Check tags for style hints
-    tags = raw.get("tags", "")
-    if isinstance(tags, str) and tags:
-        tags_lower = tags.lower()
-        if any(w in tags_lower for w in ("drone", "aerial", "satellite")):
-            return "aerial"
-        if any(w in tags_lower for w in ("microscope", "macro", "extreme close")):
-            return "macro"
-        if any(w in tags_lower for w in ("cgi", "3d", "render", "animation", "computer generated")):
-            return "cgi_render"
-        if any(w in tags_lower for w in ("vintage", "old film", "retro", "archive", "sepia")):
-            return "archival_film"
+    # Check video_url for style hints (filename-based)
+    video_url = asset.video_url.lower()
 
     # Check query for style hints
     query_lower = query.lower()
@@ -74,6 +62,16 @@ def _classify_style(
         return "cgi_render"
     if any(w in query_lower for w in ("microscope", "macro", "extreme close")):
         return "macro"
+
+    # Check URL for style hints
+    if any(w in video_url for w in ("drone", "aerial", "satellite")):
+        return "aerial"
+    if any(w in video_url for w in ("cgi", "3d", "render", "animation", "computer-generated")):
+        return "cgi_render"
+    if any(w in video_url for w in ("microscope", "macro", "extreme-close")):
+        return "macro"
+    if any(w in video_url for w in ("vintage", "old-film", "retro", "archive", "sepia")):
+        return "archival_film"
 
     # Category-based defaults
     if category == "Space":
@@ -165,7 +163,7 @@ class AestheticAgent:
 
     def check_asset(
         self,
-        asset: dict,
+        asset: AssetPlan,
         provider: str,
         query: str,
         category: str,
@@ -188,7 +186,7 @@ class AestheticAgent:
         if self._style.aesthetic in ("photorealistic", "documentary", "archival"):
             if style_cat in ("cgi_render", "infographic"):
                 # Check if the asset is explicitly tagged as CGI
-                raw_tags = asset.get("_raw", {}).get("tags", "")
+                raw_tags = asset.filepath  # Use filepath as proxy for raw metadata
                 if isinstance(raw_tags, str) and "cgi" in raw_tags.lower():
                     return False, (
                         f"style '{style_cat}' incompatible with global "
@@ -217,7 +215,7 @@ class AestheticAgent:
 
     def check_scene_assets(
         self,
-        scene_assets: list[dict],
+        scene_assets: list[AssetPlan],
         scene_providers: list[str],
         scene_queries: list[str],
         scene_categories: list[str],

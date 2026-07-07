@@ -20,6 +20,8 @@ import urllib.parse
 import urllib.request
 from typing import Any, Optional
 
+from src.models.schemas import AssetPlan, ProviderType, Scene
+
 logger = logging.getLogger(__name__)
 
 
@@ -50,9 +52,9 @@ class FallbackDirector:
         narration: str,
         search_queries: Any,
         target_duration: float,
-        accepted_scenes: list,
-    ) -> Optional[dict]:
-        """Attempt fallback chain. Returns asset dict or None.
+        accepted_scenes: list[Scene],
+    ) -> Optional[AssetPlan]:
+        """Attempt fallback chain. Returns AssetPlan or None.
 
         Parameters
         ----------
@@ -65,8 +67,8 @@ class FallbackDirector:
             fallback imagery.
         target_duration : float
             Desired video duration in seconds.
-        accepted_scenes : list[dict]
-            Previously accepted scene asset dicts, used by the reuse fallback.
+        accepted_scenes : list[Scene]
+            Previously accepted Scene objects, used by the reuse fallback.
         """
         # Normalise search_queries to a list of strings
         if isinstance(search_queries, str):
@@ -115,22 +117,17 @@ class FallbackDirector:
 
     def _make_asset(
         self, filepath: str, provider: str, query: str, score: float,
-    ) -> dict:
-        return {
-            "filepath": filepath,
-            "video_path": filepath,
-            "audio_path": "",
-            "provider": provider,
-            "query": query,
-            "search_query": query,
-            "score": score,
-            "semantic_score": score,
-            "technical_score": score,
-            "aesthetic_style": provider,
-            "video_url": "",
-            "narration": "",
-            "duration": self._get_duration(filepath),
-        }
+    ) -> AssetPlan:
+        return AssetPlan(
+            provider=ProviderType(provider),
+            filepath=filepath,
+            query_used=query,
+            score=score,
+            semantic_score=score,
+            technical_score=score,
+            aesthetic_style=provider,
+            duration=self._get_duration(filepath),
+        )
 
     def _get_duration(self, filepath: str) -> float:
         try:
@@ -151,9 +148,9 @@ class FallbackDirector:
     # Validation
     # ------------------------------------------------------------------ #
 
-    def _validate_visual(self, asset: dict) -> bool:
+    def _validate_visual(self, asset: AssetPlan) -> bool:
         """Reject artifacts that are blank/black/empty."""
-        fp = asset.get("filepath", "") or asset.get("video_path", "")
+        fp = asset.filepath
         if not fp or not os.path.isfile(fp):
             return False
         if os.path.getsize(fp) < 1024:
@@ -176,7 +173,7 @@ class FallbackDirector:
     # Fallback 2: NASA image + Ken Burns
     # ------------------------------------------------------------------ #
 
-    def _try_nasa_image(self, queries: Optional[list[str]] = None) -> Optional[dict]:
+    def _try_nasa_image(self, queries: Optional[list[str]] = None) -> Optional[AssetPlan]:
         """Search NASA image archive, download, animate with Ken Burns."""
         api_key = os.environ.get("NASA_API_KEY", "DEMO_KEY")
         query = self._pick_nasa_query(queries)
@@ -256,7 +253,7 @@ class FallbackDirector:
     # Fallback 3: Wikimedia image + Ken Burns
     # ------------------------------------------------------------------ #
 
-    def _try_wikimedia_image(self, queries: Optional[list[str]] = None) -> Optional[dict]:
+    def _try_wikimedia_image(self, queries: Optional[list[str]] = None) -> Optional[AssetPlan]:
         """Search Wikimedia Commons for a CC-licensed image relevant to the topic."""
         query = self._pick_wikimedia_query(queries)
 
@@ -406,7 +403,7 @@ class FallbackDirector:
     # Fallback 4: Generated image (placeholder for future generator)
     # ------------------------------------------------------------------ #
 
-    def _try_generated_image(self) -> Optional[dict]:
+    def _try_generated_image(self) -> Optional[AssetPlan]:
         """Placeholder for AI-generated image fallback."""
         # This will be implemented when an image generation model is available
         return None
@@ -420,8 +417,8 @@ class FallbackDirector:
         scene_num: int,
         narration: str,
         target_duration: float,
-        accepted_scenes: list,
-    ) -> Optional[dict]:
+        accepted_scenes: list[Scene],
+    ) -> Optional[AssetPlan]:
         """Reuse a previously accepted scene with a different crop/zoom/timing."""
         if not accepted_scenes:
             return None
@@ -429,13 +426,13 @@ class FallbackDirector:
         # Pick from earlier scenes (not the last one, for diversity)
         candidates = [
             s for s in accepted_scenes
-            if s.get("filepath") and os.path.isfile(s.get("filepath", ""))
+            if s.asset_plan and s.asset_plan.filepath and os.path.isfile(s.asset_plan.filepath)
         ]
         if not candidates:
             return None
 
         source = self.rng.choice(candidates)
-        src_path = source["filepath"]
+        src_path = source.asset_plan.filepath
         out_path = os.path.join(
             self.cache_dir, f"reuse_scene{scene_num}.mp4",
         )
@@ -469,7 +466,7 @@ class FallbackDirector:
 
             if os.path.isfile(out_path) and os.path.getsize(out_path) > 5000:
                 return self._make_asset(
-                    out_path, "reuse", source.get("query", "reused"),
+                    out_path, "reuse", source.asset_plan.query_used if source.asset_plan else "reused",
                     0.75,
                 )
         except Exception as exc:
@@ -483,7 +480,7 @@ class FallbackDirector:
 
     def _try_animated_placeholder(
         self, target_duration: float = 12.0,
-    ) -> Optional[dict]:
+    ) -> Optional[AssetPlan]:
         """Generate a cinematic animated placeholder with gradient overlay.
         Uses only reliable ffmpeg filters — no drawtext, no geq."""
         out_path = os.path.join(
@@ -538,7 +535,7 @@ class FallbackDirector:
     # Absolute last resort
     # ------------------------------------------------------------------ #
 
-    def _emergency_placeholder(self, duration: float = 12.0) -> dict:
+    def _emergency_placeholder(self, duration: float = 12.0) -> AssetPlan:
         """Create a visible colour video as the absolute last resort.
 
         NEVER produces a black frame — always visible colours.

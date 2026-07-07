@@ -19,6 +19,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from src.director.fallback_director import FallbackDirector
 from src.director.quality_gate import QualityGates
+from src.models.schemas import AssetPlan, ProviderType, Scene, SceneNarration, SearchPlan
 
 
 # ── Helpers ────────────────────────────────────────────────────────────
@@ -124,7 +125,7 @@ class TestFallbackDirector:
         """The cinematic animated placeholder must never produce a black frame."""
         result = self.fd._try_animated_placeholder(target_duration=5.0)
         assert result is not None, "Placeholder must produce a result"
-        fp = result.get("filepath", "")
+        fp = result.filepath
         assert fp, "Placeholder must produce a filepath"
         assert os.path.isfile(fp), f"Placeholder file must exist: {fp}"
         assert not is_black_video(fp), f"Placeholder must not be black: {fp}"
@@ -134,7 +135,7 @@ class TestFallbackDirector:
         """Emergency gradient fallback must produce visible content."""
         result = self.fd._emergency_placeholder(duration=3.0)
         assert result is not None
-        fp = result.get("filepath", "")
+        fp = result.filepath
         assert fp and os.path.isfile(fp), "Emergency must produce a file"
         assert os.path.getsize(fp) > 5000, "Emergency must be >5KB"
 
@@ -153,10 +154,11 @@ class TestFallbackDirector:
                 accepted_scenes=[],
             )
         assert result is not None, "Fallback chain must produce something"
-        assert result["provider"] in ("placeholder", "emergency"), (
-            f"Expected placeholder/emergency, got {result['provider']}"
+        provider_val = result.provider.value if hasattr(result.provider, 'value') else result.provider
+        assert provider_val in ("placeholder", "emergency"), (
+            f"Expected placeholder/emergency, got {provider_val}"
         )
-        assert not is_black_video(result["filepath"]), (
+        assert not is_black_video(result.filepath), (
             "Fallback output must not be black"
         )
 
@@ -173,12 +175,22 @@ class TestFallbackDirector:
             capture_output=True, text=True, timeout=30,
         )
 
-        accepted = [{
-            "filepath": src_path,
-            "provider": "pixabay",
-            "query": "blue space",
-            "score": 0.9,
-        }]
+        accepted = [Scene(
+            scene_id=0,
+            title="Source Scene",
+            expected_duration=5.0,
+            topic="test",
+            narration=SceneNarration(spoken_narration="Test narration"),
+            search_plan=SearchPlan(asset_search_queries=["blue space"]),
+            asset_plan=AssetPlan(
+                provider=ProviderType.PIXABAY,
+                filepath=src_path,
+                query_used="blue space",
+                score=0.9,
+                semantic_score=0.9,
+                technical_score=0.9,
+            ),
+        )]
 
         result = self.fd._try_reuse_scene(
             scene_num=2, narration="Test",
@@ -186,8 +198,8 @@ class TestFallbackDirector:
         )
 
         if result:
-            assert result["provider"] == "reuse"
-            fp = result.get("filepath", "")
+            assert result.provider.value == "reuse"
+            fp = result.filepath
             assert os.path.isfile(fp), "Reuse must produce valid file"
             assert os.path.getsize(fp) > 5000, "Reuse must be >5KB"
             # Check that reuse file is different from source
@@ -266,9 +278,9 @@ class TestFallbackDirector:
         self.fd._try_wikimedia_image = old_wiki
 
         assert result is not None, "Must produce fallback even without network"
-        assert result.get("filepath"), "Must have filepath"
-        assert os.path.isfile(result["filepath"]), "File must exist"
-        quality = check_placeholder_quality(result["filepath"])
+        assert result.filepath, "Must have filepath"
+        assert os.path.isfile(result.filepath), "File must exist"
+        quality = check_placeholder_quality(result.filepath)
         assert not quality["black"], "Output must not be black"
 
     # ── Test 4: Semantic validation still works ────────────────────────
@@ -293,27 +305,39 @@ class TestFallbackDirector:
         gates = QualityGates(visual_style=style, aesthetic_agent=agent, semantic_threshold=0.75)
 
         # Test with low semantic score
-        asset = {
-            "id": "test_asset",
-            "title": "Test Asset",
-            "description": "test",
-            "video_files": [{"link": "https://example.com/v.mp4"}],
-            "width": 1920, "height": 1080,
-            "duration": 10,
-        }
-        passed, reason, details = gates.check_all(
-            asset=asset, provider="pixabay",
-            query="test", category="Space",
+        asset = AssetPlan(
+            provider=ProviderType.PIXABAY,
+            filepath="",
+            video_url="https://example.com/v.mp4",
+            query_used="test",
+            score=0.5,
             semantic_score=0.5,
+            technical_score=0.5,
+            width=1920,
+            height=1080,
+            duration=10,
+        )
+        passed, reason, details = gates.check_all(
+            asset=asset, category="Space",
         )
         assert not passed, "Score 0.5 must be rejected"
         assert "semantic" in reason.lower()
 
         # Test with high semantic score
-        passed, reason, details = gates.check_all(
-            asset=asset, provider="pixabay",
-            query="test", category="Space",
+        asset = AssetPlan(
+            provider=ProviderType.PIXABAY,
+            filepath="",
+            video_url="https://example.com/v.mp4",
+            query_used="test",
+            score=0.85,
             semantic_score=0.85,
+            technical_score=0.85,
+            width=1920,
+            height=1080,
+            duration=10,
+        )
+        passed, reason, details = gates.check_all(
+            asset=asset, category="Space",
         )
         assert passed, "Score 0.85 must pass"
 
@@ -331,7 +355,21 @@ class TestFallbackDirector:
             capture_output=True, text=True, timeout=30,
         )
 
-        accepted = [{"filepath": bad_src}]
+        accepted = [Scene(
+            scene_id=0,
+            title="Bad Source",
+            expected_duration=5.0,
+            topic="test",
+            narration=SceneNarration(spoken_narration="test"),
+            search_plan=SearchPlan(asset_search_queries=["test"]),
+            asset_plan=AssetPlan(
+                provider=ProviderType.PIXABAY,
+                filepath=bad_src,
+                score=0.5,
+                semantic_score=0.5,
+                technical_score=0.5,
+            ),
+        )]
 
         # Try reuse first, then animated placeholder
         result = self.fd._try_reuse_scene(
@@ -339,8 +377,8 @@ class TestFallbackDirector:
             target_duration=5.0, accepted_scenes=accepted,
         )
         # The reuse should still produce a file (even from tiny source)
-        if result and result.get("filepath"):
-            fp = result["filepath"]
+        if result and result.filepath:
+            fp = result.filepath
             if os.path.getsize(fp) > 5000:
                 # Check it's not all black
                 check = check_placeholder_quality(fp)
@@ -348,10 +386,10 @@ class TestFallbackDirector:
                     # Reuse failed - now test animated placeholder
                     pl = self.fd._try_animated_placeholder(target_duration=5.0)
                     assert pl is not None, "Animated placeholder must rescue"
-                    assert not is_black_video(pl["filepath"]), "Placeholder must not be black"
+                    assert not is_black_video(pl.filepath), "Placeholder must not be black"
 
     def test_make_asset_valid_keys(self):
-        """Asset dict produced by fallback must have the right keys."""
+        """AssetPlan produced by fallback must have the right attributes."""
         test_path = os.path.join(self.cache_dir, "test.mp4")
         subprocess.run(
             ["ffmpeg", "-y", "-f", "lavfi",
@@ -360,17 +398,19 @@ class TestFallbackDirector:
             capture_output=True, text=True, timeout=30,
         )
 
-        asset = self.fd._make_asset(test_path, "test_provider", "test_query", 0.8)
-        required = ["filepath", "provider", "query", "search_query", "score"]
-        for key in required:
-            assert key in asset, f"Missing key: {key}"
-        assert asset["provider"] == "test_provider"
-        assert asset["score"] == 0.8
+        asset = self.fd._make_asset(test_path, "pixabay", "test_query", 0.8)
+        assert isinstance(asset, AssetPlan)
+        assert asset.filepath == test_path
+        assert asset.provider.value == "pixabay"
+        assert asset.query_used == "test_query"
+        assert asset.score == 0.8
+        assert asset.semantic_score == 0.8
+        assert asset.technical_score == 0.8
 
     def test_validate_visual_rejects_empty(self):
         """_validate_visual must reject empty/missing files."""
-        assert not self.fd._validate_visual({"filepath": ""})
-        assert not self.fd._validate_visual({"filepath": "/tmp/nonexistent_file.mp4"})
+        assert not self.fd._validate_visual(AssetPlan(filepath="", provider=ProviderType.PIXABAY))
+        assert not self.fd._validate_visual(AssetPlan(filepath="/tmp/nonexistent_file.mp4", provider=ProviderType.PIXABAY))
 
     def test_validate_visual_accepts_valid(self):
         """_validate_visual must accept valid video files."""
@@ -381,7 +421,7 @@ class TestFallbackDirector:
              "-c:v", "libx264", "-preset", "fast", test_path],
             capture_output=True, text=True, timeout=30,
         )
-        assert self.fd._validate_visual({"filepath": test_path})
+        assert self.fd._validate_visual(AssetPlan(filepath=test_path, provider=ProviderType.PIXABAY, score=0.8, semantic_score=0.8, technical_score=0.8))
 
 
 # ── Integration tests ─────────────────────────────────────────────────
