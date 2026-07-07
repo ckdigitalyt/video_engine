@@ -35,7 +35,7 @@ subtitle_engine = SubtitleEngine()
 cache_video = get_config("pipeline.cache.video", "cache/video")
 cache_audio = get_config("pipeline.cache.audio", "cache/audio")
 cache_music = get_config("pipeline.cache.music", "cache/music")
-fallback_video = get_config("pipeline.fallback.video", "cache/video/test_clip.mp4")
+# FallbackDirector handles all degradation — no static fallback clip
 background_music_path = os.path.join(
     cache_music,
     os.path.basename(get_config("voices.mixing.background_music", "cinematic.mp3")),

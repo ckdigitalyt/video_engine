@@ -41,7 +41,7 @@ modules load their settings through the `src.utils.config` loader (see
 | `pipeline.cache.video` | `"cache/video"` | Directory for downloaded video clips |
 | `pipeline.cache.audio` | `"cache/audio"` | Directory for generated audio files |
 | `pipeline.cache.music` | `"cache/music"` | Directory for background music files |
-| `pipeline.fallback.video` | `"cache/video/test_clip.mp4"` | Fallback video when Pexels fails |
+| `pipeline.fallback.video` | `""` | Fallback video path (unused — FallbackDirector handles all degradation) |
 | `pipeline.output.default` | `"final_output.mp4"` | Final output video filename |
 | `pipeline.critic.frame_extraction_ss` | `"00:00:02"` | FFmpeg seek timestamp for frame extraction |
 | `pipeline.critic.eval_frame` | `"cache/video/eval_frame.jpg"` | Path for the extracted evaluation frame |
