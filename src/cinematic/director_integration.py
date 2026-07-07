@@ -98,21 +98,18 @@ class BeatDirector:
         purpose = f"{shot.shot_type.value} shot for beat {beat.index}"
         query_text = shot.description or beat.visual_purpose[:100]
 
-        queries = self._concept_planner.generate_queries(
-            narration=narration,
-            title=f"scene_{scene.scene_id}_b{beat.index}_s{shot_index}",
-            topic=self._topic,
-            purpose=purpose,
-        )
-        if not queries:
-            queries = [query_text]
+        # Use the scene-level search query as base for per-shot searches
+        base_query = scene.search_plan.asset_search_queries[0] if scene.search_plan.asset_search_queries else self._topic
+        shot_query = f"{base_query} {shot.shot_type.value} shot"
+
+        queries = [shot_query, base_query, f"{self._topic} documentary stock footage"]
 
         for query in queries[:max_retries]:
             self.total_queries_tried += 1
             try:
                 mq_result = self._router.multi_query_search(
-                    [query], min_acceptable_score=0.0, max_attempts=2,
-                    diversity_weighting=0.2, target_duration=max(shot.duration, 3.0),
+                    [query], min_acceptable_score=0.0, max_attempts=3,
+                    diversity_weighting=0.15, target_duration=max(shot.duration, 3.0),
                 )
             except Exception as e:
                 continue
@@ -157,7 +154,7 @@ class BeatDirector:
         """FallbackDirector as last resort."""
         return self._fallback_director.produce(
             scene_num=scene.scene_id, narration=narration,
-            search_queries=shot.description or beat.visual_purpose[:100],
+            search_queries=scene.search_plan.asset_search_queries[0] if scene.search_plan.asset_search_queries else self._topic,
             target_duration=max(shot.duration, 3.0),
             accepted_scenes=[],
         )

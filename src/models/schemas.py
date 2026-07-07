@@ -673,6 +673,11 @@ class Scene(BaseModel):
         default=None,
         description="Retrieved asset information (populated after asset search).",
     )
+    beat_plans: Optional[list[BeatPlan]] = Field(
+        default=None,
+        description="Beat-based breakdown of this scene (populated after beat planning).",
+    )
+    
     audio_plan: Optional[AudioPlan] = Field(
         default=None,
         description="Audio rendering instructions (populated after TTS).",
@@ -804,8 +809,4 @@ def scene_to_flat_dict(scene: Scene) -> dict[str, Any]:
         "filepath": scene.asset_plan.filepath if scene.asset_plan else "",
         "duration": scene.expected_duration,
     }
-    beat_plans: Optional[list[BeatPlan]] = Field(
-        default=None,
-        description="Beat-based breakdown of this scene (populated after beat planning).",
-    )
     
