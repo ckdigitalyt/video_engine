@@ -15,7 +15,40 @@ implement the ``AssetProvider`` interface.
 from __future__ import annotations
 
 import os
+from pathlib import Path
 from typing import Any, Optional
+
+
+# ── Auto-load .env if present ──────────────────────────────────────────────
+# This ensures API keys are available regardless of what entry point
+# imports this module first (orchestrator, fermi_paradox.py, tests, etc.)
+_env_loaded = False
+def _load_env_if_needed() -> None:
+    global _env_loaded
+    if _env_loaded:
+        return
+    # Walk up from project root looking for .env
+    search_paths = [
+        Path(__file__).resolve().parent.parent.parent / ".env",    # video_engine/
+        Path(__file__).resolve().parent.parent.parent.parent / ".env",  # parent of video_engine/
+    ]
+    for dotenv_path in search_paths:
+        if dotenv_path.exists():
+            with open(dotenv_path) as f:
+                for line in f:
+                    line = line.strip()
+                    if not line or line.startswith("#") or "=" not in line:
+                        continue
+                    key, val = line.split("=", 1)
+                    if key and key not in os.environ:
+                        os.environ[key] = val
+            print(f"[asset_router] Loaded env vars from {dotenv_path}")
+            break
+    _env_loaded = True
+
+
+# Load env right away so _is_provider_ready sees the keys
+_load_env_if_needed()
 
 from src.assets.topic_classifier import TopicClassifier
 from src.assets.asset_library import AssetLibrary
@@ -33,13 +66,13 @@ from src.utils.config import get_config
 # ── Default routing table (fallback when config YAML is absent) ────────────
 
 _DEFAULT_ROUTES: dict[str, list[str]] = {
-    "Space":      ["nasa", "pixabay", "pexels"],
+    "Space":      ["nasa", "pexels", "pixabay", "wikimedia"],
     "History":    ["wikimedia", "pixabay", "pexels"],
-    "Science":    ["nasa", "pixabay", "pexels"],
-    "Nature":     ["pixabay", "pexels"],
-    "Technology": ["pixabay", "pexels"],
-    "Finance":    ["pixabay", "pexels"],
-    "General":    ["pixabay", "pexels"],
+    "Science":    ["nasa", "pexels", "pixabay", "wikimedia"],
+    "Nature":     ["pexels", "pixabay", "wikimedia"],
+    "Technology": ["pexels", "pixabay", "wikimedia"],
+    "Finance":    ["pexels", "pixabay", "wikimedia"],
+    "General":    ["pexels", "pixabay", "wikimedia"],
 }
 
 
@@ -412,27 +445,18 @@ class AssetRouter:
 
     @staticmethod
     def _is_provider_ready(provider: AssetProvider, name: str) -> bool:
-        """Check if a provider is ready for use (not stubbed, API key present).
+        """Check if a provider is ready for use.
 
-        Real providers that are missing their API key are silently skipped
-        so the router can fall back to the next provider in the chain.
+        Only blocks providers that genuinely require an API key.
+        Pexels and NASA work without authentication.
+        Pixabay is the only provider that truly needs a key.
         """
-        # Check API key requirements
-        required_keys = {
-            "pixabay": "PIXABAY_API_KEY",
-            "nasa": "NASA_API_KEY",
-            "pexels": "PEXELS_API_KEY",
-        }
-
-        if name in required_keys:
-            key = os.environ.get(required_keys[name], "")
-            if not key or key == "":
+        if name == "pixabay":
+            key = os.environ.get("PIXABAY_API_KEY", "")
+            if not key:
                 return False
 
-        if name == "wikimedia":
-            # Wikimedia requires no API key — always ready
-            return True
-
+        # All other providers (pexels, nasa, wikimedia) work without keys
         return True
 
     @staticmethod

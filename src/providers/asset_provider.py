@@ -247,7 +247,8 @@ class PixabayProvider(AssetProvider):
             "min_width": self._min_width,
         }
         try:
-            res = requests.get(self._base_url, params=params).json()
+            headers = {"User-Agent": "VideoEngine/1.0"}
+            res = requests.get(self._base_url, params=params, headers=headers).json()
         except Exception as e:
             print(f"-> Pixabay API request failed: {e}")
             return []
@@ -397,7 +398,8 @@ class NasaMediaProvider(AssetProvider):
             "page_size": 10,
         }
         try:
-            res = requests.get(self._base_url, params=params).json()
+            headers = {"User-Agent": "VideoEngine/1.0"}
+            res = requests.get(self._base_url, params=params, headers=headers).json()
         except Exception as e:
             print(f"-> NASA API request failed: {e}")
             return []
@@ -440,7 +442,11 @@ class NasaMediaProvider(AssetProvider):
 
 
 def _normalise_nasa_items(items: list) -> list:
-    """Convert NASA API items to the internal asset model."""
+    """Convert NASA API items to the internal asset model.
+
+    Fetches actual video URLs from the NASA asset endpoint, falling back
+    to thumbnail images when the asset endpoint fails.
+    """
     results = []
     for item in items:
         data_list = item.get("data", [])
@@ -448,27 +454,54 @@ def _normalise_nasa_items(items: list) -> list:
             continue
         data = data_list[0]
 
-        links = item.get("links", [])
-        if not links:
-            continue
-
         nasa_id = data.get("nasa_id", "")
         title = data.get("title", "")
         description = data.get("description", "")
         date_created = data.get("date_created", "")
 
+        # Fetch actual video URLs from the asset endpoint
         video_files = []
-        for link in links:
-            href = link.get("href", "")
-            if not href:
-                continue
-            video_files.append({
-                "link": href,
-                "quality": "sd",
-                "width": 0,
-                "height": 0,
-                "file_size": 0,
-            })
+        try:
+            asset_resp = requests.get(
+                f"https://images-api.nasa.gov/asset/{nasa_id}",
+                timeout=10,
+            )
+            if asset_resp.status_code == 200:
+                asset_data = asset_resp.json()
+                asset_items = asset_data.get("collection", {}).get("items", [])
+                for ai in asset_items:
+                    href = ai.get("href", "")
+                    if href.endswith(".mp4"):
+                        quality = "hd" if "orig" in href else "sd"
+                        video_files.append({
+                            "link": href,
+                            "quality": quality,
+                            "width": 1920,
+                            "height": 1080,
+                            "file_size": 0,
+                        })
+        except Exception:
+            pass
+
+        # Fallback: use thumbnail images from search response
+        if not video_files:
+            links = item.get("links", [])
+            for link in links:
+                href = link.get("href", "")
+                if not href:
+                    continue
+                # Only include actual image files (not captions/subtitles)
+                if any(href.endswith(ext) for ext in [".jpg", ".png", ".jpeg"]):
+                    video_files.append({
+                        "link": href,
+                        "quality": "hd" if "large" in href else "sd",
+                        "width": 0,
+                        "height": 0,
+                        "file_size": 0,
+                    })
+
+        if not video_files:
+            continue
 
         results.append({
             "id": nasa_id,
@@ -532,7 +565,20 @@ class WikimediaCommonsProvider(AssetProvider):
             "srprop": "size|timestamp",
         }
         try:
-            res = requests.get(self._base_url, params=params).json()
+            headers = {"User-Agent": "VideoEngine/1.0"}
+            raw_resp = requests.get(self._base_url, params=params, headers=headers, timeout=15)
+            # Check if response is HTML (rate limiting) rather than JSON
+            for attempt in range(3):
+                content_type = raw_resp.headers.get("Content-Type", "")
+                if "text/html" in content_type or raw_resp.status_code == 429:
+                    import time
+                    wait = 3 * (attempt + 1)
+                    print(f"-> Wikimedia API rate limited, retry {attempt+1} in {wait}s...")
+                    time.sleep(wait)
+                    raw_resp = requests.get(self._base_url, params=params, headers=headers, timeout=15)
+                else:
+                    break
+            res = raw_resp.json()
         except Exception as e:
             print(f"-> Wikimedia API request failed: {e}")
             return []
@@ -552,7 +598,18 @@ class WikimediaCommonsProvider(AssetProvider):
             "iiurlwidth": 1920,
         }
         try:
-            info_res = requests.get(self._base_url, params=info_params).json()
+            raw_info = requests.get(self._base_url, params=info_params, headers=headers, timeout=15)
+            for attempt in range(3):
+                content_type = raw_info.headers.get("Content-Type", "")
+                if "text/html" in content_type or raw_info.status_code == 429:
+                    import time
+                    wait = 3 * (attempt + 1)
+                    print(f"-> Wikimedia image info rate limited, retry {attempt+1} in {wait}s...")
+                    time.sleep(wait)
+                    raw_info = requests.get(self._base_url, params=info_params, headers=headers, timeout=15)
+                else:
+                    break
+            info_res = raw_info.json()
         except Exception as e:
             print(f"-> Wikimedia image info request failed: {e}")
             return []

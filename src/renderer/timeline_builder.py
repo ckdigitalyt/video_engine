@@ -108,7 +108,8 @@ class TimelineBuilder:
             if path and not os.path.exists(path):
                 errors.append(f"Video file not found: {path}")
 
-        # ── Monotonic timestamps / no overlap (audio) ──────────────────
+        # ── Monotonic timestamps / no overlap (audio only; video shots
+        # may intentionally overlap for crossfades, L-cuts, J-cuts) ─────
         for track_name, entries in [("audio", audio_tl), ("video", video_tl)]:
             sorted_entries = sorted(entries, key=lambda e: e.get("start_time", 0))
             for i, e in enumerate(sorted_entries):
@@ -118,7 +119,7 @@ class TimelineBuilder:
                     errors.append(
                         f"{track_name} entry {i}: end_time ({et}) < start_time ({st})"
                     )
-                if i > 0:
+                if i > 0 and track_name == "audio":
                     prev = sorted_entries[i - 1]
                     prev_et = prev.get("end_time", 0)
                     if st < prev_et:

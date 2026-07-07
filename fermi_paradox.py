@@ -3,6 +3,27 @@ import sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 os.environ["VIRTUAL_ENV"] = os.path.join(os.path.dirname(os.path.abspath(__file__)), "venv")
 
+# Load .env BEFORE any imports that need API keys
+try:
+    from dotenv import load_dotenv
+    dotenv_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
+    if os.path.exists(dotenv_path):
+        load_dotenv(dotenv_path)
+        print(f"[fermi] Loaded .env from {dotenv_path}")
+    else:
+        print(f"[fermi] .env not found at {dotenv_path}")
+except ImportError:
+    # Manual fallback: parse .env ourselves
+    dotenv_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
+    if os.path.exists(dotenv_path):
+        with open(dotenv_path) as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    key, val = line.split("=", 1)
+                    if key not in os.environ:
+                        os.environ[key] = val
+
 """
 Render a Fermi Paradox documentary using beat-based editing.
 """

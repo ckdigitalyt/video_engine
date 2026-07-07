@@ -66,7 +66,7 @@ class VisualDirector:
         topic: str,
         llm_provider: Optional[LLMProvider] = None,
         scene_data: Optional[list] = None,
-                 use_beats: bool = False,
+                 use_beats: bool = True,
     ):
         self._topic = topic
         self._llm_provider = llm_provider

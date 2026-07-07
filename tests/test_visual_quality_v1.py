@@ -343,6 +343,7 @@ class TestNasaProvider:
 
     @pytest.fixture
     def mock_nasa_response(self):
+        # Use .jpg thumbnail links (what NASA search API actually returns)
         return {
             "collection": {
                 "items": [
@@ -353,7 +354,7 @@ class TestNasaProvider:
                             "description": "The Hubble Space Telescope",
                             "date_created": "2017-01-01",
                         }],
-                        "links": [{"href": "https://images.nasa.gov/details-hubble.mp4"}],
+                        "links": [{"href": "https://images.nasa.gov/details-hubble~large.jpg"}],
                     },
                     {
                         "data": [{
@@ -362,20 +363,34 @@ class TestNasaProvider:
                             "description": "Milky Way galaxy",
                             "date_created": "2018-01-01",
                         }],
-                        "links": [{"href": "https://images.nasa.gov/details-milkyway.mp4"}],
+                        "links": [{"href": "https://images.nasa.gov/details-milkyway~large.jpg"}],
                     },
                 ]
             }
         }
 
-    def test_search_normalises_items(self, mock_nasa_response):
+    @patch("src.providers.asset_provider.requests.get")
+    def test_search_normalises_items(self, mock_get, mock_nasa_response):
+        # Mock TWO calls: first is the /asset/ endpoint (returns empty), 
+        # second is the actual search items (used for fallback thumbnails)
+        from unittest.mock import MagicMock
+        
+        # Asset endpoint response (empty - no video URLs found)
+        asset_resp = MagicMock()
+        asset_resp.json.return_value = {"collection": {"items": []}}
+        asset_resp.status_code = 200
+        asset_resp.headers = {"Content-Type": "application/json"}
+        
+        mock_get.side_effect = [asset_resp]
+
         from src.providers.asset_provider import _normalise_nasa_items
         items = mock_nasa_response["collection"]["items"]
         results = _normalise_nasa_items(items)
         assert len(results) == 2
         assert results[0]["id"] == "GSFC_20171208_Archive_e001603"
         assert len(results[0]["video_files"]) == 1
-        assert results[0]["video_files"][0]["link"] == "https://images.nasa.gov/details-hubble.mp4"
+        # Without video URL from /asset/ endpoint, falls back to thumbnail image
+        assert results[0]["video_files"][0]["link"].endswith(".jpg")
 
     @patch("requests.get")
     def test_search_no_apikey(self, mock_get):

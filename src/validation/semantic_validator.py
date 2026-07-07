@@ -115,11 +115,23 @@ class SemanticValidator:
 
     @staticmethod
     def _score_fallback(narration: str, query: str, tags: str) -> float:
-        """Simple keyword-overlap heuristic for semantic relevance.
+        """Heuristic for semantic relevance using keyword overlap.
 
-        Counts how many non-stop-word tokens from the narration appear
-        in the query + tags, normalised by total unique tokens.
+        Scores are computed in three complementary ways and the maximum
+        is returned:
+
+        1. Narration→query+tags overlap (catches narration leak into
+           search queries).
+        2. Query→tags overlap (measures how well the search result
+           matches what was searched for).
+        3. Query→narration overlap (measures how well the search query
+           relates to the narration topic).
+
+        Returns a float in [0.0, 1.0].  Includes punctuation stripping
+        and stem-less matching for better coverage.
         """
+        import re
+
         stop_words = {
             "the", "a", "an", "is", "are", "was", "were", "be", "been",
             "being", "have", "has", "had", "do", "does", "did", "will",
@@ -135,28 +147,59 @@ class SemanticValidator:
             "when", "where", "why", "how",
         }
 
-        # Extract meaningful tokens
-        nar_tokens = {
-            w.lower() for w in narration.split()
-            if w.lower() not in stop_words and len(w) > 2
-        }
-        query_tokens = {
-            w.lower() for w in query.split()
-            if w.lower() not in stop_words and len(w) > 2
-        }
-        tag_tokens = {
-            w.lower() for w in tags.split()
-            if w.lower() not in stop_words and len(w) > 2
-        }
+        def tokenize(text: str) -> set:
+            """Split, strip punctuation, remove stop words and short tokens."""
+            return {
+                re.sub(r'[^\w]', '', w).lower()
+                for w in text.split()
+                if len(re.sub(r'[^\w]', '', w)) > 2
+                and re.sub(r'[^\w]', '', w).lower() not in stop_words
+            }
 
+        nar_tokens = tokenize(narration)
+        query_tokens = tokenize(query)
+        tag_tokens = tokenize(tags)
+
+        if not nar_tokens:
+            return 0.5
+
+        # ── Score 1: narration keywords found in query+tags ───────────
         combined = query_tokens | tag_tokens
+        if combined:
+            nar_matches = nar_tokens & combined
+            score_nar = len(nar_matches) / max(len(nar_tokens), 1)
+        else:
+            score_nar = 0.0
 
-        if not nar_tokens or not combined:
-            return 0.5  # Neutral score when we can't compare
+        # ── Score 2: query keywords found in tags (asset relevance) ───
+        if query_tokens and tag_tokens:
+            query_tag_matches = query_tokens & tag_tokens
+            score_query_tags = len(query_tag_matches) / max(len(query_tokens), 1)
+        else:
+            score_query_tags = 0.5
 
-        matches = nar_tokens & combined
-        score = len(matches) / min(len(nar_tokens), len(nar_tokens | combined))
-        return round(max(0.0, min(1.0, score)), 4)
+        # ── Score 3: query keywords found in narration (topic match) ──
+        if query_tokens and nar_tokens:
+            query_nar_matches = query_tokens & nar_tokens
+            score_query_nar = len(query_nar_matches) / max(len(query_tokens), 1)
+        else:
+            score_query_nar = 0.5
+
+        # Take the maximum of narration-derived scores only.
+        # Query-tag matching alone ("search returned what I asked for")
+        # is NOT evidence of narration relevance.
+        # Only query-tag matching > 0 AND some narration overlap counts.
+        if score_nar > 0.0 or score_query_nar > 0.0:
+            final = max(score_nar, score_query_tags, score_query_nar)
+        else:
+            final = max(score_nar, score_query_nar)
+
+        # Bonus: when there IS some narration signal AND the query was
+        # a good search match, bump the score.
+        if (score_nar > 0.0 or score_query_nar > 0.0) and score_query_tags >= 0.5:
+            final = max(final, min(1.0, final + 0.1))
+
+        return round(max(0.0, min(1.0, final)), 4)
 
     # ── Helpers ────────────────────────────────────────────────────────
 
@@ -164,8 +207,9 @@ class SemanticValidator:
     def _extract_tags(asset: AssetPlan) -> str:
         """Extract a combined tag/description string from an AssetPlan.
 
-        Uses video_url, query_used, and filepath to build a description
-        of the asset for semantic scoring.
+        Uses query_used, filepath, video_url, and any available asset
+        metadata (width/height) to build a description of the asset for
+        semantic scoring.
         """
         parts = []
 
@@ -173,11 +217,16 @@ class SemanticValidator:
         if asset.query_used:
             parts.append(asset.query_used)
 
+        # Include width/height as resolution hints
+        if asset.width and asset.height:
+            parts.append(f"{asset.width}x{asset.height}")
+
         # Use filepath (filename) for hints
         if asset.filepath:
             # Extract just the filename without extension
             filename = asset.filepath.rsplit("/", 1)[-1].replace(".mp4", "")
-            parts.append(filename)
+            # Also include the NASA asset ID if it's in the filename
+            parts.append(filename.replace("_", " ").replace("-", " "))
 
         # Use video_url for additional context
         if asset.video_url:

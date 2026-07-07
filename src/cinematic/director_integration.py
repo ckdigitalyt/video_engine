@@ -108,7 +108,7 @@ class BeatDirector:
             self.total_queries_tried += 1
             try:
                 mq_result = self._router.multi_query_search(
-                    [query], min_acceptable_score=0.0, max_attempts=3,
+                    [query], min_acceptable_score=0.0, max_attempts=1,
                     diversity_weighting=0.15, target_duration=max(shot.duration, 3.0),
                 )
             except Exception as e:
@@ -125,12 +125,32 @@ class BeatDirector:
             vf = best.get("video_files", [{}])
             vf_link = vf[0].get("link", "") if isinstance(vf, list) and vf else ""
 
+            # Include NASA/Wikimedia metadata in query_used for better semantic scoring
+            raw_meta = best.get("_raw", {})
+            if isinstance(raw_meta, dict):
+                asset_title = raw_meta.get("title", "") or ""
+                asset_desc = raw_meta.get("description", "") or ""
+                # Strip "Description: " prefix that NASA prepends
+                if asset_desc.startswith("Description: "):
+                    asset_desc = asset_desc[13:]
+            else:
+                asset_title = ""
+                asset_desc = ""
+
+            query_text = str(sq[0] if isinstance(sq, list) else sq)
+            if asset_desc:
+                query_text = f"{query_text} {asset_desc[:300]}"
+            elif asset_title:
+                query_text = f"{query_text} {asset_title}"
+
             ap = AssetPlan(
                 provider=ProviderType(sp), filepath="", video_url=vf_link,
-                query_used=str(sq[0] if isinstance(sq, list) else sq),
+                query_used=query_text,
                 score=max(ts, 0.5), semantic_score=0.5,
                 technical_score=max(ts, 0.5), aesthetic_style="real_stock",
                 duration=best.get("duration", 0.0),
+                width=best.get("width", 0),
+                height=best.get("height", 0),
             )
 
             sem_score = self._semantic_validator.score(narration=narration, query=str(sq), asset=ap)

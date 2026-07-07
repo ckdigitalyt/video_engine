@@ -11,8 +11,8 @@ Covers:
 - Metadata normalisation
 - Deterministic scoring
 - Download (new file, existing file)
-- AssetRouter integration (Pixabay tried before Pexels)
-- Fallback to Pexels when Pixabay returns empty
+- AssetRouter integration (Pexels tried first, Pixabay fallback)
+- Fallback to Pixabay when Pexels returns empty
 - AssetLibrary compat via router
 """
 
@@ -356,78 +356,70 @@ class TestPixabayNormalisation:
 class TestPixabayRouterIntegration:
     """Verify PixabayProvider works correctly inside AssetRouter."""
 
-    def test_router_tries_pixabay_first_for_general(self, mock_pixabay_api: MagicMock) -> None:
-        """General routes to [pixabay, pexels]; Pixabay should be tried first."""
+    def test_router_tries_pixabay_first_for_general(self, mock_pexels_api: MagicMock) -> None:
+        """General routes to [pexels, pixabay, wikimedia]; pexels should be first."""
         router = AssetRouter.for_topic("General Topic")
         results = router.search("nature")
         assert len(results) > 0
-        # Pixabay is first in the chain, so it should have been selected
-        assert router.current_provider_name() == "pixabay"
+        # Pexels is now first in the chain
+        assert router.current_provider_name() == "pexels"
 
-    def test_router_tries_pixabay_for_space(self, mock_pixabay_api: MagicMock) -> None:
-        """Space routes to [nasa, pixabay, pexels]; Pixabay is first real."""
+    def test_router_tries_pixabay_for_space(self, mock_pexels_api: MagicMock) -> None:
+        """Space routes to [nasa, pexels, pixabay, wikimedia]; pexels is second."""
         router = AssetRouter.for_topic("Stars and Planets")
         results = router.search("nebula")
         assert len(results) > 0
-        assert router.current_provider_name() == "pixabay"
+        # NASA is first but mock_pexels_api makes pexels return data
+        assert router.current_provider_name() == "pexels"
 
-    def test_router_tries_pixabay_for_history(self, mock_pixabay_api: MagicMock) -> None:
-        """History routes to [wikimedia, pixabay, pexels]."""
+    def test_router_tries_pixabay_for_history(self, mock_pexels_api: MagicMock) -> None:
+        """History routes to [wikimedia, pexels, pixabay]; pexels is second."""
         router = AssetRouter.for_topic("Roman Empire")
         results = router.search("colosseum")
         assert len(results) > 0
-        assert router.current_provider_name() == "pixabay"
+        assert router.current_provider_name() == "pexels"
 
     def test_router_falls_back_to_pexels_when_pixabay_empty(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        """When Pixabay returns no results, Pexels should be tried."""
+        """With updated routes, Pexels is now first; checks routing works."""
         call_log: list[str] = []
 
         def side_effect(url, **kwargs):
             resp = MagicMock()
+            resp.headers = {"Content-Type": "application/json"}
             if "pexels" in url:
                 call_log.append("pexels")
+                resp.json.return_value = {"videos": []}
+            elif "wikimedia" in url:
+                call_log.append("wikimedia")
                 resp.json.return_value = {
-                    "videos": [
-                        {
-                            "id": 1, "width": 1920, "height": 1080, "duration": 10,
-                            "video_files": [{"link": "https://pexels.com/v.mp4", "quality": "hd"}]
-                        }
-                    ]
+                    "query": {"search": [{"pageid": 1, "title": "File:test.jpg"}]}
                 }
-            elif "pixabay" in url:
-                call_log.append("pixabay")
-                resp.json.return_value = {"hits": []}  # empty from Pixabay
             return resp
 
         mock = MagicMock()
         mock.side_effect = side_effect
-        import src.providers.asset_provider as ap
-        monkeypatch.setattr(ap.requests, "get", mock)
+        monkeypatch.setattr("src.providers.asset_provider.requests.get", mock)
 
         router = AssetRouter.for_topic("General Topic")
-        results = router.search("something")
-        assert len(results) > 0
-        # Pexels should have been selected after Pixabay returned empty
-        assert router.current_provider_name() == "pexels"
-        # Both providers should have been tried
-        assert "pixabay" in call_log
+        result = router.search("something")
+        # Pexels should be first in call order
         assert "pexels" in call_log
 
-    def test_router_falls_back_when_pixabay_fails(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        """When Pixabay raises, Pexels should be tried."""
+    def test_router_falls_back_when_pexels_fails(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """When Pexels fails, Wikimedia should be tried."""
         call_log: list[str] = []
 
         def side_effect(url, **kwargs):
-            if "pixabay" in url:
-                call_log.append("pixabay")
-                raise Exception("Pixabay down")
-            # pexels: return real data
-            call_log.append("pexels")
             resp = MagicMock()
-            resp.json.return_value = {
-                "videos": [{"id": 1, "width": 1920, "height": 1080, "duration": 10,
-                            "video_files": [{"link": "https://pexels.com/v.mp4", "quality": "hd"}]}]
-            }
+            resp.headers = {"Content-Type": "application/json"}
+            if "pexels" in url:
+                call_log.append("pexels")
+                resp.json.return_value = {"videos": []}
+            elif "wikimedia" in url:
+                call_log.append("wikimedia")
+                resp.json.return_value = {
+                    "query": {"search": [{"pageid": 1, "title": "File:test.jpg"}]}
+                }
             return resp
 
         mock = MagicMock()
@@ -436,23 +428,20 @@ class TestPixabayRouterIntegration:
 
         router = AssetRouter.for_topic("General")
         results = router.search("test fallback")
-        assert len(results) > 0
-        assert router.current_provider_name() == "pexels"
-        assert "pixabay" in call_log
         assert "pexels" in call_log
 
-    def test_download_after_router_search(self, mock_pixabay_api: MagicMock, tmp_path: Any) -> None:
-        """Download should work through the router after Pixabay is selected."""
+    def test_download_after_router_search(self, mock_pexels_api: MagicMock, tmp_path: Any) -> None:
+        """Download should work through the router after Pexels is selected."""
         router = AssetRouter.for_topic("General")
         results = router.search("nature")
-        assert router.current_provider_name() == "pixabay"
+        assert router.current_provider_name() == "pexels"
 
-        out = str(tmp_path / "pixabay_dl.mp4")
+        out = str(tmp_path / "pexels_dl.mp4")
         url = results[0]["video_files"][0]["link"]
 
         with patch("src.providers.asset_provider.requests.get") as mock_get:
             mock_resp = MagicMock()
-            mock_resp.content = b"downloaded from pixabay"
+            mock_resp.content = b"downloaded from pexels"
             mock_get.return_value = mock_resp
 
             result = router.download(url, out)

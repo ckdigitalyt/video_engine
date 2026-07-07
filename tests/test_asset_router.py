@@ -437,7 +437,7 @@ class TestOrchestratorIntegration:
         router = AssetRouter.for_topic("The Roman Empire")
         assert router.category == "History"
         priority = router._routes.get("History", [])
-        assert priority == ["wikimedia", "pixabay", "pexels"]
+        assert priority == ["wikimedia", "pexels", "pixabay"]
 
     def test_stubs_have_no_effect_on_routing(self, mock_pexels_api: MagicMock) -> None:
         """Even though stubs are in the provider list, they don't block

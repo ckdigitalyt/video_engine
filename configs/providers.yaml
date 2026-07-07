@@ -53,13 +53,13 @@ providers:
 asset_routing:
   # Provider priority per category (first provider with results wins)
   routes:
-    Space:      [nasa, pixabay, pexels]
-    History:    [wikimedia, pixabay, pexels]
-    Science:    [nasa, pixabay, pexels]
-    Nature:     [pixabay, pexels]
-    Technology: [pixabay, pexels]
-    Finance:    [pixabay, pexels]
-    General:    [pixabay, pexels]
+    Space:      [nasa, pexels, pixabay, wikimedia]
+    History:    [wikimedia, pexels, pixabay]
+    Science:    [nasa, pexels, pixabay, wikimedia]
+    Nature:     [pexels, pixabay, wikimedia]
+    Technology: [pexels, pixabay, wikimedia]
+    Finance:    [pexels, pixabay, wikimedia]
+    General:    [pexels, pixabay, wikimedia]
 
   # Category keyword definitions for the TopicClassifier
   keywords:
