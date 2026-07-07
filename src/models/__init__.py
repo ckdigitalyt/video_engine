@@ -26,6 +26,9 @@ from .schemas import (
     PipelineState,
     # Helpers
     scene_to_flat_dict,
+    ShotType,
+    ShotPlan,
+    BeatPlan,
 )
 
 # ── Backward-compatible dataclasses (deprecated) ───────────────────
@@ -64,6 +67,9 @@ __all__ = [
     "RenderPlan",
     "Scene",
     "PipelineState",
+    "ShotType",
+    "ShotPlan",
+    "BeatPlan",
     "scene_to_flat_dict",
     # Legacy dataclasses
     "LegacyScene",

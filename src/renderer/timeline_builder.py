@@ -18,7 +18,7 @@ from typing import Any, Union
 
 from pydub import AudioSegment
 from src.utils.config import get_config
-from src.models import SceneAsset
+from src.models import SceneAsset, BeatPlan
 from src.models.schemas import (
     Scene,
     AssetPlan,
@@ -147,10 +147,38 @@ class TimelineBuilder:
     @staticmethod
     def _to_asset_dict(scene: Union[dict[str, Any], SceneAsset, Scene]) -> dict[str, Any]:
         """Normalize a Scene, SceneAsset, or raw dict to a dict with
-        scene_id/video_path/audio_path."""
+        scene_id/video_path/audio_path.
+
+        When a Scene has beat_plans, returns a list of shot-level dicts
+        keyed as a "shots" list within the scene dict.
+        """
         if isinstance(scene, Scene):
-            # Scene objects carry asset_plan and audio_plan with the
-            # resolved file paths used in the timeline.
+            # Check for beat-based editing
+            if hasattr(scene, 'beat_plans') and scene.beat_plans:
+                result = {
+                    "scene_id": scene.scene_id,
+                    "video_path": "",
+                    "audio_path": "",
+                    "shots": [],
+                }
+                if scene.audio_plan is not None:
+                    result["audio_path"] = scene.audio_plan.narration_audio_path
+
+                for beat in scene.beat_plans:
+                    for shot in beat.shots:
+                        if shot.asset_plan and shot.asset_plan.filepath:
+                            result["shots"].append({
+                                "beat_index": beat.index,
+                                "shot_type": shot.shot_type.value,
+                                "timestamp": beat.start_time + shot.timestamp,
+                                "duration": shot.duration,
+                                "filepath": shot.asset_plan.filepath,
+                                "motion": shot.motion,
+                                "transition": shot.transition.value,
+                                "camera": shot.camera.value,
+                            })
+                return result
+
             video_path = ""
             audio_path = ""
             if scene.asset_plan is not None:
@@ -174,7 +202,12 @@ class TimelineBuilder:
         self,
         scenes: Union[list[dict[str, Any]], list[SceneAsset], list[Scene]],
     ) -> dict:
-        """Internal: produce a raw timeline dict from scenes (no validation)."""
+        """Internal: produce a raw timeline dict from scenes (no validation).
+
+        Supports both single-clip scenes and beat-based shot-level scenes.
+        Beat-based scenes expand shots into individual video timeline entries
+        with per-shot motion and transition metadata.
+        """
         audio_timeline: list[dict] = []
         video_timeline: list[dict] = []
 
@@ -182,17 +215,20 @@ class TimelineBuilder:
         scene_dicts = [self._to_asset_dict(s) for s in scenes]
         scene_dicts.sort(key=lambda s: s["scene_id"])
 
-        current_time: float = 0.0
+        global_time: float = 0.0
 
         for sd in scene_dicts:
             audio_path = sd["audio_path"]
             video_path = sd["video_path"]
 
             # Determine exact audio duration
-            audio_len = self._get_audio_duration(audio_path)
+            if audio_path:
+                audio_len = self._get_audio_duration(audio_path)
+            else:
+                audio_len = 10.0  # fallback
 
-            start = current_time
-            end = current_time + audio_len
+            start = global_time
+            end = global_time + audio_len
 
             audio_timeline.append({
                 "track": "voice",
@@ -201,17 +237,43 @@ class TimelineBuilder:
                 "end_time": end,
             })
 
-            video_timeline.append({
-                "layer": 1,
-                "file": video_path,
-                "start_time": start,
-                "end_time": end,
-                "transition_out": "none",
-            })
+            # Check for beat-based shots
+            shots = sd.get("shots", [])
+            if shots:
+                # Shot-level entries with per-shot timing
+                shot_time_offset = global_time
+                for shot in shots:
+                    shot_start = shot_time_offset + shot["timestamp"]
+                    shot_start = max(global_time, shot_start)  # clamp to scene start
+                    shot_end = shot_start + shot["duration"]
+                    shot_end = min(end, shot_end)  # clamp to scene end
+
+                    if shot["filepath"] and shot_end > shot_start:
+                        video_timeline.append({
+                            "layer": 1,
+                            "file": shot["filepath"],
+                            "start_time": shot_start,
+                            "end_time": shot_end,
+                            "transition": shot["transition"],
+                            "motion": shot["motion"],
+                            "camera": shot["camera"],
+                            "beat_index": shot["beat_index"],
+                            "shot_type": shot["shot_type"],
+                        })
+            else:
+                # Single clip per scene (legacy mode)
+                video_timeline.append({
+                    "layer": 1,
+                    "file": video_path,
+                    "start_time": start,
+                    "end_time": end,
+                    "transition": "none",
+                    "motion": "none",
+                    "camera": "static",
+                })
 
             # Advance the clock for the next scene.
-            # Future: apply transition_offset here when cross-fades are supported.
-            current_time = end
+            global_time = end
 
         return {
             "render_settings": {

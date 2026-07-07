@@ -17,6 +17,7 @@ import PIL.Image
 if not hasattr(PIL.Image, "ANTIALIAS"):
     PIL.Image.ANTIALIAS = PIL.Image.LANCZOS
 
+import os
 import json
 from typing import Any, Optional
 
@@ -208,20 +209,44 @@ class MoviePyRenderer(Renderer):
         transition_descriptors = transition_engine.generate(len(video_tracks))
 
         for i, track in enumerate(video_tracks):
+            if not os.path.exists(track.file):
+                print(f"  -> Skipping missing video file: {track.file}")
+                continue
+
             clip = VideoFileClip(track.file)
 
-            # ── Apply motion ───────────────────────────────────────────
-            clip = _apply_motion(clip, motion_descriptors[i], target_res)
+            # ── Apply motion (from timeline or auto-generated) ────────
+            # Check for per-shot motion from timeline metadata
+            track_dict = raw.get("video_timeline", [])
+            track_meta = track_dict[i] if i < len(track_dict) else {}
+            shot_motion = track_meta.get("motion", "")
+            shot_transition = track_meta.get("transition", "crossfade")
 
-            # ── Apply transitions (adjust timing for overlap) ──────────
+            if motion_enabled and shot_motion and shot_motion != "none":
+                # Use motion from timeline metadata
+                motion_desc = {"type": shot_motion, "intensity": 0.3}
+                clip = _apply_motion(clip, motion_desc, target_res)
+            elif motion_enabled:
+                # Fall back to auto-generated motion
+                clip = _apply_motion(clip, motion_descriptors[i], target_res)
+
+            # ── Apply transitions ───────────────────────────────────────
             trans = transition_descriptors[i]
             tdur = trans.get("duration", 0.0)
+
+            # Use timeline-specified transition type
+            if shot_transition and shot_transition != "none":
+                if "dissolve" in shot_transition or "crossfade" in shot_transition:
+                    trans["type"] = "dissolve"
+                elif "fade" in shot_transition or "dip_to_black" in shot_transition:
+                    trans["type"] = "fade"
+                elif "wipe" in shot_transition:
+                    trans["type"] = "wipe"
 
             if trans["type"] != "cut" and tdur > 0 and i > 0:
                 # Overlap with previous clip: shift start earlier by tdur
                 start = track.start_time - tdur
                 end = track.end_time
-                # Ensure we don't start before time 0
                 start = max(0.0, start)
                 clip = clip.set_start(start).set_end(end)
                 clip = _apply_transition(clip, trans, tdur)
