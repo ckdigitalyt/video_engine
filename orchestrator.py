@@ -109,7 +109,7 @@ def execution_node(state: AgentState):
     # ── Create the closed-loop Visual Director ─────────────────────────
     from src.director.director import VisualDirector
 
-    director = VisualDirector(
+    director = VisualDirector(use_beats=True, 
         topic=state["topic"],
         llm_provider=deepseek,
         scene_data=director_scene_data,
