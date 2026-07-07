@@ -10,9 +10,9 @@ pipeline:
     audio: "cache/audio"
     music: "cache/music"
 
-  # Fallback video asset used when Pexels download fails
+  # Fallback is handled by FallbackDirector — no static clip
   fallback:
-    video: "cache/video/test_clip.mp4"
+    video: ""  # Empty: FallbackDirector handles all degradation
 
   # Default output video file
   output:

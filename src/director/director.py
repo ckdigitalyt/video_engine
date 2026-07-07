@@ -11,7 +11,7 @@ director-driven loop.  For each scene:
 5. QualityGates enforce all hard gates
 6. IF any gate fails → retry with next query/provider
 7. IF all queries exhausted → regenerate scene narration via planner
-8. IF max retries reached → fall back to best available (with warning)
+8. IF max retries reached → fall back via FallbackDirector (never a black clip)
 
 Only after ALL quality gates pass does the director move to the next scene.
 """
@@ -32,6 +32,7 @@ from src.director.visual_style import VisualStyle
 from src.director.concept_planner import ConceptPlanner
 from src.director.aesthetic_agent import AestheticAgent
 from src.director.quality_gate import QualityGates
+from src.director.fallback_director import FallbackDirector
 from audio_engine import generate_voice
 
 
@@ -57,9 +58,15 @@ class VisualDirector:
         self._topic = topic
         self._llm_provider = llm_provider
         self._scene_data = scene_data or []
+
+        # -- Config for caches and fallback director ----------------------
         self._cache_video = get_config("pipeline.cache.video", "cache/video")
         self._cache_audio = get_config("pipeline.cache.audio", "cache/audio")
-        self._fallback_video = get_config("pipeline.fallback.video", "cache/video/test_clip.mp4")
+
+        self._fallback_director = FallbackDirector(config={
+            "cache_dir": self._cache_video,
+            "random_seed": get_config("effects.random_seed", 42),
+        })
 
         # ── Create the Visual Style ────────────────────────────────────
         self._router = AssetRouter.for_topic(topic)
@@ -113,6 +120,7 @@ class VisualDirector:
             semantic_score, aesthetic_style
         """
         scene_assets: list[dict] = []
+        accepted_scenes: list[dict] = []
 
         print(f"\n{'='*60}")
         print(f"  Visual Director: {self._style.describe()}")
@@ -137,10 +145,13 @@ class VisualDirector:
                 scene_title=scene_title,
                 purpose=purpose,
                 target_duration=scene_data.get("estimated_duration"),
+                accepted_scenes=accepted_scenes,
             )
 
             self._results["scene_results"].append(result)
             scene_assets.append(result)
+            # Track scenes that succeeded so they can be reused by FallbackDirector
+            accepted_scenes.append(result)
 
         print(f"\n{'='*50}")
         print(f"  Director Results:")
@@ -162,6 +173,7 @@ class VisualDirector:
         scene_title: str = "",
         purpose: str = "general",
         target_duration: Optional[float] = None,
+        accepted_scenes: Optional[list[dict]] = None,
     ) -> dict:
         """Process a single scene with full retry loop.
 
@@ -304,25 +316,67 @@ class VisualDirector:
                     print(f"    New narration: {current_narration[:100]}...")
                     continue
 
-        # ── ALL ATTEMPTS EXHAUSTED — fall back ────────────────────────
+        # ── ALL ATTEMPTS EXHAUSTED — fall back via FallbackDirector ───
         self._results["total_fallbacks"] += 1
         print(f"    -> WARNING: All attempts exhausted for scene {scene_id}. Using fallback.")
 
-        video_path = self._fallback_video
         audio_path = f"{self._cache_audio}/scene_{scene_id}.wav"
         generate_voice(current_narration, audio_path)
+
+        fallback_asset = self._fallback_director.produce(
+            scene_num=scene_id,
+            narration=current_narration,
+            search_queries=current_query,
+            target_duration=target_duration or 12.0,
+            accepted_scenes=accepted_scenes or [],
+        )
+
+        if fallback_asset and fallback_asset.get("video_path"):
+            video_path = fallback_asset["video_path"]
+            provider = fallback_asset.get("provider", "fallback")
+            query_str = fallback_asset.get("query", "")
+            tech_score = fallback_asset.get("technical_score", 0.0)
+            sem_score = fallback_asset.get("semantic_score", 0.0)
+            ast_style = fallback_asset.get("aesthetic_style", "fallback")
+            vid_url = fallback_asset.get("video_url", "")
+            print(f"    -> FallbackDirector produced: {provider}/{query_str}")
+        else:
+            # Absolute last resort — this should never be reached because
+            # FallbackDirector._emergency_placeholder always returns a dict.
+            # But if it somehow does, create a coloured gradient inline.
+            print(f"    -> WARNING: FallbackDirector returned None. Generating emergency gradient.")
+            video_path = os.path.join(self._cache_video, f"emergency_scene_{scene_id}.mp4")
+            provider = "emergency"
+            query_str = ""
+            tech_score = 0.50
+            sem_score = 0.50
+            ast_style = "emergency"
+            vid_url = ""
+            try:
+                import subprocess
+                subprocess.run([
+                    "ffmpeg", "-y",
+                    "-f", "lavfi",
+                    "-i", "color=c=#0a0a2e:s=640x480:d=12:r=30",
+                    "-c:v", "libx264",
+                    "-preset", "ultrafast",
+                    "-pix_fmt", "yuv420p",
+                    video_path,
+                ], capture_output=True, timeout=30)
+            except Exception:
+                pass
 
         return {
             "scene_id": scene_id,
             "video_path": video_path,
             "audio_path": audio_path,
             "narration": current_narration,
-            "provider": "fallback",
-            "query": "",
-            "technical_score": 0.0,
-            "semantic_score": 0.0,
-            "aesthetic_style": "fallback",
-            "video_url": "",
+            "provider": provider,
+            "query": query_str,
+            "technical_score": tech_score,
+            "semantic_score": sem_score,
+            "aesthetic_style": ast_style,
+            "video_url": vid_url,
         }
 
     # ── Narration regeneration ─────────────────────────────────────────
