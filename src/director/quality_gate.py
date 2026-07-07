@@ -17,6 +17,7 @@ from __future__ import annotations
 
 from typing import Optional
 
+from src.models.schemas import AssetPlan, ProviderType, Scene
 from src.utils.config import get_config
 from src.director.aesthetic_agent import AestheticAgent
 from src.director.visual_style import VisualStyle
@@ -28,7 +29,7 @@ class QualityGates:
     Usage::
 
         gates = QualityGates(visual_style, aesthetic_agent)
-        passed, reason = gates.check_all(asset, provider, query, category, semantic_score)
+        passed, reason = gates.check_all(asset, category)
         if not passed:
             print(f"Asset REJECTED: {reason}")
             # retry with different query/provider
@@ -64,11 +65,8 @@ class QualityGates:
 
     def check_all(
         self,
-        asset: dict,
-        provider: str,
-        query: str,
+        asset: AssetPlan,
         category: str,
-        semantic_score: float,
     ) -> tuple[bool, str, dict]:
         """Run ALL quality gates on *asset*.
 
@@ -77,6 +75,10 @@ class QualityGates:
         (passed: bool, reason: str, details: dict)
             *details* contains per-gate results for transparency.
         """
+        provider = asset.provider.value
+        query = asset.query_used
+        semantic_score = asset.semantic_score
+
         gates: list[tuple[str, callable]] = [
             ("semantic", lambda: self._check_semantic(semantic_score)),
             ("aesthetic", lambda: self._check_aesthetic(asset, provider, query, category)),
@@ -114,16 +116,15 @@ class QualityGates:
         return False, f"semantic_score={score:.3f} < {self._semantic_threshold}"
 
     def _check_aesthetic(
-        self, asset: dict, provider: str, query: str, category: str
+        self, asset: AssetPlan, provider: str, query: str, category: str
     ) -> tuple[bool, str]:
         """Gate 2: Aesthetic compatibility (delegates to AestheticAgent)."""
         return self._agent.check_asset(asset, provider, query, category)
 
-    def _check_reuse(self, asset: dict) -> tuple[bool, str]:
+    def _check_reuse(self, asset: AssetPlan) -> tuple[bool, str]:
         """Gate 3: No recent reuse of the same asset."""
-        asset_id = str(asset.get("id", ""))
-        video_files = asset.get("video_files", [])
-        asset_url = video_files[0].get("link", "") if video_files else ""
+        asset_url = asset.video_url
+        asset_id = asset.query_used  # Use query_used as a provenance identifier
 
         if asset_url and asset_url in self._recent_asset_urls:
             return False, f"asset URL already used (penalty={self._reuse_penalty})"
@@ -132,14 +133,13 @@ class QualityGates:
 
         return True, "no reuse detected"
 
-    def _check_duplicate(self, asset: dict) -> tuple[bool, str]:
+    def _check_duplicate(self, asset: AssetPlan) -> tuple[bool, str]:
         """Gate 4: Not visually identical to recent assets (by URL).
 
         Full duplicate detection would compare embeddings or color
         histograms.  Currently checks URL identity (fastest check).
         """
-        video_files = asset.get("video_files", [])
-        asset_url = video_files[0].get("link", "") if video_files else ""
+        asset_url = asset.video_url
 
         if asset_url and asset_url in self._recent_asset_urls[-10:]:
             return False, "duplicate asset (same URL)"
@@ -147,11 +147,10 @@ class QualityGates:
 
     # ── Tracking ───────────────────────────────────────────────────────
 
-    def _track_asset(self, asset: dict) -> None:
+    def _track_asset(self, asset: AssetPlan) -> None:
         """Add asset to tracking history after acceptance."""
-        asset_id = str(asset.get("id", ""))
-        video_files = asset.get("video_files", [])
-        asset_url = video_files[0].get("link", "") if video_files else ""
+        asset_url = asset.video_url
+        asset_id = asset.query_used
 
         if asset_url:
             self._recent_asset_urls.append(asset_url)

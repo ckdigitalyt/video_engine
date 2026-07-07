@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 from src.models import (
-    Scene,
+    LegacyScene,
     SceneAsset,
     Narration,
     Timeline,
@@ -33,13 +33,13 @@ from src.models import (
 
 class TestScene:
     def test_minimal(self) -> None:
-        s = Scene(scene_id=1, search_query="milky way", narration="Hello")
+        s = LegacyScene(scene_id=1, search_query="milky way", narration="Hello")
         assert s.scene_id == 1
         assert s.search_query == "milky way"
         assert s.narration == "Hello"
 
     def test_types(self) -> None:
-        s = Scene(scene_id=42, search_query="q", narration="n")
+        s = LegacyScene(scene_id=42, search_query="q", narration="n")
         assert isinstance(s.scene_id, int)
         assert isinstance(s.search_query, str)
 
@@ -186,8 +186,8 @@ class TestVideoProject:
 
     def test_with_scenes(self) -> None:
         scenes = [
-            Scene(scene_id=1, search_query="q1", narration="n1"),
-            Scene(scene_id=2, search_query="q2", narration="n2"),
+            LegacyScene(scene_id=1, search_query="q1", narration="n1"),
+            LegacyScene(scene_id=2, search_query="q2", narration="n2"),
         ]
         meta = VideoMetadata(topic="t", duration_seconds=60.0)
         vp = VideoProject(topic="test", scenes=scenes, metadata=meta, iteration=1)

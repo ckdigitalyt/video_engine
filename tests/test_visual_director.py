@@ -16,6 +16,8 @@ from unittest.mock import MagicMock, patch, PropertyMock
 
 import pytest
 
+from src.models.schemas import AssetPlan, ProviderType
+
 
 # ── VisualStyle Tests ──────────────────────────────────────────────────
 
@@ -152,22 +154,33 @@ class TestAestheticAgent:
         style = VisualStyle(aesthetic="photorealistic")
         return AestheticAgent(visual_style=style, enabled=True)
 
+    def _make_asset(self, asset_id: str, provider: str = "pixabay", query: str = "test", score: float = 0.85) -> AssetPlan:
+        return AssetPlan(
+            provider=ProviderType(provider),
+            filepath="",
+            video_url="http://example.com/v.mp4",
+            query_used=query,
+            score=score,
+            semantic_score=score,
+            technical_score=score,
+        )
+
     def test_first_asset_accepted(self, agent):
         ok, reason = agent.check_asset(
-            {"id": "1"}, "pixabay", "mountain nature", "Nature"
+            self._make_asset("1"), "pixabay", "mountain nature", "Nature"
         )
         assert ok is True
         assert "first asset" in reason
 
     def test_same_provider_consistent(self, agent):
-        agent.check_asset({"id": "1"}, "pixabay", "mountain", "Nature")
-        ok, reason = agent.check_asset({"id": "2"}, "pixabay", "forest", "Nature")
+        agent.check_asset(self._make_asset("1"), "pixabay", "mountain", "Nature")
+        ok, reason = agent.check_asset(self._make_asset("2"), "pixabay", "forest", "Nature")
         assert ok is True
 
     def test_wikimedia_historic_image(self, agent):
         """Wikimedia assets should be classified as historic_image."""
         ok, reason = agent.check_asset(
-            {"id": "1"}, "wikimedia", "roman colosseum", "History"
+            self._make_asset("1", provider="wikimedia"), "wikimedia", "roman colosseum", "History"
         )
         assert ok is True
         # The agent tracking should say it was historic
@@ -175,7 +188,7 @@ class TestAestheticAgent:
 
     def test_nasa_space_photo(self, agent):
         ok, reason = agent.check_asset(
-            {"id": "1"}, "nasa", "mars surface", "Space"
+            self._make_asset("1", provider="nasa"), "nasa", "mars surface", "Space"
         )
         assert ok is True
         assert agent.history[-1] == "space_photo"
@@ -183,18 +196,18 @@ class TestAestheticAgent:
     def test_disabled_returns_accepted(self):
         from src.director.aesthetic_agent import AestheticAgent
         agent = AestheticAgent(enabled=False)
-        ok, reason = agent.check_asset({"id": "1"}, "pixabay", "test", "General")
+        ok, reason = agent.check_asset(self._make_asset("1"), "pixabay", "test", "General")
         assert ok is True
         assert "disabled" in reason
 
     def test_reset(self, agent):
-        agent.check_asset({"id": "1"}, "pixabay", "test", "General")
+        agent.check_asset(self._make_asset("1"), "pixabay", "test", "General")
         assert len(agent.history) == 1
         agent.reset()
         assert len(agent.history) == 0
 
     def test_batch_check(self, agent):
-        assets = [{"id": "1"}, {"id": "2"}]
+        assets = [self._make_asset("1"), self._make_asset("2")]
         all_ok, reasons = agent.check_scene_assets(
             assets, ["pixabay", "pixabay"],
             ["mountain", "forest"],
@@ -217,64 +230,79 @@ class TestQualityGates:
             reuse_window=3,
         )
 
-    def test_all_gates_pass(self, gates):
-        asset = {"id": "1", "video_files": [{"link": "http://example.com/v1.mp4"}]}
-        passed, reason, details = gates.check_all(
-            asset, "pixabay", "galaxy", "Space", 0.85
+    def _make_asset(self, provider: str = "pixabay", query: str = "galaxy", score: float = 0.85, semantic_score: float = 0.85) -> AssetPlan:
+        return AssetPlan(
+            provider=ProviderType(provider),
+            filepath="",
+            video_url="http://example.com/v1.mp4",
+            query_used=query,
+            score=score,
+            semantic_score=semantic_score,
+            technical_score=score,
         )
+
+    def test_all_gates_pass(self, gates):
+        asset = self._make_asset(score=0.85)
+        passed, reason, details = gates.check_all(asset=asset, category="Space")
         assert passed is True
         assert "semantic" in details
         assert details["semantic"]["passed"] is True
 
     def test_semantic_gate_fails(self, gates):
-        asset = {"id": "1", "video_files": [{"link": "http://example.com/v1.mp4"}]}
-        passed, reason, details = gates.check_all(
-            asset, "pixabay", "galaxy", "Space", 0.5
-        )
+        asset = self._make_asset(score=0.5, semantic_score=0.5)
+        passed, reason, details = gates.check_all(asset=asset, category="Space")
         assert passed is False
         assert "semantic" in reason
         assert details["semantic"]["passed"] is False
 
     def test_reuse_gate_fails(self, gates):
-        asset = {"id": "1", "video_files": [{"link": "http://example.com/v1.mp4"}]}
+        asset = self._make_asset(score=0.85)
         # First pass: should succeed
-        gates.check_all(asset, "pixabay", "galaxy", "Space", 0.85)
+        gates.check_all(asset=asset, category="Space")
 
         # Second pass with same asset: reuse gate should trigger
-        passed, reason, details = gates.check_all(
-            asset, "pixabay", "nebula", "Space", 0.85
-        )
+        passed, reason, details = gates.check_all(asset=asset, category="Space")
         assert passed is False
         assert "reuse" in reason or "duplicate" in reason
 
     def test_duplicate_gate_by_id(self, gates):
-        asset1 = {"id": "1", "video_files": [{"link": "http://example.com/v1.mp4"}]}
-        asset2 = {"id": "1", "video_files": [{"link": "http://example.com/v2.mp4"}]}
-        gates.check_all(asset1, "pixabay", "q1", "Space", 0.85)
-        passed, reason, details = gates.check_all(
-            asset2, "pixabay", "q2", "Space", 0.85
+        asset1 = AssetPlan(
+            provider=ProviderType.PIXABAY,
+            filepath="",
+            video_url="http://example.com/v1.mp4",
+            query_used="q1",
+            score=0.85,
+            semantic_score=0.85,
+            technical_score=0.85,
         )
+        asset2 = AssetPlan(
+            provider=ProviderType.PIXABAY,
+            filepath="",
+            video_url="http://example.com/v2.mp4",
+            query_used="q1",
+            score=0.85,
+            semantic_score=0.85,
+            technical_score=0.85,
+        )
+        gates.check_all(asset1, category="Space")
+        passed, reason, details = gates.check_all(asset2, category="Space")
         assert passed is False
         assert "reuse" in reason
 
     def test_check_all_details_structure(self, gates):
         """Details dict should have per-gate entries."""
-        asset = {"id": "1", "video_files": [{"link": "http://example.com/v1.mp4"}]}
-        passed, reason, details = gates.check_all(
-            asset, "pixabay", "galaxy", "Space", 0.85
-        )
+        asset = self._make_asset(score=0.85)
+        passed, reason, details = gates.check_all(asset=asset, category="Space")
         assert "semantic" in details
         assert "aesthetic" in details
         assert "reuse" in details
         assert "duplicate" in details
 
     def test_reset(self, gates):
-        asset = {"id": "1", "video_files": [{"link": "http://example.com/v1.mp4"}]}
-        gates.check_all(asset, "pixabay", "q1", "Space", 0.85)
+        asset = self._make_asset(score=0.85)
+        gates.check_all(asset=asset, category="Space")
         gates.reset()
-        passed, reason, details = gates.check_all(
-            asset, "pixabay", "q2", "Space", 0.85
-        )
+        passed, reason, details = gates.check_all(asset=asset, category="Space")
         assert passed is True  # After reset, asset is not tracked
 
 
@@ -410,7 +438,7 @@ class TestVisualDirector:
         # We expect fallback since download paths won't exist
         results = director.run()
         assert len(results) == 1
-        assert results[0]["scene_id"] == 1
+        assert results[0].scene_id == 1
 
     def test_narration_regeneration(self):
         """Verify the director can regenerate narration."""

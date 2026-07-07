@@ -9,6 +9,7 @@ search query.  If all queries fail, the highest semantic score is used.
 
 from typing import Optional
 
+from src.models.schemas import AssetPlan
 from src.providers.llm_provider import LLMProvider
 from src.utils.config import get_config
 
@@ -68,7 +69,7 @@ class SemanticValidator:
         self,
         narration: str,
         query: str,
-        asset: dict,
+        asset: AssetPlan,
     ) -> float:
         """Score the semantic relevance of *asset* for *narration*.
 
@@ -160,32 +161,28 @@ class SemanticValidator:
     # ── Helpers ────────────────────────────────────────────────────────
 
     @staticmethod
-    def _extract_tags(asset: dict) -> str:
-        """Extract a combined tag/description string from an asset dict.
+    def _extract_tags(asset: AssetPlan) -> str:
+        """Extract a combined tag/description string from an AssetPlan.
 
-        Handles both Pexels and Pixabay formats.
+        Uses video_url, query_used, and filepath to build a description
+        of the asset for semantic scoring.
         """
         parts = []
 
-        # Pexels format: tags are in the top-level or nested
-        raw_tags = asset.get("tags", asset.get("_raw", {}).get("tags", ""))
-        if isinstance(raw_tags, list):
-            parts.extend(raw_tags)
-        elif isinstance(raw_tags, str) and raw_tags:
-            parts.append(raw_tags)
+        # Use query_used as a primary descriptor
+        if asset.query_used:
+            parts.append(asset.query_used)
 
-        # Pixabay format: tags stored in _raw.tags as comma string
-        raw_raw = asset.get("_raw", {})
-        px_tags = raw_raw.get("tags", "")
-        if px_tags and isinstance(px_tags, str):
-            parts.append(px_tags)
+        # Use filepath (filename) for hints
+        if asset.filepath:
+            # Extract just the filename without extension
+            filename = asset.filepath.rsplit("/", 1)[-1].replace(".mp4", "")
+            parts.append(filename)
 
-        # URL/source filename can also give hints
-        vf = asset.get("video_files", [])
-        if vf:
-            link = vf[0].get("link", "")
+        # Use video_url for additional context
+        if asset.video_url:
             # Extract filename from URL
-            parts.append(link.split("/")[-1].split("?")[0] if link else "")
+            parts.append(asset.video_url.split("/")[-1].split("?")[0])
 
         return " ".join(p for p in parts if p)
 

@@ -32,6 +32,15 @@ from moviepy.video.fx.resize import resize
 
 from src.effects import MotionEngine, TransitionEngine
 from src.models import RenderSettings, Timeline, TimelineTrack
+from src.models.schemas import (
+    Scene,
+    AssetPlan,
+    AudioPlan,
+    RenderPlan,
+    EditingPlan,
+    CameraMotion,
+    TransitionType,
+)
 from src.renderer import Renderer
 from src.utils.config import get_config
 

@@ -12,11 +12,14 @@ orchestrator logic — simply register them in the config file and
 implement the ``AssetProvider`` interface.
 """
 
+from __future__ import annotations
+
 import os
-from typing import Optional
+from typing import Any, Optional
 
 from src.assets.topic_classifier import TopicClassifier
 from src.assets.asset_library import AssetLibrary
+from src.models.schemas import SearchPlan, AssetPlan, ProviderType
 from src.providers.asset_provider import (
     AssetProvider,
     PexelsProvider,
@@ -117,7 +120,7 @@ class AssetRouter:
         """The topic category this router was created for."""
         return self._category
 
-    def search(self, query: str, **kwargs) -> list:
+    def search(self, query: str, **kwargs: Any) -> list:
         """Search for assets matching *query*.
 
         Iterates through the provider priority list for the current
@@ -159,7 +162,7 @@ class AssetRouter:
         min_acceptable_score: float = 0.75,
         max_attempts: int = 15,
         diversity_weighting: float = 0.2,
-        **kwargs,
+        **kwargs: Any,
     ) -> dict:
         """Search for assets using multiple queries, stopping on the first
         sufficiently high-quality result.
@@ -319,7 +322,7 @@ class AssetRouter:
         }
 
     @staticmethod
-    def _score_top_asset(result: dict, **kwargs) -> float:
+    def _score_top_asset(result: dict, **kwargs: Any) -> float:
         """Extract or compute a quality score for the top asset result.
 
         The score is approximated from resolution and HD bonus when the
@@ -414,8 +417,6 @@ class AssetRouter:
         Real providers that are missing their API key are silently skipped
         so the router can fall back to the next provider in the chain.
         """
-        import os
-
         # Check API key requirements
         required_keys = {
             "pixabay": "PIXABAY_API_KEY",

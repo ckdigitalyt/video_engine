@@ -18,6 +18,7 @@ import json
 import logging
 from typing import Any, Optional
 
+from src.models.schemas import Scene, SceneNarration, VisualPlan, SearchPlan, EditingPlan
 from src.providers.llm_provider import LLMProvider, DeepSeekProvider
 from src.utils.config import get_config
 from .templates import get_template, StoryTemplate
@@ -65,17 +66,15 @@ class StoryPlanner:
 
     # ── Public API ───────────────────────────────────────────────────────
 
-    def generate_plan(self, topic: str) -> str:
-        """Generate a complete plan JSON string for a topic.
+    def generate_plan(self, topic: str) -> list[Scene]:
+        """Generate a complete plan for a topic.
 
         Internally runs two phases:
 
         1. Outline generation (narrative arc).
         2. Scene generation (expanded scenes).
 
-        Returns a JSON string matching the schema expected by the
-        execution node:
-        ``{"scenes": [{"scene_id", "title", "search_query", "narration", "estimated_duration"}, ...]}``
+        Returns a list of Scene objects wrapping the generated content.
 
         Parameters
         ----------
@@ -89,7 +88,28 @@ class StoryPlanner:
         logger.info("Phase 2: Generating scenes from outline")
         scenes_json = self._generate_scenes(topic, outline)
 
-        return scenes_json
+        # Parse scene dicts and wrap in Scene objects
+        scene_dicts = json.loads(scenes_json).get("scenes", [])
+        scenes: list[Scene] = []
+        for i, scene_data in enumerate(scene_dicts):
+            scene = Scene(
+                scene_id=i,
+                title=scene_data.get("title", f"Scene {i}"),
+                expected_duration=scene_data.get("estimated_duration", 12.0),
+                topic=topic,
+                narration=SceneNarration(
+                    spoken_narration=scene_data.get("narration", "narration pending"),
+                ),
+                search_plan=SearchPlan(
+                    asset_search_queries=["general"],
+                    primary_topic=topic,
+                ),
+                visual_plan=VisualPlan(),
+                editing_plan=EditingPlan(),
+            )
+            scenes.append(scene)
+
+        return scenes
 
     # ── Phase 1: Outline ─────────────────────────────────────────────────
 

@@ -19,6 +19,16 @@ from typing import Any, Union
 from pydub import AudioSegment
 from src.utils.config import get_config
 from src.models import SceneAsset
+from src.models.schemas import (
+    Scene,
+    AssetPlan,
+    SceneNarration,
+    SearchPlan,
+    EditingPlan,
+    AudioPlan,
+    RenderPlan,
+    scene_to_flat_dict,
+)
 
 
 class TimelineBuilder:
@@ -35,15 +45,21 @@ class TimelineBuilder:
 
     def build_and_write(
         self,
-        scenes: Union[list[dict[str, Any]], list[SceneAsset]],
+        scenes: Union[list[dict[str, Any]], list[SceneAsset], list[Scene]],
         output_path: str = "timeline.json",
     ) -> str:
         """
         Build a validated timeline from *scenes* and write it to *output_path*.
 
-        *scenes* is a list of :class:`SceneAsset` objects or dicts, each with:
+        *scenes* is a list of :class:`SceneAsset`, :class:`Scene`, or dicts.
+        Dict-based scenes must have:
 
             {"scene_id": int, "video_path": str, "audio_path": str}
+
+        :class:`Scene` objects are converted to flat dicts via
+        ``scene_to_flat_dict()``, then mapped to the timeline format using
+        ``asset_plan`` fields (filepath for video, audio_plan.narration_audio_path
+        for audio).
 
         Returns the timeline as a JSON string.
         """
@@ -129,8 +145,23 @@ class TimelineBuilder:
     # ── Internal helpers ───────────────────────────────────────────────────
 
     @staticmethod
-    def _to_asset_dict(scene: Union[dict[str, Any], SceneAsset]) -> dict[str, Any]:
-        """Normalize a SceneAsset or raw dict to a dict with scene_id/video_path/audio_path."""
+    def _to_asset_dict(scene: Union[dict[str, Any], SceneAsset, Scene]) -> dict[str, Any]:
+        """Normalize a Scene, SceneAsset, or raw dict to a dict with
+        scene_id/video_path/audio_path."""
+        if isinstance(scene, Scene):
+            # Scene objects carry asset_plan and audio_plan with the
+            # resolved file paths used in the timeline.
+            video_path = ""
+            audio_path = ""
+            if scene.asset_plan is not None:
+                video_path = scene.asset_plan.filepath
+            if scene.audio_plan is not None:
+                audio_path = scene.audio_plan.narration_audio_path
+            return {
+                "scene_id": scene.scene_id,
+                "video_path": video_path,
+                "audio_path": audio_path,
+            }
         if isinstance(scene, SceneAsset):
             return {
                 "scene_id": scene.scene_id,
@@ -139,7 +170,10 @@ class TimelineBuilder:
             }
         return scene
 
-    def _build(self, scenes: Union[list[dict[str, Any]], list[SceneAsset]]) -> dict:
+    def _build(
+        self,
+        scenes: Union[list[dict[str, Any]], list[SceneAsset], list[Scene]],
+    ) -> dict:
         """Internal: produce a raw timeline dict from scenes (no validation)."""
         audio_timeline: list[dict] = []
         video_timeline: list[dict] = []
