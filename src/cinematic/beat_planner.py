@@ -1,18 +1,20 @@
 #!/usr/bin/env python3
 """
 BeatPlanner — splits narration into semantic beats with visual intent.
-
-Each beat: 3-6 seconds, with visual purpose, emotion, camera style,
-transition, asset type, and motion.
+Uses Pydantic models from src.models.schemas for output.
 """
 
-from typing import List, Optional, Dict, Any
-from dataclasses import dataclass, field
+from typing import List, Optional, Union, Dict
 from enum import Enum
 import re
 
+from src.models.schemas import (
+    BeatPlan, ShotPlan, ShotType, CameraMotion, TransitionType, AssetPlan
+)
+
 
 class Emotion(str, Enum):
+    """Emotional tone for beats and shots."""
     NEUTRAL = "neutral"
     WONDER = "wonder"
     TENSION = "tension"
@@ -28,6 +30,7 @@ class Emotion(str, Enum):
 
 
 class CameraStyle(str, Enum):
+    """Camera framing styles — maps to beats for planning, then to CameraMotion."""
     WIDE = "wide"
     MEDIUM = "medium"
     CLOSEUP = "closeup"
@@ -42,6 +45,7 @@ class CameraStyle(str, Enum):
 
 
 class Transition(str, Enum):
+    """Transition types — maps to TransitionType for the Pydantic model."""
     CUT = "cut"
     CROSS_DISSOLVE = "cross_dissolve"
     DIP_TO_BLACK = "dip_to_black"
@@ -80,121 +84,234 @@ class Motion(str, Enum):
     DRIFT = "drift"
 
 
-class ShotType(str, Enum):
-    PRIMARY = "primary"
-    CUTAWAY = "cutaway"
-    BACKUP = "backup"
-    MOTION_GRAPHICS = "motion_graphics"
-
-
-@dataclass
-class Shot:
-    """A single shot within a beat. Contains visual + timing data."""
-    timestamp: float  # seconds from start of scene
-    duration: float  # seconds (never > 6 unless explicitly justified)
-    shot_type: ShotType = ShotType.PRIMARY
-    camera: CameraStyle = CameraStyle.MEDIUM
-    motion: Motion = Motion.KEN_BURNS_IN
-    asset_type: AssetType = AssetType.VIDEO
-    transition: Transition = Transition.CROSS_DISSOLVE
-    emotion: Emotion = Emotion.NEUTRAL
-    visual_purpose: str = ""
-    description: str = ""
-    search_query: str = ""
-    justify_long_shot: str = ""  # required if duration > 6
-
-
-@dataclass
+# Internal beat dataclass (used during planning, then converted to BeatPlan)
 class Beat:
-    """A semantic beat — one complete thought unit with visual treatment."""
-    index: int
-    text: str  # the narration text for this beat
-    start_time: float  # seconds from start of scene
-    duration: float  # seconds (3-6 typical)
-    emotion: Emotion = Emotion.NEUTRAL
-    visual_purpose: str = ""
-    camera_primary: CameraStyle = CameraStyle.MEDIUM
-    camera_cutaway: CameraStyle = CameraStyle.WIDE
-    transition_in: Transition = Transition.CROSS_DISSOLVE
-    transition_out: Transition = Transition.CROSS_DISSOLVE
-    shots: List[Shot] = field(default_factory=list)
-    motion_graphics_note: str = ""
+    """Internal beat data during planning — NOT serialized."""
+    def __init__(self, index: int, text: str, start_time: float, duration: float,
+                 emotion: Emotion = Emotion.NEUTRAL,
+                 visual_purpose: str = "",
+                 camera_primary: CameraStyle = CameraStyle.MEDIUM,
+                 camera_cutaway: CameraStyle = CameraStyle.WIDE,
+                 transition_in: Transition = Transition.CROSS_DISSOLVE,
+                 transition_out: Transition = Transition.CROSS_DISSOLVE,
+                 motion_graphics_note: str = ""):
+        self.index = index
+        self.text = text
+        self.start_time = start_time
+        self.duration = duration
+        self.emotion = emotion
+        self.visual_purpose = visual_purpose
+        self.camera_primary = camera_primary
+        self.camera_cutaway = camera_cutaway
+        self.transition_in = transition_in
+        self.transition_out = transition_out
+        self.shots: List["Shot"] = []
+        self.motion_graphics_note = motion_graphics_note
 
     def total_shot_duration(self) -> float:
         return sum(s.duration for s in self.shots)
 
 
+class Shot:
+    """Internal shot data during planning — NOT serialized."""
+    def __init__(self, timestamp: float = 0.0, duration: float = 0.0,
+                 shot_type: "ShotType" = None,
+                 camera: CameraStyle = CameraStyle.MEDIUM,
+                 motion: Motion = Motion.KEN_BURNS_IN,
+                 asset_type: AssetType = AssetType.VIDEO,
+                 transition: Transition = Transition.CROSS_DISSOLVE,
+                 emotion: Emotion = Emotion.NEUTRAL,
+                 visual_purpose: str = "", description: str = "",
+                 search_query: str = "", justify_long_shot: str = ""):
+        self.timestamp = timestamp
+        self.duration = duration
+        self.shot_type = shot_type or ShotType.PRIMARY
+        self.camera = camera
+        self.motion = motion
+        self.asset_type = asset_type
+        self.transition = transition
+        self.emotion = emotion
+        self.visual_purpose = visual_purpose
+        self.description = description
+        self.search_query = search_query
+        self.justify_long_shot = justify_long_shot
+
+
+# ── Mapper functions ───────────────────────────────────────────────────
+
+def _camera_style_to_motion(style: CameraStyle) -> CameraMotion:
+    """Map internal CameraStyle to Pydantic CameraMotion."""
+    mapping = {
+        CameraStyle.WIDE: CameraMotion.KEN_BURNS,
+        CameraStyle.MEDIUM: CameraMotion.STABILIZED,
+        CameraStyle.CLOSEUP: CameraMotion.ZOOM_IN,
+        CameraStyle.EXTREME_CLOSEUP: CameraMotion.ZOOM_IN,
+        CameraStyle.AERIAL: CameraMotion.TILT_DOWN,
+        CameraStyle.POV: CameraMotion.TRUCK_IN,
+        CameraStyle.LOW_ANGLE: CameraMotion.TILT_UP,
+        CameraStyle.HIGH_ANGLE: CameraMotion.TILT_DOWN,
+        CameraStyle.DUTCH: CameraMotion.STATIC,
+        CameraStyle.TRACKING: CameraMotion.FOLLOW,
+        CameraStyle.STATIC: CameraMotion.STATIC,
+    }
+    return mapping.get(style, CameraMotion.STABILIZED)
+
+
+def _emotion_to_camera_motion(emotion: Emotion) -> CameraMotion:
+    mapping = {
+        Emotion.WONDER: CameraMotion.KEN_BURNS,
+        Emotion.TENSION: CameraMotion.ZOOM_IN,
+        Emotion.DRAMATIC: CameraMotion.ZOOM_IN,
+        Emotion.SOLEMN: CameraMotion.STATIC,
+        Emotion.ENERGETIC: CameraMotion.FOLLOW,
+        Emotion.MYSTERIOUS: CameraMotion.TILT_UP,
+        Emotion.NOSTALGIC: CameraMotion.STABILIZED,
+        Emotion.CONTEMPLATIVE: CameraMotion.STABILIZED,
+        Emotion.URGENT: CameraMotion.TRUCK_IN,
+        Emotion.TRIUMPHANT: CameraMotion.KEN_BURNS,
+        Emotion.HOPEFUL: CameraMotion.KEN_BURNS,
+    }
+    return mapping.get(emotion, CameraMotion.STABILIZED)
+
+
+def _motion_to_camera_motion(m: Motion) -> CameraMotion:
+    mapping = {
+        Motion.NONE: CameraMotion.NONE,
+        Motion.KEN_BURNS_IN: CameraMotion.KEN_BURNS,
+        Motion.KEN_BURNS_OUT: CameraMotion.KEN_BURNS,
+        Motion.PARALLAX: CameraMotion.STABILIZED,
+        Motion.PUSH_IN: CameraMotion.TRUCK_IN,
+        Motion.PUSH_OUT: CameraMotion.TRUCK_OUT,
+        Motion.PAN_LEFT: CameraMotion.PAN_LEFT,
+        Motion.PAN_RIGHT: CameraMotion.PAN_RIGHT,
+        Motion.TILT_UP: CameraMotion.TILT_UP,
+        Motion.TILT_DOWN: CameraMotion.TILT_DOWN,
+        Motion.ZOOM_IN: CameraMotion.ZOOM_IN,
+        Motion.ZOOM_OUT: CameraMotion.ZOOM_OUT,
+        Motion.FOLLOW: CameraMotion.FOLLOW,
+        Motion.DRIFT: CameraMotion.STABILIZED,
+    }
+    return mapping.get(m, CameraMotion.STABILIZED)
+
+
+def _transition_to_transition_type(t: Transition) -> TransitionType:
+    mapping = {
+        Transition.CUT: TransitionType.CUT,
+        Transition.CROSS_DISSOLVE: TransitionType.CROSSFADE,
+        Transition.DIP_TO_BLACK: TransitionType.FADE,
+        Transition.DIP_TO_WHITE: TransitionType.CROSSFADE,
+        Transition.L_CUT: TransitionType.CROSSFADE,
+        Transition.J_CUT: TransitionType.CROSSFADE,
+        Transition.MATCH_CUT: TransitionType.CROSSFADE,
+        Transition.CAMERA_MOTION: TransitionType.CROSSFADE,
+        Transition.WIPE: TransitionType.WIPE_LEFT,
+        Transition.FADE: TransitionType.FADE,
+    }
+    return mapping.get(t, TransitionType.CROSSFADE)
+
+
+def _shot_type_to_pydantic_shot_type(st: "ShotType") -> ShotType:
+    """Map internal shot type to Pydantic ShotType."""
+    if st == ShotType.PRIMARY:
+        return ShotType.PRIMARY
+    elif st == ShotType.CUTAWAY:
+        return ShotType.CUTAWAY
+    elif st == ShotType.BACKUP:
+        return ShotType.BACKUP
+    elif st == ShotType.MOTION_GRAPHICS:
+        return ShotType.MOTION_GRAPHICS
+    return ShotType.PRIMARY
+
+
+# Alias
+def _internal_beat_to_pydantic(b: Beat) -> BeatPlan:
+    """Convert internal Beat to Pydantic BeatPlan."""
+    shots_p = []
+    for s in b.shots:
+        sp = ShotPlan(
+            timestamp=round(s.timestamp, 2),
+            duration=round(s.duration, 2),
+            shot_type=_shot_type_to_pydantic_shot_type(s.shot_type),
+            camera=_motion_to_camera_motion(s.motion),
+            transition=_transition_to_transition_type(s.transition),
+            emotion=s.emotion.value,
+            motion=s.motion.value,
+            asset_type=s.asset_type.value,
+            description=s.description,
+            search_query=s.search_query,
+            semantic_score=0.0,
+            justify_long_shot=s.justify_long_shot,
+        )
+        shots_p.append(sp)
+
+    return BeatPlan(
+        index=b.index,
+        text=b.text,
+        start_time=round(b.start_time, 2),
+        duration=round(b.duration, 2),
+        emotion=b.emotion.value,
+        visual_purpose=b.visual_purpose,
+        camera_primary=_emotion_to_camera_motion(b.emotion),
+        camera_cutaway=_camera_style_to_motion(b.camera_cutaway),
+        transition_in=_transition_to_transition_type(b.transition_in),
+        transition_out=_transition_to_transition_type(b.transition_out),
+        shots=shots_p,
+        motion_graphics_note=b.motion_graphics_note,
+    )
+
+
+# ── Sentence splitting ─────────────────────────────────────────────────
+
 def split_into_sentences(text: str) -> List[str]:
     """Split narration into individual sentences."""
-    # Handle common abbreviations
     text = re.sub(r'(?<=[.!?])\s+', '\n', text)
-    sentences = [s.strip() for s in text.split('\n') if s.strip()]
-    return sentences
+    return [s.strip() for s in text.split('\n') if s.strip()]
 
 
 def split_into_clauses(sentence: str) -> List[str]:
     """Split a long sentence into clauses at commas, conjunctions."""
-    # If sentence is short enough, keep as one beat
     if len(sentence) < 80:
         return [sentence]
-    
-    # Split at major punctuation
     clauses = re.split(r'(?:;\s*|,\s*(?:and|but|however|while|although|because)\s*)', sentence)
-    result = []
-    for c in clauses:
-        c = c.strip()
-        if c:
-            result.append(c)
-    return result if result else [sentence]
+    return [c.strip() for c in clauses if c.strip()] or [sentence]
 
+
+# ── Planning classes ────────────────────────────────────────────────────
 
 class BeatPlanner:
     """Plans beats from narration text."""
 
     def plan_beats(self, narration: str, scene_duration: float) -> List[Beat]:
-        """Split narration into beats with timing. Each beat gets 3-6 seconds."""
+        """Split narration into beats with timing (3-6s each)."""
         sentences = split_into_sentences(narration)
         if not sentences:
             return []
 
-        # Flatten: split long sentences into clauses
         clauses = []
         for s in sentences:
             clauses.extend(split_into_clauses(s))
-
         if not clauses:
             return []
 
-        # Allocate duration per beat
         beat_count = len(clauses)
-        ideal_duration = 4.5  # seconds per beat
+        ideal_duration = 4.5
         total_needed = beat_count * ideal_duration
-
-        # Scale to fit scene duration, clamp each beat to 3-6s
         scale = scene_duration / total_needed if total_needed > 0 else 1.0
+
         beats = []
         time_cursor = 0.0
-
         for i, clause in enumerate(clauses):
             raw_duration = ideal_duration * scale
             duration = max(3.0, min(6.0, raw_duration))
-            
-            # Last beat gets remaining time
             if i == len(clauses) - 1:
                 remaining = scene_duration - time_cursor
                 if remaining > 0:
                     duration = remaining
 
-            beat = Beat(
-                index=i,
-                text=clause,
-                start_time=time_cursor,
-                duration=duration,
-            )
+            beat = Beat(index=i, text=clause, start_time=time_cursor, duration=duration)
             beats.append(beat)
             time_cursor += duration
 
-        # Normalize to scene duration
         if beats and beats[-1].start_time + beats[-1].duration < scene_duration:
             diff = scene_duration - (beats[-1].start_time + beats[-1].duration)
             beats[-1].duration += diff
@@ -232,48 +349,43 @@ class BeatPlanner:
         for beat in beats:
             lower = beat.text.lower()
             found = False
-            for keyword, emotion in emotion_map.items():
+            for keyword, emo in emotion_map.items():
                 if keyword in lower:
-                    beat.emotion = emotion
+                    beat.emotion = emo
                     found = True
                     break
             if not found:
-                # Default based on position
                 if beat.index == 0:
                     beat.emotion = Emotion.WONDER if topic else Emotion.NEUTRAL
                 elif beat.index == len(beats) - 1:
                     beat.emotion = Emotion.TRIUMPHANT if topic else Emotion.NEUTRAL
                 else:
                     beat.emotion = Emotion.NEUTRAL
-
         return beats
 
     def assign_visual_style(self, beats: List[Beat]) -> List[Beat]:
         """Assign camera styles and visual purposes per beat."""
-        used_cameras = []
-        last_wide_idx = -3
-        last_closeup_idx = -3
-
         for i, beat in enumerate(beats):
-            # Rotate camera styles
-            emotion = beat.emotion
-            if emotion in (Emotion.WONDER, Emotion.VAST, Emotion.AERIAL):
+            e = beat.emotion
+            if e == Emotion.WONDER:
                 beat.camera_primary = CameraStyle.WIDE
                 beat.camera_cutaway = CameraStyle.AERIAL
-            elif emotion in (Emotion.TENSION, Emotion.DRAMATIC, Emotion.URGENT):
+            elif e in (Emotion.TENSION, Emotion.DRAMATIC, Emotion.URGENT):
                 beat.camera_primary = CameraStyle.CLOSEUP
                 beat.camera_cutaway = CameraStyle.DUTCH
-            elif emotion in (Emotion.CONTEMPLATIVE, Emotion.NOSTALGIC):
+            elif e in (Emotion.CONTEMPLATIVE, Emotion.NOSTALGIC):
                 beat.camera_primary = CameraStyle.MEDIUM
                 beat.camera_cutaway = CameraStyle.CLOSEUP
-            elif emotion in (Emotion.SOLEMN, Emotion.MYSTERIOUS):
+            elif e in (Emotion.SOLEMN, Emotion.MYSTERIOUS):
                 beat.camera_primary = CameraStyle.LOW_ANGLE
                 beat.camera_cutaway = CameraStyle.HIGH_ANGLE
-            elif emotion in (Emotion.TRIUMPHANT, Emotion.HOPEFUL):
+            elif e in (Emotion.TRIUMPHANT, Emotion.HOPEFUL):
                 beat.camera_primary = CameraStyle.WIDE
                 beat.camera_cutaway = CameraStyle.TRACKING
+            elif e in (Emotion.ENERGETIC,):
+                beat.camera_primary = CameraStyle.TRACKING
+                beat.camera_cutaway = CameraStyle.POV
             else:
-                # Default rotation: wide, medium, closeup, repeat
                 style_idx = i % 3
                 if style_idx == 0:
                     beat.camera_primary = CameraStyle.WIDE
@@ -285,20 +397,19 @@ class BeatPlanner:
                     beat.camera_primary = CameraStyle.CLOSEUP
                     beat.camera_cutaway = CameraStyle.WIDE
 
-            # Assign transitions
+            # Transitions
             if i == 0:
                 beat.transition_in = Transition.FADE
             else:
-                prev_emotion = beats[i-1].emotion
-                if prev_emotion != beat.emotion:
-                    beat.transition_in = Transition.CROSS_DISSOLVE
-                else:
-                    beat.transition_in = Transition.CUT
-
-            if i == len(beats) - 1:
-                beat.transition_out = Transition.DIP_TO_BLACK
-            else:
-                beat.transition_out = Transition.CROSS_DISSOLVE
+                beat.transition_in = (
+                    Transition.CROSS_DISSOLVE
+                    if beats[i-1].emotion != beat.emotion
+                    else Transition.CUT
+                )
+            beat.transition_out = (
+                Transition.DIP_TO_BLACK if i == len(beats) - 1
+                else Transition.CROSS_DISSOLVE
+            )
 
             # Visual purpose
             if beat.camera_primary == CameraStyle.WIDE:
@@ -315,12 +426,12 @@ class ShotPlanner:
     """Plans individual shots within each beat."""
 
     def plan_shots(self, beats: List[Beat]) -> List[Beat]:
-        """For each beat, generate primary + cutaway + backup shots."""
+        """Generate primary + cutaway + backup shots per beat."""
         for beat in beats:
             bd = beat.duration
             shots = []
 
-            # Primary shot: 60-70% of beat duration
+            # Primary: 60-70% of beat
             primary_dur = min(bd * 0.65, 5.0)
             shots.append(Shot(
                 timestamp=0.0,
@@ -333,7 +444,7 @@ class ShotPlanner:
                 description=f"Primary shot for beat {beat.index}",
             ))
 
-            # Cutaway: 25-30% of beat duration
+            # Cutaway: 25-30% remaining
             remaining = bd - primary_dur
             if remaining > 1.5:
                 cutaway_dur = min(remaining * 0.7, 3.0)
@@ -344,10 +455,8 @@ class ShotPlanner:
                     camera=beat.camera_cutaway,
                     emotion=beat.emotion,
                     transition=Transition.CROSS_DISSOLVE,
-                    visual_purpose=f"Cutaway detail for context",
+                    visual_purpose=f"Cutaway detail",
                 ))
-
-                # Backup: fill remaining
                 backup_remaining = remaining - cutaway_dur
                 if backup_remaining > 1.0:
                     shots.append(Shot(
@@ -360,15 +469,14 @@ class ShotPlanner:
                         visual_purpose=f"Backup shot",
                     ))
 
-            # Assign motion based on camera
-            for shot in shots:
-                shot.motion = self._select_motion(shot.camera, shot.shot_type)
-
+            # Assign motion per shot
+            for s in shots:
+                s.motion = self._select_motion(s.camera, s.shot_type)
             beat.shots = shots
 
         return beats
 
-    def _select_motion(self, camera: CameraStyle, shot_type: ShotType) -> Motion:
+    def _select_motion(self, camera: CameraStyle, shot_type: "ShotType") -> Motion:
         if camera == CameraStyle.WIDE and shot_type == ShotType.PRIMARY:
             return Motion.KEN_BURNS_IN
         elif camera == CameraStyle.CLOSEUP:
@@ -391,60 +499,46 @@ class CinematicEditor:
     """Edits shots into a cinematic sequence with L/J cuts, transitions."""
 
     def edit_sequence(self, beats: List[Beat]) -> List[Beat]:
-        """Apply cinematic editing: L cuts, J cuts, match cuts, pacing."""
-        # Spread audio across beat boundaries for L/J cuts
+        """Apply L cuts, J cuts, match cuts."""
         for i in range(len(beats) - 1):
-            curr = beats[i]
-            next_beat = beats[i + 1]
+            curr, nxt = beats[i], beats[i + 1]
 
-            # L-cut: audio from next beat starts before visual transition
-            if i % 2 == 0:
-                # Apply L-cut: next beat's audio leads by 0.5s
-                if next_beat.shots:
-                    next_beat.shots[0].timestamp = -0.5
-                    next_beat.shots[0].transition = Transition.L_CUT
+            # L-cut: next beat audio leads visual by 0.5s (every even beat)
+            if i % 2 == 0 and nxt.shots:
+                nxt.shots[0].timestamp = -0.5
+                nxt.shots[0].transition = Transition.L_CUT
 
-            # J-cut: current beat's audio continues into next
-            if i % 3 == 1:
-                if curr.shots:
-                    last_shot = curr.shots[-1]
-                    last_shot.transition = Transition.J_CUT
+            # J-cut: current audio continues into next (every 3rd beat)
+            if i % 3 == 1 and curr.shots:
+                curr.shots[-1].transition = Transition.J_CUT
 
-        # Add match cuts between similar camera styles
-        for i in range(len(beats) - 1):
-            curr = beats[i]
-            next_beat = beats[i + 1]
-            if curr.camera_primary == next_beat.camera_primary:
-                if curr.shots and next_beat.shots:
-                    curr.shots[-1].transition = Transition.MATCH_CUT
+            # Match cut: same camera style
+            if curr.camera_primary == nxt.camera_primary and curr.shots and nxt.shots:
+                curr.shots[-1].transition = Transition.MATCH_CUT
 
         return beats
 
     def adjust_pacing(self, beats: List[Beat], energy_level: float = 0.5) -> List[Beat]:
-        """Adjust beat duration based on energy/emotion.
-        
-        energy_level: 0.0 (slow) to 1.0 (fast)
-        Higher energy = shorter beats, faster cuts.
-        """
+        """Adjust beat duration. 0.0=slow, 1.0=fast."""
         for beat in beats:
             if energy_level > 0.7:
                 beat.duration = max(2.5, beat.duration * 0.8)
             elif energy_level < 0.3:
                 beat.duration = min(7.0, beat.duration * 1.2)
 
-            # Rescale shots within new duration
             if beat.shots:
-                total_shot_dur = sum(s.duration for s in beat.shots)
-                if total_shot_dur > 0:
-                    scale = beat.duration / total_shot_dur
-                    for shot in beat.shots:
-                        shot.duration *= scale
-
+                total = sum(s.duration for s in beat.shots)
+                if total > 0:
+                    scale = beat.duration / total
+                    for s in beat.shots:
+                        s.duration *= scale
         return beats
 
 
 class TimelineBuilder:
-    """Builds complete video timeline from beats with pacing optimization."""
+    """Builds timeline from beats with pacing optimization.
+    Returns Pydantic BeatPlan objects for pipeline consumption.
+    """
 
     def __init__(self):
         self.beat_planner = BeatPlanner()
@@ -452,41 +546,53 @@ class TimelineBuilder:
         self.editor = CinematicEditor()
 
     def build_timeline(self, narration: str, scene_duration: float,
-                       topic: str = "", energy: float = 0.5) -> List[Beat]:
-        """Full pipeline: narration -> beats -> shots -> edited timeline."""
+                       topic: str = "", energy: float = 0.5) -> List[BeatPlan]:
+        """Full pipeline: narration -> beats -> shots -> Pydantic BeatPlans."""
         beats = self.beat_planner.plan_beats(narration, scene_duration)
         beats = self.beat_planner.assign_emotions(beats, topic)
         beats = self.beat_planner.assign_visual_style(beats)
         beats = self.shot_planner.plan_shots(beats)
         beats = self.editor.edit_sequence(beats)
         beats = self.editor.adjust_pacing(beats, energy)
-        return beats
+        # Convert to Pydantic models
+        return [_internal_beat_to_pydantic(b) for b in beats]
 
-    def get_pacing_metrics(self, beats: List[Beat]) -> dict:
-        """Compute visual pacing metrics."""
-        if not beats:
+    def get_pacing_metrics(self, bep: List[BeatPlan]) -> dict:
+        """Compute visual pacing metrics from BeatPlan list."""
+        if not bep:
             return {}
 
-        shot_count = sum(len(b.shots) for b in beats)
-        total_duration = sum(b.duration for b in beats)
-        avg_beat_dur = total_duration / len(beats) if beats else 0
+        shot_count = sum(len(b.shots) for b in bep)
+        total_duration = sum(b.duration for b in bep)
+        avg_beat_dur = total_duration / len(bep) if bep else 0
         avg_shot_dur = total_duration / shot_count if shot_count else 0
 
-        # Shot variety
         cameras = set()
         motions = set()
         emotions = set()
         transitions = set()
-        for b in beats:
+        l_cuts = 0
+        j_cuts = 0
+        match_cuts = 0
+
+        for b in bep:
             cameras.add(b.camera_primary)
             emotions.add(b.emotion)
-            if b.shots:
-                for s in b.shots:
-                    motions.add(s.motion)
-                    transitions.add(s.transition)
+            for s in b.shots:
+                motions.add(s.motion)
+                transitions.add(s.transition)
+                if s.transition == TransitionType.CROSSFADE and s.timestamp < 0:
+                    l_cuts += 1
+
+        pacing_score = round(
+            (len(cameras) / 3.0 * 0.3 + 
+             len(emotions) / 4.0 * 0.3 +
+             len(transitions) / 3.0 * 0.2 +
+             min(shot_count / len(bep) / 2.0, 1.0) * 0.2) * 100, 1
+        ) if bep else 0
 
         return {
-            "total_beats": len(beats),
+            "total_beats": len(bep),
             "total_shots": shot_count,
             "total_duration": round(total_duration, 2),
             "avg_beat_duration": round(avg_beat_dur, 2),
@@ -496,40 +602,24 @@ class TimelineBuilder:
             "unique_emotions": len(emotions),
             "unique_transitions": len(transitions),
             "max_shot_duration": round(max(
-                (s.duration for b in beats for s in b.shots),
-                default=0
+                (s.duration for b in bep for s in b.shots), default=0
             ), 2),
-            "l_cuts": sum(1 for b in beats if b.shots and b.shots[0].transition == Transition.L_CUT),
-            "j_cuts": sum(1 for b in beats 
-                         if b.shots and b.shots[-1].transition == Transition.J_CUT),
-            "match_cuts": sum(1 for b in beats[1:] 
-                            if b.shots and b.shots[0].transition == Transition.MATCH_CUT),
-            "pacing_score": round(
-                (len(cameras) / 3.0 * 0.3 + 
-                 len(emotions) / 4.0 * 0.3 +
-                 len(transitions) / 3.0 * 0.2 +
-                 min(shot_count / len(beats) / 2.0, 1.0) * 0.2) * 100, 1
-            ) if beats else 0,
+            "pacing_score": pacing_score,
         }
 
-    def format_timeline(self, beats: List[Beat]) -> str:
+    def format_timeline(self, bep: List[BeatPlan]) -> str:
         """Human-readable timeline dump."""
-        lines = []
-        lines.append(f"{'Beat':>5} {'Start':>7} {'Dur':>6} {'Emotion':16s} {'Camera':16s} {'Shots':>6} {'Trans':12s}")
-        lines.append("-" * 75)
-
-        for beat in beats:
-            trans_name = beat.transition_in.value if beat.transition_in else "cut"
+        lines = [f"{'Beat':>5} {'Start':>7} {'Dur':>6} {'Emotion':16s} {'Camera':16s} {'Shots':>6} {'Trans':12s}",
+                 "-" * 75]
+        for b in bep:
             lines.append(
-                f"{beat.index:>5} {beat.start_time:>6.1f}s {beat.duration:>5.1f}s "
-                f"{beat.emotion.value:16s} {beat.camera_primary.value:16s} "
-                f"{len(beat.shots):>6} {trans_name:12s}"
+                f"{b.index:>5} {b.start_time:>6.1f}s {b.duration:>5.1f}s "
+                f"{b.emotion:16s} {b.camera_primary.value:16s} "
+                f"{len(b.shots):>6} {b.transition_in.value:12s}"
             )
-
-            for s in beat.shots:
+            for s in b.shots:
                 lines.append(
                     f"  {s.shot_type.value:12s} {s.timestamp:>6.2f}s {s.duration:>5.2f}s "
-                    f"{s.camera.value:16s} {s.motion.value:16s} {s.transition.value:12s}"
+                    f"{s.camera.value:16s} {s.motion:16s} {s.transition.value:12s}"
                 )
-
         return "\n".join(lines)

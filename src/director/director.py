@@ -44,6 +44,7 @@ from src.director.concept_planner import ConceptPlanner
 from src.director.aesthetic_agent import AestheticAgent
 from src.director.quality_gate import QualityGates
 from src.director.fallback_director import FallbackDirector
+# BeatDirector imported lazily in _run_beat_mode
 from audio_engine import generate_voice
 
 
@@ -65,10 +66,12 @@ class VisualDirector:
         topic: str,
         llm_provider: Optional[LLMProvider] = None,
         scene_data: Optional[list] = None,
+                 use_beats: bool = False,
     ):
         self._topic = topic
         self._llm_provider = llm_provider
         self._scene_data = scene_data or []
+        self._use_beats = use_beats
 
         # -- Config for caches and fallback director ----------------------
         self._cache_video = get_config("pipeline.cache.video", "cache/video")
@@ -78,6 +81,9 @@ class VisualDirector:
             "cache_dir": self._cache_video,
             "random_seed": get_config("effects.random_seed", 42),
         })
+
+        # ── Beat-based editing ────────────────────────────────────────
+        self._beat_director = None
 
         # ── Create the Visual Style ────────────────────────────────────
         self._router = AssetRouter.for_topic(topic)
@@ -126,8 +132,15 @@ class VisualDirector:
     def run(self) -> list[Scene]:
         """Execute the closed-loop director pipeline for all scenes.
 
+        When use_beats=True, each scene is split into semantic beats with
+        per-shot asset search, L/J cuts, cross dissolves, and pacing optimization.
+        Otherwise behaves as single-clip-per-scene.
+
         Returns a list of Scene objects with asset plans populated.
         """
+        if self._use_beats:
+            return self._run_beat_mode()
+
         scene_assets: list[dict] = []
         accepted_scenes: list[Scene] = []
 
@@ -196,6 +209,62 @@ class VisualDirector:
             visual_plan=VisualPlan(),
             editing_plan=EditingPlan(),
         )
+
+    # ── Beat-based mode ───────────────────────────────────────────────────
+
+    def _run_beat_mode(self) -> list[Scene]:
+        """Run the director in beat-based editing mode.
+
+        Each scene's narration is split into semantic beats via BeatTimelineBuilder.
+        Every shot in every beat gets its own asset search + quality gate loop.
+        """
+        accepted_scenes: list[Scene] = []
+
+        print(f"\n{'='*60}")
+        print(f"  Visual Director (BEAT MODE): {self._style.describe()}")
+        print(f"  Topic: {self._topic}")
+        print(f"{'='*60}\n")
+
+        # Lazy-import BeatDirector to avoid circular import
+        if self._beat_director is None:
+            from src.cinematic.director_integration import BeatDirector
+            self._beat_director = BeatDirector(
+                router=self._router,
+                quality_gates=self._quality_gates,
+                semantic_validator=self._semantic_validator,
+                concept_planner=self._concept_planner,
+                fallback_director=self._fallback_director,
+                topic=self._topic,
+                cache_video=self._cache_video,
+                cache_audio=self._cache_audio,
+            )
+
+        for scene_data in self._scene_data:
+            if isinstance(scene_data, Scene):
+                scene = scene_data
+            else:
+                scene = self._dict_to_scene(scene_data)
+
+            print(f"\n{'─'*50}")
+            print(f"  Scene {scene.scene_id}: {scene.title}")
+            print(f"{'─'*50}")
+
+            # Process scene with beat-based editing
+            scene = self._beat_director.process_scene_beats(scene)
+            accepted_scenes.append(scene)
+
+        stats = self._beat_director.get_stats()
+        print(f"\n{'='*50}")
+        print(f"  Beat Director Results:")
+        print(f"    Shots requested: {stats['shots_requested']}")
+        print(f"    Shots accepted:  {stats['shots_accepted']}")
+        print(f"    Queries tried:   {stats['queries_tried']}")
+        print(f"    Gate rejections: {stats['gate_rejections']}")
+        print(f"    Fallbacks:       {stats['fallbacks']}")
+        print(f"    Success rate:    {stats['shot_success_rate']}%")
+        print(f"{'='*50}\n")
+
+        return accepted_scenes
 
     # ── Build AssetPlan from result ────────────────────────────────────
 

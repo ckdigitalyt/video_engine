@@ -476,6 +476,150 @@ class RenderPlan(BaseModel):
 
 
 # ═══════════════════════════════════════════════════════════════════════ #
+# ── Beat-based editing models ──────────────────────────────────────────
+
+
+class ShotType(str, Enum):
+    """Type of shot within a beat."""
+    PRIMARY = "primary"
+    CUTAWAY = "cutaway"
+    BACKUP = "backup"
+    MOTION_GRAPHICS = "motion_graphics"
+
+
+class ShotPlan(BaseModel):
+    """A single shot within a beat — timing, camera, motion, asset."""
+
+    model_config = {"extra": "forbid"}
+
+    timestamp: float = Field(
+        default=0.0,
+        ge=-1.0,
+        description="Start time relative to beat start (seconds). -0.5 for L-cut lead.",
+    )
+    duration: float = Field(
+        ...,
+        ge=0.5,
+        le=10.0,
+        description="Shot duration in seconds (max 6s unless justified).",
+    )
+    shot_type: ShotType = Field(
+        default=ShotType.PRIMARY,
+        description="Role of this shot within the beat.",
+    )
+    camera: CameraMotion = Field(
+        default=CameraMotion.KEN_BURNS,
+        description="Camera motion to apply.",
+    )
+    transition: TransitionType = Field(
+        default=TransitionType.CROSSFADE,
+        description="Transition from previous shot to this one.",
+    )
+    emotion: str = Field(
+        default="neutral",
+        max_length=20,
+        description="Emotional tone of this shot.",
+    )
+    motion: str = Field(
+        default="ken_burns_in",
+        max_length=30,
+        description="Detailed motion descriptor passed to the motion engine.",
+    )
+    asset_type: str = Field(
+        default="video",
+        max_length=20,
+        description="Type of asset: video, image_ken_burns, generated, motion_graphics.",
+    )
+    description: str = Field(
+        default="",
+        max_length=500,
+        description="Visual description for asset search.",
+    )
+    search_query: str = Field(
+        default="",
+        max_length=200,
+        description="Search query used (populated after asset selection).",
+    )
+    asset_plan: Optional[AssetPlan] = Field(
+        default=None,
+        description="Selected asset for this shot (populated after search).",
+    )
+    semantic_score: float = Field(
+        default=0.0,
+        ge=0.0,
+        le=1.0,
+        description="Semantic relevance score of selected asset.",
+    )
+    justify_long_shot: str = Field(
+        default="",
+        max_length=200,
+        description="Required justification if duration > 6s.",
+    )
+
+
+class BeatPlan(BaseModel):
+    """A semantic beat — one complete thought unit with visual treatment."""
+
+    model_config = {"extra": "forbid"}
+
+    index: int = Field(
+        ...,
+        ge=0,
+        description="Beat index within scene.",
+    )
+    text: str = Field(
+        ...,
+        max_length=500,
+        description="Narration text for this beat.",
+    )
+    start_time: float = Field(
+        default=0.0,
+        ge=0.0,
+        description="Start time in seconds from scene start.",
+    )
+    duration: float = Field(
+        ...,
+        ge=1.0,
+        le=12.0,
+        description="Beat duration in seconds (3-6s typical).",
+    )
+    emotion: str = Field(
+        default="neutral",
+        max_length=20,
+        description="Emotional tone of this beat.",
+    )
+    visual_purpose: str = Field(
+        default="",
+        max_length=500,
+        description="Why this beat exists and what it should show.",
+    )
+    camera_primary: CameraMotion = Field(
+        default=CameraMotion.KEN_BURNS,
+        description="Primary camera motion for main shot.",
+    )
+    camera_cutaway: CameraMotion = Field(
+        default=CameraMotion.STATIC,
+        description="Camera motion for cutaway shot.",
+    )
+    transition_in: TransitionType = Field(
+        default=TransitionType.CROSSFADE,
+        description="Transition into this beat.",
+    )
+    transition_out: TransitionType = Field(
+        default=TransitionType.CROSSFADE,
+        description="Transition out of this beat.",
+    )
+    shots: list[ShotPlan] = Field(
+        default_factory=list,
+        description="Individual shots within this beat.",
+    )
+    motion_graphics_note: str = Field(
+        default="",
+        max_length=500,
+        description="Optional motion graphics overlay description.",
+    )
+
+
 # Scene — the composite model
 # ═══════════════════════════════════════════════════════════════════════ #
 
@@ -660,3 +804,8 @@ def scene_to_flat_dict(scene: Scene) -> dict[str, Any]:
         "filepath": scene.asset_plan.filepath if scene.asset_plan else "",
         "duration": scene.expected_duration,
     }
+    beat_plans: Optional[list[BeatPlan]] = Field(
+        default=None,
+        description="Beat-based breakdown of this scene (populated after beat planning).",
+    )
+    
