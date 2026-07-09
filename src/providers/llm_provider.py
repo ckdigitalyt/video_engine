@@ -48,7 +48,7 @@ class LLMProvider(ABC):
 class DeepSeekProvider(LLMProvider):
     """LLM provider backed by DeepSeek Chat via LangChain's ChatOpenAI."""
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         self._llm = ChatOpenAI(
             api_key=os.environ.get("DEEPSEEK_API_KEY"),
             base_url=get_config("providers.deepseek.base_url", "https://api.deepseek.com"),
@@ -66,7 +66,7 @@ class DeepSeekProvider(LLMProvider):
 class GeminiProvider(LLMProvider):
     """LLM provider backed by Google Gemini (used for multimodal critic)."""
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         api_key = os.environ.get("GEMINI_API_KEY")
         self._client = genai.Client(api_key=api_key)
         self._model_name = get_config("llm.gemini.model", "gemini-1.5-flash")

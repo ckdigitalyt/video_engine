@@ -24,7 +24,7 @@ from src.renderer.timeline_builder import TimelineBuilder
 
 from src.utils.config import get_config
 from audio_engine import generate_voice
-from src.providers import DeepSeekProvider
+from src.providers.factory import ProviderFactory
 
 topic = "The Fermi Paradox"
 
@@ -63,7 +63,9 @@ for i, sd in enumerate(scenes_data):
     )
     scenes.append(scene)
 
-llm = DeepSeekProvider()
+# Get provider from factory so selection comes from YAML config
+_factory = ProviderFactory()
+llm = _factory.get_llm_provider_for_role("planner")
 
 # ── Step 2: VisualDirector in beat mode ───────────────────────────────
 t0 = time.time()
