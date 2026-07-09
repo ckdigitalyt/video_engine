@@ -13,7 +13,7 @@ from src.renderer import Renderer
 from src.renderer.moviepy_renderer import MoviePyRenderer
 from src.utils.config import get_config
 from src.utils.duration import ensure_video_duration, get_media_duration
-from src.providers import DeepSeekProvider, GeminiProvider
+from src.providers.factory import ProviderFactory
 from src.assets import AssetRouter
 from src.assets.search_planner import SearchPlanner
 from src.validation.semantic_validator import SemanticValidator
@@ -39,8 +39,12 @@ load_dotenv()
 
 # ── Providers ──────────────────────────────────────────────────────────────
 
-deepseek = DeepSeekProvider()
-gemini = GeminiProvider()
+provider_factory = ProviderFactory()
+
+# Get providers from the factory based on their configured roles
+planning_provider = provider_factory.get_llm_provider_for_role("planner")
+critic_provider = provider_factory.get_llm_provider_for_role("critic")
+
 renderer: Renderer = MoviePyRenderer()
 subtitle_engine = SubtitleEngine()
 
@@ -70,7 +74,7 @@ def planner_node(state: AgentState):
     iteration = state.get("iteration", 0) + 1
     print(f"\n[1/4] Node: Story Planning Engine (Iteration: {iteration})")
 
-    planner = StoryPlanner(provider=deepseek)
+    planner = StoryPlanner(provider=planning_provider)
     scenes: list[PydanticScene] = planner.generate_plan(state["topic"])
 
     # Serialize Scene models to JSON for LangGraph state compatibility.
@@ -111,7 +115,7 @@ def execution_node(state: AgentState):
 
     director = VisualDirector(use_beats=True, 
         topic=state["topic"],
-        llm_provider=deepseek,
+        llm_provider=planning_provider,
         scene_data=director_scene_data,
     )
 
@@ -254,7 +258,7 @@ def critic_node(state: AgentState):
     print("-> Querying Gemini API for Visual QA...")
     try:
         prompt = "You are a ruthless video QA critic. Analyze this extracted frame. You MUST REJECT it (Answer NO) if you see ANY of the following: 1. Large black borders, letterboxing, or pillarboxing. 2. The video not filling the entire frame. 3. Solid blue or black error frames. If the image perfectly fills the screen and looks cinematic, answer YES."
-        decision = gemini.generate_text(prompt, image_path=frame_path).upper()
+        decision = critic_provider.generate_text(prompt, image_path=frame_path).upper()
 
         print(f"-> Gemini Assessment: {decision}")
         # Parse the decision — must contain YES for approval
@@ -281,7 +285,7 @@ def critic_node(state: AgentState):
         for backoff in [2, 4, 8]:
             _time.sleep(backoff)
             try:
-                decision = gemini.generate_text(prompt, image_path=frame_path).upper()
+                decision = critic_provider.generate_text(prompt, image_path=frame_path).upper()
                 if "YES" in decision:
                     approved = True
                     result = CriticResult(approved=True, decision=decision, error=None)

@@ -43,7 +43,7 @@ from src.director import VisualDirector
 from src.renderer.moviepy_renderer import MoviePyRenderer
 from src.renderer.timeline_builder import TimelineBuilder as LegacyTimelineBuilder
 from src.utils.config import get_config
-from src.providers import DeepSeekProvider
+from src.providers.factory import ProviderFactory
 from audio_engine import generate_voice, mix_audio
 
 # ── Topic data ────────────────────────────────────────────────────────
@@ -127,9 +127,13 @@ def main():
         scenes.append(scene)
 
     # ── Step 2: Run VisualDirector in beat mode ───────────────────────
+    # Get provider from factory so selection comes from YAML config
+    _factory = ProviderFactory()
+    _llm = _factory.get_llm_provider_for_role("planner")
+
     director = VisualDirector(
         topic=topic,
-        llm_provider=None,
+        llm_provider=_llm,
         scene_data=scenes,
         use_beats=True,
     )

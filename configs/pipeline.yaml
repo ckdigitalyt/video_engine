@@ -35,3 +35,12 @@ pipeline:
     frame_extraction_ss: "00:00:02"
     # Path for the extracted evaluation frame
     eval_frame: "cache/video/eval_frame.jpg"
+
+  roles:
+    # Default LLM provider used when no specific role is configured
+    default: "gemini"
+    # Fallback provider when the default is unavailable
+    fallback: "deepseek"
+    # Role-specific provider overrides
+    planner: "deepseek"
+    critic: "gemini"

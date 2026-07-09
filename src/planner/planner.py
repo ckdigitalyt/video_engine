@@ -19,7 +19,8 @@ import logging
 from typing import Any, Optional
 
 from src.models.schemas import Scene, SceneNarration, VisualPlan, SearchPlan, EditingPlan
-from src.providers.llm_provider import LLMProvider, DeepSeekProvider
+from src.providers.llm_provider import LLMProvider
+from src.providers.factory import ProviderFactory
 from src.utils.config import get_config
 from .templates import get_template, StoryTemplate
 
@@ -32,7 +33,9 @@ class StoryPlanner:
     Parameters
     ----------
     provider : LLMProvider, optional
-        LLM provider for text generation.  Defaults to ``DeepSeekProvider()``.
+        LLM provider for text generation.  If ``None``, uses the configured
+        provider from ``pipeline.roles.planner`` in YAML, then falls back to
+        ``pipeline.roles.default``, and finally ``pipeline.roles.fallback``.
     template_name : str, optional
         Story template name.  If ``None``, uses ``planner.story_template``
         from config (default ``"documentary"``).
@@ -51,7 +54,21 @@ class StoryPlanner:
         target_scene_count: Optional[int] = None,
         target_duration: Optional[int] = None,
     ):
-        self._provider = provider or DeepSeekProvider()
+        # Provider selection: explicit argument > factory default > factory fallback
+        if provider is not None:
+            self._provider = provider
+        else:
+            _factory = ProviderFactory()
+            try:
+                # Try the role-specific planner provider first
+                self._provider = _factory.get_llm_provider_for_role("planner")
+            except (ValueError, ImportError):
+                try:
+                    # Fall back to default provider
+                    self._provider = _factory.get_default_llm_provider()
+                except (ValueError, ImportError):
+                    # Ultimate fallback
+                    self._provider = _factory.get_fallback_llm_provider()
         self._template = get_template(template_name)
         self._target_scene_count = (
             target_scene_count
