@@ -153,25 +153,44 @@ def execution_node(state: AgentState):
         # Update the Pydantic Scene with the resolved assets
         if scene_id < len(pydantic_scenes):
             ps = pydantic_scenes[scene_id]
-            if hasattr(result, "asset_plan") and result.asset_plan:
-                ps.asset_plan = result.asset_plan
-            else:
+            if isinstance(result, dict):
+                # Legacy dict-format result
                 ps.asset_plan = AssetPlan(
                     provider=ProviderType(result.get("provider", "pixabay")),
                     filepath=video_path,
                     video_url=result.get("video_url", ""),
                     query_used=result.get("query", ""),
-                score=max(
-                    result.get("technical_score", 0.0),
-                    result.get("semantic_score", 0.0),
-                ),
-                semantic_score=result.get("semantic_score", 0.0),
-                technical_score=result.get("technical_score", 0.0),
-                aesthetic_style=result.get("aesthetic_style", "documentary"),
-                duration=ps.expected_duration,
-                width=1920,
-                height=1080,
-            )
+                    score=max(
+                        result.get("technical_score", 0.0),
+                        result.get("semantic_score", 0.0),
+                    ),
+                    semantic_score=result.get("semantic_score", 0.0),
+                    technical_score=result.get("technical_score", 0.0),
+                    aesthetic_style=result.get("aesthetic_style", "documentary"),
+                    duration=ps.expected_duration,
+                    width=1920,
+                    height=1080,
+                )
+            elif hasattr(result, "asset_plan") and result.asset_plan:
+                # Scene object with an asset plan — use it directly
+                ps.asset_plan = result.asset_plan
+            else:
+                # Scene object without an asset plan — extract fallback attributes
+                ps.asset_plan = AssetPlan(
+                    provider=ProviderType(
+                        getattr(result, "provider", "pixabay") or "pixabay"
+                    ),
+                    filepath=video_path,
+                    video_url=getattr(result, "video_url", "") or "",
+                    query_used=getattr(result, "query_used", "") or "",
+                    score=max(
+                        float(getattr(result, "technical_score", 0.0) or 0.0),
+                        float(getattr(result, "semantic_score", 0.0) or 0.0),
+                    ),
+                    semantic_score=float(getattr(result, "semantic_score", 0.0) or 0.0),
+                    technical_score=float(getattr(result, "technical_score", 0.0) or 0.0),
+                    aesthetic_style=getattr(result, "aesthetic_style", "documentary") or "documentary",
+                )
             ps.audio_plan = AudioPlan(
                 narration_audio_path=audio_path,
             )

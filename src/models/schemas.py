@@ -580,8 +580,8 @@ class BeatPlan(BaseModel):
     duration: float = Field(
         ...,
         ge=1.0,
-        le=12.0,
-        description="Beat duration in seconds (3-6s typical).",
+        le=30.0,
+        description="Beat duration in seconds (3-10s typical, max 30s).",
     )
     emotion: str = Field(
         default="neutral",
