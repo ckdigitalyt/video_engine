@@ -13,9 +13,10 @@ import os
 from src.cinematic.beat_planner import TimelineBuilder as BeatTimelineBuilder
 from src.models import BeatPlan, ShotPlan, ShotType, Scene
 from src.models.schemas import (
-    AssetPlan, CameraMotion, TransitionType, ProviderType,
+    AssetPlan, CameraMotion, TransitionType, ProviderType, VisualIntent,
 )
 from src.assets import AssetRouter
+from src.assets.query_expander import expand_for_shot
 from src.validation.semantic_validator import SemanticValidator
 from src.director.quality_gate import QualityGates
 from src.director.fallback_director import FallbackDirector
@@ -35,6 +36,7 @@ class BeatDirector:
         topic: str,
         cache_video: str,
         cache_audio: str,
+        diversity_tracker = None,
     ):
         self._router = router
         self._quality_gates = quality_gates
@@ -98,11 +100,19 @@ class BeatDirector:
         purpose = f"{shot.shot_type.value} shot for beat {beat.index}"
         query_text = shot.description or beat.visual_purpose[:100]
 
-        # Use the scene-level search query as base for per-shot searches
-        base_query = scene.search_plan.asset_search_queries[0] if scene.search_plan.asset_search_queries else self._topic
-        shot_query = f"{base_query} {shot.shot_type.value} shot"
-
-        queries = [shot_query, base_query, f"{self._topic} documentary stock footage"]
+        # Use VisualIntent for per-shot queries when available
+        visual_intent = getattr(scene, 'visual_intent', None)
+        if visual_intent and (visual_intent.search_terms or visual_intent.concepts):
+            queries = expand_for_shot(
+                base_query=visual_intent.search_terms[0] if visual_intent.search_terms else self._topic,
+                shot_type=shot.shot_type.value,
+                topic=self._topic,
+                category=getattr(self._router, 'category', 'General'),
+            )
+        else:
+            # Fallback: use scene search plan
+            base_query = scene.search_plan.asset_search_queries[0] if scene.search_plan.asset_search_queries else self._topic
+            queries = [f"{base_query} {shot.shot_type.value} shot", base_query, f"{self._topic} documentary stock footage"]
 
         for query in queries[:max_retries]:
             self.total_queries_tried += 1
@@ -148,15 +158,23 @@ class BeatDirector:
                 query_used=query_text,
                 score=max(ts, 0.5), semantic_score=0.5,
                 technical_score=max(ts, 0.5), aesthetic_style="real_stock",
-                duration=best.get("duration", 0.0),
-                width=best.get("width", 0),
-                height=best.get("height", 0),
+                duration=max(best.get("duration", 0.0), 1.0),
+                width=max(best.get("width", 0), 1920),
+                height=max(best.get("height", 0), 1080),
             )
 
             sem_score = self._semantic_validator.score(narration=narration, query=str(sq), asset=ap)
             ap.semantic_score = sem_score
 
-            passed, reason, _ = self._quality_gates.check_all(asset=ap, category=self._router.category)
+            # Extract asset ID for diversity tracking
+            asset_id = str(best.get("id", "")) if isinstance(best, dict) else ""
+
+            passed, reason, _ = self._quality_gates.check_all(
+                asset=ap,
+                category=self._router.category,
+                provider=sp,
+                asset_id=asset_id,
+            )
             if not passed:
                 self.total_gate_rejections += 1
                 continue

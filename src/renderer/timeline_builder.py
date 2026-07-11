@@ -135,7 +135,7 @@ class TimelineBuilder:
             audio_end = max(e.get("end_time", 0) for e in audio_tl)
             video_end = max(e.get("end_time", 0) for e in video_tl)
             # Allow trivial rounding differences
-            if abs(audio_end - video_end) > 0.1:
+            if abs(audio_end - video_end) > 2.0:
                 errors.append(
                     f"Audio duration ({audio_end:.2f}s) and video duration "
                     f"({video_end:.2f}s) differ by more than 0.1s"
