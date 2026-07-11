@@ -1,0 +1,28 @@
+INFO:src.research.research_agent:Researching topic: 'The Fermi Paradox'
+INFO:httpx:HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+WARNING:src.research.research_agent:All web searches returned empty for 'The Fermi Paradox' — using fallback
+INFO:src.research.research_agent:Generating fallback research for 'The Fermi Paradox' from LLM knowledge
+INFO:httpx:HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+
+============================================================
+RESEARCH AGENT -- MINIMAL SAMPLE RUN
+============================================================
+Topic:                      The Fermi Paradox
+Runtime:                    16.362s
+Peak memory:                13.77 MB
+Sources collected:          0
+Facts extracted:            6
+Statistics:                 4
+Key dates:                  4
+Key people:                 5
+Controversies:              4
+Unanswered questions:       4
+
+--- Sample Facts ---
+  [0.30] The Fermi Paradox is the apparent contradiction between the high probability estimates for the existence of extraterrestrial civilizations (
+  [0.30] The paradox is named after physicist Enrico Fermi, who is said to have posed the question 'Where is everybody?' during a 1950 lunchtime conv
+  [0.30] The Drake equation, formulated by Frank Drake in 1961, estimates the number of active, communicative extraterrestrial civilizations in the M
+  [0.30] One prominent proposed solution to the Fermi Paradox is the Great Filter hypothesis, which suggests that at some point from abiogenesis to a
+  [0.30] The Zoo Hypothesis, another proposed solution, suggests that advanced extraterrestrial civilizations deliberately avoid contact with humanit
+
+--- Sample Sources ---
