@@ -55,10 +55,12 @@ def _research_node(
     elapsed = time.monotonic() - start
     logger.info("Stage 1 complete: %d facts, %d sources (%.1fs)",
                 len(doc.key_facts), len(doc.sources), elapsed)
+    elapsed_dict = dict(state.stages_elapsed or {})
+    elapsed_dict["research"] = elapsed
     return {
         "research_document": doc,
         "status": "researching",
-        "stages_elapsed": {"research": elapsed},
+        "stages_elapsed": elapsed_dict,
     }
 
 
@@ -76,10 +78,12 @@ def _knowledge_node(
     elapsed = time.monotonic() - start
     logger.info("Stage 2 complete: %d nodes, %d edges (%.1fs)",
                 len(kg.nodes), len(kg.edges), elapsed)
+    elapsed_dict = dict(state.stages_elapsed or {})
+    elapsed_dict["knowledge"] = elapsed
     return {
         "knowledge_graph": kg,
         "status": "kged",
-        "stages_elapsed": {"knowledge": elapsed},
+        "stages_elapsed": elapsed_dict,
     }
 
 
@@ -97,10 +101,12 @@ def _narrative_node(
     elapsed = time.monotonic() - start
     logger.info("Stage 3 complete: %d beats, framework=%s (%.1fs)",
                 len(arc.beats), arc.narrative_framework, elapsed)
+    elapsed_dict = dict(state.stages_elapsed or {})
+    elapsed_dict["narrative"] = elapsed
     return {
         "narrative_arc": arc,
         "status": "narratived",
-        "stages_elapsed": {"narrative": elapsed},
+        "stages_elapsed": elapsed_dict,
     }
 
 
