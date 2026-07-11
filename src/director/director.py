@@ -44,6 +44,8 @@ from src.director.concept_planner import ConceptPlanner
 from src.director.aesthetic_agent import AestheticAgent
 from src.director.quality_gate import QualityGates
 from src.director.fallback_director import FallbackDirector
+from src.director.diversity_tracker import DiversityTracker
+from src.director.storyboard_validator import StoryboardValidator
 # BeatDirector imported lazily in _run_beat_mode
 from audio_engine import generate_voice
 
@@ -100,10 +102,15 @@ class VisualDirector:
             threshold=get_config("visual_director.quality_gates.semantic_threshold", 0.75),
         )
         self._aesthetic_agent = AestheticAgent(visual_style=self._style)
+        self._diversity_tracker = DiversityTracker()
         self._quality_gates = QualityGates(
             visual_style=self._style,
             aesthetic_agent=self._aesthetic_agent,
+            diversity_tracker=self._diversity_tracker,
             semantic_threshold=self._semantic_validator._threshold,
+        )
+        self._storyboard_validator = StoryboardValidator(
+            diversity_tracker=self._diversity_tracker,
         )
 
         # Overall tracking
@@ -180,6 +187,23 @@ class VisualDirector:
             # Track scenes that succeeded so they can be reused by FallbackDirector
             accepted_scenes.append(scene)
 
+        # ── Storyboard validation ────────────────────────────────────
+        print(f"\n{'='*50}")
+        print(f"  Storyboard Validation...")
+        validation_report = self._storyboard_validator.validate(
+            accepted_scenes,
+            target_duration=sum(s.expected_duration for s in accepted_scenes),
+        )
+        if validation_report.passed:
+            print(f"  ✓ Storyboard passed all checks")
+        else:
+            print(f"  ⚠ Storyboard issues found:")
+            for err in validation_report.errors:
+                print(f"    - {err}")
+            for v in validation_report.diversity_violations:
+                print(f"    - Diversity: {v}")
+            print(f"  (Continuing with best effort - rendering may produce suboptimal results)")
+
         print(f"\n{'='*50}")
         print(f"  Director Results:")
         print(f"    Queries tried: {self._results['total_queries_tried']}")
@@ -187,6 +211,9 @@ class VisualDirector:
         print(f"    Scene regenerations: {self._results['total_scene_regenerations']}")
         print(f"    Fallbacks: {self._results['total_fallbacks']}")
         print(f"{'='*50}\n")
+
+        # Store validation report for external access
+        self._results["validation_report"] = validation_report
 
         return accepted_scenes
 
@@ -237,6 +264,7 @@ class VisualDirector:
                 topic=self._topic,
                 cache_video=self._cache_video,
                 cache_audio=self._cache_audio,
+                diversity_tracker=self._diversity_tracker,
             )
 
         for scene_data in self._scene_data:
@@ -254,6 +282,25 @@ class VisualDirector:
             accepted_scenes.append(scene)
 
         stats = self._beat_director.get_stats()
+        # ── Storyboard validation ────────────────────────────────────
+        print(f"\n{'='*50}")
+        print(f"  Storyboard Validation...")
+        validation_report = self._storyboard_validator.validate(
+            accepted_scenes,
+            target_duration=sum(s.expected_duration for s in accepted_scenes),
+        )
+        if validation_report.passed:
+            print(f"  ✓ Storyboard passed all checks")
+        else:
+            print(f"  ⚠ Storyboard issues found:")
+            for err in validation_report.errors[:5]:
+                print(f"    - {err}")
+            for v in validation_report.diversity_violations[:5]:
+                print(f"    - Diversity: {v}")
+            if len(validation_report.errors) > 5:
+                print(f"    ... and {len(validation_report.errors) - 5} more errors")
+            print(f"  (Continuing with best effort)")
+
         print(f"\n{'='*50}")
         print(f"  Beat Director Results:")
         print(f"    Shots requested: {stats['shots_requested']}")
@@ -263,6 +310,8 @@ class VisualDirector:
         print(f"    Fallbacks:       {stats['fallbacks']}")
         print(f"    Success rate:    {stats['shot_success_rate']}%")
         print(f"{'='*50}\n")
+
+        self._results["validation_report"] = validation_report
 
         return accepted_scenes
 
@@ -316,22 +365,36 @@ class VisualDirector:
         current_query = search_query
         attempts = 0
 
+        # Extract VisualIntent from the scene if available
+        visual_intent = scene.visual_intent if scene and hasattr(scene, 'visual_intent') else None
+
         for regeneration in range(max_regenerations + 1):
-            # Generate concept-driven queries
-            queries = self._concept_planner.generate_queries(
-                narration=current_narration,
-                title=scene_title,
-                topic=self._topic,
-                purpose=purpose,
-            )
+            # Generate concept-driven queries using VisualIntent
+            if visual_intent and (visual_intent.search_terms or visual_intent.concepts):
+                # Generate queries from visual intent directly
+                queries = self._concept_planner.generate_queries(
+                    narration=current_narration,
+                    title=scene_title,
+                    topic=self._topic,
+                    purpose=purpose,
+                    visual_intent=visual_intent,
+                )
+                print(f"    Generated {len(queries)} queries from visual intent")
+            else:
+                # Fallback: LLM extraction from narration (original behavior)
+                queries = self._concept_planner.generate_queries(
+                    narration=current_narration,
+                    title=scene_title,
+                    topic=self._topic,
+                    purpose=purpose,
+                )
+                print(f"    Generated {len(queries)} visual concepts from narration")
 
             # If no concept queries, prepend the original search query
             if not queries or all(q in ("", "stock footage") for q in queries):
                 queries = [current_query] if current_query else ["stock footage"]
 
             queries = queries[:get_config("search_planner.num_queries", 7)]
-
-            print(f"    Generated {len(queries)} visual concepts")
 
             for query_idx, query in enumerate(queries):
                 if attempts >= max_retries * (regeneration + 1):
@@ -377,7 +440,9 @@ class VisualDirector:
                     semantic_score=0.5,
                     technical_score=technical_score if technical_score >= 0 else 0.5,
                     aesthetic_style="real_stock",
-                    duration=best_asset.get("duration", 0.0),
+                    duration=max(best_asset.get("duration", 0.0), 1.0),
+                    width=max(best_asset.get("width", 0), 1920),
+                    height=max(best_asset.get("height", 0), 1080),
                 )
 
                 # ── Semantic Validation ────────────────────────────────
@@ -391,10 +456,21 @@ class VisualDirector:
                 # Update AssetPlan with the validated semantic score
                 best_asset_plan.semantic_score = sem_score
 
+                # Extract asset ID from NASA/Wikimedia metadata for diversity tracking
+                asset_id = ""
+                if selected_provider == "nasa":
+                    asset_id = best_asset.get("id", "") if isinstance(best_asset, dict) else ""
+                elif selected_provider == "pexels":
+                    asset_id = str(best_asset.get("id", "")) if isinstance(best_asset, dict) else ""
+                elif selected_provider == "pixabay":
+                    asset_id = str(best_asset.get("id", "")) if isinstance(best_asset, dict) else ""
+
                 # ── Quality Gates ──────────────────────────────────────
                 gate_passed, gate_reason, gate_details = self._quality_gates.check_all(
                     asset=best_asset_plan,
                     category=self._router.category,
+                    provider=selected_provider,
+                    asset_id=asset_id,
                 )
 
                 # Log per-gate details

@@ -122,6 +122,19 @@ def execution_node(state: AgentState):
     # Run the director's quality-gated pipeline
     direct_results = director.run()
 
+    # Log storyboard validation results
+    validation_report = director.results.get("validation_report")
+    if validation_report:
+        if validation_report.passed:
+            print(f"[execution] Storyboard validation PASSED")
+        else:
+            print(f"[execution] Storyboard validation ISSUES: "
+                  f"{len(validation_report.errors)} errors, "
+                  f"{len(validation_report.diversity_violations)} diversity violations")
+            if validation_report.errors:
+                for err in validation_report.errors[:3]:
+                    print(f"  -> {err}")
+
     # Convert director results to SceneAsset and update Scene objects
     scene_assets: list[SceneAsset] = []
     scene_narrations: list[tuple[int, str, str]] = []
@@ -153,43 +166,49 @@ def execution_node(state: AgentState):
         # Update the Pydantic Scene with the resolved assets
         if scene_id < len(pydantic_scenes):
             ps = pydantic_scenes[scene_id]
-            if isinstance(result, dict):
-                # Legacy dict-format result
+            # result is a Pydantic Scene object — access attributes directly
+            scene_result = result if hasattr(result, "scene_id") else None
+            if scene_result:
+                # Copy beat plans (beat mode) if present
+                if scene_result.beat_plans:
+                    ps.beat_plans = scene_result.beat_plans
+                # Copy asset plan (V2 Scene mode) if present
+                if scene_result.asset_plan:
+                    ps.asset_plan = scene_result.asset_plan
+                else:
+                    # Scene object without an asset plan — extract fallback attributes
+                    ps.asset_plan = AssetPlan(
+                        provider=ProviderType(
+                            getattr(scene_result, "provider", "pixabay") or "pixabay"
+                        ),
+                        filepath=video_path,
+                        video_url=getattr(scene_result, "video_url", "") or "",
+                        query_used=getattr(scene_result, "query_used", "") or "",
+                        score=max(
+                            float(getattr(scene_result, "technical_score", 0.0) or 0.0),
+                            float(getattr(scene_result, "semantic_score", 0.0) or 0.0),
+                        ),
+                        semantic_score=float(getattr(scene_result, "semantic_score", 0.0) or 0.0),
+                        technical_score=float(getattr(scene_result, "technical_score", 0.0) or 0.0),
+                        aesthetic_style=getattr(scene_result, "aesthetic_style", "documentary") or "documentary",
+                    )
+            else:
+                # Dict-style result (backward compat with legacy Scene objects)
                 ps.asset_plan = AssetPlan(
                     provider=ProviderType(result.get("provider", "pixabay")),
                     filepath=video_path,
                     video_url=result.get("video_url", ""),
                     query_used=result.get("query", ""),
                     score=max(
-                        result.get("technical_score", 0.0),
-                        result.get("semantic_score", 0.0),
+                        float(result.get("technical_score", 0.0) or 0.0),
+                        float(result.get("semantic_score", 0.0) or 0.0),
                     ),
-                    semantic_score=result.get("semantic_score", 0.0),
-                    technical_score=result.get("technical_score", 0.0),
-                    aesthetic_style=result.get("aesthetic_style", "documentary"),
+                    semantic_score=float(result.get("semantic_score", 0.0) or 0.0),
+                    technical_score=float(result.get("technical_score", 0.0) or 0.0),
+                    aesthetic_style=result.get("aesthetic_style", "documentary") or "documentary",
                     duration=ps.expected_duration,
                     width=1920,
                     height=1080,
-                )
-            elif hasattr(result, "asset_plan") and result.asset_plan:
-                # Scene object with an asset plan — use it directly
-                ps.asset_plan = result.asset_plan
-            else:
-                # Scene object without an asset plan — extract fallback attributes
-                ps.asset_plan = AssetPlan(
-                    provider=ProviderType(
-                        getattr(result, "provider", "pixabay") or "pixabay"
-                    ),
-                    filepath=video_path,
-                    video_url=getattr(result, "video_url", "") or "",
-                    query_used=getattr(result, "query_used", "") or "",
-                    score=max(
-                        float(getattr(result, "technical_score", 0.0) or 0.0),
-                        float(getattr(result, "semantic_score", 0.0) or 0.0),
-                    ),
-                    semantic_score=float(getattr(result, "semantic_score", 0.0) or 0.0),
-                    technical_score=float(getattr(result, "technical_score", 0.0) or 0.0),
-                    aesthetic_style=getattr(result, "aesthetic_style", "documentary") or "documentary",
                 )
             ps.audio_plan = AudioPlan(
                 narration_audio_path=audio_path,

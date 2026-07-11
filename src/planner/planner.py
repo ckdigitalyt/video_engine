@@ -18,11 +18,61 @@ import json
 import logging
 from typing import Any, Optional
 
-from src.models.schemas import Scene, SceneNarration, VisualPlan, SearchPlan, EditingPlan
+from src.models.schemas import Scene, SceneNarration, VisualPlan, VisualIntent, SearchPlan, EditingPlan
 from src.providers.llm_provider import LLMProvider
 from src.providers.factory import ProviderFactory
+
+
+# ── Visual-only fallback terms ────────────────────────────────────────
+
+_VISUAL_FALLBACKS: dict[str, list[str]] = {
+    "Space": [
+        "deep space nebula 4K",
+        "starfield timelapse cosmos",
+        "galaxy spiral astronomy footage",
+        "celestial space environment",
+        "interstellar cosmic landscape",
+        "astronomical deep field zoom",
+        "solar system planet orbit animation",
+        "Milky Way night sky panorama",
+        "cosmic dust nebula close-up",
+        "space documentary establishing shot",
+        "universe background stars motion",
+        "Hubble telescope deep space view",
+    ],
+}
 from src.utils.config import get_config
 from .templates import get_template, StoryTemplate
+
+
+# ── Domain-specific concept maps for query expansion ──────────────────
+
+_CONCEPT_MAPS: dict[str, dict[str, list[str]]] = {
+    "Space": {
+        "black sky": ["deep space", "night sky", "void of space", "cosmic darkness"],
+        "stars": ["starfield", "celestial bodies", "stellar formation", "Milky Way"],
+        "light": ["photons", "light spectrum", "electromagnetic waves", "visible light"],
+        "vacuum": ["interstellar medium", "cosmic void", "empty space", "space vacuum"],
+        "atmosphere": ["Earth atmosphere", "atmospheric scattering", "sky blue", "sunlight scattering"],
+        "telescope": ["Hubble Space Telescope", "JWST", "observatory", "astronomical telescope"],
+        "galaxy": ["spiral galaxy", "Andromeda", "deep field", "galactic cluster"],
+        "wavelength": ["spectrum chart", "frequency diagram", "light wave", "electromagnetic spectrum"],
+        "universe": ["observable universe", "cosmic web", "deep field", "universe expansion"],
+        "sun": ["solar surface", "sunlight", "solar flare", "sun in space"],
+        "earth": ["Earth from space", "blue marble", "planet Earth", "Earth orbit"],
+        "astronaut": ["astronaut spacewalk", "ISS", "International Space Station", "space suit"],
+        "infographic": ["science diagram", "educational graphic", "labeled chart", "data visualization"],
+    },
+}
+
+_KEN_BURNS_CONCEPTS = {
+    "nebula", "galaxy", "starfield", "deep space", "planet", "moon", "astronaut",
+}
+
+_DIAGRAM_CONCEPTS = {
+    "wavelength", "spectrum", "frequency", "photon", "inverse-square",
+    "orbital", "scale", "comparison", "timeline", "cross-section",
+}
 
 logger = logging.getLogger(__name__)
 
@@ -109,6 +159,19 @@ class StoryPlanner:
         scene_dicts = json.loads(scenes_json).get("scenes", [])
         scenes: list[Scene] = []
         for i, scene_data in enumerate(scene_dicts):
+            # Generate visual intent from the scene content
+            visual_intent = self._generate_visual_intent(
+                scene_data, topic, i,
+            )
+
+            # ── Sanitise search terms against narration overlap ──────
+            narration_text = scene_data.get("narration", "")
+            sanitised_terms = self._sanitise_search_terms(
+                visual_intent.search_terms,
+                narration_text,
+                topic,
+            )
+
             scene = Scene(
                 scene_id=i,
                 title=scene_data.get("title", f"Scene {i}"),
@@ -117,9 +180,11 @@ class StoryPlanner:
                 narration=SceneNarration(
                     spoken_narration=scene_data.get("narration", "narration pending"),
                 ),
+                visual_intent=visual_intent,
                 search_plan=SearchPlan(
-                    asset_search_queries=["general"],
+                    asset_search_queries=sanitised_terms or ["general"],
                     primary_topic=topic,
+                    scene_purpose=(visual_intent.visual_objective or "general")[:200],
                 ),
                 visual_plan=VisualPlan(),
                 editing_plan=EditingPlan(),
@@ -182,6 +247,224 @@ Rules:
 4. The arc must have a clear beginning, middle, and end.
 """
         return self._provider.generate_json(prompt)
+
+    # ── Visual Intent generation ────────────────────────────────────────
+
+    def _generate_visual_intent(
+        self,
+        scene_data: dict,
+        topic: str,
+        scene_index: int,
+    ) -> VisualIntent:
+        """Generate structured visual metadata for a scene.
+
+        First attempts LLM-based generation. Falls back to rule-based
+        expansion from the concept map when the LLM call fails or
+        returns unusable output.
+        """
+        narration = scene_data.get("narration", "")
+        title = scene_data.get("title", f"Scene {scene_index}")
+        estimated_dur = scene_data.get("estimated_duration", 12.0)
+
+        # Attempt LLM generation first
+        intent = self._llm_visual_intent(narration, title, topic, estimated_dur)
+        if intent is not None:
+            return intent
+
+        # Fallback: rule-based expansion from concept map
+        return self._rule_based_visual_intent(narration, title, topic, scene_index)
+
+    def _llm_visual_intent(
+        self,
+        narration: str,
+        title: str,
+        topic: str,
+        duration: float,
+    ) -> Optional[VisualIntent]:
+        """Ask the LLM to generate structured visual metadata."""
+        topic_category = self._classify_topic_for_intent(topic)
+
+        prompt = f"""You generate structured visual metadata for documentary video scenes.
+
+Topic: {topic}
+Category: {topic_category}
+Scene: {title}
+Duration: {duration}s
+Narration: {narration}
+
+Generate a JSON object with:
+- "visual_objective": what this scene should show VISUALLY (1 sentence)
+- "concepts": up to 8 key concepts as a list of strings
+- "required_assets": list of needed asset types from ["stock_video", "photograph", "diagram", "animation", "infographic", "timelapse"]
+- "preferred_asset_types": list from ["wide_shot", "close_up", "infographic", "animation", "diagram", "timelapse", "macro"]
+- "animation_requirements": describe any needed animation (e.g. "manim_photon_travel") or leave empty
+- "camera_style": one of "static_diagram", "slow_pan", "ken_burns", "dynamic", "tilt_shift"
+- "motion_style": one of "gentle", "dynamic", "none", "timelapse"
+- "fallback_strategy": one of "fallback_to_diagram", "fallback_to_reuse", "fallback_to_photograph", ""
+- "search_terms": generate 10-15 diverse search keywords for stock footage (e.g. "deep space nebula", "starfield 4K")
+
+Return ONLY raw JSON. No markdown. No code fences."""
+
+        try:
+            result_str = self._provider.generate_json(prompt)
+            if not result_str or len(result_str) < 20:
+                return None
+            result = json.loads(result_str)
+            return VisualIntent(
+                visual_objective=result.get("visual_objective", ""),
+                concepts=result.get("concepts", [])[:20],
+                required_assets=result.get("required_assets", [])[:5],
+                preferred_asset_types=result.get("preferred_asset_types", [])[:10],
+                animation_requirements=result.get("animation_requirements", ""),
+                camera_style=result.get("camera_style", ""),
+                motion_style=result.get("motion_style", ""),
+                fallback_strategy=result.get("fallback_strategy", ""),
+                search_terms=result.get("search_terms", [])[:30],
+            )
+        except Exception as exc:
+            logger.debug("LLM visual intent failed for scene '%s': %s", title, exc)
+            return None
+
+    def _rule_based_visual_intent(
+        self,
+        narration: str,
+        title: str,
+        topic: str,
+        scene_index: int,
+    ) -> VisualIntent:
+        """Generate visual intent from concept maps when LLM is unavailable."""
+        narration_lower = narration.lower()
+        concepts: list[str] = []
+        search_terms: list[str] = []
+        required_assets: list[str] = ["stock_video"]
+        preferred_types: list[str] = ["wide_shot"]
+        animation_req = ""
+        camera_style = "slow_pan"
+        motion_style = "gentle"
+        fallback = ""
+
+        # Build search terms from concept map
+        category_map = _CONCEPT_MAPS.get(topic, {})
+        for concept, keywords in category_map.items():
+            if concept in narration_lower:
+                concepts.append(concept)
+                search_terms.extend(keywords)
+
+        # Add topic-level keywords
+        if search_terms:
+            search_terms.append(f"{topic.lower()} documentary")
+            search_terms.append(f"{topic.lower()} 4k")
+            search_terms.append(f"{topic.lower()} footage")
+        else:
+            # Generic fallback
+            search_terms = [
+                f"{topic.lower()} documentary",
+                f"{topic.lower()} stock footage",
+                "science documentary",
+                "educational footage",
+            ]
+
+        # Determine asset types from narration
+        diag_keywords = {"wavelength", "spectrum", "frequency", "photon", "diagram", "scale", "comparison"}
+        if diag_keywords & set(narration_lower.split()):
+            required_assets.append("diagram")
+            preferred_types.append("infographic")
+            animation_req = "diagram_explainer"
+            camera_style = "static_diagram"
+            motion_style = "none"
+
+        # Vary camera style per scene
+        styles = ["slow_pan", "ken_burns", "static", "dynamic", "gentle_zoom"]
+        camera_style = styles[scene_index % len(styles)]
+
+        # De-duplicate search terms while preserving order
+        seen: set[str] = set()
+        unique_terms: list[str] = []
+        for term in search_terms:
+            t = term.strip().lower()
+            if t and t not in seen:
+                seen.add(t)
+                unique_terms.append(term.strip())
+
+        return VisualIntent(
+            visual_objective=f"Visually illustrate: {title}",
+            concepts=concepts[:20],
+            required_assets=required_assets[:5],
+            preferred_asset_types=preferred_types[:10],
+            animation_requirements=animation_req,
+            camera_style=camera_style,
+            motion_style=motion_style,
+            fallback_strategy=fallback,
+            search_terms=unique_terms[:30],
+        )
+
+    @staticmethod
+    def _sanitise_search_terms(
+        search_terms: list[str],
+        narration: str,
+        topic: str,
+    ) -> list[str]:
+        """Replace any search term that has >60% word overlap with narration.
+
+        The validator in Scene.check_no_narration_leak_in_search rejects
+        queries whose word overlap with spoken narration exceeds 90%%.
+        To stay well clear of that boundary we apply a 60%% pre-check.
+        """
+        if not narration or not search_terms:
+            return search_terms
+
+        narration_words: set[str] = set(narration.lower().split())
+        if len(narration_words) < 3:
+            return search_terms
+
+        # Determine the topic category so we can pick appropriate fallbacks
+        category = StoryPlanner._classify_topic_for_intent(topic)
+        fallback_pool: list[str] = _VISUAL_FALLBACKS.get(
+            category,
+            _VISUAL_FALLBACKS.get("Space", []),
+        )
+        fallback_idx = 0
+
+        result: list[str] = []
+        for term in search_terms:
+            query_words: set[str] = set(term.lower().split())
+            if len(query_words) < 3:
+                result.append(term)
+                continue
+
+            overlap = len(narration_words & query_words) / len(query_words)
+            if overlap > 0.60:
+                # Replace with a visual-only alternative from the fallback pool
+                replacement = fallback_pool[fallback_idx % len(fallback_pool)]
+                fallback_idx += 1
+                logger.info(
+                    "Replaced search term '%s' (%.0f%% word overlap) with '%s'",
+                    term, overlap * 100, replacement,
+                )
+                result.append(replacement)
+            else:
+                result.append(term)
+
+        return result
+
+    @staticmethod
+    def _classify_topic_for_intent(topic: str) -> str:
+        """Simple topic classification for visual intent generation."""
+        topic_lower = topic.lower()
+        if any(w in topic_lower for w in ["space", "star", "galaxy", "universe", "planet"]):
+            return "Space"
+        if any(w in topic_lower for w in ["history", "war", "empire", "ancient", "medieval"]):
+            return "History"
+        if any(w in topic_lower for w in ["science", "physics", "biology", "chemistry"]):
+            return "Science"
+        if any(w in topic_lower for w in ["nature", "animal", "ocean", "forest"]):
+            return "Nature"
+        if any(w in topic_lower for w in ["tech", "computer", "ai", "robot"]):
+            return "Technology"
+        if any(w in topic_lower for w in ["finance", "money", "economy", "market"]):
+            return "Finance"
+        return "General"
+
 
     # ── Phase 2: Scene generation ───────────────────────────────────────
 

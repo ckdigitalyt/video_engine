@@ -1,211 +1,41 @@
-# providers.yaml — External API provider configuration
+# Provider configuration for the asset pipeline
+# Provider chain order: first match wins.
+provider_chain:
+  - nasa
+  - pexels
+  - pixabay
+  - wikimedia
+  - internet_archive
+  - fallback
 
-providers:
-  deepseek:
-    # DeepSeek API base URL
-    base_url: "https://api.deepseek.com"
+# Cache: check disk before making any external API call
+cache_first: true
 
-  pexels:
-    # Pexels video search API endpoint
-    base_url: "https://api.pexels.com/videos/search"
-    # Results per page (asset scoring evaluates up to this many candidates)
-    per_page: 10
-    # Weighting for deterministic asset quality scoring
-    scoring:
-      resolution_weight: 0.40
-      duration_match_weight: 0.40
-      hd_bonus_weight: 0.20
-    # Orientation filter for video search
-    orientation: "landscape"
+# Provider-specific config
+nasa:
+  base_url: "https://images-api.nasa.gov"
+  max_results: 5
+  timeout: 15
 
-    # Reusable asset library (local-first lookup)
-    reuse:
-      enabled: true
-      similarity_threshold: 0.45
-      max_candidates: 5
+pexels:
+  base_url: "https://api.pexels.com/videos"
+  max_results: 5
+  timeout: 15
 
-  pixabay:
-    # Pixabay video search API endpoint
-    base_url: "https://pixabay.com/api/videos"
-    # Results per page
-    per_page: 10
-    # Orientation filter: "horizontal", "vertical", or "all"
-    orientation: "horizontal"
-    # Minimum video width (px) — filters out low-res content
-    min_width: 1920
-    # Safe search: "true" or "false"
-    safesearch: "true"
-    # Scoring uses the same weights as pexels (shared via PexelsProvider._score_candidates)
+pixabay:
+  base_url: "https://pixabay.com/api/videos"
+  max_results: 5
+  timeout: 15
 
-# ── Topic-aware asset routing ──────────────────────────────────────────────
-# The AssetRouter uses this table to determine which provider(s) to try for
-# a given topic category.  Providers are tried in order; the first non-empty
-# result wins.
-#
-# To add a new provider:
-# 1. Implement the AssetProvider interface.
-# 2. Add the provider name to the appropriate category routes below.
-# 3. Instantiate it in AssetRouter._default_providers().
-#
-# Category keywords are used by the TopicClassifier to map a video topic
-# string (e.g. "The Fermi Paradox") to a category name.
+wikimedia:
+  base_url: "https://commons.wikimedia.org/w/api.php"
+  max_results: 5
+  timeout: 15
 
-asset_routing:
-  # Provider priority per category (first provider with results wins)
-  routes:
-    Space:      [nasa, pexels, pixabay, wikimedia]
-    History:    [wikimedia, pexels, pixabay]
-    Science:    [nasa, pexels, pixabay, wikimedia]
-    Nature:     [pexels, pixabay, wikimedia]
-    Technology: [pexels, pixabay, wikimedia]
-    Finance:    [pexels, pixabay, wikimedia]
-    General:    [pexels, pixabay, wikimedia]
+internet_archive:
+  base_url: "https://archive.org/advancedsearch.php"
+  max_results: 5
+  timeout: 15
 
-  # Category keyword definitions for the TopicClassifier
-  keywords:
-    Space:
-      - space
-      - astronomy
-      - astronaut
-      - nasa
-      - planet
-      - star
-      - galaxy
-      - universe
-      - cosmos
-      - telescope
-      - orbit
-      - satellite
-      - solar
-      - mars
-      - moon
-      - alien
-      - ufo
-      - extraterrestrial
-      - rocket
-      - launch
-      - nebula
-      - asteroid
-      - comet
-      - stellar
-      - fermi
-      - paradox
-      - cosmic
-      - interstellar
-      - celestial
-      - constellation
-      - lunar
-      - meteor
-      - observatory
-      - sputnik
-      - voyager
-      - hubble
-      - spacecraft
-      - spaceflight
-      - spacewalk
-      - black hole
-      - quasar
-    History:
-      - history
-      - ancient
-      - empire
-      - war
-      - revolution
-      - medieval
-      - roman
-      - greek
-      - egyptian
-      - civilization
-      - king
-      - queen
-      - battle
-      - century
-      - historical
-      - archaeology
-      - ruins
-      - renaissance
-      - colony
-      - dynasty
-      - monarch
-      - conquest
-    Science:
-      - science
-      - physics
-      - chemistry
-      - biology
-      - experiment
-      - laboratory
-      - research
-      - discovery
-      - dna
-      - genetics
-      - quantum
-      - particle
-      - energy
-      - element
-      - molecule
-      - scientist
-      - theory
-      - evolution
-      - microscope
-    Technology:
-      - technology
-      - computer
-      - ai
-      - programming
-      - software
-      - internet
-      - robot
-      - digital
-      - startup
-      - innovation
-      - cyber
-      - blockchain
-      - code
-      - algorithm
-      - machine learning
-      - artificial intelligence
-      - data
-      - network
-      - processor
-    Nature:
-      - nature
-      - animal
-      - wildlife
-      - ocean
-      - forest
-      - mountain
-      - river
-      - climate
-      - weather
-      - environment
-      - planet earth
-      - ecosystem
-      - bird
-      - fish
-      - plant
-      - garden
-      - landscape
-      - sea
-      - rainforest
-      - desert
-      - coral
-      - conservation
-    Finance:
-      - finance
-      - money
-      - economy
-      - bank
-      - stock
-      - investment
-      - wealth
-      - crypto
-      - market
-      - trading
-      - budget
-      - fund
-      - financial
-      - business
-      - entrepreneur
-      - recession
-      - inflation
+fallback:
+  always_allowed: true

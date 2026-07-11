@@ -306,7 +306,7 @@ class BeatPlanner:
             if i == len(clauses) - 1:
                 remaining = scene_duration - time_cursor
                 if remaining > 0:
-                    duration = remaining
+                    duration = min(remaining, 12.0)
 
             beat = Beat(index=i, text=clause, start_time=time_cursor, duration=duration)
             beats.append(beat)
@@ -314,7 +314,8 @@ class BeatPlanner:
 
         if beats and beats[-1].start_time + beats[-1].duration < scene_duration:
             diff = scene_duration - (beats[-1].start_time + beats[-1].duration)
-            beats[-1].duration += diff
+            new_dur = beats[-1].duration + diff
+            beats[-1].duration = min(new_dur, 12.0)
 
         return beats
 
