@@ -1,0 +1,38 @@
+# research.yaml — Research agent configuration
+#
+# Controls the web research phase of the V2 pipeline.
+# Research runs before story planning to build an evidence base.
+
+research:
+  # Maximum number of web sources to collect
+  max_sources: 15
+
+  # Recency filter — only consider sources within this many days
+  recency_days: 365
+
+  # Number of search queries to generate from the topic
+  search_query_count: 6
+
+  # Number of results to fetch per search query
+  results_per_query: 3
+
+  # Maximum concurrent operations
+  concurrency:
+    web_requests: 4
+    llm_extractions: 4
+
+  # Cache settings
+  cache:
+    store: "cache/research"
+    ttl_days: 7
+
+  # Fallback fact count when web search fails entirely
+  fallback_fact_count: 5
+
+  # Confidence threshold for fact verification (Stage 1.5)
+  verification:
+    cross_ref_required: 2    # Minimum sources per fact for high confidence
+    high_confidence: 0.8     # Score assigned with 3+ sources
+    medium_confidence: 0.6   # Score assigned with 2 sources
+    low_confidence: 0.3      # Score assigned with 1 source (LLM fallback)
+    insufficient: 0.15       # Score assigned when no sources support the claim
