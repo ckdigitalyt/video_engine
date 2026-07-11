@@ -118,6 +118,19 @@ def execution_node(state: AgentState):
     # Run the director's quality-gated pipeline
     direct_results = director.run()
 
+    # Log storyboard validation results
+    validation_report = director.results.get("validation_report")
+    if validation_report:
+        if validation_report.passed:
+            print(f"[execution] Storyboard validation PASSED")
+        else:
+            print(f"[execution] Storyboard validation ISSUES: "
+                  f"{len(validation_report.errors)} errors, "
+                  f"{len(validation_report.diversity_violations)} diversity violations")
+            if validation_report.errors:
+                for err in validation_report.errors[:3]:
+                    print(f"  -> {err}")
+
     # Convert director results to SceneAsset and update Scene objects
     scene_assets: list[SceneAsset] = []
     scene_narrations: list[tuple[int, str, str]] = []
@@ -149,25 +162,36 @@ def execution_node(state: AgentState):
         # Update the Pydantic Scene with the resolved assets
         if scene_id < len(pydantic_scenes):
             ps = pydantic_scenes[scene_id]
-            if hasattr(result, "asset_plan") and result.asset_plan:
-                ps.asset_plan = result.asset_plan
+            # result is a Pydantic Scene object — access attributes directly
+            scene_result = result if hasattr(result, "scene_id") else None
+            if scene_result:
+                # Copy beat plans (beat mode) if present
+                if scene_result.beat_plans:
+                    ps.beat_plans = scene_result.beat_plans
+                # Copy asset plan (legacy mode) if present
+                if scene_result.asset_plan:
+                    ps.asset_plan = scene_result.asset_plan
             else:
+                # Dict-style result (backward compat)
+                provider = result.get("provider", "pixabay") if not scene_result else "pixabay"
+                r_url = result.get("video_url", "") if not scene_result else ""
+                r_query = result.get("query", "") if not scene_result else ""
+                r_tech = result.get("technical_score", 0.0) if not scene_result else 0.0
+                r_sem = result.get("semantic_score", 0.0) if not scene_result else 0.0
+                r_aes = result.get("aesthetic_style", "documentary") if not scene_result else "documentary"
                 ps.asset_plan = AssetPlan(
-                    provider=ProviderType(result.get("provider", "pixabay")),
+                    provider=ProviderType(provider),
                     filepath=video_path,
-                    video_url=result.get("video_url", ""),
-                    query_used=result.get("query", ""),
-                score=max(
-                    result.get("technical_score", 0.0),
-                    result.get("semantic_score", 0.0),
-                ),
-                semantic_score=result.get("semantic_score", 0.0),
-                technical_score=result.get("technical_score", 0.0),
-                aesthetic_style=result.get("aesthetic_style", "documentary"),
-                duration=ps.expected_duration,
-                width=1920,
-                height=1080,
-            )
+                    video_url=r_url,
+                    query_used=r_query,
+                    score=max(r_tech, r_sem),
+                    semantic_score=r_sem,
+                    technical_score=r_tech,
+                    aesthetic_style=r_aes,
+                    duration=ps.expected_duration,
+                    width=1920,
+                    height=1080,
+                )
             ps.audio_plan = AudioPlan(
                 narration_audio_path=audio_path,
             )

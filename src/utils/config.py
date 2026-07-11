@@ -28,6 +28,9 @@ _CONFIG_FILES = [
     "logging.yaml",
     "planner.yaml",
     "evaluator.yaml",
+    "search_planner.yaml",
+    "visual_director.yaml",
+    "visual_quality.yaml",
 ]
 
 _cache = None
