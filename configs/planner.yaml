@@ -1,5 +1,36 @@
 # planner.yaml — Story planning configuration
 
+# ── Stage 3: Narrative arc configuration ─────────────────────────────────
+
+narrative:
+  # Cache store directory (relative to project root)
+  cache:
+    store: "cache/narrative"
+    ttl_days: 14
+
+  # Beat constraints
+  min_beats: 5
+  max_beats: 8
+
+  # Hook self-critic threshold (0.0-1.0)
+  hook_threshold: 0.7
+
+  # Default narrative framework when LLM selection fails
+  default_framework: "mystery_reveal"
+
+  # Available narrative frameworks (for reference)
+  frameworks:
+    - "mystery_reveal"
+    - "chronological"
+    - "problem_solution"
+    - "comparison"
+    - "listicle"
+    - "character_driven"
+
+# ── V1 planner configuration (unchanged) ────────────────────────────────
+
+planner:
+
 planner:
   # Default story template
   story_template: "documentary"
