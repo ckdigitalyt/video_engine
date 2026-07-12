@@ -1,0 +1,245 @@
+Runtime trace: 2026-07-12 12:54:37 UTC
+======================================================================
+[12:54:37.%f] Starting instrumented pipeline — fast mode
+[12:54:37.%f] Invoking pipeline...
+[12:55:43.%f] \n[Beat Mode] Director starting _run_beat_mode
+[12:55:45.%f] === CHECKPOINT A (after _process_shot returns) ===
+[12:55:45.%f]   scene_id: 0
+[12:55:45.%f]   beat_id: 0
+[12:55:45.%f]   shot_id: 0
+[12:55:45.%f]   has_result: True
+[12:55:45.%f]   asset_plan.filepath: cache/video/scene_0_b0_s0.mp4
+[12:55:45.%f]   asset_plan.video_url: https://videos.pexels.com/video-files/854223/854223-sd_960_540_30fps.mp4
+[12:55:45.%f]   file_exists: True
+[12:55:45.%f]   file_size: 42944382
+[12:55:47.%f] === CHECKPOINT A (after _process_shot returns) ===
+[12:55:47.%f]   scene_id: 0
+[12:55:47.%f]   beat_id: 1
+[12:55:47.%f]   shot_id: 0
+[12:55:47.%f]   has_result: False
+[12:55:47.%f] [FALLBACK PATH] Scene 0, Beat 1, Shot fallback invoked
+[12:55:54.%f]   FallbackDirector returned: filepath='cache/video/nasa_fallback_kenburns_97197.mp4' exists=True
+[12:55:54.%f] === CHECKPOINT A1 (after process_scene_beats for Scene 0) ===
+[12:55:54.%f]   scene_id: 0
+[12:55:54.%f]   beat_plans_count: 2
+[12:55:54.%f]   Beat 0, Shot 0: filepath='cache/video/scene_0_b0_s0.mp4' exists=True
+[12:55:54.%f]   Beat 1, Shot 0: filepath='cache/video/nasa_fallback_kenburns_97197.mp4' exists=True
+[12:55:56.%f] === CHECKPOINT A (after _process_shot returns) ===
+[12:55:56.%f]   scene_id: 1
+[12:55:56.%f]   beat_id: 0
+[12:55:56.%f]   shot_id: 0
+[12:55:56.%f]   has_result: False
+[12:55:57.%f] === CHECKPOINT A (after _process_shot returns) ===
+[12:55:57.%f]   scene_id: 1
+[12:55:57.%f]   beat_id: 1
+[12:55:57.%f]   shot_id: 0
+[12:55:57.%f]   has_result: False
+[12:55:59.%f] === CHECKPOINT A (after _process_shot returns) ===
+[12:55:59.%f]   scene_id: 1
+[12:55:59.%f]   beat_id: 2
+[12:55:59.%f]   shot_id: 0
+[12:55:59.%f]   has_result: False
+[12:55:59.%f] [FALLBACK PATH] Scene 1, Beat 0, Shot fallback invoked
+[12:56:09.%f]   FallbackDirector returned: filepath='cache/video/nasa_fallback_kenburns_3906.mp4' exists=True
+[12:56:09.%f] [FALLBACK PATH] Scene 1, Beat 1, Shot fallback invoked
+[12:56:21.%f]   FallbackDirector returned: filepath='cache/video/nasa_fallback_kenburns_58879.mp4' exists=True
+[12:56:21.%f] [FALLBACK PATH] Scene 1, Beat 2, Shot fallback invoked
+[12:56:32.%f]   FallbackDirector returned: filepath='cache/video/nasa_fallback_kenburns_46567.mp4' exists=True
+[12:56:34.%f] === CHECKPOINT A (after _process_shot returns) ===
+[12:56:34.%f]   scene_id: 2
+[12:56:34.%f]   beat_id: 0
+[12:56:34.%f]   shot_id: 0
+[12:56:34.%f]   has_result: False
+[12:56:36.%f] === CHECKPOINT A (after _process_shot returns) ===
+[12:56:36.%f]   scene_id: 2
+[12:56:36.%f]   beat_id: 0
+[12:56:36.%f]   shot_id: 1
+[12:56:36.%f]   has_result: False
+[12:56:38.%f] === CHECKPOINT A (after _process_shot returns) ===
+[12:56:38.%f]   scene_id: 2
+[12:56:38.%f]   beat_id: 1
+[12:56:38.%f]   shot_id: 0
+[12:56:38.%f]   has_result: False
+[12:56:40.%f] === CHECKPOINT A (after _process_shot returns) ===
+[12:56:40.%f]   scene_id: 2
+[12:56:40.%f]   beat_id: 1
+[12:56:40.%f]   shot_id: 1
+[12:56:40.%f]   has_result: False
+[12:56:40.%f] [FALLBACK PATH] Scene 2, Beat 0, Shot fallback invoked
+[12:56:46.%f]   FallbackDirector returned: filepath='cache/video/placeholder_scene_81960.mp4' exists=True
+[12:56:46.%f] [FALLBACK PATH] Scene 2, Beat 0, Shot fallback invoked
+[12:56:55.%f]   FallbackDirector returned: filepath='cache/video/nasa_fallback_kenburns_66541.mp4' exists=True
+[12:56:55.%f] [FALLBACK PATH] Scene 2, Beat 1, Shot fallback invoked
+[12:57:07.%f]   FallbackDirector returned: filepath='cache/video/nasa_fallback_kenburns_69164.mp4' exists=True
+[12:57:07.%f] [FALLBACK PATH] Scene 2, Beat 1, Shot fallback invoked
+[12:57:14.%f]   FallbackDirector returned: filepath='cache/video/nasa_fallback_kenburns_29452.mp4' exists=True
+[12:57:16.%f] === CHECKPOINT A (after _process_shot returns) ===
+[12:57:16.%f]   scene_id: 3
+[12:57:16.%f]   beat_id: 0
+[12:57:16.%f]   shot_id: 0
+[12:57:16.%f]   has_result: False
+[12:57:18.%f] === CHECKPOINT A (after _process_shot returns) ===
+[12:57:18.%f]   scene_id: 3
+[12:57:18.%f]   beat_id: 0
+[12:57:18.%f]   shot_id: 1
+[12:57:18.%f]   has_result: False
+[12:57:20.%f] === CHECKPOINT A (after _process_shot returns) ===
+[12:57:20.%f]   scene_id: 3
+[12:57:20.%f]   beat_id: 0
+[12:57:20.%f]   shot_id: 2
+[12:57:20.%f]   has_result: False
+[12:57:20.%f] [FALLBACK PATH] Scene 3, Beat 0, Shot fallback invoked
+[12:57:28.%f]   FallbackDirector returned: filepath='cache/video/nasa_fallback_kenburns_67392.mp4' exists=True
+[12:57:28.%f] [FALLBACK PATH] Scene 3, Beat 0, Shot fallback invoked
+turns) ===
+[12:55:22.%f]   scene_id: 7
+[12:55:22.%f]   beat_id: 0
+[12:55:22.%f]   shot_id: 0
+[12:55:22.%f]   has_result: False
+[12:55:24.%f] === CHECKPOINT A (after _process_shot returns) ===
+[12:55:24.%f]   scene_id: 7
+[12:55:24.%f]   beat_id: 1
+[12:55:24.%f]   shot_id: 0
+[12:55:24.%f]   has_result: False
+[12:55:26.%f] === CHECKPOINT A (after _process_shot returns) ===
+[12:55:26.%f]   scene_id: 7
+[12:55:26.%f]   beat_id: 2
+[12:55:26.%f]   shot_id: 0
+[12:55:26.%f]   has_result: False
+[12:55:53.%f] === CHECKPOINT A (after _process_shot returns) ===
+[12:55:53.%f]   scene_id: 8
+[12:55:53.%f]   beat_id: 0
+[12:55:53.%f]   shot_id: 0
+[12:55:53.%f]   has_result: False
+[12:55:55.%f] === CHECKPOINT A (after _process_shot returns) ===
+[12:55:55.%f]   scene_id: 8
+[12:55:55.%f]   beat_id: 0
+[12:55:55.%f]   shot_id: 1
+[12:55:55.%f]   has_result: False
+[12:55:56.%f] === CHECKPOINT A (after _process_shot returns) ===
+[12:55:56.%f]   scene_id: 8
+[12:55:56.%f]   beat_id: 1
+[12:55:56.%f]   shot_id: 0
+[12:55:56.%f]   has_result: False
+[12:55:57.%f] === CHECKPOINT A (after _process_shot returns) ===
+[12:55:57.%f]   scene_id: 8
+[12:55:57.%f]   beat_id: 1
+[12:55:57.%f]   shot_id: 1
+[12:55:57.%f]   has_result: False
+[12:56:41.%f] === CHECKPOINT A (after _process_shot returns) ===
+[12:56:41.%f]   scene_id: 9
+[12:56:41.%f]   beat_id: 0
+[12:56:41.%f]   shot_id: 0
+[12:56:41.%f]   has_result: False
+[12:56:44.%f] === CHECKPOINT A (after _process_shot returns) ===
+[12:56:44.%f]   scene_id: 9
+[12:56:44.%f]   beat_id: 0
+[12:56:44.%f]   shot_id: 1
+[12:56:44.%f]   has_result: False
+[12:57:07.%f] [Beat Mode] Director returned 10 scenes
+[12:57:07.%f] === CHECKPOINT A2 (after _run_beat_mode returns) ===
+[12:57:07.%f]   scene_id: 0
+[12:57:07.%f]   title: The Great Silence
+[12:57:07.%f]   scene.asset_plan: None
+[12:57:07.%f]   beat_plans_count: 3
+[12:57:07.%f]   beat_plans: [{'beat_index': 0, 'shots': [{'shot_type': 'primary', 'filepath': 'cache/video/scene_0_b0_s0.mp4', 'video_url': 'https://videos.pexels.com/video-files/854223/854223-sd_960_540_30fps.mp4', 'exists': True}]}, {'beat_index': 1, 'shots': [{'shot_type': 'primary', 'filepath': 'cache/video/nasa_fallback_kenburns_97197.mp4', 'video_url': '', 'exists': True}]}, {'beat_index': 2, 'shots': [{'shot_type': 'primary', 'filepath': 'cache/video/nasa_fallback_kenburns_3906.mp4', 'video_url': '', 'exists': True}]}]
+[12:57:07.%f] === CHECKPOINT A2 (after _run_beat_mode returns) ===
+[12:57:07.%f]   scene_id: 1
+[12:57:07.%f]   title: Fermi's Question
+[12:57:07.%f]   scene.asset_plan: None
+[12:57:07.%f]   beat_plans_count: 1
+[12:57:07.%f]   beat_plans: [{'beat_index': 0, 'shots': [{'shot_type': 'primary', 'filepath': 'cache/video/nasa_fallback_kenburns_58879.mp4', 'video_url': '', 'exists': True}, {'shot_type': 'cutaway', 'filepath': 'cache/video/nasa_fallback_kenburns_46567.mp4', 'video_url': '', 'exists': True}, {'shot_type': 'backup', 'filepath': 'cache/video/emergency_39118.mp4', 'video_url': '', 'exists': True}]}]
+[12:57:07.%f] === CHECKPOINT A2 (after _run_beat_mode returns) ===
+[12:57:07.%f]   scene_id: 2
+[12:57:07.%f]   title: Scale of the Cosmos
+[12:57:07.%f]   scene.asset_plan: None
+[12:57:07.%f]   beat_plans_count: 2
+[12:57:07.%f]   beat_plans: [{'beat_index': 0, 'shots': [{'shot_type': 'primary', 'filepath': 'cache/video/nasa_fallback_kenburns_69164.mp4', 'video_url': '', 'exists': True}, {'shot_type': 'cutaway', 'filepath': 'cache/video/nasa_fallback_kenburns_29452.mp4', 'video_url': '', 'exists': True}]}, {'beat_index': 1, 'shots': [{'shot_type': 'primary', 'filepath': 'cache/video/nasa_fallback_kenburns_67392.mp4', 'video_url': '', 'exists': True}, {'shot_type': 'cutaway', 'filepath': 'cache/video/nasa_fallback_kenburns_55520.mp4', 'video_url': '', 'exists': True}]}]
+[12:57:07.%f] === CHECKPOINT A2 (after _run_beat_mode returns) ===
+[12:57:07.%f]   scene_id: 3
+[12:57:07.%f]   title: The Great Filter
+[12:57:07.%f]   scene.asset_plan: None
+[12:57:07.%f]   beat_plans_count: 1
+[12:57:07.%f]   beat_plans: [{'beat_index': 0, 'shots': [{'shot_type': 'primary', 'filepath': 'cache/video/nasa_fallback_kenburns_95449.mp4', 'video_url': '', 'exists': True}, {'shot_type': 'cutaway', 'filepath': 'cache/video/nasa_fallback_kenburns_58083.mp4', 'video_url': '', 'exists': True}, {'shot_type': 'backup', 'filepath': 'cache/video/nasa_fallback_kenburns_6573.mp4', 'video_url': '', 'exists': True}]}]
+[12:57:07.%f] === CHECKPOINT A2 (after _run_beat_mode returns) ===
+[12:57:07.%f]   scene_id: 4
+[12:57:07.%f]   title: Rare Earth
+[12:57:07.%f]   scene.asset_plan: None
+[12:57:07.%f]   beat_plans_count: 1
+[12:57:07.%f]   beat_plans: [{'beat_index': 0, 'shots': [{'shot_type': 'primary', 'filepath': 'cache/video/nasa_fallback_kenburns_13578.mp4', 'video_url': '', 'exists': True}, {'shot_type': 'cutaway', 'filepath': 'cache/video/nasa_fallback_kenburns_64033.mp4', 'video_url': '', 'exists': True}, {'shot_type': 'backup', 'filepath': 'cache/video/nasa_fallback_kenburns_57913.mp4', 'video_url': '', 'exists': True}]}]
+[12:57:07.%f] === CHECKPOINT A2 (after _run_beat_mode returns) ===
+[12:57:07.%f]   scene_id: 5
+[12:57:07.%f]   title: The Planetarium Hypothesis
+[12:57:07.%f]   scene.asset_plan: None
+[12:57:07.%f]   beat_plans_count: 1
+[12:57:07.%f]   beat_plans: [{'beat_index': 0, 'shots': [{'shot_type': 'primary', 'filepath': 'cache/video/placeholder_scene_78194.mp4', 'video_url': '', 'exists': True}, {'shot_type': 'cutaway', 'filepath': 'cache/video/nasa_fallback_kenburns_24915.mp4', 'video_url': '', 'exists': True}, {'shot_type': 'backup', 'filepath': 'cache/video/nasa_fallback_kenburns_57955.mp4', 'video_url': '', 'exists': True}]}]
+[12:57:07.%f] === CHECKPOINT A2 (after _run_beat_mode returns) ===
+[12:57:07.%f]   scene_id: 6
+[12:57:07.%f]   title: Transcendence
+[12:57:07.%f]   scene.asset_plan: None
+[12:57:07.%f]   beat_plans_count: 1
+[12:57:07.%f]   beat_plans: [{'beat_index': 0, 'shots': [{'shot_type': 'primary', 'filepath': 'cache/video/placeholder_scene_70799.mp4', 'video_url': '', 'exists': True}, {'shot_type': 'cutaway', 'filepath': 'cache/video/nasa_fallback_kenburns_19770.mp4', 'video_url': '', 'exists': True}, {'shot_type': 'backup', 'filepath': 'cache/video/nasa_fallback_kenburns_70009.mp4', 'video_url': '', 'exists': True}]}]
+[12:57:07.%f] === CHECKPOINT A2 (after _run_beat_mode returns) ===
+[12:57:07.%f]   scene_id: 7
+[12:57:07.%f]   title: Uncertainty Acknowledged
+[12:57:07.%f]   scene.asset_plan: None
+[12:57:07.%f]   beat_plans_count: 3
+[12:57:07.%f]   beat_plans: [{'beat_index': 0, 'shots': [{'shot_type': 'primary', 'filepath': 'cache/video/nasa_fallback_kenburns_85216.mp4', 'video_url': '', 'exists': True}]}, {'beat_index': 1, 'shots': [{'shot_type': 'primary', 'filepath': 'cache/video/nasa_fallback_kenburns_25996.mp4', 'video_url': '', 'exists': True}]}, {'beat_index': 2, 'shots': [{'shot_type': 'primary', 'filepath': 'cache/video/nasa_fallback_kenburns_62403.mp4', 'video_url': '', 'exists': True}]}]
+[12:57:07.%f] === CHECKPOINT A2 (after _run_beat_mode returns) ===
+[12:57:07.%f]   scene_id: 8
+[12:57:07.%f]   title: A Humble Perspective
+[12:57:07.%f]   scene.asset_plan: None
+[12:57:07.%f]   beat_plans_count: 2
+[12:57:07.%f]   beat_plans: [{'beat_index': 0, 'shots': [{'shot_type': 'primary', 'filepath': 'cache/video/nasa_fallback_kenburns_59474.mp4', 'video_url': '', 'exists': True}, {'shot_type': 'cutaway', 'filepath': 'cache/video/nasa_fallback_kenburns_97371.mp4', 'video_url': '', 'exists': True}]}, {'beat_index': 1, 'shots': [{'shot_type': 'primary', 'filepath': 'cache/video/nasa_fallback_kenburns_38830.mp4', 'video_url': '', 'exists': True}, {'shot_type': 'cutaway', 'filepath': 'cache/video/nasa_fallback_kenburns_6735.mp4', 'video_url': '', 'exists': True}]}]
+[12:57:07.%f] === CHECKPOINT A2 (after _run_beat_mode returns) ===
+[12:57:07.%f]   scene_id: 9
+[12:57:07.%f]   title: Listening to the Silence
+[12:57:07.%f]   scene.asset_plan: None
+[12:57:07.%f]   beat_plans_count: 1
+[12:57:07.%f]   beat_plans: [{'beat_index': 0, 'shots': [{'shot_type': 'primary', 'filepath': 'cache/video/nasa_fallback_kenburns_9711.mp4', 'video_url': '', 'exists': True}, {'shot_type': 'cutaway', 'filepath': 'cache/video/nasa_fallback_kenburns_81400.mp4', 'video_url': '', 'exists': True}]}]
+[12:57:10.%f] \n============================================================
+[12:57:10.%f] CHECKPOINT D (after _build)
+[12:57:10.%f] ============================================================
+[12:57:10.%f]   video_timeline: file='cache/video/scene_0_b0_s0.mp4' exists=True size=42944382
+[12:57:10.%f]   video_timeline: file='cache/video/nasa_fallback_kenburns_97197.mp4' exists=True size=1013995
+[12:57:10.%f]   video_timeline: file='cache/video/nasa_fallback_kenburns_3906.mp4' exists=True size=917641
+[12:57:10.%f]   video_timeline: file='cache/video/nasa_fallback_kenburns_58879.mp4' exists=True size=1110413
+[12:57:10.%f]   video_timeline: file='cache/video/nasa_fallback_kenburns_46567.mp4' exists=True size=416922
+[12:57:10.%f]   video_timeline: file='cache/video/emergency_39118.mp4' exists=True size=9283
+[12:57:10.%f]   video_timeline: file='cache/video/nasa_fallback_kenburns_69164.mp4' exists=True size=1003358
+[12:57:10.%f]   video_timeline: file='cache/video/nasa_fallback_kenburns_29452.mp4' exists=True size=524336
+[12:57:10.%f]   video_timeline: file='cache/video/nasa_fallback_kenburns_67392.mp4' exists=True size=2284036
+[12:57:10.%f]   video_timeline: file='cache/video/nasa_fallback_kenburns_55520.mp4' exists=True size=1017265
+[12:57:10.%f]   video_timeline: file='cache/video/nasa_fallback_kenburns_95449.mp4' exists=True size=1957628
+[12:57:10.%f]   video_timeline: file='cache/video/nasa_fallback_kenburns_58083.mp4' exists=True size=1264799
+[12:57:10.%f]   video_timeline: file='cache/video/nasa_fallback_kenburns_6573.mp4' exists=True size=1967588
+[12:57:10.%f]   video_timeline: file='cache/video/nasa_fallback_kenburns_13578.mp4' exists=True size=1731500
+[12:57:10.%f]   video_timeline: file='cache/video/nasa_fallback_kenburns_64033.mp4' exists=True size=1489058
+[12:57:10.%f]   video_timeline: file='cache/video/nasa_fallback_kenburns_57913.mp4' exists=True size=896278
+[12:57:10.%f]   video_timeline: file='cache/video/placeholder_scene_78194.mp4' exists=True size=14187
+[12:57:10.%f]   video_timeline: file='cache/video/nasa_fallback_kenburns_24915.mp4' exists=True size=1113048
+[12:57:10.%f]   video_timeline: file='cache/video/nasa_fallback_kenburns_57955.mp4' exists=True size=1316923
+[12:57:10.%f]   video_timeline: file='cache/video/placeholder_scene_70799.mp4' exists=True size=14187
+[12:57:10.%f]   video_timeline: file='cache/video/nasa_fallback_kenburns_19770.mp4' exists=True size=1305379
+[12:57:10.%f]   video_timeline: file='cache/video/nasa_fallback_kenburns_70009.mp4' exists=True size=1056633
+[12:57:10.%f]   video_timeline: file='cache/video/nasa_fallback_kenburns_85216.mp4' exists=True size=2122831
+[12:57:10.%f]   video_timeline: file='cache/video/nasa_fallback_kenburns_25996.mp4' exists=True size=806732
+[12:57:10.%f]   video_timeline: file='cache/video/nasa_fallback_kenburns_62403.mp4' exists=True size=2989095
+[12:57:10.%f]   video_timeline: file='cache/video/nasa_fallback_kenburns_59474.mp4' exists=True size=463127
+[12:57:10.%f]   video_timeline: file='cache/video/nasa_fallback_kenburns_97371.mp4' exists=True size=1391284
+[12:57:10.%f]   video_timeline: file='cache/video/nasa_fallback_kenburns_38830.mp4' exists=True size=996119
+[12:57:10.%f]   video_timeline: file='cache/video/nasa_fallback_kenburns_6735.mp4' exists=True size=643730
+[12:57:10.%f]   video_timeline: file='cache/video/nasa_fallback_kenburns_9711.mp4' exists=True size=1066729
+[12:57:10.%f]   video_timeline: file='cache/video/nasa_fallback_kenburns_81400.mp4' exists=True size=692597
+[12:57:10.%f]   audio_timeline: file='cache/audio/scene_0_mixed.wav' exists=True size=1459664
+[12:57:10.%f]   audio_timeline: file='cache/audio/scene_1_mixed.wav' exists=True size=1418300
+[12:57:10.%f]   audio_timeline: file='cache/audio/scene_2_mixed.wav' exists=True size=1286616
+[12:57:10.%f]   audio_timeline: file='cache/audio/scene_3_mixed.wav' exists=True size=1384430
+[12:57:10.%f]   audio_timeline: file='cache/audio/scene_4_mixed.wav' exists=True size=1292262
+[12:57:10.%f]   audio_timeline: file='cache/audio/scene_5_mixed.wav' exists=True size=1239518
+[12:57:10.%f]   audio_timeline: file='cache/audio/scene_6_mixed.wav' exists=True size=1226376
+[12:57:10.%f]   audio_timeline: file='cache/audio/scene_7_mixed.wav' exists=True size=1260244
+[12:57:10.%f]   audio_timeline: file='cache/audio/scene_8_mixed.wav' exists=True size=1408862
+[12:57:10.%f]   audio_timeline: file='cache/audio/scene_9_mixed.wav' exists=True size=1043890
+[12:57:10.%f] ============================================================
+[12:57:10.%f] PIPELINE EXCEPTION: RuntimeError: Timeline validation failed with 1 error(s)
