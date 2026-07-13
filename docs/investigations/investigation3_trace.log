@@ -1,0 +1,153 @@
+Investigation #3 trace: 2026-07-13 12:09:14 UTC
+Target: Scene 0, Beat 0, Shot 1
+======================================================================
+[2026-07-13 12:09:14.%f] Starting Investigation #3 — instrumented pipeline
+[2026-07-13 12:09:14.%f] Target: Scene 0, Beat 0, Shot 1
+[2026-07-13 12:09:15.%f] Invoking pipeline...
+[2026-07-13 12:10:22.%f] [Shot 0/0/0] → SKIPPED (not target) | result=cache/video/scene_0_b0_s0.mp4
+[2026-07-13 12:10:22.%f] 
+######################################################################
+[2026-07-13 12:10:22.%f]   ### INVESTIGATION TARGET: Scene 0, Beat 0, Shot 1 ###
+[2026-07-13 12:10:22.%f] ######################################################################
+[2026-07-13 12:10:22.%f]   Shot type: cutaway
+[2026-07-13 12:10:22.%f]   Shot description: 
+[2026-07-13 12:10:22.%f]   Shot duration: 1.37s
+[2026-07-13 12:10:22.%f] 
+
+[2026-07-13 12:10:22.%f]   Queries to try: ['general cutaway shot', 'general', 'The Fermi Paradox documentary stock footage']
+[2026-07-13 12:10:22.%f]   Provider order for category 'Space': ['nasa', 'pexels', 'pixabay', 'wikimedia']
+[2026-07-13 12:10:22.%f] 
+
+[2026-07-13 12:10:22.%f]   --- Attempt 1: query='general cutaway shot' ---
+[2026-07-13 12:10:22.%f] 
+======================================================================
+[2026-07-13 12:10:22.%f]   CHECKPOINT 1
+[2026-07-13 12:10:22.%f] ======================================================================
+[2026-07-13 12:10:22.%f]   provider: none
+[2026-07-13 12:10:22.%f]   search_query: general cutaway shot
+[2026-07-13 12:10:22.%f]   HTTP status: 200 (assumed from provider libs)
+[2026-07-13 12:10:22.%f]   number_of_candidates_returned: 0
+[2026-07-13 12:10:22.%f]   all_video_ids: []
+[2026-07-13 12:10:22.%f]   provider_order_tried: ['nasa', 'pexels', 'pixabay', 'wikimedia']
+[2026-07-13 12:10:22.%f] 
+[2026-07-13 12:10:22.%f]   -> No candidates returned for 'general cutaway shot'
+[2026-07-13 12:10:22.%f] 
+======================================================================
+[2026-07-13 12:10:22.%f]   CHECKPOINT 2
+[2026-07-13 12:10:22.%f] ======================================================================
+[2026-07-13 12:10:22.%f]   candidate_IDs: []
+[2026-07-13 12:10:22.%f]   candidate_scores: []
+[2026-07-13 12:10:22.%f]   selected_candidate_ID: N/A
+[2026-07-13 12:10:22.%f]   rejection_reason: No assets returned from provider search
+[2026-07-13 12:10:22.%f] 
+[2026-07-13 12:10:22.%f]   --- Attempt 2: query='general' ---
+[2026-07-13 12:10:22.%f] 
+======================================================================
+[2026-07-13 12:10:22.%f]   CHECKPOINT 1
+[2026-07-13 12:10:22.%f] ======================================================================
+[2026-07-13 12:10:22.%f]   provider: nasa
+[2026-07-13 12:10:22.%f]   search_query: general
+[2026-07-13 12:10:22.%f]   HTTP status: 200 (assumed from provider libs)
+[2026-07-13 12:10:22.%f]   number_of_candidates_returned: 1
+[2026-07-13 12:10:22.%f]   all_video_ids: ['idx_0']
+[2026-07-13 12:10:22.%f]   provider_order_tried: ['nasa', 'pexels', 'pixabay', 'wikimedia']
+[2026-07-13 12:10:22.%f] 
+[2026-07-13 12:10:22.%f] 
+======================================================================
+[2026-07-13 12:10:22.%f]   CHECKPOINT 2
+[2026-07-13 12:10:22.%f] ======================================================================
+[2026-07-13 12:10:22.%f]   candidate_IDs: ['unknown']
+[2026-07-13 12:10:22.%f]   candidate_scores: [{"id": "unknown", "width": 0, "height": 0, "duration": 0, "score_approx": 0.2}]
+[2026-07-13 12:10:22.%f]   selected_candidate_ID: unknown
+[2026-07-13 12:10:22.%f]   rejection_reason: N/A (candidate selected)
+[2026-07-13 12:10:22.%f] 
+[2026-07-13 12:10:22.%f] 
+======================================================================
+[2026-07-13 12:10:22.%f]   CHECKPOINT 3
+[2026-07-13 12:10:22.%f] ======================================================================
+[2026-07-13 12:10:22.%f]   selected_candidate_ID: unknown
+[2026-07-13 12:10:22.%f]   video_files_count: 1
+[2026-07-13 12:10:22.%f]   extracted_vf_link: http://images-assets.nasa.gov/video/NHQ_2019_0719_We Go as the Artemis Generation/NHQ_2019_0719_We Go as the Artemis Gen...
+[2026-07-13 12:10:22.%f]   vf_link_is_empty: False
+[2026-07-13 12:10:22.%f] 
+[2026-07-13 12:10:23.%f]   Semantic score: 0.0000 (threshold: 0.75)
+[2026-07-13 12:10:23.%f] 
+======================================================================
+[2026-07-13 12:10:23.%f]   CHECKPOINT 4
+[2026-07-13 12:10:23.%f] ======================================================================
+[2026-07-13 12:10:23.%f]   download_URL: http://images-assets.nasa.gov/video/NHQ_2019_0719_We Go as the Artemis Generation/NHQ_2019_0719_We Go as the Artemis Gen...
+[2026-07-13 12:10:23.%f]   destination_path: cache/video/scene_0_b0_s1.mp4
+[2026-07-13 12:10:23.%f] 
+[2026-07-13 12:10:26.%f] 
+======================================================================
+[2026-07-13 12:10:26.%f]   CHECKPOINT 5
+[2026-07-13 12:10:26.%f] ======================================================================
+[2026-07-13 12:10:26.%f]   download_success: True
+[2026-07-13 12:10:26.%f]   file_exists: True
+[2026-07-13 12:10:26.%f]   file_size: 13577378
+[2026-07-13 12:10:26.%f]   any_exception: None
+[2026-07-13 12:10:26.%f] 
+[2026-07-13 12:10:26.%f] 
+======================================================================
+[2026-07-13 12:10:26.%f]   CHECKPOINT 6
+[2026-07-13 12:10:26.%f] ======================================================================
+[2026-07-13 12:10:26.%f]   filepath: cache/video/scene_0_b0_s1.mp4
+[2026-07-13 12:10:26.%f]   duration: 71.84s
+[2026-07-13 12:10:26.%f]   resolution: 1280,720
+[2026-07-13 12:10:26.%f]   gate_decision: REJECTED
+[2026-07-13 12:10:26.%f]   exact_rejection_reason: SemanticGate: semantic_score 0.000 < threshold 0.75
+[2026-07-13 12:10:26.%f]   gate_details: {"semantic": {"passed": false, "reason": "semantic_score 0.000 < threshold 0.75"}}
+[2026-07-13 12:10:26.%f] 
+[2026-07-13 12:10:26.%f]   -> REJECTED by quality gates: SemanticGate: semantic_score 0.000 < threshold 0.75
+[2026-07-13 12:10:26.%f]   -> Deleted rejected file: cache/video/scene_0_b0_s1.mp4
+[2026-07-13 12:10:26.%f]   --- Attempt 3: query='The Fermi Paradox documentary stock footage' ---
+[2026-07-13 12:10:27.%f] 
+======================================================================
+[2026-07-13 12:10:27.%f]   CHECKPOINT 1
+[2026-07-13 12:10:27.%f] ======================================================================
+[2026-07-13 12:10:27.%f]   provider: none
+[2026-07-13 12:10:27.%f]   search_query: The Fermi Paradox documentary stock footage
+[2026-07-13 12:10:27.%f]   HTTP status: 200 (assumed from provider libs)
+[2026-07-13 12:10:27.%f]   number_of_candidates_returned: 0
+[2026-07-13 12:10:27.%f]   all_video_ids: []
+[2026-07-13 12:10:27.%f]   provider_order_tried: ['nasa', 'pexels', 'pixabay', 'wikimedia']
+[2026-07-13 12:10:27.%f] 
+[2026-07-13 12:10:27.%f]   -> No candidates returned for 'The Fermi Paradox documentary stock footage'
+[2026-07-13 12:10:27.%f] 
+======================================================================
+[2026-07-13 12:10:27.%f]   CHECKPOINT 2
+[2026-07-13 12:10:27.%f] ======================================================================
+[2026-07-13 12:10:27.%f]   candidate_IDs: []
+[2026-07-13 12:10:27.%f]   candidate_scores: []
+[2026-07-13 12:10:27.%f]   selected_candidate_ID: N/A
+[2026-07-13 12:10:27.%f]   rejection_reason: No assets returned from provider search
+[2026-07-13 12:10:27.%f] 
+[2026-07-13 12:10:27.%f] 
+  -> All 3 queries exhausted for shot 0/0/1
+[2026-07-13 12:10:27.%f] 
+======================================================================
+[2026-07-13 12:10:27.%f]   CHECKPOINT 7
+[2026-07-13 12:10:27.%f] ======================================================================
+[2026-07-13 12:10:27.%f]   precise_reason_primary_pipeline_failed: No assets returned by any provider for any query
+[2026-07-13 12:10:27.%f]   queries_tried: ['general cutaway shot', 'general', 'The Fermi Paradox documentary stock footage']
+[2026-07-13 12:10:27.%f] 
+[2026-07-13 12:10:39.%f] 
+======================================================================
+[2026-07-13 12:10:39.%f]   CHECKPOINT 8
+[2026-07-13 12:10:39.%f] ======================================================================
+[2026-07-13 12:10:39.%f]   fallback_type: nasa
+[2026-07-13 12:10:39.%f]   output_path: cache/video/nasa_fallback_kenburns_97197.mp4
+[2026-07-13 12:10:39.%f]   file_exists: True
+[2026-07-13 12:10:39.%f]   file_size: 1013995
+[2026-07-13 12:10:39.%f] 
+[2026-07-13 12:10:48.%f] [Fallback] Scene 0, Beat 1 — non-target shot got fallback: type=nasa
+[2026-07-13 12:10:56.%f] [Fallback] Scene 0, Beat 1 — non-target shot got fallback: type=nasa
+[2026-07-13 12:10:56.%f] [post-process] Scene 0, Beat 0, Shot 0: filepath='cache/video/scene_0_b0_s0.mp4'
+[2026-07-13 12:10:56.%f] [post-process] Scene 0, Beat 0, Shot 1: filepath='cache/video/nasa_fallback_kenburns_97197.mp4'
+[2026-07-13 12:10:56.%f] [post-process] Scene 0, Beat 1, Shot 0: filepath='cache/video/nasa_fallback_kenburns_3906.mp4'
+[2026-07-13 12:10:56.%f] [post-process] Scene 0, Beat 1, Shot 1: filepath='cache/video/nasa_fallback_kenburns_58879.mp4'
+[2026-07-13 12:11:17.%f] [Fallback] Scene 1, Beat 0 — non-target shot got fallback: type=nasa
+[2026-07-13 12:11:34.%f] [Fallback] Scene 1, Beat 0 — non-target shot got fallback: type=emergency
+[2026-07-13 12:11:41.%f] [Fallback] Scene 1, Beat 1 — non-target shot got fallback: type=nasa
+[2026-07-13 12:11:50.%f] [Fallback] Scene 1, Beat 1 — non-target shot got fallback: type=nasa
+[2026-07-13 12:12:08.%f] [Fallback] Scene 2, Beat 0 — non-target shot got fallback: type=nasa
