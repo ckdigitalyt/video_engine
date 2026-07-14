@@ -1,0 +1,37 @@
+Search Term Lineage Trace - 2026-07-14 07:35 UTC
+======================================================================
+
+[INSERTION POINT A] planner.py:185  sanitised_terms or ['general']
+  _sanitise_search_terms([], 'narration', 'The Fermi Paradox') = []
+  [] or ['general'] -> ['general']  ← ROOT CAUSE
+
+  _sanitise_search_terms(['deep space'], 'narration', ...) = ['deep space']
+  ['deep space'] or ['general'] -> ['deep space']
+
+[expand_for_shot] When base_query='general'
+  shot_type='cutaway' -> ['general cutaway shot', 'general wide shot', 'general establishing', 'The Fermi Paradox cutaway', 'The Fermi Paradox documentary footage', 'deep space', 'night sky']
+  shot_type='primary' -> ['general primary shot', 'general wide shot', 'general establishing', ...]
+
+[expand_for_shot] When base_query='The Fermi Paradox' (correct)
+  shot_type='cutaway' -> ['The Fermi Paradox cutaway shot', 'The Fermi Paradox wide shot', 'The Fermi Paradox establishing', ...]
+
+[expand_for_shot] When base_query='deep space' (ideal)
+  shot_type='cutaway' -> ['deep space cutaway shot', 'deep space wide shot', 'deep space establishing', ...]
+
+======================================================================
+ROOT CAUSE: The literal 'general' enters the pipeline at planner.py:185
+  sanitised_terms or ['general']
+  When _sanitise_search_terms returns [] (because terms had >60% word
+  overlap with narration, or because LLM returned empty search_terms),
+  the falsy [] triggers the fallback ['general']
+
+  Then 'general' propagates to:
+    1. SearchPlan.asset_search_queries = ['general']
+    2. Scene object's search_plan carries ['general']
+    3. BeatDirector._process_shot reads base_query = search_terms[0] = 'general'
+    4. expand_for_shot('general', 'cutaway', ...) produces 'general cutaway shot'
+    5. Provider API receives 'general cutaway shot' -> NASA returns Artemis assets
+
+RECOMMENDATION:
+  Replace ['general'] with topic-based fallback:
+    sanitised_terms or [f'{topic} documentary stock footage', topic]
