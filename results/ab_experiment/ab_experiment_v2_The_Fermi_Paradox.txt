@@ -1,0 +1,992 @@
+[asset_router] Loaded env vars from /home/ubuntu/.openclaw/workspace/video_engine/.env
+-> AssetRouter: topic='The Fermi Paradox' → category='Space'
+======================================================================
+  A/B EXPERIMENT v2 — Search-Term Sanitiser Impact
+  Topic: The Fermi Paradox
+  Scenes: 5
+  Overlap threshold: 50%
+  Replacement map size: 38 entries
+======================================================================
+
+────────────────────────────────────────────────────────────
+  Scene 0: The Question of Silence
+────────────────────────────────────────────────────────────
+  Narration: The universe is vast, ancient, and filled with billions of Earth-like worlds. So why have we heard nothing from anyone o...
+  Raw LLM terms (7):
+    [1] 'Fermi looking up at stars 1950s diner'
+    [2] 'desolate radio telescope dish rotating slow motion'
+    [3] 'sand falling in hourglass cosmic scale'
+    [4] 'empty alien city ruins atmospheric fog'
+    [5] 'single candle flame in vast dark void'
+    [6] 'ancient star map parchment with symbols'
+    [7] 'ripple in pond reflecting galaxies'
+
+  ── Sanitiser Output ──
+  Raw terms:      7
+  Sanitised terms: 7
+  Terms removed:   0
+
+  ── Per-term Overlap (B) ──
+    'Fermi looking up at stars 1950s diner'
+      Overlap: 57.1% — REJECTED
+      Common:  at, fermi, stars, up
+      → Replacement: 'celestial star field'
+    'desolate radio telescope dish rotating slow motion'
+      Overlap: 0.0% — ACCEPTED
+      Common:  (none)
+    'sand falling in hourglass cosmic scale'
+      Overlap: 16.7% — ACCEPTED
+      Common:  in
+    'empty alien city ruins atmospheric fog'
+      Overlap: 0.0% — ACCEPTED
+      Common:  (none)
+    'single candle flame in vast dark void'
+      Overlap: 14.3% — ACCEPTED
+      Common:  in
+    'ancient star map parchment with symbols'
+      Overlap: 16.7% — ACCEPTED
+      Common:  with
+    'ripple in pond reflecting galaxies'
+      Overlap: 20.0% — ACCEPTED
+      Common:  in
+
+  ── Per-Term Pipeline Results ──
+    Testing: 'Fermi looking up at stars 1950s diner'
+-> NASA Cache MISS: 'Fermi looking up at stars 1950s diner' — calling NASA API
+-> Cache MISS: 'Fermi looking up at stars 1950s diner' — calling Pexels API
+  Candidate 1: id=7476130 1920x1080 dur=8s score=0.800 ← SELECTED
+  Candidate 2: id=6531806 4096x2160 dur=18s score=0.800
+  Candidate 3: id=7182150 4096x2160 dur=29s score=0.800
+  Candidate 4: id=10882975 3840x2160 dur=55s score=0.800
+  Candidate 5: id=7653593 4096x2160 dur=18s score=0.800
+  Candidate 6: id=4669703 4096x2160 dur=9s score=0.800
+  Candidate 7: id=6531897 4096x2160 dur=25s score=0.800
+  Candidate 8: id=12286522 1920x1028 dur=9s score=0.781
+  Candidate 9: id=29408668 2906x1002 dur=63s score=0.600
+  Candidate 10: id=29408907 2906x1002 dur=59s score=0.600
+-> Multi-query: accepted 'Fermi looking up at stars 1950s diner' (score=0.800 >= 0.0) — early exit
+      Provider: pexels
+      Hits:     10
+      Semantic: 1.000
+      Gate:     PASS
+
+    Testing: 'desolate radio telescope dish rotating slow motion'
+-> NASA Cache MISS: 'desolate radio telescope dish rotating slow motion' — calling NASA API
+-> Cache MISS: 'desolate radio telescope dish rotating slow motion' — calling Pexels API
+  Candidate 1: id=2954001 1920x1080 dur=21s score=0.800 ← SELECTED
+  Candidate 2: id=2954003 1920x1080 dur=18s score=0.800
+  Candidate 3: id=5670778 3840x2160 dur=25s score=0.800
+  Candidate 4: id=18308549 4096x2160 dur=16s score=0.800
+  Candidate 5: id=18308547 4096x2160 dur=60s score=0.800
+  Candidate 6: id=18308545 4096x2160 dur=34s score=0.800
+  Candidate 7: id=18308546 4096x2160 dur=46s score=0.800
+  Candidate 8: id=18308548 4096x2160 dur=56s score=0.800
+  Candidate 9: id=31807873 1920x1080 dur=20s score=0.600
+  Candidate 10: id=27960896 1920x1080 dur=7s score=0.600
+-> Multi-query: accepted 'desolate radio telescope dish rotating slow motion' (score=0.800 >= 0.0) — early exit
+      Provider: pexels
+      Hits:     10
+      Semantic: 0.850
+      Gate:     PASS
+
+    Testing: 'sand falling in hourglass cosmic scale'
+-> NASA Cache MISS: 'sand falling in hourglass cosmic scale' — calling NASA API
+-> Cache MISS: 'sand falling in hourglass cosmic scale' — calling Pexels API
+  Candidate 1: id=1188938 1920x1080 dur=29s score=0.800 ← SELECTED
+  Candidate 2: id=6634798 1920x1080 dur=8s score=0.800
+  Candidate 3: id=7955147 4096x2160 dur=15s score=0.800
+  Candidate 4: id=7955144 4096x2160 dur=27s score=0.800
+  Candidate 5: id=7944931 4096x2160 dur=80s score=0.800
+  Candidate 6: id=6151238 1920x1080 dur=12s score=0.800
+  Candidate 7: id=4514641 1920x1080 dur=30s score=0.800
+  Candidate 8: id=10296175 1920x1080 dur=25s score=0.800
+  Candidate 9: id=37127709 3840x2160 dur=32s score=0.600
+  Candidate 10: id=37182312 3840x2160 dur=31s score=0.600
+-> Multi-query: accepted 'sand falling in hourglass cosmic scale' (score=0.800 >= 0.0) — early exit
+      Provider: pexels
+      Hits:     10
+      Semantic: 0.400
+      Gate:     FAIL
+
+    Testing: 'empty alien city ruins atmospheric fog'
+-> NASA Cache MISS: 'empty alien city ruins atmospheric fog' — calling NASA API
+-> Cache MISS: 'empty alien city ruins atmospheric fog' — calling Pexels API
+  Candidate 1: id=11048757 1920x1080 dur=98s score=0.800 ← SELECTED
+  Candidate 2: id=12992123 1920x1080 dur=13s score=0.800
+  Candidate 3: id=31013711 3840x2160 dur=38s score=0.600
+  Candidate 4: id=36244096 3840x2160 dur=9s score=0.600
+  Candidate 5: id=33060711 3840x2160 dur=21s score=0.600
+  Candidate 6: id=33576431 3840x2160 dur=10s score=0.600
+  Candidate 7: id=34842426 1920x1080 dur=10s score=0.600
+  Candidate 8: id=33647947 3840x2160 dur=15s score=0.600
+  Candidate 9: id=33576509 3840x2160 dur=14s score=0.600
+  Candidate 10: id=34964499 1920x1080 dur=22s score=0.600
+-> Multi-query: accepted 'empty alien city ruins atmospheric fog' (score=0.800 >= 0.0) — early exit
+      Provider: pexels
+      Hits:     10
+      Semantic: 0.200
+      Gate:     FAIL
+
+    Testing: 'single candle flame in vast dark void'
+-> NASA Cache MISS: 'single candle flame in vast dark void' — calling NASA API
+-> Cache MISS: 'single candle flame in vast dark void' — calling Pexels API
+  Candidate 1: id=8773961 1920x1080 dur=7s score=0.800 ← SELECTED
+  Candidate 2: id=5555355 3840x2160 dur=20s score=0.800
+  Candidate 3: id=4106248 1920x1080 dur=12s score=0.800
+  Candidate 4: id=4106194 1920x1080 dur=47s score=0.800
+  Candidate 5: id=15950418 1920x1080 dur=11s score=0.800
+  Candidate 6: id=19382178 3840x2160 dur=47s score=0.800
+  Candidate 7: id=11053905 4096x2160 dur=33s score=0.800
+  Candidate 8: id=4061908 1920x1080 dur=30s score=0.800
+  Candidate 9: id=6889380 1920x1080 dur=189s score=0.800
+  Candidate 10: id=3344052 1904x1088 dur=45s score=0.800
+-> Multi-query: accepted 'single candle flame in vast dark void' (score=0.800 >= 0.0) — early exit
+      Provider: pexels
+      Hits:     10
+      Semantic: 0.500
+      Gate:     FAIL
+
+    Testing: 'ancient star map parchment with symbols'
+-> NASA Cache MISS: 'ancient star map parchment with symbols' — calling NASA API
+-> Cache MISS: 'ancient star map parchment with symbols' — calling Pexels API
+  Candidate 1: id=7977624 1920x1080 dur=19s score=0.800 ← SELECTED
+  Candidate 2: id=7606373 1920x1080 dur=23s score=0.800
+  Candidate 3: id=7575433 1920x1080 dur=31s score=0.800
+  Candidate 4: id=7431747 4096x2160 dur=27s score=0.800
+  Candidate 5: id=7431509 4096x2160 dur=29s score=0.800
+  Candidate 6: id=7492693 1920x1080 dur=25s score=0.800
+  Candidate 7: id=7492692 1920x1080 dur=22s score=0.800
+  Candidate 8: id=7575359 1920x1080 dur=30s score=0.800
+  Candidate 9: id=2953641 4096x2160 dur=15s score=0.800
+  Candidate 10: id=32779852 3840x2160 dur=68s score=0.600
+-> Multi-query: accepted 'ancient star map parchment with symbols' (score=0.800 >= 0.0) — early exit
+      Provider: pexels
+      Hits:     10
+      Semantic: 0.800
+      Gate:     PASS
+
+    Testing: 'ripple in pond reflecting galaxies'
+-> NASA Cache MISS: 'ripple in pond reflecting galaxies' — calling NASA API
+-> Cache MISS: 'ripple in pond reflecting galaxies' — calling Pexels API
+  Candidate 1: id=19069293 3840x2160 dur=37s score=0.800 ← SELECTED
+  Candidate 2: id=4584722 1920x1080 dur=20s score=0.800
+  Candidate 3: id=1164968 1920x1080 dur=29s score=0.800
+  Candidate 4: id=1391007 3840x2160 dur=3s score=0.800
+  Candidate 5: id=11619106 3840x2160 dur=16s score=0.800
+  Candidate 6: id=27863511 1920x1080 dur=59s score=0.600
+  Candidate 7: id=38365015 3840x2160 dur=11s score=0.600
+  Candidate 8: id=5378951 1280x720 dur=23s score=0.578
+  Candidate 9: id=5138001 1280x720 dur=23s score=0.578
+  Candidate 10: id=5363951 1280x720 dur=23s score=0.578
+-> Multi-query: accepted 'ripple in pond reflecting galaxies' (score=0.800 >= 0.0) — early exit
+      Provider: pexels
+      Hits:     10
+      Semantic: 0.150
+      Gate:     FAIL
+
+    Testing: 'celestial star field'
+-> NASA Cache MISS: 'celestial star field' — calling NASA API
+-> Cache MISS: 'celestial star field' — calling Pexels API
+  Candidate 1: id=11431384 3840x2160 dur=8s score=0.800 ← SELECTED
+  Candidate 2: id=12336965 1920x1028 dur=21s score=0.781
+  Candidate 3: id=12336940 1920x1028 dur=21s score=0.781
+  Candidate 4: id=12336960 1920x1028 dur=21s score=0.781
+  Candidate 5: id=36735105 1920x1080 dur=10s score=0.600
+  Candidate 6: id=34750442 1920x1080 dur=120s score=0.600
+  Candidate 7: id=32992818 1920x1080 dur=10s score=0.600
+  Candidate 8: id=36747759 1920x1080 dur=10s score=0.600
+  Candidate 9: id=32992023 1920x1080 dur=10s score=0.600
+  Candidate 10: id=30928256 3840x2160 dur=6s score=0.600
+-> Multi-query: accepted 'celestial star field' (score=0.800 >= 0.0) — early exit
+      Provider: pexels
+      Hits:     10
+      Semantic: 0.900
+      Gate:     PASS
+
+
+  ── Scene Summary ──
+  | Metric              | A (Baseline) | B (Sanitiser) |
+  |---------------------|--------------|---------------|
+  | Terms tested        |            7 |             7 |
+  | Total hits          |           70 |            70 |
+  | Hit rate            | 10.00/term      | 10.00/term       |
+  | Downloadable terms  |            7 |             7 |
+  | Avg semantic score  | 0.557          | 0.543           |
+  | Gate pass rate      | 42.9%          | 42.9%           |
+
+────────────────────────────────────────────────────────────
+  Scene 1: Quantifying the Unknown
+────────────────────────────────────────────────────────────
+  Narration: Frank Drake gave us a formula to estimate the number of talking civilizations out there. Plug in optimistic numbers, and...
+  Raw LLM terms (7):
+    [1] 'radio telescope dish staring at stars'
+    [2] 'empty cosmic void deep space'
+    [3] 'ethereal galaxy spiral slow rotation'
+    [4] 'abandoned satellite drifting silent'
+    [5] 'scratchy static television noise screen'
+    [6] 'flickering candle flame in darkness'
+    [7] 'ancient stone face whispering silence'
+
+  ── Sanitiser Output ──
+  Raw terms:      7
+  Sanitised terms: 7
+  Terms removed:   0
+
+  ── Per-term Overlap (B) ──
+    'radio telescope dish staring at stars'
+      Overlap: 0.0% — ACCEPTED
+      Common:  (none)
+    'empty cosmic void deep space'
+      Overlap: 0.0% — ACCEPTED
+      Common:  (none)
+    'ethereal galaxy spiral slow rotation'
+      Overlap: 20.0% — ACCEPTED
+      Common:  galaxy
+    'abandoned satellite drifting silent'
+      Overlap: 0.0% — ACCEPTED
+      Common:  (none)
+    'scratchy static television noise screen'
+      Overlap: 0.0% — ACCEPTED
+      Common:  (none)
+    'flickering candle flame in darkness'
+      Overlap: 20.0% — ACCEPTED
+      Common:  in
+    'ancient stone face whispering silence'
+      Overlap: 0.0% — ACCEPTED
+      Common:  (none)
+
+  ── Per-Term Pipeline Results ──
+    Testing: 'radio telescope dish staring at stars'
+-> NASA Cache MISS: 'radio telescope dish staring at stars' — calling NASA API
+-> Cache MISS: 'radio telescope dish staring at stars' — calling Pexels API
+  Candidate 1: id=2954006 1920x1080 dur=22s score=0.800 ← SELECTED
+  Candidate 2: id=2954002 1920x1080 dur=26s score=0.800
+  Candidate 3: id=2954000 1920x1080 dur=35s score=0.800
+  Candidate 4: id=6420488 1920x1080 dur=29s score=0.800
+  Candidate 5: id=4472998 1920x1080 dur=18s score=0.800
+  Candidate 6: id=12751033 3190x1020 dur=30s score=0.800
+  Candidate 7: id=9121395 3840x2160 dur=15s score=0.800
+  Candidate 8: id=17808869 3840x2160 dur=13s score=0.800
+  Candidate 9: id=38495902 3840x2160 dur=9s score=0.600
+  Candidate 10: id=25921138 3840x2160 dur=16s score=0.600
+-> Multi-query: accepted 'radio telescope dish staring at stars' (score=0.800 >= 0.0) — early exit
+      Provider: pexels
+      Hits:     10
+      Semantic: 1.000
+      Gate:     PASS
+
+    Testing: 'empty cosmic void deep space'
+-> NASA Cache MISS: 'empty cosmic void deep space' — calling NASA API
+-> Cache MISS: 'empty cosmic void deep space' — calling Pexels API
+  Candidate 1: id=20556585 1920x1080 dur=120s score=0.800 ← SELECTED
+  Candidate 2: id=4182916 3840x2160 dur=30s score=0.800
+  Candidate 3: id=2611250 3840x2160 dur=10s score=0.800
+  Candidate 4: id=8443332 3840x2160 dur=4s score=0.800
+  Candidate 5: id=856987 1920x1080 dur=16s score=0.800
+  Candidate 6: id=36610776 1920x1080 dur=120s score=0.600
+  Candidate 7: id=35026099 1920x1080 dur=10s score=0.600
+  Candidate 8: id=31541410 1920x1080 dur=27s score=0.600
+  Candidate 9: id=36743357 1920x1080 dur=10s score=0.600
+  Candidate 10: id=33830782 7680x4320 dur=8s score=0.600
+-> Multi-query: accepted 'empty cosmic void deep space' (score=0.800 >= 0.0) — early exit
+      Provider: pexels
+      Hits:     10
+      Semantic: 0.900
+      Gate:     PASS
+
+    Testing: 'ethereal galaxy spiral slow rotation'
+-> NASA Cache MISS: 'ethereal galaxy spiral slow rotation' — calling NASA API
+-> Cache MISS: 'ethereal galaxy spiral slow rotation' — calling Pexels API
+  Candidate 1: id=6961824 3840x2160 dur=10s score=0.800 ← SELECTED
+  Candidate 2: id=14909668 1920x1080 dur=300s score=0.800
+  Candidate 3: id=32876270 1920x1080 dur=120s score=0.600
+  Candidate 4: id=33830765 7680x4320 dur=8s score=0.600
+  Candidate 5: id=33830768 7680x4320 dur=8s score=0.600
+  Candidate 6: id=34985000 1920x1080 dur=120s score=0.600
+  Candidate 7: id=29243404 1920x1080 dur=10s score=0.600
+  Candidate 8: id=35908419 1920x1080 dur=10s score=0.600
+  Candidate 9: id=35086776 1920x1080 dur=10s score=0.600
+  Candidate 10: id=34196331 1920x1080 dur=120s score=0.600
+-> Multi-query: accepted 'ethereal galaxy spiral slow rotation' (score=0.800 >= 0.0) — early exit
+      Provider: pexels
+      Hits:     10
+      Semantic: 1.000
+      Gate:     PASS
+
+    Testing: 'abandoned satellite drifting silent'
+-> NASA Cache MISS: 'abandoned satellite drifting silent' — calling NASA API
+-> Cache MISS: 'abandoned satellite drifting silent' — calling Pexels API
+  Candidate 1: id=17416991 3840x2160 dur=12s score=0.800 ← SELECTED
+  Candidate 2: id=12992112 1920x1080 dur=31s score=0.800
+  Candidate 3: id=3147544 1920x1080 dur=11s score=0.800
+  Candidate 4: id=13075439 3840x2160 dur=79s score=0.800
+  Candidate 5: id=3044429 3840x2160 dur=13s score=0.800
+  Candidate 6: id=13188716 1920x1080 dur=19s score=0.800
+  Candidate 7: id=12191466 3840x2160 dur=5s score=0.800
+  Candidate 8: id=12155749 1920x1080 dur=6s score=0.800
+  Candidate 9: id=36046979 3840x2160 dur=20s score=0.600
+  Candidate 10: id=31802187 1920x1080 dur=9s score=0.600
+-> Multi-query: accepted 'abandoned satellite drifting silent' (score=0.800 >= 0.0) — early exit
+      Provider: pexels
+      Hits:     10
+      Semantic: 0.700
+      Gate:     FAIL
+
+    Testing: 'scratchy static television noise screen'
+-> NASA Cache MISS: 'scratchy static television noise screen' — calling NASA API
+-> Cache MISS: 'scratchy static television noise screen' — calling Pexels API
+  Candidate 1: id=10487953 1920x1080 dur=6s score=0.800 ← SELECTED
+  Candidate 2: id=20063221 3840x2160 dur=11s score=0.800
+  Candidate 3: id=10487961 1920x1080 dur=6s score=0.800
+  Candidate 4: id=11999581 1920x1080 dur=37s score=0.800
+  Candidate 5: id=14221291 1920x1080 dur=14s score=0.800
+  Candidate 6: id=15069621 1920x1080 dur=16s score=0.800
+  Candidate 7: id=6041714 3840x2160 dur=40s score=0.800
+  Candidate 8: id=6955107 1920x1080 dur=12s score=0.800
+  Candidate 9: id=6041711 3840x2160 dur=60s score=0.800
+  Candidate 10: id=12471033 3840x2160 dur=10s score=0.800
+-> Multi-query: accepted 'scratchy static television noise screen' (score=0.800 >= 0.0) — early exit
+      Provider: pexels
+      Hits:     10
+      Semantic: 0.300
+      Gate:     FAIL
+
+    Testing: 'flickering candle flame in darkness'
+-> NASA Cache MISS: 'flickering candle flame in darkness' — calling NASA API
+-> Cache MISS: 'flickering candle flame in darkness' — calling Pexels API
+  Candidate 1: id=8677058 1920x1080 dur=13s score=0.800 ← SELECTED
+  Candidate 2: id=8773961 1920x1080 dur=7s score=0.800
+  Candidate 3: id=14090582 1920x1080 dur=50s score=0.800
+  Candidate 4: id=17795659 1920x1080 dur=43s score=0.800
+  Candidate 5: id=12550702 3840x2160 dur=19s score=0.800
+  Candidate 6: id=15950418 1920x1080 dur=11s score=0.800
+  Candidate 7: id=5767251 3840x2160 dur=31s score=0.800
+  Candidate 8: id=3344057 1904x1088 dur=78s score=0.800
+  Candidate 9: id=29072078 3840x2160 dur=21s score=0.600
+  Candidate 10: id=6227435 1280x720 dur=21s score=0.578
+-> Multi-query: accepted 'flickering candle flame in darkness' (score=0.800 >= 0.0) — early exit
+      Provider: pexels
+      Hits:     10
+      Semantic: 0.000
+      Gate:     FAIL
+
+    Testing: 'ancient stone face whispering silence'
+-> NASA Cache MISS: 'ancient stone face whispering silence' — calling NASA API
+-> Cache MISS: 'ancient stone face whispering silence' — calling Pexels API
+  Candidate 1: id=7534448 1920x1080 dur=7s score=0.800 ← SELECTED
+  Candidate 2: id=10632825 3840x2160 dur=37s score=0.800
+  Candidate 3: id=7574278 1920x1080 dur=24s score=0.800
+  Candidate 4: id=8347568 4096x2160 dur=21s score=0.800
+  Candidate 5: id=6158408 1920x1080 dur=6s score=0.800
+  Candidate 6: id=7534439 1920x1080 dur=12s score=0.800
+  Candidate 7: id=28222231 1920x1080 dur=14s score=0.600
+  Candidate 8: id=28222218 1920x1080 dur=10s score=0.600
+  Candidate 9: id=36419622 1920x1080 dur=22s score=0.600
+  Candidate 10: id=28222227 1920x1080 dur=8s score=0.600
+-> Multi-query: accepted 'ancient stone face whispering silence' (score=0.800 >= 0.0) — early exit
+      Provider: pexels
+      Hits:     10
+      Semantic: 0.300
+      Gate:     FAIL
+
+
+  ── Scene Summary ──
+  | Metric              | A (Baseline) | B (Sanitiser) |
+  |---------------------|--------------|---------------|
+  | Terms tested        |            7 |             7 |
+  | Total hits          |           70 |            70 |
+  | Hit rate            | 10.00/term      | 10.00/term       |
+  | Downloadable terms  |            7 |             7 |
+  | Avg semantic score  | 0.600          | 0.600           |
+  | Gate pass rate      | 42.9%          | 42.9%           |
+
+────────────────────────────────────────────────────────────
+  Scene 2: The Search and the Filter
+────────────────────────────────────────────────────────────
+  Narration: For decades, SETI has scanned the skies with radio telescopes, hoping to catch a stray signal from another world. The si...
+  Raw LLM terms (7):
+    [1] 'radio telescope dish tilted skyward'
+    [2] 'desolate alien planet aerial view'
+    [3] 'ancient fossil in cracked earth'
+    [4] 'galaxy fading into darkness'
+    [5] 'single light flickering in abyss'
+    [6] 'silhouette figure staring at stars'
+    [7] 'microscopic cell dividing then collapsing'
+
+  ── Sanitiser Output ──
+  Raw terms:      7
+  Sanitised terms: 7
+  Terms removed:   0
+
+  ── Per-term Overlap (B) ──
+    'radio telescope dish tilted skyward'
+      Overlap: 20.0% — ACCEPTED
+      Common:  radio
+    'desolate alien planet aerial view'
+      Overlap: 0.0% — ACCEPTED
+      Common:  (none)
+    'ancient fossil in cracked earth'
+      Overlap: 20.0% — ACCEPTED
+      Common:  in
+    'galaxy fading into darkness'
+      Overlap: 0.0% — ACCEPTED
+      Common:  (none)
+    'single light flickering in abyss'
+      Overlap: 20.0% — ACCEPTED
+      Common:  in
+    'silhouette figure staring at stars'
+      Overlap: 0.0% — ACCEPTED
+      Common:  (none)
+    'microscopic cell dividing then collapsing'
+      Overlap: 0.0% — ACCEPTED
+      Common:  (none)
+
+  ── Per-Term Pipeline Results ──
+    Testing: 'radio telescope dish tilted skyward'
+-> NASA Cache MISS: 'radio telescope dish tilted skyward' — calling NASA API
+-> Cache MISS: 'radio telescope dish tilted skyward' — calling Pexels API
+  Candidate 1: id=4472998 1920x1080 dur=18s score=0.800 ← SELECTED
+  Candidate 2: id=2954003 1920x1080 dur=18s score=0.800
+  Candidate 3: id=18308546 4096x2160 dur=46s score=0.800
+  Candidate 4: id=2954001 1920x1080 dur=21s score=0.800
+  Candidate 5: id=2954006 1920x1080 dur=22s score=0.800
+  Candidate 6: id=6420488 1920x1080 dur=29s score=0.800
+  Candidate 7: id=2954002 1920x1080 dur=26s score=0.800
+  Candidate 8: id=18308547 4096x2160 dur=60s score=0.800
+  Candidate 9: id=18308549 4096x2160 dur=16s score=0.800
+  Candidate 10: id=4473000 1920x1080 dur=29s score=0.800
+-> Multi-query: accepted 'radio telescope dish tilted skyward' (score=0.800 >= 0.0) — early exit
+      Provider: pexels
+      Hits:     10
+      Semantic: 1.000
+      Gate:     PASS
+
+    Testing: 'desolate alien planet aerial view'
+-> NASA Cache MISS: 'desolate alien planet aerial view' — calling NASA API
+-> Cache MISS: 'desolate alien planet aerial view' — calling Pexels API
+  Candidate 1: id=8474576 1920x1080 dur=8s score=0.800 ← SELECTED
+  Candidate 2: id=8474589 1920x1080 dur=11s score=0.800
+  Candidate 3: id=8474640 1920x1080 dur=10s score=0.800
+  Candidate 4: id=7624427 3840x2160 dur=20s score=0.800
+  Candidate 5: id=8474593 1920x1080 dur=10s score=0.800
+  Candidate 6: id=37112568 3840x2160 dur=18s score=0.600
+  Candidate 7: id=37112546 3840x2160 dur=27s score=0.600
+  Candidate 8: id=37112566 3840x2160 dur=25s score=0.600
+  Candidate 9: id=37112522 3840x2160 dur=17s score=0.600
+  Candidate 10: id=37112639 3840x2160 dur=11s score=0.600
+-> Multi-query: accepted 'desolate alien planet aerial view' (score=0.800 >= 0.0) — early exit
+      Provider: pexels
+      Hits:     10
+      Semantic: 0.900
+      Gate:     PASS
+
+    Testing: 'ancient fossil in cracked earth'
+-> NASA Cache MISS: 'ancient fossil in cracked earth' — calling NASA API
+-> Cache MISS: 'ancient fossil in cracked earth' — calling Pexels API
+  Candidate 1: id=7538700 4096x2160 dur=19s score=0.800 ← SELECTED
+  Candidate 2: id=6498490 3840x2160 dur=45s score=0.800
+  Candidate 3: id=5358448 2704x1520 dur=12s score=0.800
+  Candidate 4: id=26078307 3840x2160 dur=12s score=0.600
+  Candidate 5: id=26447996 3840x2160 dur=20s score=0.600
+  Candidate 6: id=29504947 3840x2160 dur=12s score=0.600
+  Candidate 7: id=29504939 3840x2160 dur=14s score=0.600
+  Candidate 8: id=37533724 3840x2160 dur=48s score=0.600
+  Candidate 9: id=29504941 3840x2160 dur=30s score=0.600
+  Candidate 10: id=29276174 1920x1080 dur=8s score=0.600
+-> Multi-query: accepted 'ancient fossil in cracked earth' (score=0.800 >= 0.0) — early exit
+      Provider: pexels
+      Hits:     10
+      Semantic: 0.200
+      Gate:     FAIL
+
+    Testing: 'galaxy fading into darkness'
+-> NASA Cache MISS: 'galaxy fading into darkness' — calling NASA API
+-> Cache MISS: 'galaxy fading into darkness' — calling Pexels API
+  Candidate 1: id=14904107 1920x1080 dur=10s score=0.800 ← SELECTED
+  Candidate 2: id=12751030 3190x1020 dur=30s score=0.800
+  Candidate 3: id=1926295 1920x1080 dur=6s score=0.800
+  Candidate 4: id=12815787 3840x2160 dur=6s score=0.800
+  Candidate 5: id=12354568 1920x1080 dur=11s score=0.800
+  Candidate 6: id=10296178 1920x1080 dur=26s score=0.800
+  Candidate 7: id=12336940 1920x1028 dur=21s score=0.781
+  Candidate 8: id=12336972 1920x1028 dur=20s score=0.781
+  Candidate 9: id=12275385 1920x1028 dur=33s score=0.781
+  Candidate 10: id=30488448 3840x2160 dur=5s score=0.600
+-> Multi-query: accepted 'galaxy fading into darkness' (score=0.800 >= 0.0) — early exit
+      Provider: pexels
+      Hits:     10
+      Semantic: 0.700
+      Gate:     FAIL
+
+    Testing: 'single light flickering in abyss'
+-> NASA Cache MISS: 'single light flickering in abyss' — calling NASA API
+-> Cache MISS: 'single light flickering in abyss' — calling Pexels API
+  Candidate 1: id=15950418 1920x1080 dur=11s score=0.800 ← SELECTED
+  Candidate 2: id=4106152 1920x1080 dur=43s score=0.800
+  Candidate 3: id=6889380 1920x1080 dur=189s score=0.800
+  Candidate 4: id=4106248 1920x1080 dur=12s score=0.800
+  Candidate 5: id=15018832 4096x2160 dur=50s score=0.800
+  Candidate 6: id=8773961 1920x1080 dur=7s score=0.800
+  Candidate 7: id=19212508 1920x1080 dur=25s score=0.800
+  Candidate 8: id=17795660 1920x1080 dur=36s score=0.800
+  Candidate 9: id=3344052 1904x1088 dur=45s score=0.800
+  Candidate 10: id=855196 1440x1080 dur=58s score=0.700
+-> Multi-query: accepted 'single light flickering in abyss' (score=0.800 >= 0.0) — early exit
+      Provider: pexels
+      Hits:     10
+      Semantic: 0.700
+      Gate:     FAIL
+
+    Testing: 'silhouette figure staring at stars'
+-> NASA Cache MISS: 'silhouette figure staring at stars' — calling NASA API
+-> Cache MISS: 'silhouette figure staring at stars' — calling Pexels API
+  Candidate 1: id=9121395 3840x2160 dur=15s score=0.800 ← SELECTED
+  Candidate 2: id=9121282 3840x2160 dur=7s score=0.800
+  Candidate 3: id=11533575 3840x2160 dur=7s score=0.800
+  Candidate 4: id=19314287 3840x2160 dur=15s score=0.800
+  Candidate 5: id=19078140 3840x2160 dur=36s score=0.800
+  Candidate 6: id=13382270 3840x2160 dur=33s score=0.800
+  Candidate 7: id=29644229 3840x2160 dur=12s score=0.600
+  Candidate 8: id=35227869 3840x2160 dur=8s score=0.600
+  Candidate 9: id=852369 1280x720 dur=9s score=0.578
+  Candidate 10: id=5041483 1280x720 dur=9s score=0.578
+-> Multi-query: accepted 'silhouette figure staring at stars' (score=0.800 >= 0.0) — early exit
+      Provider: pexels
+      Hits:     10
+      Semantic: 0.900
+      Gate:     PASS
+
+    Testing: 'microscopic cell dividing then collapsing'
+-> NASA Cache MISS: 'microscopic cell dividing then collapsing' — calling NASA API
+-> Cache MISS: 'microscopic cell dividing then collapsing' — calling Pexels API
+  Candidate 1: id=29851224 1920x1080 dur=10s score=0.600 ← SELECTED
+  Candidate 2: id=35419786 1920x1080 dur=10s score=0.600
+  Candidate 3: id=35637540 1920x1080 dur=10s score=0.600
+  Candidate 4: id=35634993 1920x1080 dur=10s score=0.600
+  Candidate 5: id=35637992 1920x1080 dur=10s score=0.600
+  Candidate 6: id=35636096 1920x1080 dur=10s score=0.600
+  Candidate 7: id=34739799 1920x1080 dur=10s score=0.600
+  Candidate 8: id=36043708 1920x1080 dur=10s score=0.600
+  Candidate 9: id=34910580 1920x1080 dur=10s score=0.600
+  Candidate 10: id=38533119 1920x1080 dur=15s score=0.600
+-> Multi-query: accepted 'microscopic cell dividing then collapsing' (score=0.600 >= 0.0) — early exit
+      Provider: pexels
+      Hits:     10
+      Semantic: 0.300
+      Gate:     FAIL
+
+
+  ── Scene Summary ──
+  | Metric              | A (Baseline) | B (Sanitiser) |
+  |---------------------|--------------|---------------|
+  | Terms tested        |            7 |             7 |
+  | Total hits          |           70 |            70 |
+  | Hit rate            | 10.00/term      | 10.00/term       |
+  | Downloadable terms  |            7 |             7 |
+  | Avg semantic score  | 0.671          | 0.671           |
+  | Gate pass rate      | 42.9%          | 42.9%           |
+
+────────────────────────────────────────────────────────────
+  Scene 3: The Dark Forest and the Zoo
+────────────────────────────────────────────────────────────
+  Narration: Perhaps the universe is a dark forest where every civilization is a hidden hunter, and to reveal yourself is to invite a...
+  Raw LLM terms (7):
+    [1] 'dark forest fog silhouette hunter'
+    [2] 'zoo enclosure night empty'
+    [3] 'spaceship floating deep space silent'
+    [4] 'ancient telescope observatory dome open'
+    [5] 'alien quarantine quarantine sign rusted'
+    [6] 'slow motion firefly light flicker'
+    [7] 'planet reflection in astronaut helmet'
+
+  ── Sanitiser Output ──
+  Raw terms:      7
+  Sanitised terms: 7
+  Terms removed:   0
+
+  ── Per-term Overlap (B) ──
+    'dark forest fog silhouette hunter'
+      Overlap: 40.0% — ACCEPTED
+      Common:  dark, forest
+    'zoo enclosure night empty'
+      Overlap: 0.0% — ACCEPTED
+      Common:  (none)
+    'spaceship floating deep space silent'
+      Overlap: 0.0% — ACCEPTED
+      Common:  (none)
+    'ancient telescope observatory dome open'
+      Overlap: 0.0% — ACCEPTED
+      Common:  (none)
+    'alien quarantine quarantine sign rusted'
+      Overlap: 0.0% — ACCEPTED
+      Common:  (none)
+    'slow motion firefly light flicker'
+      Overlap: 0.0% — ACCEPTED
+      Common:  (none)
+    'planet reflection in astronaut helmet'
+      Overlap: 0.0% — ACCEPTED
+      Common:  (none)
+
+  ── Per-Term Pipeline Results ──
+    Testing: 'dark forest fog silhouette hunter'
+-> NASA Cache MISS: 'dark forest fog silhouette hunter' — calling NASA API
+-> Cache MISS: 'dark forest fog silhouette hunter' — calling Pexels API
+  Candidate 1: id=6200910 3840x2160 dur=15s score=0.800 ← SELECTED
+  Candidate 2: id=17428163 1920x1080 dur=10s score=0.800
+  Candidate 3: id=6200843 3840x2160 dur=10s score=0.800
+  Candidate 4: id=11349555 1920x1080 dur=42s score=0.800
+  Candidate 5: id=13141960 3840x2160 dur=20s score=0.800
+  Candidate 6: id=9130078 3840x2160 dur=19s score=0.800
+  Candidate 7: id=17428421 1920x1080 dur=21s score=0.800
+  Candidate 8: id=6201050 3840x2160 dur=13s score=0.800
+  Candidate 9: id=11514997 1920x1080 dur=44s score=0.800
+  Candidate 10: id=16502838 3840x2160 dur=23s score=0.800
+-> Multi-query: accepted 'dark forest fog silhouette hunter' (score=0.800 >= 0.0) — early exit
+      Provider: pexels
+      Hits:     10
+      Semantic: 0.950
+      Gate:     PASS
+
+    Testing: 'zoo enclosure night empty'
+-> NASA Cache MISS: 'zoo enclosure night empty' — calling NASA API
+-> Cache MISS: 'zoo enclosure night empty' — calling Pexels API
+  Candidate 1: id=10762802 3840x2160 dur=31s score=0.800 ← SELECTED
+  Candidate 2: id=19972544 1920x1080 dur=16s score=0.800
+  Candidate 3: id=15448669 1920x1080 dur=11s score=0.800
+  Candidate 4: id=36731299 1920x1080 dur=12s score=0.600
+  Candidate 5: id=37219183 3840x2160 dur=6s score=0.600
+  Candidate 6: id=37411186 3840x2160 dur=23s score=0.600
+  Candidate 7: id=33347118 3840x2160 dur=56s score=0.600
+  Candidate 8: id=38110170 1920x1080 dur=7s score=0.600
+  Candidate 9: id=38141172 1920x1080 dur=18s score=0.600
+  Candidate 10: id=37121919 3840x2160 dur=15s score=0.600
+-> Multi-query: accepted 'zoo enclosure night empty' (score=0.800 >= 0.0) — early exit
+      Provider: pexels
+      Hits:     10
+      Semantic: 0.300
+      Gate:     FAIL
+
+    Testing: 'spaceship floating deep space silent'
+-> NASA Cache MISS: 'spaceship floating deep space silent' — calling NASA API
+-> Cache MISS: 'spaceship floating deep space silent' — calling Pexels API
+  Candidate 1: id=36312374 3840x2160 dur=20s score=0.600 ← SELECTED
+  Candidate 2: id=29857693 3840x2160 dur=58s score=0.600
+  Candidate 3: id=36113134 3840x2160 dur=20s score=0.600
+  Candidate 4: id=34849714 3840x2160 dur=16s score=0.600
+  Candidate 5: id=38458547 3840x2160 dur=16s score=0.600
+  Candidate 6: id=38445180 3840x2160 dur=33s score=0.600
+  Candidate 7: id=29779825 3840x2160 dur=62s score=0.600
+  Candidate 8: id=29780240 3840x2160 dur=70s score=0.600
+  Candidate 9: id=38339594 3840x2160 dur=20s score=0.600
+  Candidate 10: id=36136184 3840x2160 dur=20s score=0.600
+-> Multi-query: accepted 'spaceship floating deep space silent' (score=0.600 >= 0.0) — early exit
+      Provider: pexels
+      Hits:     10
+      Semantic: 0.700
+      Gate:     FAIL
+
+    Testing: 'ancient telescope observatory dome open'
+-> NASA Cache MISS: 'ancient telescope observatory dome open' — calling NASA API
+-> Cache MISS: 'ancient telescope observatory dome open' — calling Pexels API
+  Candidate 1: id=13003966 3840x2160 dur=49s score=0.800 ← SELECTED
+  Candidate 2: id=854256 1920x1080 dur=27s score=0.800
+  Candidate 3: id=2954003 1920x1080 dur=18s score=0.800
+  Candidate 4: id=13075428 3840x2160 dur=78s score=0.800
+  Candidate 5: id=2954002 1920x1080 dur=26s score=0.800
+  Candidate 6: id=14381270 1920x1080 dur=36s score=0.800
+  Candidate 7: id=3078534 1920x1080 dur=30s score=0.800
+  Candidate 8: id=14381269 1920x1080 dur=46s score=0.800
+  Candidate 9: id=36419581 3840x2160 dur=15s score=0.600
+  Candidate 10: id=36199699 3840x2160 dur=14s score=0.600
+-> Multi-query: accepted 'ancient telescope observatory dome open' (score=0.800 >= 0.0) — early exit
+      Provider: pexels
+      Hits:     10
+      Semantic: 0.000
+      Gate:     FAIL
+
+    Testing: 'alien quarantine quarantine sign rusted'
+-> NASA Cache MISS: 'alien quarantine quarantine sign rusted' — calling NASA API
+-> Cache MISS: 'alien quarantine quarantine sign rusted' — calling Pexels API
+  Candidate 1: id=12160783 3840x2160 dur=3s score=0.800 ← SELECTED
+  Candidate 2: id=12251612 3840x2160 dur=4s score=0.800
+  Candidate 3: id=12160793 3840x2160 dur=3s score=0.800
+  Candidate 4: id=12160775 3840x2160 dur=4s score=0.800
+  Candidate 5: id=5846385 1920x1080 dur=10s score=0.800
+  Candidate 6: id=12251611 3840x2160 dur=6s score=0.800
+  Candidate 7: id=12160787 3840x2160 dur=4s score=0.800
+  Candidate 8: id=12160809 3840x2160 dur=4s score=0.800
+  Candidate 9: id=4590193 1920x1080 dur=25s score=0.800
+  Candidate 10: id=36371397 1920x1080 dur=59s score=0.600
+-> Multi-query: accepted 'alien quarantine quarantine sign rusted' (score=0.800 >= 0.0) — early exit
+      Provider: pexels
+      Hits:     10
+      Semantic: 0.700
+      Gate:     FAIL
+
+    Testing: 'slow motion firefly light flicker'
+-> NASA Cache MISS: 'slow motion firefly light flicker' — calling NASA API
+-> Cache MISS: 'slow motion firefly light flicker' — calling Pexels API
+  Candidate 1: id=7006552 1920x1080 dur=43s score=0.800 ← SELECTED
+  Candidate 2: id=11945977 4096x2160 dur=60s score=0.800
+  Candidate 3: id=853848 1920x1080 dur=15s score=0.800
+  Candidate 4: id=9665455 1920x1080 dur=27s score=0.800
+  Candidate 5: id=4218117 1920x1080 dur=5s score=0.800
+  Candidate 6: id=856646 1920x1080 dur=58s score=0.800
+  Candidate 7: id=6719608 1620x1080 dur=6s score=0.738
+  Candidate 8: id=35286672 1920x1080 dur=120s score=0.600
+  Candidate 9: id=29936087 1920x1080 dur=14s score=0.600
+  Candidate 10: id=29756785 1920x1080 dur=10s score=0.600
+-> Multi-query: accepted 'slow motion firefly light flicker' (score=0.800 >= 0.0) — early exit
+      Provider: pexels
+      Hits:     10
+      Semantic: 0.300
+      Gate:     FAIL
+
+    Testing: 'planet reflection in astronaut helmet'
+-> NASA Cache MISS: 'planet reflection in astronaut helmet' — calling NASA API
+-> Cache MISS: 'planet reflection in astronaut helmet' — calling Pexels API
+  Candidate 1: id=7649286 3840x2160 dur=16s score=0.800 ← SELECTED
+  Candidate 2: id=7649288 3840x2160 dur=16s score=0.800
+  Candidate 3: id=7649291 3840x2160 dur=16s score=0.800
+  Candidate 4: id=7649279 3840x2160 dur=12s score=0.800
+  Candidate 5: id=7649281 3840x2160 dur=11s score=0.800
+  Candidate 6: id=7649280 3840x2160 dur=9s score=0.800
+  Candidate 7: id=7649283 3840x2160 dur=10s score=0.800
+  Candidate 8: id=12668693 3840x2160 dur=9s score=0.800
+  Candidate 9: id=7649289 3840x2160 dur=18s score=0.800
+  Candidate 10: id=5281941 3840x2160 dur=8s score=0.800
+-> Multi-query: accepted 'planet reflection in astronaut helmet' (score=0.800 >= 0.0) — early exit
+      Provider: pexels
+      Hits:     10
+      Semantic: 0.200
+      Gate:     FAIL
+
+
+  ── Scene Summary ──
+  | Metric              | A (Baseline) | B (Sanitiser) |
+  |---------------------|--------------|---------------|
+  | Terms tested        |            7 |             7 |
+  | Total hits          |           70 |            70 |
+  | Hit rate            | 10.00/term      | 10.00/term       |
+  | Downloadable terms  |            7 |             7 |
+  | Avg semantic score  | 0.450          | 0.450           |
+  | Gate pass rate      | 14.3%          | 14.3%           |
+
+────────────────────────────────────────────────────────────
+  Scene 4: Fermi's Haunting Echo
+────────────────────────────────────────────────────────────
+  Narration: Each hypothesis is a chilling reminder: the silence may be a warning, a privilege, or a test. Either way, we are still a...
+  Raw LLM terms (7):
+    [1] 'empty chair in dark room'
+    [2] 'radio telescope scanning night sky'
+    [3] 'lighthouse beam piercing fog'
+    [4] 'single candle flame in vast darkness'
+    [5] 'ancient stone face weeping'
+    [6] 'void between star clusters'
+    [7] 'silent clock with broken pendulum'
+
+  ── Sanitiser Output ──
+  Raw terms:      7
+  Sanitised terms: 7
+  Terms removed:   0
+
+  ── Per-term Overlap (B) ──
+    'empty chair in dark room'
+      Overlap: 0.0% — ACCEPTED
+      Common:  (none)
+    'radio telescope scanning night sky'
+      Overlap: 0.0% — ACCEPTED
+      Common:  (none)
+    'lighthouse beam piercing fog'
+      Overlap: 0.0% — ACCEPTED
+      Common:  (none)
+    'single candle flame in vast darkness'
+      Overlap: 0.0% — ACCEPTED
+      Common:  (none)
+    'ancient stone face weeping'
+      Overlap: 0.0% — ACCEPTED
+      Common:  (none)
+    'void between star clusters'
+      Overlap: 0.0% — ACCEPTED
+      Common:  (none)
+    'silent clock with broken pendulum'
+      Overlap: 20.0% — ACCEPTED
+      Common:  with
+
+  ── Per-Term Pipeline Results ──
+    Testing: 'empty chair in dark room'
+-> NASA Cache MISS: 'empty chair in dark room' — calling NASA API
+-> Cache MISS: 'empty chair in dark room' — calling Pexels API
+  Candidate 1: id=8128278 3840x2160 dur=8s score=0.800 ← SELECTED
+  Candidate 2: id=7986776 4096x2160 dur=17s score=0.800
+  Candidate 3: id=7988176 4096x2160 dur=25s score=0.800
+  Candidate 4: id=7988175 4096x2160 dur=25s score=0.800
+  Candidate 5: id=2996079 1920x1080 dur=65s score=0.800
+  Candidate 6: id=19217895 3840x2160 dur=10s score=0.800
+  Candidate 7: id=7984190 4096x2160 dur=22s score=0.800
+  Candidate 8: id=6470619 3840x2160 dur=17s score=0.800
+  Candidate 9: id=29732319 1920x1080 dur=4s score=0.600
+  Candidate 10: id=35148856 3840x2160 dur=71s score=0.600
+-> Multi-query: accepted 'empty chair in dark room' (score=0.800 >= 0.0) — early exit
+      Provider: pexels
+      Hits:     10
+      Semantic: 0.750
+      Gate:     PASS
+
+    Testing: 'radio telescope scanning night sky'
+-> NASA Cache MISS: 'radio telescope scanning night sky' — calling NASA API
+-> Cache MISS: 'radio telescope scanning night sky' — calling Pexels API
+  Candidate 1: id=2954003 1920x1080 dur=18s score=0.800 ← SELECTED
+  Candidate 2: id=17808869 3840x2160 dur=13s score=0.800
+  Candidate 3: id=2954004 1920x1080 dur=25s score=0.800
+  Candidate 4: id=4473000 1920x1080 dur=29s score=0.800
+  Candidate 5: id=16544208 2560x1440 dur=8s score=0.800
+  Candidate 6: id=17808868 3840x2160 dur=5s score=0.800
+  Candidate 7: id=12337002 1920x1028 dur=41s score=0.781
+  Candidate 8: id=38495902 3840x2160 dur=9s score=0.600
+  Candidate 9: id=27442169 5760x3240 dur=5s score=0.600
+  Candidate 10: id=25921138 3840x2160 dur=16s score=0.600
+-> Multi-query: accepted 'radio telescope scanning night sky' (score=0.800 >= 0.0) — early exit
+      Provider: pexels
+      Hits:     10
+      Semantic: 0.900
+      Gate:     PASS
+
+    Testing: 'lighthouse beam piercing fog'
+-> NASA Cache MISS: 'lighthouse beam piercing fog' — calling NASA API
+-> Cache MISS: 'lighthouse beam piercing fog' — calling Pexels API
+  Candidate 1: id=6255501 4096x2160 dur=20s score=0.800 ← SELECTED
+  Candidate 2: id=4814151 1920x1080 dur=20s score=0.800
+  Candidate 3: id=11348722 3840x1922 dur=6s score=0.800
+  Candidate 4: id=2409572 3840x2160 dur=32s score=0.800
+  Candidate 5: id=28957437 1920x1080 dur=38s score=0.600
+  Candidate 6: id=38068667 3840x2160 dur=7s score=0.600
+  Candidate 7: id=32177354 3840x2160 dur=9s score=0.600
+  Candidate 8: id=38401934 3840x2160 dur=16s score=0.600
+  Candidate 9: id=32193344 3840x2160 dur=6s score=0.600
+  Candidate 10: id=32193362 3840x2160 dur=6s score=0.600
+-> Multi-query: accepted 'lighthouse beam piercing fog' (score=0.800 >= 0.0) — early exit
+      Provider: pexels
+      Hits:     10
+      Semantic: 0.300
+      Gate:     FAIL
+
+    Testing: 'single candle flame in vast darkness'
+-> NASA Cache MISS: 'single candle flame in vast darkness' — calling NASA API
+-> Cache MISS: 'single candle flame in vast darkness' — calling Pexels API
+  Candidate 1: id=8773961 1920x1080 dur=7s score=0.800 ← SELECTED
+  Candidate 2: id=5555355 3840x2160 dur=20s score=0.800
+  Candidate 3: id=4106194 1920x1080 dur=47s score=0.800
+  Candidate 4: id=4106248 1920x1080 dur=12s score=0.800
+  Candidate 5: id=15950418 1920x1080 dur=11s score=0.800
+  Candidate 6: id=19382178 3840x2160 dur=47s score=0.800
+  Candidate 7: id=4061908 1920x1080 dur=30s score=0.800
+  Candidate 8: id=17795660 1920x1080 dur=36s score=0.800
+  Candidate 9: id=6889380 1920x1080 dur=189s score=0.800
+  Candidate 10: id=3344052 1904x1088 dur=45s score=0.800
+-> Multi-query: accepted 'single candle flame in vast darkness' (score=0.800 >= 0.0) — early exit
+      Provider: pexels
+      Hits:     10
+      Semantic: 0.400
+      Gate:     FAIL
+
+    Testing: 'ancient stone face weeping'
+-> NASA Cache MISS: 'ancient stone face weeping' — calling NASA API
+-> Cache MISS: 'ancient stone face weeping' — calling Pexels API
+  Candidate 1: id=10260230 3840x2160 dur=5s score=0.800 ← SELECTED
+  Candidate 2: id=6158408 1920x1080 dur=6s score=0.800
+  Candidate 3: id=7534448 1920x1080 dur=7s score=0.800
+  Candidate 4: id=7534439 1920x1080 dur=12s score=0.800
+  Candidate 5: id=7574278 1920x1080 dur=24s score=0.800
+  Candidate 6: id=11197130 2688x1512 dur=9s score=0.800
+  Candidate 7: id=6719223 3840x2160 dur=16s score=0.800
+  Candidate 8: id=28222231 1920x1080 dur=14s score=0.600
+  Candidate 9: id=28222218 1920x1080 dur=10s score=0.600
+  Candidate 10: id=29089378 3840x2160 dur=5s score=0.600
+-> Multi-query: accepted 'ancient stone face weeping' (score=0.800 >= 0.0) — early exit
+      Provider: pexels
+      Hits:     10
+      Semantic: 0.300
+      Gate:     FAIL
+
+    Testing: 'void between star clusters'
+-> NASA Cache MISS: 'void between star clusters' — calling NASA API
+-> Cache MISS: 'void between star clusters' — calling Pexels API
+  Candidate 1: id=20556585 1920x1080 dur=120s score=0.800 ← SELECTED
+  Candidate 2: id=2611250 3840x2160 dur=10s score=0.800
+  Candidate 3: id=856987 1920x1080 dur=16s score=0.800
+  Candidate 4: id=9860821 1920x1080 dur=53s score=0.800
+  Candidate 5: id=12751030 3190x1020 dur=30s score=0.800
+  Candidate 6: id=12336975 1920x1028 dur=21s score=0.781
+  Candidate 7: id=31541410 1920x1080 dur=27s score=0.600
+  Candidate 8: id=36743357 1920x1080 dur=10s score=0.600
+  Candidate 9: id=36610776 1920x1080 dur=120s score=0.600
+  Candidate 10: id=31336263 1920x1080 dur=119s score=0.600
+-> Multi-query: accepted 'void between star clusters' (score=0.800 >= 0.0) — early exit
+      Provider: pexels
+      Hits:     10
+      Semantic: 1.000
+      Gate:     PASS
+
+    Testing: 'silent clock with broken pendulum'
+-> NASA Cache MISS: 'silent clock with broken pendulum' — calling NASA API
+-> Cache MISS: 'silent clock with broken pendulum' — calling Pexels API
+  Candidate 1: id=8322152 4096x2160 dur=20s score=0.800 ← SELECTED
+  Candidate 2: id=4169072 1920x1080 dur=6s score=0.800
+  Candidate 3: id=8090346 4096x2160 dur=22s score=0.800
+  Candidate 4: id=8322345 4096x2160 dur=18s score=0.800
+  Candidate 5: id=8322012 4096x2160 dur=44s score=0.800
+  Candidate 6: id=8322009 4096x2160 dur=23s score=0.800
+  Candidate 7: id=6890305 3840x2160 dur=20s score=0.800
+  Candidate 8: id=8428299 4096x2160 dur=6s score=0.800
+  Candidate 9: id=5571638 1920x1080 dur=15s score=0.800
+  Candidate 10: id=30084927 1920x1080 dur=9s score=0.600
+-> Multi-query: accepted 'silent clock with broken pendulum' (score=0.800 >= 0.0) — early exit
+      Provider: pexels
+      Hits:     10
+      Semantic: 0.700
+      Gate:     FAIL
+
+
+  ── Scene Summary ──
+  | Metric              | A (Baseline) | B (Sanitiser) |
+  |---------------------|--------------|---------------|
+  | Terms tested        |            7 |             7 |
+  | Total hits          |           70 |            70 |
+  | Hit rate            | 10.00/term      | 10.00/term       |
+  | Downloadable terms  |            7 |             7 |
+  | Avg semantic score  | 0.621          | 0.621           |
+  | Gate pass rate      | 42.9%          | 42.9%           |
+
+======================================================================
+  OVERALL RESULTS
+======================================================================
+
+  | Metric                  | A (Baseline)  | B (Sanitiser) | Delta      |
+  |-------------------------|---------------|---------------|------------|
+  | Total terms             |            35 |            35 | +++++++0 |
+  | Total hits              |           350 |           350 | +++++++0 |
+  | Hit rate (hits/term)    | 10.00/term       | 10.00/term        | +0.00/term    |
+  | Downloadable terms      |            35 |            35 | +++++++0 |
+  | Download rate           | 100.0%          | 100.0%           | +0.0%      |
+  | Avg semantic score      | 0.580          | 0.577           | -0.003      |
+  | Gate pass rate          | 37.1%          | 37.1%           | +0.0%      |
+  | Terms removed by sanit  | —             |             0 | —          |
+
+  WINNERS:
+    Hit rate:      Tie
+    Semantic:      A
+    Gate pass:     Tie
+    Download rate: Tie
+
+  ANALYSIS:
+
+  1. Provider retrieval: NO CHANGE (10.00 hits/term both)
+  2. Semantic quality: SANITISER WORSENED by 0.003
+  3. Irrelevant downloads: NO CHANGE
+Traceback (most recent call last):
+  File "/home/ubuntu/.openclaw/workspace/video_engine/tools/ab_experiment_sanitizer_v2.py", line 611, in <module>
+    main()
+  File "/home/ubuntu/.openclaw/workspace/video_engine/tools/ab_experiment_sanitizer_v2.py", line 555, in main
+    rlog(f"  4. Primary pipeline success (gate pass): ", end="")
+TypeError: main.<locals>.rlog() got an unexpected keyword argument 'end'
