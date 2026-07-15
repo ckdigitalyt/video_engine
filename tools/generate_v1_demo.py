@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from src.providers.factory import ProviderFactory
-from src.planner import ScenePlanner
+from src.planner import StoryPlanner
 from src.director.director import VisualDirector
 from src.director.concept_planner import ConceptPlanner
 from src.assets.asset_router import AssetRouter
@@ -48,7 +48,7 @@ def main():
     print(f"  Generating ~1 min documentary on: {TOPIC}")
     print(f"{'='*60}\n")
     
-    planner = ScenePlanner(provider=planning_provider)
+    planner = StoryPlanner(provider=planning_provider)
     scenes = planner.generate_plan(TOPIC)
     
     # Take first 3 scenes for ~1 minute

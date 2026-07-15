@@ -24,7 +24,7 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 def run_topic(topic):
     """Run one documentary, collect metrics."""
     from src.providers.factory import ProviderFactory
-    from src.planner import ScenePlanner
+    from src.planner import StoryPlanner
     from src.director.director import VisualDirector
     from src.assets.asset_router import AssetRouter
     from src.director.quality_gate import QualityGates
@@ -65,7 +65,7 @@ def run_topic(topic):
     try:
         factory = ProviderFactory()
         planning_provider = factory.get_llm_provider_for_role("planner")
-        planner = ScenePlanner(provider=planning_provider)
+        planner = StoryPlanner(provider=planning_provider)
         scenes = planner.generate_plan(topic)
 
         director_scene_data = []
