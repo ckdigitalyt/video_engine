@@ -1,0 +1,130 @@
+{
+  "render_settings": {
+    "resolution": [
+      1920,
+      1080
+    ],
+    "fps": 30
+  },
+  "audio_timeline": [
+    {
+      "track": "voice",
+      "file": "cache/audio/scene_0.wav",
+      "start_time": 0.0,
+      "end_time": 8.768
+    },
+    {
+      "track": "voice",
+      "file": "cache/audio/scene_1.wav",
+      "start_time": 8.768,
+      "end_time": 17.472
+    },
+    {
+      "track": "voice",
+      "file": "cache/audio/scene_2.wav",
+      "start_time": 17.472,
+      "end_time": 24.32
+    }
+  ],
+  "video_timeline": [
+    {
+      "layer": 1,
+      "file": "cache/video/scene_0_b0_s0.mp4",
+      "start_time": 0.0,
+      "end_time": 4.36,
+      "transition": "fade",
+      "motion": "ken_burns_in",
+      "camera": "ken_burns",
+      "beat_index": 0,
+      "shot_type": "primary"
+    },
+    {
+      "layer": 1,
+      "file": "cache/video/scene_0_b0_s1.mp4",
+      "start_time": 3.9,
+      "end_time": 5.54,
+      "transition": "crossfade",
+      "motion": "zoom_in",
+      "camera": "zoom_in",
+      "beat_index": 0,
+      "shot_type": "cutaway"
+    },
+    {
+      "layer": 1,
+      "file": "cache/video/scene_0_b1_s0.mp4",
+      "start_time": 5.5,
+      "end_time": 8.768,
+      "transition": "crossfade",
+      "motion": "zoom_in",
+      "camera": "zoom_in",
+      "beat_index": 1,
+      "shot_type": "primary"
+    },
+    {
+      "layer": 1,
+      "file": "cache/video/scene_1_b0_s0.mp4",
+      "start_time": 8.768,
+      "end_time": 13.128,
+      "transition": "fade",
+      "motion": "ken_burns_in",
+      "camera": "ken_burns",
+      "beat_index": 0,
+      "shot_type": "primary"
+    },
+    {
+      "layer": 1,
+      "file": "cache/video/scene_1_b0_s1.mp4",
+      "start_time": 12.668000000000001,
+      "end_time": 14.308000000000002,
+      "transition": "crossfade",
+      "motion": "parallax",
+      "camera": "stabilized",
+      "beat_index": 0,
+      "shot_type": "cutaway"
+    },
+    {
+      "layer": 1,
+      "file": "cache/video/scene_1_b1_s0.mp4",
+      "start_time": 14.268,
+      "end_time": 17.472,
+      "transition": "crossfade",
+      "motion": "ken_burns_in",
+      "camera": "ken_burns",
+      "beat_index": 1,
+      "shot_type": "primary"
+    },
+    {
+      "layer": 1,
+      "file": "cache/video/nasa_fallback_kenburns_97197.mp4",
+      "start_time": 17.472,
+      "end_time": 21.832,
+      "transition": "fade",
+      "motion": "ken_burns_in",
+      "camera": "ken_burns",
+      "beat_index": 0,
+      "shot_type": "primary"
+    },
+    {
+      "layer": 1,
+      "file": "cache/video/nasa_fallback_kenburns_3906.mp4",
+      "start_time": 21.372,
+      "end_time": 23.012,
+      "transition": "crossfade",
+      "motion": "parallax",
+      "camera": "stabilized",
+      "beat_index": 0,
+      "shot_type": "cutaway"
+    },
+    {
+      "layer": 1,
+      "file": "cache/video/nasa_fallback_kenburns_58879.mp4",
+      "start_time": 22.972,
+      "end_time": 24.32,
+      "transition": "crossfade",
+      "motion": "ken_burns_in",
+      "camera": "ken_burns",
+      "beat_index": 1,
+      "shot_type": "primary"
+    }
+  ]
+}

@@ -219,7 +219,11 @@ class BeatDirector:
             if vf_link:
                 vp = os.path.join(self._cache_video, f"scene_{scene.scene_id}_b{beat.index}_s{shot_index}.mp4")
                 self._router.download(vf_link, vp)
-                ap.filepath = vp
+                if os.path.exists(vp) and os.path.getsize(vp) > 1024:
+                    ap.filepath = vp
+                else:
+                    print(f"    [BeatDirector] Download failed or empty: {vf_link[:60]}")
+                    continue
 
             print(f"    [BeatDirector] Shot accepted: {purpose} (provider={provider_name}, score={best_scored.score:.3f})")
             return ap
