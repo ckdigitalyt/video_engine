@@ -186,7 +186,7 @@ class QualityGates:
             self._diversity_tracker.record_accepted(
                 scene_id=scene_id,
                 provider=provider or asset.provider.value,
-                asset_id=asset_id or asset.query_used,
+                asset_id=(asset_id or asset.query_used)[:200],
                 query_used=asset.query_used,
                 filepath=asset.filepath,
             )
