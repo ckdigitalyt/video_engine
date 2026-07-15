@@ -264,7 +264,6 @@ class VisualDirector:
                 topic=self._topic,
                 cache_video=self._cache_video,
                 cache_audio=self._cache_audio,
-                diversity_tracker=self._diversity_tracker,
             )
 
         for scene_data in self._scene_data:

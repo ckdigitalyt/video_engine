@@ -1,47 +1,53 @@
 [
   {
     "topic": "The Fermi Paradox",
-    "total_scenes": 5,
-    "total_shots": 22,
-    "primary_success": 22,
-    "fallbacks": 7,
+    "total_scenes": 10,
+    "total_shots": 0,
+    "primary_success": 0,
+    "fallbacks": 0,
     "provider_usage": {},
     "semantic_pass": 0,
     "semantic_fail": 0,
     "total_semantic": 0.0,
-    "render_duration": 526.5817558765411,
-    "final_video_duration": 89.833333,
-    "exceptions": [],
+    "render_duration": 57.096335649490356,
+    "final_video_duration": 0.0,
+    "exceptions": [
+      "BeatDirector.__init__() got an unexpected keyword argument 'diversity_tracker'"
+    ],
     "video_path": "results/validation/the_fermi_paradox.mp4"
   },
   {
     "topic": "James Webb Space Telescope",
-    "total_scenes": 5,
-    "total_shots": 22,
-    "primary_success": 22,
-    "fallbacks": 9,
+    "total_scenes": 10,
+    "total_shots": 0,
+    "primary_success": 0,
+    "fallbacks": 0,
     "provider_usage": {},
     "semantic_pass": 0,
     "semantic_fail": 0,
     "total_semantic": 0.0,
-    "render_duration": 526.151597738266,
-    "final_video_duration": 88.233333,
-    "exceptions": [],
+    "render_duration": 58.811691999435425,
+    "final_video_duration": 0.0,
+    "exceptions": [
+      "BeatDirector.__init__() got an unexpected keyword argument 'diversity_tracker'"
+    ],
     "video_path": "results/validation/james_webb_space_telescope.mp4"
   },
   {
     "topic": "Black Holes Explained",
-    "total_scenes": 5,
-    "total_shots": 27,
-    "primary_success": 27,
-    "fallbacks": 8,
+    "total_scenes": 11,
+    "total_shots": 0,
+    "primary_success": 0,
+    "fallbacks": 0,
     "provider_usage": {},
     "semantic_pass": 0,
     "semantic_fail": 0,
     "total_semantic": 0.0,
-    "render_duration": 646.4089472293854,
-    "final_video_duration": 115.5,
-    "exceptions": [],
+    "render_duration": 53.78462791442871,
+    "final_video_duration": 0.0,
+    "exceptions": [
+      "BeatDirector.__init__() got an unexpected keyword argument 'diversity_tracker'"
+    ],
     "video_path": "results/validation/black_holes_explained.mp4"
   }
 ]

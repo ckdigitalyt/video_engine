@@ -197,9 +197,9 @@ class BeatDirector:
                 query_used=query_text,
                 score=max(ts, 0.5), semantic_score=0.5,
                 technical_score=max(ts, 0.5), aesthetic_style="real_stock",
-                duration=best.get("duration", 0.0),
-                width=best.get("width", 0),
-                height=best.get("height", 0),
+                duration=max(best.get("duration", 0.0), 1.0),
+                width=max(best.get("width", 0), 1920),
+                height=max(best.get("height", 0), 1080),
             )
 
             sem_score = self._semantic_validator.score(narration=narration, query=str(sq), asset=ap)
