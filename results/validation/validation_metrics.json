@@ -1,0 +1,47 @@
+[
+  {
+    "topic": "The Fermi Paradox",
+    "total_scenes": 5,
+    "total_shots": 22,
+    "primary_success": 22,
+    "fallbacks": 7,
+    "provider_usage": {},
+    "semantic_pass": 0,
+    "semantic_fail": 0,
+    "total_semantic": 0.0,
+    "render_duration": 526.5817558765411,
+    "final_video_duration": 89.833333,
+    "exceptions": [],
+    "video_path": "results/validation/the_fermi_paradox.mp4"
+  },
+  {
+    "topic": "James Webb Space Telescope",
+    "total_scenes": 5,
+    "total_shots": 22,
+    "primary_success": 22,
+    "fallbacks": 9,
+    "provider_usage": {},
+    "semantic_pass": 0,
+    "semantic_fail": 0,
+    "total_semantic": 0.0,
+    "render_duration": 526.151597738266,
+    "final_video_duration": 88.233333,
+    "exceptions": [],
+    "video_path": "results/validation/james_webb_space_telescope.mp4"
+  },
+  {
+    "topic": "Black Holes Explained",
+    "total_scenes": 5,
+    "total_shots": 27,
+    "primary_success": 27,
+    "fallbacks": 8,
+    "provider_usage": {},
+    "semantic_pass": 0,
+    "semantic_fail": 0,
+    "total_semantic": 0.0,
+    "render_duration": 646.4089472293854,
+    "final_video_duration": 115.5,
+    "exceptions": [],
+    "video_path": "results/validation/black_holes_explained.mp4"
+  }
+]

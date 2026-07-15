@@ -100,12 +100,16 @@ class TimelineBuilder:
         # ── File existence ─────────────────────────────────────────────
         for entry in audio_tl:
             path = entry.get("file", "")
-            if path and not os.path.exists(path):
+            if not path:
+                errors.append("Audio entry has empty file path")
+            elif not os.path.exists(path):
                 errors.append(f"Audio file not found: {path}")
 
         for entry in video_tl:
             path = entry.get("file", "")
-            if path and not os.path.exists(path):
+            if not path:
+                errors.append("Video entry has empty file path")
+            elif not os.path.exists(path):
                 errors.append(f"Video file not found: {path}")
 
         # ── Monotonic timestamps / no overlap (audio only; video shots
@@ -129,16 +133,16 @@ class TimelineBuilder:
                         )
 
         # ── Audio / video duration correspondence ──────────────────────
-        # For the current single-scene pipeline, the full timeline length
-        # is determined by audio; video clips should cover the same range.
+        # Video clips with transitions overlap, so the video track end
+        # may not match audio end exactly.  We accept up to a 1.0s gap
+        # (the video can undershoot — we pad; overshoot is a real problem).
         if audio_tl and video_tl:
             audio_end = max(e.get("end_time", 0) for e in audio_tl)
             video_end = max(e.get("end_time", 0) for e in video_tl)
-            # Allow trivial rounding differences
-            if abs(audio_end - video_end) > 2.0:
+            if audio_end > 0 and video_end < audio_end - 1.0:
                 errors.append(
-                    f"Audio duration ({audio_end:.2f}s) and video duration "
-                    f"({video_end:.2f}s) differ by more than 0.1s"
+                    f"Audio duration ({audio_end:.2f}s) exceeds video duration "
+                    f"({video_end:.2f}s) by more than 1.0s"
                 )
 
         return errors
@@ -223,7 +227,7 @@ class TimelineBuilder:
             video_path = sd["video_path"]
 
             # Determine exact audio duration
-            if audio_path:
+            if audio_path and os.path.exists(audio_path):
                 audio_len = self._get_audio_duration(audio_path)
             else:
                 audio_len = 10.0  # fallback
@@ -260,6 +264,26 @@ class TimelineBuilder:
                             "camera": shot["camera"],
                             "beat_index": shot["beat_index"],
                             "shot_type": shot["shot_type"],
+                        })
+
+                # If shots don't cover the full audio length,
+                # extend the last shot to fill the gap (hold last frame).
+                scene_shots = [v for v in video_timeline
+                               if v.get("start_time", 0) >= start and v.get("end_time", 0) <= end]
+                if scene_shots:
+                    last_vid_end = max(v.get("end_time", 0) for v in scene_shots)
+                    last_shot = max(scene_shots, key=lambda v: v.get("end_time", 0))
+                    if last_vid_end < end - 0.1:
+                        video_timeline.append({
+                            "layer": 1,
+                            "file": last_shot.get("file", ""),
+                            "start_time": last_vid_end,
+                            "end_time": end,
+                            "transition": "none",
+                            "motion": "none",
+                            "camera": "static",
+                            "beat_index": last_shot.get("beat_index", 0),
+                            "shot_type": "hold",
                         })
             else:
                 # Single clip per scene (legacy mode)

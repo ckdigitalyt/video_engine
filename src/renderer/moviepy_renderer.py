@@ -192,6 +192,9 @@ class MoviePyRenderer(Renderer):
         # ── Audio clips ────────────────────────────────────────────────
         audio_clips = []
         for track in timeline.audio_timeline:
+            if not track.file or not os.path.exists(track.file):
+                print(f"  -> Skipping missing audio file: {track.file!r}")
+                continue
             clip = AudioFileClip(track.file).set_start(track.start_time)
             audio_clips.append(clip)
 

@@ -256,7 +256,6 @@ class AssetRouter:
             for provider_name in provider_order:
                 if attempts >= max_attempts:
                     break
-                attempts += 1
 
                 provider = self._providers.get(provider_name)
                 if provider is None:
@@ -278,7 +277,9 @@ class AssetRouter:
                         "count": len(results) if results else 0,
                     })
 
+                    # Only consume attempt budget when providers return candidates
                     if results:
+                        attempts += 1
                         # Score the top result (it's already sorted best-first)
                         top = results[0]
                         score = self._score_top_asset(top, **kwargs)

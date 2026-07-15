@@ -1,0 +1,37 @@
+{
+  "topic": "The Fermi Paradox",
+  "total_scenes": 5,
+  "total_beats": 25,
+  "total_shots": 25,
+  "primary_asset_success": 25,
+  "provider_usage": {
+    "pexels": 0,
+    "pixabay": 0,
+    "nasa": 0,
+    "wikimedia": 0
+  },
+  "provider_searches": {
+    "pexels": 0,
+    "pixabay": 0,
+    "nasa": 0,
+    "wikimedia": 0
+  },
+  "provider_hits": {
+    "pexels": 0,
+    "pixabay": 0,
+    "nasa": 0,
+    "wikimedia": 0
+  },
+  "semantic_pass": 0,
+  "semantic_fail": 25,
+  "fallback_count": 25,
+  "avg_semantic_score": 0.0,
+  "total_semantic_score": 1.3499999999999999,
+  "semantic_samples": 25,
+  "render_duration": 404.4946026802063,
+  "final_video_duration": 0.0,
+  "exceptions": [
+    "Can't instantiate abstract class Renderer without an implementation for abstract method 'render'"
+  ],
+  "video_path": "results/benchmark_suite/the_fermi_paradox"
+}

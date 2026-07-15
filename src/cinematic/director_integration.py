@@ -13,14 +13,36 @@ import os
 from src.cinematic.beat_planner import TimelineBuilder as BeatTimelineBuilder
 from src.models import BeatPlan, ShotPlan, ShotType, Scene
 from src.models.schemas import (
-    AssetPlan, CameraMotion, TransitionType, ProviderType, VisualIntent,
+    AssetPlan, CameraMotion, TransitionType, ProviderType,
 )
 from src.assets import AssetRouter
-from src.assets.query_expander import expand_for_shot
 from src.validation.semantic_validator import SemanticValidator
 from src.director.quality_gate import QualityGates
 from src.director.fallback_director import FallbackDirector
 from src.director.concept_planner import ConceptPlanner
+
+
+class ConceptQueryPool:
+    """Round-robin pool of ConceptPlanner-generated queries for one scene.
+
+    Caches the ConceptPlanner output and distributes queries across shots
+    so each beat gets a visually distinct search term.
+    """
+
+    def __init__(self, topic: str, raw_terms: list[str], concept_planner: ConceptPlanner):
+        self._topic = topic
+        self._pool = list(raw_terms) if raw_terms else [topic]
+        self._index = 0
+
+    def next_query(self, shot_type: str = "primary") -> str:
+        """Get the next query from the pool (round-robin)."""
+        base = self._pool[self._index % len(self._pool)]
+        self._index += 1
+        return f"{base} {shot_type} shot"
+
+    @property
+    def query_count(self) -> int:
+        return len(self._pool)
 
 
 class BeatDirector:
@@ -36,7 +58,6 @@ class BeatDirector:
         topic: str,
         cache_video: str,
         cache_audio: str,
-        diversity_tracker = None,
     ):
         self._router = router
         self._quality_gates = quality_gates
@@ -47,6 +68,9 @@ class BeatDirector:
         self._cache_video = cache_video
         self._cache_audio = cache_audio
         self._beat_timeline_builder = BeatTimelineBuilder()
+
+        # Per-scene concept query pools (populated lazily in process_scene_beats)
+        self._concept_pools: dict[int, ConceptQueryPool] = {}
 
         self.total_queries_tried = 0
         self.total_gate_rejections = 0
@@ -68,6 +92,23 @@ class BeatDirector:
         beat_plans = self._beat_timeline_builder.build_timeline(narration, duration, topic)
         if not beat_plans:
             return scene
+
+        # ── Generate ConceptPlanner queries ONCE per scene ────────────────
+        purpose = scene.search_plan.scene_purpose if hasattr(scene, 'search_plan') and scene.search_plan else "general"
+        raw_terms = self._concept_planner.generate_queries(
+            narration=narration,
+            title=scene.title,
+            topic=self._topic,
+            purpose=purpose,
+        )
+        if not raw_terms or all(q in ("", "stock footage") for q in raw_terms):
+            # Fallback to topic-based terms
+            raw_terms = [self._topic]
+        print(f"  [BeatDirector] Concept terms ({len(raw_terms)}): {raw_terms[:4]}...")
+
+        pool = ConceptQueryPool(self._topic, raw_terms, self._concept_planner)
+        self._concept_pools[scene.scene_id] = pool
+        # ───────────────────────────────────────────────────────────────
 
         print(f"  [BeatDirector] {len(beat_plans)} beats, "
               f"{sum(len(b.shots) for b in beat_plans)} shots")
@@ -100,19 +141,17 @@ class BeatDirector:
         purpose = f"{shot.shot_type.value} shot for beat {beat.index}"
         query_text = shot.description or beat.visual_purpose[:100]
 
-        # Use VisualIntent for per-shot queries when available
-        visual_intent = getattr(scene, 'visual_intent', None)
-        if visual_intent and (visual_intent.search_terms or visual_intent.concepts):
-            queries = expand_for_shot(
-                base_query=visual_intent.search_terms[0] if visual_intent.search_terms else self._topic,
-                shot_type=shot.shot_type.value,
-                topic=self._topic,
-                category=getattr(self._router, 'category', 'General'),
-            )
+        # Use ConceptPlanner query pool instead of stale SearchPlan
+        pool = self._concept_pools.get(scene.scene_id)
+        if pool and pool.query_count > 0:
+            shot_query = pool.next_query(shot.shot_type.value)
+            base_query = self._concept_pools[scene.scene_id]._pool[0] if self._concept_pools[scene.scene_id]._pool else self._topic
         else:
-            # Fallback: use scene search plan
+            # Fallback: use scene's search plan or topic
             base_query = scene.search_plan.asset_search_queries[0] if scene.search_plan.asset_search_queries else self._topic
-            queries = [f"{base_query} {shot.shot_type.value} shot", base_query, f"{self._topic} documentary stock footage"]
+            shot_query = f"{base_query} {shot.shot_type.value} shot"
+
+        queries = [shot_query, base_query, f"{self._topic} documentary stock footage"]
 
         for query in queries[:max_retries]:
             self.total_queries_tried += 1
@@ -158,23 +197,15 @@ class BeatDirector:
                 query_used=query_text,
                 score=max(ts, 0.5), semantic_score=0.5,
                 technical_score=max(ts, 0.5), aesthetic_style="real_stock",
-                duration=max(best.get("duration", 0.0), 1.0),
-                width=max(best.get("width", 0), 1920),
-                height=max(best.get("height", 0), 1080),
+                duration=best.get("duration", 0.0),
+                width=best.get("width", 0),
+                height=best.get("height", 0),
             )
 
             sem_score = self._semantic_validator.score(narration=narration, query=str(sq), asset=ap)
             ap.semantic_score = sem_score
 
-            # Extract asset ID for diversity tracking
-            asset_id = str(best.get("id", "")) if isinstance(best, dict) else ""
-
-            passed, reason, _ = self._quality_gates.check_all(
-                asset=ap,
-                category=self._router.category,
-                provider=sp,
-                asset_id=asset_id,
-            )
+            passed, reason, _ = self._quality_gates.check_all(asset=ap, category=self._router.category)
             if not passed:
                 self.total_gate_rejections += 1
                 continue
@@ -190,12 +221,28 @@ class BeatDirector:
 
     def _fallback_for_shot(self, scene, beat, shot, narration):
         """FallbackDirector as last resort."""
+        # Use first concept term for fallback search if available
+        pool = self._concept_pools.get(scene.scene_id)
+        if pool and pool._pool:
+            base = pool._pool[0]
+        else:
+            base = scene.search_plan.asset_search_queries[0] if scene.search_plan.asset_search_queries else self._topic
         return self._fallback_director.produce(
             scene_num=scene.scene_id, narration=narration,
-            search_queries=scene.search_plan.asset_search_queries[0] if scene.search_plan.asset_search_queries else self._topic,
+            search_queries=base,
             target_duration=max(shot.duration, 3.0),
             accepted_scenes=[],
         )
+
+    def get_stats(self) -> Dict:
+        return {
+            "shots_requested": self.total_shots_requested,
+            "shots_accepted": self.total_shots_accepted,
+            "queries_tried": self.total_queries_tried,
+            "gate_rejections": self.total_gate_rejections,
+            "fallbacks": self.total_fallbacks,
+            "shot_success_rate": round(self.total_shots_accepted / max(self.total_shots_requested, 1) * 100, 1),
+        }
 
     def get_stats(self) -> Dict:
         return {
