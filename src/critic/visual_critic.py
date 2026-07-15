@@ -81,12 +81,8 @@ class VisualCritic:
         prompt += "\nScore:"
 
         try:
-            raw = self._provider.llm_complete(
-                system=CRITIC_PROMPT,
-                prompt=prompt,
-                temperature=0.3,
-                max_tokens=200,
-            )
+            full_prompt = f"{CRITIC_PROMPT}\n\n{prompt}"
+            raw = self._provider.generate_text(full_prompt)
             return self._parse(raw)
         except Exception as e:
             return {

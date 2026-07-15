@@ -153,12 +153,8 @@ class VisualIntentPlanner:
         """Produce a VisualIntent for a given narration + scene title."""
         try:
             prompt = f"Scene: {scene_title}\nNarration: {narration}\n\nVisualIntent:"
-            raw = self._provider.llm_complete(
-                system=SYSTEM_PROMPT,
-                prompt=prompt,
-                temperature=0.5,
-                max_tokens=400,
-            )
+            full_prompt = f"{SYSTEM_PROMPT}\n\nScene: {scene_title}\nNarration: {narration}\n\nVisualIntent:"
+            raw = self._provider.generate_text(full_prompt)
             intent = self._parse(raw)
             if intent:
                 return intent

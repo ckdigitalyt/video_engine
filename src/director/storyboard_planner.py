@@ -179,12 +179,8 @@ class StoryboardPlanner:
                 f"Target shots: {num_shots}\n\n"
                 "Storyboard:"
             )
-            raw = self._provider.llm_complete(
-                system=STORYBOARD_PROMPT,
-                prompt=prompt,
-                temperature=0.5,
-                max_tokens=800,
-            )
+            full_prompt = f"{STORYBOARD_PROMPT}\n\n{prompt}"
+            raw = self._provider.generate_text(full_prompt)
             shots = self._parse_shots(raw, num_shots)
             if shots:
                 scene.shots = shots

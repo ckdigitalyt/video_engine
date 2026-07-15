@@ -139,11 +139,11 @@ class ProjectCache:
             topic.lower().replace(" ", "_")[:30],
             provider,
             query_hash,
-            aspect,
+            aspect.replace(":", "_"),
             dur_bucket,
             res_tier,
         ]
-        return ":".join(key_parts)
+        return "|".join(key_parts)
 
     def get(self, key: str) -> Optional[str]:
         """Look up cached asset filepath by cache key.

@@ -76,6 +76,11 @@ class SemanticQueryPlanner:
     def __init__(self, provider: Optional[LLMProvider] = None):
         self._provider = provider or self._default_provider()
 
+    @staticmethod
+    def _default_provider() -> LLMProvider:
+        factory = ProviderFactory()
+        return factory.get_llm_provider_for_role("planner")
+
     # ── Public API ─────────────────────────────────────────────────────
 
     def plan(self, narration: str, n_queries: int = 5) -> list[str]:
@@ -85,13 +90,8 @@ class SemanticQueryPlanner:
         Falls back to simple keyword extraction if the LLM call fails.
         """
         try:
-            prompt = f"Narration: {narration}\n\nQueries:"
-            raw = self._provider.llm_complete(
-                system=SEARCH_QUERY_SYSTEM_PROMPT,
-                prompt=prompt,
-                temperature=0.7,
-                max_tokens=300,
-            )
+            full_prompt = f"{SEARCH_QUERY_SYSTEM_PROMPT}\n\nNarration: {narration}\n\nQueries:"
+            raw = self._provider.generate_text(full_prompt)
             queries = self._parse_response(raw, n_queries)
             if queries:
                 return queries

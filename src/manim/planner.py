@@ -320,12 +320,8 @@ Import: from manim import *
 
         user = f"Create a Manim animation for: {prompt}"
         try:
-            response = self._provider.llm_complete(
-                system=system,
-                prompt=user,
-                temperature=0.4,
-                max_tokens=1000,
-            )
+            full_prompt = f"{system}\n\n{user}"
+            response = self._provider.generate_text(full_prompt)
             # Extract code block
             if "```python" in response:
                 response = response.split("```python")[1]
