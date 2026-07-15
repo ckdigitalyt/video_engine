@@ -144,8 +144,8 @@ class DiversityTracker:
         """Record an accepted asset for future diversity checks."""
         fp = _content_fingerprint(filepath) if filepath else ""
 
-        # Determine similarity group from provider + asset_id
-        sim_group = f"{provider}/{asset_id}" if provider and asset_id else provider
+        # Determine similarity group from provider + asset_id (truncated to 100)
+        sim_group = (f"{provider}/{asset_id}" if provider and asset_id else provider)[:100]
 
         record = DiversityRecord(
             scene_id=scene_id,
