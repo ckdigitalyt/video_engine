@@ -366,6 +366,16 @@ class AssetPlan(BaseModel):
             )
         return v
 
+    @field_validator("width", "height", "duration", mode="before")
+    @classmethod
+    def coerce_zero_to_default(cls, v: object, info) -> object:
+        """Coerce 0/None to a usable default so callers never fail on API data."""
+        if v is None or (isinstance(v, (int, float)) and v <= 0):
+            if info.field_name == "duration":
+                return 10.0
+            return 1920 if info.field_name == "width" else 1080
+        return v
+
     class Config:
         extra = "forbid"
 

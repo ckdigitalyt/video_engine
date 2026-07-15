@@ -2,18 +2,16 @@
   {
     "topic": "The Fermi Paradox",
     "total_scenes": 10,
-    "total_shots": 0,
-    "primary_success": 0,
-    "fallbacks": 0,
+    "total_shots": 41,
+    "primary_success": 41,
+    "fallbacks": 19,
     "provider_usage": {},
     "semantic_pass": 0,
     "semantic_fail": 0,
     "total_semantic": 0.0,
-    "render_duration": 57.096335649490356,
-    "final_video_duration": 0.0,
-    "exceptions": [
-      "BeatDirector.__init__() got an unexpected keyword argument 'diversity_tracker'"
-    ],
+    "render_duration": 697.7159433364868,
+    "final_video_duration": 86.066667,
+    "exceptions": [],
     "video_path": "results/validation/the_fermi_paradox.mp4"
   },
   {
@@ -26,10 +24,10 @@
     "semantic_pass": 0,
     "semantic_fail": 0,
     "total_semantic": 0.0,
-    "render_duration": 58.811691999435425,
+    "render_duration": 82.57349872589111,
     "final_video_duration": 0.0,
     "exceptions": [
-      "BeatDirector.__init__() got an unexpected keyword argument 'diversity_tracker'"
+      "2 validation errors for DiversityRecord\nasset_id\n  String should have at most 200 characters [type=string_too_long, input_value='James Webb Space Telesco...plex series of deployme', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/string_too_long\nsimilarity_group\n  String should have at most 100 characters [type=string_too_long, input_value='nasa/James Webb Space Te...plex series of deployme', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/string_too_long"
     ],
     "video_path": "results/validation/james_webb_space_telescope.mp4"
   },
@@ -43,10 +41,10 @@
     "semantic_pass": 0,
     "semantic_fail": 0,
     "total_semantic": 0.0,
-    "render_duration": 53.78462791442871,
+    "render_duration": 223.60889863967896,
     "final_video_duration": 0.0,
     "exceptions": [
-      "BeatDirector.__init__() got an unexpected keyword argument 'diversity_tracker'"
+      "2 validation errors for DiversityRecord\nasset_id\n  String should have at most 200 characters [type=string_too_long, input_value='Black Holes Explained  W...h form when massive sta', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/string_too_long\nsimilarity_group\n  String should have at most 100 characters [type=string_too_long, input_value='nasa/Black Holes Explain...h form when massive sta', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/string_too_long"
     ],
     "video_path": "results/validation/black_holes_explained.mp4"
   }
