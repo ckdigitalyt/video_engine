@@ -364,16 +364,23 @@ class FallbackDirector:
             self.cache_dir, f"{prefix}_kenburns_{self.rng.randint(1,99999)}.mp4",
         )
 
-        # Random zoom parameters
-        # Static zoom only — no Ken Burns animation to prevent flicker
+        # Ken Burns zoom/pan — slow, cinematic camera motion over still images
+        # start slightly zoomed out, zoom in over duration; slow pan in random direction
         zoom_start = 1.0
-        zoom_end = 1.0
-        pan_x = "0"
-        pan_y = "0"
+        zoom_end = self.rng.uniform(1.15, 1.35)
+        duration_frames = int(duration * 30)
+        # Slow, linear pan across the image
+        pan_x_start = self.rng.choice(["0", "(iw-iw*0.9)/2"])
+        pan_y_start = self.rng.choice(["0", "(ih-ih*0.9)/2"])
+        # Pan toward a different edge by the end
+        pan_x_end = self.rng.choice(["0", "iw-iw*0.9"])
+        pan_y_end = self.rng.choice(["0", "ih-ih*0.9"])
 
         zoom_filter = (
             f"zoompan=z='if(eq(on,1),{zoom_start},min({zoom_end},zoom+0.005))':"
-            f"x='{pan_x}':y='{pan_y}':d={int(duration * 30)}:s=1920x1080"
+            f"x='if(eq(on,1),{pan_x_start},{pan_x_end})':"
+            f"y='if(eq(on,1),{pan_y_start},{pan_y_end})':"
+            f"d={duration_frames}:s=1920x1080"
         )
 
         try:

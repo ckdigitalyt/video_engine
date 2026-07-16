@@ -255,6 +255,9 @@ class VisualDirector:
         # Lazy-import BeatDirector to avoid circular import
         if self._beat_director is None:
             from src.cinematic.director_integration import BeatDirector
+            from src.knowledge.visual_knowledge_library import VisualKnowledgeLibrary
+            kl = VisualKnowledgeLibrary()
+            kl.load_all()
             self._beat_director = BeatDirector(
                 router=self._router,
                 quality_gates=self._quality_gates,
@@ -264,6 +267,7 @@ class VisualDirector:
                 topic=self._topic,
                 cache_video=self._cache_video,
                 cache_audio=self._cache_audio,
+                knowledge_library=kl,
             )
 
         for scene_data in self._scene_data:

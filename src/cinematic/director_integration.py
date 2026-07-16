@@ -62,6 +62,7 @@ class BeatDirector:
         topic: str,
         cache_video: str,
         cache_audio: str,
+        knowledge_library: Optional[Any] = None,
     ):
         self._router = router
         self._quality_gates = quality_gates
@@ -72,6 +73,9 @@ class BeatDirector:
         self._cache_video = cache_video
         self._cache_audio = cache_audio
         self._beat_timeline_builder = BeatTimelineBuilder()
+
+        # Knowledge Library for curated per-shot search queries
+        self._knowledge_library = knowledge_library
 
         # Per-scene concept query pools (populated lazily in process_scene_beats)
         self._concept_pools: dict[int, ConceptQueryPool] = {}
@@ -105,8 +109,27 @@ class BeatDirector:
             topic=self._topic,
             purpose=purpose,
         )
+
+        # If ConceptPlanner returned weak/generic terms, enrich with
+        # Knowledge Library curated searches for this topic
+        is_weak = (
+            not raw_terms
+            or len(raw_terms) <= 2
+            or all(q in ("", "stock footage", "documentary", "general")
+                   for q in raw_terms[:4])
+        )
+        if is_weak and self._knowledge_library is not None:
+            entry = self._knowledge_library.lookup(self._topic)
+            if entry and entry.preferred_stock_footage_searches:
+                raw_terms = list(entry.preferred_stock_footage_searches)
+                # Also add NASA and Wikimedia searches for variety
+                if entry.preferred_nasa_searches:
+                    raw_terms.extend(entry.preferred_nasa_searches[:3])
+                if entry.preferred_wikimedia_searches:
+                    raw_terms.extend(entry.preferred_wikimedia_searches[:2])
+                print(f"  [BeatDirector] Enriched with Knowledge Library ({len(raw_terms)} terms)")
+
         if not raw_terms or all(q in ("", "stock footage") for q in raw_terms):
-            # Fallback to topic-based terms
             raw_terms = [self._topic]
         print(f"  [BeatDirector] Concept terms ({len(raw_terms)}): {raw_terms[:4]}...")
 
@@ -154,9 +177,17 @@ class BeatDirector:
             base_query = scene.search_plan.asset_search_queries[0] if scene.search_plan.asset_search_queries else self._topic
             shot_query = f"{base_query} {shot.shot_type.value} shot"
 
+        # Build diversified query list — include Knowledge Library terms as fallback
         queries = [shot_query, base_query, f"{self._topic} documentary stock footage"]
+        # Add Knowledge Library diversified per-shot queries as extra fallbacks
+        if self._knowledge_library is not None:
+            entry = self._knowledge_library.lookup(self._topic)
+            if entry:
+                all_motifs = list(entry.preferred_visual_motifs)
+                if all_motifs:
+                    queries.extend(all_motifs[:4])
 
-        for query in queries[:max_retries]:
+        for query in queries[:max_retries + 4]:
             self.total_queries_tried += 1
 
             # --- NEW: Collect from ALL providers before picking ---
