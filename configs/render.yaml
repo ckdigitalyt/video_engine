@@ -42,14 +42,14 @@ effects:
   random_seed: 42
 
   motion:
-    enabled: true
-    strength: 0.08       # Zoom/pan amount (0–1)
-    probability: 0.85    # Chance a clip gets motion
+    enabled: false          # Disabled — causes flicker from per-frame resize
+    strength: 0.0           # Overridden by enabled=false
+    probability: 0.0        # Overridden by enabled=false
 
   transitions:
     enabled: true
-    default_transition: "crossfade"
-    transition_duration: 0.5  # seconds
+    default_transition: "cut"      # Was crossfade — use cut to prevent overlap ghosting
+    transition_duration: 0.3       # Was 0.5 — shorter means less visible transition
 
 output:
   # Default output filename when none is specified

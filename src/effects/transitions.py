@@ -59,10 +59,10 @@ class TransitionEngine:
             "effects.transitions.enabled", True
         )
         self._default = default_transition if default_transition is not None else get_config(
-            "effects.transitions.default_transition", "crossfade"
+            "effects.transitions.default_transition", "cut"
         )
         self._duration = duration if duration is not None else get_config(
-            "effects.transitions.transition_duration", 0.5
+            "effects.transitions.transition_duration", 0.3
         )
         self._seed = seed if seed is not None else get_config(
             "effects.random_seed", 42

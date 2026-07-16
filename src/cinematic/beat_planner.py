@@ -117,9 +117,9 @@ class Shot:
     def __init__(self, timestamp: float = 0.0, duration: float = 0.0,
                  shot_type: "ShotType" = None,
                  camera: CameraStyle = CameraStyle.MEDIUM,
-                 motion: Motion = Motion.KEN_BURNS_IN,
+                 motion: Motion = Motion.NONE,
                  asset_type: AssetType = AssetType.VIDEO,
-                 transition: Transition = Transition.CROSS_DISSOLVE,
+                 transition: Transition = Transition.CUT,
                  emotion: Emotion = Emotion.NEUTRAL,
                  visual_purpose: str = "", description: str = "",
                  search_query: str = "", justify_long_shot: str = ""):
@@ -140,58 +140,19 @@ class Shot:
 # ── Mapper functions ───────────────────────────────────────────────────
 
 def _camera_style_to_motion(style: CameraStyle) -> CameraMotion:
-    """Map internal CameraStyle to Pydantic CameraMotion."""
-    mapping = {
-        CameraStyle.WIDE: CameraMotion.KEN_BURNS,
-        CameraStyle.MEDIUM: CameraMotion.STABILIZED,
-        CameraStyle.CLOSEUP: CameraMotion.ZOOM_IN,
-        CameraStyle.EXTREME_CLOSEUP: CameraMotion.ZOOM_IN,
-        CameraStyle.AERIAL: CameraMotion.TILT_DOWN,
-        CameraStyle.POV: CameraMotion.TRUCK_IN,
-        CameraStyle.LOW_ANGLE: CameraMotion.TILT_UP,
-        CameraStyle.HIGH_ANGLE: CameraMotion.TILT_DOWN,
-        CameraStyle.DUTCH: CameraMotion.STATIC,
-        CameraStyle.TRACKING: CameraMotion.FOLLOW,
-        CameraStyle.STATIC: CameraMotion.STATIC,
-    }
-    return mapping.get(style, CameraMotion.STABILIZED)
+    """Map internal CameraStyle to Pydantic CameraMotion.
+    All default to STATIC. Motion is opt-in per shot.
+    """
+    return CameraMotion.STATIC
 
 
 def _emotion_to_camera_motion(emotion: Emotion) -> CameraMotion:
-    mapping = {
-        Emotion.WONDER: CameraMotion.KEN_BURNS,
-        Emotion.TENSION: CameraMotion.ZOOM_IN,
-        Emotion.DRAMATIC: CameraMotion.ZOOM_IN,
-        Emotion.SOLEMN: CameraMotion.STATIC,
-        Emotion.ENERGETIC: CameraMotion.FOLLOW,
-        Emotion.MYSTERIOUS: CameraMotion.TILT_UP,
-        Emotion.NOSTALGIC: CameraMotion.STABILIZED,
-        Emotion.CONTEMPLATIVE: CameraMotion.STABILIZED,
-        Emotion.URGENT: CameraMotion.TRUCK_IN,
-        Emotion.TRIUMPHANT: CameraMotion.KEN_BURNS,
-        Emotion.HOPEFUL: CameraMotion.KEN_BURNS,
-    }
-    return mapping.get(emotion, CameraMotion.STABILIZED)
+    """All emotions default to STATIC. Motion is opt-in."""
+    return CameraMotion.STATIC
 
 
 def _motion_to_camera_motion(m: Motion) -> CameraMotion:
-    mapping = {
-        Motion.NONE: CameraMotion.NONE,
-        Motion.KEN_BURNS_IN: CameraMotion.KEN_BURNS,
-        Motion.KEN_BURNS_OUT: CameraMotion.KEN_BURNS,
-        Motion.PARALLAX: CameraMotion.STABILIZED,
-        Motion.PUSH_IN: CameraMotion.TRUCK_IN,
-        Motion.PUSH_OUT: CameraMotion.TRUCK_OUT,
-        Motion.PAN_LEFT: CameraMotion.PAN_LEFT,
-        Motion.PAN_RIGHT: CameraMotion.PAN_RIGHT,
-        Motion.TILT_UP: CameraMotion.TILT_UP,
-        Motion.TILT_DOWN: CameraMotion.TILT_DOWN,
-        Motion.ZOOM_IN: CameraMotion.ZOOM_IN,
-        Motion.ZOOM_OUT: CameraMotion.ZOOM_OUT,
-        Motion.FOLLOW: CameraMotion.FOLLOW,
-        Motion.DRIFT: CameraMotion.STABILIZED,
-    }
-    return mapping.get(m, CameraMotion.STABILIZED)
+    return CameraMotion.NONE
 
 
 def _transition_to_transition_type(t: Transition) -> TransitionType:
@@ -398,19 +359,17 @@ class BeatPlanner:
                     beat.camera_primary = CameraStyle.CLOSEUP
                     beat.camera_cutaway = CameraStyle.WIDE
 
-            # Transitions
+            # Transitions — use CUT for everything under 4s,
+            # only dissolve between emotion changes on long shots
+            min_dur_for_transition = 4.0
             if i == 0:
                 beat.transition_in = Transition.FADE
+                beat.transition_out = Transition.CROSS_DISSOLVE
             else:
-                beat.transition_in = (
-                    Transition.CROSS_DISSOLVE
-                    if beats[i-1].emotion != beat.emotion
-                    else Transition.CUT
-                )
-            beat.transition_out = (
-                Transition.DIP_TO_BLACK if i == len(beats) - 1
-                else Transition.CROSS_DISSOLVE
-            )
+                beat.transition_in = Transition.CUT
+                beat.transition_out = Transition.CUT
+            if i == len(beats) - 1:
+                beat.transition_out = Transition.DIP_TO_BLACK
 
             # Visual purpose
             if beat.camera_primary == CameraStyle.WIDE:

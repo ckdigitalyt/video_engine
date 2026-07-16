@@ -365,10 +365,11 @@ class FallbackDirector:
         )
 
         # Random zoom parameters
-        zoom_start = self.rng.uniform(1.0, 1.05)
-        zoom_end = self.rng.uniform(1.1, 1.3)
-        pan_x = self.rng.choice(["0", "(w-tw)/2"])
-        pan_y = self.rng.choice(["0", "(h-th)/2"])
+        # Static zoom only — no Ken Burns animation to prevent flicker
+        zoom_start = 1.0
+        zoom_end = 1.0
+        pan_x = "0"
+        pan_y = "0"
 
         zoom_filter = (
             f"zoompan=z='if(eq(on,1),{zoom_start},min({zoom_end},zoom+0.005))':"
