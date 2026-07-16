@@ -12,6 +12,7 @@ immediately by zoom_out) and downgrades violating shots to static.
 
 from __future__ import annotations
 
+import math
 from enum import Enum
 from typing import Any, Optional
 
@@ -54,6 +55,47 @@ def get_motion_direction(motion_name: str) -> MotionDirection:
 
 
 # ── Archetypal sequences ───────────────────────────────────────────────
+
+# ── Narrative arc motion mapping ──────────────────────────────────────
+
+# Motion progression across the documentary timeline:
+#   Opening (0-25%):    static shots, slow pans
+#   Rising (25-60%):    Ken Burns, push_ins
+#   Climax (60-80%):    fast push_ins, zooms
+#   Resolution (80-100%): slow pans, fade to black
+
+NARRATIVE_ARC_MOTIONS: dict[str, list[str]] = {
+    "opening": ["none", "pan_left", "pan_right", "ken_burns_in"],
+    "rising": ["ken_burns_in", "push_in", "pan_left", "drift"],
+    "climax": ["push_in", "zoom_in", "parallax", "pan_left", "tilt_up"],
+    "resolution": ["none", "pan_right", "ken_burns_out", "tilt_down"],
+}
+
+
+def get_narrative_arc_position(scene_index: int, total_scenes: int) -> str:
+    """Determine which narrative arc phase a scene falls into.
+
+    Args:
+        scene_index: 0-based scene index.
+        total_scenes: Total number of scenes in the video.
+
+    Returns:
+        One of "opening", "rising", "climax", "resolution".
+    """
+    if total_scenes <= 1:
+        return "opening"
+
+    progress = scene_index / max(total_scenes - 1, 1)
+
+    if progress < 0.25:
+        return "opening"
+    elif progress < 0.60:
+        return "rising"
+    elif progress < 0.80:
+        return "climax"
+    else:
+        return "resolution"
+
 
 ARCHETYPAL_SEQUENCES: list[dict[str, Any]] = [
     {
@@ -109,13 +151,27 @@ ARCHETYPAL_SEQUENCES: list[dict[str, Any]] = [
 ]
 
 
-def select_archetype(scene_index: int, emotion: str = "neutral") -> dict[str, Any]:
+def select_archetype(scene_index: int, emotion: str = "neutral",
+                     narrative_arc_position: Optional[str] = None) -> dict[str, Any]:
     """Select an archetypal motion sequence based on scene index and emotion.
 
-    Cycles through archetypes deterministically, but allows emotional
-    overrides for specific tones.
+    Incorporates narrative arc position (opening/rising/climax/resolution)
+    to pick sequences that match the documentary's dramatic progression.
+
+    Emotion-based overrides still take precedence, but the narrative arc
+    narrows which archetypes are eligible.
     """
-    # Emotion-based override
+    # Determine eligible archetypes based on narrative arc
+    arc_preferences: dict[str, list[str]] = {
+        "opening": ["classic_reveal", "slow_reveal", "contemplative_study"],
+        "rising": ["sweep_and_land", "classic_reveal", "dynamic_action"],
+        "climax": ["dynamic_action", "sweep_and_land"],
+        "resolution": ["contemplative_study", "slow_reveal", "classic_reveal"],
+    }
+
+    preferred_names = arc_preferences.get(narrative_arc_position, None)
+
+    # Emotion-based override (takes precedence)
     emotion_override = {
         "wonder": "classic_reveal",
         "tension": "dynamic_action",
@@ -131,11 +187,24 @@ def select_archetype(scene_index: int, emotion: str = "neutral") -> dict[str, An
 
     preferred = emotion_override.get(emotion.lower())
     if preferred:
+        # Only use emotion override if it's compatible with the arc
+        if preferred_names and preferred in preferred_names:
+            for seq in ARCHETYPAL_SEQUENCES:
+                if seq["name"] == preferred:
+                    return seq
+        # If not compatible, still return it — emotion trumps arc
         for seq in ARCHETYPAL_SEQUENCES:
             if seq["name"] == preferred:
                 return seq
 
-    # Deterministic round-robin by scene index
+    # Narrative arc-based selection: round-robin within the arc's preferred set
+    if preferred_names:
+        compatible = [s for s in ARCHETYPAL_SEQUENCES if s["name"] in preferred_names]
+        if compatible:
+            idx = scene_index % len(compatible)
+            return compatible[idx]
+
+    # Deterministic round-robin by scene index (fallback)
     idx = scene_index % len(ARCHETYPAL_SEQUENCES)
     return ARCHETYPAL_SEQUENCES[idx]
 
@@ -203,8 +272,15 @@ def apply_archetype_to_sequence(
     shots: list[Any],
     scene_index: int,
     emotion: str = "neutral",
+    narrative_arc_position: Optional[str] = None,
+    total_shot_positions: Optional[int] = None,
 ) -> list[Any]:
     """Apply an archetypal motion pattern to a list of shot objects.
+
+    Incorporates narrative arc tracking: motion intensity and type
+    vary based on where the shot falls in the documentary timeline.
+    Opening shots use static/slow pans; climax shots use fast zooms;
+    resolution shots use slow pans and fades.
 
     Each shot must have a ``motion`` attribute (string) that will be
     set/overridden.  Additional shots beyond the archetype length use
@@ -214,24 +290,51 @@ def apply_archetype_to_sequence(
         shots: List of shot objects with a ``motion`` attribute.
         scene_index: Scene index for deterministic archetype selection.
         emotion: Emotional tone for archetype selection.
+        narrative_arc_position: "opening"|"rising"|"climax"|"resolution".
+        total_shot_positions: Total number of shot positions in the video
+            (used to compute relative progress for fine-grained motion).
 
     Returns:
         The modified shots list (in-place).
     """
-    archetype = select_archetype(scene_index, emotion)
+    archetype = select_archetype(scene_index, emotion, narrative_arc_position)
     pattern = archetype["shots"]
+
+    # Get arc-specific motion candidates for override
+    arc_motions = NARRATIVE_ARC_MOTIONS.get(narrative_arc_position or "opening", [])
 
     prev_motion = "none"
     # Resolve Motion enum type from the shot objects
     from src.cinematic.beat_planner import Motion as MotionEnum
     str_to_enum = {m.value: m for m in MotionEnum}
+    arc_enum_motions = [str_to_enum.get(m, MotionEnum.NONE) for m in arc_motions]
 
     for i, shot in enumerate(shots):
         if i < len(pattern):
             raw_motion = pattern[i]["motion"]
         else:
-            # Repeat last motion for extra shots
             raw_motion = pattern[-1]["motion"]
+
+        # If narrative arc motion set exists, prefer arc-appropriate motions
+        # for higher-energy phases (climax) and slower for opening/resolution
+        if arc_enum_motions and narrative_arc_position in ("climax", "rising"):
+            # For climax, try to use a more energetic motion if safe
+            energetic_options = [m for m in arc_enum_motions
+                                 if m.value in ("push_in", "zoom_in", "parallax")]
+            if energetic_options and raw_motion in ("none", "ken_burns_in", "pan_left"):
+                import random
+                candidate = random.choice(energetic_options).value
+                if get_safe_motion_fallback(prev_motion, candidate) != "none":
+                    raw_motion = candidate
+        elif arc_enum_motions and narrative_arc_position in ("opening", "resolution"):
+            # For opening/resolution, prefer static/slow motions
+            calm_options = [m for m in arc_enum_motions
+                            if m.value in ("none", "pan_left", "pan_right", "ken_burns_out")]
+            if calm_options and raw_motion in ("push_in", "zoom_in", "parallax"):
+                import random
+                candidate = random.choice(calm_options).value
+                if get_safe_motion_fallback(prev_motion, candidate) != "none":
+                    raw_motion = candidate
 
         # Enforce motion grammar compatibility
         assigned_motion_str = get_safe_motion_fallback(prev_motion, raw_motion)

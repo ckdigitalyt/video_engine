@@ -12,6 +12,7 @@ import os
 import concurrent.futures
 
 from src.cinematic.beat_planner import TimelineBuilder as BeatTimelineBuilder
+from src.cinematic.duplicate_detector import DuplicateDetector
 from src.models import BeatPlan, ShotPlan, ShotType, Scene
 from src.models.schemas import (
     AssetPlan, CameraMotion, TransitionType, ProviderType,
@@ -77,6 +78,13 @@ class BeatDirector:
 
         # Knowledge Library for curated per-shot search queries
         self._knowledge_library = knowledge_library
+
+        # Duplicate detector — tracks all used assets per render run
+        self._duplicate_detector = DuplicateDetector(
+            hash_size=8,
+            similarity_threshold=0.85,
+            max_reuses_per_video=2,
+        )
 
         # Per-scene concept query pools (populated lazily in process_scene_beats)
         self._concept_pools: dict[int, ConceptQueryPool] = {}
@@ -204,8 +212,11 @@ class BeatDirector:
             if not all_candidates:
                 continue
 
-            # --- NEW: Rank candidates using AssetRanker ---
-            ranked = self._rank_candidates(all_candidates, query, max(shot.duration, 3.0))
+            # --- NEW: Rank candidates using AssetRanker, with duplicate detection ---
+            ranked = self._rank_candidates(
+                all_candidates, query, max(shot.duration, 3.0),
+                duplicate_detector=self._duplicate_detector,
+            )
             if not ranked:
                 continue
 
@@ -261,6 +272,9 @@ class BeatDirector:
                     print(f"    [BeatDirector] Download failed or empty: {vf_link[:60]}")
                     continue
 
+            # Record accepted asset in duplicate detector
+            self._duplicate_detector.record_use(vp or vf_link, timestamp=shot.timestamp)
+
             print(f"    [BeatDirector] Shot accepted: {purpose} (provider={provider_name}, score={best_scored.score:.3f})")
             return ap
         return None
@@ -306,11 +320,15 @@ class BeatDirector:
                     continue
         return candidates
 
-    def _rank_candidates(self, candidates: list[tuple[str, str, list[dict]]], query: str, target_duration: float):
+    def _rank_candidates(self, candidates: list[tuple[str, str, list[dict]]], query: str,
+                          target_duration: float,
+                          duplicate_detector: Optional[DuplicateDetector] = None):
         """Score and rank candidates from all providers.
 
-        Applies a diversity penalty: if >8 shots have been accepted from the
-        same provider, later candidates from that provider get a score penalty.
+        Applies:
+          - Duplicate image penalty using perceptual hash detection.
+          - Provider diversity penalty (after 8+ from same provider, penalty grows).
+          - 50% max from any single provider in top results.
         """
         if not hasattr(self, '_ranker'):
             self._ranker = AssetRanker()
@@ -324,18 +342,31 @@ class BeatDirector:
 
         scored = self._ranker.score_and_rank(candidates, query=query, target_duration=target_duration)
 
-        # Apply provider diversity penalty (40-50% cap: after 8+ from same provider)
         for sa in scored:
+            # Apply duplicate detector penalty (perceptual hash)
+            dup_penalty = 0.0
+            if duplicate_detector is not None:
+                # Check if this asset's path (from raw metadata) is a duplicate
+                asset_path = ""
+                raw = sa.asset.get("_raw", {}) if isinstance(sa.asset, dict) else {}
+                if isinstance(raw, dict):
+                    asset_path = raw.get("url", raw.get("link", ""))
+                if asset_path:
+                    dup_penalty = duplicate_detector.check_and_penalise(asset_path)
+
+            # Apply provider diversity penalty (after 8+ from same provider)
             prov_count = provider_counts.get(sa.provider, 0)
+            provider_penalty = 0.0
             if prov_count >= 8:
                 # Penalty grows from 0.05 at 8 uses to 0.30 at 12+ uses
-                penalty = min(0.30, (prov_count - 8) * 0.05)
-                sa.score = round(sa.score * (1.0 - penalty), 4)
-                sa.scores["diversity_penalty"] = penalty
-            else:
-                sa.scores["diversity_penalty"] = 0.0
+                provider_penalty = min(0.30, (prov_count - 8) * 0.05)
 
-        # Re-sort with diversity penalty applied
+            total_penalty = max(dup_penalty, provider_penalty)
+            sa.score = round(sa.score * (1.0 - total_penalty), 4)
+            sa.scores["duplicate_penalty"] = dup_penalty
+            sa.scores["provider_diversity_penalty"] = provider_penalty
+
+        # Re-sort with penalties applied
         scored.sort(key=lambda s: s.score, reverse=True)
 
         # Enforce max 50% from any single provider in top results

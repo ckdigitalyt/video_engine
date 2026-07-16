@@ -4,9 +4,10 @@ BeatPlanner — splits narration into semantic beats with visual intent.
 Uses Pydantic models from src.models.schemas for output.
 """
 
-from typing import List, Optional, Union, Dict
-from enum import Enum
+import random
 import re
+from enum import Enum
+from typing import List, Optional, Union, Dict
 
 from src.models.schemas import (
     BeatPlan, ShotPlan, ShotType, CameraMotion, TransitionType, AssetPlan
@@ -161,20 +162,105 @@ def _motion_to_camera_motion(m: Motion) -> CameraMotion:
     return CameraMotion.NONE
 
 
-def _transition_to_transition_type(t: Transition) -> TransitionType:
-    mapping = {
-        Transition.CUT: TransitionType.CUT_SYNC,
-        Transition.CROSS_DISSOLVE: TransitionType.CROSSFADE,
-        Transition.DIP_TO_BLACK: TransitionType.FADE,
-        Transition.DIP_TO_WHITE: TransitionType.CROSSFADE,
-        Transition.L_CUT: TransitionType.CROSSFADE,
-        Transition.J_CUT: TransitionType.CROSSFADE,
-        Transition.MATCH_CUT: TransitionType.CROSSFADE,
-        Transition.CAMERA_MOTION: TransitionType.CROSSFADE,
-        Transition.WIPE: TransitionType.WIPE_LEFT,
-        Transition.FADE: TransitionType.FADE,
-    }
-    return mapping.get(t, TransitionType.CROSSFADE)
+def _transition_to_transition_type(t: Transition, narrative_role: str = "exploration",
+                                    beat_index: int = 0, total_beats: int = 1) -> TransitionType:
+    """Map internal Transition to Pydantic TransitionType with mood-based mixing.
+
+    CUT maps to CUT_SYNC only ~50% of the time, not always 1:1.
+    The remainder is distributed among FADE, CROSSFADE, and WIPE based on
+    the narrative arc position (exposition/climax/conclusion).
+
+    Args:
+        t: Internal transition type.
+        narrative_role: Where we are in the narrative arc.
+        beat_index: Index of the current beat.
+        total_beats: Total number of beats in the scene.
+
+    Returns:
+        Appropriate TransitionType based on mood and position.
+    """
+    # Non-CUT transitions keep their explicit mapping
+    if t != Transition.CUT:
+        mapping = {
+            Transition.CROSS_DISSOLVE: TransitionType.CROSSFADE,
+            Transition.DIP_TO_BLACK: TransitionType.FADE,
+            Transition.DIP_TO_WHITE: TransitionType.CROSSFADE,
+            Transition.L_CUT: TransitionType.CROSSFADE,
+            Transition.J_CUT: TransitionType.CROSSFADE,
+            Transition.MATCH_CUT: TransitionType.CROSSFADE,
+            Transition.CAMERA_MOTION: TransitionType.CROSSFADE,
+            Transition.WIPE: TransitionType.WIPE_LEFT,
+            Transition.FADE: TransitionType.FADE,
+        }
+        return mapping.get(t, TransitionType.CROSSFADE)
+
+    # CUT → mood-based transition mixing
+    # Determine narrative position as a 0.0–1.0 progress
+    progress = beat_index / max(total_beats - 1, 1) if total_beats > 1 else 0.5
+
+    # Mood-based transition mix
+    if progress < 0.25:
+        # Exposition: 50% cut_sync, 30% fade, 20% crossfade
+        roll = random.random()
+        if roll < 0.50:
+            return TransitionType.CUT_SYNC
+        elif roll < 0.80:
+            return TransitionType.FADE
+        else:
+            return TransitionType.CROSSFADE
+    elif progress < 0.60:
+        # Rising action: 50% cut_sync, 25% fade, 25% crossfade
+        roll = random.random()
+        if roll < 0.50:
+            return TransitionType.CUT_SYNC
+        elif roll < 0.75:
+            return TransitionType.FADE
+        else:
+            return TransitionType.CROSSFADE
+    elif progress < 0.80:
+        # Climax: 40% cut, 30% wipe, 30% zoom_in
+        roll = random.random()
+        if roll < 0.40:
+            return TransitionType.CUT
+        elif roll < 0.70:
+            return TransitionType.WIPE_LEFT
+        else:
+            return TransitionType.ZOOM_IN
+    else:
+        # Conclusion: 50% fade, 30% cut_sync, 20% crossfade
+        roll = random.random()
+        if roll < 0.50:
+            return TransitionType.FADE
+        elif roll < 0.80:
+            return TransitionType.CUT_SYNC
+        else:
+            return TransitionType.CROSSFADE
+
+
+# ── Crossfade counter (module-level, reset per video) ────────────────
+
+_crossfade_counter: int = 0
+_MAX_CROSSFADES_PER_VIDEO: int = 4
+
+
+def _cap_crossfades(t: TransitionType) -> TransitionType:
+    """Cap the number of crossfade transitions per video.
+
+    After _MAX_CROSSFADES_PER_VIDEO crossfades, any remaining
+    crossfade transitions are downgraded to CUT.
+    """
+    global _crossfade_counter
+    if t == TransitionType.CROSSFADE:
+        _crossfade_counter += 1
+        if _crossfade_counter > _MAX_CROSSFADES_PER_VIDEO:
+            return TransitionType.CUT
+    return t
+
+
+def _reset_crossfade_counter() -> None:
+    """Reset the crossfade counter for a new video."""
+    global _crossfade_counter
+    _crossfade_counter = 0
 
 
 def _shot_type_to_pydantic_shot_type(st: "ShotType") -> ShotType:
@@ -191,16 +277,24 @@ def _shot_type_to_pydantic_shot_type(st: "ShotType") -> ShotType:
 
 
 # Alias
-def _internal_beat_to_pydantic(b: Beat) -> BeatPlan:
-    """Convert internal Beat to Pydantic BeatPlan."""
+def _internal_beat_to_pydantic(b: Beat, narrative_role: str = "exploration",
+                               total_beats: int = 1) -> BeatPlan:
+    """Convert internal Beat to Pydantic BeatPlan.
+
+    Applies mood-based transition mixing and crossfade capping.
+    """
     shots_p = []
     for s in b.shots:
+        tr_type = _transition_to_transition_type(
+            s.transition, narrative_role, b.index, total_beats
+        )
+        tr_type = _cap_crossfades(tr_type)
         sp = ShotPlan(
             timestamp=round(s.timestamp, 2),
             duration=round(s.duration, 2),
             shot_type=_shot_type_to_pydantic_shot_type(s.shot_type),
             camera=_motion_to_camera_motion(s.motion),
-            transition=_transition_to_transition_type(s.transition),
+            transition=tr_type,
             emotion=s.emotion.value,
             motion=s.motion.value if hasattr(s.motion, 'value') else str(s.motion),
             asset_type=s.asset_type.value,
@@ -211,6 +305,13 @@ def _internal_beat_to_pydantic(b: Beat) -> BeatPlan:
         )
         shots_p.append(sp)
 
+    t_in = _cap_crossfades(_transition_to_transition_type(
+        b.transition_in, narrative_role, b.index, total_beats
+    ))
+    t_out = _cap_crossfades(_transition_to_transition_type(
+        b.transition_out, narrative_role, b.index, total_beats
+    ))
+
     return BeatPlan(
         index=b.index,
         text=b.text,
@@ -220,8 +321,8 @@ def _internal_beat_to_pydantic(b: Beat) -> BeatPlan:
         visual_purpose=b.visual_purpose,
         camera_primary=_emotion_to_camera_motion(b.emotion),
         camera_cutaway=_camera_style_to_motion(b.camera_cutaway),
-        transition_in=_transition_to_transition_type(b.transition_in),
-        transition_out=_transition_to_transition_type(b.transition_out),
+        transition_in=t_in,
+        transition_out=t_out,
         shots=shots_p,
         motion_graphics_note=b.motion_graphics_note,
     )
@@ -245,6 +346,35 @@ def split_into_clauses(sentence: str) -> List[str]:
 
 # ── Planning classes ────────────────────────────────────────────────────
 
+def merge_short_cut_sync_shots(shots: List[Shot], min_duration: float = 4.0) -> List[Shot]:
+    """Merge adjacent short cut_sync shots into one longer shot.
+
+    Shots under min_duration with a cut_sync transition are merged
+    with the next compatible shot to produce longer, more watchable clips.
+
+    Args:
+        shots: List of internal Shot objects.
+        min_duration: Minimum duration before a shot is considered for merging.
+
+    Returns:
+        Merged list of shots.
+    """
+    if not shots:
+        return []
+
+    merged = []
+    for shot in shots:
+        if shot.duration < min_duration and shot.transition == Transition.CUT:
+            if merged and merged[-1].transition == Transition.CUT:
+                # Merge into the previous shot
+                merged[-1].duration += shot.duration
+            else:
+                merged.append(shot)
+        else:
+            merged.append(shot)
+    return merged
+
+
 class BeatPlanner:
     """Plans beats from narration text."""
 
@@ -254,7 +384,7 @@ class BeatPlanner:
 
         Uses the PaceProfiler to analyze narration for sentence boundaries
         and natural breath points, then sets shot durations to match
-        breath units (3.5s-6.0s range) instead of arbitrary intervals.
+        breath units (4.5s-6.0s range) instead of arbitrary intervals.
         """
         sentences = split_into_sentences(narration)
         if not sentences:
@@ -273,9 +403,11 @@ class BeatPlanner:
         # Use recommended average from pace profiler as base duration
         ideal_duration = pace.recommended_avg
 
-        # Use pace profiler min/max
-        min_dur = pace.recommended_min
-        max_dur = pace.recommended_max
+        # Raised minimum floor to prevent 2.5s clips.
+        # The PaceProfiler's min may be as low as 2.5; we override upward
+        # to target 4.5-6.0s average duration.
+        min_dur = max(pace.recommended_min, 4.0)
+        max_dur = max(pace.recommended_max, 6.0)
 
         total_needed = beat_count * ideal_duration
         scale = scene_duration / total_needed if total_needed > 0 else 1.0
@@ -284,7 +416,7 @@ class BeatPlanner:
         time_cursor = 0.0
         for i, clause in enumerate(clauses):
             raw_duration = ideal_duration * scale
-            # Clamp within pace-profiler bounds
+            # Clamp within our raised bounds — no 2.5s ceiling
             duration = max(min_dur, min(max_dur, raw_duration))
             if i == len(clauses) - 1:
                 remaining = scene_duration - time_cursor
@@ -415,13 +547,17 @@ class ShotPlanner:
 
         Uses Motion Grammar to apply archetypal motion sequences across shots,
         ensuring direction consistency and eliminating flicker.
+
+        Primary shot duration is raised to min(bd * 0.75, 6.5) so that
+        average shot durations land in the 4.5-6.0s target range instead
+        of being clamped to 2.5-3.0s.
         """
         for beat in beats:
             bd = beat.duration
             shots = []
 
-            # Primary: 60-70% of beat
-            primary_dur = min(bd * 0.65, 5.0)
+            # Primary: 65-75% of beat — raised cap from 5.0 to 6.5
+            primary_dur = min(bd * 0.75, 6.5)
             shots.append(Shot(
                 timestamp=0.0,
                 duration=primary_dur,
@@ -537,18 +673,33 @@ class TimelineBuilder:
                        narrative_role: str = "exploration") -> List[BeatPlan]:
         """Full pipeline: narration -> beats -> shots -> Pydantic BeatPlans.
 
+        Includes:
+          - Raised minimum duration floor for longer shots.
+          - Merge of adjacent short cut_sync shots.
+          - Mood-based transition mixing (not all CUT_SYNC).
+          - Crossfade capping to max 4 per video.
+
         Args:
             scene_index: Used to select deterministic motion archetype.
             narrative_role: Role in narrative arc for pace-based duration.
         """
+        # Reset per-video counters
+        _reset_crossfade_counter()
+
         beats = self.beat_planner.plan_beats(narration, scene_duration, narrative_role)
         beats = self.beat_planner.assign_emotions(beats, topic)
         beats = self.beat_planner.assign_visual_style(beats)
         beats = self.shot_planner.plan_shots(beats, scene_index)
         beats = self.editor.edit_sequence(beats)
         beats = self.editor.adjust_pacing(beats, energy)
-        # Convert to Pydantic models
-        return [_internal_beat_to_pydantic(b) for b in beats]
+
+        # Merge adjacent short cut_sync shots
+        for beat in beats:
+            beat.shots = merge_short_cut_sync_shots(beat.shots, min_duration=3.5)
+
+        # Convert to Pydantic models with mood-based transitions
+        total_beats = len(beats)
+        return [_internal_beat_to_pydantic(b, narrative_role, total_beats) for b in beats]
 
     def get_pacing_metrics(self, bep: List[BeatPlan]) -> dict:
         """Compute visual pacing metrics from BeatPlan list."""
