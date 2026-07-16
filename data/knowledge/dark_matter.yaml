@@ -1,0 +1,82 @@
+# Visual Knowledge Library — Dark Matter
+concept: "Dark Matter"
+aliases: ["invisible matter", "dark halo", "missing mass", "non-baryonic matter", "dark matter halo"]
+documentary_explanation: >
+  Dark matter is an unknown form of matter that does not emit, absorb, or
+  reflect light, making it invisible to telescopes.  Its existence is inferred
+  from gravitational effects: galaxy rotation curves that don't match visible
+  mass, gravitational lensing stronger than expected, and the large-scale
+  structure of the cosmos.  Dark matter constitutes approximately 85% of all
+  matter in the universe.
+preferred_visual_motifs:
+  - "galaxy rotation curve animation"
+  - "gravitational lensing visualization"
+  - "halo of invisible matter around galaxy"
+  - "cosmic web structure simulation"
+  - "particle detector underground"
+  - "dark matter distribution simulation"
+  - "bullet cluster gravitational lensing"
+preferred_stock_footage_searches:
+  - "galaxy rotation animation"
+  - "gravitational lensing illustration"
+  - "cosmic web dark matter simulation"
+  - "particle accelerator laboratory"
+  - "underground laboratory science"
+  - "supercomputer simulation cosmos"
+preferred_nasa_searches:
+  - "Hubble dark matter map"
+  - "bullet cluster gravitational lensing"
+  - "galaxy rotation curve graph"
+  - "dark matter simulation illustration"
+  - "cosmic web simulation NASA"
+preferred_wikimedia_searches:
+  - "Dark matter distribution simulation"
+  - "Galaxy rotation curve graph"
+  - "Bullet cluster dark matter map"
+  - "Gravitational lensing diagram"
+  - "Dark matter halo illustration"
+preferred_animation_strategy: "manim"
+manim_templates:
+  - "galaxy_rotation_curve"
+  - "gravitational_lensing"
+  - "dark_matter_halo"
+  - "cosmic_web"
+diagrams_charts_timelines:
+  - "Galaxy rotation curve (observed vs predicted)"
+  - "Gravitational lensing ray diagram"
+  - "Bullet cluster dark matter map"
+  - "Matter composition of universe (pie chart)"
+  - "Dark matter distribution in galaxy cluster"
+camera_suggestions:
+  - description: "slow pan across dark matter simulation"
+    motion: "pan_right"
+  - description: "zoom into galaxy rotation curve diagram"
+    motion: "zoom_in"
+  - description: "static demonstration of gravitational lensing"
+    motion: "static"
+  - description: "fly-through of dark matter cosmic web"
+    motion: "dolly"
+transition_suggestions:
+  - "dissolve from simulation to real observation"
+  - "crossfade between rotation curve and galaxy image"
+  - "fade to black for 'what we cannot see'"
+colour_palette:
+  - "#000000"
+  - "#8A2BE2"
+  - "#4169E1"
+  - "#FFFFFF"
+  - "#00FFFF"
+keywords_to_avoid:
+  - "ghosts"
+  - "supernatural"
+  - "mysticism"
+  - "dark force"
+  - "the Force"
+  - "star wars"
+  - "invisible monsters"
+recommended_fallback_sequence:
+  - ["manim", "galaxy_rotation_curve"]
+  - ["stock_footage", "gravitational lensing illustration"]
+  - ["nasa", "Hubble dark matter map"]
+  - ["wikimedia", "Dark matter distribution simulation"]
+  - ["emergency", "animated particle simulation"]

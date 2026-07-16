@@ -1,0 +1,89 @@
+# Visual Knowledge Library — Nuclear Fusion
+concept: "Nuclear Fusion"
+aliases: ["fusion", "stellar fusion", "proton-proton chain", "fusion reactor", "stellar nucleosynthesis"]
+documentary_explanation: >
+  Nuclear fusion is the process where light atomic nuclei combine to form
+  heavier nuclei, releasing enormous amounts of energy.  It powers stars,
+  including our Sun, through the proton-proton chain and CNO cycle.  On Earth,
+  scientists are working to harness fusion for clean energy using tokamaks
+  (like ITER) and stellarators.  Fusion requires extreme temperatures and
+  pressures to overcome electrostatic repulsion.
+preferred_visual_motifs:
+  - "Sun surface fusion animation"
+  - "proton-proton chain diagram"
+  - "tokamak reactor interior"
+  - "plasma confinement magnetic field"
+  - "stellar core showing fusion"
+  - "ITER tokamak construction"
+  - "plasma ring inside reactor"
+  - "Einstein E=mc² equation overlay"
+preferred_stock_footage_searches:
+  - "Sun surface solar flare"
+  - "fusion reactor tokamak"
+  - "plasma physics laboratory"
+  - "ITER fusion project"
+  - "magnetic confinement plasma"
+  - "nuclear fusion animation"
+  - "solar plasma loop close up"
+preferred_nasa_searches:
+  - "Sun SDO imagery"
+  - "solar fusion illustration"
+  - "stellar evolution diagram"
+  - "Solar Dynamics Observatory sun"
+  - "solar corona imagery"
+preferred_wikimedia_searches:
+  - "Fusion reaction diagram"
+  - "Proton-proton chain diagram"
+  - "Tokamak cross section diagram"
+  - "Binding energy per nucleon graph"
+  - "CNO cycle diagram"
+  - "ITER diagram"
+preferred_animation_strategy: "manim"
+manim_templates:
+  - "nuclear_fusion"
+  - "proton_proton_chain"
+  - "tokamak_plasma"
+  - "binding_energy"
+diagrams_charts_timelines:
+  - "Proton-proton chain reaction diagram"
+  - "Binding energy per nucleon curve"
+  - "Fission vs fusion energy comparison"
+  - "ITER timeline (construction to first plasma)"
+  - "Conditions required for fusion (temperature/pressure)"
+  - "Stellar fusion stages by star mass"
+camera_suggestions:
+  - description: "static diagram of proton-proton chain with annotations"
+    motion: "static"
+  - description: "slow zoom into Sun surface showing fusion zone"
+    motion: "zoom_in"
+  - description: "pan across Tokamak cross section interior"
+    motion: "pan_right"
+  - description: "fly-through of ITER construction facility"
+    motion: "dolly"
+transition_suggestions:
+  - "dissolve between diagram and real fusion imagery"
+  - "crossfade from Sun to laboratory fusion"
+  - "zoom from atomic (nuclei) to stellar scale"
+  - "fade to black for 'unlocking star power'"
+colour_palette:
+  - "#FF4500"
+  - "#FFD700"
+  - "#FFFFFF"
+  - "#000000"
+  - "#8B0000"
+keywords_to_avoid:
+  - "nuclear explosion"
+  - "nuclear bomb"
+  - "meltdown"
+  - "Hiroshima"
+  - "fallout"
+  - "radiation poisoning"
+  - "cold fusion"
+  - "perpetual motion"
+recommended_fallback_sequence:
+  - ["manim", "nuclear_fusion"]
+  - ["stock_footage", "Sun surface solar flare"]
+  - ["nasa", "Sun SDO imagery"]
+  - ["wikimedia", "Fusion reaction diagram"]
+  - ["stock_footage", "fusion reactor tokamak"]
+  - ["emergency", "animated plasma glow"]

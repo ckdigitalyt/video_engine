@@ -1,0 +1,95 @@
+# Visual Knowledge Library — Roman Empire
+concept: "Roman Empire"
+aliases: ["ancient Rome", "Roman civilization", "Roman Republic", "Julius Caesar", "Roman Empire rise", "SPQR"]
+documentary_explanation: >
+  The Roman Empire was the post-Republican period of ancient Rome, spanning
+  from 27 BCE when Augustus became the first emperor, to the fall of the
+  Western Roman Empire in 476 CE.  At its height, it controlled territory
+  from Britain to North Africa to Mesopotamia.  Roman contributions include
+  republican government, codified law (Roman law, Justinian Code), engineering
+  (aqueducts, roads, concrete), the Latin language, and the spread of
+  Christianity.
+preferred_visual_motifs:
+  - "Colosseum Rome"
+  - "Roman aqueduct remains"
+  - "Roman road cobblestone"
+  - "Roman forum ruins"
+  - "map of Roman Empire expansion"
+  - "Roman legion reenactment"
+  - "Roman architecture detail"
+  - "Pompeii ruins"
+  - "Hadrian's Wall"
+  - "Roman bath ruins"
+  - "Julius Caesar portrait sculpture"
+preferred_stock_footage_searches:
+  - "Colosseum Rome aerial drone"
+  - "Roman aqueduct Pont du Gard"
+  - "Roman forum ruins sunset"
+  - "Ancient Rome architecture"
+  - "Italian countryside Roman ruins"
+  - "Roman Empire map animation"
+  - "Pompeii excavated ruins"
+  - "Roman legion reenactment"
+  - "Hadrian's Wall England"
+  - "Roman concrete ancient structures"
+preferred_nasa_searches:
+  - "satellite Rome city"
+  - "satellite Italian peninsula"
+  - "satellite ancient Roman road traces"
+preferred_wikimedia_searches:
+  - "Roman Empire map maximum extent"
+  - "Roman Colosseum cutaway diagram"
+  - "Roman aqueduct system diagram"
+  - "Roman legion organization chart"
+  - "Pompeii plan ruins"
+  - "Roman concrete composition"
+  - "Julius Caesar bust photograph"
+preferred_animation_strategy: "timeline"
+manim_templates:
+  - "roman_timeline"
+  - "empire_expansion"
+  - "architecture_evolution"
+diagrams_charts_timelines:
+  - "Roman Empire growth timeline (753 BCE - 476 CE)"
+  - "Map of Roman Empire at maximum extent (117 CE)"
+  - "Roman government structure (Republic → Empire)"
+  - "Roman aqueduct engineering diagram"
+  - "Roman legion organization chart"
+  - "Roman emperors timeline"
+camera_suggestions:
+  - description: "aerial drone reveal of Colosseum"
+    motion: "zoom_out"
+  - description: "slow pan along Roman aqueduct remains"
+    motion: "pan_right"
+  - description: "static museum display of Roman artifacts"
+    motion: "static"
+  - description: "zoom into empire expansion map"
+    motion: "zoom_in"
+  - description: "walk-through Roman forum ruins"
+    motion: "follow"
+transition_suggestions:
+  - "dissolve between ruins and reconstructions"
+  - "crossfade from map to real ruins"
+  - "fade to black for empire's decline"
+  - "wipe: Roman Republic to Empire"
+  - "zoom map animation expanding borders"
+colour_palette:
+  - "#8B4513"
+  - "#DEB887"
+  - "#CD5C5C"
+  - "#2F4F4F"
+  - "#FFD700"
+keywords_to_avoid:
+  - "gladiator movie"
+  - "Russell Crowe"
+  - "Hollywood Rome"
+  - "fantasy"
+  - "Rome: Total War gameplay"
+  - "Ridley Scott film clips"
+  - "made-up history"
+recommended_fallback_sequence:
+  - ["stock_footage", "Colosseum Rome aerial drone"]
+  - ["wikimedia", "Roman Empire map maximum extent"]
+  - ["stock_footage", "Roman aqueduct Pont du Gard"]
+  - ["stock_footage", "Pompeii excavated ruins"]
+  - ["emergency", "ancient ruins placeholder"]

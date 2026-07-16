@@ -1,0 +1,82 @@
+# Visual Knowledge Library — Gravitational Waves
+concept: "Gravitational Waves"
+aliases: ["ripples in spacetime", "LIGO", "gravity waves", "Einstein waves", "spacetime ripples"]
+documentary_explanation: >
+  Gravitational waves are ripples in spacetime itself, predicted by Albert
+  Einstein's general theory of relativity in 1916 and first directly detected
+  by LIGO in September 2015.  They are produced by cataclysmic events such as
+  merging black holes, neutron star collisions, and supernovae.  Each
+  detection opens a new window on the universe—gravitational wave astronomy.
+preferred_visual_motifs:
+  - "spacetime grid rippling"
+  - "two black holes merging"
+  - "LIGO observatory aerial"
+  - "interferometer laser beams"
+  - "neutron star collision animation"
+  - "gravitational wave visualization"
+  - "distorted spacetime grid"
+preferred_stock_footage_searches:
+  - "LIGO observatory Hanford"
+  - "gravity waves spacetime animation"
+  - "interferometer laser optics"
+  - "scientific observatory aerial"
+  - "black hole merger simulation"
+  - "gravity simulation particles waves"
+  - "spacetime bending animation"
+preferred_nasa_searches:
+  - "gravitational wave illustration"
+  - "LISA space antenna concept"
+  - "neutron star merger simulation"
+  - "black hole merger visualization"
+  - "gravitational wave detection diagram"
+preferred_wikimedia_searches:
+  - "LIGO interferometer diagram"
+  - "Gravitational wave detection signal graph"
+  - "Merging black holes illustration"
+  - "Spacetime ripple visualization"
+  - "Neutron star merger simulation"
+preferred_animation_strategy: "manim"
+manim_templates:
+  - "gravitational_waves"
+  - "black_hole_merger"
+  - "ligo_detection"
+  - "spacetime_ripple"
+diagrams_charts_timelines:
+  - "LIGO schematic (interferometer setup)"
+  - "Gravitational wave signal (chirp waveform)"
+  - "Known gravitational wave events timeline"
+  - "Gravitational wave spectrum"
+  - "Black hole merger stages diagram"
+camera_suggestions:
+  - description: "aerial drone shot of LIGO observatory"
+    motion: "static"
+  - description: "slow zoom into spacetime grid before disturbance"
+    motion: "zoom_in"
+  - description: "pan across gravitational wave signal graph"
+    motion: "pan_right"
+  - description: "push through interferometer laser path"
+    motion: "truck_in"
+transition_suggestions:
+  - "dissolve from observatory to spacetime simulation"
+  - "crossfade between merger stages"
+  - "fade to black for 'a new kind of astronomy'"
+  - "zoom from laboratory to cosmic scale"
+colour_palette:
+  - "#000000"
+  - "#00BFFF"
+  - "#FFFFFF"
+  - "#4169E1"
+  - "#00FF7F"
+keywords_to_avoid:
+  - "psychic waves"
+  - "spiritual"
+  - "new age"
+  - "consciousness"
+  - "pyramid power"
+  - "telepathy"
+recommended_fallback_sequence:
+  - ["manim", "gravitational_waves"]
+  - ["stock_footage", "LIGO observatory Hanford"]
+  - ["nasa", "gravitational wave illustration"]
+  - ["wikimedia", "LIGO interferometer diagram"]
+  - ["emergency", "animated spacetime ripple"]

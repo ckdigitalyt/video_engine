@@ -1,0 +1,97 @@
+# Phase 0: Visual Knowledge Library — YAML entry for Fermi Paradox
+concept: "Fermi Paradox"
+aliases: ["Great Silence", "Where is everybody?", "Fermi's Question", "Fermi Paradox Explained"]
+documentary_explanation: >
+  The Fermi Paradox is the contradiction between the high probability of
+  extraterrestrial life (given the age and scale of the universe) and
+  humanity's lack of contact with or evidence for such civilizations.
+  Named after physicist Enrico Fermi who famously asked "Where is everybody?"
+  over lunch at Los Alamos in 1950.
+preferred_visual_motifs:
+  - "deep space stars"
+  - "Milky Way timelapse"
+  - "radio telescope at night"
+  - "observatory dome at sunset"
+  - "galaxy rotation animation"
+  - "SETI observatory dishes"
+  - "Andromeda galaxy wide shot"
+  - "interstellar dust and gas"
+  - "cosmic web visualization"
+  - "Earth from space"
+preferred_stock_footage_searches:
+  - "deep space starfield"
+  - "radio telescope array"
+  - "Arecibo observatory"
+  - "Milky Way galaxy from Earth"
+  - "night sky timelapse remote observatory"
+  - "galaxy cluster deep field"
+  - "VLT observatory Chile"
+  - "interstellar space animation"
+preferred_nasa_searches:
+  - "Hubble deep field"
+  - "Milky Way center infrared"
+  - "exoplanet transit graphics"
+  - "observable universe map"
+  - "galaxy evolution simulation"
+preferred_wikimedia_searches:
+  - "Drake Equation diagram"
+  - "Fermi Paradox illustration"
+  - "galaxy types classification"
+  - "telescope array diagrams"
+  - "Enrico Fermi portrait"
+preferred_animation_strategy: "manim"
+manim_templates:
+  - "drake_equation"
+  - "civilization_timeline"
+  - "probability_tree"
+  - "signal_propagation"
+  - "stellar_lifetimes"
+diagrams_charts_timelines:
+  - "Drake Equation (animated)"
+  - "Civilization type timeline (Kardashev scale)"
+  - "Probability tree of life emergence"
+  - "Signal propagation distance map"
+  - "Stellar lifetime comparison chart"
+camera_suggestions:
+  - description: "slow zoom into Milky Way from wide shot"
+    motion: "zoom_in"
+  - description: "slow pan across radio telescope array"
+    motion: "pan_right"
+  - description: "stable establishing shot of observatory dome"
+    motion: "static"
+  - description: "slow push into deep space through starfield"
+    motion: "truck_in"
+  - description: "pan across galaxy cluster Hubble image"
+    motion: "pan_left"
+transition_suggestions:
+  - "slow dissolve between space scenes"
+  - "crossfade from telescope to galaxy shot"
+  - "fade to black for moments of contemplative silence"
+  - "crossfade for diagram overlays"
+  - "dissolve between animation and live footage"
+colour_palette:
+  - "#000011"
+  - "#0a0a2e"
+  - "#FFD700"
+  - "#4169E1"
+  - "#FFFFFF"
+keywords_to_avoid:
+  - "astronaut"
+  - "Artemis"
+  - "space shuttle"
+  - "ISS"
+  - "rocket"
+  - "space suit"
+  - "Apollo"
+  - "launch pad"
+  - "space station"
+  - "alien abduction"
+  - "UFO"
+  - "Hollywood aliens"
+recommended_fallback_sequence:
+  - ["manim", "drake_equation"]
+  - ["manim", "civilization_timeline"]
+  - ["stock_footage", "deep space starfield"]
+  - ["nasa", "Hubble deep field"]
+  - ["wikimedia", "Fermi Paradox illustration"]
+  - ["emergency", "animated galaxy placeholder"]

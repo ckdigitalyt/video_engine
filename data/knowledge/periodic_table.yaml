@@ -1,0 +1,87 @@
+# Visual Knowledge Library — Periodic Table
+concept: "Periodic Table"
+aliases: ["elements", "periodic table of elements", "Mendeleev table", "chemical elements", "atomic numbers"]
+documentary_explanation: >
+  The periodic table is a tabular arrangement of chemical elements, organized
+  by atomic number (number of protons), electron configuration, and recurring
+  chemical properties.  First developed by Dmitri Mendeleev in 1869, who left
+  gaps for undiscovered elements, the table now contains 118 confirmed
+  elements.  Periods (rows) correspond to electron shells, while groups
+  (columns) contain elements with similar valence electron configurations and
+  chemical behavior.
+preferred_visual_motifs:
+  - "periodic table high resolution"
+  - "element samples display"
+  - "element property trends animation"
+  - "atom structure proton neutrons electrons"
+  - "electron shell filling"
+  - "element discovery timeline"
+  - "chemical reaction demonstration"
+  - "laboratory element samples"
+preferred_stock_footage_searches:
+  - "periodic table animation"
+  - "chemistry laboratory experiment"
+  - "element samples display"
+  - "chemical reaction colorful"
+  - "scientist chemistry lab"
+  - "atom structure 3D animation"
+  - "chemistry glassware laboratory"
+  - "science classroom periodic table"
+preferred_nasa_searches:
+  - "element formation supernova"
+  - "stellar nucleosynthesis chart"
+  - "abundance of elements universe"
+preferred_wikimedia_searches:
+  - "Periodic table high resolution"
+  - "Mendeleev original periodic table"
+  - "Electron configuration diagram"
+  - "Element abundance in universe graph"
+  - "Element discovery timeline"
+  - "Periodic trends graph (electronegativity, radius)"
+preferred_animation_strategy: "manim"
+manim_templates:
+  - "periodic_table"
+  - "element_trends"
+  - "electron_configuration"
+  - "element_formation"
+diagrams_charts_timelines:
+  - "Mendeleev's original table vs modern table"
+  - "Periodic trends: electronegativity, atomic radius, ionization energy"
+  - "Electron shell filling diagram"
+  - "Element discovery timeline"
+  - "Abundance of elements in universe vs Earth"
+  - "Element groups: alkali, halogens, noble gases, etc."
+camera_suggestions:
+  - description: "static full periodic table with group highlighting"
+    motion: "static"
+  - description: "slow zoom into individual element detail tile"
+    motion: "zoom_in"
+  - description: "pan across element discovery timeline"
+    motion: "pan_right"
+  - description: "push through periodic table by group"
+    motion: "truck_in"
+transition_suggestions:
+  - "dissolve: table to individual element samples"
+  - "crossfade between periodic trends graphs"
+  - "zoom from element to electron shell diagram"
+  - "wipe by group (left to right across table)"
+colour_palette:
+  - "#FFFFFF"
+  - "#0000FF"
+  - "#FF0000"
+  - "#00FF00"
+  - "#FFD700"
+  - "#800080"
+keywords_to_avoid:
+  - "alchemy"
+  - "magic"
+  - "transmutation"
+  - "philosopher's stone"
+  - "conspiracy elements"
+  - "Mendeleev dream myth"
+recommended_fallback_sequence:
+  - ["manim", "periodic_table"]
+  - ["stock_footage", "periodic table animation"]
+  - ["wikimedia", "Periodic table high resolution"]
+  - ["stock_footage", "chemistry laboratory experiment"]
+  - ["emergency", "animated periodic table grid"]

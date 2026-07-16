@@ -1,0 +1,96 @@
+# Visual Knowledge Library — Black Hole
+concept: "Black Hole"
+aliases: ["stellar mass black hole", "supermassive black hole", "Sagittarius A*", "singularity", "event horizon"]
+documentary_explanation: >
+  A black hole is a region of spacetime where gravity is so intense that
+  nothing—not even light—can escape.  General relativity predicts that a
+  sufficiently compact mass can deform spacetime to form a black hole.
+  Stellar-mass black holes form when massive stars collapse.  Supermassive
+  black holes, millions to billions of solar masses, sit at the centers of
+  most galaxies including our own Milky Way.
+preferred_visual_motifs:
+  - "spiral galaxy with bright center"
+  - "accretion disk simulation"
+  - "gravitational lensing visualization"
+  - "stars orbiting invisible object"
+  - "spacetime curvature diagram"
+  - "event horizon visualization"
+  - "X-ray binary system"
+  - "supermassive black hole at galaxy center"
+  - "M87 black hole shadow image"
+preferred_stock_footage_searches:
+  - "galaxy spiral animation"
+  - "stellar cluster deep space"
+  - "gravity simulation particles"
+  - "black hole accretion disk simulation"
+  - "spacetime grid deforming"
+  - "M87 black hole Event Horizon Telescope"
+  - "quasar bright galaxy center"
+  - "gravity well animation"
+preferred_nasa_searches:
+  - "Chandra X-ray black hole"
+  - "Hubble black hole stars"
+  - "Event Horizon Telescope M87"
+  - "Sagittarius A* visualization"
+  - "X-ray binary animation"
+  - "gravitational wave illustration"
+  - "galaxy merger simulation"
+preferred_wikimedia_searches:
+  - "Black hole diagram Schwarzschild radius"
+  - "Einstein cross gravitational lensing"
+  - "Penrose diagram"
+  - "black hole size comparison"
+  - "supermassive black hole galaxy center diagram"
+preferred_animation_strategy: "manim"
+manim_templates:
+  - "black_hole_geometry"
+  - "spacetime_curvature"
+  - "gravitational_lensing"
+  - "event_horizon"
+  - "accretion_disk"
+diagrams_charts_timelines:
+  - "Black hole size comparison (stellar vs supermassive)"
+  - "Event horizon diagram (Schwarzschild radius)"
+  - "Gravitational lensing ray-traced diagram"
+  - "Stellar collapse → black hole formation timeline"
+  - "X-ray binary system labelled diagram"
+camera_suggestions:
+  - description: "slow zoom into galaxy center suggesting hidden mass"
+    motion: "zoom_in"
+  - description: "slow rotation around accretion disk visualization"
+    motion: "pan_right"
+  - description: "static shot of spacetime grid distortion"
+    motion: "static"
+  - description: "slow push toward event horizon visualization"
+    motion: "truck_in"
+  - description: "orbit around black hole simulation viewpoint"
+    motion: "follow"
+transition_suggestions:
+  - "crossfade between simulation and real M87 imagery"
+  - "dissolve to diagram overlay"
+  - "fade to black for 'beyond event horizon' moment"
+  - "zoom transition from galaxy overview to center"
+  - "wipe from animation to telescope observation"
+colour_palette:
+  - "#000000"
+  - "#FF4500"
+  - "#FFFFFF"
+  - "#1a1a2e"
+  - "#FFD700"
+  - "#8B0000"
+keywords_to_avoid:
+  - "wormhole"
+  - "time travel"
+  - "interstellar movie"
+  - "science fiction"
+  - "aliens"
+  - "Hollywood"
+  - "fantasy"
+  - "portal"
+recommended_fallback_sequence:
+  - ["manim", "black_hole_geometry"]
+  - ["manim", "spacetime_curvature"]
+  - ["stock_footage", "galaxy spiral animation"]
+  - ["nasa", "Chandra X-ray black hole"]
+  - ["wikimedia", "Black hole diagram"]
+  - ["emergency", "animated space background"]

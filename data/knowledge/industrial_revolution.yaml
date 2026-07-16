@@ -1,0 +1,91 @@
+# Visual Knowledge Library — Industrial Revolution
+concept: "Industrial Revolution"
+aliases: ["Industrial Age", "steam engine", "factory system", "Industrialisation", "Industrial Revolution 1760"]
+documentary_explanation: >
+  The Industrial Revolution was the transition from agrarian, handcraft
+  economies to machine-manufacturing, factory-based industrialised economies.
+  Beginning in Britain around 1760, key innovations included the steam engine
+  (Watt), spinning jenny, power loom, iron smelting with coke, and the
+  railroad.  It led to unprecedented economic growth, urbanisation, and
+  profound social changes — as well as child labour, pollution, and
+  exploitation that sparked the labour movement.
+preferred_visual_motifs:
+  - "steam engine cross section"
+  - "factory interior 19th century"
+  - "coal mine illustration"
+  - "Victorian factory workers"
+  - "steam locomotive train"
+  - "iron bridge engineering"
+  - "cityscape industrial smoke"
+  - "textile mill machinery"
+  - "child labour historical photos"
+  - "Urbanization map 1800s"
+preferred_stock_footage_searches:
+  - "steam locomotive railway"
+  - "old factory machinery"
+  - "coal mine historic"
+  - "industrial revolution museum"
+  - "steam engine working"
+  - "Birmingham industrial canal"
+  - "Victorian architecture city"
+  - "textile mill machinery"
+  - "iron bridge Ironbridge Gorge"
+preferred_nasa_searches:
+  - "Earth at night urbanisation"
+  - "global CO2 concentration"
+  - "satellite urban expansion"
+preferred_wikimedia_searches:
+  - "Steam engine diagram Watt"
+  - "Industrial Revolution timeline"
+  - "Factory system illustration 1800s"
+  - "Coal mine cross section"
+  - "Child labour photos Lewis Hine"
+  - "Urban population growth chart"
+  - "Textile machinery spinning jenny"
+preferred_animation_strategy: "timeline"
+manim_templates:
+  - "industrial_timeline"
+  - "steam_engine_mechanism"
+diagrams_charts_timelines:
+  - "Industrial Revolution timeline (1760-1840)"
+  - "Steam engine mechanism (Newcomen → Watt)"
+  - "Urban population growth chart 1700-1900"
+  - "Factory system vs cottage industry comparison"
+  - "Industrial output growth 1750-1900"
+  - "Child labour legislation timeline"
+camera_suggestions:
+  - description: "pan across historic factory interior"
+    motion: "pan_right"
+  - description: "zoom into steam engine mechanism diagram"
+    motion: "zoom_in"
+  - description: "static museum shot of machinery exhibit"
+    motion: "static"
+  - description: "follow shot along railway track"
+    motion: "follow"
+  - description: "aerial push into industrial cityscape painting"
+    motion: "truck_in"
+transition_suggestions:
+  - "dissolve between historical paintings and surviving artifacts"
+  - "crossfade: invention diagram to real museum object"
+  - "fade to black for 'the human cost' section"
+  - "wipe: agrarian to industrial landscape"
+colour_palette:
+  - "#2F2F2F"
+  - "#8B7355"
+  - "#A0522D"
+  - "#696969"
+  - "#B22222"
+  - "#4682B4"
+keywords_to_avoid:
+  - "steampunk"
+  - "fantasy"
+  - "Victorian fiction"
+  - "movie depictions"
+  - "Charles Dickens caricature"  # use real sources
+  - "inaccurate costume drama"
+recommended_fallback_sequence:
+  - ["stock_footage", "steam locomotive railway"]
+  - ["wikimedia", "Industrial Revolution timeline"]
+  - ["stock_footage", "old factory machinery"]
+  - ["wikimedia", "Child labour photos Lewis Hine"]
+  - ["emergency", "animated steam engine diagram"]

@@ -1,0 +1,92 @@
+# Visual Knowledge Library — CMB (Cosmic Microwave Background)
+concept: "Cosmic Microwave Background"
+aliases: ["CMB", "cosmic background radiation", "WMAP", "Planck satellite", "relic radiation", "first light"]
+documentary_explanation: >
+  The Cosmic Microwave Background is the thermal radiation left over from the
+  Big Bang, filling all of space.  It was emitted about 380,000 years after
+  the Big Bang when the universe cooled enough for electrons and protons to
+  form neutral hydrogen (recombination), allowing photons to travel freely.
+  Its near-perfect blackbody spectrum at 2.725 K and tiny temperature
+  fluctuations (parts in 100,000) provide a snapshot of the early universe
+  and encode its composition, geometry, and evolution.
+preferred_visual_motifs:
+  - "CMB temperature map full sky"
+  - "WMAP or Planck satellite image"
+  - "tiny temperature fluctuations color"
+  - "recombination epoch animation"
+  - "universe cooling down from hot"
+  - "CMB dipole anisotropy"
+  - "power spectrum graph"
+  - "sound waves in early universe"
+  - "acoustic peaks CMB spectrum"
+  - "last scattering surface diagram"
+preferred_stock_footage_searches:
+  - "cosmic microwave background map"
+  - "universe early formation animation"
+  - "space satellite observation"
+  - "deep space science visualization"
+  - "cosmic radiation concept"
+preferred_nasa_searches:
+  - "WMAP cosmic microwave background"
+  - "Planck CMB full sky map"
+  - "CMB temperature fluctuations"
+  - "CMB power spectrum"
+  - "CMB acoustic peaks"
+  - "WMAP universe composition pie chart"
+preferred_wikimedia_searches:
+  - "CMB temperature map full sky"
+  - "CMB power spectrum graph"
+  - "Recombination epoch diagram"
+  - "WMAP vs Planck comparison"
+  - "Last scattering surface diagram"
+  - "Cosmic timeline with CMB"
+preferred_animation_strategy: "manim"
+manim_templates:
+  - "cmb_formation"
+  - "recombination"
+  - "cmb_power_spectrum"
+  - "universe_composition"
+diagrams_charts_timelines:
+  - "CMB power spectrum with acoustic peaks labeled"
+  - "Universe composition from CMB (dark energy, dark matter, ordinary matter)"
+  - "Cosmic timeline from Big Bang to CMB to present"
+  - "CMB temperature fluctuation map (Planck)"
+  - "Recombination: from plasma to neutral gas"
+  - "Flat universe vs curved universe from CMB"
+camera_suggestions:
+  - description: "slow pan across full-sky CMB temperature map"
+    motion: "pan_right"
+  - description: "zoom into CMB fluctuation region from full map"
+    motion: "zoom_in"
+  - description: "static power spectrum with peak annotations"
+    motion: "static"
+  - description: "pull back from CMB map to cosmic timeline"
+    motion: "zoom_out"
+  - description: "rotate around Planck satellite model"
+    motion: "follow"
+transition_suggestions:
+  - "dissolve: satellite image to CMB map"
+  - "crossfade from CMB map to universe composition pie chart"
+  - "fade to black for 'before the CMB'"
+  - "wipe: WMAP map to higher resolution Planck map"
+colour_palette:
+  - "#000011"
+  - "#FF6B35"
+  - "#00BFFF"
+  - "#FFFFFF"
+  - "#FFD700"
+  - "#FF1493"
+keywords_to_avoid:
+  - "proof of God"
+  - "creationist interpretation"
+  - "religious"
+  - "mystical radiation"
+  - "vibrations of the universe"  # pseudoscientific
+  - "consciousness"
+  - "new age"
+recommended_fallback_sequence:
+  - ["manim", "cmb_formation"]
+  - ["nasa", "WMAP cosmic microwave background"]
+  - ["stock_footage", "cosmic microwave background map"]
+  - ["wikimedia", "CMB power spectrum graph"]
+  - ["emergency", "animated CMB temperature map"]

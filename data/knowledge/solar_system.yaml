@@ -1,0 +1,95 @@
+# Visual Knowledge Library — Solar System
+concept: "Solar System"
+aliases: ["our solar system", "planets", "inner planets", "outer planets", "Kuiper belt", "Oort cloud", "planetary system"]
+documentary_explanation: >
+  Our solar system consists of the Sun and everything bound to it by gravity:
+  eight planets, five dwarf planets, hundreds of moons, millions of asteroids,
+  comets, and the distant Kuiper Belt and Oort Cloud.  The inner rocky planets
+  (Mercury, Venus, Earth, Mars) contrast with the outer gas and ice giants
+  (Jupiter, Saturn, Uranus, Neptune).  The solar system formed 4.6 billion
+  years ago from a collapsing molecular cloud.
+preferred_visual_motifs:
+  - "planets orbiting sun animation"
+  - "Jupiter Great Red Spot"
+  - "Saturn rings up close"
+  - "Mars surface panorama"
+  - "Earth from space"
+  - "asteroid belt illustration"
+  - "Kuiper Belt diagram"
+  - "Solar system to scale"
+  - "planet size comparison"
+  - "moon orbit around planet"
+preferred_stock_footage_searches:
+  - "solar system animation"
+  - "planets orbit sun"
+  - "Earth rotating from space"
+  - "Jupiter Great Red Spot timelapse"
+  - "Saturn rings rotating"
+  - "moon orbit around Earth"
+  - "asteroid field animation"
+  - "Mars surface landscape"
+preferred_nasa_searches:
+  - "Jupiter Juno mission images"
+  - "Saturn Cassini images"
+  - "Mars Perseverance photos"
+  - "Earth from space Apollo"
+  - "Moon surface Apollo"
+  - "solar system illustration"
+  - "planet size comparison"
+  - "Kuiper Belt New Horizons"
+preferred_wikimedia_searches:
+  - "Solar system diagram"
+  - "Planet classification chart"
+  - "Asteroid belt diagram"
+  - "Solar system formation illustration"
+  - "Planet orbit comparison"
+  - "Solar system to scale"
+preferred_animation_strategy: "manim"
+manim_templates:
+  - "solar_system"
+  - "planet_orbits"
+  - "planet_size_comparison"
+  - "moon_formation"
+diagrams_charts_timelines:
+  - "Planets in order from Sun (with scale)"
+  - "Planet size comparison chart"
+  - "Solar system formation timeline"
+  - "Planet composition comparison (rocky vs gas vs ice)"
+  - "Distance from Sun bar chart"
+camera_suggestions:
+  - description: "wide static view of full solar system"
+    motion: "static"
+  - description: "slow fly-by of each planet from Mercury outward"
+    motion: "follow"
+  - description: "zoom into Jupiter from system view"
+    motion: "zoom_in"
+  - description: "slow pan across planetary surface for each world"
+    motion: "pan_right"
+  - description: "pull back from Earth to show full system"
+    motion: "zoom_out"
+transition_suggestions:
+  - "dissolve from planet to planet in sequence"
+  - "crossfade between real imagery and diagram"
+  - "zoom transition from planet close-up to scale diagram"
+  - "wipe from inner to outer solar system"
+colour_palette:
+  - "#000011"
+  - "#FFD700"
+  - "#FF4500"
+  - "#4169E1"
+  - "#DEB887"
+  - "#DAA520"
+keywords_to_avoid:
+  - "science fiction"
+  - "aliens on Mars"
+  - "conspiracy"
+  - "flat earth"
+  - "astrology"
+  - "Nibiru"
+  - "planet X conspiracy"
+recommended_fallback_sequence:
+  - ["manim", "solar_system"]
+  - ["stock_footage", "solar system animation"]
+  - ["nasa", "planet size comparison"]
+  - ["wikimedia", "Solar system diagram"]
+  - ["emergency", "animated planets orbit"]

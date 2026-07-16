@@ -1,0 +1,91 @@
+# Visual Knowledge Library — Thermodynamics
+concept: "Thermodynamics"
+aliases: ["laws of thermodynamics", "heat transfer", "entropy", "second law", "thermal physics"]
+documentary_explanation: >
+  Thermodynamics is the branch of physics that deals with heat, work,
+  temperature, and energy in physical systems.  The four laws govern all
+  energy transformations: Zeroth (thermal equilibrium), First (energy
+  conservation: ΔU = Q - W), Second (entropy always increases in isolated
+  systems), and Third (absolute zero is unattainable).  The concept of
+  entropy, a measure of disorder, has profound implications in physics,
+  information theory, and cosmology.
+preferred_visual_motifs:
+  - "heat engine diagram (Carnot cycle)"
+  - "entropy disorder animation"
+  - "temperature molecular motion"
+  - "steam engine piston cycle"
+  - "refrigeration cycle"
+  - "Brownian motion particles"
+  - "Carnot cycle P-V diagram"
+  - "thermal imaging camera view"
+  - "absolute zero temperature scale"
+preferred_stock_footage_searches:
+  - "heat engine animation"
+  - "steam engine working"
+  - "thermal camera infrared"
+  - "temperature molecular animation"
+  - "experiment heat transfer"
+  - "fire and ice temperature"
+  - "thermodynamics laboratory"
+  - "Brownian motion experiment"
+preferred_nasa_searches:
+  - "heat shield re-entry"
+  - "spacecraft thermal control"
+  - "cosmic background temperature"
+  - "Earth's thermal radiation"
+  - "heat death of universe visualization"
+preferred_wikimedia_searches:
+  - "Carnot cycle P-V diagram"
+  - "First law of thermodynamics diagram"
+  - "Entropy illustration disorder"
+  - "Heat engine diagram labeled"
+  - "Maxwell's demon thought experiment"
+  - "Temperature scales comparison"
+preferred_animation_strategy: "manim"
+manim_templates:
+  - "thermodynamics_laws"
+  - "carnot_cycle"
+  - "entropy"
+  - "heat_transfer"
+diagrams_charts_timelines:
+  - "Carnot cycle (P-V diagram with isothermal/adiabatic steps)"
+  - "Four laws of thermodynamics summary"
+  - "Entropy as disorder: crystalline vs liquid vs gas"
+  - "Heat transfer methods: conduction, convection, radiation"
+  - "Temperature scale conversions (K, C, F)"
+  - "Maxwell's demon thought experiment setup"
+camera_suggestions:
+  - description: "static diagram with animated particle motion"
+    motion: "static"
+  - description: "slow pan across Carnot cycle P-V graph"
+    motion: "pan_right"
+  - description: "zoom into molecules moving faster as temperature rises"
+    motion: "zoom_in"
+  - description: "push through thermal camera view"
+    motion: "truck_in"
+transition_suggestions:
+  - "crossfade between diagram and real-world application"
+  - "dissolve: ice melting to steam at molecular level"
+  - "fade to black for 'heat death of the universe'"
+  - "wipe between heat transfer modes"
+colour_palette:
+  - "#FF4500"
+  - "#0000CD"
+  - "#FFFFFF"
+  - "#000000"
+  - "#FFD700"
+  - "#696969"
+keywords_to_avoid:
+  - "perpetual motion"
+  - "free energy"
+  - "cold fusion"
+  - "energy healing"
+  - "homeopathy energy"
+  - "anti-entropy"
+  - "over-unity devices"
+recommended_fallback_sequence:
+  - ["manim", "thermodynamics_laws"]
+  - ["stock_footage", "heat engine animation"]
+  - ["wikimedia", "Carnot cycle P-V diagram"]
+  - ["stock_footage", "thermal camera infrared"]
+  - ["emergency", "animated particle motion temperature"]

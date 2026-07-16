@@ -1,0 +1,92 @@
+# Visual Knowledge Library — Compound Interest
+concept: "Compound Interest"
+aliases: ["compounding", "exponential growth", "interest on interest", "the eighth wonder", "Einstein compounding"]
+documentary_explanation: >
+  Compound interest is the process where interest earned on an investment is
+  reinvested to generate additional interest, leading to exponential growth.
+  The formula is A = P(1 + r/n)^(nt), where P is principal, r the annual
+  rate, n compounding periods per year, and t years.  Over long time horizons,
+  compounding produces dramatically larger returns than simple interest.
+  It applies to investments, loans, credit cards, and population growth.
+preferred_visual_motifs:
+  - "exponential growth curve"
+  - "compound vs simple interest graph"
+  - "snowball rolling down hill metaphor"
+  - "money growing tree"
+  - "investment growth chart"
+  - "interest compounding animation"
+  - "savings account accumulating"
+  - "credit card debt spiral"
+  - "Rule of 72 diagram"
+  - "doubling penny experiment"
+preferred_stock_footage_searches:
+  - "exponential growth graph"
+  - "snowball rolling downhill"
+  - "money growing plant"
+  - "investment portfolio growth"
+  - "savings coins accumulating"
+  - "retirement savings concept"
+  - "stock market growth chart"
+preferred_nasa_searches:
+  - "exponential population growth"
+  - "Moore's law chart"
+  - "exponential technology growth"
+preferred_wikimedia_searches:
+  - "Compound interest vs simple interest graph"
+  - "Exponential growth curve diagram"
+  - "Rule of 72 chart (years to double)"
+  - "Compound interest formula derivation"
+  - "Population growth exponential curve"
+  - "Snowball effect illustration"
+preferred_animation_strategy: "manim"
+manim_templates:
+  - "compound_interest"
+  - "exponential_growth"
+  - "rule_of_72"
+  - "snowball_effect"
+diagrams_charts_timelines:
+  - "Compound vs simple interest comparison (over 30 years)"
+  - "Exponential growth curve (linear vs exponential on same axes)"
+  - "Rule of 72: doubling time by interest rate"
+  - "Effect of compounding frequency (annual vs monthly vs daily)"
+  - "Power of starting early (saving at 25 vs 35 vs 45)"
+  - "Credit card debt compounding illustration"
+camera_suggestions:
+  - description: "slow zoom into exponential curve takeoff"
+    motion: "zoom_in"
+  - description: "pan across compound vs simple interest comparison"
+    motion: "pan_right"
+  - description: "static graph with animated compounding dots"
+    motion: "static"
+  - description: "pull back from snowball metaphor to graph"
+    motion: "zoom_out"
+  - description: "push through years on timeline as bars grow"
+    motion: "truck_in"
+transition_suggestions:
+  - "dissolve: metaphorical snowball to actual graph"
+  - "crossfade between different compounding scenarios"
+  - "wipe: simple interest side to compound interest side"
+  - "fade to black for 'the cost of avoiding it'"
+colour_palette:
+  - "#228B22"
+  - "#FFD700"
+  - "#000000"
+  - "#FFFFFF"
+  - "#006400"
+  - "#B22222"
+keywords_to_avoid:
+  - "get rich quick"
+  - "crypto moon"
+  - "guaranteed returns"
+  - "roi promises"
+  - "Ponzi scheme"
+  - "pyramid scheme"
+  - "financial freedom guru"
+  - "passive income myth"
+  - "day trading strategy"
+recommended_fallback_sequence:
+  - ["manim", "compound_interest"]
+  - ["stock_footage", "exponential growth graph"]
+  - ["wikimedia", "Compound interest vs simple interest graph"]
+  - ["stock_footage", "investment portfolio growth"]
+  - ["emergency", "animated exponential curve"]

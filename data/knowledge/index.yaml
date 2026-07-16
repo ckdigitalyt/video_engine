@@ -1,0 +1,45 @@
+# index.yaml — Visual Knowledge Library domain index
+#
+# Every concept listed here must have a corresponding {slug}.yaml file
+# in this directory.  The domains field is purely organisational —
+# lookup is always by concept name or alias.
+
+domains:
+  astronomy:
+    - "Fermi Paradox"
+    - "Black Hole"
+    - "Big Bang"
+    - "Redshift"
+    - "Dark Matter"
+    - "Exoplanets"
+    - "Solar System"
+    - "Milky Way Galaxy"
+    - "Cosmic Microwave Background"
+    - "Stellar Evolution"
+    - "Neutron Stars"
+    - "Gravitational Waves"
+    - "Dark Energy"
+    - "Spacetime Curvature"
+  physics:
+    - "Quantum Mechanics"
+    - "Electromagnetism"
+    - "Thermodynamics"
+    - "Nuclear Fusion"
+    - "Particle Physics"
+  biology:
+    - "Evolution"
+    - "DNA"
+    - "Photosynthesis"
+  chemistry:
+    - "Periodic Table"
+  history:
+    - "Roman Empire"
+    - "Industrial Revolution"
+  ai_math:
+    - "Neural Networks"
+    - "Probability"
+    - "Statistics"
+  economics:
+    - "Supply and Demand"
+    - "Inflation"
+    - "Compound Interest"

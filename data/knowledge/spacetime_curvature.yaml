@@ -1,0 +1,96 @@
+# Visual Knowledge Library — Spacetime Curvature
+concept: "Spacetime Curvature"
+aliases: ["general relativity", "curved spacetime", "Einstein gravity", "fabric of spacetime", "gravity as geometry", "geodesics"]
+documentary_explanation: >
+  Spacetime curvature is the central concept of Einstein's general theory of
+  relativity (1915), which describes gravity not as a force but as a
+  curvature of four-dimensional spacetime caused by mass and energy.  Objects
+  move along geodesics (the "straightest possible paths") in curved
+  spacetime.  This explains planetary orbits, light bending around massive
+  objects (gravitational lensing), time dilation near strong gravity, and
+  the expansion of the universe.
+preferred_visual_motifs:
+  - "spacetime grid with heavy ball deforming"
+  - "Earth orbiting curved spacetime well"
+  - "light bending around massive object"
+  - "geodesic path on curved surface"
+  - "gravitational lensing ring"
+  - "Einstein cross four images"
+  - "rubber sheet analogy"
+  - "time dilation near black hole"
+  - "Mercury perihelion precession"
+  - "gravity probe B experiment"
+preferred_stock_footage_searches:
+  - "spacetime curvature animation"
+  - "gravity bending light"
+  - "Earth orbit spacetime well"
+  - "rubber sheet gravity analogy"
+  - "Einstein general relativity"
+  - "gravitational lensing galaxy"
+  - "spacetime grid distortion"
+preferred_nasa_searches:
+  - "Gravity Probe B experiment"
+  - "gravitational lensing Hubble"
+  - "Einstein ring Hubble image"
+  - "light deflection solar eclipse"
+  - "spacetime curvature illustration"
+preferred_wikimedia_searches:
+  - "Spacetime curvature diagram"
+  - "Geodesic diagram on curved surface"
+  - "Gravitational lensing diagram"
+  - "Einstein cross illustration"
+  - "Mercury perihelion precession diagram"
+  - "Rubber sheet analogy spacetime"
+preferred_animation_strategy: "manim"
+manim_templates:
+  - "spacetime_curvature"
+  - "gravitational_lensing"
+  - "geodesics"
+  - "time_dilation"
+  - "einstein_ring"
+diagrams_charts_timelines:
+  - "Spacetime curvature rubber sheet analogy"
+  - "Geodesic paths in curved vs flat spacetime"
+  - "Gravitational lensing geometry (source → lens → observer)"
+  - "Mercury perihelion precession diagram"
+  - "Time dilation vs gravitational strength"
+  - "Equivalence principle: elevator thought experiment"
+camera_suggestions:
+  - description: "static grid with weight deforming it"
+    motion: "static"
+  - description: "slow orbit around spacetime curvature visualization"
+    motion: "follow"
+  - description: "zoom into geodesic path on curved surface"
+    motion: "zoom_in"
+  - description: "push through gravitational lensing from source to Earth"
+    motion: "truck_in"
+  - description: "pan across Einstein cross galaxy image"
+    motion: "pan_right"
+transition_suggestions:
+  - "dissolve: rubber sheet analogy to real gravitational lensing image"
+  - "crossfade between flat and curved spacetime"
+  - "fade to black for 'beyond the analogy'"
+  - "zoom: from thought experiment to experimental verification"
+colour_palette:
+  - "#000000"
+  - "#00BFFF"
+  - "#FFFFFF"
+  - "#FFD700"
+  - "#4169E1"
+  - "#32CD32"
+keywords_to_avoid:
+  - "warp drive"
+  - "alcubierre drive"
+  - "star trek"
+  - "time machine"
+  - "science fiction"
+  - "wormhole travel"
+  - "faster than light"
+  - "anti-gravity"
+recommended_fallback_sequence:
+  - ["manim", "spacetime_curvature"]
+  - ["stock_footage", "spacetime curvature animation"]
+  - ["nasa", "Gravity Probe B experiment"]
+  - ["wikimedia", "Spacetime curvature diagram"]
+  - ["stock_footage", "gravity bending light"]
+  - ["emergency", "animated grid distortion"]

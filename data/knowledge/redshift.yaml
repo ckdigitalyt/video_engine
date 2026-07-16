@@ -1,0 +1,80 @@
+# Visual Knowledge Library — Redshift
+concept: "Redshift"
+aliases: ["cosmological redshift", "Doppler shift", "light stretching", "wavelength elongation", "Hubble redshift"]
+documentary_explanation: >
+  Redshift is the phenomenon where light from distant objects is shifted
+  toward longer (redder) wavelengths as the universe expands.  It is a
+  direct consequence of the expansion of space itself — not just relative
+  motion — and is the key evidence for the Big Bang and ongoing cosmic
+  expansion.  Higher redshift means greater distance and earlier cosmic epoch.
+preferred_visual_motifs:
+  - "light waves stretching diagram"
+  - "spectrum lines shifting"
+  - "distant galaxies receding"
+  - "Hubble flow animation"
+  - "galaxy spectra comparison"
+  - "expanding grid with light waves"
+  - "prism splitting light into spectrum"
+preferred_stock_footage_searches:
+  - "light spectrum animation"
+  - "prism light refraction"
+  - "galaxy cluster deep space"
+  - "wavelength diagram animation"
+  - "Hubble telescope galaxy observation"
+  - "spectrometer optical instrument"
+preferred_nasa_searches:
+  - "Hubble redshift survey"
+  - "Hubble ultra deep field"
+  - "galaxy spectra SDSS"
+  - "cosmic distance ladder"
+  - "Hubble constant measurement"
+preferred_wikimedia_searches:
+  - "Redshift diagram spectrum"
+  - "Hubble's law graph"
+  - "Doppler effect diagram"
+  - "galaxy redshift survey map"
+  - "spectral lines absorption"
+preferred_animation_strategy: "manim"
+manim_templates:
+  - "redshift"
+  - "doppler_effect"
+  - "hubble_law"
+  - "cosmic_distance_ladder"
+  - "galaxy_redshift_survey"
+diagrams_charts_timelines:
+  - "Hubble's law graph (velocity vs distance)"
+  - "Galaxy spectrum comparison (nearby vs distant)"
+  - "Redshift-z cosmic timeline"
+  - "Cosmic distance ladder diagram"
+camera_suggestions:
+  - description: "static diagram showing light waves stretching"
+    motion: "static"
+  - description: "slow push into galaxy spectrum comparison"
+    motion: "truck_in"
+  - description: "pan across Hubble ultra deep field"
+    motion: "pan_right"
+  - description: "zoom out from spectrum to galaxy to universe"
+    motion: "zoom_out"
+transition_suggestions:
+  - "crossfade between galaxy image and its spectrum"
+  - "wipe from diagram to observation"
+  - "dissolve through redshift scale"
+colour_palette:
+  - "#000011"
+  - "#FF0000"
+  - "#0000FF"
+  - "#FFFFFF"
+  - "#FF4500"
+keywords_to_avoid:
+  - "time travel"
+  - "warp drive"
+  - "science fiction"
+  - "star trek"
+  - "Doppler effect sound"  # light vs sound confusion
+recommended_fallback_sequence:
+  - ["manim", "redshift"]
+  - ["manim", "hubble_law"]
+  - ["stock_footage", "light spectrum animation"]
+  - ["nasa", "Hubble redshift survey"]
+  - ["wikimedia", "Redshift diagram spectrum"]
+  - ["emergency", "animated expanding grid with light waves"]

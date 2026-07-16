@@ -1,0 +1,94 @@
+# Visual Knowledge Library — Electromagnetism
+concept: "Electromagnetism"
+aliases: ["electromagnetic force", "Maxwell's equations", "light as EM wave", "electromagnetic spectrum", "EM field"]
+documentary_explanation: >
+  Electromagnetism is one of the four fundamental forces of nature.  It
+  governs the interactions between electrically charged particles and is
+  described by Maxwell's equations (1864), which unified electricity and
+  magnetism into a single framework.  Light is an electromagnetic wave.
+  The electromagnetic spectrum spans radio waves, microwaves, infrared,
+  visible light, ultraviolet, X-rays, and gamma rays — all differing only
+  in wavelength and frequency.
+preferred_visual_motifs:
+  - "electromagnetic wave diagram"
+  - "EM spectrum chart"
+  - "magnetic field lines iron filings"
+  - "electric field visualization"
+  - "Maxwell equations display"
+  - "radio antenna transmitting"
+  - "light through prism splitting"
+  - "electric circuit demonstration"
+  - "Faraday cage"
+  - "Oersted experiment compass"
+preferred_stock_footage_searches:
+  - "electromagnetic wave animation"
+  - "magnetic field iron filings"
+  - "light prism rainbow spectrum"
+  - "radio telescope antenna"
+  - "X-ray medical imaging"
+  - "electricity spark discharge"
+  - "antenna tower transmission"
+  - "electromagnetic laboratory experiment"
+preferred_nasa_searches:
+  - "electromagnetic spectrum chart"
+  - "X-ray astronomy image"
+  - "multi-wavelength universe comparison"
+  - "radio astronomy observatory"
+  - "gamma ray burst visualization"
+preferred_wikimedia_searches:
+  - "Maxwell's equations"
+  - "Electromagnetic spectrum diagram"
+  - "Magnetic field lines diagram"
+  - "Oersted experiment illustration"
+  - "Faraday's law of induction"
+  - "Electromagnetic wave propagation"
+preferred_animation_strategy: "manim"
+manim_templates:
+  - "electromagnetic_wave"
+  - "maxwell_equations"
+  - "em_spectrum"
+  - "magnetic_field"
+diagrams_charts_timelines:
+  - "Electromagnetic spectrum with wavelength/frequency labels"
+  - "Maxwell's equations in integral and differential form"
+  - "Transverse wave propagation diagram (E and B fields)"
+  - "Right-hand rule for magnetic fields"
+  - "Oersted's experiment: current → magnetic field"
+  - "Multi-wavelength universe comparison (same object, different EM bands)"
+camera_suggestions:
+  - description: "static EM wave propagation animation"
+    motion: "static"
+  - description: "slow pan across EM spectrum chart"
+    motion: "pan_right"
+  - description: "zoom into wave segment showing E field and B field"
+    motion: "zoom_in"
+  - description: "push through Maxwell equations display"
+    motion: "truck_in"
+transition_suggestions:
+  - "crossfade: wave animation to real-world application"
+  - "dissolve across EM spectrum (radio to gamma)"
+  - "wipe: theory to experiment demonstration"
+  - "zoom from equation to physical manifestation"
+colour_palette:
+  - "#00008B"
+  - "#FF0000"
+  - "#00FF00"
+  - "#0000FF"
+  - "#FFFFFF"
+  - "#FF00FF"
+keywords_to_avoid:
+  - "free energy"
+  - "perpetual motion"
+  - "torsion fields"
+  - "scalar waves"
+  - "pseudoscience"
+  - "Nikola Tesla conspiracy"
+  - "zero-point energy"
+  - "orgone"
+recommended_fallback_sequence:
+  - ["manim", "electromagnetic_wave"]
+  - ["stock_footage", "electromagnetic wave animation"]
+  - ["wikimedia", "Electromagnetic spectrum diagram"]
+  - ["stock_footage", "light prism rainbow spectrum"]
+  - ["nasa", "electromagnetic spectrum chart"]
+  - ["emergency", "animated EM wave"]

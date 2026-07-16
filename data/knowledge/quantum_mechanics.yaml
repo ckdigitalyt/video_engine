@@ -1,0 +1,90 @@
+# Visual Knowledge Library — Quantum Mechanics
+concept: "Quantum Mechanics"
+aliases: ["quantum physics", "quantum theory", "wave-particle duality", "superposition", "quantum entanglement", "Schrödinger equation"]
+documentary_explanation: >
+  Quantum mechanics is the fundamental theory describing nature at the smallest
+  scales of energy levels of subatomic particles.  It introduces concepts like
+  wave-particle duality (particles behave as both particles and waves),
+  quantization of energy levels, superposition (a particle exists in multiple
+  states until measured), and entanglement (particles remain correlated even
+  across vast distances).  It is the most precisely tested theory in science.
+preferred_visual_motifs:
+  - "wave-particle duality animation"
+  - "double-slit experiment"
+  - "probability cloud electron"
+  - "orbital shapes (s, p, d)"
+  - "quantum superposition visualization"
+  - "entangled particles"
+  - "photon polarization"
+  - "uncertainty principle diagram"
+  - "quantum tunneling"
+  - "energy level transition"
+preferred_stock_footage_searches:
+  - "particle physics laboratory"
+  - "CERN Large Hadron Collider"
+  - "subatomic particle animation"
+  - "wave interference pattern"
+  - "scientist quantum experiment"
+  - "quantum computer laboratory"
+  - "microscope atomic resolution"
+preferred_nasa_searches: []
+preferred_wikimedia_searches:
+  - "Double-slit experiment diagram"
+  - "Atomic orbital shapes"
+  - "Schrödinger equation"
+  - "Quantum entanglement illustration"
+  - "Uncertainty principle visualization"
+  - "Quantum eraser experiment"
+  - "Wave function collapse"
+preferred_animation_strategy: "manim"
+manim_templates:
+  - "wave_particle_duality"
+  - "double_slit"
+  - "quantum_orbital"
+  - "uncertainty_principle"
+  - "quantum_tunneling"
+  - "entanglement"
+diagrams_charts_timelines:
+  - "Double-slit experiment setup and results"
+  - "Atomic orbital shapes (s, p, d, f)"
+  - "Electromagnetic spectrum with quantum transitions"
+  - "Particle-wave duality diagram"
+  - "Uncertainty principle (Δx·Δp ≥ ħ/2)"
+  - "Quantum mechanics historical timeline (1900-present)"
+camera_suggestions:
+  - description: "static diagram of double slit with interference showing"
+    motion: "static"
+  - description: "slow zoom into probability cloud around nucleus"
+    motion: "zoom_in"
+  - description: "pan across quantum experiment timeline"
+    motion: "pan_right"
+  - description: "push through quantum eraser setup"
+    motion: "truck_in"
+transition_suggestions:
+  - "dissolve between theory visualization and lab footage"
+  - "fade to black for 'the weirdness of quantum' moments"
+  - "crossfade between different quantum phenomena"
+  - "wipe from macroscopic to microscopic scale"
+colour_palette:
+  - "#000000"
+  - "#00FFFF"
+  - "#FF00FF"
+  - "#FFFFFF"
+  - "#00FF00"
+keywords_to_avoid:
+  - "consciousness"
+  - "quantum mysticism"
+  - "The Secret"
+  - "law of attraction"
+  - "quantum healing"
+  - "alternative medicine"
+  - "Deepak Chopra"
+  - "quantum woo"
+  - "parallel universes"  # speculative, avoid unless topic
+recommended_fallback_sequence:
+  - ["manim", "double_slit"]
+  - ["manim", "wave_particle_duality"]
+  - ["stock_footage", "particle physics laboratory"]
+  - ["wikimedia", "Double-slit experiment diagram"]
+  - ["stock_footage", "wave interference pattern"]
+  - ["emergency", "animated interference pattern"]

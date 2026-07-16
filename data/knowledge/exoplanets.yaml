@@ -1,0 +1,84 @@
+# Visual Knowledge Library — Exoplanets
+concept: "Exoplanets"
+aliases: ["extrasolar planets", "alien worlds", "exoplanet discovery", "exoplanet atmospheres", "habitable zone"]
+documentary_explanation: >
+  Exoplanets are planets that orbit stars outside our solar system.  Since
+  the first confirmed detection in 1995, thousands have been discovered
+  using methods like transit photometry (Kepler, TESS), radial velocity
+  (Doppler spectroscopy), and direct imaging.  Some exoplanets orbit within
+  their star's habitable zone, where liquid water could exist.
+preferred_visual_motifs:
+  - "transit light curve animation"
+  - "planet silhouetted against star"
+  - "Kepler field of view starfield"
+  - "planet orbiting distant star"
+  - "TESS satellite illustration"
+  - "Hubble exoplanet atmosphere spectrum"
+  - "planetary system diagram"
+  - "artist impression of exoplanet surface"
+preferred_stock_footage_searches:
+  - "planet orbit animation"
+  - "starfield with distant suns"
+  - "space telescope illustration"
+  - "solar system formation animation"
+  - "distant planet artist impression"
+  - "scientific visualization planet transit"
+preferred_nasa_searches:
+  - "Kepler exoplanet discoveries"
+  - "TESS exoplanet survey"
+  - "Hubble exoplanet atmosphere"
+  - "James Webb exoplanet spectrum"
+  - "exoplanet size comparison"
+  - "habitable zone infographic"
+  - "transit method illustration"
+preferred_wikimedia_searches:
+  - "Exoplanet transit diagram"
+  - "Kepler mission discovery graph"
+  - "Radial velocity method diagram"
+  - "Habitable zone diagram"
+  - "Exoplanet atmosphere spectroscopy"
+preferred_animation_strategy: "manim"
+manim_templates:
+  - "exoplanet_transit"
+  - "habitable_zone"
+  - "radial_velocity"
+  - "planet_orbit"
+diagrams_charts_timelines:
+  - "Transit light curve diagram"
+  - "Exoplanet discovery timeline (1995-present)"
+  - "Exoplanet detection methods comparison"
+  - "Habitable zone chart by star type"
+  - "Exoplanet size/temperature scatter plot"
+camera_suggestions:
+  - description: "wide establishing orbit animation from above"
+    motion: "static"
+  - description: "slow zoom into transit light curve dip"
+    motion: "zoom_in"
+  - description: "pan across exoplanet discovery timeline"
+    motion: "pan_right"
+  - description: "fly-through of known exoplanet systems"
+    motion: "dolly"
+transition_suggestions:
+  - "crossfade between artist impression and data visualization"
+  - "dissolve from transit animation to light curve graph"
+  - "wipe from telescope to discovered planet"
+colour_palette:
+  - "#000011"
+  - "#00CED1"
+  - "#FFD700"
+  - "#FFFFFF"
+  - "#20B2AA"
+keywords_to_avoid:
+  - "aliens"
+  - "extraterrestrial life"
+  - "science fiction"
+  - "Star Wars"
+  - "UFO"
+  - "Sci-fi landscapes"
+  - "concept art fantasy"
+recommended_fallback_sequence:
+  - ["manim", "exoplanet_transit"]
+  - ["stock_footage", "planet orbit animation"]
+  - ["nasa", "Kepler exoplanet discoveries"]
+  - ["wikimedia", "Exoplanet transit diagram"]
+  - ["emergency", "animated planet orbit"]

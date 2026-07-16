@@ -1,0 +1,93 @@
+# Visual Knowledge Library — Photosynthesis
+concept: "Photosynthesis"
+aliases: ["light reactions", "Calvin cycle", "chlorophyll", "carbon fixation", "oxygen evolution"]
+documentary_explanation: >
+  Photosynthesis is the process by which plants, algae, and cyanobacteria
+  convert light energy from the sun into chemical energy.  It occurs in the
+  chloroplasts, where chlorophyll captures photons to produce ATP and NADPH
+  (light-dependent reactions), which then power the Calvin cycle to fix
+  carbon dioxide into glucose.  The overall equation: 6CO₂ + 6H₂O + light
+  → C₆H₁₂O₆ + 6O₂.  It is the primary source of organic matter and oxygen
+  on Earth.
+preferred_visual_motifs:
+  - "leaf chloroplast close-up"
+  - "sunlight hitting leaves timelapse"
+  - "chloroplast structure diagram"
+  - "thylakoid membrane animation"
+  - "Calvin cycle steps"
+  - "plant growing timelapse"
+  - "electron transport chain"
+  - "oxygen bubbles coming from plant"
+  - "forest canopy light filtering"
+  - "cellular respiration comparison"
+preferred_stock_footage_searches:
+  - "sunlight through green leaves"
+  - "microscope chloroplast plant cell"
+  - "plant growing timelapse nature"
+  - "oxygen bubbles aquatic plant"
+  - "forest sunlight canopy"
+  - "green nature leaves macro photography"
+  - "scientist plant research laboratory"
+preferred_nasa_searches:
+  - "MODIS global primary production"
+  - "Earth from space seasonal vegetation"
+  - "chlorophyll concentration ocean map"
+  - "global photosynthesis satellite"
+  - "NDVI vegetation index"
+preferred_wikimedia_searches:
+  - "Photosynthesis diagram labeled"
+  - "Chloroplast structure diagram"
+  - "Calvin cycle diagram"
+  - "Light-dependent reactions diagram"
+  - "Z-scheme electron transport"
+  - "C3 vs C4 photosynthesis comparison"
+preferred_animation_strategy: "manim"
+manim_templates:
+  - "photosynthesis_overview"
+  - "light_reactions"
+  - "calvin_cycle"
+  - "chloroplast_structure"
+  - "electron_transport_chain"
+diagrams_charts_timelines:
+  - "Photosynthesis overall equation diagram"
+  - "Chloroplast cross-section with thylakoids"
+  - "Light-dependent reactions (photosystems II and I)"
+  - "Calvin cycle (Carbon fixation, reduction, regeneration)"
+  - "C3 vs C4 vs CAM photosynthesis comparison"
+  - "Action spectrum of photosynthesis"
+camera_suggestions:
+  - description: "macro shot of leaf surface showing stomata"
+    motion: "zoom_in"
+  - description: "static diagram with animated molecular flow"
+    motion: "static"
+  - description: "pan across chloroplast internal structure"
+    motion: "pan_right"
+  - description: "pull back from molecular to forest scale"
+    motion: "zoom_out"
+transition_suggestions:
+  - "dissolve from leaf to chloroplast diagram"
+  - "crossfade between equation and actual mechanism"
+  - "zoom from cellular to global vegetation view"
+  - "wipe from light reactions to Calvin cycle"
+colour_palette:
+  - "#006400"
+  - "#32CD32"
+  - "#8FBC8F"
+  - "#FFD700"
+  - "#FFFFFF"
+  - "#006400"
+keywords_to_avoid:
+  - "plant feelings"
+  - "secret life of plants"
+  - "pseudoscience"
+  - "miracle"
+  - "magical"
+  - "breathing"  # plants don't breathe
+  - "plant intelligence mythology"
+recommended_fallback_sequence:
+  - ["manim", "photosynthesis_overview"]
+  - ["stock_footage", "sunlight through green leaves"]
+  - ["wikimedia", "Photosynthesis diagram labeled"]
+  - ["nasa", "MODIS global primary production"]
+  - ["stock_footage", "plant growing timelapse nature"]
+  - ["emergency", "animated chloroplast diagram"]

@@ -1,0 +1,86 @@
+# Visual Knowledge Library — Big Bang
+concept: "Big Bang"
+aliases: ["cosmic origin", "universe began", "initial singularity", "cosmic inflation", "early universe"]
+documentary_explanation: >
+  The Big Bang is the scientific theory describing the observable universe's
+  origin from an extremely hot, dense state approximately 13.8 billion years
+  ago.  The universe has been expanding and cooling ever since.  Evidence
+  includes the cosmic microwave background radiation, Hubble's law of galaxy
+  redshifts, and the abundance of light elements (primordial nucleosynthesis).
+preferred_visual_motifs:
+  - "expanding universe visualization"
+  - "cosmic microwave background map"
+  - "primordial fireball animation"
+  - "galaxy formation simulation"
+  - "cosmic timeline chart"
+  - "universe expansion sphere"
+  - "plasma state early universe"
+  - "first stars forming"
+preferred_stock_footage_searches:
+  - "universe expansion animation"
+  - "galaxy formation simulation"
+  - "cosmic web structure"
+  - "big bang explosion animation"
+  - "CMB map WMAP"
+  - "early universe particle simulation"
+  - "Hubble ultra deep field"
+preferred_nasa_searches:
+  - "WMAP cosmic microwave background"
+  - "Planck CMB map"
+  - "Hubble ultra deep field"
+  - "galaxy evolution timeline"
+  - "universe expansion rate"
+  - "cosmic dawn simulation"
+preferred_wikimedia_searches:
+  - "Big Bang timeline diagram"
+  - "universe expansion chart"
+  - "CMB anisotropy map"
+  - "element formation nucleosynthesis"
+  - "cosmic inflation diagram"
+preferred_animation_strategy: "manim"
+manim_templates:
+  - "big_bang_timeline"
+  - "universe_expansion"
+  - "cmb_formation"
+  - "element_formation"
+diagrams_charts_timelines:
+  - "Cosmic timeline from Big Bang to present"
+  - "Universe expansion rate chart (Hubble's law)"
+  - "Element formation (primordial nucleosynthesis)"
+  - "CMB temperature fluctuation map"
+  - "Cosmic inflation diagram"
+camera_suggestions:
+  - description: "pull back from ultra deep field to cosmic web"
+    motion: "zoom_out"
+  - description: "slow pan across CMB temperature map"
+    motion: "pan_right"
+  - description: "static shot of cosmic timeline chart"
+    motion: "static"
+  - description: "fly-through of galaxy formation simulation"
+    motion: "dolly"
+transition_suggestions:
+  - "crossfade from simulation to CMB map"
+  - "fade in from black for 'before the universe'"
+  - "dissolve through cosmic timeline"
+  - "zoom transition from subatomic to cosmic scale"
+colour_palette:
+  - "#000000"
+  - "#FF6B35"
+  - "#0047AB"
+  - "#FFFFFF"
+  - "#FFD700"
+keywords_to_avoid:
+  - "creation"
+  - "genesis"
+  - "biblical"
+  - "god"
+  - "religious"
+  - "explosion"  # Big Bang was not an explosion in space
+  - "beginning of time"  # misleading simplification
+recommended_fallback_sequence:
+  - ["manim", "big_bang_timeline"]
+  - ["manim", "universe_expansion"]
+  - ["stock_footage", "galaxy formation simulation"]
+  - ["nasa", "WMAP cosmic microwave background"]
+  - ["wikimedia", "Big Bang timeline diagram"]
+  - ["emergency", "animated cosmic timeline"]

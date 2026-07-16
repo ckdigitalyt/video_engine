@@ -1,0 +1,86 @@
+# Visual Knowledge Library — Evolution
+concept: "Evolution"
+aliases: ["natural selection", "Darwinian evolution", "descent with modification", "adaptation", "common descent"]
+documentary_explanation: >
+  Evolution by natural selection, first comprehensively formulated by Charles
+  Darwin in On the Origin of Species (1859), is the process by which species
+  change over generations through heritable variation and differential
+  survival.  It is the central organizing principle of modern biology,
+  explaining the diversity and adaptation of all life on Earth from a common
+  ancestor approximately 3.5 billion years ago.
+preferred_visual_motifs:
+  - "tree of life diagram"
+  - "Darwin's finches beak variation"
+  - "fossil record strata"
+  - "DNA helix mutation"
+  - "species divergence branching"
+  - "natural selection simulation"
+  - "peppered moth color variation"
+  - "Galapagos Islands"
+  - "transitional fossils"
+  - "adaptive radiation"
+preferred_stock_footage_searches:
+  - "Darwin Galapagos finches"
+  - "fossil excavation paleontology"
+  - "DNA helix animation science"
+  - "animal diversity wildlife"
+  - "coral reef ecosystem"
+  - "rainforest biodiversity"
+  - "Galapagos tortoise"
+  - "mutation genetic variation"
+preferred_nasa_searches: []
+preferred_wikimedia_searches:
+  - "Tree of life phylogenetic diagram"
+  - "Darwin finches beak types"
+  - "Natural selection diagram"
+  - "Transitional fossil series"
+  - "Peppered moth evolution"
+  - "Hominid skull comparison"
+  - "Continental drift species distribution"
+preferred_animation_strategy: "manim"
+manim_templates:
+  - "tree_of_life"
+  - "natural_selection"
+  - "adaptive_radiation"
+  - "genetic_drift"
+diagrams_charts_timelines:
+  - "Phylogenetic tree of all life"
+  - "Natural selection mechanism diagram"
+  - "Geologic timeline of life on Earth"
+  - "Transitional fossil series (whale, horse, human)"
+  - "Adaptive radiation (Darwin's finches, cichlids)"
+  - "Continental drift and speciation"
+camera_suggestions:
+  - description: "slow zoom into tree of life showing branches"
+    motion: "zoom_in"
+  - description: "pan across fossil strata layers"
+    motion: "pan_right"
+  - description: "static diagram with labels appearing"
+    motion: "static"
+  - description: "fly-through of evolutionary timeline"
+    motion: "dolly"
+transition_suggestions:
+  - "dissolve between fossil and living species"
+  - "crossfade from diagram to wildlife footage"
+  - "zoom transition from micro (DNA) to macro (species)"
+  - "wipe: geological era to next era"
+colour_palette:
+  - "#2E8B57"
+  - "#8FBC8F"
+  - "#DEB887"
+  - "#FFFFFF"
+  - "#A0522D"
+keywords_to_avoid:
+  - "creationism"
+  - "intelligent design"
+  - "religious"
+  - "missing link"
+  - "just a theory"
+  - "survival of the fittest"  # often misused
+  - "devolution"
+recommended_fallback_sequence:
+  - ["manim", "tree_of_life"]
+  - ["stock_footage", "animal diversity wildlife"]
+  - ["wikimedia", "Tree of life phylogenetic diagram"]
+  - ["stock_footage", "DNA helix animation science"]
+  - ["emergency", "animated branching tree diagram"]

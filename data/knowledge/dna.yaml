@@ -1,0 +1,88 @@
+# Visual Knowledge Library — DNA
+concept: "DNA"
+aliases: ["deoxyribonucleic acid", "genetic code", "double helix", "chromosome", "genome"]
+documentary_explanation: >
+  DNA (deoxyribonucleic acid) is the molecule that carries the genetic
+  instructions for all known living organisms.  Its double-helix structure,
+  discovered by Watson and Crick in 1953 (based on X-ray crystallography by
+  Rosalind Franklin), consists of two strands of nucleotides coiled around
+  each other.  The sequence of four bases—adenine (A), thymine (T), cytosine
+  (C), and guanine (G)—encodes the information for building proteins.
+preferred_visual_motifs:
+  - "double helix rotating"
+  - "DNA replication animation"
+  - "base pair close-up (A-T, C-G)"
+  - "chromosome structure"
+  - "transcription RNA"
+  - "DNA sequencing machine"
+  - "gel electrophoresis"
+  - "nucleotide structure diagram"
+  - "DNA fingerprinting"
+  - "CRISPR gene editing"
+preferred_stock_footage_searches:
+  - "DNA double helix animation"
+  - "scientist laboratory genetics"
+  - "microscope DNA research"
+  - "DNA sequencing technology"
+  - "gene editing CRISPR"
+  - "medical research DNA"
+  - "biotechnology laboratory"
+  - "genetic testing lab"
+preferred_nasa_searches: []
+preferred_wikimedia_searches:
+  - "DNA double helix diagram"
+  - "DNA replication labeled diagram"
+  - "Watson Crick Franklin phototograph 51"
+  - "Chromosome structure diagram"
+  - "Central dogma molecular biology"
+  - "CRISPR Cas9 mechanism diagram"
+  - "Genetic code table"
+preferred_animation_strategy: "manim"
+manim_templates:
+  - "dna_replication"
+  - "transcription_translation"
+  - "double_helix"
+  - "genetic_code"
+diagrams_charts_timelines:
+  - "DNA double helix structure (labeled)"
+  - "Central dogma: DNA → RNA → Protein"
+  - "Base pairing rules (A-T, C-G)"
+  - "DNA replication fork diagram"
+  - "Genetic code table (codon to amino acid)"
+  - "CRISPR Cas9 mechanism"
+camera_suggestions:
+  - description: "slow rotation of 3D double helix"
+    motion: "follow"
+  - description: "zoom into base pair detail from full helix"
+    motion: "zoom_in"
+  - description: "pan across DNA replication fork"
+    motion: "pan_right"
+  - description: "static diagram with sequential label reveals"
+    motion: "static"
+  - description: "pull back from helix to chromosome to cell"
+    motion: "zoom_out"
+transition_suggestions:
+  - "dissolve between molecular and cellular scale"
+  - "crossfade from animation to laboratory footage"
+  - "wipe from diagram to real microscopy"
+  - "fade to black for timeline transition"
+colour_palette:
+  - "#1E90FF"
+  - "#FF1493"
+  - "#00FF00"
+  - "#FFFFFF"
+  - "#000000"
+keywords_to_avoid:
+  - "designer babies"
+  - "GMOs dangerous"
+  - "junk DNA"
+  - "cloning humans"
+  - "science fiction"
+  - "Frankenstein"
+  - "eugenics"
+recommended_fallback_sequence:
+  - ["manim", "dna_replication"]
+  - ["stock_footage", "DNA double helix animation"]
+  - ["wikimedia", "DNA double helix diagram"]
+  - ["stock_footage", "scientist laboratory genetics"]
+  - ["emergency", "animated double helix"]

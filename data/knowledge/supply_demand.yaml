@@ -1,0 +1,86 @@
+# Visual Knowledge Library — Supply and Demand
+concept: "Supply and Demand"
+aliases: ["supply curve", "demand curve", "market equilibrium", "price mechanism", "law of supply and demand"]
+documentary_explanation: >
+  Supply and demand is the fundamental model of price determination in market
+  economies.  The law of demand states that as price increases, quantity
+  demanded decreases (all else equal).  The law of supply states that as
+  price increases, quantity supplied increases.  Market equilibrium occurs
+  where the two curves intersect.  Shifts in either curve (due to changes in
+  preferences, technology, costs, etc.) cause new equilibrium prices and
+  quantities.
+preferred_visual_motifs:
+  - "supply and demand graph crossing"
+  - "market equilibrium diagram"
+  - "price curve shifting"
+  - "auction room bidding"
+  - "stock market ticker"
+  - "hyperinflation chart"
+  - "Black Friday shopping crowd"
+  - "wheat field harvest supply"
+  - "price tag changing"
+  - "sellers market vs buyers market"
+preferred_stock_footage_searches:
+  - "stock market trading floor"
+  - "shopping mall consumer"
+  - "supermarket consumer buying"
+  - "wheat field harvest agriculture"
+  - "oil drill pumping"
+  - "auction house bidding"
+  - "currency exchange rate board"
+  - "online shopping delivery"
+preferred_nasa_searches: []
+preferred_wikimedia_searches:
+  - "Supply and demand equilibrium graph"
+  - "Price elasticity diagram"
+  - "Supply curve shift illustration"
+  - "Market equilibrium with consumer producer surplus"
+  - "Demand curve shift from preferences"
+  - "Adam Smith invisible hand"
+preferred_animation_strategy: "chart"
+manim_templates:
+  - "supply_demand_equilibrium"
+  - "price_elasticity"
+  - "market_shift"
+diagrams_charts_timelines:
+  - "Supply and demand graph with equilibrium point"
+  - "Price elasticity comparison (elastic vs inelastic)"
+  - "Supply curve shift (technology improvement vs input cost rise)"
+  - "Demand curve shift (change in taste vs income change)"
+  - "Price controls: price ceiling and price floor diagram"
+  - "Consumer and producer surplus diagram"
+camera_suggestions:
+  - description: "static graph with animated equilibrium point"
+    motion: "static"
+  - description: "slow zoom into intersection point on graph"
+    motion: "zoom_in"
+  - description: "pan across shift from old to new equilibrium"
+    motion: "pan_right"
+  - description: "pull back from graph to real market"
+    motion: "zoom_out"
+transition_suggestions:
+  - "dissolve: graph to real-world example"
+  - "crossfade between supply shift and demand shift scenarios"
+  - "wipe: theory graph to trading floor"
+  - "fade to black for 'what happens when it breaks'"
+colour_palette:
+  - "#00BFFF"
+  - "#FF4500"
+  - "#FFFFFF"
+  - "#000000"
+  - "#32CD32"
+  - "#FFD700"
+keywords_to_avoid:
+  - "communism"
+  - "capitalism vs socialism debate"
+  - "political propaganda"
+  - "Ayn Rand"
+  - "Marxism lecture"
+  - "conspiracy"
+  - "central bank conspiracy"
+recommended_fallback_sequence:
+  - ["manim", "supply_demand_equilibrium"]
+  - ["stock_footage", "stock market trading floor"]
+  - ["wikimedia", "Supply and demand equilibrium graph"]
+  - ["stock_footage", "supermarket consumer buying"]
+  - ["emergency", "animated supply demand graph"]

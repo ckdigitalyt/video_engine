@@ -1,0 +1,91 @@
+# Visual Knowledge Library — Probability
+concept: "Probability"
+aliases: ["probability theory", "Bayesian probability", "statistical inference", "conditional probability", "normal distribution", "central limit theorem"]
+documentary_explanation: >
+  Probability theory is the mathematical framework for quantifying
+  uncertainty.  Originating from gambling problems studied by Pascal and
+  Fermat in the 17th century, it now underpins statistics, quantum mechanics,
+  machine learning, insurance, epidemiology, and decision theory.  Key
+  concepts include conditional probability (P(A|B) = P(A∩B)/P(B)), Bayes'
+  theorem, probability distributions (normal, binomial, Poisson), and the
+  law of large numbers.
+preferred_visual_motifs:
+  - "bell curve normal distribution"
+  - "dice rolling animation"
+  - "coin flip probability tree"
+  - "Bayes theorem diagram"
+  - "Monte Carlo simulation dots"
+  - "random walk visualization"
+  - "probability distribution curves"
+  - "central limit theorem animation"
+  - "law of large numbers convergence"
+preferred_stock_footage_searches:
+  - "dice rolling gambling"
+  - "flipping coin animation"
+  - "bell curve graph"
+  - "statistics data visualization"
+  - "Monte Carlo casino roulette"
+  - "data scientist working"
+  - "charts graphs statistics"
+  - "random process animation"
+preferred_nasa_searches:
+  - "probability of asteroid impact"
+  - "Monte Carlo mission planning"
+  - "statistical significance in science"
+preferred_wikimedia_searches:
+  - "Normal distribution bell curve"
+  - "Bayes theorem Venn diagram"
+  - "Probability tree diagram"
+  - "Central limit theorem illustration"
+  - "Law of large numbers graph"
+  - "Probability density functions"
+preferred_animation_strategy: "manim"
+manim_templates:
+  - "probability"
+  - "bayes_theorem"
+  - "normal_distribution"
+  - "central_limit_theorem"
+  - "law_of_large_numbers"
+  - "monte_carlo"
+diagrams_charts_timelines:
+  - "Normal distribution with standard deviations"
+  - "Bayes theorem visual (P(A|B) = P(B|A)P(A)/P(B))"
+  - "Probability tree for sequential events"
+  - "Central limit theorem: from any distribution to normal"
+  - "Law of large numbers: convergence of sample mean"
+  - "Probability distributions comparison (normal, binomial, Poisson, exponential)"
+camera_suggestions:
+  - description: "static bell curve with area highlighting"
+    motion: "static"
+  - description: "slow zoom into probability distribution peaks"
+    motion: "zoom_in"
+  - description: "pan across probability tree branches"
+    motion: "pan_right"
+  - description: "push through Monte Carlo dots filling distribution"
+    motion: "truck_in"
+transition_suggestions:
+  - "dissolve between distribution types"
+  - "crossfade from dice animation to probability distribution"
+  - "wipe: empirical frequency → theoretical distribution"
+  - "fade to black for 'limits of probability'"
+colour_palette:
+  - "#0000FF"
+  - "#FF0000"
+  - "#00FF00"
+  - "#FFFFFF"
+  - "#000000"
+keywords_to_avoid:
+  - "gambling system"
+  - "beat the odds"
+  - "lottery strategy"
+  - "pseudoscience"
+  - "psychic prediction"
+  - "conspiracy"
+  - "religious probability"
+  - "God's dice"
+recommended_fallback_sequence:
+  - ["manim", "probability"]
+  - ["stock_footage", "dice rolling gambling"]
+  - ["wikimedia", "Normal distribution bell curve"]
+  - ["stock_footage", "charts graphs statistics"]
+  - ["emergency", "animated bell curve"]

@@ -1,0 +1,87 @@
+# Visual Knowledge Library — Neural Networks
+concept: "Neural Networks"
+aliases: ["artificial neural networks", "deep learning", "machine learning", "AI neural networks", "perceptron", "backpropagation"]
+documentary_explanation: >
+  Artificial neural networks are computing systems inspired by biological
+  neural networks in the brain.  They consist of layers of interconnected
+  artificial neurons, each performing a weighted sum followed by a nonlinear
+  activation function.  Through backpropagation and gradient descent, these
+  networks learn to recognize patterns in data.  Deep neural networks,
+  with many hidden layers, have revolutionized computer vision, natural
+  language processing, and game-playing AI.
+preferred_visual_motifs:
+  - "neural network layers diagram"
+  - "brain neuron schematic"
+  - "data flowing through network animation"
+  - "AI training loss graph"
+  - "convolution kernel sliding over image"
+  - "neuron activation visualization"
+  - "deep learning architecture diagram"
+  - "GPU rack server"
+  - "data center AI training"
+preferred_stock_footage_searches:
+  - "neural network animation"
+  - "AI deep learning visualization"
+  - "brain circuit board"
+  - "data flow network visualization"
+  - "supercomputer data center"
+  - "GPU server rack"
+  - "AI machine learning concept"
+  - "robot AI brain animation"
+preferred_nasa_searches: []
+preferred_wikimedia_searches:
+  - "Perceptron diagram"
+  - "Neural network layer architecture"
+  - "Backpropagation algorithm diagram"
+  - "Activation functions graph (ReLU, sigmoid, tanh)"
+  - "Convolutional neural network diagram"
+  - "Gradient descent optimization"
+preferred_animation_strategy: "manim"
+manim_templates:
+  - "neural_networks"
+  - "deep_learning"
+  - "backpropagation"
+  - "convolution"
+  - "gradient_descent"
+diagrams_charts_timelines:
+  - "Neural network architecture (input → hidden → output)"
+  - "Perceptron mathematical model"
+  - "Activation function comparison chart"
+  - "AI capability milestones timeline"
+  - "Neural network depth vs performance graph"
+camera_suggestions:
+  - description: "static network diagram with activation propagation"
+    motion: "static"
+  - description: "slow zoom into individual neuron layers"
+    motion: "zoom_in"
+  - description: "pan across AI history timeline"
+    motion: "pan_right"
+  - description: "push through convolution layer filtering"
+    motion: "truck_in"
+transition_suggestions:
+  - "dissolve between diagram and real AI applications"
+  - "crossfade from brain to neural network diagram"
+  - "wipe from training to inference stage"
+  - "fade to black for 'what AI cannot yet do'"
+colour_palette:
+  - "#00BFFF"
+  - "#FF1493"
+  - "#FFFFFF"
+  - "#000000"
+  - "#00FF00"
+keywords_to_avoid:
+  - "evil AI"
+  - "terminator"
+  - "robots taking over"
+  - "Skynet"
+  - "AI consciousness"
+  - "AI feelings"
+  - "Hollywood AI"
+  - "singularity prophecy"
+  - "Elon Musk warning"  # cliché
+recommended_fallback_sequence:
+  - ["manim", "neural_networks"]
+  - ["stock_footage", "neural network animation"]
+  - ["wikimedia", "Perceptron diagram"]
+  - ["stock_footage", "AI deep learning visualization"]
+  - ["emergency", "animted network node graph"]
