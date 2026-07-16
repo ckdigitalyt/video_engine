@@ -1,9 +1,10 @@
 # Provider configuration for the asset pipeline
 # Provider chain order: first match wins.
+# Video-first providers (pexels, pixabay) before NASA still images.
 provider_chain:
-  - nasa
   - pexels
   - pixabay
+  - nasa
   - wikimedia
   - internet_archive
   - fallback

@@ -405,7 +405,7 @@ class EditorialPlanner:
                     asset_type=asset_type,
                     search_guidance=motif,
                     fallback_plan=(
-                        knowledge_entry.recommended_fallback_sequence[i][0]
+                        knowledge_entry.recommended_fallback_sequence[i].provider
                         if i < len(knowledge_entry.recommended_fallback_sequence)
                         else "stock_video"
                     ),

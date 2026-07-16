@@ -66,9 +66,10 @@ from src.utils.config import get_config
 # ── Default routing table (fallback when config YAML is absent) ────────────
 
 _DEFAULT_ROUTES: dict[str, list[str]] = {
-    "Space":      ["nasa", "pexels", "pixabay", "wikimedia"],
+    # Video-first providers (pexels, pixabay) before NASA still images
+    "Space":      ["pexels", "pixabay", "nasa", "wikimedia"],
     "History":    ["wikimedia", "pixabay", "pexels"],
-    "Science":    ["nasa", "pexels", "pixabay", "wikimedia"],
+    "Science":    ["pexels", "pixabay", "nasa", "wikimedia"],
     "Nature":     ["pexels", "pixabay", "wikimedia"],
     "Technology": ["pexels", "pixabay", "wikimedia"],
     "Finance":    ["pexels", "pixabay", "wikimedia"],
