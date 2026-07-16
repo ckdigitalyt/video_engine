@@ -42,5 +42,5 @@ pipeline:
     # Fallback provider when the default is unavailable
     fallback: "deepseek"
     # Role-specific provider overrides
-    planner: "deepseek"
+    planner: "gemini"
     critic: "gemini"
