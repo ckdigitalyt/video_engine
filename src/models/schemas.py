@@ -52,6 +52,7 @@ class CameraMotion(str, Enum):
 
 class TransitionType(str, Enum):
     CUT = "cut"
+    CUT_SYNC = "cut_sync"       # Cut on word/breath boundary (voiceover-aware)
     FADE = "fade"
     DISSOLVE = "dissolve"
     CROSSFADE = "crossfade"

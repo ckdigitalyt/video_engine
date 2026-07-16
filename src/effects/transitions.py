@@ -6,11 +6,16 @@ Transitions are renderer-agnostic plain dicts.
 
 Transition types:
 - cut           : instant switch (no effect)
+- cut_sync      : voiceover-aware cut on word/breath boundary
 - fade          : fade to black, then fade in
 - crossfade     : cross dissolve from one clip to the next
 - dip_to_black  : dip through black
 - dissolve      : dissolve through overlapping opacity
 - zoom          : zoom-in transition
+
+Transition Triggers Policy:
+- ~80% CUT_SYNC (instant cuts on voiceover breath boundaries)
+- Crossfade only for scene changes (~3-4 per video max)
 """
 
 from __future__ import annotations
@@ -23,24 +28,25 @@ from typing import Any, Optional
 from src.utils.config import get_config
 
 
-TRANSITION_TYPES = ("cut", "fade", "crossfade", "dip_to_black", "dissolve", "zoom")
+TRANSITION_TYPES = ("cut", "cut_sync", "fade", "crossfade", "dip_to_black", "dissolve", "zoom")
 
 
 class TransitionEngine:
     """Selects transitions between adjacent video clips.
 
-    Supports both random and context-aware (smart) transition selection.
-    Smart transitions use topic category, provider, and visual context to
-    choose appropriate transition types.
+    Uses **Transition Triggers** — voiceover-aware cut sync points —
+    instead of crossfades.  ~80% of transitions are CUT_SYNC (cut on
+    word/breath boundary), with crossfade reserved for scene changes
+    (~3-4 per video max).
 
     Parameters
     ----------
     enabled : bool, optional
         Override for ``effects.transitions.enabled``.  Default True.
     default_transition : str, optional
-        Fallback transition type.  Default ``"crossfade"``.
+        Fallback transition type.  Default ``"cut_sync"`` (voiceover-aware cut).
     duration : float, optional
-        Transition duration in seconds.  Default 0.5.
+        Transition duration in seconds.  Default 0.0 (cuts are instant).
     seed : int, optional
         Random seed for deterministic selection.  Default 42.
     smart_enabled : bool, optional
@@ -59,10 +65,10 @@ class TransitionEngine:
             "effects.transitions.enabled", True
         )
         self._default = default_transition if default_transition is not None else get_config(
-            "effects.transitions.default_transition", "cut"
+            "effects.transitions.default_transition", "cut_sync"
         )
         self._duration = duration if duration is not None else get_config(
-            "effects.transitions.transition_duration", 0.3
+            "effects.transitions.transition_duration", 0.0
         )
         self._seed = seed if seed is not None else get_config(
             "effects.random_seed", 42
@@ -70,15 +76,19 @@ class TransitionEngine:
         self._smart_enabled = smart_enabled if smart_enabled is not None else get_config(
             "smart_transitions.enabled", True
         )
-        self._same_topic_default = get_config("smart_transitions.same_topic_default", "cut")
-        self._same_provider_default = get_config("smart_transitions.same_provider_default", "dissolve")
+        self._same_topic_default = get_config("smart_transitions.same_topic_default", "cut_sync")
+        self._same_provider_default = get_config("smart_transitions.same_provider_default", "cut_sync")
         self._new_idea_default = get_config("smart_transitions.new_idea_default", "fade")
 
     def generate(self, clip_count: int) -> list[dict[str, Any]]:
         """Produce one transition descriptor per gap between clips.
 
+        Enforces Transition Triggers policy:
+        - ~80% CUT_SYNC (instant cuts on voiceover breath boundaries)
+        - Only crossfade/fade for scene changes (~20%, max ~4 per video)
+
         Returns ``clip_count`` entries.  The first entry is always a
-        ``cut`` (nothing before clip 0).  Each subsequent entry describes
+        ``cut_sync`` (nothing before clip 0).  Each subsequent entry describes
         how to transition from clip i-1 to clip i.
 
         Each dict:
@@ -90,32 +100,36 @@ class TransitionEngine:
         if not self._enabled or clip_count <= 1:
             return self._all_cut(clip_count)
 
-        rng = random.Random(self._seed)
         descriptors: list[dict[str, Any]] = []
 
         # First entry (nothing before clip 0)
         descriptors.append({
-            "type": "cut",
+            "type": "cut_sync",
             "duration": 0.0,
             "index": 0,
         })
+
+        # Count how many crossfades/scene changes we allow
+        max_crossfades = min(4, max(1, clip_count // 5))
+        crossfade_count = 0
 
         for i in range(1, clip_count):
             if self._smart_enabled:
                 t_type = self._pick_smart(None, None, i)
             else:
-                # Legacy random selection
+                # Primary: CUT_SYNC for most transitions
                 gap_rng = random.Random(self._seed + i * 73)
-                if gap_rng.random() < 0.7 and self._duration > 0:
-                    t_type = gap_rng.choice(
-                        [t for t in TRANSITION_TYPES if t != "cut"]
-                    )
+
+                # Allow occasional crossfade for emphasis, capped at max_crossfades
+                if gap_rng.random() < 0.20 and crossfade_count < max_crossfades:
+                    crossfade_count += 1
+                    t_type = gap_rng.choice(["crossfade", "dissolve"])
                 else:
-                    t_type = "cut"
+                    t_type = "cut_sync"
 
             descriptors.append({
                 "type": t_type,
-                "duration": 0.0 if t_type == "cut" else self._duration,
+                "duration": 0.0 if t_type in ("cut_sync", "cut") else self._duration,
                 "index": i,
             })
 
@@ -140,17 +154,27 @@ class TransitionEngine:
             return self._all_cut(clip_count)
 
         descriptors: list[dict[str, Any]] = [{
-            "type": "cut", "duration": 0.0, "index": 0,
+            "type": "cut_sync", "duration": 0.0, "index": 0,
         }]
+
+        max_crossfades = min(4, max(1, clip_count // 5))
+        crossfade_count = 0
 
         for i in range(1, clip_count):
             prev_ctx = scene_contexts[i - 1] if scene_contexts and i - 1 < len(scene_contexts) else {}
             curr_ctx = scene_contexts[i] if scene_contexts and i < len(scene_contexts) else {}
 
             t_type = self._pick_smart(prev_ctx, curr_ctx, i)
+
+            # Crossfade budget enforcement
+            if t_type in ("crossfade", "dissolve", "fade") and crossfade_count >= max_crossfades:
+                t_type = "cut_sync"
+            if t_type in ("crossfade", "dissolve", "fade"):
+                crossfade_count += 1
+
             descriptors.append({
                 "type": t_type,
-                "duration": 0.0 if t_type == "cut" else self._duration,
+                "duration": 0.0 if t_type in ("cut_sync", "cut") else self._duration,
                 "index": i,
             })
 
@@ -165,16 +189,16 @@ class TransitionEngine:
         """Pick a transition based on scene context.
 
         Rules:
-        - Same topic + same category -> "cut"
-        - Same provider, different query -> "dissolve"
+        - Same topic + same category -> "cut_sync"
+        - Same provider, different query -> "cut_sync"
         - Different category / new idea -> "fade"
         - Same asset id reused -> "dissolve"
         """
         if not self._smart_enabled:
             rng = random.Random(self._seed + index * 73)
-            if rng.random() < 0.7 and self._duration > 0:
-                return rng.choice([t for t in TRANSITION_TYPES if t != "cut"])
-            return "cut"
+            if rng.random() < 0.2:
+                return rng.choice(["crossfade", "dissolve"])
+            return "cut_sync"
 
         if not prev_context or not curr_context:
             return self._default
@@ -192,23 +216,22 @@ class TransitionEngine:
         if prev_asset and curr_asset and str(prev_asset) == str(curr_asset):
             return "dissolve"
 
-        # Same category, different idea -> cut (fast pacing)
+        # Different category -> new idea (use fade for scene change emphasis)
+        if prev_cat and curr_cat and prev_cat != curr_cat:
+            return self._new_idea_default
+
+        # Same category or provider -> use cut_sync (fast pacing)
         if prev_cat and curr_cat and prev_cat == curr_cat:
             return self._same_topic_default
 
-        # Same provider, different query -> dissolve
         if prev_prov and curr_prov and prev_prov == curr_prov:
             return self._same_provider_default
-
-        # Different category -> new idea
-        if prev_cat and curr_cat and prev_cat != curr_cat:
-            return self._new_idea_default
 
         return self._default
 
     def _all_cut(self, clip_count: int) -> list[dict[str, Any]]:
         return [
-            {"type": "cut", "duration": 0.0, "index": i}
+            {"type": "cut_sync", "duration": 0.0, "index": i}
             for i in range(clip_count)
         ]
 
@@ -219,6 +242,7 @@ class TransitionEngine:
 
 class TransitionType(str, Enum):
     CUT = "cut"
+    CUT_SYNC = "cut_sync"
     CROSS_DISSOLVE = "cross_dissolve"
     FADE = "fade"
     ZOOM = "zoom"
@@ -231,8 +255,8 @@ class TransitionType(str, Enum):
 
 @dataclass
 class TransitionPlan:
-    transition_type: TransitionType = TransitionType.CROSS_DISSOLVE
-    duration: float = 0.5
+    transition_type: TransitionType = TransitionType.CUT_SYNC
+    duration: float = 0.0
     direction: str = "right"
 
     def to_dict(self) -> dict:
@@ -245,7 +269,7 @@ class TransitionPlan:
 
 class TransitionPlanner:
     def __init__(self):
-        self._last_transition = TransitionType.CUT
+        self._last_transition = TransitionType.CUT_SYNC
         self._consecutive_count = 0
 
     def plan(
@@ -263,17 +287,16 @@ class TransitionPlanner:
             elif emotion in ("exciting", "dramatic", "revelation"):
                 return TransitionPlan(TransitionType.ZOOM, duration=0.8)
             else:
-                return TransitionPlan(TransitionType.CROSS_DISSOLVE, duration=0.7)
+                return TransitionPlan(TransitionType.FADE, duration=0.5)
         if pace == "fast":
-            if self._last_transition != TransitionType.WHIP_PAN and self._consecutive_count % 3 == 0:
-                return TransitionPlan(TransitionType.WHIP_PAN, duration=0.3)
-            return TransitionPlan(TransitionType.CUT, duration=0.0)
-        if self._consecutive_count > 3 and self._last_transition == TransitionType.CROSS_DISSOLVE:
-            return TransitionPlan(TransitionType.ZOOM, duration=0.5)
-        return TransitionPlan(TransitionType.CROSS_DISSOLVE, duration=0.4)
+            if self._last_transition != TransitionType.CUT and self._consecutive_count % 3 == 0:
+                return TransitionPlan(TransitionType.CUT, duration=0.0)
+            return TransitionPlan(TransitionType.CUT_SYNC, duration=0.0)
+        # Default: use cut_sync for voiceover-aware editing
+        return TransitionPlan(TransitionType.CUT_SYNC, duration=0.0)
 
     def next(self) -> TransitionType:
-        types = [TransitionType.CROSS_DISSOLVE, TransitionType.FADE, TransitionType.ZOOM]
+        types = [TransitionType.CUT, TransitionType.CUT_SYNC]
         available = [t for t in types if t != self._last_transition]
         chosen = random.choice(available) if available else types[0]
         self._last_transition = chosen

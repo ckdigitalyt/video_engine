@@ -139,7 +139,7 @@ def _apply_transition(
 ) -> VideoFileClip:
     """Apply a transition effect to a single clip.
 
-    *cut* — no effect.
+    *cut* / *cut_sync* — no effect (instant transitions).
     *fade* — fade in at the start.
     *crossfade* — crossfade in (caller must overlap adjacent clips).
     *dip_to_black*, *dissolve*, *zoom* — fade in (simplified using crossfadein).
@@ -147,7 +147,7 @@ def _apply_transition(
     ttype = transition.get("type", "cut")
     tdur = transition.get("duration", dur)
 
-    if ttype == "cut" or tdur <= 0:
+    if ttype in ("cut", "cut_sync") or tdur <= 0:
         return clip
 
     if ttype == "fade":
@@ -246,7 +246,7 @@ class MoviePyRenderer(Renderer):
                 elif "wipe" in shot_transition:
                     trans["type"] = "wipe"
 
-            if trans["type"] != "cut" and tdur > 0 and i > 0:
+            if trans["type"] not in ("cut", "cut_sync") and tdur > 0 and i > 0:
                 # Overlap with previous clip: shift start earlier by tdur
                 start = track.start_time - tdur
                 end = track.end_time

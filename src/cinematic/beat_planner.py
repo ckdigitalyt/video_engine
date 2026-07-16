@@ -11,6 +11,12 @@ import re
 from src.models.schemas import (
     BeatPlan, ShotPlan, ShotType, CameraMotion, TransitionType, AssetPlan
 )
+from src.director.motion_grammar import (
+    apply_archetype_to_sequence,
+    get_safe_motion_fallback,
+    select_archetype,
+)
+from src.cinematic.pace_profiler import analyze_vo_narration, estimate_shot_count_from_pace
 
 
 class Emotion(str, Enum):
@@ -157,7 +163,7 @@ def _motion_to_camera_motion(m: Motion) -> CameraMotion:
 
 def _transition_to_transition_type(t: Transition) -> TransitionType:
     mapping = {
-        Transition.CUT: TransitionType.CUT,
+        Transition.CUT: TransitionType.CUT_SYNC,
         Transition.CROSS_DISSOLVE: TransitionType.CROSSFADE,
         Transition.DIP_TO_BLACK: TransitionType.FADE,
         Transition.DIP_TO_WHITE: TransitionType.CROSSFADE,
@@ -196,7 +202,7 @@ def _internal_beat_to_pydantic(b: Beat) -> BeatPlan:
             camera=_motion_to_camera_motion(s.motion),
             transition=_transition_to_transition_type(s.transition),
             emotion=s.emotion.value,
-            motion=s.motion.value,
+            motion=s.motion.value if hasattr(s.motion, 'value') else str(s.motion),
             asset_type=s.asset_type.value,
             description=s.description,
             search_query=s.search_query,
@@ -242,8 +248,14 @@ def split_into_clauses(sentence: str) -> List[str]:
 class BeatPlanner:
     """Plans beats from narration text."""
 
-    def plan_beats(self, narration: str, scene_duration: float) -> List[Beat]:
-        """Split narration into beats with timing (3-6s each)."""
+    def plan_beats(self, narration: str, scene_duration: float,
+                    narrative_role: str = "exploration") -> List[Beat]:
+        """Split narration into beats with timing based on voiceover pace analysis.
+
+        Uses the PaceProfiler to analyze narration for sentence boundaries
+        and natural breath points, then sets shot durations to match
+        breath units (3.5s-6.0s range) instead of arbitrary intervals.
+        """
         sentences = split_into_sentences(narration)
         if not sentences:
             return []
@@ -254,8 +266,17 @@ class BeatPlanner:
         if not clauses:
             return []
 
+        # Voiceover-aware pacing: analyze narration for breath units
+        pace = analyze_vo_narration(narration, narrative_role)
         beat_count = len(clauses)
-        ideal_duration = 4.5
+
+        # Use recommended average from pace profiler as base duration
+        ideal_duration = pace.recommended_avg
+
+        # Use pace profiler min/max
+        min_dur = pace.recommended_min
+        max_dur = pace.recommended_max
+
         total_needed = beat_count * ideal_duration
         scale = scene_duration / total_needed if total_needed > 0 else 1.0
 
@@ -263,7 +284,8 @@ class BeatPlanner:
         time_cursor = 0.0
         for i, clause in enumerate(clauses):
             raw_duration = ideal_duration * scale
-            duration = max(3.0, min(6.0, raw_duration))
+            # Clamp within pace-profiler bounds
+            duration = max(min_dur, min(max_dur, raw_duration))
             if i == len(clauses) - 1:
                 remaining = scene_duration - time_cursor
                 if remaining > 0:
@@ -359,16 +381,19 @@ class BeatPlanner:
                     beat.camera_primary = CameraStyle.CLOSEUP
                     beat.camera_cutaway = CameraStyle.WIDE
 
-            # Transitions — use CUT for everything under 4s,
-            # only dissolve between emotion changes on long shots
-            min_dur_for_transition = 4.0
+            # Transition Triggers: ~80% CUT_SYNC for fast-paced editing.
+            # Crossfade/fade only for scene boundaries.
             if i == 0:
+                # Scene entry: fade in from black
                 beat.transition_in = Transition.FADE
-                beat.transition_out = Transition.CROSS_DISSOLVE
+                # Scene exit: cut sync into next shot
+                beat.transition_out = Transition.CUT
             else:
+                # Within-scene: use CUT_SYNC (voiceover-aware cut)
                 beat.transition_in = Transition.CUT
                 beat.transition_out = Transition.CUT
             if i == len(beats) - 1:
+                # Scene end: dip to black
                 beat.transition_out = Transition.DIP_TO_BLACK
 
             # Visual purpose
@@ -385,8 +410,12 @@ class BeatPlanner:
 class ShotPlanner:
     """Plans individual shots within each beat."""
 
-    def plan_shots(self, beats: List[Beat]) -> List[Beat]:
-        """Generate primary + cutaway + backup shots per beat."""
+    def plan_shots(self, beats: List[Beat], scene_index: int = 0) -> List[Beat]:
+        """Generate primary + cutaway + backup shots per beat.
+
+        Uses Motion Grammar to apply archetypal motion sequences across shots,
+        ensuring direction consistency and eliminating flicker.
+        """
         for beat in beats:
             bd = beat.duration
             shots = []
@@ -414,7 +443,7 @@ class ShotPlanner:
                     shot_type=ShotType.CUTAWAY,
                     camera=beat.camera_cutaway,
                     emotion=beat.emotion,
-                    transition=Transition.CROSS_DISSOLVE,
+                    transition=Transition.CUT,
                     visual_purpose=f"Cutaway detail",
                 ))
                 backup_remaining = remaining - cutaway_dur
@@ -425,56 +454,53 @@ class ShotPlanner:
                         shot_type=ShotType.BACKUP,
                         camera=beat.camera_primary,
                         emotion=beat.emotion,
-                        transition=Transition.CROSS_DISSOLVE,
+                        transition=Transition.CUT,
                         visual_purpose=f"Backup shot",
                     ))
 
-            # Assign motion per shot
-            for s in shots:
-                s.motion = self._select_motion(s.camera, s.shot_type)
+            # Assign motion using Motion Grammar archetypes
             beat.shots = shots
 
-        return beats
+        # Apply archetypal motion patterns across all shots in the scene
+        # Use the scene index to select a deterministic archetype
+        all_shots = []
+        for beat in beats:
+            all_shots.extend(beat.shots)
 
-    def _select_motion(self, camera: CameraStyle, shot_type: "ShotType") -> Motion:
-        if camera == CameraStyle.WIDE and shot_type == ShotType.PRIMARY:
-            return Motion.KEN_BURNS_IN
-        elif camera == CameraStyle.CLOSEUP:
-            return Motion.ZOOM_IN
-        elif camera == CameraStyle.AERIAL:
-            return Motion.PARALLAX
-        elif camera == CameraStyle.TRACKING:
-            return Motion.FOLLOW
-        elif camera in (CameraStyle.LOW_ANGLE, CameraStyle.HIGH_ANGLE):
-            return Motion.TILT_UP
-        elif shot_type == ShotType.CUTAWAY:
-            return Motion.PUSH_IN
-        elif shot_type == ShotType.BACKUP:
-            return Motion.DRIFT
-        else:
-            return Motion.KEN_BURNS_IN
+        if all_shots:
+            # Get the dominant emotion from the first beat for archetype selection
+            dominant_emotion = beats[0].emotion.value if beats else "neutral"
+            applied_shots = apply_archetype_to_sequence(
+                all_shots, scene_index, dominant_emotion
+            )
+
+            # Re-distribute shots back to beats
+            shot_idx = 0
+            for beat in beats:
+                beat_shot_count = len(beat.shots)
+                beat.shots = applied_shots[shot_idx:shot_idx + beat_shot_count]
+                shot_idx += beat_shot_count
+
+        return beats
 
 
 class CinematicEditor:
     """Edits shots into a cinematic sequence with L/J cuts, transitions."""
 
     def edit_sequence(self, beats: List[Beat]) -> List[Beat]:
-        """Apply L cuts, J cuts, match cuts."""
+        """Apply editing sequence with Transition Triggers (CUT_SYNC).
+
+        Instead of L/J cuts (which require crossfades), use precise
+        cut sync points between beats.
+        """
         for i in range(len(beats) - 1):
             curr, nxt = beats[i], beats[i + 1]
 
-            # L-cut: next beat audio leads visual by 0.5s (every even beat)
-            if i % 2 == 0 and nxt.shots:
-                nxt.shots[0].timestamp = -0.5
-                nxt.shots[0].transition = Transition.L_CUT
-
-            # J-cut: current audio continues into next (every 3rd beat)
-            if i % 3 == 1 and curr.shots:
-                curr.shots[-1].transition = Transition.J_CUT
-
-            # Match cut: same camera style
-            if curr.camera_primary == nxt.camera_primary and curr.shots and nxt.shots:
-                curr.shots[-1].transition = Transition.MATCH_CUT
+            # All internal beats use CUT_SYNC transitions
+            if curr.shots:
+                curr.shots[-1].transition = Transition.CUT
+            if nxt.shots:
+                nxt.shots[0].transition = Transition.CUT
 
         return beats
 
@@ -506,12 +532,19 @@ class TimelineBuilder:
         self.editor = CinematicEditor()
 
     def build_timeline(self, narration: str, scene_duration: float,
-                       topic: str = "", energy: float = 0.5) -> List[BeatPlan]:
-        """Full pipeline: narration -> beats -> shots -> Pydantic BeatPlans."""
-        beats = self.beat_planner.plan_beats(narration, scene_duration)
+                       topic: str = "", energy: float = 0.5,
+                       scene_index: int = 0,
+                       narrative_role: str = "exploration") -> List[BeatPlan]:
+        """Full pipeline: narration -> beats -> shots -> Pydantic BeatPlans.
+
+        Args:
+            scene_index: Used to select deterministic motion archetype.
+            narrative_role: Role in narrative arc for pace-based duration.
+        """
+        beats = self.beat_planner.plan_beats(narration, scene_duration, narrative_role)
         beats = self.beat_planner.assign_emotions(beats, topic)
         beats = self.beat_planner.assign_visual_style(beats)
-        beats = self.shot_planner.plan_shots(beats)
+        beats = self.shot_planner.plan_shots(beats, scene_index)
         beats = self.editor.edit_sequence(beats)
         beats = self.editor.adjust_pacing(beats, energy)
         # Convert to Pydantic models

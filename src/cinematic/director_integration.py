@@ -9,6 +9,7 @@ This replaces the old single-clip-per-scene flow with beat-based editing.
 
 from typing import List, Optional, Dict, Any
 import os
+import concurrent.futures
 
 from src.cinematic.beat_planner import TimelineBuilder as BeatTimelineBuilder
 from src.models import BeatPlan, ShotPlan, ShotType, Scene
@@ -97,7 +98,11 @@ class BeatDirector:
         topic = self._topic
 
         print(f"\n  [BeatDirector] Planning beats for scene {scene.scene_id}...")
-        beat_plans = self._beat_timeline_builder.build_timeline(narration, duration, topic)
+        beat_plans = self._beat_timeline_builder.build_timeline(
+            narration, duration, topic, scene_index=scene.scene_id
+        )
+        if not beat_plans:
+            return scene
         if not beat_plans:
             return scene
 
@@ -260,34 +265,90 @@ class BeatDirector:
             return ap
         return None
 
-    # ── Multi-provider helpers ────────────────────────────────────────
+    # ── Multi-provider helpers (parallel) ──────────────────────────────
 
     def _collect_from_all_providers(self, query: str, target_duration: float) -> list[tuple[str, str, list[dict]]]:
-        """Query ALL providers and collect candidates."""
-        candidates: list[tuple[str, str, list[dict]]] = []
+        """Query ALL providers CONCURRENTLY and collect candidates.
+
+        Uses ThreadPoolExecutor for parallel provider queries with a 15s timeout.
+        """
         provider_order = self._router._routes.get(
             self._router.category,
             self._router._routes.get("General", []),
         )
-        for provider_name in provider_order:
+
+        def _search_one(provider_name: str) -> Optional[tuple[str, str, list[dict]]]:
             provider = self._router._providers.get(provider_name)
             if provider is None:
-                continue
+                return None
             if not AssetRouter._is_provider_ready(provider, provider_name):
-                continue
+                return None
             try:
                 results = provider.search(query, target_duration=max(target_duration, 3.0))
                 if results:
-                    candidates.append((provider_name, query, results))
+                    return (provider_name, query, results)
             except Exception:
-                continue
+                pass
+            return None
+
+        candidates: list[tuple[str, str, list[dict]]] = []
+        with concurrent.futures.ThreadPoolExecutor(max_workers=len(provider_order)) as executor:
+            future_map = {
+                executor.submit(_search_one, pn): pn
+                for pn in provider_order
+            }
+            for future in concurrent.futures.as_completed(future_map, timeout=15):
+                try:
+                    result = future.result(timeout=5)
+                    if result is not None:
+                        candidates.append(result)
+                except (concurrent.futures.TimeoutError, Exception):
+                    continue
         return candidates
 
     def _rank_candidates(self, candidates: list[tuple[str, str, list[dict]]], query: str, target_duration: float):
-        """Score and rank candidates from all providers."""
+        """Score and rank candidates from all providers.
+
+        Applies a diversity penalty: if >8 shots have been accepted from the
+        same provider, later candidates from that provider get a score penalty.
+        """
         if not hasattr(self, '_ranker'):
             self._ranker = AssetRanker()
-        return self._ranker.score_and_rank(candidates, query=query, target_duration=target_duration)
+
+        # Count current provider usage
+        provider_counts: dict[str, int] = {}
+        if hasattr(self, '_quality_gates') and hasattr(self._quality_gates, '_diversity_tracker'):
+            for rec in self._quality_gates._diversity_tracker.history:
+                prov = rec.provider
+                provider_counts[prov] = provider_counts.get(prov, 0) + 1
+
+        scored = self._ranker.score_and_rank(candidates, query=query, target_duration=target_duration)
+
+        # Apply provider diversity penalty (40-50% cap: after 8+ from same provider)
+        for sa in scored:
+            prov_count = provider_counts.get(sa.provider, 0)
+            if prov_count >= 8:
+                # Penalty grows from 0.05 at 8 uses to 0.30 at 12+ uses
+                penalty = min(0.30, (prov_count - 8) * 0.05)
+                sa.score = round(sa.score * (1.0 - penalty), 4)
+                sa.scores["diversity_penalty"] = penalty
+            else:
+                sa.scores["diversity_penalty"] = 0.0
+
+        # Re-sort with diversity penalty applied
+        scored.sort(key=lambda s: s.score, reverse=True)
+
+        # Enforce max 50% from any single provider in top results
+        max_from_provider = max(1, len(scored) // 2)
+        filtered: list = []
+        seen_providers: dict[str, int] = {}
+        for sa in scored:
+            current_count = seen_providers.get(sa.provider, 0)
+            if current_count < max_from_provider:
+                filtered.append(sa)
+                seen_providers[sa.provider] = current_count + 1
+
+        return filtered
 
     @staticmethod
     def _get_download_url(asset: dict) -> str:
@@ -313,16 +374,6 @@ class BeatDirector:
             target_duration=max(shot.duration, 3.0),
             accepted_scenes=[],
         )
-
-    def get_stats(self) -> Dict:
-        return {
-            "shots_requested": self.total_shots_requested,
-            "shots_accepted": self.total_shots_accepted,
-            "queries_tried": self.total_queries_tried,
-            "gate_rejections": self.total_gate_rejections,
-            "fallbacks": self.total_fallbacks,
-            "shot_success_rate": round(self.total_shots_accepted / max(self.total_shots_requested, 1) * 100, 1),
-        }
 
     def get_stats(self) -> Dict:
         return {
