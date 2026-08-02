@@ -135,6 +135,7 @@ MANIM_SCENES = {
 PINNED_STILLS = {
     "cache/stills/scene0_0.jpg": "PIA14111 Model of Voyager",
     "cache/stills/scene0_1.jpg": "PIA22915 Voyager Spacecraft Instruments",
+    "cache/stills/scene1_0.jpg": "PIA17464 Voyager 1 Launch 1977",
     "cache/stills/scene3_0.jpg": "PIA23645 Pale Blue Dot Revisited",
     "cache/stills/scene3_1.jpg": "PIA00452 Solar System Portrait/Pale Blue Dot",
     "cache/stills/scene4_0.jpg": "PIA16362 Preparing the Golden Record",

@@ -1,37 +1,47 @@
 {
   "topic": "Voyager 1: the farthest human-made object",
-  "started_at": "2026-08-02T14:56:11Z",
+  "started_at": "2026-08-02T15:01:43Z",
   "strategy": "stills_first",
   "stages": {
     "visuals": {
       "manim": 2,
       "nasa": 2,
       "wikimedia": 2,
-      "ai": 1,
+      "ai": 0,
       "video_fallback": 0,
-      "nasa_pinned": 5
+      "nasa_pinned": 6
     },
     "render_v1": {
       "duration_s": 61.366667,
-      "size_mb": 9.2,
-      "render_s": 76.2
+      "size_mb": 9.3,
+      "render_s": 77.7
     },
     "music_v1": {
       "mixed": true,
-      "elapsed_s": 6.6,
+      "elapsed_s": 6.9,
       "size_mb": 9.8
     },
     "review_v1": {
-      "score": 65,
+      "score": 68,
       "confidence": 0.9,
       "model_used": null
     },
     "improve_pass_1": {
       "iteration": 2,
-      "applied": [],
+      "applied": [
+        {
+          "category": "color",
+          "detail": "[color][medium] Apply a consistent color grade across archival footage and modern renders to unify the visual style.",
+          "source_rec": "Apply a consistent color grade across archival footage and modern renders to unify the visual style."
+        },
+        {
+          "category": "subtitles",
+          "detail": "[subtitles][low] Add burned-in, stylized subtitles to improve viewer retention and accessibility.",
+          "source_rec": "Add burned-in, stylized subtitles to improve viewer retention and accessibility."
+        }
+      ],
       "flagged": [
-        "[new_asset] Replace the Falcon Heavy launch footage at 0:20 with historical footage of the Titan IIIE launch from 1977.",
-        "[new_asset] Replace the Mercury image at 0:46 with an illustration of Voyager 1 in interstellar space or a JPL tracking graphic."
+        "[new_asset] Replace the cratered planet image at 00:46 with an artist's concept of Voyager in interstellar space or Deep Space Network antennas."
       ],
       "stopped_early": false,
       "notes": "",
@@ -42,15 +52,15 @@
   "final": {
     "output": "results/voyager_stills/voyager_stills_mixed.mp4",
     "iterations": 1,
-    "final_score": 65,
+    "final_score": 68,
     "duration_s": 61.366667,
     "visual_stats": {
       "manim": 2,
       "nasa": 2,
       "wikimedia": 2,
-      "ai": 1,
+      "ai": 0,
       "video_fallback": 0,
-      "nasa_pinned": 5
+      "nasa_pinned": 6
     }
   },
   "postmortem": "/home/ubuntu/video_engine/src/docs/mission/postmortems/postmortem-voyager-1-the-farthest-human-made-object-stills-first.md"
