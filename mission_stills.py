@@ -15,6 +15,7 @@ Usage:
 import argparse
 import json
 import os
+import shutil
 import subprocess
 import sys
 import time
@@ -147,12 +148,25 @@ AI_PROMPTS = {
 
 def _kenburns(image_path: str, out_path: str, duration: float = 6.0,
               zoom_in: bool = True) -> str:
+    """Ken Burns motion with LINEAR zoom across the full shot duration.
+
+    v2 fix (from motion review): the old expression ``min(z_end, zoom+0.004)``
+    hit max zoom after ~2.3s then went static for the rest of the shot —
+    perceived as non-smooth motion.  New version interpolates zoom linearly
+    over every frame, renders at 2x internal resolution for subpixel
+    smoothness, and adds a subtle diagonal pan.
+    """
     frames = int(duration * 30)
-    z_start, z_end = (1.0, 1.28) if zoom_in else (1.28, 1.0)
+    z_start, z_end = (1.0, 1.22) if zoom_in else (1.22, 1.0)
+    # linear zoom: z = z_start + (z_end - z_start) * on/frames
+    z_expr = f"{z_start}+({z_end}-{z_start})*on/{frames}"
+    # subtle pan: drift 6% of frame width/height across the shot
     vf = (
-        f"scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080,"
-        f"zoompan=z='if(eq(on,1),{z_start},min({z_end},zoom+0.004))':"
-        f"x='(iw-iw/zoom)/2':y='(ih-ih/zoom)/2':d={frames}:s=1920x1080:fps=30"
+        f"scale=3840:2160:force_original_aspect_ratio=increase,crop=3840:2160,"
+        f"zoompan=z='{z_expr}':"
+        f"x='(iw-iw/zoom)/2+(iw*0.03)*on/{frames}':"
+        f"y='(ih-ih/zoom)/2+(ih*0.03)*on/{frames}':"
+        f"d={frames}:s=1920x1080:fps=30"
     )
     subprocess.run(
         ["ffmpeg", "-y", "-loop", "1", "-i", image_path, "-vf", vf,
@@ -319,6 +333,8 @@ def main():
     ap.add_argument("--topic", default="Voyager 1: the farthest human-made object")
     ap.add_argument("--out", default=None)
     ap.add_argument("--provider", default=None)
+    ap.add_argument("--reuse", action="store_true",
+                    help="Reuse cached script/stills/audio from a previous run (A/B motion re-render)")
     args = ap.parse_args()
 
     topic = args.topic
@@ -337,50 +353,63 @@ def main():
     llm = factory.get_llm_provider(provider_name)
     run_report["provider"] = provider_name
 
-    # ── Research + verify ──────────────────────────────────────────────
-    research = M.stage_research(topic, llm)
-    research = M.stage_fact_verification(research, llm)
-    M._write_json(os.path.join(out_dir, "research.json"), research)
+    if args.reuse and os.path.exists(os.path.join(out_dir, "script_final.json")):
+        print("  [reuse] Loading cached script_final.json + cached stills/audio")
+        with open(os.path.join(out_dir, "script_final.json")) as f:
+            scenes_data = json.load(f)
+        with open(os.path.join(out_dir, "research.json")) as f:
+            research = json.load(f)
+        review_report = {"reused": True}
+    else:
+        # ── Research + verify ──────────────────────────────────────────────
+        research = M.stage_research(topic, llm)
+        research = M.stage_fact_verification(research, llm)
+        M._write_json(os.path.join(out_dir, "research.json"), research)
 
-    # ── Script + review ────────────────────────────────────────────────
-    scenes_data = M.stage_script(topic, research, llm)
-    M._write_json(os.path.join(out_dir, "script_draft.json"), scenes_data)
-    scenes_data, review_report = M.stage_script_review(scenes_data, research, provider_name)
-    # Post-review word-budget enforcement (reviewers expand the script;
-    # compress back to the ~60s target).  Same fix as mission_run v1.1.
-    total_words = sum(len(s.get("narration", "").split()) for s in scenes_data)
-    if total_words > M.MAX_SCRIPT_WORDS:
-        print(f"  !! Post-review over budget ({total_words} words) — compressing")
-        compress = llm.generate_json(
-            "Condense this script to at most " + str(M.MAX_SCRIPT_WORDS) +
-            " words total, keeping all facts and the 5-scene structure. "
-            "Return ONLY the JSON array of scenes with title/narration/visual_goal/search_queries.\n" +
-            json.dumps({"scenes": scenes_data})[:6000]
-        )
-        try:
-            data2 = json.loads(compress)
-            scenes2 = data2.get("scenes", []) if isinstance(data2, dict) else (data2 if isinstance(data2, list) else [])
-            if len(scenes2) == 5 and sum(len(s.get("narration", "").split()) for s in scenes2) <= M.MAX_SCRIPT_WORDS + 10:
-                scenes_data = scenes2
-                print(f"  Compressed to {sum(len(s.get('narration','').split()) for s in scenes_data)} words")
-        except json.JSONDecodeError:
-            print("  !! Post-review compression failed — keeping reviewed script")
-    from src.utils.tts_normalize import normalize_narration
-    for s in scenes_data:
-        s["narration"] = normalize_narration(s.get("narration", ""))
-    M._write_json(os.path.join(out_dir, "script_review_report.json"), review_report)
-    M._write_json(os.path.join(out_dir, "script_final.json"), scenes_data)
+        # ── Script + review ────────────────────────────────────────────────
+        scenes_data = M.stage_script(topic, research, llm)
+        M._write_json(os.path.join(out_dir, "script_draft.json"), scenes_data)
+        scenes_data, review_report = M.stage_script_review(scenes_data, research, provider_name)
+        # Post-review word-budget enforcement (reviewers expand the script;
+        # compress back to the ~60s target).  Same fix as mission_run v1.1.
+        total_words = sum(len(s.get("narration", "").split()) for s in scenes_data)
+        if total_words > M.MAX_SCRIPT_WORDS:
+            print(f"  !! Post-review over budget ({total_words} words) — compressing")
+            compress = llm.generate_json(
+                "Condense this script to at most " + str(M.MAX_SCRIPT_WORDS) +
+                " words total, keeping all facts and the 5-scene structure. "
+                "Return ONLY the JSON array of scenes with title/narration/visual_goal/search_queries.\n" +
+                json.dumps({"scenes": scenes_data})[:6000]
+            )
+            try:
+                data2 = json.loads(compress)
+                scenes2 = data2.get("scenes", []) if isinstance(data2, dict) else (data2 if isinstance(data2, list) else [])
+                if len(scenes2) == 5 and sum(len(s.get("narration", "").split()) for s in scenes2) <= M.MAX_SCRIPT_WORDS + 10:
+                    scenes_data = scenes2
+                    print(f"  Compressed to {sum(len(s.get('narration','').split()) for s in scenes_data)} words")
+            except json.JSONDecodeError:
+                print("  !! Post-review compression failed — keeping reviewed script")
+        from src.utils.tts_normalize import normalize_narration
+        for s in scenes_data:
+            s["narration"] = normalize_narration(s.get("narration", ""))
+        M._write_json(os.path.join(out_dir, "script_review_report.json"), review_report)
+        M._write_json(os.path.join(out_dir, "script_final.json"), scenes_data)
+
+    # Clear v2 motion clips so they regenerate with the fixed Ken Burns
+    if os.path.isdir(os.path.join(out_dir, "shots")):
+        shutil.rmtree(os.path.join(out_dir, "shots"))
 
     # ── Stills-first visual planning ───────────────────────────────────
     shot_plan, stills_stats = stage_stills_visuals(scenes_data, out_dir)
     run_report["stages"]["visuals"] = stills_stats
 
-    # ── Narration ──────────────────────────────────────────────────────
+    # ── Narration (reuse cached audio when present) ────────────────────
     os.makedirs("cache/audio", exist_ok=True)
     audio_durations = []
     for i, s in enumerate(scenes_data):
         ap = os.path.join("cache", "audio", f"scene_{i}.wav")
-        mods["generate_voice"](s["narration"], ap)
+        if not args.reuse or not os.path.exists(ap):
+            mods["generate_voice"](s["narration"], ap)
         audio_durations.append(M._probe_duration(ap))
     print(f"  Voice tracks: {len(scenes_data)} (total {sum(audio_durations):.1f}s)")
 
