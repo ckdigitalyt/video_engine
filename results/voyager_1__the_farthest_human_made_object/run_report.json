@@ -1,38 +1,85 @@
 {
-  "topic": "voyager 1  the farthest human made object",
-  "resumed": true,
-  "started_at": "2026-08-02T05:52:20Z",
+  "topic": "Voyager 1: the farthest human-made object",
+  "started_at": "2026-08-02T06:41:31Z",
   "stages": {
+    "research": {
+      "facts": 15,
+      "elapsed_s": 12.5
+    },
+    "director": {
+      "shots": 16,
+      "avg_shot_s": 4.2,
+      "providers": {
+        "manim": 1,
+        "pexels": 12,
+        "nasa": 3
+      },
+      "fallbacks": 0,
+      "transitions": {
+        "fade": 9,
+        "cut_sync": 4,
+        "crossfade": 2,
+        "cut": 1
+      },
+      "motions": {
+        "none": 5,
+        "pan_left": 5,
+        "zoom_in": 1,
+        "ken_burns_in": 4,
+        "push_in": 1
+      },
+      "elapsed_s": 78.1
+    },
+    "narration": {
+      "voice_scenes": 5,
+      "elapsed_s": 52.3
+    },
+    "render_v1": {
+      "duration_s": 61.8,
+      "size_mb": 12.9,
+      "render_s": 70.6,
+      "output": "results/voyager_1__the_farthest_human_made_object/voyager_1__the_farthest_human_made_object_v1.mp4"
+    },
+    "music_v1": {
+      "mixed": true,
+      "elapsed_s": 4.9,
+      "size_mb": 13.2
+    },
     "review_v1": {
-      "score": 72,
+      "score": 62,
       "confidence": 0.95,
-      "model_used": null,
-      "elapsed_s": 43.0
+      "elapsed_s": 51.1
     },
     "improve_pass_1": {
       "iteration": 2,
       "applied": [
         {
           "category": "shot_order",
-          "detail": "[shot_order][high] Eliminate the 'picture-in-picture' style with black backgrounds (e.g., 00:04, 00:13, 01:08, 01:22). Use full-screen cinematic shots or more intentional split-screen compositions.",
-          "source_rec": "Eliminate the 'picture-in-picture' style with black backgrounds (e.g., 00:04, 00:13, 01:08, 01:22). Use full-screen cinematic shots or more intentional split-screen compositions."
+          "detail": "[shot_order][medium] At 0:39, replace the red nebula streak with a visualization of the heliosphere or plasma waves to match the 'plasma density' narration.",
+          "source_rec": "At 0:39, replace the red nebula streak with a visualization of the heliosphere or plasma waves to match the 'plasma density' narration."
+        },
+        {
+          "category": "subtitles",
+          "detail": "[subtitles][low] Add high-quality burned-in subtitles to improve accessibility and retention for mobile viewers.",
+          "source_rec": "Add high-quality burned-in subtitles to improve accessibility and retention for mobile viewers."
         }
       ],
       "flagged": [
-        "[fact_change] Replace the Space Shuttle launch at 00:29 with archival footage of the Titan IIIE-Centaur rocket used for the Voyager missions.",
-        "[new_asset] Replace the generic satellite at 01:14 with a high-quality 3D model or accurate illustration of Voyager 1 to maintain technical credibility.",
-        "[unclassified] Replace the galaxy evolution chart at 00:41 with a diagram of the Voyager 1 trajectory or the Golden Record's pulsar map to better match the 'message in a bottle' narration."
+        "[new_asset] Replace the coastline at 0:14 and the astronaut at 0:52 with actual NASA archival footage of the Voyager launch or CGI models of the probe.",
+        "[unclassified] Remove the alien figure at 0:26. Replace with a montage of the actual images encoded on the Golden Record to better reflect the script."
       ],
       "stopped_early": false,
       "notes": "",
       "elapsed_s": 0.0
     }
   },
+  "errors": [],
+  "provider": "deepseek",
   "final": {
     "output": "results/voyager_1__the_farthest_human_made_object/voyager_1__the_farthest_human_made_object_v1_mixed.mp4",
     "iterations": 1,
-    "final_score": 72,
-    "duration_s": 126.038005
+    "final_score": 62,
+    "duration_s": 61.765011
   },
   "postmortem": "/home/ubuntu/video_engine/src/docs/mission/postmortems/postmortem-voyager-1-the-farthest-human-made-object.md"
 }

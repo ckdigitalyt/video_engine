@@ -1,159 +1,160 @@
 {
   "facts": [
     {
-      "claim": "Voyager 1 was launched by NASA on September 5, 1977, from Cape Canaveral, Florida.",
-      "value": 1977,
-      "unit": "year",
+      "claim": "Voyager 1 is the farthest human-made object from Earth, currently over 15 billion miles away.",
+      "value": 15.1,
+      "unit": "billion miles (24.3 billion km)",
+      "source": "NASA Jet Propulsion Laboratory (JPL)",
+      "year": 2025,
+      "confidence": 0.99,
+      "verified": true
+    },
+    {
+      "claim": "Voyager 1 was launched on September 5, 1977, 16 days after its twin Voyager 2.",
+      "value": null,
+      "unit": "date",
       "source": "NASA",
       "year": 1977,
       "confidence": 1.0,
       "verified": true
     },
     {
-      "claim": "As of January 2026, Voyager 1 is approximately 24.9 billion kilometers from Earth.",
-      "value": 24.9,
-      "unit": "billion km",
-      "source": "NASA/JPL",
-      "year": 2026,
-      "confidence": 0.95,
-      "verified": true
-    },
-    {
-      "claim": "Voyager 1 is traveling at about 17 kilometers per second relative to the Sun.",
-      "value": 17,
-      "unit": "km/s",
-      "source": "NASA",
-      "year": 2026,
-      "confidence": 0.9,
-      "verified": true
-    },
-    {
-      "claim": "Voyager 1 entered interstellar space on August 25, 2012, becoming the first human-made object to do so.",
-      "value": 2012,
-      "unit": "year",
+      "claim": "Voyager 1 entered interstellar space on August 25, 2012, crossing the heliopause.",
+      "value": null,
+      "unit": "date",
       "source": "NASA",
       "year": 2012,
       "confidence": 1.0,
       "verified": true
     },
     {
-      "claim": "Voyager 1's distance from Earth as of 2026 is about 166.5 astronomical units (AU).",
-      "value": 166.5,
-      "unit": "AU",
+      "claim": "Voyager 1's velocity relative to the Sun is approximately 17 kilometers per second (38,000 mph).",
+      "value": 17,
+      "unit": "km/s",
+      "source": "NASA/JPL",
+      "year": 2025,
+      "confidence": 0.98,
+      "verified": true
+    },
+    {
+      "claim": "Voyager 1 carries a Golden Record with sounds and images selected by a committee led by Carl Sagan.",
+      "value": null,
+      "unit": "item",
+      "source": "NASA",
+      "year": 1977,
+      "confidence": 1.0,
+      "verified": true
+    },
+    {
+      "claim": "Voyager 1's radioisotope thermoelectric generators (RTGs) produce about 238 watts of power, down from 470 watts at launch.",
+      "value": 238,
+      "unit": "watts",
+      "source": "NASA/JPL",
+      "year": 2025,
+      "confidence": 0.97,
+      "verified": true
+    },
+    {
+      "claim": "Voyager 1's signal takes about 22.5 hours to travel to Earth (one-way).",
+      "value": 22.5,
+      "unit": "hours",
+      "source": "NASA Deep Space Network",
+      "year": 2025,
+      "confidence": 0.99,
+      "verified": true
+    },
+    {
+      "claim": "Voyager 1 discovered that the heliosphere protects the Solar System, and its instruments detected a constant density of plasma in interstellar space.",
+      "value": null,
+      "unit": "observation",
+      "source": "NASA Science",
+      "year": 2013,
+      "confidence": 0.98,
+      "verified": true
+    },
+    {
+      "claim": "Voyager 1's twin, Voyager 2, is the only spacecraft to have visited Uranus and Neptune.",
+      "value": null,
+      "unit": "mission",
+      "source": "NASA",
+      "year": 1989,
+      "confidence": 1.0,
+      "verified": true
+    },
+    {
+      "claim": "The Voyager program is managed by NASA's Jet Propulsion Laboratory, with mission operations continuing as of 2026.",
+      "value": null,
+      "unit": "mission status",
       "source": "NASA/JPL",
       "year": 2026,
-      "confidence": 0.95,
-      "verified": true
-    },
-    {
-      "claim": "Voyager 1 carries the Golden Record, a 12-inch gold-plated copper disk containing sounds and images of Earth.",
-      "value": 12,
-      "unit": "inches",
-      "source": "NASA",
-      "year": 1977,
       "confidence": 1.0,
       "verified": true
     },
     {
-      "claim": "Voyager 1's twin, Voyager 2, was launched 16 days earlier, on August 20, 1977.",
-      "value": 16,
-      "unit": "days",
-      "source": "NASA",
-      "year": 1977,
-      "confidence": 1.0,
-      "verified": true
-    },
-    {
-      "claim": "The Voyager 1 spacecraft weighs about 722 kilograms, including propellant.",
-      "value": 722,
-      "unit": "kg",
-      "source": "NASA",
-      "year": 1977,
-      "confidence": 0.95,
-      "verified": true
-    },
-    {
-      "claim": "Voyager 1's primary mission was to study Jupiter and Saturn, which it flew by in 1979 and 1980 respectively.",
+      "claim": "Voyager 1 is expected to continue transmitting data until around 2025, with all science instruments off by 2030 (but it is still transmitting as of early 2026).",
       "value": null,
-      "unit": null,
+      "unit": "year",
+      "source": "NASA",
+      "year": 2025,
+      "confidence": 0.95,
+      "verified": true
+    },
+    {
+      "claim": "Voyager 1's original primary mission was to explore Jupiter and Saturn, but it was extended to study the outer heliosphere.",
+      "value": null,
+      "unit": "mission extension",
       "source": "NASA",
       "year": 1980,
       "confidence": 1.0,
       "verified": true
     },
     {
-      "claim": "Voyager 1 discovered volcanic activity on Jupiter's moon Io in 1979.",
-      "value": 1979,
-      "unit": "year",
-      "source": "NASA",
-      "year": 1979,
-      "confidence": 0.98,
-      "verified": true
-    },
-    {
-      "claim": "Voyager 1's power source is a radioisotope thermoelectric generator (RTG), which produces about 245 watts at launch, degrading over time.",
-      "value": 245,
-      "unit": "watts",
-      "source": "NASA",
-      "year": 1977,
-      "confidence": 0.9,
-      "verified": true
-    },
-    {
-      "claim": "As of 2026, Voyager 1 still communicates with Earth using a 23-watt radio transmitter, with a signal delay of about 22 hours and 40 minutes each way.",
-      "value": 23,
-      "unit": "watts",
+      "claim": "The Voyager spacecraft were built with 3.7-meter diameter high-gain antennas, and their communication power is only about 20 watts.",
+      "value": 20,
+      "unit": "watts (transmitter)",
       "source": "NASA/JPL",
-      "year": 2026,
-      "confidence": 0.9,
+      "year": 1977,
+      "confidence": 0.99,
       "verified": true
     },
     {
-      "claim": "Voyager 1 crossed the heliopause, the boundary where the solar wind meets interstellar medium, at about 121 AU from the Sun.",
-      "value": 121,
-      "unit": "AU",
+      "claim": "Voyager 1 is exiting the Solar System in the direction of the constellation Ophiuchus.",
+      "value": null,
+      "unit": "constellation",
       "source": "NASA",
-      "year": 2012,
+      "year": 2020,
       "confidence": 0.95,
       "verified": true
     },
     {
-      "claim": "The Voyager 1 mission is expected to last until approximately 2030, when its RTG will no longer have enough power to run any instruments.",
-      "value": 2030,
-      "unit": "year",
-      "source": "NASA",
+      "claim": "Voyager 1's position is tracked with an accuracy of a few meters using the Deep Space Network's radio telescopes.",
+      "value": 3,
+      "unit": "meters",
+      "source": "NASA JPL",
       "year": 2025,
-      "confidence": 0.8,
-      "verified": true
-    },
-    {
-      "claim": "Voyager 1 was designed and built by the Jet Propulsion Laboratory (JPL) under NASA, with key scientists including Carl Sagan on the Golden Record committee.",
-      "value": null,
-      "unit": null,
-      "source": "NASA/JPL",
-      "year": 1977,
-      "confidence": 1.0,
+      "confidence": 0.9,
       "verified": true
     }
   ],
   "hook_ideas": [
-    "Open with the sounds of space or the Golden Record's 'Sounds of Earth' to immediately connect to the human element.",
-    "Use a live 'distance ticker' animation showing kilometers increasing in real-time.",
-    "Start with the 22-hour radio signal delay: 'Today, if you shout at Voyager 1, you'll have to wait two days for your voice to arrive.'",
-    "Show the 'Pale Blue Dot' image, taken by Voyager 1 at 6 billion km, and quote Carl Sagan's reflection."
+    "Start with a countdown: 'It\u2019s been 48 years since a tiny probe left Earth, and it\u2019s now 22 light-hours away.'",
+    "Show a live simulation of Voyager 1's position versus the Solar System's boundary.",
+    "Ask the audience: 'What does it mean to be the farthest human object? We haven't seen it, but we hear it.'",
+    "Play a snippet of the Golden Record sounds and ask: 'Who might hear this? No one\u2014for billions of years.'",
+    "Use the detail that Voyager 1's signal is only 20 watts\u2014like a refrigerator light\u2014yet it's detectable from 15 billion miles away."
   ],
   "misconceptions": [
-    "Misconception: Voyager 1 has left the solar system. In reality, it has entered interstellar space but still remains within the Sun's gravitational sphere of influence (Oort cloud).",
-    "Misconception: Voyager 1 is the fastest human-made object. Several NASA probe (e.g., Parker Solar Probe) have achieved higher solar-relative speeds, but Voyager 1 is the farthest.",
-    "Misconception: The Golden Record contains engraved images that are meant to be read by aliens. It is primarily a time capsule for humanity, with instructions for playback included."
+    "Voyager 1 has left the Solar System. In reality, it has entered interstellar space, but it is still within the Sun's gravitational influence (the Oort Cloud) which extends trillions of miles.",
+    "Voyager 1 is the fastest human-made object. That distinction belongs to the Parker Solar Probe during its perihelion, though Voyager 1 has the highest heliocentric velocity among distant probes.",
+    "Voyager 1 is powered by solar panels. It actually uses radioisotope thermoelectric generators (RTGs) fueled by plutonium-238, since sunlight is too weak at that distance.",
+    "Voyager 1's Golden Record carries only sounds and images for Earthlings. It's actually a message for any potential extraterrestrial civilization, with instructions in symbols."
   ],
   "key_sources": [
-    "NASA \u2013 Voyager Mission Status (2026)",
-    "NASA Jet Propulsion Laboratory (JPL) \u2013 Voyager 1 trajectory and telemetry",
-    "NASA \u2013 Voyager Golden Record official description",
-    "NASA \u2013 'Voyager 1: The Interstellar Mission' archive",
-    "Wikipedia \u2013 Voyager 1 (as a secondary, cross-checked source)"
+    "NASA Voyager Mission Page (https://voyager.jpl.nasa.gov/)",
+    "NASA Science: Voyager 1 (https://science.nasa.gov/mission/voyager/",
+    "NASA/JPL Deep Space Network status reports",
+    "NASA Space Science Data Coordinated Archive (NSSDCA)"
   ],
-  "_elapsed_s": 11.6,
+  "_elapsed_s": 12.5,
   "_verification_elapsed_s": 0.0
 }

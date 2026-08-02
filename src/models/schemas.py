@@ -69,6 +69,7 @@ class ProviderType(str, Enum):
     PEXELS = "pexels"
     NASA = "nasa"
     WIKIMEDIA = "wikimedia"
+    MANIM = "manim"
     GENERATED = "generated"
     REUSE = "reuse"
     PLACEHOLDER = "placeholder"

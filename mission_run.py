@@ -41,14 +41,14 @@ MAX_SCRIPT_WORDS = 165
 # ═══════════════════════════════════════════════════════════════════════ #
 
 def _imports():
-    global Scene, SceneNarration, VisualPlan, SearchPlan, EditingPlan, AudioPlan, MusicStyle
+    global Scene, SceneNarration, VisualPlan, SearchPlan, EditingPlan, AudioPlan, MusicStyle, ProviderType
     global VisualDirector, MoviePyRenderer, TimelineBuilder, EditorialPlanner
     global VisualKnowledgeLibrary, analyze_vo_narration, generate_voice
     global ProviderFactory, ScriptReviewer, ImprovementPass, PostmortemRecorder
 
     from src.models.schemas import (
         Scene, SceneNarration, VisualPlan, SearchPlan, EditingPlan,
-        AudioPlan, MusicStyle,
+        AudioPlan, MusicStyle, ProviderType,
     )
     from src.director import VisualDirector
     from src.renderer.moviepy_renderer import MoviePyRenderer
@@ -65,7 +65,7 @@ def _imports():
     return {
         "Scene": Scene, "SceneNarration": SceneNarration, "VisualPlan": VisualPlan,
         "SearchPlan": SearchPlan, "EditingPlan": EditingPlan, "AudioPlan": AudioPlan,
-        "MusicStyle": MusicStyle, "VisualDirector": VisualDirector,
+        "MusicStyle": MusicStyle, "ProviderType": ProviderType, "VisualDirector": VisualDirector,
         "MoviePyRenderer": MoviePyRenderer, "TimelineBuilder": TimelineBuilder,
         "EditorialPlanner": EditorialPlanner, "VisualKnowledgeLibrary": VisualKnowledgeLibrary,
         "analyze_vo_narration": analyze_vo_narration, "generate_voice": generate_voice,
@@ -129,16 +129,24 @@ FACTS:
 {facts}"""
     try:
         raw = provider.generate_json(check_prompt.format(facts=json.dumps(facts, indent=1)[:6000]))
-        checks = json.loads(raw)
+        checks = _robust_json_array(raw)
         by_claim = {}
         for c in checks:
-            by_claim[str(c.get("fact", "")).strip().lower()] = c
+            if not isinstance(c, dict):
+                continue
+            claim_key = next((k for k in ("fact", "claim", "statement", "text") if c.get(k)), None)
+            if claim_key:
+                by_claim[str(c.get(claim_key, "")).strip().lower()] = c
+        n_checked = 0
         for f in facts:
             c = by_claim.get(str(f.get("claim", "")).strip().lower())
             if c:
+                n_checked += 1
                 f["verified"] = bool(c.get("verified", False))
                 f["verification_notes"] = c.get("notes", "")
                 f["confidence"] = c.get("adjusted_confidence", f.get("confidence", 0.5))
+        if n_checked == 0:
+            raise ValueError("verification output did not match any claims")
     except Exception as e:
         print(f"  !! Verification pass failed ({e}) — keeping research confidence.")
         for f in facts:
@@ -298,6 +306,40 @@ def stage_storyboard_and_direct(
 
     director = VisualDirector(use_beats=True, topic=topic, llm_provider=llm, scene_data=scenes)
     result_scenes = director.run()
+
+    # ── Manim injection (v2): scale-comparison scenes get a Manim clip ──
+    # Mission: Manim is first-class for scale comparisons / orbital mechanics.
+    # If any scene's narration references distance/light-time, replace its
+    # first primary shot's asset with the pre-rendered Manim clip.
+    manim_clip = os.path.join("cache", "manim", "voyager_scale.mp4")
+    if os.path.exists(manim_clip):
+        for scene in result_scenes:
+            text = (scene.narration.spoken_narration or "").lower()
+            # Broad trigger set: any scene about distance/scale/light-time
+            # (v3: v2's reviewed script didn't contain the v1 keywords)
+            triggers = (
+                "light-hour", "light hour", "22.9", "24 billion", "distance",
+                "light-years away", "billion kilometers", "billion kilometres",
+                "how far", "farthest", "far from earth", "reach earth",
+                "hours to reach", "scale", "journey so far",
+            )
+            if any(k in text for k in triggers):
+                for beat in (scene.beat_plans or []):
+                    for shot in beat.shots:
+                        if shot.shot_type.value == "primary" and shot.asset_plan:
+                            shot.asset_plan.filepath = manim_clip
+                            shot.asset_plan.provider = ProviderType.MANIM
+                            shot.asset_plan.video_url = "manim://voyager_scale"
+                            shot.asset_plan.query_used = "voyager distance light scale"
+                            shot.asset_plan.score = 0.95
+                            shot.motion = "none"  # animation is self-contained
+                            shot.duration = min(9.0, max(shot.duration, 7.0))
+                            print(f"  [Manim] Injected voyager_scale clip into scene {scene.scene_id} "
+                                  f"({shot.duration:.1f}s)")
+                            break
+                    else:
+                        continue
+                    break
 
     provider_stats, fallback_count, total_shots = {}, 0, 0
     shot_durations, transitions_used, motions_used = [], {}, {}
@@ -502,6 +544,35 @@ def stage_apply_improvements(plan: dict, timeline_path: str) -> list[str]:
 # Helpers
 # ═══════════════════════════════════════════════════════════════════════ #
 
+def _robust_json_array(raw: str) -> list:
+    """Parse a JSON array from LLM output, tolerating fences and object wraps."""
+    raw = raw.strip()
+    if raw.startswith("```"):
+        raw = raw.strip("`")
+        if raw.startswith("json"):
+            raw = raw[4:]
+        raw = raw.strip()
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError:
+        start, end = raw.find("["), raw.rfind("]")
+        if start >= 0 and end > start:
+            try:
+                data = json.loads(raw[start:end + 1])
+            except json.JSONDecodeError:
+                data = None
+        else:
+            data = None
+    if isinstance(data, list):
+        return data
+    if isinstance(data, dict):
+        for key in ("checks", "results", "verifications", "facts", "items"):
+            if isinstance(data.get(key), list):
+                return data[key]
+        return [data]
+    return []
+
+
 def _probe_duration(path: str) -> float:
     try:
         r = subprocess.run(
@@ -582,6 +653,19 @@ def main():
                 print(f"  Compressed to {sum(len(s.get('narration','').split()) for s in scenes_data)} words")
         except json.JSONDecodeError:
             print("  !! Post-review compression failed — keeping reviewed script")
+
+    # Post-review TTS normalization (v3): expand abbreviations, spell out
+    # dates/numbers so Kokoro narrates "September fifth, nineteen seventy-
+    # seven" instead of "Sept five".  Fixes v2 review finding.
+    from src.utils.tts_normalize import normalize_narration
+    for s in scenes_data:
+        s["narration"] = normalize_narration(s.get("narration", ""))
+        s["search_queries"] = [
+            q for q in s.get("search_queries", []) if not any(
+                bad in q.lower() for bad in ("alien", "ufo", "extraterrestrial",
+                                             "3d render", "fictional", "sci-fi creature")
+            )
+        ] or s.get("search_queries", ["space documentary footage"])
     _write_json(os.path.join(out_dir, "script_review_report.json"), review_report)
     _write_json(os.path.join(out_dir, "script_final.json"), scenes_data)
 

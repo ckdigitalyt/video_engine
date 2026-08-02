@@ -85,6 +85,26 @@ def parse_timeline(raw: dict) -> Timeline:
 # ── Motion helper ──────────────────────────────────────────────────────────
 
 
+def _cover_crop(clip, target_res: tuple[int, int]):
+    """Scale to fill the target frame (cover) then center-crop.
+
+    Fixes v2 regression: clips were stretched to 1920x1080, distorting
+    non-16:9 assets (letterboxed/ultra-wide Pexels clips).  Now every
+    shot fills the full canvas with correct aspect ratio.
+    """
+    tw, th = target_res
+    cw, ch = clip.size
+    if cw <= 0 or ch <= 0:
+        return clip.resize(newsize=target_res)
+    scale = max(tw / cw, th / ch)
+    new_size = (int(round(cw * scale)), int(round(ch * scale)))
+    clip = clip.resize(newsize=new_size)
+    # Center crop to exact target
+    x = (new_size[0] - tw) // 2
+    y = (new_size[1] - th) // 2
+    return clip.crop(x1=x, y1=y, width=tw, height=th)
+
+
 def _apply_motion(
     clip: VideoFileClip,
     motion: dict[str, Any],
@@ -93,11 +113,12 @@ def _apply_motion(
     """Apply a Ken Burns motion descriptor to a clip.
 
     Uses time-dependent ``resize`` and ``set_position`` to create
-    smooth zoom/pan effects.
+    smooth zoom/pan effects.  Base frame is cover-cropped (never
+    stretched) so non-16:9 assets fill the canvas.
     """
     mtype = motion.get("type", "none")
     if mtype == "none":
-        return clip.resize(newsize=target_res)
+        return _cover_crop(clip, target_res)
 
     zoom_start = motion.get("zoom_start", 1.0)
     zoom_end = motion.get("zoom_end", 1.0)
@@ -106,10 +127,10 @@ def _apply_motion(
 
     dur = clip.duration
     if dur <= 0:
-        return clip.resize(newsize=target_res)
+        return _cover_crop(clip, target_res)
 
-    # Base resize to fill the frame
-    clip = clip.resize(newsize=target_res)
+    # Base cover-crop to fill the frame (no distortion)
+    clip = _cover_crop(clip, target_res)
 
     # Time-dependent zoom (linerp between zoom_start and zoom_end)
     def _zoom(t: float) -> float:
