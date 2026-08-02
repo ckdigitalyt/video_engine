@@ -535,8 +535,10 @@ def stage_music_mix(video_path: str, music_path: str, out_path: str,
                     music_volume_db: float = -6.0) -> dict:
     """Stage 11: mix a music bed under the narration with sidechain ducking.
 
-    Uses ffmpeg sidechaincompress: music is ducked whenever the voice is
-    present, then the ducked bed is mixed back under the original audio.
+    Fixes (v6):
+      - silent music bed detection (dead mp3 -> fall back to synth bed)
+      - amix normalize=0 (was halving the voice, making audio near-inaudible)
+      - loudnorm to streaming standard (-14 LUFS, TP -1.5 dB)
     """
     print(f"\n[11/16] MUSIC & SOUND (ffmpeg sidechain ducking, bed={os.path.basename(music_path)})", flush=True)
     t0 = time.time()
@@ -544,8 +546,24 @@ def stage_music_mix(video_path: str, music_path: str, out_path: str,
         print("  !! No music bed found — skipping music mix")
         return {"mixed": False, "reason": "no music bed"}
 
+    # Detect silent/dead bed (e.g. old cinematic.mp3 was -91 dB silence)
+    probe = subprocess.run(
+        ["ffmpeg", "-i", music_path, "-af", "volumedetect", "-f", "null", "-"],
+        capture_output=True, text=True, timeout=30,
+    )
+    import re as _re
+    m = _re.search(r"max_volume: ([-\.\d]+) dB", probe.stderr)
+    max_db = float(m.group(1)) if m else 0.0
+    if max_db < -60.0:
+        alt = os.path.join(os.path.dirname(music_path), "cinematic_bed.wav")
+        if os.path.exists(alt):
+            print(f"  !! {os.path.basename(music_path)} is silent ({max_db:.0f} dB) — using synth bed")
+            music_path = alt
+        else:
+            print(f"  !! music bed silent ({max_db:.0f} dB) and no fallback — skipping mix")
+            return {"mixed": False, "reason": "silent bed"}
+
     dur = _probe_duration(video_path)
-    # volume filter: music_volume_db is negative attenuation relative to 0dB
     vol = 10 ** (music_volume_db / 20.0) if music_volume_db else 1.0
     cmd = [
         "ffmpeg", "-y",
@@ -555,7 +573,7 @@ def stage_music_mix(video_path: str, music_path: str, out_path: str,
         (
             f"[1:a]aloop=loop=-1:size=2e9,atrim=0:{dur:.3f},volume={vol:.3f}[bed];"
             f"[bed][0:a]sidechaincompress=threshold=0.03:ratio=6:attack=25:release=500[duck];"
-            f"[0:a][duck]amix=inputs=2:duration=first:dropout_transition=0:weights=1 1[aout]"
+            f"[0:a][duck]amix=inputs=2:duration=first:dropout_transition=0:normalize=0,alimiter=limit=0.89,loudnorm=I=-14:TP=-1.5:LRA=11[aout]"
         ),
         "-map", "0:v", "-map", "[aout]",
         "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",
