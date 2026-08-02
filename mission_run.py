@@ -1,0 +1,701 @@
+#!/usr/bin/env python3
+"""
+mission_run.py — Jade Studio mission pipeline runner (v1.1).
+
+Executes the 16-stage documentary production pipeline for a topic:
+
+  research → fact verification → story development → script review →
+  storyboard → visual planning → asset routing → asset generation →
+  animation planning → narration → music → rendering → video review →
+  improvement pass → final output → postmortem
+
+v1.1 fixes (from v1 review):
+  - Music bed + sidechain ducking via ffmpeg post-render mix (v1 had voice only)
+  - Script duration budget (target ~60s, hard cap)
+  - Gemini video review uses Part.from_uri (SDK fix)
+  - Improvement pass actually mutates timeline.json and re-renders
+
+Usage:
+    ./venv/bin/python mission_run.py --topic "Voyager 1" \
+        --out results/voyager/voyager_v1.mp4
+"""
+
+import argparse
+import json
+import os
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from dotenv import load_dotenv
+load_dotenv()
+
+TARGET_DURATION_S = 60.0
+MAX_SCRIPT_WORDS = 165
+
+# ═══════════════════════════════════════════════════════════════════════ #
+# Stage imports (lazy where heavy)
+# ═══════════════════════════════════════════════════════════════════════ #
+
+def _imports():
+    global Scene, SceneNarration, VisualPlan, SearchPlan, EditingPlan, AudioPlan, MusicStyle
+    global VisualDirector, MoviePyRenderer, TimelineBuilder, EditorialPlanner
+    global VisualKnowledgeLibrary, analyze_vo_narration, generate_voice
+    global ProviderFactory, ScriptReviewer, ImprovementPass, PostmortemRecorder
+
+    from src.models.schemas import (
+        Scene, SceneNarration, VisualPlan, SearchPlan, EditingPlan,
+        AudioPlan, MusicStyle,
+    )
+    from src.director import VisualDirector
+    from src.renderer.moviepy_renderer import MoviePyRenderer
+    from src.renderer.timeline_builder import TimelineBuilder
+    from src.planner.editorial_planner import EditorialPlanner
+    from src.knowledge.visual_knowledge_library import VisualKnowledgeLibrary
+    from src.cinematic.pace_profiler import analyze_vo_narration
+    from audio_engine import generate_voice
+    from src.providers.factory import ProviderFactory
+    from src.review.script_review import ScriptReviewer
+    from src.review.improvement_pass import ImprovementPass
+    from src.memory.postmortem import PostmortemRecorder
+
+    return {
+        "Scene": Scene, "SceneNarration": SceneNarration, "VisualPlan": VisualPlan,
+        "SearchPlan": SearchPlan, "EditingPlan": EditingPlan, "AudioPlan": AudioPlan,
+        "MusicStyle": MusicStyle, "VisualDirector": VisualDirector,
+        "MoviePyRenderer": MoviePyRenderer, "TimelineBuilder": TimelineBuilder,
+        "EditorialPlanner": EditorialPlanner, "VisualKnowledgeLibrary": VisualKnowledgeLibrary,
+        "analyze_vo_narration": analyze_vo_narration, "generate_voice": generate_voice,
+        "ProviderFactory": ProviderFactory,
+        "ScriptReviewer": ScriptReviewer, "ImprovementPass": ImprovementPass,
+        "PostmortemRecorder": PostmortemRecorder,
+    }
+
+
+# ═══════════════════════════════════════════════════════════════════════ #
+# Research stage
+# ═══════════════════════════════════════════════════════════════════════ #
+
+RESEARCH_PROMPT = """You are a documentary research lead. Produce a rigorous fact pack for a
+one-minute documentary on: {topic}
+
+Requirements:
+- 8-15 verified facts, each with: claim, value (number), unit, source (organisation, e.g. NASA/ESA/Wikipedia), year
+- Include: key dates, key numbers, key people/missions, 1-2 controversies or common misconceptions
+- Facts must be CURRENT as of 2026 and widely accepted
+- No speculation, no invented numbers
+
+Respond in STRICT JSON (no markdown):
+{{
+  "facts": [
+    {{"claim": "...", "value": <number or null>, "unit": "...", "source": "...", "year": <int or null>, "confidence": <0-1>}}
+  ],
+  "hook_ideas": ["..."],
+  "misconceptions": ["..."],
+  "key_sources": ["..."]
+}}"""
+
+
+def stage_research(topic: str, provider) -> dict:
+    print("\n[1/16] RESEARCH", flush=True)
+    t0 = time.time()
+    raw = provider.generate_json(RESEARCH_PROMPT.format(topic=topic))
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError:
+        print("  !! Research JSON parse failed — retrying once")
+        raw = provider.generate_json(RESEARCH_PROMPT.format(topic=topic) + "\nReturn ONLY valid JSON.")
+        data = json.loads(raw)
+    data["_elapsed_s"] = round(time.time() - t0, 1)
+    print(f"  {len(data.get('facts', []))} facts, {len(data.get('key_sources', []))} sources ({data['_elapsed_s']}s)")
+    return data
+
+
+def stage_fact_verification(research: dict, provider) -> dict:
+    print("\n[2/16] FACT VERIFICATION", flush=True)
+    t0 = time.time()
+    facts = research.get("facts", [])
+    if not facts:
+        print("  No facts to verify.")
+        return research
+    check_prompt = """You are a fact-checker. Verify each claim independently. For each fact, respond with:
+{"fact": "<claim>", "verified": true/false, "notes": "<why>", "adjusted_confidence": <0-1>}
+STRICT JSON array only.
+
+FACTS:
+{facts}"""
+    try:
+        raw = provider.generate_json(check_prompt.format(facts=json.dumps(facts, indent=1)[:6000]))
+        checks = json.loads(raw)
+        by_claim = {}
+        for c in checks:
+            by_claim[str(c.get("fact", "")).strip().lower()] = c
+        for f in facts:
+            c = by_claim.get(str(f.get("claim", "")).strip().lower())
+            if c:
+                f["verified"] = bool(c.get("verified", False))
+                f["verification_notes"] = c.get("notes", "")
+                f["confidence"] = c.get("adjusted_confidence", f.get("confidence", 0.5))
+    except Exception as e:
+        print(f"  !! Verification pass failed ({e}) — keeping research confidence.")
+        for f in facts:
+            f["verified"] = f.get("confidence", 0.5) >= 0.7
+    research["_verification_elapsed_s"] = round(time.time() - t0, 1)
+    n_verified = sum(1 for f in facts if f.get("verified"))
+    print(f"  Verified {n_verified}/{len(facts)} facts")
+    return research
+
+
+# ═══════════════════════════════════════════════════════════════════════ #
+# Script development stage
+# ═══════════════════════════════════════════════════════════════════════ #
+
+SCRIPT_PROMPT = """You are a world-class documentary scriptwriter. Write a documentary script
+of EXACTLY 5 scenes for a video with a TOTAL spoken runtime of about
+{TARGET} seconds ({MAX_WORDS} words maximum, spoken pace ~150 wpm).
+
+Topic: {topic}
+
+Use the verified facts below — every number must come from them. Do NOT invent facts.
+
+Rules:
+- Strong hook in scene 0 (first 5 seconds, curiosity without clickbait)
+- Emotional progression: wonder → journey → revelation → resonance
+- Write for SPOKEN narration; short punchy sentences (~30 words per scene)
+- No filler, no repetition, no generic AI phrasing (no "delve", "unlock the secrets", "vast tapestry")
+- Memorable closing line
+- Each scene ~12 seconds of narration
+
+Respond STRICT JSON:
+{{
+  "scenes": [
+    {{"title": "...", "narration": "...", "visual_goal": "<what the viewer should see>", "search_queries": ["3-5 stock search terms for visuals"]}}
+  ]
+}}
+
+FACTS:
+{facts}"""
+
+
+def stage_script(topic: str, research: dict, provider) -> list[dict]:
+    print("\n[3/16] SCRIPT DEVELOPMENT", flush=True)
+    t0 = time.time()
+    facts_text = json.dumps(research.get("facts", []), indent=1)[:7000]
+    prompt = SCRIPT_PROMPT.format(
+        topic=topic, facts=facts_text,
+        TARGET=int(TARGET_DURATION_S), MAX_WORDS=MAX_SCRIPT_WORDS,
+    )
+    raw = provider.generate_json(prompt)
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError:
+        print("  !! Script JSON parse failed — retrying once")
+        raw = provider.generate_json(prompt + "\nReturn ONLY valid JSON.")
+        data = json.loads(raw)
+    scenes = data.get("scenes", [])
+    total_words = sum(len(s.get("narration", "").split()) for s in scenes)
+    print(f"  {len(scenes)} scenes drafted, {total_words} words "
+          f"(~{total_words * 0.4:.0f}s at 150wpm)")
+    if total_words > MAX_SCRIPT_WORDS:
+        print(f"  !! Over word budget ({total_words} > {MAX_SCRIPT_WORDS}) — compressing once")
+        compress = provider.generate_json(
+            "Condense this script to at most " + str(MAX_SCRIPT_WORDS) +
+            " words total, keeping all facts and the 5-scene structure. "
+            "Return ONLY the JSON array of scenes with title/narration/visual_goal/search_queries.\n" +
+            json.dumps({"scenes": scenes})[:6000]
+        )
+        try:
+            data2 = json.loads(compress)
+            scenes2 = data2.get("scenes", [])
+            if len(scenes2) == 5 and sum(len(s.get("narration", "").split()) for s in scenes2) <= MAX_SCRIPT_WORDS + 10:
+                scenes = scenes2
+                print(f"  Compressed to {sum(len(s.get('narration','').split()) for s in scenes)} words")
+        except json.JSONDecodeError:
+            print("  !! Compression failed — keeping draft")
+    return scenes
+
+
+# ═══════════════════════════════════════════════════════════════════════ #
+# Script review stage (mission-critical)
+# ═══════════════════════════════════════════════════════════════════════ #
+
+def stage_script_review(scenes: list[dict], research: dict, provider_name: str) -> tuple[list[dict], dict]:
+    print("\n[4/16] SCRIPT REVIEW (4 independent reviewers, ≤3 passes)", flush=True)
+    t0 = time.time()
+    reviewer = ScriptReviewer(provider_name=provider_name, max_passes=3)
+    narrations = [s["narration"] for s in scenes]
+    final_narrations, results = reviewer.review(
+        narrations,
+        facts=research.get("facts", []),
+        topic="",
+    )
+    for s, n in zip(scenes, final_narrations):
+        s["narration"] = n
+    report = {
+        "passes": [
+            {
+                "pass": r.pass_number,
+                "passed": r.passed,
+                "scores": {k: v.score for k, v in r.scores.items()},
+                "issue_counts": {
+                    "critical": sum(1 for p in r.scores.values() for i in p.issues if i.severity == "critical"),
+                    "major": sum(1 for p in r.scores.values() for i in p.issues if i.severity == "major"),
+                    "minor": sum(1 for p in r.scores.values() for i in p.issues if i.severity == "minor"),
+                },
+            }
+            for r in results
+        ],
+        "final_gate_passed": results[-1].passed if results else False,
+        "elapsed_s": round(time.time() - t0, 1),
+    }
+    print(f"  Gate passed: {report['final_gate_passed']} after {len(results)} pass(es) "
+          f"(scores: {report['passes'][-1]['scores'] if report['passes'] else 'n/a'})")
+    return scenes, report
+
+
+# ═══════════════════════════════════════════════════════════════════════ #
+# Storyboard + visual planning + asset routing (engine stages 5-9)
+# ═══════════════════════════════════════════════════════════════════════ #
+
+def stage_storyboard_and_direct(
+    topic: str, scenes_data: list[dict], lib, ep, llm,
+) -> tuple[list, dict]:
+    print("\n[5-9/16] STORYBOARD → VISUAL PLANNING → ASSET ROUTING → GENERATION → ANIMATION", flush=True)
+    t0 = time.time()
+
+    editorial_plans = ep.plan_all(
+        scenes_with_narration=[
+            {"scene_id": i, "title": s["title"], "narration": s["narration"]}
+            for i, s in enumerate(scenes_data)
+        ],
+        topic=topic,
+    )
+
+    scenes = []
+    for i, sd in enumerate(scenes_data):
+        role = ("hook" if i == 0 else
+                "climax" if i == len(scenes_data) - 2 else
+                "conclusion" if i == len(scenes_data) - 1 else "exploration")
+        profile = analyze_vo_narration(sd["narration"], narrative_role=role)
+        visual_goal = ""
+        if i < len(editorial_plans):
+            visual_goal = editorial_plans[i].editorial_objective.visual_goal
+        queries = sd.get("search_queries") or [visual_goal] or [f"{topic} {sd['title']}"]
+        scene = Scene(
+            scene_id=i, title=sd["title"],
+            expected_duration=float(sd.get("duration", 13.0)),
+            topic=topic,
+            narration=SceneNarration(spoken_narration=sd["narration"]),
+            visual_plan=VisualPlan(visual_description=visual_goal or f"Visuals for: {sd['title']}"),
+            search_plan=SearchPlan(asset_search_queries=queries),
+            editing_plan=EditingPlan(editing_instructions="cinematic documentary with varied pacing"),
+            metadata={"title": sd["title"]},
+        )
+        scenes.append(scene)
+
+    director = VisualDirector(use_beats=True, topic=topic, llm_provider=llm, scene_data=scenes)
+    result_scenes = director.run()
+
+    provider_stats, fallback_count, total_shots = {}, 0, 0
+    shot_durations, transitions_used, motions_used = [], {}, {}
+    for scene in result_scenes:
+        for beat in (scene.beat_plans or []):
+            for shot in beat.shots:
+                total_shots += 1
+                shot_durations.append(shot.duration)
+                transitions_used[shot.transition.value] = transitions_used.get(shot.transition.value, 0) + 1
+                motions_used[shot.motion] = motions_used.get(shot.motion, 0) + 1
+                if shot.asset_plan:
+                    p = shot.asset_plan.provider.value
+                    provider_stats[p] = provider_stats.get(p, 0) + 1
+                    if p in ("placeholder", "emergency"):
+                        fallback_count += 1
+
+    stats = {
+        "shots": total_shots,
+        "avg_shot_s": round(sum(shot_durations) / len(shot_durations), 1) if shot_durations else 0,
+        "providers": provider_stats,
+        "fallbacks": fallback_count,
+        "transitions": transitions_used,
+        "motions": motions_used,
+        "elapsed_s": round(time.time() - t0, 1),
+    }
+    print(f"  Shots: {total_shots} | Avg {stats['avg_shot_s']}s | Providers: {provider_stats} | Fallbacks: {fallback_count}")
+    return result_scenes, stats
+
+
+# ═══════════════════════════════════════════════════════════════════════ #
+# Narration stage (10)
+# ═══════════════════════════════════════════════════════════════════════ #
+
+def stage_narration(result_scenes, cache_audio: str) -> dict:
+    print("\n[10/16] NARRATION (Kokoro George)", flush=True)
+    t0 = time.time()
+    for scene in result_scenes:
+        ap = os.path.join(cache_audio, f"scene_{scene.scene_id}.wav")
+        generate_voice(scene.narration.spoken_narration, ap)
+        scene.audio_plan = AudioPlan(
+            narration_audio_path=ap,
+            music_style=MusicStyle.CINEMATIC,
+            ducking_enabled=True,
+            ducking_reduction_db=8.0,
+        )
+    print(f"  Voice tracks: {len(result_scenes)} ({round(time.time()-t0,1)}s)")
+    return {"voice_scenes": len(result_scenes), "elapsed_s": round(time.time() - t0, 1)}
+
+
+# ═══════════════════════════════════════════════════════════════════════ #
+# Rendering (12) + music mix (11, post-render ffmpeg sidechain)
+# ═══════════════════════════════════════════════════════════════════════ #
+
+def stage_render(result_scenes, timeline_path: str, output_path: str,
+                 build_timeline: bool = True) -> dict:
+    print(f"\n[12/16] RENDERING → {output_path}", flush=True)
+    t0 = time.time()
+    if build_timeline:
+        TimelineBuilder().build_and_write(result_scenes, timeline_path)
+    MoviePyRenderer().render(timeline_path, output_path)
+    size_mb = os.path.getsize(output_path) / 1e6 if os.path.exists(output_path) else 0
+    dur = _probe_duration(output_path)
+    print(f"  Rendered {dur:.1f}s, {size_mb:.1f} MB ({round(time.time()-t0,1)}s)")
+    return {"duration_s": round(dur, 1), "size_mb": round(size_mb, 1),
+            "render_s": round(time.time() - t0, 1), "output": output_path}
+
+
+def stage_music_mix(video_path: str, music_path: str, out_path: str,
+                    music_volume_db: float = -6.0) -> dict:
+    """Stage 11: mix a music bed under the narration with sidechain ducking.
+
+    Uses ffmpeg sidechaincompress: music is ducked whenever the voice is
+    present, then the ducked bed is mixed back under the original audio.
+    """
+    print(f"\n[11/16] MUSIC & SOUND (ffmpeg sidechain ducking, bed={os.path.basename(music_path)})", flush=True)
+    t0 = time.time()
+    if not os.path.exists(music_path):
+        print("  !! No music bed found — skipping music mix")
+        return {"mixed": False, "reason": "no music bed"}
+
+    dur = _probe_duration(video_path)
+    # volume filter: music_volume_db is negative attenuation relative to 0dB
+    vol = 10 ** (music_volume_db / 20.0) if music_volume_db else 1.0
+    cmd = [
+        "ffmpeg", "-y",
+        "-i", video_path,
+        "-i", music_path,
+        "-filter_complex",
+        (
+            f"[1:a]aloop=loop=-1:size=2e9,atrim=0:{dur:.3f},volume={vol:.3f}[bed];"
+            f"[bed][0:a]sidechaincompress=threshold=0.03:ratio=6:attack=25:release=500[duck];"
+            f"[0:a][duck]amix=inputs=2:duration=first:dropout_transition=0:weights=1 1[aout]"
+        ),
+        "-map", "0:v", "-map", "[aout]",
+        "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",
+        "-shortest",
+        out_path,
+    ]
+    r = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+    if r.returncode != 0:
+        print(f"  !! ffmpeg music mix failed: {r.stderr[-400:]}")
+        return {"mixed": False, "reason": r.stderr[-200:]}
+    size_mb = os.path.getsize(out_path) / 1e6 if os.path.exists(out_path) else 0
+    print(f"  Music mixed (ducked under narration): {_probe_duration(out_path):.1f}s, {size_mb:.1f} MB")
+    return {"mixed": True, "elapsed_s": round(time.time() - t0, 1), "size_mb": round(size_mb, 1)}
+
+
+# ═══════════════════════════════════════════════════════════════════════ #
+# Video review (13)
+# ═══════════════════════════════════════════════════════════════════════ #
+
+def stage_video_review(video_path: str, scenes: list[dict], out_path: str) -> dict:
+    print("\n[13/16] VIDEO REVIEW (Gemini Pro, end-to-end)", flush=True)
+    t0 = time.time()
+    from review_video import _upload_and_review
+    script_text = "\n".join(f"SCENE {i}: {s['narration']}" for i, s in enumerate(scenes))
+    review = _upload_and_review(video_path, script_text, model="gemini-2.5-pro")
+    review["_meta"] = {"video": video_path, "model": "gemini-2.5-pro",
+                       "elapsed_s": round(time.time() - t0, 1)}
+    os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
+    with open(out_path, "w") as f:
+        json.dump(review, f, indent=2)
+    print(f"  Score: {review.get('quality_score')}/100 (conf {review.get('confidence')}) | "
+          f"recs: {len(review.get('prioritized_recommendations', []))}")
+    return review
+
+
+# ═══════════════════════════════════════════════════════════════════════ #
+# Improvement pass (14) — applies timeline mutations, then re-render
+# ═══════════════════════════════════════════════════════════════════════ #
+
+def stage_improvement_plan(review: dict, iteration: int, out_dir: str,
+                           max_total: int = 3, quality_target: int = 85) -> dict:
+    print(f"\n[14/16] IMPROVEMENT PASS planning (iteration {iteration}/{max_total})", flush=True)
+    t0 = time.time()
+    imp = ImprovementPass(work_dir=out_dir, max_total_iterations=max_total,
+                          quality_target=quality_target)
+    plan = imp.plan(review, iteration)
+    for a in plan.applied:
+        print(f"    APPLY  [{a.category}] {a.detail[:110]}")
+    for f in plan.flagged[:5]:
+        print(f"    FLAG   {f[:110]}")
+    return {**plan.to_dict(), "elapsed_s": round(time.time() - t0, 1)}
+
+
+def stage_apply_improvements(plan: dict, timeline_path: str) -> list[str]:
+    """Actually mutate timeline.json per the applied plan categories.
+
+    Supported mutations:
+      pacing        → scale all shot durations (e.g. +8% if 'too fast')
+      transitions   → switch cut/cut_sync to fade (or fade→cut) per review
+      color         → recorded only (ffmpeg grade handled at render, out of scope v1.1)
+    Returns list of human-readable applied changes.
+    """
+    applied: list[str] = []
+    if not os.path.exists(timeline_path):
+        return applied
+    with open(timeline_path) as f:
+        tl = json.load(f)
+    shots = tl.get("video_timeline", [])
+
+    for change in plan.get("applied", []):
+        cat = change.get("category")
+        detail = change.get("detail", "").lower()
+        if cat == "pacing" and shots:
+            factor = 1.0
+            if any(k in detail for k in ("too fast", "rushed", "quickly", "fast-paced", "faster")):
+                factor = 0.92
+            elif any(k in detail for k in ("too slow", "slowly", "drag", "drags", "slower")):
+                factor = 1.08
+            if factor != 1.0:
+                for s in shots:
+                    dur = s.get("end_time", 0) - s.get("start_time", 0)
+                    s["end_time"] = round(s.get("start_time", 0) + dur * factor, 3)
+                applied.append(f"pacing: scaled shot durations ×{factor}")
+        elif cat == "transitions" and shots:
+            if any(k in detail for k in ("cut", "jarring", "abrupt")):
+                n = 0
+                for s in shots:
+                    if s.get("transition") in ("cut", "cut_sync", "hard_cut"):
+                        s["transition"] = "fade"
+                        n += 1
+                applied.append(f"transitions: {n} cuts → fades")
+            elif "fade" in detail and "too" in detail:
+                n = 0
+                for s in shots:
+                    if s.get("transition") == "fade":
+                        s["transition"] = "cut"
+                        n += 1
+                applied.append(f"transitions: {n} fades → cuts (pacing)")
+        elif cat in ("music", "audio_balance"):
+            applied.append(f"{cat}: flagged for mix re-render (music_volume_db)")
+
+    if applied:
+        with open(timeline_path, "w") as f:
+            json.dump(tl, f, indent=2)
+        print(f"  Timeline mutated: {applied}")
+    return applied
+
+
+# ═══════════════════════════════════════════════════════════════════════ #
+# Helpers
+# ═══════════════════════════════════════════════════════════════════════ #
+
+def _probe_duration(path: str) -> float:
+    try:
+        r = subprocess.run(
+            ["ffprobe", "-v", "error", "-show_entries", "format=duration",
+             "-of", "csv=p=0", path],
+            capture_output=True, text=True, timeout=15,
+        )
+        return float(r.stdout.strip()) if r.stdout.strip() else 0.0
+    except Exception:
+        return 0.0
+
+
+def _write_json(path: str, data):
+    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+    with open(path, "w") as f:
+        json.dump(data, f, indent=2, default=str)
+
+
+def main():
+    ap = argparse.ArgumentParser(description="Jade Studio mission pipeline")
+    ap.add_argument("--topic", default="Voyager 1: the farthest human-made object")
+    ap.add_argument("--out", default=None, help="Output video path")
+    ap.add_argument("--provider", default=None, help="LLM provider (deepseek|gemini)")
+    ap.add_argument("--max-render-iterations", type=int, default=3)
+    ap.add_argument("--music", default="cache/music/cinematic.mp3")
+    ap.add_argument("--music-db", type=float, default=-6.0)
+    args = ap.parse_args()
+
+    mods = _imports()
+    topic = args.topic
+    slug = "".join(c if c.isalnum() else "_" for c in topic.lower())[:44].strip("_")
+    out_dir = os.path.join("results", slug)
+    os.makedirs(out_dir, exist_ok=True)
+    output_path = args.out or os.path.join(out_dir, f"{slug}_v1.mp4")
+    mixed_path = os.path.join(out_dir, f"{slug}_v1_mixed.mp4")
+    timeline_path = os.path.join(out_dir, "timeline.json")
+    run_report = {"topic": topic, "started_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                  "stages": {}, "errors": []}
+
+    factory = mods["ProviderFactory"]()
+    provider_name = args.provider or "deepseek"
+    llm = factory.get_llm_provider(provider_name)
+    run_report["provider"] = provider_name
+
+    lib = mods["VisualKnowledgeLibrary"]()
+    lib.load_all()
+    ep = mods["EditorialPlanner"](knowledge_library=lib)
+
+    # ── Stage 1-2: Research + verification ────────────────────────────
+    research = stage_research(topic, llm)
+    research = stage_fact_verification(research, llm)
+    _write_json(os.path.join(out_dir, "research.json"), research)
+    run_report["stages"]["research"] = {"facts": len(research.get("facts", [])),
+                                        "elapsed_s": research.get("_elapsed_s")}
+
+    # ── Stage 3: Script ───────────────────────────────────────────────
+    scenes_data = stage_script(topic, research, llm)
+    _write_json(os.path.join(out_dir, "script_draft.json"), scenes_data)
+
+    # ── Stage 4: Script review ────────────────────────────────────────
+    scenes_data, review_report = stage_script_review(scenes_data, research, provider_name)
+    # Post-review word-budget enforcement (reviewers can expand the script;
+    # re-compress to keep the runtime near the target).  Learned from v1 run.
+    total_words = sum(len(s.get("narration", "").split()) for s in scenes_data)
+    if total_words > MAX_SCRIPT_WORDS:
+        print(f"  !! Post-review over budget ({total_words} words) — compressing")
+        compress = llm.generate_json(
+            "Condense this script to at most " + str(MAX_SCRIPT_WORDS) +
+            " words total, keeping all facts and the 5-scene structure. "
+            "Return ONLY the JSON array of scenes with title/narration/visual_goal/search_queries.\n" +
+            json.dumps({"scenes": scenes_data})[:6000]
+        )
+        try:
+            data2 = json.loads(compress)
+            scenes2 = data2.get("scenes", [])
+            if len(scenes2) == 5 and sum(len(s.get("narration", "").split()) for s in scenes2) <= MAX_SCRIPT_WORDS + 10:
+                scenes_data = scenes2
+                print(f"  Compressed to {sum(len(s.get('narration','').split()) for s in scenes_data)} words")
+        except json.JSONDecodeError:
+            print("  !! Post-review compression failed — keeping reviewed script")
+    _write_json(os.path.join(out_dir, "script_review_report.json"), review_report)
+    _write_json(os.path.join(out_dir, "script_final.json"), scenes_data)
+
+    # ── Stages 5-9: Storyboard + director ─────────────────────────────
+    result_scenes, director_stats = stage_storyboard_and_direct(topic, scenes_data, lib, ep, llm)
+    run_report["stages"]["director"] = director_stats
+
+    # ── Stage 10: Narration ───────────────────────────────────────────
+    cache_audio = "cache/audio"
+    os.makedirs(cache_audio, exist_ok=True)
+    audio_stats = stage_narration(result_scenes, cache_audio)
+    run_report["stages"]["narration"] = audio_stats
+
+    # ── Stage 12: Render (initial, voice only) ────────────────────────
+    render_stats = stage_render(result_scenes, timeline_path, output_path)
+    run_report["stages"]["render_v1"] = render_stats
+
+    # ── Stage 11: Music mix (sidechain ducking) ───────────────────────
+    mix_stats = stage_music_mix(output_path, args.music, mixed_path,
+                                music_volume_db=args.music_db)
+    run_report["stages"]["music_v1"] = mix_stats
+    review_target = mixed_path if mix_stats.get("mixed") else output_path
+
+    # ── Stages 13-14: Review + improvement (bounded loop) ─────────────
+    review = stage_video_review(review_target, scenes_data,
+                                os.path.join(out_dir, "review_v1.json"))
+    run_report["stages"]["review_v1"] = {
+        "score": review.get("quality_score"), "confidence": review.get("confidence"),
+        "elapsed_s": review.get("_meta", {}).get("elapsed_s"),
+    }
+
+    iteration = 1
+    max_iter = max(1, min(args.max_render_iterations, 3))
+    while iteration < max_iter:
+        plan_dict = stage_improvement_plan(review, iteration + 1, out_dir, max_total=max_iter)
+        run_report["stages"][f"improve_pass_{iteration}"] = plan_dict
+        if plan_dict.get("stopped_early") or not plan_dict.get("applied"):
+            print("  → No auto-applicable changes; stopping improvement loop.")
+            break
+        # Apply timeline mutations and re-render (no timeline rebuild!)
+        applied = stage_apply_improvements(plan_dict, timeline_path)
+        if not applied:
+            print("  → No timeline mutations possible; stopping improvement loop.")
+            break
+        render_stats = stage_render(result_scenes, timeline_path, output_path,
+                                    build_timeline=False)
+        run_report["stages"][f"render_v{iteration+1}"] = render_stats
+        # Re-mix music on the improved render
+        mix_stats = stage_music_mix(output_path, args.music, mixed_path,
+                                    music_volume_db=args.music_db)
+        run_report["stages"][f"music_v{iteration+1}"] = mix_stats
+        review_target = mixed_path if mix_stats.get("mixed") else output_path
+        review = stage_video_review(review_target, scenes_data,
+                                    os.path.join(out_dir, f"review_v{iteration+1}.json"))
+        run_report["stages"][f"review_v{iteration+1}"] = {
+            "score": review.get("quality_score"), "confidence": review.get("confidence"),
+            "elapsed_s": review.get("_meta", {}).get("elapsed_s"),
+        }
+        iteration += 1
+
+    final_video = review_target
+    # ── Stage 15-16: Final output + postmortem ────────────────────────
+    print("\n[15-16/16] FINAL OUTPUT + POSTMORTEM", flush=True)
+    run_report["final"] = {
+        "output": final_video,
+        "iterations": iteration,
+        "final_score": review.get("quality_score"),
+        "duration_s": _probe_duration(final_video),
+    }
+    _write_json(os.path.join(out_dir, "run_report.json"), run_report)
+
+    recorder = mods["PostmortemRecorder"]()
+    pm_path = recorder.record(
+        topic,
+        techniques_succeeded=[
+            f"multi-reviewer script review ({len(review_report.get('passes', []))} passes, gate={review_report.get('final_gate_passed')})",
+            f"director beat mode: {director_stats.get('shots')} shots, providers={director_stats.get('providers')}",
+            f"ffmpeg sidechain music ducking (bed={os.path.basename(args.music)})",
+            f"Gemini Pro end-to-end review score {review.get('quality_score')}/100",
+        ],
+        techniques_failed=[
+            "web search in research agent (no API key — used DeepSeek knowledge base)",
+            "NVIDIA NIM FLUX image-gen endpoint 404 (needs endpoint refresh)",
+        ],
+        prompt_improvements=[
+            "research prompt now requests strict JSON with value/unit/source/year schema",
+            "script prompt enforces ~60s word budget + bans generic AI phrasing",
+            "script review uses 4 independent personas with quality gate",
+        ],
+        review_feedback=[
+            f"{r.get('recommendation', '')[:120]}"
+            for r in review.get("prioritized_recommendations", [])[:5]
+        ],
+        benchmark_results={"llm": provider_name, "renderer": "moviepy+ffmpeg",
+                            "tts": "kokoro bm_george", "video_review_model": "gemini-2.5-pro",
+                            "music_mix": "ffmpeg sidechaincompress"},
+        metrics={"final_score": review.get("quality_score"),
+                 "render_iterations": iteration,
+                 "shots": director_stats.get("shots"),
+                 "fallbacks": director_stats.get("fallbacks"),
+                 "duration_s": _probe_duration(final_video)},
+        artifacts={"video": final_video, "report": os.path.join(out_dir, "run_report.json")},
+    )
+    run_report["postmortem"] = pm_path
+    _write_json(os.path.join(out_dir, "run_report.json"), run_report)
+
+    print("\n" + "=" * 64)
+    print(f"MISSION RUN COMPLETE — {topic}")
+    print(f"  Video:  {final_video}")
+    print(f"  Report: {os.path.join(out_dir, 'run_report.json')}")
+    print(f"  Postmortem: {pm_path}")
+    print(f"  Final review score: {review.get('quality_score')}/100")
+    print("=" * 64)
+
+
+if __name__ == "__main__":
+    main()

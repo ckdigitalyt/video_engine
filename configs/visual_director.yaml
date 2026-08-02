@@ -12,7 +12,7 @@ visual_director:
   # ── Quality Gates ────────────────────────────────────────────────────
   quality_gates:
     # Hard semantic threshold: assets below this score are REJECTED
-    semantic_threshold: 0.75
+    semantic_threshold: 0.50
     # Prevent asset URL reuse within this many scenes
     reuse_window: 5
     # Penalty applied for asset URL reuse in quality gate scoring

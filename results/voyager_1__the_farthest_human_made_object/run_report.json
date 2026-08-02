@@ -1,0 +1,38 @@
+{
+  "topic": "voyager 1  the farthest human made object",
+  "resumed": true,
+  "started_at": "2026-08-02T05:52:20Z",
+  "stages": {
+    "review_v1": {
+      "score": 72,
+      "confidence": 0.95,
+      "model_used": null,
+      "elapsed_s": 43.0
+    },
+    "improve_pass_1": {
+      "iteration": 2,
+      "applied": [
+        {
+          "category": "shot_order",
+          "detail": "[shot_order][high] Eliminate the 'picture-in-picture' style with black backgrounds (e.g., 00:04, 00:13, 01:08, 01:22). Use full-screen cinematic shots or more intentional split-screen compositions.",
+          "source_rec": "Eliminate the 'picture-in-picture' style with black backgrounds (e.g., 00:04, 00:13, 01:08, 01:22). Use full-screen cinematic shots or more intentional split-screen compositions."
+        }
+      ],
+      "flagged": [
+        "[fact_change] Replace the Space Shuttle launch at 00:29 with archival footage of the Titan IIIE-Centaur rocket used for the Voyager missions.",
+        "[new_asset] Replace the generic satellite at 01:14 with a high-quality 3D model or accurate illustration of Voyager 1 to maintain technical credibility.",
+        "[unclassified] Replace the galaxy evolution chart at 00:41 with a diagram of the Voyager 1 trajectory or the Golden Record's pulsar map to better match the 'message in a bottle' narration."
+      ],
+      "stopped_early": false,
+      "notes": "",
+      "elapsed_s": 0.0
+    }
+  },
+  "final": {
+    "output": "results/voyager_1__the_farthest_human_made_object/voyager_1__the_farthest_human_made_object_v1_mixed.mp4",
+    "iterations": 1,
+    "final_score": 72,
+    "duration_s": 126.038005
+  },
+  "postmortem": "/home/ubuntu/video_engine/src/docs/mission/postmortems/postmortem-voyager-1-the-farthest-human-made-object.md"
+}

@@ -1,0 +1,28 @@
+[asset_router] Loaded env vars from /home/ubuntu/video_engine/.env
+
+[13/16] VIDEO REVIEW (Gemini Pro, end-to-end)
+→ Uploading results/voyager_1__the_farthest_human_made_object/voyager_1__the_farthest_human_made_object_v1_mixed.mp4 to Gemini...
+→ Uploaded: files/5zze8pqrjk9c (FileState.PROCESSING)
+→ Reviewing with gemini-2.5-pro...
+    !! gemini-2.5-pro failed: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and 
+→ Reviewing with gemini-3.5-flash...
+    !! gemini-3.5-flash failed: 503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand 
+→ Reviewing with gemini-3-flash-preview...
+  Score: 72/100 (conf 0.95) | recs: 4
+
+[14/16] IMPROVEMENT PASS planning (iteration 2/3)
+    APPLY  [shot_order] [shot_order][high] Eliminate the 'picture-in-picture' style with black backgrounds (e.g., 00:04, 00:13, 01:08,
+    FLAG   [fact_change] Replace the Space Shuttle launch at 00:29 with archival footage of the Titan IIIE-Centaur rocket
+    FLAG   [new_asset] Replace the generic satellite at 01:14 with a high-quality 3D model or accurate illustration of Vo
+    FLAG   [unclassified] Replace the galaxy evolution chart at 00:41 with a diagram of the Voyager 1 trajectory or the G
+  → No timeline mutations possible; stopping improvement loop.
+
+[15-16/16] FINAL OUTPUT + POSTMORTEM
+
+================================================================
+RESUMED RUN COMPLETE — voyager 1  the farthest human made object
+  Video:  results/voyager_1__the_farthest_human_made_object/voyager_1__the_farthest_human_made_object_v1_mixed.mp4
+  Report: results/voyager_1__the_farthest_human_made_object/run_report.json
+  Postmortem: /home/ubuntu/video_engine/src/docs/mission/postmortems/postmortem-voyager-1-the-farthest-human-made-object.md
+  Final review score: 72/100
+================================================================

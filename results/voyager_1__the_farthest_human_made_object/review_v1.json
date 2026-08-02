@@ -1,0 +1,65 @@
+{
+  "quality_score": 72,
+  "confidence": 0.95,
+  "strengths": [
+    "Compelling and emotional script with a strong hook and philosophical ending.",
+    "Professional narration with excellent clarity, pacing, and tone.",
+    "Effective use of sound effects (baby's cry, heartbeat) to reinforce the narrative.",
+    "Strong music balance that enhances the atmosphere without competing with the voiceover."
+  ],
+  "weaknesses": [
+    "Significant factual inaccuracy: shows a Space Shuttle launch at 00:29 instead of the Titan IIIE-Centaur.",
+    "Visual layout issues: many scenes use small insets with excessive black space, making the video feel unfinished or like a rough cut.",
+    "Inaccurate spacecraft assets: the satellite shown at 01:14 is not Voyager 1.",
+    "Visual relevance: some stock footage (e.g., the camera at 00:08 or the industrial site at 01:22) feels disconnected from the specific subject matter."
+  ],
+  "prioritized_recommendations": [
+    {
+      "priority": "critical",
+      "category": "fact_change",
+      "recommendation": "Replace the Space Shuttle launch at 00:29 with archival footage of the Titan IIIE-Centaur rocket used for the Voyager missions."
+    },
+    {
+      "priority": "high",
+      "category": "new_asset",
+      "recommendation": "Replace the generic satellite at 01:14 with a high-quality 3D model or accurate illustration of Voyager 1 to maintain technical credibility."
+    },
+    {
+      "priority": "high",
+      "category": "shot_order",
+      "recommendation": "Eliminate the 'picture-in-picture' style with black backgrounds (e.g., 00:04, 00:13, 01:08, 01:22). Use full-screen cinematic shots or more intentional split-screen compositions."
+    },
+    {
+      "priority": "medium",
+      "category": "visual_relevance",
+      "recommendation": "Replace the galaxy evolution chart at 00:41 with a diagram of the Voyager 1 trajectory or the Golden Record's pulsar map to better match the 'message in a bottle' narration."
+    }
+  ],
+  "factual_issues": [
+    {
+      "claim": "Launched September 5, 1977",
+      "issue": "Visual shows a Space Shuttle (STS), which did not launch Voyager.",
+      "suggested_fix": "Use footage of the Titan IIIE launch."
+    },
+    {
+      "claim": "Voyager 1... built to push farther than anything we'd ever made.",
+      "issue": "Visual at 01:14 shows a generic Earth-orbiting satellite/Hubble-style craft.",
+      "suggested_fix": "Use a 3D render of the actual Voyager 1 probe with its distinct high-gain antenna."
+    }
+  ],
+  "title_recommendations": [
+    "Voyager 1: The 23-Watt Whisper from the Void",
+    "Earth's Last Message: The Loneliest Journey",
+    "The Silent Traveler: Will Voyager 1 Ever Be Found?"
+  ],
+  "thumbnail_recommendation": {
+    "timestamp": "02:02",
+    "description": "A high-contrast shot of Earth and the Moon in the vastness of space, with the text 'THE WHISPER' in a clean, cinematic font."
+  },
+  "overall_assessment": "The documentary excels in its storytelling and auditory delivery, creating a poignant atmosphere regarding humanity's reach into the stars. However, the visual execution is inconsistent, suffering from technical inaccuracies regarding the spacecraft and a layout that leaves too much of the frame empty. Correcting the launch vehicle and filling the frame with relevant, accurate space imagery would elevate this to a professional standard.",
+  "_meta": {
+    "video": "results/voyager_1__the_farthest_human_made_object/voyager_1__the_farthest_human_made_object_v1_mixed.mp4",
+    "model": "gemini-2.5-pro",
+    "elapsed_s": 43.0
+  }
+}

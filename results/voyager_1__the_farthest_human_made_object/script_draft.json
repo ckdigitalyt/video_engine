@@ -1,0 +1,52 @@
+[
+  {
+    "title": "Whisper in the Dark",
+    "narration": "Somewhere out there, a 722-kilogram machine is calling home. Its voice? A faint 23-watt whisper, barely a nightlight.",
+    "visual_goal": "Dark starfield, a tiny blinking light in the distance, radio waves pulsing.",
+    "search_queries": [
+      "Voyager spacecraft deep space",
+      "tiny light in dark space",
+      "radio signal waves animation"
+    ]
+  },
+  {
+    "title": "Launch of a Dream",
+    "narration": "September 5, 1977. Cape Canaveral. A rocket lifts, carrying a gold-plated record of Earth's sounds and images.",
+    "visual_goal": "Historical launch footage, liftoff, the Golden Record close-up.",
+    "search_queries": [
+      "Voyager 1 launch 1977",
+      "Golden Record close-up",
+      "rocket liftoff Cape Canaveral"
+    ]
+  },
+  {
+    "title": "Giants and Fire",
+    "narration": "It flew past Jupiter in 1979, finding volcanoes on Io. Then Saturn, 1980. A journey of firsts.",
+    "visual_goal": "Jupiter and Io volcanic eruption, Saturn ring flyby animation.",
+    "search_queries": [
+      "Voyager 1 Jupiter flyby",
+      "Io volcano eruption space",
+      "Saturn rings spacecraft view"
+    ]
+  },
+  {
+    "title": "Into the Beyond",
+    "narration": "August 25, 2012. It crossed the heliopause\u2014first human object in interstellar space. Now, 24.9 billion kilometers away.",
+    "visual_goal": "Animated crossing of a boundary, transition to starry interstellar space, distance graphic.",
+    "search_queries": [
+      "heliopause crossing animation",
+      "interstellar space boundary",
+      "Voyager distance Earth graphic"
+    ]
+  },
+  {
+    "title": "The Long Silence",
+    "narration": "By 2030, it will fall silent. But it will keep sailing\u2014a message in a bottle, for anyone, or no one, to find.",
+    "visual_goal": "Voyager drifting away, fading light, Earth in distance, poetic shot.",
+    "search_queries": [
+      "Voyager future trajectory",
+      "spacecraft fading into distance",
+      "Earth from far away space"
+    ]
+  }
+]

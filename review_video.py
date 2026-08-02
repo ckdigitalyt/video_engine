@@ -1,224 +1,176 @@
 #!/usr/bin/env python3
 """
-review_video.py — Send the finished video's metadata and stats to DeepSeek
-for an expert algorithm review and improvement suggestions.
+review_video.py — End-to-end video review with Gemini Pro.
+
+Uploads the rendered MP4 to Gemini (files API) and asks Gemini 2.5 Pro to
+review the ACTUAL video: narration, pacing, visuals, transitions, timing,
+music balance, cinematography, factual accuracy, and more.  Returns a
+structured JSON review used by the improvement pass.
 
 Usage:
-    python3 review_video.py results/olbers_v3/olbers_paradox_v3.mp4
+    python3 review_video.py results/voyager/voyager_v1.mp4 --script script.json --out review.json
 """
 
-import json, os, sys, subprocess, textwrap
-from pathlib import Path
+import argparse
+import json
+import os
+import sys
+import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from src.providers.factory import ProviderFactory
-from src.providers.llm_provider import DeepSeekProvider
-from src.utils.config import get_config
-import os
+from dotenv import load_dotenv
+load_dotenv()
 
-REPORT_PATH = "docs/review_v3.md"
+REVIEW_PROMPT = """You are the executive producer of a world-class documentary studio.
+Review this rendered documentary video END-TO-END (watch the actual video frames
+and listen to the audio). Evaluate:
+
+1. factual accuracy (compare against the script claims provided)
+2. narration quality (delivery, clarity, pronunciation)
+3. script effectiveness (hook, structure, curiosity, pacing)
+4. audience engagement & retention
+5. visual relevance (do visuals match narration?)
+6. visual continuity (style consistency across shots)
+7. transitions and timing
+8. cinematography & animation quality (motion, Ken Burns, Manim segments)
+9. music balance (does music overwhelm narration?)
+10. subtitle quality (if present)
+11. thumbnail recommendation (a concrete frame description + timestamp)
+12. title recommendation (3 options)
+
+Respond in STRICT JSON (no markdown fences) with this schema:
+{{
+  "quality_score": <int 0-100>,
+  "confidence": <float 0-1>,
+  "strengths": ["..."],
+  "weaknesses": ["..."],
+  "prioritized_recommendations": [
+    {{"priority": "critical|high|medium|low",
+      "category": "pacing|transitions|music|audio_balance|color|subtitles|shot_order|zoom|story_change|fact_change|script_change|new_scene|new_asset|thumbnail|other",
+      "recommendation": "<specific, actionable, parameter-level where possible>"}}
+  ],
+  "factual_issues": [{{"claim": "...", "issue": "...", "suggested_fix": "..."}}],
+  "title_recommendations": ["t1", "t2", "t3"],
+  "thumbnail_recommendation": "{{"timestamp": "<mm:ss>", "description": "..."}},
+  "overall_assessment": "<2-3 sentences>"
+}}
+
+SCRIPT:
+{script}
+
+Be specific. Reference timestamps where useful. Prioritize fixes by impact."""
 
 
-def probe_duration(path: str) -> float:
+def _upload_and_review(video_path: str, script_text: str, model: str = "gemini-2.5-pro") -> dict:
+    from google import genai
+    from google.genai import types
+
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        raise RuntimeError("GEMINI_API_KEY not set")
+    client = genai.Client(api_key=api_key)
+
+    print(f"→ Uploading {video_path} to Gemini...")
+    upload = client.files.upload(file=video_path)
+    print(f"→ Uploaded: {upload.name} ({upload.state})")
+
+    # Wait for processing
+    for _ in range(60):
+        meta = client.files.get(name=upload.name)
+        if meta.state.name == "ACTIVE":
+            break
+        time.sleep(2)
+    else:
+        print("! File still processing after 120s — attempting review anyway.")
+
+    prompt = REVIEW_PROMPT.format(script=script_text[:12000])
+    video_part = types.Part.from_uri(file_uri=upload.uri, mime_type=upload.mime_type)
+
+    # Model fallback chain: preferred pro model first, then flash models
+    # (quota varies per key/plan; flash models are broadly available).
+    model_chain = [model, "gemini-3.5-flash", "gemini-3-flash-preview", "gemini-2.5-flash"]
+    model_chain = list(dict.fromkeys(model_chain))  # dedupe, keep order
+    last_err: Exception | None = None
+    for m in model_chain:
+        print(f"→ Reviewing with {m}...")
+        try:
+            response = client.models.generate_content(
+                model=m,
+                contents=[prompt, video_part],
+                config=types.GenerateContentConfig(
+                    temperature=0.2,
+                    response_mime_type="application/json",
+                ),
+            )
+            text = response.text or ""
+            if not text.strip():
+                raise RuntimeError("empty response")
+            review = _parse_review_json(text)
+            review["_meta"]["model_used"] = m
+            return review
+        except Exception as e:  # noqa: BLE001
+            last_err = e
+            print(f"    !! {m} failed: {str(e)[:120]}")
+            continue
+    raise RuntimeError(f"All review models failed; last error: {last_err}")
+
+
+def _parse_review_json(text: str) -> dict:
+    """Defensive JSON extraction from Gemini text output."""
+    text = text.strip()
+    if text.startswith("```"):
+        text = text.strip("`")
+        if text.startswith("json"):
+            text = text[4:]
     try:
-        r = subprocess.run(
-            ["ffprobe", "-v", "error", "-show_entries", "format=duration",
-             "-of", "csv=p=0", path],
-            capture_output=True, text=True, timeout=15,
-        )
-        return float(r.stdout.strip()) if r.stdout.strip() else 0.0
-    except Exception:
-        return 0.0
-
-
-def probe_resolution(path: str) -> str:
-    try:
-        r = subprocess.run(
-            ["ffprobe", "-v", "error", "-select_streams", "v:0",
-             "-show_entries", "stream=width,height",
-             "-of", "csv=p=0", path],
-            capture_output=True, text=True, timeout=15,
-        )
-        parts = r.stdout.strip().split(",")
-        if len(parts) == 2:
-            return f"{parts[0]}x{parts[1]}"
-    except Exception:
-        pass
-    return "unknown"
-
-
-def gather_stats() -> dict:
-    """Collect all available stats from the log and timeline."""
-    stats = {}
-
-    # Parse the log for stats section
-    log_path = "/tmp/olbers_v3_run.log"
-    log_text = ""
-    if os.path.exists(log_path):
-        with open(log_path) as f:
-            log_text = f.read()
-
-    # Extract numbers from the log
-    import re
-    m = re.search(r'Director: ([\d.]+)s.*Render: ([\d.]+)s.*Total: ([\d.]+)s', log_text)
-    if m:
-        stats["director_time_s"] = float(m.group(1))
-        stats["render_time_s"] = float(m.group(2))
-        stats["total_time_s"] = float(m.group(3))
-
-    m = re.search(r'Real assets: (\d+)/(\d+)', log_text)
-    if m:
-        stats["real_assets"] = int(m.group(1))
-        stats["total_shots"] = int(m.group(2))
-
-    m = re.search(r'Avg shot: ([\d.]+)s', log_text)
-    if m:
-        stats["avg_shot_s"] = float(m.group(1))
-
-    m = re.search(r'Transitions: ({.*?})', log_text)
-    if m:
-        try:
-            stats["transitions"] = json.loads(m.group(1).replace("'", '"'))
-        except:
-            pass
-
-    m = re.search(r'Motions: ({.*?})', log_text)
-    if m:
-        try:
-            stats["motions"] = json.loads(m.group(1).replace("'", '"'))
-        except:
-            pass
-
-    m = re.search(r'Providers: ({.*?})', log_text)
-    if m:
-        try:
-            stats["providers"] = json.loads(m.group(1).replace("'", '"'))
-        except:
-            pass
-
-    # Timeline data
-    timeline_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "timeline.json")
-    if os.path.exists(timeline_path):
-        with open(timeline_path) as f:
-            tl = json.load(f)
-        stats["num_video_clips"] = len(tl.get("video_timeline", []))
-        stats["num_scenes"] = len(tl.get("scenes", []))
-
-    return stats
-
-
-def build_prompt(stats: dict, video_path: str) -> str:
-    """Build the review prompt with all available data."""
-
-    transitions_str = json.dumps(stats.get("transitions", {}), indent=2)
-    motions_str = json.dumps(stats.get("motions", {}), indent=2)
-    providers_str = json.dumps(stats.get("providers", {}), indent=2)
-
-    prompt = f"""You are a senior video-engineering algorithms expert. Review this AI-generated video render and suggest specific, actionable algorithm improvements.
-
-## Video Metadata
-- File: {video_path}
-- Size: {os.path.getsize(video_path) / 1024 / 1024:.1f} MB
-- Duration: {probe_duration(video_path):.1f}s
-- Resolution: {probe_resolution(video_path)}
-
-## Pipeline Performance
-- Director planning: {stats.get('director_time_s', '?')}s
-- Render: {stats.get('render_time_s', '?')}s
-- Total: {stats.get('total_time_s', '?')}s
-
-## Asset Quality
-- Real assets (non-fallback): {stats.get('real_assets', '?')} / {stats.get('total_shots', '?')}
-- Providers used: {providers_str}
-- Average shot duration: {stats.get('avg_shot_s', '?')}s
-
-## Editing Config
-- Transitions: {transitions_str}
-- Motions: {motions_str}
-
-This video was rendered with "Olbers V3" algorithm — a documentary-style short (~65s target) about Olbers' Paradox ("Why is the Sky Dark at Night?"). It uses:
-- Asset-first pipeline: Pexels → Pixabay → NASA → Wikimedia → fallback
-- Cinematic voiceover (kokoro TTS)
-- Beat-based shot planning via VisualDirector
-- Scene-level editorial planner
-
-## Review Request
-1. **Transition analysis**: The config aimed for CUT/static, but the output shows crossfade and motion. Why would this happen? Fix recommendation.
-2. **Shot duration**: Min 3.0s was configured but motion + multiple assets per beat were used. What's the optimal shot length for documentary pacing?
-3. **Provider chain**: NASA provided 19/22 shots. Should we prioritize video providers (Pexels/Pixabay) over still-image providers? Tradeoffs?
-4. **Visual variety**: 3 Pexels + 19 NASA stills + ken burns motion. How can we improve visual interest without flickering?
-5. **Render speed**: 7.6min planning + 1min render for a ~65s video. What bottlenecks exist? How to speed up?
-6. **Quality heuristic**: How should we weight image quality, relevance, and motion safety when selecting shots?
-7. **Summary recommendations**: Top 3-5 specific code/algorithm changes you'd make.
-
-Be specific — reference line numbers not needed, but do suggest concrete config values, parameter changes, or architectural shifts."""
-
-    return prompt
-
-
-def write_report(review_text: str, stats: dict, video_path: str):
-    os.makedirs("docs", exist_ok=True)
-    report = f"""# Video Algorithm Review — Olbers V3
-
-**Reviewed:** {__import__('datetime').datetime.now().isoformat()}
-**Video:** {video_path} ({os.path.getsize(video_path)/1024/1024:.1f} MB, {probe_duration(video_path):.1f}s)
-
----
-
-## Pipeline Stats Summary
-
-| Metric | Value |
-|---|---|
-| Director planning | {stats.get('director_time_s', '?')}s |
-| Render time | {stats.get('render_time_s', '?')}s |
-| Total time | {stats.get('total_time_s', '?')}s |
-| Real assets | {stats.get('real_assets', '?')}/{stats.get('total_shots', '?')} |
-| Avg shot | {stats.get('avg_shot_s', '?')}s |
-| Providers | {json.dumps(stats.get('providers', {}))} |
-| Transitions | {json.dumps(stats.get('transitions', {}))} |
-| Motions | {json.dumps(stats.get('motions', {}))} |
-
----
-
-## LLM Review
-
-{review_text}
-
----
-
-*Generated by review_video.py*
-"""
-    with open(REPORT_PATH, "w") as f:
-        f.write(report)
-    print(f"✅ Report written to {REPORT_PATH}")
+        review = json.loads(text)
+    except json.JSONDecodeError:
+        start, end = text.find("{"), text.rfind("}")
+        if start >= 0 and end > start:
+            review = json.loads(text[start:end + 1])
+        else:
+            raise RuntimeError(f"Gemini returned non-JSON review: {text[:300]}")
+    review.setdefault("_meta", {})
+    return review
 
 
 def main():
-    video_path = sys.argv[1] if len(sys.argv) > 1 else "results/olbers_v3/olbers_paradox_v3.mp4"
-    full_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), video_path)
-    if not os.path.exists(full_path):
-        print(f"❌ Video not found: {full_path}")
-        sys.exit(1)
+    ap = argparse.ArgumentParser()
+    ap.add_argument("video", help="Path to rendered MP4")
+    ap.add_argument("--script", default=None, help="JSON with scenes (for fact check)")
+    ap.add_argument("--out", default=None, help="Output review JSON path")
+    ap.add_argument("--model", default="gemini-2.5-pro")
+    args = ap.parse_args()
 
-    print(f"📊 Gathering stats for {video_path}...")
-    stats = gather_stats()
+    script_text = ""
+    if args.script and os.path.exists(args.script):
+        with open(args.script) as f:
+            data = json.load(f)
+        scenes = data.get("scenes") or data.get("final_scenes") or []
+        script_text = "\n".join(f"SCENE {i}: {s}" for i, s in enumerate(scenes))
 
-    print(f"🤖 Sending to DeepSeek for review...")
-    prompt = build_prompt(stats, video_path)
+    t0 = time.time()
+    review = _upload_and_review(args.video, script_text, model=args.model)
+    elapsed = time.time() - t0
 
-    llm = DeepSeekProvider()
+    review["_meta"] = {"video": args.video, "model": args.model,
+                       "elapsed_s": round(elapsed, 1)}
+    out = args.out or (os.path.splitext(args.video)[0] + "_review.json")
+    os.makedirs(os.path.dirname(out) or ".", exist_ok=True)
+    with open(out, "w") as f:
+        json.dump(review, f, indent=2)
 
-    try:
-        review = llm.generate_text(prompt)
-        print("\n" + "=" * 60)
-        print("REVIEW RECEIVED")
-        print("=" * 60)
-        print(review)
-        write_report(review, stats, video_path)
-    except Exception as e:
-        print(f"❌ LLM call failed: {e}")
-        sys.exit(1)
+    print(f"\n=== GEMINI VIDEO REVIEW ({args.model}) ===")
+    print(f"Quality score: {review.get('quality_score')}/100 (confidence {review.get('confidence')})")
+    print(f"Strengths: {len(review.get('strengths', []))} | Weaknesses: {len(review.get('weaknesses', []))}")
+    recs = review.get("prioritized_recommendations", [])
+    print(f"Recommendations: {len(recs)}")
+    for r in recs[:10]:
+        p = r.get("priority", "?")
+        c = r.get("category", "?")
+        print(f"  [{p.upper()}][{c}] {r.get('recommendation','')[:140]}")
+    print(f"\nReview saved: {out} ({elapsed:.0f}s)")
 
 
 if __name__ == "__main__":
