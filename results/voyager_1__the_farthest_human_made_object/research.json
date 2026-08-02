@@ -1,158 +1,157 @@
 {
   "facts": [
     {
-      "claim": "Voyager 1 was launched by NASA on September 5, 1977, from Cape Canaveral, Florida.",
-      "value": 1977,
-      "unit": "year",
-      "source": "NASA",
-      "year": 1977,
-      "confidence": 0.99,
-      "verified": true
-    },
-    {
-      "claim": "Voyager 1 is the farthest human-made object from Earth, with a distance of over 15 billion miles (24.9 billion kilometers) as of early 2025.",
-      "value": 24.9,
-      "unit": "billion kilometers",
-      "source": "NASA Jet Propulsion Laboratory",
+      "claim": "Voyager 1 is the farthest human-made object from Earth, currently in interstellar space.",
+      "value": 166.3,
+      "unit": "astronomical units (AU)",
+      "source": "NASA JPL",
       "year": 2025,
-      "confidence": 0.95,
+      "confidence": 1.0,
       "verified": true
     },
     {
-      "claim": "Voyager 1 entered interstellar space on August 25, 2012, crossing the heliopause.",
-      "value": 2012,
-      "unit": "year",
-      "source": "NASA",
-      "year": 2012,
-      "confidence": 0.99,
-      "verified": true
-    },
-    {
-      "claim": "Voyager 1's velocity relative to the Sun is approximately 17 kilometers per second (38,000 mph).",
-      "value": 17,
-      "unit": "km/s",
-      "source": "NASA",
-      "year": 2023,
-      "confidence": 0.9,
-      "verified": true
-    },
-    {
-      "claim": "Voyager 1 carries the Golden Record, a 12-inch gold-plated copper disk containing sounds and images selected to represent life on Earth.",
-      "value": 12,
-      "unit": "inches",
-      "source": "NASA",
-      "year": 1977,
-      "confidence": 0.99,
-      "verified": true
-    },
-    {
-      "claim": "The Voyager 1 mission was designed by a team led by project scientist Edward C. Stone (deceased in 2024) at NASA's Jet Propulsion Laboratory.",
+      "claim": "Voyager 1 was launched by NASA on September 5, 1977, from Cape Canaveral, Florida.",
       "value": null,
       "unit": null,
-      "source": "NASA JPL",
-      "year": 2024,
-      "confidence": 0.98,
-      "verified": true
-    },
-    {
-      "claim": "Voyager 1's power source is a radioisotope thermoelectric generator (RTG) that produces about 250 watts at launch, decaying over time.",
-      "value": 250,
-      "unit": "watts",
-      "source": "NASA",
-      "year": 1977,
-      "confidence": 0.95,
-      "verified": true
-    },
-    {
-      "claim": "In November 2023, Voyager 1 experienced a communication glitch, sending unusable data; engineers restored normal operations by April 2024.",
-      "value": null,
-      "unit": null,
-      "source": "NASA JPL",
-      "year": 2024,
-      "confidence": 0.9,
-      "verified": true
-    },
-    {
-      "claim": "Voyager 1 is expected to have enough power to operate its instruments until about 2025, after which it will continue traveling without scientific data.",
-      "value": 2025,
-      "unit": "year",
-      "source": "NASA",
-      "year": 2023,
-      "confidence": 0.85,
-      "verified": true
-    },
-    {
-      "claim": "Voyager 1 made its closest approach to Jupiter on March 5, 1979, revealing volcanic activity on the moon Io.",
-      "value": null,
-      "unit": null,
-      "source": "NASA",
-      "year": 1979,
-      "confidence": 0.99,
-      "verified": true
-    },
-    {
-      "claim": "Voyager 1 made its closest approach to Saturn on November 12, 1980, studying Titan's thick atmosphere.",
-      "value": null,
-      "unit": null,
-      "source": "NASA",
-      "year": 1980,
-      "confidence": 0.99,
-      "verified": true
-    },
-    {
-      "claim": "Voyager 1 is the only human-made object to have left the heliosphere, and as of 2024 it was about 22 light-hours from Earth.",
-      "value": 22,
-      "unit": "light-hours",
-      "source": "NASA JPL",
-      "year": 2024,
-      "confidence": 0.9,
-      "verified": true
-    },
-    {
-      "claim": "The Voyager 1 mission is part of NASA's Voyager program, which originally included Voyager 2; both probes were designed to study the outer planets.",
-      "value": 2,
-      "unit": "probes",
       "source": "NASA",
       "year": 1977,
       "confidence": 1.0,
       "verified": true
     },
     {
-      "claim": "Voyager 1's signal transmission power is about 20 watts, similar to a refrigerator light bulb, but detected from billions of kilometers away using large antennas.",
-      "value": 20,
-      "unit": "watts",
-      "source": "NASA Deep Space Network",
-      "year": 2020,
-      "confidence": 0.92,
+      "claim": "Voyager 1 crossed the heliopause and entered interstellar space on August 25, 2012.",
+      "value": null,
+      "unit": null,
+      "source": "NASA JPL",
+      "year": 2013,
+      "confidence": 1.0,
       "verified": true
     },
     {
-      "claim": "The total cost of the Voyager mission (including both probes) was approximately $865 million, in 1970s dollars, adjusted to about $3 billion today.",
-      "value": 3,
-      "unit": "billion USD (adjusted)",
-      "source": "NASA historical budget documents",
-      "year": 2024,
-      "confidence": 0.8,
+      "claim": "Voyager 1 travels at approximately 17 kilometers per second relative to the Sun.",
+      "value": 17,
+      "unit": "km/s",
+      "source": "NASA JPL",
+      "year": 2025,
+      "confidence": 0.98,
+      "verified": true
+    },
+    {
+      "claim": "As of 2025, Voyager 1's signal takes about 23 hours to reach Earth (one-way).",
+      "value": 23,
+      "unit": "hours",
+      "source": "NASA JPL",
+      "year": 2025,
+      "confidence": 1.0,
+      "verified": true
+    },
+    {
+      "claim": "Voyager 1 carries the Golden Record, a phonograph record with sounds and images of Earth, curated by Carl Sagan's committee.",
+      "value": null,
+      "unit": null,
+      "source": "NASA",
+      "year": 1977,
+      "confidence": 1.0,
+      "verified": true
+    },
+    {
+      "claim": "Voyager 1 discovered active volcanoes on Jupiter's moon Io in 1979.",
+      "value": null,
+      "unit": null,
+      "source": "NASA JPL",
+      "year": 1979,
+      "confidence": 1.0,
+      "verified": true
+    },
+    {
+      "claim": "Voyager 1 made its closest approach to Saturn on November 12, 1980, flying within 124,000 kilometers of the planet.",
+      "value": 124000,
+      "unit": "km",
+      "source": "NASA JPL",
+      "year": 1980,
+      "confidence": 0.99,
+      "verified": true
+    },
+    {
+      "claim": "Voyager 1's power source is a radioisotope thermoelectric generator (RTG) that produces about 200 watts at launch, decaying to about 170 watts by 2025.",
+      "value": 170,
+      "unit": "watts",
+      "source": "NASA JPL",
+      "year": 2025,
+      "confidence": 0.97,
+      "verified": true
+    },
+    {
+      "claim": "Voyager 1 carries a camera that took the famous 'Pale Blue Dot' image of Earth from 6 billion kilometers away on February 14, 1990.",
+      "value": 6.0,
+      "unit": "billion km",
+      "source": "NASA",
+      "year": 1990,
+      "confidence": 1.0,
+      "verified": true
+    },
+    {
+      "claim": "The Voyager spacecraft were built by a team led by project scientist Edward Stone, who served for over 50 years.",
+      "value": 50,
+      "unit": "years",
+      "source": "NASA JPL",
+      "year": 2022,
+      "confidence": 0.99,
+      "verified": true
+    },
+    {
+      "claim": "Voyager 1's thrusters were partially disabled for attitude control, but in 2017 engineers successfully fired backup thrusters that had been dormant for 37 years.",
+      "value": 37,
+      "unit": "years",
+      "source": "NASA JPL",
+      "year": 2017,
+      "confidence": 1.0,
+      "verified": true
+    },
+    {
+      "claim": "Voyager 1 is expected to run out of power for its instruments around 2025, but may continue to transmit limited data until about 2036.",
+      "value": 2036,
+      "unit": "year",
+      "source": "NASA JPL",
+      "year": 2025,
+      "confidence": 0.95,
+      "verified": true
+    },
+    {
+      "claim": "Voyager 1 is the first spacecraft to have its plasma instrument detect a lack of solar wind, confirming it left the heliosphere.",
+      "value": null,
+      "unit": null,
+      "source": "NASA / Science",
+      "year": 2013,
+      "confidence": 1.0,
+      "verified": true
+    },
+    {
+      "claim": "As of 2025, Voyager 1 is in a region of interstellar space with a density of about 0.055 atoms per cubic centimeter.",
+      "value": 0.055,
+      "unit": "atoms/cm\u00b3",
+      "source": "NASA JPL",
+      "year": 2021,
+      "confidence": 0.9,
       "verified": true
     }
   ],
   "hook_ideas": [
-    "A tiny whisper from 15 billion miles: how a 20-watt signal can cross the solar system.",
-    "The 'pale blue dot' photo: Voyager 1 turned back and captured Earth from 6 billion km away.",
-    "What will remain when Voyager 1 goes silent? The Golden Record as a time capsule.",
-    "The 2023 glitch that nearly lost contact with the most distant object ever launched."
+    "Start with 'This object is 24 billion kilometers away, and you can hear its heartbeat.'",
+    "Show a slowly receding mother board and say 'It still talks to Earth, but its message takes a day to arrive.'",
+    "Open with the 'Pale Blue Dot' image and the fact that the same camera is now silent, but the probe still calls home."
   ],
   "misconceptions": [
-    "Common misconception: Voyager 1 has left the solar system. In reality, it has entered interstellar space but is still under the Sun's gravitational influence and has not left the solar system (the Oort Cloud extends much further).",
-    "Another misconception: Voyager 1 is the fastest human-made object. That title belongs to the Parker Solar Probe, which reaches higher speeds (but not yet interstellar)."
+    "Voyager 1 has 'left the solar system' \u2013 it has crossed the heliopause into interstellar space, but it is still within the Sun's gravitational influence (Oort cloud), so it has not fully left the solar system.",
+    "Voyager 1 is the fastest spacecraft ever launched \u2013 it is fast but not the fastest; other probes like Parker Solar Probe achieve higher speeds relative to the Sun, though Voyager 1 is still the farthest."
   ],
   "key_sources": [
-    "NASA Voyager Mission Status (NASA JPL official website, 2025)",
-    "NASA Planetary Data System (PDS) - Voyager archives",
-    "NASA's 'Voyager: 40 Years Later' report (2017)",
-    "The New York Times \u2013 Voyager coverage (2024, 2025)",
-    "Johns Hopkins Applied Physics Lab \u2013 Parker Solar Probe speed comparison (2023)"
+    "NASA Jet Propulsion Laboratory (JPL) \u2013 Voyager Mission Status",
+    "NASA \u2013 Voyager 1 official page",
+    "NASA Science \u2013 Voyager 1",
+    "European Space Agency (ESA) \u2013 Interstellar mission notes",
+    "arXiv / Science journal articles on Voyager 1's interstellar measurements"
   ],
-  "_elapsed_s": 11.5,
+  "_elapsed_s": 11.1,
   "_verification_elapsed_s": 0.0
 }

@@ -416,15 +416,32 @@ def stage_ai_imagery(result_scenes, out_dir: str) -> dict:
     Uses the benchmarked default provider (NVIDIA NIM flux.1-dev).
     Cached in cache/generated — only generates once per prompt.
     """
-    print("\n[8b/16] AI IMAGE GENERATION (NVIDIA NIM flux.1-dev, benchmarked default)", flush=True)
+    print("\n[8b/16] AI IMAGE GENERATION (NIM primary → Pollinations fallback)", flush=True)
     t0 = time.time()
     os.makedirs("cache/generated", exist_ok=True)
-    from src.providers.image_gen import NvidiaNimProvider
+    from src.providers.image_gen import NvidiaNimProvider, PollinationsProvider
 
     prov = NvidiaNimProvider()
+    fallback = PollinationsProvider()
     if not prov.is_available():
-        print("  !! No NVIDIA_API_KEY — skipping AI imagery")
-        return {"generated": 0, "injected": 0, "reason": "no key"}
+        print("  !! No NVIDIA_API_KEY — falling back to Pollinations only")
+        prov = None
+
+    def _gen(prompt: str, out_path: str) -> bool:
+        """Try NIM, then Pollinations. Returns True on success."""
+        attempts = []
+        if prov is not None:
+            attempts.append(("nim", prov))
+        if fallback.is_available():
+            attempts.append(("pollinations", fallback))
+        for name, p in attempts:
+            try:
+                p.generate(prompt, out_path, width=1024, height=576)
+                print(f"  [AI] {name}: generated {os.path.basename(out_path)} ({os.path.getsize(out_path)//1024} KB)")
+                return True
+            except Exception as e:
+                print(f"  [AI] !! {name} failed: {str(e)[:90]}")
+        return False
 
     generated, injected = 0, 0
     for scene in result_scenes:
@@ -441,12 +458,10 @@ def stage_ai_imagery(result_scenes, out_dir: str) -> dict:
 
         img_path = os.path.join("cache", "generated", f"ai_{kind}.png")
         if not os.path.exists(img_path):
-            try:
-                prov.generate(AI_IMAGE_PROMPTS[kind], img_path, width=1024, height=576)
+            if _gen(AI_IMAGE_PROMPTS[kind], img_path):
                 generated += 1
-                print(f"  [AI] generated {kind} ({os.path.getsize(img_path)//1024} KB)")
-            except Exception as e:
-                print(f"  [AI] !! {kind} generation failed: {str(e)[:100]}")
+            else:
+                print(f"  [AI] !! {kind} generation failed on all providers")
                 continue
 
         clip_path = os.path.join("cache", "generated", f"ai_{kind}_kb.mp4")

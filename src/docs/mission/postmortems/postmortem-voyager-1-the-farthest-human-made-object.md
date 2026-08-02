@@ -1,11 +1,11 @@
 # Postmortem — Voyager 1: the farthest human-made object
-**When:** 2026-08-02T07:14:12+00:00
+**When:** 2026-08-02T08:04:14+00:00
 
 ## Techniques that worked
 - multi-reviewer script review (3 passes, gate=False)
-- director beat mode: 13 shots, providers={'manim': 1, 'pexels': 8, 'nasa': 3, 'placeholder': 1}
+- director beat mode: 15 shots, providers={'manim': 2, 'pexels': 12, 'nasa': 1}
 - ffmpeg sidechain music ducking (bed=cinematic.mp3)
-- Gemini Pro end-to-end review score 72/100
+- Gemini Pro end-to-end review score 62/100
 
 ## Techniques that failed
 - web search in research agent (no API key — used DeepSeek knowledge base)
@@ -26,10 +26,11 @@ _(none recorded)_
 _(none recorded)_
 
 ## Review feedback
-- Remove the black screen at 00:39 and the blue screen at 00:46. Replace with continuous space b-roll or cross-dissolves b
-- Replace the footage at 00:16 with actual NASA imagery or CGI of Jupiter and Saturn to align with the narration.
-- Replace the final shot (00:51) with a wide shot of the Voyager probe drifting into the deep void to maintain the 'inters
-- Add stylized subtitles to improve accessibility and emphasize key data like '25 billion kilometers' and '17 kilometers p
+- Re-record the narration to correctly pronounce 'Io' as 'Eye-oh' and clarify if 'U.S.' should be 'U-S' or 'us'.
+- Replace the beach (00:19) and camera (00:09) clips with archival footage of the Voyager launch or mission control at JPL
+- Incorporate actual NASA flyby images of Io's volcanoes and Saturn's rings at 00:21 to match the specific claims in the s
+- Replace the black vinyl record at 00:57 with a high-quality image or 3D model of the actual Voyager Golden Record.
+- Add subtitles to improve accessibility and help viewers follow the technical data (distances and dates).
 
 ## Benchmark results
 ```json
@@ -45,10 +46,10 @@ _(none recorded)_
 ## Metrics
 ```json
 {
-  "final_score": 72,
+  "final_score": 62,
   "render_iterations": 3,
-  "shots": 13,
-  "fallbacks": 1,
-  "duration_s": 52.036009
+  "shots": 15,
+  "fallbacks": 0,
+  "duration_s": 69.799002
 }
 ```

@@ -1,147 +1,147 @@
 {
   "topic": "Voyager 1: the farthest human-made object",
-  "started_at": "2026-08-02T07:04:20Z",
+  "started_at": "2026-08-02T07:50:52Z",
   "stages": {
     "research": {
       "facts": 15,
-      "elapsed_s": 11.5
+      "elapsed_s": 11.1
     },
     "director": {
-      "shots": 13,
-      "avg_shot_s": 5.0,
+      "shots": 15,
+      "avg_shot_s": 4.6,
       "providers": {
-        "manim": 1,
-        "pexels": 8,
-        "nasa": 3,
-        "placeholder": 1
+        "manim": 2,
+        "pexels": 12,
+        "nasa": 1
       },
-      "fallbacks": 1,
+      "fallbacks": 0,
       "transitions": {
-        "fade": 10,
-        "crossfade": 1,
-        "cut_sync": 2
+        "crossfade": 5,
+        "fade": 7,
+        "cut_sync": 3
       },
       "motions": {
-        "none": 4,
+        "none": 7,
         "pan_left": 5,
-        "ken_burns_in": 4
+        "ken_burns_in": 3
       },
-      "elapsed_s": 82.3
+      "elapsed_s": 60.9
     },
     "ai_imagery": {
-      "generated": 3,
+      "generated": 0,
       "injected": 4,
-      "elapsed_s": 32.5
+      "elapsed_s": 0.0
     },
     "narration": {
       "voice_scenes": 5,
-      "elapsed_s": 48.1
+      "elapsed_s": 58.3
     },
     "render_v1": {
-      "duration_s": 52.1,
-      "size_mb": 7.6,
-      "render_s": 59.6,
+      "duration_s": 69.9,
+      "size_mb": 12.6,
+      "render_s": 93.6,
       "output": "results/voyager_1__the_farthest_human_made_object/voyager_1__the_farthest_human_made_object_v1.mp4"
     },
     "music_v1": {
       "mixed": true,
-      "elapsed_s": 4.4,
-      "size_mb": 7.9
+      "elapsed_s": 5.7,
+      "size_mb": 13.0
     },
     "review_v1": {
-      "score": 35,
+      "score": 45,
       "confidence": 0.95,
-      "elapsed_s": 30.0
+      "elapsed_s": 28.8
     },
     "improve_pass_1": {
       "iteration": 2,
       "applied": [
         {
           "category": "audio_balance",
-          "detail": "[audio_balance][critical] Re-record the final line of narration to correctly pronounce 'us' instead of 'U.S.' and replace the robotic AI voice with a more natural, emotive voiceover.",
-          "source_rec": "Re-record the final line of narration to correctly pronounce 'us' instead of 'U.S.' and replace the robotic AI voice with a more natural, emotive voiceover."
-        },
-        {
-          "category": "shot_order",
-          "detail": "[shot_order][high] Replace the irrelevant star chart with red circles (00:16) and the generic nebula (00:28) with actual NASA imagery or high-quality renders of Jupiter, Saturn's rings, and the heliopause boundary.",
-          "source_rec": "Replace the irrelevant star chart with red circles (00:16) and the generic nebula (00:28) with actual NASA imagery or high-quality renders of Jupiter, Saturn's rings, and the heliopause boundary."
+          "detail": "[audio_balance][critical] Re-record or regenerate the voiceover to correctly pronounce 'us' instead of 'U.S.' at 00:02 and 00:38.",
+          "source_rec": "Re-record or regenerate the voiceover to correctly pronounce 'us' instead of 'U.S.' at 00:02 and 00:38."
         },
         {
           "category": "transitions",
-          "detail": "[transitions][high] Remove the accidental picture-in-picture overlays at 00:06 and 00:38, and eliminate the dead black screens to ensure a continuous, professional visual flow.",
-          "source_rec": "Remove the accidental picture-in-picture overlays at 00:06 and 00:38, and eliminate the dead black screens to ensure a continuous, professional visual flow."
+          "detail": "[transitions][high] Eliminate all picture-in-picture overlays (00:03, 00:18, 00:33, 01:00) and replace them with clean, full-screen transitions.",
+          "source_rec": "Eliminate all picture-in-picture overlays (00:03, 00:18, 00:33, 01:00) and replace them with clean, full-screen transitions."
         },
         {
-          "category": "music",
-          "detail": "[music][medium] Add a low, atmospheric, space-themed ambient music track to build tension and emotion, keeping it balanced below the narration.",
-          "source_rec": "Add a low, atmospheric, space-themed ambient music track to build tension and emotion, keeping it balanced below the narration."
+          "category": "shot_order",
+          "detail": "[shot_order][medium] Replace the starfield with red circles (00:20-00:29) with actual historical images or renders of Io's volcanoes and Saturn's rings to match the narration.",
+          "source_rec": "Replace the starfield with red circles (00:20-00:29) with actual historical images or renders of Io's volcanoes and Saturn's rings to match the narration."
+        },
+        {
+          "category": "pacing",
+          "detail": "[pacing][low] Fill the black screen gaps at 00:06-00:08 and 00:36-00:40 with continuous B-roll or ambient space animations to maintain viewer engagement.",
+          "source_rec": "Fill the black screen gaps at 00:06-00:08 and 00:36-00:40 with continuous B-roll or ambient space animations to maintain viewer engagement."
         }
       ],
       "flagged": [
-        "[new_scene] Replace the solid blue screen (00:46-00:50) and the crying baby clip (00:51-00:52) with a slow, fading animation of Voyager 1 drifting into the deep cosmic dark to match the 'drift silent for billions of years' narration."
+        "[new_asset] Remove the irrelevant stock footage of the camera on the ledge (00:08-00:14) and replace it with space-themed visuals or animations of Voyager's journey.",
+        "[new_asset] Replace the modern geometric satellite shown at 00:44-00:48 with a render of Voyager 1's thrusters firing in deep space."
       ],
       "stopped_early": false,
       "notes": "",
       "elapsed_s": 0.0
     },
     "render_v2": {
-      "duration_s": 52.1,
-      "size_mb": 7.6,
-      "render_s": 57.6,
+      "duration_s": 69.9,
+      "size_mb": 12.6,
+      "render_s": 94.9,
       "output": "results/voyager_1__the_farthest_human_made_object/voyager_1__the_farthest_human_made_object_v1.mp4"
     },
     "music_v2": {
       "mixed": true,
-      "elapsed_s": 4.2,
-      "size_mb": 7.9
+      "elapsed_s": 5.6,
+      "size_mb": 13.0
     },
     "review_v2": {
-      "score": 68,
+      "score": 62,
       "confidence": 0.95,
-      "elapsed_s": 33.9
+      "elapsed_s": 167.2
     },
     "improve_pass_2": {
       "iteration": 3,
       "applied": [
         {
-          "category": "shot_order",
-          "detail": "[shot_order][high] Replace the 'galaxy survey' footage at 00:16 with a diagram showing the 'slingshot' trajectory out of the solar system.",
-          "source_rec": "Replace the 'galaxy survey' footage at 00:16 with a diagram showing the 'slingshot' trajectory out of the solar system."
-        },
-        {
-          "category": "subtitles",
-          "detail": "[subtitles][medium] Add high-contrast subtitles to improve accessibility and retention, especially for technical terms like 'heliopause'.",
-          "source_rec": "Add high-contrast subtitles to improve accessibility and retention, especially for technical terms like 'heliopause'."
-        },
-        {
           "category": "audio_balance",
-          "detail": "[audio_balance][low] The narration of 'U.S.' at the end sounds like 'us'. Ensure the script/on-screen text (if added) clarifies this refers to humanity, not just the United States.",
-          "source_rec": "The narration of 'U.S.' at the end sounds like 'us'. Ensure the script/on-screen text (if added) clarifies this refers to humanity, not just the United States."
+          "detail": "[audio_balance][critical] Re-record narration for 'U.S.' (00:03, 00:38) and 'Io' (00:19). The current pronunciation of 'U.S.' as 'us' changes the meaning of the sentence.",
+          "source_rec": "Re-record narration for 'U.S.' (00:03, 00:38) and 'Io' (00:19). The current pronunciation of 'U.S.' as 'us' changes the meaning of the sentence."
+        },
+        {
+          "category": "music",
+          "detail": "[music][medium] Duck the music track by an additional 2-3dB during the 'Pale Blue Dot' segment (00:30) to allow the weight of the narration to land.",
+          "source_rec": "Duck the music track by an additional 2-3dB during the 'Pale Blue Dot' segment (00:30) to allow the weight of the narration to land."
+        },
+        {
+          "category": "shot_order",
+          "detail": "[shot_order][low] At 01:03, replace the astronaut looking out a window with a shot of the deep star field or the 'Pale Blue Dot' image to maintain the theme of distance.",
+          "source_rec": "At 01:03, replace the astronaut looking out a window with a shot of the deep star field or the 'Pale Blue Dot' image to maintain the theme of distance."
         }
       ],
       "flagged": [
-        "[new_scene] Replace the solid blue screen from 00:46 to 00:50 with a slow-motion Ken Burns effect on a star field or a CGI shot of Voyager receding into the distance.",
-        "[new_asset] Replace the black screen at 00:09-00:15 with archival footage or CGI of Jupiter and Saturn to match the narration of the 1977 flybys."
+        "[unclassified] Replace the beach footage at 00:19 with NASA's actual 1979 footage of Io's volcanic activity.",
+        "[unclassified] Replace the geometric tower at 00:45 with an animation of the Voyager thrusters or a technical diagram of the RTG (plutonium power source)."
       ],
       "stopped_early": false,
       "notes": "",
       "elapsed_s": 0.0
     },
     "render_v3": {
-      "duration_s": 52.1,
-      "size_mb": 7.6,
-      "render_s": 56.0,
+      "duration_s": 69.9,
+      "size_mb": 12.6,
+      "render_s": 95.0,
       "output": "results/voyager_1__the_farthest_human_made_object/voyager_1__the_farthest_human_made_object_v1.mp4"
     },
     "music_v3": {
       "mixed": true,
-      "elapsed_s": 4.1,
-      "size_mb": 7.9
+      "elapsed_s": 5.6,
+      "size_mb": 13.0
     },
     "review_v3": {
-      "score": 72,
+      "score": 62,
       "confidence": 0.95,
-      "elapsed_s": 45.5
+      "elapsed_s": 39.2
     }
   },
   "errors": [],
@@ -149,8 +149,8 @@
   "final": {
     "output": "results/voyager_1__the_farthest_human_made_object/voyager_1__the_farthest_human_made_object_v1_mixed.mp4",
     "iterations": 3,
-    "final_score": 72,
-    "duration_s": 52.036009
+    "final_score": 62,
+    "duration_s": 69.799002
   },
   "postmortem": "/home/ubuntu/video_engine/src/docs/mission/postmortems/postmortem-voyager-1-the-farthest-human-made-object.md"
 }
