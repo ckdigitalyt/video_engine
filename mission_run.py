@@ -122,7 +122,7 @@ def stage_fact_verification(research: dict, provider) -> dict:
         print("  No facts to verify.")
         return research
     check_prompt = """You are a fact-checker. Verify each claim independently. For each fact, respond with:
-{"fact": "<claim>", "verified": true/false, "notes": "<why>", "adjusted_confidence": <0-1>}
+{{"fact": "<claim>", "verified": true/false, "notes": "<why>", "adjusted_confidence": <0-1>}}
 STRICT JSON array only.
 
 FACTS:
@@ -147,8 +147,14 @@ FACTS:
                 f["confidence"] = c.get("adjusted_confidence", f.get("confidence", 0.5))
         if n_checked == 0:
             raise ValueError("verification output did not match any claims")
+        research["_verification_failed"] = False
     except Exception as e:
-        print(f"  !! Verification pass failed ({e}) — keeping research confidence.")
+        # Never silently degrade: expose the failure, classify severity.
+        research["_verification_failed"] = True
+        research["_verification_error"] = str(e)[:200]
+        research["_verification_severity"] = "warning"
+        print(f"  !! Verification pass failed ({e}) — fallback confidence used. "
+              f"[degradation exposed in run_report]")
         for f in facts:
             f["verified"] = f.get("confidence", 0.5) >= 0.7
     research["_verification_elapsed_s"] = round(time.time() - t0, 1)
