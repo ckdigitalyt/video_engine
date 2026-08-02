@@ -209,12 +209,12 @@ class DeterministicQA:
                         run_start = hashes[idx - 1][0]
                     run_len += 1
                 else:
-                    if run_len and run_len * self._sample_every >= self._frozen_threshold_s:
+                    if run_len and run_len * self._sample_every >= self._frozen_th:
                         frozen_runs.append((round(run_start, 1), round(run_len * self._sample_every, 1)))
                     run_start, run_len = None, 0
             report.add(QACheck(
                 "frozen_shots", not frozen_runs,
-                detail=f"frozen runs (>= {self._frozen_threshold_s}s): {frozen_runs}" if frozen_runs else "no frozen shots",
+                detail=f"frozen runs (>= {self._frozen_th}s): {frozen_runs}" if frozen_runs else "no frozen shots",
                 metrics={"frozen_runs": frozen_runs, "frames_sampled": len(hashes)},
             ))
             # Static window: longest run regardless of threshold

@@ -1,0 +1,50 @@
+{
+  "quality_score": 78,
+  "confidence": 0.95,
+  "strengths": [
+    "High-quality CGI and Manim animations",
+    "Professional, authoritative narration",
+    "Strong hook and educational pacing"
+  ],
+  "weaknesses": [
+    "Discrepancy between script and narration regarding mass conversion",
+    "Abrupt transition to terrestrial footage at 0:06",
+    "Inconsistent date references for the Parker Solar Probe"
+  ],
+  "prioritized_recommendations": [
+    {
+      "priority": "high",
+      "category": "fact_change",
+      "recommendation": "Align narration and script on fusion mass (600m tons) vs. energy conversion (4m tons) to avoid viewer confusion."
+    },
+    {
+      "priority": "medium",
+      "category": "transitions",
+      "recommendation": "Add a cross-dissolve or light leak at 0:06 to bridge the space-to-beach transition."
+    },
+    {
+      "priority": "low",
+      "category": "subtitles",
+      "recommendation": "Ensure on-screen text for '15 million degrees' matches the narration timing exactly."
+    }
+  ],
+  "factual_issues": [
+    {
+      "claim": "600 million tons of hydrogen",
+      "issue": "Narration mentions 4 million tons of matter becoming energy, which is correct but differs from the provided script text.",
+      "suggested_fix": "Standardize the script to mention both the fusion rate and the resulting energy mass."
+    }
+  ],
+  "title_recommendations": [
+    "The Sun: A 5-Billion-Year Countdown",
+    "Inside the Solar Furnace",
+    "Our Star's Violent Secret"
+  ],
+  "thumbnail_recommendation": "{\"timestamp\": \"00:53\", \"description\": \"Close-up of a massive solar flare erupting from the sun's limb with high contrast.\"}",
+  "overall_assessment": "A visually compelling documentary with professional production values. It effectively balances complex astrophysics with engaging visuals, though it requires minor script-to-audio synchronization. The pacing is excellent for digital audience retention.",
+  "_meta": {
+    "video": "results/the_sun__our_star/the_sun__our_star_mixed.mp4",
+    "model": "gemini-2.5-pro",
+    "elapsed_s": 25.8
+  }
+}

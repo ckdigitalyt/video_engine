@@ -1,0 +1,52 @@
+[
+  {
+    "title": "A Star Among Us",
+    "narration": "Every morning, a silent giant rises. It holds 99.86% of everything in our solar system. Yet we barely notice it.",
+    "visual_goal": "Sun rising over a landscape, with a subtle overlay of the solar system showing the sun's dominance",
+    "search_queries": [
+      "sun rising earth",
+      "solar system sun dominance",
+      "sunrise time-lapse"
+    ]
+  },
+  {
+    "title": "The Furnace Within",
+    "narration": "At its core, 15 million degrees Celsius. Every second, 600 million tons of hydrogen become helium. That fire has burned for 4.6 billion years.",
+    "visual_goal": "Cross-section animation of the sun's core, with fusion particles and energy radiating outward",
+    "search_queries": [
+      "sun core animation",
+      "nuclear fusion sun",
+      "sun internal structure"
+    ]
+  },
+  {
+    "title": "The Journey Out",
+    "narration": "Its surface simmers at 5,500 degrees. Above, the corona flares to a million. A magnetic pulse flips every 11 years.",
+    "visual_goal": "Solar surface with prominences and corona, then a visualization of magnetic field lines flipping",
+    "search_queries": [
+      "sun surface solar flare",
+      "corona sun",
+      "solar magnetic field cycle"
+    ]
+  },
+  {
+    "title": "Our Messenger",
+    "narration": "We dared to touch it. The Parker Solar Probe came within 6.1 million kilometers of that fire\u2014closer than anything we've ever sent.",
+    "visual_goal": "Animation of Parker Solar Probe approaching the sun, with heat shield glowing, then a cut to the actual probe",
+    "search_queries": [
+      "Parker Solar Probe sun approach",
+      "spacecraft near sun",
+      "solar probe heat shield"
+    ]
+  },
+  {
+    "title": "The Long Goodbye",
+    "narration": "It will shine for 5 billion more years. But one day, it will swell and fade. Until then, every sunrise is a gift.",
+    "visual_goal": "Sequence: current sun, then red giant phase, then white dwarf, fading to a calm dawn on Earth",
+    "search_queries": [
+      "sun red giant future",
+      "sun white dwarf",
+      "earth sunrise calm"
+    ]
+  }
+]

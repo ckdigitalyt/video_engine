@@ -140,18 +140,42 @@ MANIM_SCENES = {
     "voyager_scale": "cache/manim/voyager_scale.mp4",
     "voyager_timeline": "cache/manim/voyager_timeline.mp4",
     "voyager_trajectory": "cache/manim/voyager_trajectory.mp4",
+    "sun_scale": "cache/manim/sun_scale.mp4",
+    "sun_layers": "cache/manim/sun_layers.mp4",
+}
+
+# Topic -> Manim scenes (intent-mapped).  General registry: adding a new
+# topic means adding its scenes here; the planner logic stays topic-free.
+TOPIC_MANIM = {
+    "voyager": {"scale": "voyager_scale", "timeline": "voyager_timeline",
+                 "journey": "voyager_trajectory"},
+    "sun":     {"scale": "sun_scale", "explanation": "sun_layers",
+                 "structure": "sun_layers"},
+}
+
+# Which topic a given text belongs to (keyword hints, general-purpose)
+_TOPIC_HINTS = {
+    "voyager": ("voyager", "spacecraft", "golden record", "pale blue dot",
+                 "jupiter", "saturn", "heliopause"),
+    "sun":     ("sun", "solar", "fusion", "star", "photosphere",
+                 "sunlight", "solar system's star"),
 }
 
 # Pinned stills: real NASA assets that must NOT be overwritten by the
 # fetch planner (human-approved swaps from refine_stills).  Keyed by
 # the local still path; value is a label for logging.
-PINNED_STILLS = {
-    "cache/stills/scene0_0.jpg": "PIA14111 Model of Voyager",
-    "cache/stills/scene0_1.jpg": "PIA22915 Voyager Spacecraft Instruments",
-    "cache/stills/scene1_0.jpg": "PIA17464 Voyager 1 Launch 1977",
-    "cache/stills/scene3_0.jpg": "PIA23645 Pale Blue Dot Revisited",
-    "cache/stills/scene3_1.jpg": "PIA00452 Solar System Portrait/Pale Blue Dot",
-    "cache/stills/scene4_0.jpg": "PIA16362 Preparing the Golden Record",
+# Pinned stills per topic: real NASA assets that must NOT be overwritten
+# by the fetch planner (human-approved swaps from refine_stills).  Keyed by
+# topic slug, then by the topic-scoped still path.
+PINNED_STILLS_BY_TOPIC = {
+    "voyager_1_the_farthest_human_made_object": {
+        "scene0_0.jpg": "PIA14111 Model of Voyager",
+        "scene0_1.jpg": "PIA22915 Voyager Spacecraft Instruments",
+        "scene1_0.jpg": "PIA17464 Voyager 1 Launch 1977",
+        "scene3_0.jpg": "PIA23645 Pale Blue Dot Revisited",
+        "scene3_1.jpg": "PIA00452 Solar System Portrait/Pale Blue Dot",
+        "scene4_0.jpg": "PIA16362 Preparing the Golden Record",
+    },
 }
 
 AI_PROMPTS = {
@@ -211,35 +235,54 @@ def _kenburns(image_path: str, out_path: str, duration: float = 6.0,
     return out_path if os.path.exists(out_path) else ""
 
 
-def _manim_scene_for(scene_text: str) -> str:
+def _detect_topic(scene_text: str) -> str:
     t = scene_text.lower()
-    if any(k in t for k in ("22.9", "light-hour", "light hour", "billion km", "how far", "distance", "scale")):
-        return MANIM_SCENES["voyager_scale"]
-    if any(k in t for k in ("1977", "nineteen seventy-seven", "years", "decades", "2012", "timeline", "history", "journey")):
-        return MANIM_SCENES["voyager_timeline"]
-    if any(k in t for k in ("jupiter", "saturn", "gravity", "slingshot", "flyby", "boost", "trajectory")):
-        return MANIM_SCENES["voyager_trajectory"]
+    for topic, hints in _TOPIC_HINTS.items():
+        if any(h in t for h in hints):
+            return topic
     return ""
 
 
-def _still_plan_for(scene_text: str) -> list[str]:
-    """Return ordered candidate prompts/queries for still imagery."""
+def _manim_scene_for(scene_text: str, intent: str = "default") -> str:
+    """Pick a Manim scene by topic + intent (general, registry-driven)."""
+    topic = _detect_topic(scene_text)
+    if not topic or topic not in TOPIC_MANIM:
+        return ""
+    mapping = TOPIC_MANIM[topic]
+    # intent-priority: scale/explanation beats are the natural Manim beats
+    for key in ("scale", "explanation", "timeline", "journey", "structure"):
+        if intent == key and key in mapping:
+            return MANIM_SCENES[mapping[key]]
+        # also trigger on scale words even when intent is generic
+        if key == "scale" and any(k in scene_text.lower() for k in
+                                  ("how big", "how far", "million", "billion", "fit inside", "size")):
+            return MANIM_SCENES[mapping[key]]
+    return ""
+
+
+def _still_plan_for(scene_text: str, spec=None) -> list:
+    """Ordered candidate prompts/queries for still imagery.
+
+    General algorithm: derive queries from the scene's EntitySpec
+    (required entities + visual objective) when available; fall back to
+    topic-aware keyword hints.  No hardcoded per-topic asset lists.
+    """
     t = scene_text.lower()
+    topic = _detect_topic(scene_text)
     plan = []
-    if any(k in t for k in ("launch", "1977", "nineteen seventy-seven", "rocket", "canaveral")):
-        plan += [("ai", AI_PROMPTS["launch"]), ("nasa", "Voyager launch"), ("wiki", "Voyager 1 launch")]
-    if any(k in t for k in ("jupiter", "great red spot")):
-        plan += [("nasa", "Jupiter Voyager"), ("wiki", "Jupiter Voyager 1"), ("ai", AI_PROMPTS["jupiter"])]
-    if any(k in t for k in ("saturn", "rings")):
-        plan += [("nasa", "Saturn Voyager"), ("wiki", "Saturn rings Cassini"), ("ai", AI_PROMPTS["saturn"])]
-    if any(k in t for k in ("golden record", "record", "disc", "sounds of earth")):
-        plan += [("ai", AI_PROMPTS["golden_record"]), ("wiki", "Voyager Golden Record"), ("nasa", "Voyager golden record")]
-    if any(k in t for k in ("spacecraft", "probe", "antenna", "voyager", "machine", "twin")):
-        plan += [("ai", AI_PROMPTS["spacecraft"]), ("nasa", "Voyager spacecraft model"), ("wiki", "Voyager 1 spacecraft")]
-    if any(k in t for k in ("interstellar", "pale blue dot", "earth", "beyond", "void", "lonely", "stars")):
-        plan += [("ai", AI_PROMPTS["interstellar"]), ("nasa", "pale blue dot"), ("wiki", "Pale Blue Dot")]
-    # generic fallback
-    plan += [("ai", AI_PROMPTS["spacecraft"]), ("nasa", "Voyager"), ("wiki", "Voyager 1")]
+
+    # EntitySpec-driven: search NASA/Wikimedia for each required entity,
+    # and craft an AI prompt from the visual objective.
+    if spec is not None and spec.required_entities:
+        for ent in spec.required_entities[:2]:
+            plan += [("nasa", ent), ("wiki", ent)]
+        obj = spec.visual_objective or f"{topic} documentary scene"
+        plan.append(("ai", f"Photorealistic documentary image: {obj}, cinematic, high detail"))
+    else:
+        # topic-aware keyword fallback (still general, not per-topic lists)
+        plan += [("nasa", topic), ("wiki", topic),
+                 ("ai", f"Photorealistic documentary image of {topic}, cinematic")]
+
     # dedupe keeping order
     seen, out = set(), []
     for p in plan:
@@ -250,7 +293,8 @@ def _still_plan_for(scene_text: str) -> list[str]:
 
 
 def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
-                         gates=None, specs: Optional[dict] = None) -> dict:
+                         gates=None, specs: Optional[dict] = None,
+                         topic_slug: str = "") -> dict:
     """Build per-scene shot lists: Manim clips + Ken Burns stills.
 
     When *gates* is provided, every candidate still is verified against
@@ -258,17 +302,36 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
     enter the timeline, and camera moves come from the intent-driven
     CameraDirector instead of alternating zoom_in flags.
 
+    Stills are cached topic-scoped (``cache/stills/<topic_slug>/``) so a
+    fresh topic never reuses another topic's pinned assets.
+
     Returns {scene_id: [{"file": clip, "duration": s}, ...]} and stats.
     """
     print("\n[5-9/16] STILLS-FIRST VISUAL PLANNING (NASA/Wikimedia/AI + Manim)", flush=True)
     t0 = time.time()
     os.makedirs(os.path.join(out_dir, "shots"), exist_ok=True)
-    os.makedirs("cache/stills", exist_ok=True)
+    still_root = os.path.join("cache", "stills", topic_slug or "default")
+    os.makedirs(still_root, exist_ok=True)
+    pinned = PINNED_STILLS_BY_TOPIC.get(topic_slug, {})
 
     plan = {}
     stats = {"manim": 0, "nasa": 0, "wikimedia": 0, "ai": 0, "video_fallback": 0,
-             "rejected": 0, "vision_checked": 0}
+             "rejected": 0, "vision_checked": 0, "deduped": 0}
     manim_used = set()
+    # Content-based dedup: dHash of every placed still (Priority 6 — no
+    # consecutive near-identical assets, including same-content files with
+    # different names).
+    placed_hashes: list[str] = []
+
+    def _is_dup(jpg_path: str) -> bool:
+        try:
+            from src.qa.deterministic_qa import dhash, hamming
+            from PIL import Image
+            with Image.open(jpg_path) as im:
+                h = dhash(im)
+            return any(hamming(h, ph) < 6 for ph in placed_hashes)
+        except Exception:
+            return False
 
     for i, scene in enumerate(scenes_data):
         text = scene.get("narration", "")
@@ -276,7 +339,7 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
         intent = spec.scene_intent if spec else "default"
         shots = []
         # 1) Manim explanation clip if scene calls for it
-        manim = _manim_scene_for(text)
+        manim = _manim_scene_for(text, intent)
         if manim and os.path.exists(manim) and manim not in manim_used:
             manim_used.add(manim)
             shots.append({"file": manim, "duration": min(10.0, M._probe_duration(manim)),
@@ -284,15 +347,16 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
             stats["manim"] += 1
         # 2) Stills with Ken Burns (2 per scene typically)
         still_count = 0
-        for kind, query in _still_plan_for(text):
+        for kind, query in _still_plan_for(text, spec):
             if still_count >= 2:
                 break
-            out = os.path.join("cache", "stills", f"scene{i}_{still_count}.jpg")
+            fname = f"scene{i}_{still_count}.jpg"
+            out = os.path.join(still_root, fname)
             got, src, title = "", "", ""
-            if out in PINNED_STILLS and os.path.exists(out) and os.path.getsize(out) > 15000:
+            if fname in pinned and os.path.exists(out) and os.path.getsize(out) > 15000:
                 got, src = out, "nasa_pinned"
-                title = PINNED_STILLS[out]
-                print(f"  [PIN] {os.path.basename(out)} kept ({PINNED_STILLS[out]})")
+                title = pinned[fname]
+                print(f"  [PIN] {fname} kept ({pinned[fname]})")
             elif kind == "nasa":
                 got, title = _nasa_still_title(query, out)
                 src = "nasa"
@@ -304,21 +368,26 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                 src = "ai"
             if not got:
                 continue
+            # Content-based dedup: skip near-identical stills already placed
+            if os.path.exists(got) and _is_dup(got):
+                stats["deduped"] += 1
+                print(f"  [dedup] skipped {fname} (perceptually identical to a placed still)")
+                continue
             # ── ASSET-GATE: verify against scene EntitySpec ────────────
             if gates is not None and spec is not None:
-                pre_verified = out in PINNED_STILLS  # human-approved assets
+                pre_verified = fname in pinned  # human-approved assets
                 ver = gates.verify_asset(
-                    spec, asset_path=got, title=title, filename=os.path.basename(got),
+                    spec, asset_path=got, title=title, filename=fname,
                     provider=src, query_used=query, pre_verified=pre_verified,
                 )
                 stats["vision_checked"] += int(bool(ver.get("vision_check")))
                 if not ver.get("passed"):
                     stats["rejected"] += 1
-                    print(f"  [gate] rejected {os.path.basename(got)} "
+                    print(f"  [gate] rejected {fname} "
                           f"({ver.get('reasons', ['?'])[:1]})")
                     continue
             # ── CAMERA: intent-driven motion (diversity-aware) ─────────
-            clip = os.path.join(out_dir, "shots", f"scene{i}_{still_count}.mp4")
+            clip = os.path.join(out_dir, "shots", fname.replace(".jpg", ".mp4"))
             dur = 5.5 if len(shots) < 3 else 4.5
             cam = gates.camera_decision(intent) if gates is not None else {
                 "move": "push_in" if still_count % 2 == 0 else "pull_out",
@@ -336,7 +405,52 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                               "title": title, "query": query})
                 stats[src] = stats.get(src, 0) + 1
                 still_count += 1
+                # record hash for dedup (content-based, not path-based)
+                try:
+                    from src.qa.deterministic_qa import dhash
+                    from PIL import Image
+                    with Image.open(got) as im:
+                        placed_hashes.append(dhash(im))
+                except Exception:
+                    pass
         plan[i] = shots
+
+    # Guaranteed fill: any scene with zero stills after gate/dedup gets a
+    # topic-generic fallback (never leave a black gap in the timeline).
+    for i, scene in enumerate(scenes_data):
+        if plan.get(i):
+            continue
+        text = scene.get("narration", "")
+        spec = (specs or {}).get(i)
+        intent = spec.scene_intent if spec else "default"
+        manim = _manim_scene_for(text, intent)
+        if manim and os.path.exists(manim) and manim not in manim_used:
+            manim_used.add(manim)
+            plan[i] = [{"file": manim,
+                        "duration": min(10.0, M._probe_duration(manim)),
+                        "kind": "manim"}]
+            stats["manim"] += 1
+            print(f"  [fill] scene{i} filled with Manim {os.path.basename(manim)}")
+            continue
+        topic = _detect_topic(text) or "documentary"
+        fname = f"scene{i}_fill.jpg"
+        out = os.path.join(still_root, fname)
+        got, src, title = _nasa_still_title(topic, out)
+        if not got:
+            got, src, title = _ai_still(
+                f"Photorealistic documentary image of {topic}, cinematic", out), "ai", ""
+        if got and os.path.exists(got):
+            clip = os.path.join(out_dir, "shots", fname.replace(".jpg", ".mp4"))
+            cam = gates.camera_decision(intent) if gates is not None else {"move": "push_in", "params": {}}
+            cam_params = cam.get("params", {}) or {}
+            zoom_in = cam_params.get("zoom_end", 1.2) > cam_params.get("zoom_start", 1.0)
+            if _kenburns(got, clip, duration=6.0, zoom_in=zoom_in, camera=cam_params):
+                plan[i] = [{"file": clip, "duration": 6.0, "kind": src,
+                            "camera": cam.get("move", "push_in"),
+                            "motion_params": cam_params, "title": title,
+                            "query": topic}]
+                stats[src] = stats.get(src, 0) + 1
+                print(f"  [fill] scene{i} filled with {src} still ({topic})")
 
     print(f"  Shots planned: " + ", ".join(f"scene{i}: {len(v)}" for i, v in plan.items()))
     print(f"  Sources: {stats} ({(time.time()-t0):.1f}s)")
@@ -387,6 +501,12 @@ def build_stills_timeline(scenes_data: list[dict], shot_plan: dict,
                 "shot_type": "primary",
             })
             t += dur
+        # Per-scene coverage: stretch the last shot of this scene to cover
+        # the full narration window.  Otherwise a scene whose shots sum to
+        # less than its audio duration leaves a black gap (QA: frozen/static).
+        scene_end = cursor + adur
+        if tl["video_timeline"] and t < scene_end:
+            tl["video_timeline"][-1]["end_time"] = round(scene_end, 3)
         cursor += adur
 
     # extend final shot to cover any trailing audio
@@ -411,11 +531,11 @@ def main():
     args = ap.parse_args()
 
     topic = args.topic
-    slug = "voyager_stills"
+    slug = "".join(c if c.isalnum() else "_" for c in topic.lower())[:40].strip("_")
     out_dir = os.path.join("results", slug)
     os.makedirs(out_dir, exist_ok=True)
-    output_path = args.out or os.path.join(out_dir, "voyager_stills.mp4")
-    mixed_path = os.path.join(out_dir, "voyager_stills_mixed.mp4")
+    output_path = args.out or os.path.join(out_dir, f"{slug}.mp4")
+    mixed_path = os.path.join(out_dir, f"{slug}_mixed.mp4")
     timeline_path = os.path.join(out_dir, "timeline.json")
     run_report = {"topic": topic, "started_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
                   "strategy": "stills_first", "stages": {}}
@@ -487,7 +607,8 @@ def main():
         run_report["camera_diversity"] = gates.camera_diversity()
     except Exception as e:
         print(f"  !! gates init failed (continuing un-gated): {str(e)[:100]}")
-    shot_plan, stills_stats = stage_stills_visuals(scenes_data, out_dir, gates, specs)
+    shot_plan, stills_stats = stage_stills_visuals(scenes_data, out_dir, gates, specs,
+                                                  topic_slug=slug)
     run_report["stages"]["visuals"] = stills_stats
 
     # ── Narration (reuse cached audio when present) ────────────────────

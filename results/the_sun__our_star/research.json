@@ -1,0 +1,151 @@
+{
+  "facts": [
+    {
+      "claim": "The Sun contains 99.86% of the total mass of the Solar System.",
+      "value": 99.86,
+      "unit": "percent",
+      "source": "NASA",
+      "year": 2020,
+      "confidence": 1.0,
+      "verified": true
+    },
+    {
+      "claim": "The Sun's core temperature is approximately 15 million degrees Celsius.",
+      "value": 15000000,
+      "unit": "degrees Celsius",
+      "source": "NASA",
+      "year": 2022,
+      "confidence": 1.0,
+      "verified": true
+    },
+    {
+      "claim": "The Sun's surface temperature is about 5,500 degrees Celsius.",
+      "value": 5500,
+      "unit": "degrees Celsius",
+      "source": "ESA",
+      "year": 2021,
+      "confidence": 1.0,
+      "verified": true
+    },
+    {
+      "claim": "The Sun is approximately 4.6 billion years old.",
+      "value": 4.6,
+      "unit": "billion years",
+      "source": "NASA",
+      "year": 2020,
+      "confidence": 1.0,
+      "verified": true
+    },
+    {
+      "claim": "The Sun is about 93 million miles (150 million kilometers) from Earth.",
+      "value": 150000000,
+      "unit": "kilometers",
+      "source": "NASA",
+      "year": 2021,
+      "confidence": 1.0,
+      "verified": true
+    },
+    {
+      "claim": "The Sun's diameter is about 1.39 million kilometers.",
+      "value": 1390000,
+      "unit": "kilometers",
+      "source": "NASA",
+      "year": 2022,
+      "confidence": 1.0,
+      "verified": true
+    },
+    {
+      "claim": "The Sun's mass is about 1.989 \u00d7 10^30 kilograms.",
+      "value": 1.989e+30,
+      "unit": "kilograms",
+      "source": "NASA",
+      "year": 2020,
+      "confidence": 1.0,
+      "verified": true
+    },
+    {
+      "claim": "The Sun's energy output is about 3.8 \u00d7 10^26 watts.",
+      "value": 3.8e+26,
+      "unit": "watts",
+      "source": "ESA",
+      "year": 2021,
+      "confidence": 1.0,
+      "verified": true
+    },
+    {
+      "claim": "The Sun converts about 600 million tons of hydrogen into helium per second.",
+      "value": 600,
+      "unit": "million tons per second",
+      "source": "NASA",
+      "year": 2020,
+      "confidence": 1.0,
+      "verified": true
+    },
+    {
+      "claim": "The Sun's magnetic field reverses polarity approximately every 11 years during the solar cycle.",
+      "value": 11,
+      "unit": "years",
+      "source": "NASA",
+      "year": 2023,
+      "confidence": 1.0,
+      "verified": true
+    },
+    {
+      "claim": "The Parker Solar Probe, launched in 2018, became the closest human-made object to the Sun, coming within 6.1 million kilometers of the surface in 2024.",
+      "value": 6100000,
+      "unit": "kilometers",
+      "source": "NASA",
+      "year": 2024,
+      "confidence": 1.0,
+      "verified": true
+    },
+    {
+      "claim": "The Sun is currently in its main sequence phase and will remain there for about 5 billion more years.",
+      "value": 5,
+      "unit": "billion years",
+      "source": "ESA",
+      "year": 2022,
+      "confidence": 1.0,
+      "verified": true
+    },
+    {
+      "claim": "The Sun's corona is hotter than its surface, with temperatures exceeding 1 million degrees Celsius.",
+      "value": 1000000,
+      "unit": "degrees Celsius",
+      "source": "NASA",
+      "year": 2021,
+      "confidence": 1.0,
+      "verified": true
+    },
+    {
+      "claim": "The Sun's rotation period at its equator is about 25 days, while at its poles it takes about 35 days.",
+      "value": 25,
+      "unit": "days (equatorial)",
+      "source": "NASA",
+      "year": 2020,
+      "confidence": 1.0,
+      "verified": true
+    }
+  ],
+  "hook_ideas": [
+    "What if the Sun suddenly stopped shining? (The darkness would take 8 minutes to reach us, but we'd freeze within days.)",
+    "The Sun is 330,000 times heavier than Earth \u2014 yet it's just an average star.",
+    "We're all made of star dust \u2014 the Sun's energy powers every life on Earth, but a single solar flare can disrupt our tech.",
+    "How do we know the Sun's age? From meteorites, not the Sun itself."
+  ],
+  "misconceptions": [
+    "The Sun is not burning (combustion) \u2014 it's fuse hydrogen into helium via nuclear fusion.",
+    "The Sun is not yellow \u2014 it appears yellow from Earth due to atmospheric scattering; its true color is white.",
+    "The Sun does not rise and set \u2014 Earth rotates; the Sun is stationary relative to the Earth's orbit.",
+    "The Sun is not a solid object \u2014 it's a glowing ball of plasma."
+  ],
+  "key_sources": [
+    "NASA Solar System Exploration (solarsystem.nasa.gov)",
+    "ESA Science & Technology (sci.esa.int)",
+    "Wikipedia: Sun (as of 2026, verified against NASA/ESA data)",
+    "NASA Parker Solar Probe mission site",
+    "National Solar Observatory (NSO)"
+  ],
+  "_elapsed_s": 13.5,
+  "_verification_elapsed_s": 0.0
+}
