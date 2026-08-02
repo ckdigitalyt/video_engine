@@ -96,6 +96,41 @@ def _number_to_words(n: int) -> str:
 
 # ── Main normalization ──────────────────────────────────────────────────
 
+# ── Prosody ───────────────────────────────────────────────────────────
+
+_PAUSE_HINTS = {
+    "hook":        "... ",
+    "emotion":     "... ",
+    "conclusion":  "... ",
+    "reveal":      ", ",
+    "scale":       ", ",
+    "explanation": ", ",
+    "default":     ", ",
+}
+
+
+def apply_prosody(text: str, intent: str = "default") -> str:
+    """Tune narration for natural spoken delivery.
+
+    - ensure sentence-level pauses exist (periods/commas)
+    - add a breath pause before the final sentence for dramatic beats
+    - avoid over-pausing: only insert when punctuation is missing
+    """
+    if not text:
+        return text
+    out = text.strip()
+    # Ensure terminal punctuation
+    if out and out[-1] not in ".!?":
+        out += "."
+    # Dramatic pause before the last sentence for hook/emotion/conclusion
+    if intent in ("hook", "emotion", "conclusion"):
+        sentences = [s.strip() for s in out.split(".") if s.strip()]
+        if len(sentences) > 1:
+            head = ". ".join(sentences[:-1])
+            out = f"{head}. ... {sentences[-1]}."
+    return out
+
+
 def normalize_narration(text: str) -> str:
     """Normalize a narration string for spoken TTS delivery."""
     if not text:

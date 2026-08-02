@@ -1,10 +1,10 @@
 # Postmortem — Voyager 1: the farthest human-made object (stills-first)
-**When:** 2026-08-02T15:04:46+00:00
+**When:** 2026-08-02T17:52:16+00:00
 
 ## Techniques that worked
 - stills-first visual strategy: NASA/Wikimedia/AI Ken Burns + Manim beats
-- manim scenes: 2, nasa: 2, wikimedia: 2, ai: 0
-- Gemini review score 68/100
+- manim scenes: 2, nasa: 3, wikimedia: 1, ai: 0
+- Gemini review score 72/100
 
 ## Techniques that failed
 - stock-video director (pexels) deprioritized by design in stills mode
@@ -27,13 +27,15 @@ _(none recorded)_
 ## Metrics
 ```json
 {
-  "final_score": 68,
+  "final_score": 72,
   "duration_s": 61.366667,
   "manim": 2,
-  "nasa": 2,
-  "wikimedia": 2,
+  "nasa": 3,
+  "wikimedia": 1,
   "ai": 0,
   "video_fallback": 0,
+  "rejected": 1,
+  "vision_checked": 2,
   "nasa_pinned": 6
 }
 ```

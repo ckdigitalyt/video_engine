@@ -1,0 +1,13 @@
+scene_id,beat_index,shot_index,asset_path,asset_source,asset_title,query_used,shot_duration_s,narration_duration_s,camera_motion,transition,timeline_start_s,timeline_end_s,verified
+0,0,0,results/voyager_stills/shots/scene0_0.mp4,nasa_pinned,PIA14111 Model of Voyager,"Photorealistic documentary image of the Voyager 1 spacecraft, large dish antenna, golden record attached, deep interstellar space, cinematic NASA style",5.5,10.15,reveal,fade,0.0,5.5,True
+0,0,1,results/voyager_stills/shots/scene0_1.mp4,nasa_pinned,PIA22915 Voyager Spacecraft Instruments,Voyager spacecraft model,5.5,10.15,crane_up,crossfade,5.5,11.0,True
+1,0,0,cache/manim/voyager_timeline.mp4,manim,,,9.53,12.2,static,fade,10.15,19.69,False
+1,0,1,results/voyager_stills/shots/scene1_0.mp4,nasa_pinned,PIA17464 Voyager 1 Launch 1977,"Voyager spacecraft atop a Titan IIIE-Centaur rocket on the launch pad at night, floodlights, 1970s archival documentary style, historical NASA photograph",5.5,12.2,push_in,crossfade,19.69,25.19,True
+1,0,2,results/voyager_stills/shots/scene1_1.mp4,nasa,Voyager 1 Launch,Voyager launch,5.5,12.2,static,crossfade,25.19,30.69,True
+2,0,0,cache/manim/voyager_trajectory.mp4,manim,,,10.0,14.55,static,fade,22.36,32.36,False
+2,0,1,results/voyager_stills/shots/scene2_0.mp4,nasa,Jupiter from Voyager 2,Jupiter Voyager,5.5,14.55,tracking,crossfade,32.36,37.86,True
+2,0,2,results/voyager_stills/shots/scene2_1.mp4,wikimedia,File:Jupiter from Voyager 1.jpg,Jupiter Voyager 1,5.5,14.55,pan_right,crossfade,37.86,43.36,True
+3,0,0,results/voyager_stills/shots/scene3_0.mp4,nasa_pinned,PIA23645 Pale Blue Dot Revisited,"Photorealistic documentary image of the Voyager 1 spacecraft, large dish antenna, golden record attached, deep interstellar space, cinematic NASA style",5.5,9.22,pull_out,fade,36.91,42.41,True
+3,0,1,results/voyager_stills/shots/scene3_1.mp4,nasa_pinned,PIA00452 Solar System Portrait/Pale Blue Dot,Voyager spacecraft model,5.5,9.22,push_in,crossfade,42.41,47.91,True
+4,0,0,results/voyager_stills/shots/scene4_0.mp4,nasa_pinned,PIA16362 Preparing the Golden Record,"Close-up of the Voyager Golden Record, gold-plated copper phonograph record with cover, floating in space, cinematic",5.5,15.23,reveal,fade,46.12,51.62,True
+4,0,1,results/voyager_stills/shots/scene4_1.mp4,nasa,Voyager: Preparing the Golden Record,Voyager golden record,5.5,15.23,static,crossfade,51.62,61.35,True

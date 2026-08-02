@@ -1,0 +1,32 @@
+[
+  {
+    "timestamp_s": 6,
+    "actual_subject": "PIA22915 Voyager Spacecraft Instruments diagram",
+    "matches_expected": true,
+    "notes": "The frame correctly displays the labeled Voyager spacecraft instruments."
+  },
+  {
+    "timestamp_s": 20,
+    "actual_subject": "PIA17464 Voyager 1 Launch 1977",
+    "matches_expected": true,
+    "notes": "The frame shows the black and white launch of Voyager 1."
+  },
+  {
+    "timestamp_s": 39,
+    "actual_subject": "PIA23645 Pale Blue Dot Revisited",
+    "matches_expected": true,
+    "notes": "The frame shows the remastered Pale Blue Dot image."
+  },
+  {
+    "timestamp_s": 43,
+    "actual_subject": "PIA00452 Solar System Portrait (original Pale Blue Dot)",
+    "matches_expected": true,
+    "notes": "The frame shows the original grainy Pale Blue Dot image."
+  },
+  {
+    "timestamp_s": 46,
+    "actual_subject": "PIA00452 Solar System Portrait (original Pale Blue Dot)",
+    "matches_expected": true,
+    "notes": "The frame continues to show the original Pale Blue Dot image."
+  }
+]

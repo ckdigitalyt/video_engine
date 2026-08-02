@@ -19,6 +19,7 @@ import shutil
 import subprocess
 import sys
 import time
+from typing import Optional
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -33,6 +34,12 @@ import mission_run as M
 # ═══════════════════════════════════════════════════════════════════════ #
 
 def _nasa_still(query: str, out_path: str) -> str:
+    got, _ = _nasa_still_title(query, out_path)
+    return got
+
+
+def _nasa_still_title(query: str, out_path: str) -> tuple[str, str]:
+    """Fetch a NASA still; returns (path, title)."""
     import requests
     headers = {"User-Agent": "JadeStudio/1.0 (documentary pipeline)"}
     try:
@@ -40,11 +47,12 @@ def _nasa_still(query: str, out_path: str) -> str:
                          params={"q": query, "media_type": "image", "page_size": 4},
                          headers=headers, timeout=25)
         if r.status_code != 200:
-            return ""
+            return "", ""
         items = r.json().get("collection", {}).get("items", [])
     except Exception:
-        return ""
+        return "", ""
     for it in items:
+        title = (it.get("data") or [{}])[0].get("title", "")
         try:
             col = requests.get(it.get("href"), headers=headers, timeout=20)
             if col.status_code != 200:
@@ -59,15 +67,20 @@ def _nasa_still(query: str, out_path: str) -> str:
                 os.makedirs(os.path.dirname(out_path), exist_ok=True)
                 with open(out_path, "wb") as f:
                     f.write(img.content)
-                title = (it.get("data") or [{}])[0].get("title", "")[:60]
-                print(f"  [NASA] {query!r} → {os.path.basename(out_path)} ({len(img.content)//1024} KB) | {title}")
-                return out_path
+                print(f"  [NASA] {query!r} → {os.path.basename(out_path)} ({len(img.content)//1024} KB) | {title[:60]}")
+                return out_path, title
         except Exception:
             continue
-    return ""
+    return "", ""
 
 
 def _wikimedia_still(query: str, out_path: str) -> str:
+    got, _ = _wikimedia_still_title(query, out_path)
+    return got
+
+
+def _wikimedia_still_title(query: str, out_path: str) -> tuple[str, str]:
+    """Fetch a Wikimedia still; returns (path, title)."""
     import requests
     headers = {"User-Agent": "JadeStudio/1.0 (documentary pipeline; contact: studio@localhost)"}
     try:
@@ -79,11 +92,11 @@ def _wikimedia_still(query: str, out_path: str) -> str:
         }, headers=headers, timeout=25)
         if r.status_code != 200:
             print(f"  [Wiki] !! HTTP {r.status_code} for {query!r}")
-            return ""
+            return "", ""
         data = r.json()
     except Exception as e:
         print(f"  [Wiki] !! API error for {query!r}: {str(e)[:80]}")
-        return ""
+        return "", ""
     pages = data.get("query", {}).get("pages", {})
     for p in sorted(pages.values(), key=lambda x: x.get("index", 99)):
         ii = (p.get("imageinfo") or [{}])[0]
@@ -101,10 +114,10 @@ def _wikimedia_still(query: str, out_path: str) -> str:
                 with open(out_path, "wb") as f:
                     f.write(img.content)
                 print(f"  [Wiki] {query!r} → {os.path.basename(out_path)} ({len(img.content)//1024} KB) | {p.get('title','')[:60]} | {lic[:30]}")
-                return out_path
+                return out_path, p.get("title", "")
         except Exception:
             continue
-    return ""
+    return "", ""
 
 
 def _ai_still(prompt: str, out_path: str) -> str:
@@ -160,25 +173,33 @@ AI_PROMPTS = {
 
 
 def _kenburns(image_path: str, out_path: str, duration: float = 6.0,
-              zoom_in: bool = True) -> str:
+              zoom_in: bool = True, camera: Optional[dict] = None) -> str:
     """Ken Burns motion with LINEAR zoom across the full shot duration.
 
     v2 fix (from motion review): the old expression ``min(z_end, zoom+0.004)``
-    hit max zoom after ~2.3s then went static for the rest of the shot —
-    perceived as non-smooth motion.  New version interpolates zoom linearly
-    over every frame, renders at 2x internal resolution for subpixel
-    smoothness, and adds a subtle diagonal pan.
+    hit max zoom after ~2.3s then went static — perceived as non-smooth.
+    New version interpolates zoom linearly over every frame, renders at 2x
+    internal resolution, and applies intent-driven camera params when given
+    (zoom_start/zoom_end/pan_x/pan_y from CameraDirector).
     """
     frames = int(duration * 30)
-    z_start, z_end = (1.0, 1.22) if zoom_in else (1.22, 1.0)
+    cam = camera or {}
+    if zoom_in:
+        z_start = float(cam.get("zoom_start", 1.0))
+        z_end = float(cam.get("zoom_end", 1.22))
+    else:
+        z_start = float(cam.get("zoom_start", 1.22))
+        z_end = float(cam.get("zoom_end", 1.0))
+    pan_x = float(cam.get("pan_x", 0))
+    pan_y = float(cam.get("pan_y", 0))
     # linear zoom: z = z_start + (z_end - z_start) * on/frames
     z_expr = f"{z_start}+({z_end}-{z_start})*on/{frames}"
-    # subtle pan: drift 6% of frame width/height across the shot
+    # pan: drift by pan_x/pan_y pixels (in 2x space) across the shot
+    px = f"(iw-iw/zoom)/2+({pan_x}*2)*on/{frames}"
+    py = f"(ih-ih/zoom)/2+({pan_y}*2)*on/{frames}"
     vf = (
         f"scale=3840:2160:force_original_aspect_ratio=increase,crop=3840:2160,"
-        f"zoompan=z='{z_expr}':"
-        f"x='(iw-iw/zoom)/2+(iw*0.03)*on/{frames}':"
-        f"y='(ih-ih/zoom)/2+(ih*0.03)*on/{frames}':"
+        f"zoompan=z='{z_expr}':x='{px}':y='{py}':"
         f"d={frames}:s=1920x1080:fps=30"
     )
     subprocess.run(
@@ -228,8 +249,14 @@ def _still_plan_for(scene_text: str) -> list[str]:
     return out
 
 
-def stage_stills_visuals(scenes_data: list[dict], out_dir: str) -> dict:
+def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
+                         gates=None, specs: Optional[dict] = None) -> dict:
     """Build per-scene shot lists: Manim clips + Ken Burns stills.
+
+    When *gates* is provided, every candidate still is verified against
+    its scene's EntitySpec (multi-signal + vision fallback) before it may
+    enter the timeline, and camera moves come from the intent-driven
+    CameraDirector instead of alternating zoom_in flags.
 
     Returns {scene_id: [{"file": clip, "duration": s}, ...]} and stats.
     """
@@ -239,11 +266,14 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str) -> dict:
     os.makedirs("cache/stills", exist_ok=True)
 
     plan = {}
-    stats = {"manim": 0, "nasa": 0, "wikimedia": 0, "ai": 0, "video_fallback": 0}
+    stats = {"manim": 0, "nasa": 0, "wikimedia": 0, "ai": 0, "video_fallback": 0,
+             "rejected": 0, "vision_checked": 0}
     manim_used = set()
 
     for i, scene in enumerate(scenes_data):
         text = scene.get("narration", "")
+        spec = (specs or {}).get(i)
+        intent = spec.scene_intent if spec else "default"
         shots = []
         # 1) Manim explanation clip if scene calls for it
         manim = _manim_scene_for(text)
@@ -258,27 +288,52 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str) -> dict:
             if still_count >= 2:
                 break
             out = os.path.join("cache", "stills", f"scene{i}_{still_count}.jpg")
-            got = ""
-            # Pinned real assets take priority and are never re-fetched
+            got, src, title = "", "", ""
             if out in PINNED_STILLS and os.path.exists(out) and os.path.getsize(out) > 15000:
-                got = out
-                src = "nasa_pinned"
+                got, src = out, "nasa_pinned"
+                title = PINNED_STILLS[out]
                 print(f"  [PIN] {os.path.basename(out)} kept ({PINNED_STILLS[out]})")
             elif kind == "nasa":
-                got = _nasa_still(query, out)
+                got, title = _nasa_still_title(query, out)
                 src = "nasa"
             elif kind == "wiki":
-                got = _wikimedia_still(query, out)
+                got, title = _wikimedia_still_title(query, out)
                 src = "wikimedia"
             else:
                 got = _ai_still(query, out)
                 src = "ai"
             if not got:
                 continue
+            # ── ASSET-GATE: verify against scene EntitySpec ────────────
+            if gates is not None and spec is not None:
+                pre_verified = out in PINNED_STILLS  # human-approved assets
+                ver = gates.verify_asset(
+                    spec, asset_path=got, title=title, filename=os.path.basename(got),
+                    provider=src, query_used=query, pre_verified=pre_verified,
+                )
+                stats["vision_checked"] += int(bool(ver.get("vision_check")))
+                if not ver.get("passed"):
+                    stats["rejected"] += 1
+                    print(f"  [gate] rejected {os.path.basename(got)} "
+                          f"({ver.get('reasons', ['?'])[:1]})")
+                    continue
+            # ── CAMERA: intent-driven motion (diversity-aware) ─────────
             clip = os.path.join(out_dir, "shots", f"scene{i}_{still_count}.mp4")
             dur = 5.5 if len(shots) < 3 else 4.5
-            if _kenburns(got, clip, duration=dur, zoom_in=(still_count % 2 == 0)):
-                shots.append({"file": clip, "duration": dur, "kind": src})
+            cam = gates.camera_decision(intent) if gates is not None else {
+                "move": "push_in" if still_count % 2 == 0 else "pull_out",
+                "params": {},
+            }
+            cam_params = cam.get("params", {}) or {}
+            zoom_in = cam_params.get("zoom_end", 1.2) > cam_params.get("zoom_start", 1.0)
+            kb = _kenburns(got, clip, duration=dur, zoom_in=zoom_in,
+                           camera=cam_params)
+            if kb:
+                shots.append({"file": clip, "duration": dur, "kind": src,
+                              "camera": cam.get("move", "push_in"),
+                              "motion_params": cam_params,
+                              "verification": ver if (gates is not None and spec is not None) else None,
+                              "title": title, "query": query})
                 stats[src] = stats.get(src, 0) + 1
                 still_count += 1
         plan[i] = shots
@@ -407,9 +462,13 @@ def main():
                     print(f"  Compressed to {sum(len(s.get('narration','').split()) for s in scenes_data)} words")
             except json.JSONDecodeError:
                 print("  !! Post-review compression failed — keeping reviewed script")
-        from src.utils.tts_normalize import normalize_narration
+        from src.utils.tts_normalize import normalize_narration, apply_prosody
         for s in scenes_data:
             s["narration"] = normalize_narration(s.get("narration", ""))
+            # Wave-1 prosody: dramatic breath-pause before final sentence
+            # for hook/emotion/conclusion intents
+            s["narration"] = apply_prosody(s.get("narration", ""),
+                                            intent=s.get("intent", "default"))
         M._write_json(os.path.join(out_dir, "script_review_report.json"), review_report)
         M._write_json(os.path.join(out_dir, "script_final.json"), scenes_data)
 
@@ -417,8 +476,18 @@ def main():
     if os.path.isdir(os.path.join(out_dir, "shots")):
         shutil.rmtree(os.path.join(out_dir, "shots"))
 
-    # ── Stills-first visual planning ───────────────────────────────────
-    shot_plan, stills_stats = stage_stills_visuals(scenes_data, out_dir)
+    # ── Stills-first visual planning (with Wave-1 gates) ──────────────
+    gates = None
+    specs = None
+    try:
+        from src.pipeline.engine_gates import EngineGates
+        gates = EngineGates(llm_provider=llm, vision_enabled=True)
+        specs = gates.build_scene_specs(scenes_data, research.get("facts", []))
+        run_report["entity_specs"] = {str(k): v.to_dict() for k, v in specs.items()}
+        run_report["camera_diversity"] = gates.camera_diversity()
+    except Exception as e:
+        print(f"  !! gates init failed (continuing un-gated): {str(e)[:100]}")
+    shot_plan, stills_stats = stage_stills_visuals(scenes_data, out_dir, gates, specs)
     run_report["stages"]["visuals"] = stills_stats
 
     # ── Narration (reuse cached audio when present) ────────────────────
@@ -435,12 +504,61 @@ def main():
     build_stills_timeline(scenes_data, shot_plan, audio_durations, timeline_path)
     print(f"\n[12/16] RENDERING → {output_path}", flush=True)
     t0 = time.time()
+    if gates is not None:
+        gates._instrumenter.start_render()
     mods["MoviePyRenderer"]().render(timeline_path, output_path)
+    render_s = time.time() - t0
     run_report["stages"]["render_v1"] = {
         "duration_s": M._probe_duration(output_path),
         "size_mb": round(os.path.getsize(output_path) / 1e6, 1),
-        "render_s": round(time.time() - t0, 1),
+        "render_s": round(render_s, 1),
     }
+
+    # ── Wave-1: instrument shots with timeline placement ──────────────
+    if gates is not None:
+        try:
+            with open(timeline_path) as f:
+                tl = json.load(f)
+            # map shot files to their timeline placement
+            placement = {}
+            for v in tl.get("video_timeline", []):
+                placement.setdefault(os.path.basename(v.get("file", "")), []).append(v)
+            for i, shots in shot_plan.items():
+                adur = audio_durations[i] if i < len(audio_durations) else 0
+                for si, sh in enumerate(shots):
+                    base = os.path.basename(sh.get("file", ""))
+                    pl = (placement.get(base) or [{}])[0]
+                    gates.record_shot(
+                        scene_id=i, beat_index=0, shot_index=si,
+                        asset_path=sh.get("file", ""),
+                        asset_source=sh.get("kind", ""),
+                        asset_title=sh.get("title", ""),
+                        query_used=sh.get("query", ""),
+                        shot_duration_s=sh.get("duration", 0),
+                        narration_duration_s=adur,
+                        camera_motion=sh.get("camera", "static"),
+                        motion_params=sh.get("motion_params", {}),
+                        transition=pl.get("transition", ""),
+                        timeline_start_s=pl.get("start_time", 0),
+                        timeline_end_s=pl.get("end_time", 0),
+                        verification=sh.get("verification"),
+                        entity_spec=(specs or {}).get(i).to_dict() if (specs or {}).get(i) else None,
+                    )
+            gates.write_diagnostics(out_dir, render_s)
+            run_report["diversity"] = gates._diversity.metrics()
+            run_report["camera_diversity"] = gates.camera_diversity()
+        except Exception as e:
+            print(f"  !! instrumentation failed (non-fatal): {str(e)[:100]}")
+
+    # ── Wave-1: deterministic QA gate (block only objective failures) ──
+    if gates is not None:
+        allow, qa_report = gates.qa_gate(output_path, timeline_path, out_dir)
+        run_report["stages"]["qa_v1"] = qa_report
+        if not allow:
+            print("  !! QA BLOCKED: objective failures → " +
+                  str(qa_report["blocking_failures"]))
+        else:
+            print("  [qa] deterministic QA passed (no objective failures)")
 
     # ── Music ──────────────────────────────────────────────────────────
     mix = M.stage_music_mix(output_path, "cache/music/cinematic.mp3", mixed_path)

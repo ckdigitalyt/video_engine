@@ -1,0 +1,933 @@
+{
+  "generated_at": "2026-08-02T17:51:29Z",
+  "total_render_s": 72.47,
+  "shot_count": 12,
+  "shots": [
+    {
+      "scene_id": 0,
+      "beat_index": 0,
+      "shot_index": 0,
+      "asset_path": "results/voyager_stills/shots/scene0_0.mp4",
+      "asset_source": "nasa_pinned",
+      "asset_title": "PIA14111 Model of Voyager",
+      "query_used": "Photorealistic documentary image of the Voyager 1 spacecraft, large dish antenna, golden record attached, deep interstellar space, cinematic NASA style",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [
+          "Voyager 1",
+          "Earth"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene0",
+        "scene_id": 0,
+        "required_entities": [
+          "Voyager 1",
+          "Earth"
+        ],
+        "match_terms": {
+          "Voyager 1": [
+            "Voyager 1",
+            "voyager"
+          ],
+          "Earth": [
+            "Earth",
+            "pale blue dot"
+          ]
+        },
+        "optional_entities": [
+          "Sun",
+          "solar system",
+          "interstellar space"
+        ],
+        "prohibited_entities": [
+          "Voyager 2",
+          "Mars",
+          "Moon"
+        ],
+        "scene_intent": "reveal",
+        "confidence": 1.0,
+        "visual_objective": "Show Voyager 1 as a tiny, distant object against the vastness of space, with Earth as a faint dot, to evoke isolation and awe."
+      },
+      "shot_duration_s": 5.5,
+      "narration_duration_s": 10.15,
+      "camera_motion": "reveal",
+      "motion_params": {
+        "zoom_start": 1.25,
+        "zoom_end": 1.0,
+        "pan_x": 0,
+        "pan_y": 0
+      },
+      "transition": "fade",
+      "timeline_start_s": 0.0,
+      "timeline_end_s": 5.5,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 0,
+      "beat_index": 0,
+      "shot_index": 1,
+      "asset_path": "results/voyager_stills/shots/scene0_1.mp4",
+      "asset_source": "nasa_pinned",
+      "asset_title": "PIA22915 Voyager Spacecraft Instruments",
+      "query_used": "Voyager spacecraft model",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [
+          "Voyager 1",
+          "Earth"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene0",
+        "scene_id": 0,
+        "required_entities": [
+          "Voyager 1",
+          "Earth"
+        ],
+        "match_terms": {
+          "Voyager 1": [
+            "Voyager 1",
+            "voyager"
+          ],
+          "Earth": [
+            "Earth",
+            "pale blue dot"
+          ]
+        },
+        "optional_entities": [
+          "Sun",
+          "solar system",
+          "interstellar space"
+        ],
+        "prohibited_entities": [
+          "Voyager 2",
+          "Mars",
+          "Moon"
+        ],
+        "scene_intent": "reveal",
+        "confidence": 1.0,
+        "visual_objective": "Show Voyager 1 as a tiny, distant object against the vastness of space, with Earth as a faint dot, to evoke isolation and awe."
+      },
+      "shot_duration_s": 5.5,
+      "narration_duration_s": 10.15,
+      "camera_motion": "crane_up",
+      "motion_params": {
+        "zoom_start": 1.05,
+        "zoom_end": 1.18,
+        "pan_x": 0,
+        "pan_y": -60
+      },
+      "transition": "crossfade",
+      "timeline_start_s": 5.5,
+      "timeline_end_s": 11.0,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 1,
+      "beat_index": 0,
+      "shot_index": 0,
+      "asset_path": "cache/manim/voyager_timeline.mp4",
+      "asset_source": "manim",
+      "asset_title": "",
+      "query_used": "",
+      "verification": null,
+      "entity_spec": {
+        "beat_id": "scene1",
+        "scene_id": 1,
+        "required_entities": [
+          "Voyager 1",
+          "Pale Blue Dot photo"
+        ],
+        "match_terms": {
+          "Voyager 1": [
+            "Voyager 1",
+            "voyager"
+          ],
+          "Pale Blue Dot photo": [
+            "Pale Blue Dot photo",
+            "pale blue dot",
+            "earth from 6 billion km"
+          ]
+        },
+        "optional_entities": [
+          "Titan IIIE / Centaur",
+          "Golden Record"
+        ],
+        "prohibited_entities": [
+          "Voyager 2",
+          "Mars",
+          "Moon",
+          "Space Shuttle",
+          "Apollo mission"
+        ],
+        "scene_intent": "emotion",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see Voyager 1 as a lone, enduring machine\u2014perhaps a slow zoom on the spacecraft or the Pale Blue Dot\u2014and feel awe at its decades-long resilience against the odds."
+      },
+      "shot_duration_s": 9.53,
+      "narration_duration_s": 12.2,
+      "camera_motion": "static",
+      "motion_params": {},
+      "transition": "fade",
+      "timeline_start_s": 10.15,
+      "timeline_end_s": 19.69,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 1,
+      "beat_index": 0,
+      "shot_index": 1,
+      "asset_path": "results/voyager_stills/shots/scene1_0.mp4",
+      "asset_source": "nasa_pinned",
+      "asset_title": "PIA17464 Voyager 1 Launch 1977",
+      "query_used": "Voyager spacecraft atop a Titan IIIE-Centaur rocket on the launch pad at night, floodlights, 1970s archival documentary style, historical NASA photograph",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [
+          "Voyager 1",
+          "Pale Blue Dot photo"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene1",
+        "scene_id": 1,
+        "required_entities": [
+          "Voyager 1",
+          "Pale Blue Dot photo"
+        ],
+        "match_terms": {
+          "Voyager 1": [
+            "Voyager 1",
+            "voyager"
+          ],
+          "Pale Blue Dot photo": [
+            "Pale Blue Dot photo",
+            "pale blue dot",
+            "earth from 6 billion km"
+          ]
+        },
+        "optional_entities": [
+          "Titan IIIE / Centaur",
+          "Golden Record"
+        ],
+        "prohibited_entities": [
+          "Voyager 2",
+          "Mars",
+          "Moon",
+          "Space Shuttle",
+          "Apollo mission"
+        ],
+        "scene_intent": "emotion",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see Voyager 1 as a lone, enduring machine\u2014perhaps a slow zoom on the spacecraft or the Pale Blue Dot\u2014and feel awe at its decades-long resilience against the odds."
+      },
+      "shot_duration_s": 5.5,
+      "narration_duration_s": 12.2,
+      "camera_motion": "push_in",
+      "motion_params": {
+        "zoom_start": 1.0,
+        "zoom_end": 1.22,
+        "pan_x": 0,
+        "pan_y": 0
+      },
+      "transition": "crossfade",
+      "timeline_start_s": 19.69,
+      "timeline_end_s": 25.19,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 1,
+      "beat_index": 0,
+      "shot_index": 2,
+      "asset_path": "results/voyager_stills/shots/scene1_1.mp4",
+      "asset_source": "nasa",
+      "asset_title": "Voyager 1 Launch",
+      "query_used": "Voyager launch",
+      "verification": {
+        "asset_path": "cache/stills/scene1_1.jpg",
+        "beat_id": "scene1",
+        "passed": true,
+        "score": 0.54,
+        "signal_scores": {
+          "metadata": {
+            "score": 0.7,
+            "evidence": "hits=['Voyager 1'], bans=[]"
+          },
+          "captions": {
+            "score": 0.8,
+            "evidence": "hits=['Voyager 1'], bans=[]"
+          },
+          "filename": {
+            "score": 0.2,
+            "evidence": "hits=[], bans=[]"
+          },
+          "provider_tags": {
+            "score": 0.25,
+            "evidence": "tags=['Voyager launch'], hits=[], bans=[]"
+          }
+        },
+        "matched_required": [
+          "Voyager 1"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [
+          "Pale Blue Dot photo"
+        ],
+        "vision_check": {
+          "subject": "",
+          "passed": false,
+          "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and ",
+          "model": "gemini-3.5-flash"
+        },
+        "reasons": [
+          "vision unavailable (429 RESOURCE_EXHAUSTED. {'error': {'code); metadata fallback score=0.54 (low-confidence accept)"
+        ]
+      },
+      "entity_spec": {
+        "beat_id": "scene1",
+        "scene_id": 1,
+        "required_entities": [
+          "Voyager 1",
+          "Pale Blue Dot photo"
+        ],
+        "match_terms": {
+          "Voyager 1": [
+            "Voyager 1",
+            "voyager"
+          ],
+          "Pale Blue Dot photo": [
+            "Pale Blue Dot photo",
+            "pale blue dot",
+            "earth from 6 billion km"
+          ]
+        },
+        "optional_entities": [
+          "Titan IIIE / Centaur",
+          "Golden Record"
+        ],
+        "prohibited_entities": [
+          "Voyager 2",
+          "Mars",
+          "Moon",
+          "Space Shuttle",
+          "Apollo mission"
+        ],
+        "scene_intent": "emotion",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see Voyager 1 as a lone, enduring machine\u2014perhaps a slow zoom on the spacecraft or the Pale Blue Dot\u2014and feel awe at its decades-long resilience against the odds."
+      },
+      "shot_duration_s": 5.5,
+      "narration_duration_s": 12.2,
+      "camera_motion": "static",
+      "motion_params": {
+        "zoom_start": 1.0,
+        "zoom_end": 1.0,
+        "pan_x": 0,
+        "pan_y": 0
+      },
+      "transition": "crossfade",
+      "timeline_start_s": 25.19,
+      "timeline_end_s": 30.69,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 2,
+      "beat_index": 0,
+      "shot_index": 0,
+      "asset_path": "cache/manim/voyager_trajectory.mp4",
+      "asset_source": "manim",
+      "asset_title": "",
+      "query_used": "",
+      "verification": null,
+      "entity_spec": {
+        "beat_id": "scene2",
+        "scene_id": 2,
+        "required_entities": [
+          "Voyager 1",
+          "Jupiter",
+          "Voyager 2"
+        ],
+        "match_terms": {
+          "Voyager 1": [
+            "Voyager 1",
+            "voyager one",
+            "vgr1"
+          ],
+          "Jupiter": [
+            "Jupiter",
+            "jovian"
+          ],
+          "Voyager 2": [
+            "Voyager 2",
+            "voyager two",
+            "vgr2"
+          ]
+        },
+        "optional_entities": [
+          "Io",
+          "Saturn",
+          "heliopause",
+          "interstellar space",
+          "Pale Blue Dot"
+        ],
+        "prohibited_entities": [
+          "Mars",
+          "Cassini",
+          "New Horizons",
+          "Apollo",
+          "Galileo (spacecraft)",
+          "Hubble Space Telescope"
+        ],
+        "scene_intent": "journey",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should SEE the Voyager spacecrafts' epic journey past Jupiter and Saturn, culminating in the crossing into interstellar space, and FEEL the profound loneliness and pioneering spirit of humanity's farthest reach."
+      },
+      "shot_duration_s": 10.0,
+      "narration_duration_s": 14.55,
+      "camera_motion": "static",
+      "motion_params": {},
+      "transition": "fade",
+      "timeline_start_s": 22.36,
+      "timeline_end_s": 32.36,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 2,
+      "beat_index": 0,
+      "shot_index": 1,
+      "asset_path": "results/voyager_stills/shots/scene2_0.mp4",
+      "asset_source": "nasa",
+      "asset_title": "Jupiter from Voyager 2",
+      "query_used": "Jupiter Voyager",
+      "verification": {
+        "asset_path": "cache/stills/scene2_0.jpg",
+        "beat_id": "scene2",
+        "passed": true,
+        "score": 0.64,
+        "signal_scores": {
+          "metadata": {
+            "score": 0.7,
+            "evidence": "hits=['Jupiter', 'Voyager 2'], bans=[]"
+          },
+          "captions": {
+            "score": 0.8,
+            "evidence": "hits=['Jupiter', 'Voyager 2'], bans=[]"
+          },
+          "filename": {
+            "score": 0.2,
+            "evidence": "hits=[], bans=[]"
+          },
+          "provider_tags": {
+            "score": 0.75,
+            "evidence": "tags=['Jupiter Voyager'], hits=['Jupiter'], bans=[]"
+          }
+        },
+        "matched_required": [
+          "Voyager 1",
+          "Jupiter",
+          "Voyager 2"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null,
+        "reasons": [
+          "signals confirm (score=0.64)"
+        ]
+      },
+      "entity_spec": {
+        "beat_id": "scene2",
+        "scene_id": 2,
+        "required_entities": [
+          "Voyager 1",
+          "Jupiter",
+          "Voyager 2"
+        ],
+        "match_terms": {
+          "Voyager 1": [
+            "Voyager 1",
+            "voyager one",
+            "vgr1"
+          ],
+          "Jupiter": [
+            "Jupiter",
+            "jovian"
+          ],
+          "Voyager 2": [
+            "Voyager 2",
+            "voyager two",
+            "vgr2"
+          ]
+        },
+        "optional_entities": [
+          "Io",
+          "Saturn",
+          "heliopause",
+          "interstellar space",
+          "Pale Blue Dot"
+        ],
+        "prohibited_entities": [
+          "Mars",
+          "Cassini",
+          "New Horizons",
+          "Apollo",
+          "Galileo (spacecraft)",
+          "Hubble Space Telescope"
+        ],
+        "scene_intent": "journey",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should SEE the Voyager spacecrafts' epic journey past Jupiter and Saturn, culminating in the crossing into interstellar space, and FEEL the profound loneliness and pioneering spirit of humanity's farthest reach."
+      },
+      "shot_duration_s": 5.5,
+      "narration_duration_s": 14.55,
+      "camera_motion": "tracking",
+      "motion_params": {
+        "zoom_start": 1.1,
+        "zoom_end": 1.1,
+        "pan_x": -80,
+        "pan_y": 0
+      },
+      "transition": "crossfade",
+      "timeline_start_s": 32.36,
+      "timeline_end_s": 37.86,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 2,
+      "beat_index": 0,
+      "shot_index": 2,
+      "asset_path": "results/voyager_stills/shots/scene2_1.mp4",
+      "asset_source": "wikimedia",
+      "asset_title": "File:Jupiter from Voyager 1.jpg",
+      "query_used": "Jupiter Voyager 1",
+      "verification": {
+        "asset_path": "cache/stills/scene2_1.jpg",
+        "beat_id": "scene2",
+        "passed": true,
+        "score": 0.64,
+        "signal_scores": {
+          "metadata": {
+            "score": 0.7,
+            "evidence": "hits=['Voyager 1', 'Jupiter'], bans=[]"
+          },
+          "captions": {
+            "score": 0.8,
+            "evidence": "hits=['Voyager 1', 'Jupiter'], bans=[]"
+          },
+          "filename": {
+            "score": 0.2,
+            "evidence": "hits=[], bans=[]"
+          },
+          "provider_tags": {
+            "score": 0.75,
+            "evidence": "tags=['Jupiter Voyager 1'], hits=['Voyager 1', 'Jupiter'], bans=[]"
+          }
+        },
+        "matched_required": [
+          "Voyager 1",
+          "Jupiter",
+          "Voyager 2"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null,
+        "reasons": [
+          "signals confirm (score=0.64)"
+        ]
+      },
+      "entity_spec": {
+        "beat_id": "scene2",
+        "scene_id": 2,
+        "required_entities": [
+          "Voyager 1",
+          "Jupiter",
+          "Voyager 2"
+        ],
+        "match_terms": {
+          "Voyager 1": [
+            "Voyager 1",
+            "voyager one",
+            "vgr1"
+          ],
+          "Jupiter": [
+            "Jupiter",
+            "jovian"
+          ],
+          "Voyager 2": [
+            "Voyager 2",
+            "voyager two",
+            "vgr2"
+          ]
+        },
+        "optional_entities": [
+          "Io",
+          "Saturn",
+          "heliopause",
+          "interstellar space",
+          "Pale Blue Dot"
+        ],
+        "prohibited_entities": [
+          "Mars",
+          "Cassini",
+          "New Horizons",
+          "Apollo",
+          "Galileo (spacecraft)",
+          "Hubble Space Telescope"
+        ],
+        "scene_intent": "journey",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should SEE the Voyager spacecrafts' epic journey past Jupiter and Saturn, culminating in the crossing into interstellar space, and FEEL the profound loneliness and pioneering spirit of humanity's farthest reach."
+      },
+      "shot_duration_s": 5.5,
+      "narration_duration_s": 14.55,
+      "camera_motion": "pan_right",
+      "motion_params": {
+        "zoom_start": 1.12,
+        "zoom_end": 1.12,
+        "pan_x": 60,
+        "pan_y": 0
+      },
+      "transition": "crossfade",
+      "timeline_start_s": 37.86,
+      "timeline_end_s": 43.36,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 3,
+      "beat_index": 0,
+      "shot_index": 0,
+      "asset_path": "results/voyager_stills/shots/scene3_0.mp4",
+      "asset_source": "nasa_pinned",
+      "asset_title": "PIA23645 Pale Blue Dot Revisited",
+      "query_used": "Photorealistic documentary image of the Voyager 1 spacecraft, large dish antenna, golden record attached, deep interstellar space, cinematic NASA style",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [
+          "Voyager 1",
+          "Earth"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene3",
+        "scene_id": 3,
+        "required_entities": [
+          "Voyager 1",
+          "Earth"
+        ],
+        "match_terms": {
+          "Voyager 1": [
+            "Voyager 1",
+            "voyager"
+          ],
+          "Earth": [
+            "Earth",
+            "pale blue dot"
+          ]
+        },
+        "optional_entities": [
+          "Sun",
+          "pale blue dot photo"
+        ],
+        "prohibited_entities": [
+          "Voyager 2",
+          "Mars",
+          "Moon",
+          "Apollo spacecraft",
+          "space shuttle"
+        ],
+        "scene_intent": "reflection",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see the iconic Pale Blue Dot image\u2014Earth as a tiny speck in the vastness of space\u2014and feel a profound sense of humility and connection to all of humanity."
+      },
+      "shot_duration_s": 5.5,
+      "narration_duration_s": 9.22,
+      "camera_motion": "pull_out",
+      "motion_params": {
+        "zoom_start": 1.22,
+        "zoom_end": 1.0,
+        "pan_x": 0,
+        "pan_y": 0
+      },
+      "transition": "fade",
+      "timeline_start_s": 36.91,
+      "timeline_end_s": 42.41,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 3,
+      "beat_index": 0,
+      "shot_index": 1,
+      "asset_path": "results/voyager_stills/shots/scene3_1.mp4",
+      "asset_source": "nasa_pinned",
+      "asset_title": "PIA00452 Solar System Portrait/Pale Blue Dot",
+      "query_used": "Voyager spacecraft model",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [
+          "Voyager 1",
+          "Earth"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene3",
+        "scene_id": 3,
+        "required_entities": [
+          "Voyager 1",
+          "Earth"
+        ],
+        "match_terms": {
+          "Voyager 1": [
+            "Voyager 1",
+            "voyager"
+          ],
+          "Earth": [
+            "Earth",
+            "pale blue dot"
+          ]
+        },
+        "optional_entities": [
+          "Sun",
+          "pale blue dot photo"
+        ],
+        "prohibited_entities": [
+          "Voyager 2",
+          "Mars",
+          "Moon",
+          "Apollo spacecraft",
+          "space shuttle"
+        ],
+        "scene_intent": "reflection",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see the iconic Pale Blue Dot image\u2014Earth as a tiny speck in the vastness of space\u2014and feel a profound sense of humility and connection to all of humanity."
+      },
+      "shot_duration_s": 5.5,
+      "narration_duration_s": 9.22,
+      "camera_motion": "push_in",
+      "motion_params": {
+        "zoom_start": 1.0,
+        "zoom_end": 1.22,
+        "pan_x": 0,
+        "pan_y": 0
+      },
+      "transition": "crossfade",
+      "timeline_start_s": 42.41,
+      "timeline_end_s": 47.91,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 4,
+      "beat_index": 0,
+      "shot_index": 0,
+      "asset_path": "results/voyager_stills/shots/scene4_0.mp4",
+      "asset_source": "nasa_pinned",
+      "asset_title": "PIA16362 Preparing the Golden Record",
+      "query_used": "Close-up of the Voyager Golden Record, gold-plated copper phonograph record with cover, floating in space, cinematic",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [
+          "Voyager 1",
+          "Golden Record"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene4",
+        "scene_id": 4,
+        "required_entities": [
+          "Voyager 1",
+          "Golden Record"
+        ],
+        "match_terms": {
+          "Voyager 1": [
+            "Voyager 1",
+            "voyager",
+            "Voyager 1 spacecraft",
+            "Voyager 1 probe"
+          ],
+          "Golden Record": [
+            "Golden Record",
+            "voyager golden record",
+            "voyager record"
+          ]
+        },
+        "optional_entities": [
+          "NASA JPL",
+          "Titan IIIE / Centaur",
+          "Pale Blue Dot",
+          "Earth"
+        ],
+        "prohibited_entities": [
+          "Voyager 2",
+          "Cassini",
+          "New Horizons",
+          "Mars",
+          "Moon",
+          "International Space Station"
+        ],
+        "scene_intent": "emotion",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see the Voyager spacecraft and its Golden Record, feeling a sense of awe and pride in human curiosity and exploration."
+      },
+      "shot_duration_s": 5.5,
+      "narration_duration_s": 15.23,
+      "camera_motion": "reveal",
+      "motion_params": {
+        "zoom_start": 1.25,
+        "zoom_end": 1.0,
+        "pan_x": 0,
+        "pan_y": 0
+      },
+      "transition": "fade",
+      "timeline_start_s": 46.12,
+      "timeline_end_s": 51.62,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 4,
+      "beat_index": 0,
+      "shot_index": 1,
+      "asset_path": "results/voyager_stills/shots/scene4_1.mp4",
+      "asset_source": "nasa",
+      "asset_title": "Voyager: Preparing the Golden Record",
+      "query_used": "Voyager golden record",
+      "verification": {
+        "asset_path": "cache/stills/scene4_1.jpg",
+        "beat_id": "scene4",
+        "passed": true,
+        "score": 0.64,
+        "signal_scores": {
+          "metadata": {
+            "score": 0.7,
+            "evidence": "hits=['Golden Record'], bans=[]"
+          },
+          "captions": {
+            "score": 0.8,
+            "evidence": "hits=['Golden Record'], bans=[]"
+          },
+          "filename": {
+            "score": 0.2,
+            "evidence": "hits=[], bans=[]"
+          },
+          "provider_tags": {
+            "score": 0.75,
+            "evidence": "tags=['Voyager golden record'], hits=['Golden Record'], bans=[]"
+          }
+        },
+        "matched_required": [
+          "Voyager 1",
+          "Golden Record"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null,
+        "reasons": [
+          "signals confirm (score=0.64)"
+        ]
+      },
+      "entity_spec": {
+        "beat_id": "scene4",
+        "scene_id": 4,
+        "required_entities": [
+          "Voyager 1",
+          "Golden Record"
+        ],
+        "match_terms": {
+          "Voyager 1": [
+            "Voyager 1",
+            "voyager",
+            "Voyager 1 spacecraft",
+            "Voyager 1 probe"
+          ],
+          "Golden Record": [
+            "Golden Record",
+            "voyager golden record",
+            "voyager record"
+          ]
+        },
+        "optional_entities": [
+          "NASA JPL",
+          "Titan IIIE / Centaur",
+          "Pale Blue Dot",
+          "Earth"
+        ],
+        "prohibited_entities": [
+          "Voyager 2",
+          "Cassini",
+          "New Horizons",
+          "Mars",
+          "Moon",
+          "International Space Station"
+        ],
+        "scene_intent": "emotion",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see the Voyager spacecraft and its Golden Record, feeling a sense of awe and pride in human curiosity and exploration."
+      },
+      "shot_duration_s": 5.5,
+      "narration_duration_s": 15.23,
+      "camera_motion": "static",
+      "motion_params": {
+        "zoom_start": 1.0,
+        "zoom_end": 1.0,
+        "pan_x": 0,
+        "pan_y": 0
+      },
+      "transition": "crossfade",
+      "timeline_start_s": 51.62,
+      "timeline_end_s": 61.35,
+      "render_duration_s": 0.0
+    }
+  ]
+}
