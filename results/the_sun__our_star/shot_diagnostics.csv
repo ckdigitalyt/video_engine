@@ -1,11 +1,11 @@
 scene_id,beat_index,shot_index,asset_path,asset_source,asset_title,query_used,shot_duration_s,narration_duration_s,camera_motion,transition,timeline_start_s,timeline_end_s,verified
 0,0,0,results/the_sun__our_star/shots/scene0_0.mp4,nasa,Sun Shines in High-Energy X-rays,Sun,5.5,14.49,push_in,fade,0.0,5.5,True
 0,0,1,results/the_sun__our_star/shots/scene0_1.mp4,wikimedia,"File:The sun and the moon in South New Brighton's beach, New Zealand.jpg",Sun,5.5,14.49,reveal,crossfade,5.5,14.48,True
-1,0,0,cache/manim/sun_scale.mp4,manim,,,10.0,15.94,static,fade,14.48,24.48,False
-1,0,1,results/the_sun__our_star/shots/scene1_0.mp4,nasa,The Earth & Moon,Earth,5.5,15.94,pan_right,crossfade,24.48,29.98,True
-1,0,2,results/the_sun__our_star/shots/scene1_1.mp4,wikimedia,File:The Earth seen from Apollo 17.jpg,Earth,5.5,15.94,push_in,crossfade,29.98,35.48,True
-2,0,0,results/the_sun__our_star/shots/scene2_0.mp4,nasa,Parker Solar Probe Antenna Deployment,Parker Solar Probe,5.5,16.6,pull_out,fade,30.42,35.92,True
-2,0,1,results/the_sun__our_star/shots/scene2_1.mp4,ai,,"Photorealistic documentary image: The viewer should see the Sun’s blazing surface and corona, with a hint of the Parker Solar Probe, feeling awe at the Sun’s extreme heat and mysterious magnetic cycles., cinematic, high detail",5.5,16.6,reveal,crossfade,35.92,47.02,True
-3,0,0,results/the_sun__our_star/shots/scene3_0.mp4,wikimedia,File:Parker Solar Probe Gets Its Revolutionary Heat Shield.jpg,Parker Solar Probe,5.5,13.72,pan_right,fade,47.02,52.52,True
-3,0,1,results/the_sun__our_star/shots/scene3_1.mp4,ai,,"Photorealistic documentary image: Show the Parker Solar Probe approaching the Sun's blazing surface, emphasizing extreme closeness and the probe's defiance in the searing plasma, while conveying the Sun's nurturing yet destructive power., cinematic, high detail",5.5,13.72,pull_out,crossfade,52.52,60.74,True
-4,0,0,results/the_sun__our_star/shots/scene4_0.mp4,ai,,"Photorealistic documentary image: Show the Sun in a majestic, impending sense of scale, with Earth small and fragile nearby, evoking both awe and the ticking clock of cosmic time., cinematic, high detail",5.5,13.8,static,fade,60.74,74.54,True
+1,0,0,results/the_sun__our_star/shots/scene1_0.mp4,ai,,"Photorealistic documentary image: The viewer should see the Sun in extreme close-up and wide shots, feeling both its immense scale and the awe of its mysterious heat., cinematic, high detail",5.5,15.94,pull_out,fade,14.48,30.42,True
+2,0,0,cache/manim/sun_scale.mp4,manim,,,10.0,16.6,static,fade,30.42,40.42,False
+2,0,1,results/the_sun__our_star/shots/scene2_0.mp4,ai,,"Photorealistic documentary image: The viewer should see the Sun dominating the frame, feeling its immense age and power, with a sense of cosmic scale and awe., cinematic, high detail",5.5,16.6,parallax,crossfade,40.42,47.02,True
+3,0,0,cache/manim/voyager_scale.mp4,manim,,,10.0,13.72,static,fade,47.02,57.02,False
+3,0,1,results/the_sun__our_star/shots/scene3_0.mp4,nasa,Parker Solar Probe Antenna Deployment,Parker Solar Probe,5.5,13.72,push_in,crossfade,57.02,62.52,True
+3,0,2,results/the_sun__our_star/shots/scene3_1.mp4,wikimedia,File:Parker Solar Probe.jpg,Parker Solar Probe,5.5,13.72,reveal,crossfade,62.52,68.02,True
+4,0,0,results/the_sun__our_star/shots/scene4_0.mp4,nasa,The Earth & Moon,Earth,5.5,13.8,parallax,fade,60.74,66.24,True
+4,0,1,results/the_sun__our_star/shots/scene4_1.mp4,wikimedia,File:The Earth seen from Apollo 17.jpg,Earth,5.5,13.8,push_in,crossfade,66.24,74.54,True

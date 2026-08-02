@@ -489,7 +489,7 @@ def build_stills_timeline(scenes_data: list[dict], shot_plan: dict,
         t = cursor
         for si, shot in enumerate(shots):
             dur = shot["duration"]
-            tl["video_timeline"].append({
+            entry = {
                 "layer": 1,
                 "file": shot["file"],
                 "start_time": round(t, 3),
@@ -499,7 +499,20 @@ def build_stills_timeline(scenes_data: list[dict], shot_plan: dict,
                 "camera": "ken_burns" if shot["kind"] != "manim" else "static",
                 "beat_index": si,
                 "shot_type": "primary",
-            })
+            }
+            # ── Semantic identity (iteration guidance: any frame traceable
+            #    from the timeline alone, not just diagnostics) ──
+            entry["camera_move"] = shot.get("camera", "static")
+            entry["motion_params"] = shot.get("motion_params", {})
+            entry["asset_source"] = shot.get("kind", "")
+            entry["asset_title"] = shot.get("title", "")
+            entry["query_used"] = shot.get("query", "")
+            entry["scene_id"] = i
+            ver = shot.get("verification") or {}
+            entry["verification_passed"] = bool(ver.get("passed", True))
+            entry["verification_reasons"] = ver.get("reasons", [])
+            entry["pre_verified"] = bool(ver.get("pre_verified", False))
+            tl["video_timeline"].append(entry)
             t += dur
         # Per-scene coverage: stretch the last shot of this scene to cover
         # the full narration window.  Otherwise a scene whose shots sum to
@@ -722,6 +735,40 @@ def main():
         iteration += 1
 
     # ── Final + postmortem ─────────────────────────────────────────────
+    # ── Degradations report (iteration guidance #3: no silent degradation) ──
+    degradations = []
+    if research.get("_verification_failed"):
+        degradations.append({
+            "stage": "fact_verification",
+            "severity": "warning",
+            "detail": research.get("_verification_error", "verification pass failed"),
+        })
+    if stills_stats.get("rejected", 0):
+        degradations.append({
+            "stage": "asset_gate",
+            "severity": "info",
+            "detail": f"{stills_stats['rejected']} assets rejected by Entity-Asset verification (correct behavior)",
+        })
+    if stills_stats.get("deduped", 0):
+        degradations.append({
+            "stage": "asset_dedup",
+            "severity": "info",
+            "detail": f"{stills_stats['deduped']} near-identical assets skipped (perceptual dedup)",
+        })
+    qa_block = run_report.get("stages", {}).get("qa_v1", {}).get("blocking_failures", [])
+    if qa_block:
+        degradations.append({
+            "stage": "deterministic_qa",
+            "severity": "error",
+            "detail": f"blocking failures: {qa_block}",
+        })
+    if run_report.get("stages", {}).get("music_v1", {}).get("mixed") is False:
+        degradations.append({
+            "stage": "music", "severity": "warning",
+            "detail": "music mix failed or no bed available",
+        })
+    run_report["degradations"] = degradations
+
     run_report["final"] = {
         "output": review_target, "iterations": iteration,
         "final_score": review.get("quality_score"),

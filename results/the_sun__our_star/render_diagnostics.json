@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-08-02T19:10:04Z",
-  "total_render_s": 81.44,
+  "generated_at": "2026-08-02T19:58:34Z",
+  "total_render_s": 81.47,
   "shot_count": 10,
   "shots": [
     {
@@ -38,9 +38,7 @@
           "Sun"
         ],
         "violated_prohibited": [],
-        "missing_required": [
-          "Parker Solar Probe"
-        ],
+        "missing_required": [],
         "vision_check": null,
         "reasons": [
           "signals confirm (score=0.64)"
@@ -50,37 +48,31 @@
         "beat_id": "scene0",
         "scene_id": 0,
         "required_entities": [
-          "Sun",
-          "Parker Solar Probe"
+          "Sun"
         ],
         "match_terms": {
           "Sun": [
             "Sun",
             "solar",
-            "sol",
-            "solar surface",
-            "solar corona"
-          ],
-          "Parker Solar Probe": [
-            "Parker Solar Probe",
-            "parker probe"
+            "photosphere",
+            "sdo",
+            "solar dynamics observatory"
           ]
         },
         "optional_entities": [
-          "Solar System",
-          "planets",
-          "Earth"
+          "Earth",
+          "inner solar system"
         ],
         "prohibited_entities": [
+          "Jupiter",
+          "Saturn",
           "Voyager 1",
-          "Apollo 11",
           "Mars rover",
-          "Moon landing",
-          "Galileo spacecraft"
+          "asteroid belt"
         ],
         "scene_intent": "hook",
         "confidence": 1.0,
-        "visual_objective": "The viewer should see the Sun in its overwhelming, fiery glory, feeling its immense scale and dominance over the solar system, with a hint of the probe that dares to approach it."
+        "visual_objective": "The viewer should see the Sun dominating the frame\u2014massive, blazing, and almost overwhelming\u2014with a small Earth for scale, feeling awe at its sheer dominance of the solar system."
       },
       "shot_duration_s": 5.5,
       "narration_duration_s": 14.49,
@@ -131,9 +123,7 @@
           "Sun"
         ],
         "violated_prohibited": [],
-        "missing_required": [
-          "Parker Solar Probe"
-        ],
+        "missing_required": [],
         "vision_check": null,
         "reasons": [
           "signals confirm (score=0.64)"
@@ -143,37 +133,31 @@
         "beat_id": "scene0",
         "scene_id": 0,
         "required_entities": [
-          "Sun",
-          "Parker Solar Probe"
+          "Sun"
         ],
         "match_terms": {
           "Sun": [
             "Sun",
             "solar",
-            "sol",
-            "solar surface",
-            "solar corona"
-          ],
-          "Parker Solar Probe": [
-            "Parker Solar Probe",
-            "parker probe"
+            "photosphere",
+            "sdo",
+            "solar dynamics observatory"
           ]
         },
         "optional_entities": [
-          "Solar System",
-          "planets",
-          "Earth"
+          "Earth",
+          "inner solar system"
         ],
         "prohibited_entities": [
+          "Jupiter",
+          "Saturn",
           "Voyager 1",
-          "Apollo 11",
           "Mars rover",
-          "Moon landing",
-          "Galileo spacecraft"
+          "asteroid belt"
         ],
         "scene_intent": "hook",
         "confidence": 1.0,
-        "visual_objective": "The viewer should see the Sun in its overwhelming, fiery glory, feeling its immense scale and dominance over the solar system, with a hint of the probe that dares to approach it."
+        "visual_objective": "The viewer should see the Sun dominating the frame\u2014massive, blazing, and almost overwhelming\u2014with a small Earth for scale, feeling awe at its sheer dominance of the solar system."
       },
       "shot_duration_s": 5.5,
       "narration_duration_s": 14.49,
@@ -193,85 +177,23 @@
       "scene_id": 1,
       "beat_index": 0,
       "shot_index": 0,
-      "asset_path": "cache/manim/sun_scale.mp4",
-      "asset_source": "manim",
-      "asset_title": "",
-      "query_used": "",
-      "verification": null,
-      "entity_spec": {
-        "beat_id": "scene1",
-        "scene_id": 1,
-        "required_entities": [
-          "Sun",
-          "Earth",
-          "Parker Solar Probe"
-        ],
-        "match_terms": {
-          "Sun": [
-            "Sun",
-            "solar",
-            "solar surface",
-            "solar corona",
-            "sunspot"
-          ],
-          "Earth": [
-            "Earth",
-            "planet earth",
-            "blue marble"
-          ],
-          "Parker Solar Probe": [
-            "Parker Solar Probe",
-            "parker",
-            "solar probe"
-          ]
-        },
-        "optional_entities": [
-          "solar flare",
-          "coronal mass ejection",
-          "solar cycle"
-        ],
-        "prohibited_entities": [
-          "Venus",
-          "Mars",
-          "Jupiter",
-          "Apollo mission",
-          "moon landing",
-          "Saturn"
-        ],
-        "scene_intent": "explanation",
-        "confidence": 1.0,
-        "visual_objective": "Show the Sun\u2019s overwhelming scale and energy, contrasted with Earth\u2019s tiny size, to convey the Sun\u2019s immense power and longevity."
-      },
-      "shot_duration_s": 10.0,
-      "narration_duration_s": 15.94,
-      "camera_motion": "static",
-      "motion_params": {},
-      "transition": "fade",
-      "timeline_start_s": 14.48,
-      "timeline_end_s": 24.48,
-      "render_duration_s": 0.0
-    },
-    {
-      "scene_id": 1,
-      "beat_index": 0,
-      "shot_index": 1,
       "asset_path": "results/the_sun__our_star/shots/scene1_0.mp4",
-      "asset_source": "nasa",
-      "asset_title": "The Earth & Moon",
-      "query_used": "Earth",
+      "asset_source": "ai",
+      "asset_title": "",
+      "query_used": "Photorealistic documentary image: The viewer should see the Sun in extreme close-up and wide shots, feeling both its immense scale and the awe of its mysterious heat., cinematic, high detail",
       "verification": {
         "asset_path": "cache/stills/the_sun__our_star/scene1_0.jpg",
         "beat_id": "scene1",
         "passed": true,
-        "score": 0.64,
+        "score": 0.43,
         "signal_scores": {
           "metadata": {
-            "score": 0.7,
-            "evidence": "hits=['Earth'], bans=[]"
+            "score": 0.3,
+            "evidence": "hits=[], bans=[]"
           },
           "captions": {
-            "score": 0.8,
-            "evidence": "hits=['Earth'], bans=[]"
+            "score": 0.5,
+            "evidence": "no text"
           },
           "filename": {
             "score": 0.2,
@@ -279,262 +201,58 @@
           },
           "provider_tags": {
             "score": 0.75,
-            "evidence": "tags=['Earth'], hits=['Earth'], bans=[]"
+            "evidence": "tags=['Photorealistic documentary image: The viewer should see the Sun in extreme close-up and wide shots, feeling both its immense scale and the awe of its mysterious heat., cinematic, high detail'], hits=['Sun'], bans=[]"
           }
         },
         "matched_required": [
-          "Earth"
-        ],
-        "violated_prohibited": [],
-        "missing_required": [
-          "Sun",
-          "Parker Solar Probe"
-        ],
-        "vision_check": null,
-        "reasons": [
-          "signals confirm (score=0.64)"
-        ]
-      },
-      "entity_spec": {
-        "beat_id": "scene1",
-        "scene_id": 1,
-        "required_entities": [
-          "Sun",
-          "Earth",
-          "Parker Solar Probe"
-        ],
-        "match_terms": {
-          "Sun": [
-            "Sun",
-            "solar",
-            "solar surface",
-            "solar corona",
-            "sunspot"
-          ],
-          "Earth": [
-            "Earth",
-            "planet earth",
-            "blue marble"
-          ],
-          "Parker Solar Probe": [
-            "Parker Solar Probe",
-            "parker",
-            "solar probe"
-          ]
-        },
-        "optional_entities": [
-          "solar flare",
-          "coronal mass ejection",
-          "solar cycle"
-        ],
-        "prohibited_entities": [
-          "Venus",
-          "Mars",
-          "Jupiter",
-          "Apollo mission",
-          "moon landing",
-          "Saturn"
-        ],
-        "scene_intent": "explanation",
-        "confidence": 1.0,
-        "visual_objective": "Show the Sun\u2019s overwhelming scale and energy, contrasted with Earth\u2019s tiny size, to convey the Sun\u2019s immense power and longevity."
-      },
-      "shot_duration_s": 5.5,
-      "narration_duration_s": 15.94,
-      "camera_motion": "pan_right",
-      "motion_params": {
-        "zoom_start": 1.12,
-        "zoom_end": 1.12,
-        "pan_x": 60,
-        "pan_y": 0
-      },
-      "transition": "crossfade",
-      "timeline_start_s": 24.48,
-      "timeline_end_s": 29.98,
-      "render_duration_s": 0.0
-    },
-    {
-      "scene_id": 1,
-      "beat_index": 0,
-      "shot_index": 2,
-      "asset_path": "results/the_sun__our_star/shots/scene1_1.mp4",
-      "asset_source": "wikimedia",
-      "asset_title": "File:The Earth seen from Apollo 17.jpg",
-      "query_used": "Earth",
-      "verification": {
-        "asset_path": "cache/stills/the_sun__our_star/scene1_1.jpg",
-        "beat_id": "scene1",
-        "passed": true,
-        "score": 0.64,
-        "signal_scores": {
-          "metadata": {
-            "score": 0.7,
-            "evidence": "hits=['Earth'], bans=[]"
-          },
-          "captions": {
-            "score": 0.8,
-            "evidence": "hits=['Earth'], bans=[]"
-          },
-          "filename": {
-            "score": 0.2,
-            "evidence": "hits=[], bans=[]"
-          },
-          "provider_tags": {
-            "score": 0.75,
-            "evidence": "tags=['Earth'], hits=['Earth'], bans=[]"
-          }
-        },
-        "matched_required": [
-          "Earth"
-        ],
-        "violated_prohibited": [],
-        "missing_required": [
-          "Sun",
-          "Parker Solar Probe"
-        ],
-        "vision_check": null,
-        "reasons": [
-          "signals confirm (score=0.64)"
-        ]
-      },
-      "entity_spec": {
-        "beat_id": "scene1",
-        "scene_id": 1,
-        "required_entities": [
-          "Sun",
-          "Earth",
-          "Parker Solar Probe"
-        ],
-        "match_terms": {
-          "Sun": [
-            "Sun",
-            "solar",
-            "solar surface",
-            "solar corona",
-            "sunspot"
-          ],
-          "Earth": [
-            "Earth",
-            "planet earth",
-            "blue marble"
-          ],
-          "Parker Solar Probe": [
-            "Parker Solar Probe",
-            "parker",
-            "solar probe"
-          ]
-        },
-        "optional_entities": [
-          "solar flare",
-          "coronal mass ejection",
-          "solar cycle"
-        ],
-        "prohibited_entities": [
-          "Venus",
-          "Mars",
-          "Jupiter",
-          "Apollo mission",
-          "moon landing",
-          "Saturn"
-        ],
-        "scene_intent": "explanation",
-        "confidence": 1.0,
-        "visual_objective": "Show the Sun\u2019s overwhelming scale and energy, contrasted with Earth\u2019s tiny size, to convey the Sun\u2019s immense power and longevity."
-      },
-      "shot_duration_s": 5.5,
-      "narration_duration_s": 15.94,
-      "camera_motion": "push_in",
-      "motion_params": {
-        "zoom_start": 1.0,
-        "zoom_end": 1.22,
-        "pan_x": 0,
-        "pan_y": 0
-      },
-      "transition": "crossfade",
-      "timeline_start_s": 29.98,
-      "timeline_end_s": 35.48,
-      "render_duration_s": 0.0
-    },
-    {
-      "scene_id": 2,
-      "beat_index": 0,
-      "shot_index": 0,
-      "asset_path": "results/the_sun__our_star/shots/scene2_0.mp4",
-      "asset_source": "nasa",
-      "asset_title": "Parker Solar Probe Antenna Deployment",
-      "query_used": "Parker Solar Probe",
-      "verification": {
-        "asset_path": "cache/stills/the_sun__our_star/scene2_0.jpg",
-        "beat_id": "scene2",
-        "passed": true,
-        "score": 0.64,
-        "signal_scores": {
-          "metadata": {
-            "score": 0.7,
-            "evidence": "hits=['Parker Solar Probe'], bans=[]"
-          },
-          "captions": {
-            "score": 0.8,
-            "evidence": "hits=['Parker Solar Probe'], bans=[]"
-          },
-          "filename": {
-            "score": 0.2,
-            "evidence": "hits=[], bans=[]"
-          },
-          "provider_tags": {
-            "score": 0.75,
-            "evidence": "tags=['Parker Solar Probe'], hits=['Parker Solar Probe'], bans=[]"
-          }
-        },
-        "matched_required": [
-          "Sun",
-          "Parker Solar Probe"
+          "Sun"
         ],
         "violated_prohibited": [],
         "missing_required": [],
-        "vision_check": null,
+        "vision_check": {
+          "subject": "",
+          "passed": false,
+          "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and ",
+          "model": "gemini-3.5-flash"
+        },
         "reasons": [
-          "signals confirm (score=0.64)"
+          "vision unavailable (429 RESOURCE_EXHAUSTED. {'error': {'code); metadata fallback score=0.43 (low-confidence accept)"
         ]
       },
       "entity_spec": {
-        "beat_id": "scene2",
-        "scene_id": 2,
+        "beat_id": "scene1",
+        "scene_id": 1,
         "required_entities": [
-          "Sun",
-          "Parker Solar Probe"
+          "Sun"
         ],
         "match_terms": {
           "Sun": [
             "Sun",
             "solar",
+            "photosphere",
             "corona",
-            "solar flare"
-          ],
-          "Parker Solar Probe": [
-            "Parker Solar Probe",
-            "solar probe",
-            "parker"
+            "solar surface"
           ]
         },
         "optional_entities": [
-          "solar flare",
-          "corona",
-          "magnetic field"
+          "Earth",
+          "solar corona",
+          "SOHO",
+          "SDO"
         ],
         "prohibited_entities": [
-          "Earth",
           "Jupiter",
+          "Moon",
+          "Mars",
           "Voyager 1",
-          "Apollo mission",
-          "Saturn"
+          "Hubble Space Telescope"
         ],
-        "scene_intent": "explanation",
+        "scene_intent": "scale",
         "confidence": 1.0,
-        "visual_objective": "The viewer should see the Sun\u2019s blazing surface and corona, with a hint of the Parker Solar Probe, feeling awe at the Sun\u2019s extreme heat and mysterious magnetic cycles."
+        "visual_objective": "The viewer should see the Sun in extreme close-up and wide shots, feeling both its immense scale and the awe of its mysterious heat."
       },
       "shot_duration_s": 5.5,
-      "narration_duration_s": 16.6,
+      "narration_duration_s": 15.94,
       "camera_motion": "pull_out",
       "motion_params": {
         "zoom_start": 1.22,
@@ -543,20 +261,69 @@
         "pan_y": 0
       },
       "transition": "fade",
+      "timeline_start_s": 14.48,
+      "timeline_end_s": 30.42,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 2,
+      "beat_index": 0,
+      "shot_index": 0,
+      "asset_path": "cache/manim/sun_scale.mp4",
+      "asset_source": "manim",
+      "asset_title": "",
+      "query_used": "",
+      "verification": null,
+      "entity_spec": {
+        "beat_id": "scene2",
+        "scene_id": 2,
+        "required_entities": [
+          "Sun"
+        ],
+        "match_terms": {
+          "Sun": [
+            "Sun",
+            "solar",
+            "sol",
+            "sun surface",
+            "solar flare",
+            "photosphere"
+          ]
+        },
+        "optional_entities": [
+          "stars",
+          "galaxy"
+        ],
+        "prohibited_entities": [
+          "Earth (unless shown as tiny dot for scale)",
+          "Moon",
+          "Voyager 1",
+          "Mars",
+          "comet"
+        ],
+        "scene_intent": "scale",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see the Sun dominating the frame, feeling its immense age and power, with a sense of cosmic scale and awe."
+      },
+      "shot_duration_s": 10.0,
+      "narration_duration_s": 16.6,
+      "camera_motion": "static",
+      "motion_params": {},
+      "transition": "fade",
       "timeline_start_s": 30.42,
-      "timeline_end_s": 35.92,
+      "timeline_end_s": 40.42,
       "render_duration_s": 0.0
     },
     {
       "scene_id": 2,
       "beat_index": 0,
       "shot_index": 1,
-      "asset_path": "results/the_sun__our_star/shots/scene2_1.mp4",
+      "asset_path": "results/the_sun__our_star/shots/scene2_0.mp4",
       "asset_source": "ai",
       "asset_title": "",
-      "query_used": "Photorealistic documentary image: The viewer should see the Sun\u2019s blazing surface and corona, with a hint of the Parker Solar Probe, feeling awe at the Sun\u2019s extreme heat and mysterious magnetic cycles., cinematic, high detail",
+      "query_used": "Photorealistic documentary image: The viewer should see the Sun dominating the frame, feeling its immense age and power, with a sense of cosmic scale and awe., cinematic, high detail",
       "verification": {
-        "asset_path": "cache/stills/the_sun__our_star/scene2_1.jpg",
+        "asset_path": "cache/stills/the_sun__our_star/scene2_0.jpg",
         "beat_id": "scene2",
         "passed": true,
         "score": 0.43,
@@ -575,12 +342,11 @@
           },
           "provider_tags": {
             "score": 0.75,
-            "evidence": "tags=['Photorealistic documentary image: The viewer should see the Sun\u2019s blazing surface and corona, with a hint of the Parker Solar Probe, feeling awe at the Sun\u2019s extreme heat and mysterious magnetic cycles., cinematic, high detail'], hits=['Sun', 'Parker Solar Probe'], bans=[]"
+            "evidence": "tags=['Photorealistic documentary image: The viewer should see the Sun dominating the frame, feeling its immense age and power, with a sense of cosmic scale and awe., cinematic, high detail'], hits=['Sun'], bans=[]"
           }
         },
         "matched_required": [
-          "Sun",
-          "Parker Solar Probe"
+          "Sun"
         ],
         "violated_prohibited": [],
         "missing_required": [],
@@ -598,49 +364,44 @@
         "beat_id": "scene2",
         "scene_id": 2,
         "required_entities": [
-          "Sun",
-          "Parker Solar Probe"
+          "Sun"
         ],
         "match_terms": {
           "Sun": [
             "Sun",
             "solar",
-            "corona",
-            "solar flare"
-          ],
-          "Parker Solar Probe": [
-            "Parker Solar Probe",
-            "solar probe",
-            "parker"
+            "sol",
+            "sun surface",
+            "solar flare",
+            "photosphere"
           ]
         },
         "optional_entities": [
-          "solar flare",
-          "corona",
-          "magnetic field"
+          "stars",
+          "galaxy"
         ],
         "prohibited_entities": [
-          "Earth",
-          "Jupiter",
+          "Earth (unless shown as tiny dot for scale)",
+          "Moon",
           "Voyager 1",
-          "Apollo mission",
-          "Saturn"
+          "Mars",
+          "comet"
         ],
-        "scene_intent": "explanation",
+        "scene_intent": "scale",
         "confidence": 1.0,
-        "visual_objective": "The viewer should see the Sun\u2019s blazing surface and corona, with a hint of the Parker Solar Probe, feeling awe at the Sun\u2019s extreme heat and mysterious magnetic cycles."
+        "visual_objective": "The viewer should see the Sun dominating the frame, feeling its immense age and power, with a sense of cosmic scale and awe."
       },
       "shot_duration_s": 5.5,
       "narration_duration_s": 16.6,
-      "camera_motion": "reveal",
+      "camera_motion": "parallax",
       "motion_params": {
-        "zoom_start": 1.25,
-        "zoom_end": 1.0,
-        "pan_x": 0,
-        "pan_y": 0
+        "zoom_start": 1.2,
+        "zoom_end": 1.05,
+        "pan_x": 50,
+        "pan_y": -30
       },
       "transition": "crossfade",
-      "timeline_start_s": 35.92,
+      "timeline_start_s": 40.42,
       "timeline_end_s": 47.02,
       "render_duration_s": 0.0
     },
@@ -648,9 +409,62 @@
       "scene_id": 3,
       "beat_index": 0,
       "shot_index": 0,
+      "asset_path": "cache/manim/voyager_scale.mp4",
+      "asset_source": "manim",
+      "asset_title": "",
+      "query_used": "",
+      "verification": null,
+      "entity_spec": {
+        "beat_id": "scene3",
+        "scene_id": 3,
+        "required_entities": [
+          "Parker Solar Probe",
+          "Sun"
+        ],
+        "match_terms": {
+          "Parker Solar Probe": [
+            "Parker Solar Probe",
+            "parker probe",
+            "psp"
+          ],
+          "Sun": [
+            "Sun",
+            "solar corona",
+            "solar surface",
+            "sunspots"
+          ]
+        },
+        "optional_entities": [
+          "Sunspots"
+        ],
+        "prohibited_entities": [
+          "Solar Orbiter",
+          "SOHO",
+          "Voyager 1",
+          "Mars",
+          "Earth",
+          "Moon"
+        ],
+        "scene_intent": "hook",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see a spacecraft bravely diving into the Sun's fiery atmosphere, feeling the tension and awe of surviving the impossible heat, while sunspots rotate on the solar surface to hint at the Sun's 27-day spin."
+      },
+      "shot_duration_s": 10.0,
+      "narration_duration_s": 13.72,
+      "camera_motion": "static",
+      "motion_params": {},
+      "transition": "fade",
+      "timeline_start_s": 47.02,
+      "timeline_end_s": 57.02,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 3,
+      "beat_index": 0,
+      "shot_index": 1,
       "asset_path": "results/the_sun__our_star/shots/scene3_0.mp4",
-      "asset_source": "wikimedia",
-      "asset_title": "File:Parker Solar Probe Gets Its Revolutionary Heat Shield.jpg",
+      "asset_source": "nasa",
+      "asset_title": "Parker Solar Probe Antenna Deployment",
       "query_used": "Parker Solar Probe",
       "verification": {
         "asset_path": "cache/stills/the_sun__our_star/scene3_0.jpg",
@@ -676,11 +490,12 @@
           }
         },
         "matched_required": [
-          "Parker Solar Probe",
-          "Sun"
+          "Parker Solar Probe"
         ],
         "violated_prohibited": [],
-        "missing_required": [],
+        "missing_required": [
+          "Sun"
+        ],
         "vision_check": null,
         "reasons": [
           "signals confirm (score=0.64)"
@@ -696,64 +511,66 @@
         "match_terms": {
           "Parker Solar Probe": [
             "Parker Solar Probe",
-            "parker probe"
+            "parker probe",
+            "psp"
           ],
           "Sun": [
             "Sun",
-            "solar"
+            "solar corona",
+            "solar surface",
+            "sunspots"
           ]
         },
         "optional_entities": [
-          "solar corona",
-          "solar plasma",
-          "Earth"
+          "Sunspots"
         ],
         "prohibited_entities": [
-          "Jupiter",
-          "Saturn",
+          "Solar Orbiter",
+          "SOHO",
           "Voyager 1",
           "Mars",
+          "Earth",
           "Moon"
         ],
-        "scene_intent": "explanation",
+        "scene_intent": "hook",
         "confidence": 1.0,
-        "visual_objective": "Show the Parker Solar Probe approaching the Sun's blazing surface, emphasizing extreme closeness and the probe's defiance in the searing plasma, while conveying the Sun's nurturing yet destructive power."
+        "visual_objective": "The viewer should see a spacecraft bravely diving into the Sun's fiery atmosphere, feeling the tension and awe of surviving the impossible heat, while sunspots rotate on the solar surface to hint at the Sun's 27-day spin."
       },
       "shot_duration_s": 5.5,
       "narration_duration_s": 13.72,
-      "camera_motion": "pan_right",
+      "camera_motion": "push_in",
       "motion_params": {
-        "zoom_start": 1.12,
-        "zoom_end": 1.12,
-        "pan_x": 60,
+        "zoom_start": 1.0,
+        "zoom_end": 1.22,
+        "pan_x": 0,
         "pan_y": 0
       },
-      "transition": "fade",
-      "timeline_start_s": 47.02,
-      "timeline_end_s": 52.52,
+      "transition": "crossfade",
+      "timeline_start_s": 57.02,
+      "timeline_end_s": 62.52,
       "render_duration_s": 0.0
     },
     {
       "scene_id": 3,
       "beat_index": 0,
-      "shot_index": 1,
+      "shot_index": 2,
       "asset_path": "results/the_sun__our_star/shots/scene3_1.mp4",
-      "asset_source": "ai",
-      "asset_title": "",
-      "query_used": "Photorealistic documentary image: Show the Parker Solar Probe approaching the Sun's blazing surface, emphasizing extreme closeness and the probe's defiance in the searing plasma, while conveying the Sun's nurturing yet destructive power., cinematic, high detail",
+      "asset_source": "wikimedia",
+      "asset_title": "File:Parker Solar Probe.jpg",
+      "query_used": "Parker Solar Probe",
       "verification": {
         "asset_path": "cache/stills/the_sun__our_star/scene3_1.jpg",
         "beat_id": "scene3",
         "passed": true,
-        "score": 0.43,
+        "score": 0.64,
         "signal_scores": {
           "metadata": {
-            "score": 0.3,
-            "evidence": "hits=[], bans=[]"
+            "score": 0.7,
+            "evidence": "hits=['Parker Solar Probe'], bans=[]"
           },
           "captions": {
-            "score": 0.5,
-            "evidence": "no text"
+            "score": 0.8,
+            "evidence": "hits=['Parker Solar Probe'], bans=[]"
           },
           "filename": {
             "score": 0.2,
@@ -761,23 +578,19 @@
           },
           "provider_tags": {
             "score": 0.75,
-            "evidence": "tags=[\"Photorealistic documentary image: Show the Parker Solar Probe approaching the Sun's blazing surface, emphasizing extreme closeness and the probe's defiance in the searing plasma, while conveying the Sun's nurturing yet destructive power., cinematic, high detail\"], hits=['Parker Solar Probe', 'Sun'], bans=[]"
+            "evidence": "tags=['Parker Solar Probe'], hits=['Parker Solar Probe'], bans=[]"
           }
         },
         "matched_required": [
-          "Parker Solar Probe",
-          "Sun"
+          "Parker Solar Probe"
         ],
         "violated_prohibited": [],
-        "missing_required": [],
-        "vision_check": {
-          "subject": "",
-          "passed": false,
-          "error": "429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and ",
-          "model": "gemini-3.5-flash"
-        },
+        "missing_required": [
+          "Sun"
+        ],
+        "vision_check": null,
         "reasons": [
-          "vision unavailable (429 RESOURCE_EXHAUSTED. {'error': {'code); metadata fallback score=0.43 (low-confidence accept)"
+          "signals confirm (score=0.64)"
         ]
       },
       "entity_spec": {
@@ -790,41 +603,43 @@
         "match_terms": {
           "Parker Solar Probe": [
             "Parker Solar Probe",
-            "parker probe"
+            "parker probe",
+            "psp"
           ],
           "Sun": [
             "Sun",
-            "solar"
+            "solar corona",
+            "solar surface",
+            "sunspots"
           ]
         },
         "optional_entities": [
-          "solar corona",
-          "solar plasma",
-          "Earth"
+          "Sunspots"
         ],
         "prohibited_entities": [
-          "Jupiter",
-          "Saturn",
+          "Solar Orbiter",
+          "SOHO",
           "Voyager 1",
           "Mars",
+          "Earth",
           "Moon"
         ],
-        "scene_intent": "explanation",
+        "scene_intent": "hook",
         "confidence": 1.0,
-        "visual_objective": "Show the Parker Solar Probe approaching the Sun's blazing surface, emphasizing extreme closeness and the probe's defiance in the searing plasma, while conveying the Sun's nurturing yet destructive power."
+        "visual_objective": "The viewer should see a spacecraft bravely diving into the Sun's fiery atmosphere, feeling the tension and awe of surviving the impossible heat, while sunspots rotate on the solar surface to hint at the Sun's 27-day spin."
       },
       "shot_duration_s": 5.5,
       "narration_duration_s": 13.72,
-      "camera_motion": "pull_out",
+      "camera_motion": "reveal",
       "motion_params": {
-        "zoom_start": 1.22,
+        "zoom_start": 1.25,
         "zoom_end": 1.0,
         "pan_x": 0,
         "pan_y": 0
       },
       "transition": "crossfade",
-      "timeline_start_s": 52.52,
-      "timeline_end_s": 60.74,
+      "timeline_start_s": 62.52,
+      "timeline_end_s": 68.02,
       "render_duration_s": 0.0
     },
     {
@@ -832,22 +647,22 @@
       "beat_index": 0,
       "shot_index": 0,
       "asset_path": "results/the_sun__our_star/shots/scene4_0.mp4",
-      "asset_source": "ai",
-      "asset_title": "",
-      "query_used": "Photorealistic documentary image: Show the Sun in a majestic, impending sense of scale, with Earth small and fragile nearby, evoking both awe and the ticking clock of cosmic time., cinematic, high detail",
+      "asset_source": "nasa",
+      "asset_title": "The Earth & Moon",
+      "query_used": "Earth",
       "verification": {
         "asset_path": "cache/stills/the_sun__our_star/scene4_0.jpg",
         "beat_id": "scene4",
         "passed": true,
-        "score": 0.43,
+        "score": 0.64,
         "signal_scores": {
           "metadata": {
-            "score": 0.3,
-            "evidence": "hits=[], bans=[]"
+            "score": 0.7,
+            "evidence": "hits=['Earth'], bans=[]"
           },
           "captions": {
-            "score": 0.5,
-            "evidence": "no text"
+            "score": 0.8,
+            "evidence": "hits=['Earth'], bans=[]"
           },
           "filename": {
             "score": 0.2,
@@ -855,18 +670,19 @@
           },
           "provider_tags": {
             "score": 0.75,
-            "evidence": "tags=['Photorealistic documentary image: Show the Sun in a majestic, impending sense of scale, with Earth small and fragile nearby, evoking both awe and the ticking clock of cosmic time., cinematic, high detail'], hits=['Sun', 'Earth'], bans=[]"
+            "evidence": "tags=['Earth'], hits=['Earth'], bans=[]"
           }
         },
         "matched_required": [
-          "Sun",
           "Earth"
         ],
         "violated_prohibited": [],
-        "missing_required": [],
+        "missing_required": [
+          "Sun"
+        ],
         "vision_check": null,
         "reasons": [
-          "metadata-only accept (score=0.43); vision broken"
+          "signals confirm (score=0.64)"
         ]
       },
       "entity_spec": {
@@ -879,8 +695,7 @@
         "match_terms": {
           "Sun": [
             "Sun",
-            "solar",
-            "star"
+            "solar"
           ],
           "Earth": [
             "Earth",
@@ -890,28 +705,120 @@
         "optional_entities": [
           "Mercury",
           "Venus",
-          "Parker Solar Probe"
+          "red giant"
         ],
         "prohibited_entities": [
+          "Voyager 1",
           "Jupiter",
-          "Saturn",
-          "Moon"
+          "Apollo 11",
+          "Mars",
+          "spaceship"
         ],
-        "scene_intent": "emotion",
+        "scene_intent": "hook",
         "confidence": 1.0,
-        "visual_objective": "Show the Sun in a majestic, impending sense of scale, with Earth small and fragile nearby, evoking both awe and the ticking clock of cosmic time."
+        "visual_objective": "The viewer should see the Sun as a dominating, life-giving presence and Earth as a small, fragile blue dot in its glow, feeling both awe at the Sun's scale and an urgent tenderness for our home planet."
       },
       "shot_duration_s": 5.5,
       "narration_duration_s": 13.8,
-      "camera_motion": "static",
+      "camera_motion": "parallax",
       "motion_params": {
-        "zoom_start": 1.0,
-        "zoom_end": 1.0,
-        "pan_x": 0,
-        "pan_y": 0
+        "zoom_start": 1.2,
+        "zoom_end": 1.05,
+        "pan_x": 50,
+        "pan_y": -30
       },
       "transition": "fade",
       "timeline_start_s": 60.74,
+      "timeline_end_s": 66.24,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 4,
+      "beat_index": 0,
+      "shot_index": 1,
+      "asset_path": "results/the_sun__our_star/shots/scene4_1.mp4",
+      "asset_source": "wikimedia",
+      "asset_title": "File:The Earth seen from Apollo 17.jpg",
+      "query_used": "Earth",
+      "verification": {
+        "asset_path": "cache/stills/the_sun__our_star/scene4_1.jpg",
+        "beat_id": "scene4",
+        "passed": true,
+        "score": 0.64,
+        "signal_scores": {
+          "metadata": {
+            "score": 0.7,
+            "evidence": "hits=['Earth'], bans=[]"
+          },
+          "captions": {
+            "score": 0.8,
+            "evidence": "hits=['Earth'], bans=[]"
+          },
+          "filename": {
+            "score": 0.2,
+            "evidence": "hits=[], bans=[]"
+          },
+          "provider_tags": {
+            "score": 0.75,
+            "evidence": "tags=['Earth'], hits=['Earth'], bans=[]"
+          }
+        },
+        "matched_required": [
+          "Earth"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [
+          "Sun"
+        ],
+        "vision_check": null,
+        "reasons": [
+          "signals confirm (score=0.64)"
+        ]
+      },
+      "entity_spec": {
+        "beat_id": "scene4",
+        "scene_id": 4,
+        "required_entities": [
+          "Sun",
+          "Earth"
+        ],
+        "match_terms": {
+          "Sun": [
+            "Sun",
+            "solar"
+          ],
+          "Earth": [
+            "Earth",
+            "pale blue dot"
+          ]
+        },
+        "optional_entities": [
+          "Mercury",
+          "Venus",
+          "red giant"
+        ],
+        "prohibited_entities": [
+          "Voyager 1",
+          "Jupiter",
+          "Apollo 11",
+          "Mars",
+          "spaceship"
+        ],
+        "scene_intent": "hook",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see the Sun as a dominating, life-giving presence and Earth as a small, fragile blue dot in its glow, feeling both awe at the Sun's scale and an urgent tenderness for our home planet."
+      },
+      "shot_duration_s": 5.5,
+      "narration_duration_s": 13.8,
+      "camera_motion": "push_in",
+      "motion_params": {
+        "zoom_start": 1.0,
+        "zoom_end": 1.22,
+        "pan_x": 0,
+        "pan_y": 0
+      },
+      "transition": "crossfade",
+      "timeline_start_s": 66.24,
       "timeline_end_s": 74.54,
       "render_duration_s": 0.0
     }

@@ -1,47 +1,47 @@
 [
   {
-    "title": "A Star Among Us",
-    "narration": "This ball of fire is ninety-nine point eight six% of our solar system. Planets, moons, asteroids\u2014less than point one four% of all mass. You've never truly seen it; we'll show you what it does every second.",
-    "visual_goal": "Sun rising over landscape, overlay of solar system showing dominance",
+    "title": "The Hidden Giant",
+    "narration": "Everything you\u2019ve known\u2014planets, asteroids, people\u2014is point one four% of the solar system. The Sun owns ninety-nine point eight six%. So what is that ball of fire?",
+    "visual_goal": "Sunrise over Earth, zoom to Sun's surface.",
     "search_queries": [
-      "sun rising earth",
-      "solar system sun dominance"
+      "sunrise Earth",
+      "Sun close-up surface"
     ]
   },
   {
-    "title": "The Furnace Within",
-    "narration": "Every second, the sun fuses six hundred million tons of hydrogen into helium\u2014like swallowing five hundred thousand Earths. Core temperature: fifteen million degrees. It's done this for four point six billion years, outlasting any flame. Fury doesn't stay locked inside.",
-    "visual_goal": "Cross-section of sun's core with fusion particles radiating",
+    "title": "Journey to the Core",
+    "narration": "Surface: five thousand five hundred\u00b0C. Core: fifteen million\u00b0C. Spans one point three nine million kilometers. The outer atmosphere is a million times hotter\u2014still unexplained.",
+    "visual_goal": "Cutaway from surface to core showing temperature contrast.",
     "search_queries": [
       "sun core animation",
-      "nuclear fusion sun"
+      "solar temperature layers"
     ]
   },
   {
-    "title": "The Journey Out",
-    "narration": "Surface blazes at five thousand five hundred degrees; corona above burns at over a million. Like a campfire scorching a mile away\u2014a mystery. Every eleven years, the magnetic field flips, hurling storms we watch for.",
-    "visual_goal": "Solar prominences and corona, then magnetic field lines flipping",
+    "title": "The Ancient Engine",
+    "narration": "For four point six billion years, the Sun fused hydrogen (seventy-three% of mass), releasing three point eight\u00d7ten^twenty-six watts every second\u2014enough to power billions of stars.",
+    "visual_goal": "Composition diagram, then flares and energy waves.",
     "search_queries": [
-      "solar flare corona",
-      "solar magnetic cycle"
+      "sun hydrogen helium composition",
+      "solar luminosity"
     ]
   },
   {
-    "title": "Our Messenger",
-    "narration": "To predict storms, Parker Solar Probe (twenty eighteen) flew within six point one million kilometers of the Sun in two thousand twenty-four\u2014closer than ever. It plunges through million-degree plasma; it shouldn't exist, but sends secrets. The sun that nurtures will consume us.",
-    "visual_goal": "Parker probe approaching sun with glowing heat shield",
+    "title": "Touch the Corona",
+    "narration": "In two thousand twenty-one, a spacecraft flew through the Sun\u2019s million-degree corona and survived. The Sun spins once every twenty-seven days\u2014visible via sunspots.",
+    "visual_goal": "Parker Solar Probe near corona glow.",
     "search_queries": [
-      "Parker Solar Probe approach",
-      "solar probe heat shield"
+      "Parker Solar Probe corona",
+      "sun rotation"
     ]
   },
   {
-    "title": "The Long Goodbye",
-    "narration": "It will shine five billion more years, swell into a red giant\u2014swallowing Mercury, Venus, possibly Earth. Not fiction\u2014a calendar. Each sunrise is both promise and countdown. We're here to see this one.",
-    "visual_goal": "Sun to red giant to white dwarf, fading to calm dawn",
+    "title": "Your Star",
+    "narration": "In ~five billion years, the Sun becomes a red giant, engulfing Mercury, Venus\u2014maybe Earth. For now, one hundred forty-nine point six million kilometers away, it fuels our days. The next solar maximum may change how we live.",
+    "visual_goal": "Star to red giant, then quiet Sun over Earth.",
     "search_queries": [
       "sun red giant future",
-      "sun white dwarf"
+      "sunset calm"
     ]
   }
 ]

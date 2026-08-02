@@ -1,22 +1,22 @@
 {
   "topic": "The Sun: our star",
-  "started_at": "2026-08-02T19:04:20Z",
+  "started_at": "2026-08-02T19:53:02Z",
   "strategy": "stills_first",
   "stages": {
     "visuals": {
-      "manim": 1,
+      "manim": 2,
       "nasa": 3,
       "wikimedia": 3,
-      "ai": 3,
+      "ai": 2,
       "video_fallback": 0,
       "rejected": 0,
       "vision_checked": 2,
-      "deduped": 11
+      "deduped": 6
     },
     "render_v1": {
       "duration_s": 74.566667,
-      "size_mb": 9.6,
-      "render_s": 81.4
+      "size_mb": 9.2,
+      "render_s": 81.5
     },
     "qa_v1": {
       "passed": true,
@@ -86,38 +86,45 @@
     },
     "music_v1": {
       "mixed": true,
-      "elapsed_s": 8.2,
-      "size_mb": 10.2
+      "elapsed_s": 8.3,
+      "size_mb": 9.8
     },
     "review_v1": {
-      "score": 68,
-      "confidence": 0.92,
+      "score": 72,
+      "confidence": 0.95,
       "model_used": null
     },
     "improve_pass_1": {
       "iteration": 2,
       "applied": [
         {
+          "category": "transitions",
+          "detail": "[transitions][high] Smooth the jump between CGI Sun and Earth beach at 0:06.",
+          "source_rec": "Smooth the jump between CGI Sun and Earth beach at 0:06."
+        },
+        {
           "category": "audio_balance",
-          "detail": "[audio_balance][low] Increase music volume by 3dB during the final 5 seconds for emotional impact.",
-          "source_rec": "Increase music volume by 3dB during the final 5 seconds for emotional impact."
+          "detail": "[audio_balance][medium] Lower background track by 3dB during the core temperature explanation.",
+          "source_rec": "Lower background track by 3dB during the core temperature explanation."
+        },
+        {
+          "category": "subtitles",
+          "detail": "[subtitles][low] Add burned-in captions for key statistics like 99.86% mass.",
+          "source_rec": "Add burned-in captions for key statistics like 99.86% mass."
         }
       ],
-      "flagged": [
-        "[fact_change] Synchronize Cycle 25 peak date; video says 2026, script implies 2024.",
-        "[new_asset] Replace static Parker Solar Probe image at 00:30 with dynamic 3D model or B-roll."
-      ],
+      "flagged": [],
       "stopped_early": false,
       "notes": "",
       "elapsed_s": 0.0
     },
     "render_v2": {
       "duration_s": 74.566667,
-      "render_s": 80.7
+      "render_s": 82.8
     },
     "review_v2": {
       "score": 72,
-      "confidence": 0.78,
+      "confidence": 0.95,
       "model_used": null
     },
     "improve_pass_2": {
@@ -125,17 +132,17 @@
       "applied": [
         {
           "category": "transitions",
-          "detail": "[transitions][medium] Use a light-speed zoom effect at 0:14 to bridge the beach and solar core scenes.",
-          "source_rec": "Use a light-speed zoom effect at 0:14 to bridge the beach and solar core scenes."
+          "detail": "[transitions][medium] Smooth the cut at 00:30 between the Sun animation and the size comparison chart.",
+          "source_rec": "Smooth the cut at 00:30 between the Sun animation and the size comparison chart."
         },
         {
-          "category": "audio_balance",
-          "detail": "[audio_balance][low] Slightly lower ambient synth pad during the Parker Probe segment for better clarity.",
-          "source_rec": "Slightly lower ambient synth pad during the Parker Probe segment for better clarity."
+          "category": "color",
+          "detail": "[color][low] Match the saturation of the Sun's orange hues between the 00:15 and 00:40 segments.",
+          "source_rec": "Match the saturation of the Sun's orange hues between the 00:15 and 00:40 segments."
         }
       ],
       "flagged": [
-        "[script_change] Align the 600 million ton hydrogen claim with the 4 million ton energy conversion mentioned in audio."
+        "[fact_change] Standardize all distance measurements to either metric or imperial throughout the video and overlays."
       ],
       "stopped_early": false,
       "notes": "",
@@ -143,10 +150,10 @@
     },
     "render_v3": {
       "duration_s": 74.566667,
-      "render_s": 79.2
+      "render_s": 82.6
     },
     "review_v3": {
-      "score": 78,
+      "score": 74,
       "confidence": 0.95,
       "model_used": null
     }
@@ -157,117 +164,94 @@
       "beat_id": "scene0",
       "scene_id": 0,
       "required_entities": [
-        "Sun",
-        "Parker Solar Probe"
+        "Sun"
+      ],
+      "match_terms": {
+        "Sun": [
+          "Sun",
+          "solar",
+          "photosphere",
+          "sdo",
+          "solar dynamics observatory"
+        ]
+      },
+      "optional_entities": [
+        "Earth",
+        "inner solar system"
+      ],
+      "prohibited_entities": [
+        "Jupiter",
+        "Saturn",
+        "Voyager 1",
+        "Mars rover",
+        "asteroid belt"
+      ],
+      "scene_intent": "hook",
+      "confidence": 1.0,
+      "visual_objective": "The viewer should see the Sun dominating the frame\u2014massive, blazing, and almost overwhelming\u2014with a small Earth for scale, feeling awe at its sheer dominance of the solar system."
+    },
+    "1": {
+      "beat_id": "scene1",
+      "scene_id": 1,
+      "required_entities": [
+        "Sun"
+      ],
+      "match_terms": {
+        "Sun": [
+          "Sun",
+          "solar",
+          "photosphere",
+          "corona",
+          "solar surface"
+        ]
+      },
+      "optional_entities": [
+        "Earth",
+        "solar corona",
+        "SOHO",
+        "SDO"
+      ],
+      "prohibited_entities": [
+        "Jupiter",
+        "Moon",
+        "Mars",
+        "Voyager 1",
+        "Hubble Space Telescope"
+      ],
+      "scene_intent": "scale",
+      "confidence": 1.0,
+      "visual_objective": "The viewer should see the Sun in extreme close-up and wide shots, feeling both its immense scale and the awe of its mysterious heat."
+    },
+    "2": {
+      "beat_id": "scene2",
+      "scene_id": 2,
+      "required_entities": [
+        "Sun"
       ],
       "match_terms": {
         "Sun": [
           "Sun",
           "solar",
           "sol",
-          "solar surface",
-          "solar corona"
-        ],
-        "Parker Solar Probe": [
-          "Parker Solar Probe",
-          "parker probe"
+          "sun surface",
+          "solar flare",
+          "photosphere"
         ]
       },
       "optional_entities": [
-        "Solar System",
-        "planets",
-        "Earth"
+        "stars",
+        "galaxy"
       ],
       "prohibited_entities": [
+        "Earth (unless shown as tiny dot for scale)",
+        "Moon",
         "Voyager 1",
-        "Apollo 11",
-        "Mars rover",
-        "Moon landing",
-        "Galileo spacecraft"
-      ],
-      "scene_intent": "hook",
-      "confidence": 1.0,
-      "visual_objective": "The viewer should see the Sun in its overwhelming, fiery glory, feeling its immense scale and dominance over the solar system, with a hint of the probe that dares to approach it."
-    },
-    "1": {
-      "beat_id": "scene1",
-      "scene_id": 1,
-      "required_entities": [
-        "Sun",
-        "Earth",
-        "Parker Solar Probe"
-      ],
-      "match_terms": {
-        "Sun": [
-          "Sun",
-          "solar",
-          "solar surface",
-          "solar corona",
-          "sunspot"
-        ],
-        "Earth": [
-          "Earth",
-          "planet earth",
-          "blue marble"
-        ],
-        "Parker Solar Probe": [
-          "Parker Solar Probe",
-          "parker",
-          "solar probe"
-        ]
-      },
-      "optional_entities": [
-        "solar flare",
-        "coronal mass ejection",
-        "solar cycle"
-      ],
-      "prohibited_entities": [
-        "Venus",
         "Mars",
-        "Jupiter",
-        "Apollo mission",
-        "moon landing",
-        "Saturn"
+        "comet"
       ],
-      "scene_intent": "explanation",
+      "scene_intent": "scale",
       "confidence": 1.0,
-      "visual_objective": "Show the Sun\u2019s overwhelming scale and energy, contrasted with Earth\u2019s tiny size, to convey the Sun\u2019s immense power and longevity."
-    },
-    "2": {
-      "beat_id": "scene2",
-      "scene_id": 2,
-      "required_entities": [
-        "Sun",
-        "Parker Solar Probe"
-      ],
-      "match_terms": {
-        "Sun": [
-          "Sun",
-          "solar",
-          "corona",
-          "solar flare"
-        ],
-        "Parker Solar Probe": [
-          "Parker Solar Probe",
-          "solar probe",
-          "parker"
-        ]
-      },
-      "optional_entities": [
-        "solar flare",
-        "corona",
-        "magnetic field"
-      ],
-      "prohibited_entities": [
-        "Earth",
-        "Jupiter",
-        "Voyager 1",
-        "Apollo mission",
-        "Saturn"
-      ],
-      "scene_intent": "explanation",
-      "confidence": 1.0,
-      "visual_objective": "The viewer should see the Sun\u2019s blazing surface and corona, with a hint of the Parker Solar Probe, feeling awe at the Sun\u2019s extreme heat and mysterious magnetic cycles."
+      "visual_objective": "The viewer should see the Sun dominating the frame, feeling its immense age and power, with a sense of cosmic scale and awe."
     },
     "3": {
       "beat_id": "scene3",
@@ -279,28 +263,30 @@
       "match_terms": {
         "Parker Solar Probe": [
           "Parker Solar Probe",
-          "parker probe"
+          "parker probe",
+          "psp"
         ],
         "Sun": [
           "Sun",
-          "solar"
+          "solar corona",
+          "solar surface",
+          "sunspots"
         ]
       },
       "optional_entities": [
-        "solar corona",
-        "solar plasma",
-        "Earth"
+        "Sunspots"
       ],
       "prohibited_entities": [
-        "Jupiter",
-        "Saturn",
+        "Solar Orbiter",
+        "SOHO",
         "Voyager 1",
         "Mars",
+        "Earth",
         "Moon"
       ],
-      "scene_intent": "explanation",
+      "scene_intent": "hook",
       "confidence": 1.0,
-      "visual_objective": "Show the Parker Solar Probe approaching the Sun's blazing surface, emphasizing extreme closeness and the probe's defiance in the searing plasma, while conveying the Sun's nurturing yet destructive power."
+      "visual_objective": "The viewer should see a spacecraft bravely diving into the Sun's fiery atmosphere, feeling the tension and awe of surviving the impossible heat, while sunspots rotate on the solar surface to hint at the Sun's 27-day spin."
     },
     "4": {
       "beat_id": "scene4",
@@ -312,8 +298,7 @@
       "match_terms": {
         "Sun": [
           "Sun",
-          "solar",
-          "star"
+          "solar"
         ],
         "Earth": [
           "Earth",
@@ -323,53 +308,61 @@
       "optional_entities": [
         "Mercury",
         "Venus",
-        "Parker Solar Probe"
+        "red giant"
       ],
       "prohibited_entities": [
+        "Voyager 1",
         "Jupiter",
-        "Saturn",
-        "Moon"
+        "Apollo 11",
+        "Mars",
+        "spaceship"
       ],
-      "scene_intent": "emotion",
+      "scene_intent": "hook",
       "confidence": 1.0,
-      "visual_objective": "Show the Sun in a majestic, impending sense of scale, with Earth small and fragile nearby, evoking both awe and the ticking clock of cosmic time."
+      "visual_objective": "The viewer should see the Sun as a dominating, life-giving presence and Earth as a small, fragile blue dot in its glow, feeling both awe at the Sun's scale and an urgent tenderness for our home planet."
     }
   },
   "camera_diversity": {
-    "moves": 9,
-    "entropy": 2.281,
-    "normalized_entropy": 0.982,
+    "moves": 8,
+    "entropy": 1.906,
+    "normalized_entropy": 0.953,
     "repetitive": false,
     "distribution": {
-      "pull_out": 2,
-      "pan_right": 2,
-      "static": 1,
-      "reveal": 2,
-      "push_in": 2
+      "parallax": 2,
+      "push_in": 3,
+      "pull_out": 1,
+      "reveal": 2
     }
   },
   "diversity": {
     "asset_diversity": 1.0,
     "transition_diversity": 1.0,
-    "motion_diversity": 1.0,
-    "shot_duration_mean_s": 5.95,
-    "shot_duration_std_s": 1.35,
+    "motion_diversity": 0.967,
+    "shot_duration_mean_s": 6.4,
+    "shot_duration_std_s": 1.8,
     "shot_count": 10
   },
+  "degradations": [
+    {
+      "stage": "asset_dedup",
+      "severity": "info",
+      "detail": "6 near-identical assets skipped (perceptual dedup)"
+    }
+  ],
   "final": {
     "output": "results/the_sun__our_star/the_sun__our_star_mixed.mp4",
     "iterations": 3,
-    "final_score": 78,
+    "final_score": 74,
     "duration_s": 74.566667,
     "visual_stats": {
-      "manim": 1,
+      "manim": 2,
       "nasa": 3,
       "wikimedia": 3,
-      "ai": 3,
+      "ai": 2,
       "video_fallback": 0,
       "rejected": 0,
       "vision_checked": 2,
-      "deduped": 11
+      "deduped": 6
     }
   },
   "postmortem": "/home/ubuntu/video_engine/src/docs/mission/postmortems/postmortem-the-sun-our-star-stills-first.md"
