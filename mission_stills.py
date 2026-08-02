@@ -129,6 +129,17 @@ MANIM_SCENES = {
     "voyager_trajectory": "cache/manim/voyager_trajectory.mp4",
 }
 
+# Pinned stills: real NASA assets that must NOT be overwritten by the
+# fetch planner (human-approved swaps from refine_stills).  Keyed by
+# the local still path; value is a label for logging.
+PINNED_STILLS = {
+    "cache/stills/scene0_0.jpg": "PIA14111 Model of Voyager",
+    "cache/stills/scene0_1.jpg": "PIA22915 Voyager Spacecraft Instruments",
+    "cache/stills/scene3_0.jpg": "PIA23645 Pale Blue Dot Revisited",
+    "cache/stills/scene3_1.jpg": "PIA00452 Solar System Portrait/Pale Blue Dot",
+    "cache/stills/scene4_0.jpg": "PIA16362 Preparing the Golden Record",
+}
+
 AI_PROMPTS = {
     "spacecraft": ("Photorealistic documentary image of the Voyager 1 spacecraft, "
                    "large dish antenna, golden record attached, deep interstellar "
@@ -137,8 +148,9 @@ AI_PROMPTS = {
                       "phonograph record with cover, floating in space, cinematic"),
     "interstellar": ("Voyager spacecraft tiny against a vast starfield, pale blue "
                      "dot Earth in the distance, cinematic, photorealistic"),
-    "launch": ("Voyager spacecraft with a Titan IIIE rocket on the launch pad at "
-               "night, floodlights, 1970s archival documentary style"),
+    "launch": ("Voyager spacecraft atop a Titan IIIE-Centaur rocket on the "
+               "launch pad at night, floodlights, 1970s archival documentary "
+               "style, historical NASA photograph"),
     "jupiter": ("The planet Jupiter with the Great Red Spot as seen from deep "
                 "space, photorealistic, documentary style"),
     "saturn": ("The planet Saturn with rings as seen from deep space, "
@@ -246,7 +258,12 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str) -> dict:
                 break
             out = os.path.join("cache", "stills", f"scene{i}_{still_count}.jpg")
             got = ""
-            if kind == "nasa":
+            # Pinned real assets take priority and are never re-fetched
+            if out in PINNED_STILLS and os.path.exists(out) and os.path.getsize(out) > 15000:
+                got = out
+                src = "nasa_pinned"
+                print(f"  [PIN] {os.path.basename(out)} kept ({PINNED_STILLS[out]})")
+            elif kind == "nasa":
                 got = _nasa_still(query, out)
                 src = "nasa"
             elif kind == "wiki":

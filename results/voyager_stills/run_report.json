@@ -1,42 +1,37 @@
 {
   "topic": "Voyager 1: the farthest human-made object",
-  "started_at": "2026-08-02T12:43:01Z",
+  "started_at": "2026-08-02T14:56:11Z",
   "strategy": "stills_first",
   "stages": {
     "visuals": {
       "manim": 2,
-      "nasa": 4,
+      "nasa": 2,
       "wikimedia": 2,
-      "ai": 4,
-      "video_fallback": 0
+      "ai": 1,
+      "video_fallback": 0,
+      "nasa_pinned": 5
     },
     "render_v1": {
-      "duration_s": 57.633333,
-      "size_mb": 7.5,
-      "render_s": 69.1
+      "duration_s": 61.366667,
+      "size_mb": 9.2,
+      "render_s": 76.2
     },
     "music_v1": {
       "mixed": true,
-      "elapsed_s": 6.4,
-      "size_mb": 8.0
+      "elapsed_s": 6.6,
+      "size_mb": 9.8
     },
     "review_v1": {
-      "score": 68,
+      "score": 65,
       "confidence": 0.9,
       "model_used": null
     },
     "improve_pass_1": {
       "iteration": 2,
-      "applied": [
-        {
-          "category": "shot_order",
-          "detail": "[shot_order][medium] Replace the generic vinyl record at 00:42 with a render of the actual Golden Record being mounted or in space.",
-          "source_rec": "Replace the generic vinyl record at 00:42 with a render of the actual Golden Record being mounted or in space."
-        }
-      ],
+      "applied": [],
       "flagged": [
-        "[new_asset] Replace the abstract colorful 3D shape at 00:06 and 00:39 with actual imagery of Voyager or the iconic Pale Blue Dot photograph.",
-        "[fact_change] Update script/narration to acknowledge Voyager 2 has also crossed the heliopause, correcting 'No other human object' to 'Voyager 1 was the first'."
+        "[new_asset] Replace the Falcon Heavy launch footage at 0:20 with historical footage of the Titan IIIE launch from 1977.",
+        "[new_asset] Replace the Mercury image at 0:46 with an illustration of Voyager 1 in interstellar space or a JPL tracking graphic."
       ],
       "stopped_early": false,
       "notes": "",
@@ -47,14 +42,15 @@
   "final": {
     "output": "results/voyager_stills/voyager_stills_mixed.mp4",
     "iterations": 1,
-    "final_score": 68,
-    "duration_s": 57.633333,
+    "final_score": 65,
+    "duration_s": 61.366667,
     "visual_stats": {
       "manim": 2,
-      "nasa": 4,
+      "nasa": 2,
       "wikimedia": 2,
-      "ai": 4,
-      "video_fallback": 0
+      "ai": 1,
+      "video_fallback": 0,
+      "nasa_pinned": 5
     }
   },
   "postmortem": "/home/ubuntu/video_engine/src/docs/mission/postmortems/postmortem-voyager-1-the-farthest-human-made-object-stills-first.md"

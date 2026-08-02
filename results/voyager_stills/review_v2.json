@@ -1,0 +1,52 @@
+{
+  "quality_score": 65,
+  "confidence": 0.9,
+  "strengths": [
+    "Clear narration delivery and pacing",
+    "Clean, informative 2D timeline and trajectory animations"
+  ],
+  "weaknesses": [
+    "Inaccurate launch footage showing a Space Shuttle instead of a Titan IIIE rocket",
+    "Repetitive and irrelevant visual asset used during the Pale Blue Dot segment",
+    "Awkward text-to-speech pronunciation of 'us' as 'U.S.' in the opening scene"
+  ],
+  "prioritized_recommendations": [
+    {
+      "priority": "critical",
+      "category": "new_asset",
+      "recommendation": "Replace the Space Shuttle launch footage at 0:20 with historical footage of the Titan IIIE-Centaur launch."
+    },
+    {
+      "priority": "high",
+      "category": "new_asset",
+      "recommendation": "Replace the repeated magnetic field graphic at 0:43 with the actual Pale Blue Dot image or a stylized representation of Earth."
+    },
+    {
+      "priority": "medium",
+      "category": "audio_balance",
+      "recommendation": "Re-record or edit the narration at 0:04 to pronounce 'us' naturally instead of spelling out 'U.S.'."
+    }
+  ],
+  "factual_issues": [
+    {
+      "claim": "Launched by NASA in nineteen seventy-seven",
+      "issue": "Visuals at 0:20 show a Space Shuttle launch, which did not fly until 1981 and was not the launch vehicle for Voyager.",
+      "suggested_fix": "Use archival footage of the Voyager 1 Titan IIIE launch."
+    }
+  ],
+  "title_recommendations": [
+    "Voyager: The Longest Journey",
+    "Sailing Into the Dark",
+    "The Voice of Humanity"
+  ],
+  "thumbnail_recommendation": {
+    "timestamp": "00:38",
+    "description": "A dramatic CGI render of the Voyager spacecraft silhouetted against a distant sunlit planetary crescent."
+  },
+  "overall_assessment": "The documentary features a compelling narrative structure and clean motion graphics, but suffers from notable visual inaccuracies. Replacing the incorrect launch footage and the repetitive placeholder graphics in the second half will significantly elevate its professional appeal.",
+  "_meta": {
+    "video": "results/voyager_stills/voyager_stills_mixed.mp4",
+    "model": "gemini-2.5-pro",
+    "elapsed_s": 25.6
+  }
+}

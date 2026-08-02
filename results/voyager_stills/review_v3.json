@@ -1,0 +1,52 @@
+{
+  "quality_score": 65,
+  "confidence": 0.9,
+  "strengths": [
+    "Clean and informative motion graphics for the timeline and gravity-assist trajectory.",
+    "Good pacing and clear voiceover delivery overall."
+  ],
+  "weaknesses": [
+    "Narrator pronounces 'us' as 'U.S.' due to a capitalization typo in the script.",
+    "Inaccurate stock footage used for the launch (shows a Space Shuttle instead of a Titan IIIE rocket).",
+    "Irrelevant 3D shape model visuals used during key narrative moments."
+  ],
+  "prioritized_recommendations": [
+    {
+      "priority": "critical",
+      "category": "new_asset",
+      "recommendation": "Replace the Space Shuttle launch footage at 00:20 with historical footage of the Titan IIIE-Centaur rocket launch."
+    },
+    {
+      "priority": "high",
+      "category": "script_change",
+      "recommendation": "Change 'reach U.S.' to 'reach us' in the script and re-record the voiceover at 00:04 to avoid mispronunciation."
+    },
+    {
+      "priority": "medium",
+      "category": "visual_relevance",
+      "recommendation": "Replace the abstract 3D shape model at 00:06 and 00:43 with actual Voyager spacecraft renders or the real 'Pale Blue Dot' photograph."
+    }
+  ],
+  "factual_issues": [
+    {
+      "claim": "Launched by NASA in 1977",
+      "issue": "Visual shows a Space Shuttle launch (first flown in 1981) instead of Voyager's actual Titan IIIE launch vehicle.",
+      "suggested_fix": "Use archival footage of the Voyager 1 launch on September 5, 1977."
+    }
+  ],
+  "title_recommendations": [
+    "Voyager 1: The Endless Journey",
+    "Sailing Into the Interstellar Void",
+    "The Loneliest Spacecraft"
+  ],
+  "thumbnail_recommendation": {
+    "timestamp": "00:38",
+    "description": "A high-contrast CGI shot of the Voyager spacecraft silhouetted against a distant golden sun and the curve of a planet."
+  },
+  "overall_assessment": "The documentary features clean motion graphics and a compelling narrative structure. However, it is held back by a prominent voiceover mispronunciation and inaccurate stock footage of a Space Shuttle launch. Addressing these visual and audio errors will significantly elevate its educational value.",
+  "_meta": {
+    "video": "results/voyager_stills/voyager_stills_mixed.mp4",
+    "model": "gemini-2.5-pro",
+    "elapsed_s": 22.5
+  }
+}

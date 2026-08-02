@@ -1,7 +1,7 @@
 [
   {
     "title": "The Farthest Whisper",
-    "narration": "Beyond the planets, a tiny spacecraft calls home. Its voice takes over a day to reach U.S.. That voice is Voyager one, the most distant thing we've ever made.",
+    "narration": "Beyond the planets, a tiny spacecraft calls home. Its voice takes over a day to reach us. That voice is Voyager one, the most distant thing we've ever made.",
     "visual_goal": "Tiny spacecraft against vast stars with faint signal wave.",
     "search_queries": [
       "Voyager 1 deep space",
@@ -21,7 +21,7 @@
   },
   {
     "title": "The Journey Out",
-    "narration": "At Jupiter, it found volcanoes on Io. It swept past Saturn, then crossed the heliopause into interstellar space. No other human object has crossed that line.",
+    "narration": "At Jupiter, it found volcanoes on Io. It swept past Saturn, then crossed the heliopause into interstellar space. Voyager one was the first. In 2018, its twin, Voyager two, crossed the same line.",
     "visual_goal": "Animated flybys of Jupiter and Saturn, then heliopause crossover.",
     "search_queries": [
       "Jupiter flyby",
