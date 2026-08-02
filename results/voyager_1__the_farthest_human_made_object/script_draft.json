@@ -1,52 +1,57 @@
 [
   {
     "title": "The Whisper",
-    "narration": "Fifteen billion miles away, a faint signal. Voyager 1, humanity's farthest reach, still speaks.",
-    "visual_goal": "Deep space, a tiny spacecraft silhouette against stars, a radio wave pulse",
+    "narration": "A faint signal, 24.9 billion kilometers away. That's Voyager 1\u2014the farthest human-made object. It's still talking. Still listening.",
+    "visual_goal": "Deep space star field with a tiny glowing point, then a slow zoom, evoking loneliness and wonder.",
     "search_queries": [
-      "Voyager 1 spacecraft deep space",
-      "radio telescope signal",
-      "interstellar space stars"
+      "deep space star field",
+      "tiny spacecraft in space",
+      "Voyager 1 illustration",
+      "faint signal antenna"
     ]
   },
   {
     "title": "Leaving Home",
-    "narration": "Launched in 1977, it flew past Jupiter and Saturn. Then, in 2012, it crossed into interstellar space.",
-    "visual_goal": "Launch footage, Jupiter and Saturn flybys, then a boundary crossing animation",
+    "narration": "Launched in 1977 from Cape Canaveral. It flew past Jupiter, finding volcanoes on Io. Then Saturn, and Titan's thick haze. Then\u2014outward, forever.",
+    "visual_goal": "Montage of NASA archival footage: launch, Jupiter flyby, Io's volcanoes, Saturn and Titan.",
     "search_queries": [
       "Voyager 1 launch 1977",
-      "Jupiter Saturn flyby",
-      "heliopause crossing"
+      "Jupiter Io volcano NASA",
+      "Saturn Titan flyby",
+      "Voyager archive footage"
+    ]
+  },
+  {
+    "title": "Crossing the Boundary",
+    "narration": "In 2012, it crossed the heliopause\u2014leaving the Sun's bubble. Now it sails interstellar space, at 17 kilometers per second.",
+    "visual_goal": "Animated diagram of the heliopause crossing, then a starfield rushing past, conveying motion and boundary.",
+    "search_queries": [
+      "heliopause diagram animation",
+      "interstellar space visualization",
+      "Voyager crossing boundary",
+      "solar wind termination shock"
     ]
   },
   {
     "title": "The Golden Record",
-    "narration": "On board, a Golden Record. Sounds and images chosen by Carl Sagan. A message for anyone out there.",
-    "visual_goal": "Close-up of the Golden Record, its cover, and symbolic graphics",
+    "narration": "On board: a golden record\u2014greetings, music, Earth's sounds. A message in a bottle, drifting for anyone\u2014or anything\u2014to find.",
+    "visual_goal": "Close-up of the Golden Record, then rotating, reflecting light, with Earth in the background, evoking fragility and hope.",
     "search_queries": [
-      "Golden Record cover",
-      "Carl Sagan",
-      "Voyager record sounds"
+      "Golden Record closeup",
+      "Voyager Golden Record images",
+      "record with Earth background",
+      "NASA Golden Record"
     ]
   },
   {
-    "title": "Fading Power",
-    "narration": "Its signal takes 22.5 hours to reach us. Power is fading\u2014down to 238 watts. But it still transmits.",
-    "visual_goal": "Animation of signal travel time, power gauge dropping, Deep Space Network antennas",
+    "title": "The Last Light",
+    "narration": "Its power will fade by 2025. But it will keep sailing, silently, for billions of years. Voyager 1\u2014our farthest 'hello'.",
+    "visual_goal": "Slow fade of the spacecraft's instruments dimming, then a starfield with a tiny dot receding into the dark, leaving a sense of lasting legacy.",
     "search_queries": [
-      "Deep Space Network antenna",
-      "Voyager power decline",
-      "signal travel time"
-    ]
-  },
-  {
-    "title": "The Silent Emissary",
-    "narration": "By 2030, its instruments will go quiet. But Voyager will keep sailing\u2014toward Ophiuchus. Forever our first step.",
-    "visual_goal": "Constellation Ophiuchus, a spacecraft drifting away, fading into stars",
-    "search_queries": [
-      "Ophiuchus constellation",
-      "Voyager 1 trajectory",
-      "spacecraft silhouette stars"
+      "Voyager 1 RTG power decay",
+      "spacecraft fading into stars",
+      "lonely probe deep space",
+      "humanity's message in space"
     ]
   }
 ]

@@ -217,7 +217,7 @@ def stage_script(topic: str, research: dict, provider) -> list[dict]:
         )
         try:
             data2 = json.loads(compress)
-            scenes2 = data2.get("scenes", [])
+            scenes2 = data2.get("scenes", []) if isinstance(data2, dict) else (data2 if isinstance(data2, list) else [])
             if len(scenes2) == 5 and sum(len(s.get("narration", "").split()) for s in scenes2) <= MAX_SCRIPT_WORDS + 10:
                 scenes = scenes2
                 print(f"  Compressed to {sum(len(s.get('narration','').split()) for s in scenes)} words")
@@ -367,6 +367,115 @@ def stage_storyboard_and_direct(
     }
     print(f"  Shots: {total_shots} | Avg {stats['avg_shot_s']}s | Providers: {provider_stats} | Fallbacks: {fallback_count}")
     return result_scenes, stats
+
+
+# ═══════════════════════════════════════════════════════════════════════ #
+# AI image generation (stage 8b) — NVIDIA NIM (benchmarked default)
+# ═══════════════════════════════════════════════════════════════════════ #
+
+AI_IMAGE_PROMPTS = {
+    "spacecraft": (
+        "Photorealistic documentary image of the Voyager 1 spacecraft, "
+        "large dish antenna, golden record attached, deep interstellar "
+        "space with faint stars, cinematic NASA style, high detail"
+    ),
+    "golden_record": (
+        "Close-up of the Voyager Golden Record, gold-plated copper "
+        "phonograph record with its cover and stylus, floating in space, "
+        "cinematic lighting, photorealistic"
+    ),
+    "interstellar": (
+        "Voyager 1 spacecraft receding into interstellar space, tiny "
+        "silhouette against vast starfield, pale blue dot earth in distance, "
+        "cinematic, photorealistic, documentary style"
+    ),
+}
+
+
+def _still_to_kenburns(image_path: str, out_path: str, duration: float = 9.0) -> str:
+    """Convert a still image to a Ken Burns motion clip (1920x1080@30)."""
+    frames = int(duration * 30)
+    vf = (
+        f"scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080,"
+        f"zoompan=z='if(eq(on,1),1.0,min(1.25,zoom+0.004))':"
+        f"x='(iw-iw/zoom)/2':y='(ih-ih/zoom)/2':d={frames}:s=1920x1080:fps=30"
+    )
+    subprocess.run(
+        ["ffmpeg", "-y", "-loop", "1", "-i", image_path,
+         "-vf", vf, "-c:v", "libx264", "-preset", "fast",
+         "-t", str(duration), "-pix_fmt", "yuv420p", "-r", "30", out_path],
+        capture_output=True, text=True, timeout=120,
+    )
+    return out_path if os.path.exists(out_path) else ""
+
+
+def stage_ai_imagery(result_scenes, out_dir: str) -> dict:
+    """Generate AI stills for scenes that need specific subject imagery
+    (spacecraft, golden record) and inject them as Ken Burns clips.
+
+    Uses the benchmarked default provider (NVIDIA NIM flux.1-dev).
+    Cached in cache/generated — only generates once per prompt.
+    """
+    print("\n[8b/16] AI IMAGE GENERATION (NVIDIA NIM flux.1-dev, benchmarked default)", flush=True)
+    t0 = time.time()
+    os.makedirs("cache/generated", exist_ok=True)
+    from src.providers.image_gen import NvidiaNimProvider
+
+    prov = NvidiaNimProvider()
+    if not prov.is_available():
+        print("  !! No NVIDIA_API_KEY — skipping AI imagery")
+        return {"generated": 0, "injected": 0, "reason": "no key"}
+
+    generated, injected = 0, 0
+    for scene in result_scenes:
+        text = (scene.narration.spoken_narration or "").lower()
+        kind = None
+        if any(k in text for k in ("golden record", "record", "disc", "sounds of earth")):
+            kind = "golden_record"
+        elif any(k in text for k in ("spacecraft", "probe", "antenna", "voyager", "machine")):
+            kind = "spacecraft"
+        elif any(k in text for k in ("interstellar", "leaving", "beyond", "void", "lonely")):
+            kind = "interstellar"
+        if not kind:
+            continue
+
+        img_path = os.path.join("cache", "generated", f"ai_{kind}.png")
+        if not os.path.exists(img_path):
+            try:
+                prov.generate(AI_IMAGE_PROMPTS[kind], img_path, width=1024, height=576)
+                generated += 1
+                print(f"  [AI] generated {kind} ({os.path.getsize(img_path)//1024} KB)")
+            except Exception as e:
+                print(f"  [AI] !! {kind} generation failed: {str(e)[:100]}")
+                continue
+
+        clip_path = os.path.join("cache", "generated", f"ai_{kind}_kb.mp4")
+        if not os.path.exists(clip_path):
+            clip_path = _still_to_kenburns(img_path, clip_path, duration=9.0)
+        if not clip_path:
+            continue
+
+        # Inject into the scene's last primary shot (replacing weak stock)
+        for beat in (scene.beat_plans or []):
+            for shot in beat.shots:
+                if shot.shot_type.value == "primary" and shot.asset_plan:
+                    shot.asset_plan.filepath = clip_path
+                    shot.asset_plan.provider = ProviderType.GENERATED
+                    shot.asset_plan.video_url = f"ai://{kind}"
+                    shot.asset_plan.query_used = f"ai_generated_{kind}"
+                    shot.asset_plan.score = 0.9
+                    shot.motion = "none"
+                    shot.duration = min(9.0, max(shot.duration, 6.0))
+                    injected += 1
+                    print(f"  [AI] injected {kind} into scene {scene.scene_id} ({shot.duration:.1f}s)")
+                    break
+            else:
+                continue
+            break
+
+    print(f"  Generated {generated}, injected {injected} ({(time.time()-t0):.1f}s)")
+    return {"generated": generated, "injected": injected,
+            "elapsed_s": round(time.time() - t0, 1)}
 
 
 # ═══════════════════════════════════════════════════════════════════════ #
@@ -647,7 +756,7 @@ def main():
         )
         try:
             data2 = json.loads(compress)
-            scenes2 = data2.get("scenes", [])
+            scenes2 = data2.get("scenes", []) if isinstance(data2, dict) else (data2 if isinstance(data2, list) else [])
             if len(scenes2) == 5 and sum(len(s.get("narration", "").split()) for s in scenes2) <= MAX_SCRIPT_WORDS + 10:
                 scenes_data = scenes2
                 print(f"  Compressed to {sum(len(s.get('narration','').split()) for s in scenes_data)} words")
@@ -672,6 +781,10 @@ def main():
     # ── Stages 5-9: Storyboard + director ─────────────────────────────
     result_scenes, director_stats = stage_storyboard_and_direct(topic, scenes_data, lib, ep, llm)
     run_report["stages"]["director"] = director_stats
+
+    # ── Stage 8b: AI imagery (NVIDIA NIM, benchmarked default) ────────
+    ai_stats = stage_ai_imagery(result_scenes, out_dir)
+    run_report["stages"]["ai_imagery"] = ai_stats
 
     # ── Stage 10: Narration ───────────────────────────────────────────
     cache_audio = "cache/audio"

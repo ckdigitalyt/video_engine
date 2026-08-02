@@ -1,11 +1,11 @@
 # Postmortem — Voyager 1: the farthest human-made object
-**When:** 2026-08-02T06:48:13+00:00
+**When:** 2026-08-02T07:14:12+00:00
 
 ## Techniques that worked
 - multi-reviewer script review (3 passes, gate=False)
-- director beat mode: 16 shots, providers={'manim': 1, 'pexels': 12, 'nasa': 3}
+- director beat mode: 13 shots, providers={'manim': 1, 'pexels': 8, 'nasa': 3, 'placeholder': 1}
 - ffmpeg sidechain music ducking (bed=cinematic.mp3)
-- Gemini Pro end-to-end review score 62/100
+- Gemini Pro end-to-end review score 72/100
 
 ## Techniques that failed
 - web search in research agent (no API key — used DeepSeek knowledge base)
@@ -26,10 +26,10 @@ _(none recorded)_
 _(none recorded)_
 
 ## Review feedback
-- Replace the coastline at 0:14 and the astronaut at 0:52 with actual NASA archival footage of the Voyager launch or CGI m
-- Remove the alien figure at 0:26. Replace with a montage of the actual images encoded on the Golden Record to better refl
-- At 0:39, replace the red nebula streak with a visualization of the heliosphere or plasma waves to match the 'plasma dens
-- Add high-quality burned-in subtitles to improve accessibility and retention for mobile viewers.
+- Remove the black screen at 00:39 and the blue screen at 00:46. Replace with continuous space b-roll or cross-dissolves b
+- Replace the footage at 00:16 with actual NASA imagery or CGI of Jupiter and Saturn to align with the narration.
+- Replace the final shot (00:51) with a wide shot of the Voyager probe drifting into the deep void to maintain the 'inters
+- Add stylized subtitles to improve accessibility and emphasize key data like '25 billion kilometers' and '17 kilometers p
 
 ## Benchmark results
 ```json
@@ -45,10 +45,10 @@ _(none recorded)_
 ## Metrics
 ```json
 {
-  "final_score": 62,
-  "render_iterations": 1,
-  "shots": 16,
-  "fallbacks": 0,
-  "duration_s": 61.765011
+  "final_score": 72,
+  "render_iterations": 3,
+  "shots": 13,
+  "fallbacks": 1,
+  "duration_s": 52.036009
 }
 ```

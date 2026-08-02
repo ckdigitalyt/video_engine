@@ -1,47 +1,48 @@
 [
   {
     "title": "The Whisper",
-    "narration": "A spacecraft fifteen billion miles away whispers, but its voice fades. Voyager one, our farthest ambassador, calls from the edge of the Solar System.",
-    "visual_goal": "Tiny spacecraft against stars, radio pulse",
+    "narration": "twenty-five billion kilometers away, Voyager one went silent in November two thousand twenty-three, sending static. After months, it came back.",
+    "visual_goal": "Deep space star field with tiny glowing point, slow zoom.",
     "search_queries": [
-      "Voyager 1 deep space",
-      "radio telescope signal"
+      "deep space star field",
+      "Voyager 1 illustration"
     ]
   },
   {
     "title": "Leaving Home",
-    "narration": "Launched September five, nineteen seventy-seven, Voyager one explored Jupiter and Saturn, revealing Io's volcanoes and new moons. In twenty twelve, it crossed into interstellar space, sending a warning about beyond our Sun's bubble.",
-    "visual_goal": "Launch, flybys, boundary crossing",
+    "narration": "Launched nineteen seventy-seven, it flew by Jupiter (Io's volcanoes), Saturn (rings, Titan haze), then slingshotted outward, first human object to leave the solar system.",
+    "visual_goal": "NASA archival montage: launch, Jupiter, Io, Saturn, Titan.",
     "search_queries": [
-      "Voyager 1 launch",
-      "Jupiter Saturn flyby"
+      "Voyager 1 launch 1977",
+      "Io volcano NASA",
+      "Saturn Titan flyby"
+    ]
+  },
+  {
+    "title": "Crossing the Boundary",
+    "narration": "In twenty twelve, it crossed the heliopause, becoming the first interstellar traveler, moving seventeen kilometers per second (thirty-eight thousand miles per hour), faster than a bullet.",
+    "visual_goal": "Animated diagram of heliopause crossing, starfield rushing past.",
+    "search_queries": [
+      "heliopause diagram",
+      "interstellar space visualization"
     ]
   },
   {
     "title": "The Golden Record",
-    "narration": "It carries a Golden Record, curated by Carl Sagan, with sounds and images for any civilization. It may outlast every human who built it.",
-    "visual_goal": "Close-up of record and cover",
+    "narration": "On board: a gold-plated disc with greetings, music, images, a heartbeat. Our message: 'We were here.' One chance to get it right.",
+    "visual_goal": "Close-up of Golden Record rotating, Earth in background.",
     "search_queries": [
-      "Golden Record cover",
-      "Carl Sagan"
+      "Golden Record closeup",
+      "NASA Golden Record"
     ]
   },
   {
-    "title": "Fading Power",
-    "narration": "Voyager sends unique data on plasma density that defies models. Signals take a day to arrive; power has fallen from four hundred seventy to two hundred thirty-eight watts. Still, scientists listen.",
-    "visual_goal": "Signal travel, power gauge, antennas",
+    "title": "The Last Light",
+    "narration": "Instruments will stop by two thousand twenty-five, but it will drift silent for billions of years, carrying our first hello. The record speaks for U.S..",
+    "visual_goal": "Instruments dimming, tiny dot receding into starfield.",
     "search_queries": [
-      "Deep Space Network",
-      "Voyager power decline"
-    ]
-  },
-  {
-    "title": "The Silent Emissary",
-    "narration": "By ~two thousand thirty, instruments shut down, but as of two thousand twenty-six it transmits. It drifts toward Ophiuchus at thirty-eight thousand miles per hour, carrying our first hello long after we're dust.",
-    "visual_goal": "Ophiuchus, spacecraft fading into stars",
-    "search_queries": [
-      "Ophiuchus constellation",
-      "Voyager trajectory"
+      "Voyager 1 power decay",
+      "spacecraft fading into stars"
     ]
   }
 ]

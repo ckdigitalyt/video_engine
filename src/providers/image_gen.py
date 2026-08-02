@@ -60,15 +60,22 @@ class ImageGenProvider(ABC):
 class NvidiaNimProvider(ImageGenProvider):
     """NVIDIA NIM hosted FLUX image generation.
 
-    Endpoint discovered via benchmark; falls back to known-good candidates.
+    Verified endpoint (2026-08): ``/v1/genai/black-forest-labs/flux.1-dev``.
+    ``flux.1-dev`` accepts square/landscape dims from a fixed set
+    (multiples of 64); we snap requested sizes to the nearest allowed.
     """
 
     name = "nvidia_nim"
 
+    # flux.1-dev valid dimensions (multiples of 64, min 768)
+    _ALLOWED_DIMS = [768, 832, 896, 960, 1024, 1088, 1152, 1216, 1280,
+                     1344, 1408, 1472, 1536, 1600, 1664, 1728, 1792,
+                     1856, 1920, 1984, 2048]
+
     ENDPOINTS = [
-        "https://ai.api.nvidia.com/v1/genai/nvidia/flux.1-schnell",
+        "https://ai.api.nvidia.com/v1/genai/black-forest-labs/flux.1-dev",
+        "https://ai.api.nvidia.com/v1/genai/black-forest-labs/flux.1-schnell",
         "https://ai.api.nvidia.com/v1/genai/nvidia/flux.1-dev",
-        "https://integrate.api.nvidia.com/v1/images/generations",
     ]
 
     def __init__(self, api_key: Optional[str] = None):
@@ -77,11 +84,16 @@ class NvidiaNimProvider(ImageGenProvider):
     def is_available(self) -> bool:
         return bool(self._api_key)
 
+    @classmethod
+    def _snap(cls, v: int) -> int:
+        return min(cls._ALLOWED_DIMS, key=lambda d: abs(d - v))
+
     def generate(self, prompt: str, output_path: str,
                  width: int = 1024, height: int = 576,
                  seed: Optional[int] = None) -> str:
         if not self._api_key:
             raise RuntimeError("NVIDIA_API_KEY not set")
+        width, height = self._snap(width), self._snap(height)
         payload = {
             "prompt": prompt,
             "width": width,
@@ -100,9 +112,8 @@ class NvidiaNimProvider(ImageGenProvider):
                         "Accept": "application/json",
                     },
                 )
-                with urllib.request.urlopen(req, timeout=120) as resp:
+                with urllib.request.urlopen(req, timeout=180) as resp:
                     body = json.loads(resp.read().decode())
-                # NIM returns base64 in various shapes
                 b64 = (
                     body.get("artifacts", [{}])[0].get("base64")
                     or body.get("data", [{}])[0].get("b64_json")
@@ -114,16 +125,16 @@ class NvidiaNimProvider(ImageGenProvider):
                     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
                     Path(output_path).write_bytes(raw)
                     return output_path
-                # Some NIM endpoints return a URL
                 img_url = body.get("url") or (body.get("data") or [{}])[0].get("url")
                 if img_url:
-                    with urllib.request.urlopen(img_url, timeout=60) as r:
+                    with urllib.request.urlopen(img_url, timeout=120) as r:
                         Path(output_path).parent.mkdir(parents=True, exist_ok=True)
                         Path(output_path).write_bytes(r.read())
                     return output_path
                 last_err = RuntimeError(f"unexpected NIM response shape: {list(body)[:5]}")
             except urllib.error.HTTPError as e:
                 last_err = e
+                # 422 = schema error on this endpoint (e.g. bad dims) — try next
                 continue
             except Exception as e:  # noqa: BLE001
                 last_err = e
