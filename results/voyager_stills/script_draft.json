@@ -1,0 +1,53 @@
+[
+  {
+    "title": "The Farthest Whisper",
+    "narration": "Somewhere out there, a spacecraft is still talking. Voyager 1. It's flown farther than anything we've ever made.",
+    "visual_goal": "A tiny spacecraft against vast stars, with a faint signal wave emanating.",
+    "search_queries": [
+      "Voyager 1 spacecraft deep space",
+      "stars background space",
+      "radio signal waves space"
+    ]
+  },
+  {
+    "title": "Launch and Legacy",
+    "narration": "Launched in 1977, it weighed 815 kilograms. Its mission? Five years. It's been forty-nine.",
+    "visual_goal": "Historical footage of Titan IIIE Centaur launch, then transition to modern animation of Voyager trajectory.",
+    "search_queries": [
+      "Voyager 1 launch 1977",
+      "Titan IIIE Centaur rocket",
+      "Voyager trajectory animation"
+    ]
+  },
+  {
+    "title": "The Journey Out",
+    "narration": "It flew past Jupiter, saw volcanoes on Io. Then Saturn. And kept going. In 2012, it crossed into interstellar space.",
+    "visual_goal": "Animated flyby of Jupiter and Saturn, followed by a transition to the heliopause boundary with a cross-over effect.",
+    "search_queries": [
+      "Jupiter flyby Voyager",
+      "volcanoes Io Jupiter",
+      "Saturn rings Voyager",
+      "heliopause interstellar space"
+    ]
+  },
+  {
+    "title": "Pale Blue Dot",
+    "narration": "In 1990, it turned back and captured Earth. A pale blue dot. Six billion kilometers away. Everything we've ever known, in one pixel.",
+    "visual_goal": "Show the famous Pale Blue Dot photo, slowly zooming out to a wide shot of Voyager far away.",
+    "search_queries": [
+      "Pale Blue Dot photo",
+      "Earth from space tiny",
+      "Voyager 1 golden record"
+    ]
+  },
+  {
+    "title": "The Carries On",
+    "narration": "Now it's over 165 astronomical units away. Still speeding at 17 kilometers per second. It carries our sounds, our images, our greeting. But the real message? We are curious. We explore. And we never stop.",
+    "visual_goal": "Close-up of the Golden Record, then a slow zoom to Voyager flying into the dark, with stars streaking by.",
+    "search_queries": [
+      "Golden Record close up",
+      "Voyager 1 interstellar space",
+      "spacecraft flying into unknown"
+    ]
+  }
+]

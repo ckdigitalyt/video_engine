@@ -1,0 +1,476 @@
+#!/usr/bin/env python3
+"""
+mission_stills.py — Stills-first documentary runner (images + Manim).
+
+Visual strategy: NASA/Wikimedia/AI stills with Ken Burns motion + Manim
+explanation clips as the PRIMARY visual language; stock video only as a
+last resort.  Reuses mission_run stages for research / script / script
+review / narration / music / Gemini review / improvement / postmortem.
+
+Usage:
+    ./venv/bin/python mission_stills.py --topic "Voyager 1" \
+        --out results/voyager_stills/voyager_stills.mp4
+"""
+
+import argparse
+import json
+import os
+import subprocess
+import sys
+import time
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from dotenv import load_dotenv
+load_dotenv()
+
+import mission_run as M
+
+
+# ═══════════════════════════════════════════════════════════════════════ #
+# Still finders (public domain: NASA / Wikimedia) + AI fallback
+# ═══════════════════════════════════════════════════════════════════════ #
+
+def _nasa_still(query: str, out_path: str) -> str:
+    import requests
+    headers = {"User-Agent": "JadeStudio/1.0 (documentary pipeline)"}
+    try:
+        r = requests.get("https://images-api.nasa.gov/search",
+                         params={"q": query, "media_type": "image", "page_size": 4},
+                         headers=headers, timeout=25)
+        if r.status_code != 200:
+            return ""
+        items = r.json().get("collection", {}).get("items", [])
+    except Exception:
+        return ""
+    for it in items:
+        try:
+            col = requests.get(it.get("href"), headers=headers, timeout=20)
+            if col.status_code != 200:
+                continue
+            assets = col.json()  # plain list of asset URLs
+            picks = [a for a in assets if "~orig" in a] or [a for a in assets if a.endswith((".jpg", ".jpeg", ".png"))]
+            if not picks:
+                continue
+            url = picks[0]
+            img = requests.get(url, headers=headers, timeout=40)
+            if img.status_code == 200 and len(img.content) > 20000:
+                os.makedirs(os.path.dirname(out_path), exist_ok=True)
+                with open(out_path, "wb") as f:
+                    f.write(img.content)
+                title = (it.get("data") or [{}])[0].get("title", "")[:60]
+                print(f"  [NASA] {query!r} → {os.path.basename(out_path)} ({len(img.content)//1024} KB) | {title}")
+                return out_path
+        except Exception:
+            continue
+    return ""
+
+
+def _wikimedia_still(query: str, out_path: str) -> str:
+    import requests
+    headers = {"User-Agent": "JadeStudio/1.0 (documentary pipeline; contact: studio@localhost)"}
+    try:
+        r = requests.get("https://commons.wikimedia.org/w/api.php", params={
+            "action": "query", "generator": "search",
+            "gsrsearch": f"{query} filetype:bitmap", "gsrnamespace": 6,
+            "gsrlimit": 8, "prop": "imageinfo", "iiprop": "url|size|extmetadata",
+            "iiurlwidth": 1920, "format": "json",
+        }, headers=headers, timeout=25)
+        if r.status_code != 200:
+            print(f"  [Wiki] !! HTTP {r.status_code} for {query!r}")
+            return ""
+        data = r.json()
+    except Exception as e:
+        print(f"  [Wiki] !! API error for {query!r}: {str(e)[:80]}")
+        return ""
+    pages = data.get("query", {}).get("pages", {})
+    for p in sorted(pages.values(), key=lambda x: x.get("index", 99)):
+        ii = (p.get("imageinfo") or [{}])[0]
+        url = ii.get("thumburl") or ii.get("url")
+        if not url or ii.get("width", 0) < 800:
+            continue
+        meta = ii.get("extmetadata", {})
+        lic = (meta.get("LicenseShortName", {}) or {}).get("value", "").upper()
+        if lic and not any(k in lic for k in ("CC", "PUBLIC DOMAIN", "PD")):
+            continue
+        try:
+            img = requests.get(url, headers=headers, timeout=40)
+            if img.status_code == 200 and len(img.content) > 20000:
+                os.makedirs(os.path.dirname(out_path), exist_ok=True)
+                with open(out_path, "wb") as f:
+                    f.write(img.content)
+                print(f"  [Wiki] {query!r} → {os.path.basename(out_path)} ({len(img.content)//1024} KB) | {p.get('title','')[:60]} | {lic[:30]}")
+                return out_path
+        except Exception:
+            continue
+    return ""
+
+
+def _ai_still(prompt: str, out_path: str) -> str:
+    from src.providers.image_gen import NvidiaNimProvider, PollinationsProvider
+    for prov in (NvidiaNimProvider(), PollinationsProvider()):
+        try:
+            prov.generate(prompt, out_path, width=1024, height=576)
+            print(f"  [AI] {prov.name}: {os.path.basename(out_path)} ({os.path.getsize(out_path)//1024} KB)")
+            return out_path
+        except Exception as e:
+            print(f"  [AI] !! {prov.name} failed: {str(e)[:80]}")
+    return ""
+
+
+# ═══════════════════════════════════════════════════════════════════════ #
+# Stills-first visual planner
+# ═══════════════════════════════════════════════════════════════════════ #
+
+MANIM_SCENES = {
+    "voyager_scale": "cache/manim/voyager_scale.mp4",
+    "voyager_timeline": "cache/manim/voyager_timeline.mp4",
+    "voyager_trajectory": "cache/manim/voyager_trajectory.mp4",
+}
+
+AI_PROMPTS = {
+    "spacecraft": ("Photorealistic documentary image of the Voyager 1 spacecraft, "
+                   "large dish antenna, golden record attached, deep interstellar "
+                   "space, cinematic NASA style"),
+    "golden_record": ("Close-up of the Voyager Golden Record, gold-plated copper "
+                      "phonograph record with cover, floating in space, cinematic"),
+    "interstellar": ("Voyager spacecraft tiny against a vast starfield, pale blue "
+                     "dot Earth in the distance, cinematic, photorealistic"),
+    "launch": ("Voyager spacecraft with a Titan IIIE rocket on the launch pad at "
+               "night, floodlights, 1970s archival documentary style"),
+    "jupiter": ("The planet Jupiter with the Great Red Spot as seen from deep "
+                "space, photorealistic, documentary style"),
+    "saturn": ("The planet Saturn with rings as seen from deep space, "
+               "photorealistic, documentary style"),
+}
+
+
+def _kenburns(image_path: str, out_path: str, duration: float = 6.0,
+              zoom_in: bool = True) -> str:
+    frames = int(duration * 30)
+    z_start, z_end = (1.0, 1.28) if zoom_in else (1.28, 1.0)
+    vf = (
+        f"scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080,"
+        f"zoompan=z='if(eq(on,1),{z_start},min({z_end},zoom+0.004))':"
+        f"x='(iw-iw/zoom)/2':y='(ih-ih/zoom)/2':d={frames}:s=1920x1080:fps=30"
+    )
+    subprocess.run(
+        ["ffmpeg", "-y", "-loop", "1", "-i", image_path, "-vf", vf,
+         "-c:v", "libx264", "-preset", "fast", "-t", str(duration),
+         "-pix_fmt", "yuv420p", "-r", "30", out_path],
+        capture_output=True, text=True, timeout=120,
+    )
+    return out_path if os.path.exists(out_path) else ""
+
+
+def _manim_scene_for(scene_text: str) -> str:
+    t = scene_text.lower()
+    if any(k in t for k in ("22.9", "light-hour", "light hour", "billion km", "how far", "distance", "scale")):
+        return MANIM_SCENES["voyager_scale"]
+    if any(k in t for k in ("1977", "nineteen seventy-seven", "years", "decades", "2012", "timeline", "history", "journey")):
+        return MANIM_SCENES["voyager_timeline"]
+    if any(k in t for k in ("jupiter", "saturn", "gravity", "slingshot", "flyby", "boost", "trajectory")):
+        return MANIM_SCENES["voyager_trajectory"]
+    return ""
+
+
+def _still_plan_for(scene_text: str) -> list[str]:
+    """Return ordered candidate prompts/queries for still imagery."""
+    t = scene_text.lower()
+    plan = []
+    if any(k in t for k in ("launch", "1977", "nineteen seventy-seven", "rocket", "canaveral")):
+        plan += [("ai", AI_PROMPTS["launch"]), ("nasa", "Voyager launch"), ("wiki", "Voyager 1 launch")]
+    if any(k in t for k in ("jupiter", "great red spot")):
+        plan += [("nasa", "Jupiter Voyager"), ("wiki", "Jupiter Voyager 1"), ("ai", AI_PROMPTS["jupiter"])]
+    if any(k in t for k in ("saturn", "rings")):
+        plan += [("nasa", "Saturn Voyager"), ("wiki", "Saturn rings Cassini"), ("ai", AI_PROMPTS["saturn"])]
+    if any(k in t for k in ("golden record", "record", "disc", "sounds of earth")):
+        plan += [("ai", AI_PROMPTS["golden_record"]), ("wiki", "Voyager Golden Record"), ("nasa", "Voyager golden record")]
+    if any(k in t for k in ("spacecraft", "probe", "antenna", "voyager", "machine", "twin")):
+        plan += [("ai", AI_PROMPTS["spacecraft"]), ("nasa", "Voyager spacecraft model"), ("wiki", "Voyager 1 spacecraft")]
+    if any(k in t for k in ("interstellar", "pale blue dot", "earth", "beyond", "void", "lonely", "stars")):
+        plan += [("ai", AI_PROMPTS["interstellar"]), ("nasa", "pale blue dot"), ("wiki", "Pale Blue Dot")]
+    # generic fallback
+    plan += [("ai", AI_PROMPTS["spacecraft"]), ("nasa", "Voyager"), ("wiki", "Voyager 1")]
+    # dedupe keeping order
+    seen, out = set(), []
+    for p in plan:
+        if p not in seen:
+            seen.add(p)
+            out.append(p)
+    return out
+
+
+def stage_stills_visuals(scenes_data: list[dict], out_dir: str) -> dict:
+    """Build per-scene shot lists: Manim clips + Ken Burns stills.
+
+    Returns {scene_id: [{"file": clip, "duration": s}, ...]} and stats.
+    """
+    print("\n[5-9/16] STILLS-FIRST VISUAL PLANNING (NASA/Wikimedia/AI + Manim)", flush=True)
+    t0 = time.time()
+    os.makedirs(os.path.join(out_dir, "shots"), exist_ok=True)
+    os.makedirs("cache/stills", exist_ok=True)
+
+    plan = {}
+    stats = {"manim": 0, "nasa": 0, "wikimedia": 0, "ai": 0, "video_fallback": 0}
+    manim_used = set()
+
+    for i, scene in enumerate(scenes_data):
+        text = scene.get("narration", "")
+        shots = []
+        # 1) Manim explanation clip if scene calls for it
+        manim = _manim_scene_for(text)
+        if manim and os.path.exists(manim) and manim not in manim_used:
+            manim_used.add(manim)
+            shots.append({"file": manim, "duration": min(10.0, M._probe_duration(manim)),
+                          "kind": "manim"})
+            stats["manim"] += 1
+        # 2) Stills with Ken Burns (2 per scene typically)
+        still_count = 0
+        for kind, query in _still_plan_for(text):
+            if still_count >= 2:
+                break
+            out = os.path.join("cache", "stills", f"scene{i}_{still_count}.jpg")
+            got = ""
+            if kind == "nasa":
+                got = _nasa_still(query, out)
+                src = "nasa"
+            elif kind == "wiki":
+                got = _wikimedia_still(query, out)
+                src = "wikimedia"
+            else:
+                got = _ai_still(query, out)
+                src = "ai"
+            if not got:
+                continue
+            clip = os.path.join(out_dir, "shots", f"scene{i}_{still_count}.mp4")
+            dur = 5.5 if len(shots) < 3 else 4.5
+            if _kenburns(got, clip, duration=dur, zoom_in=(still_count % 2 == 0)):
+                shots.append({"file": clip, "duration": dur, "kind": src})
+                stats[src] = stats.get(src, 0) + 1
+                still_count += 1
+        plan[i] = shots
+
+    print(f"  Shots planned: " + ", ".join(f"scene{i}: {len(v)}" for i, v in plan.items()))
+    print(f"  Sources: {stats} ({(time.time()-t0):.1f}s)")
+    return plan, stats
+
+
+# ═══════════════════════════════════════════════════════════════════════ #
+# Timeline + render
+# ═══════════════════════════════════════════════════════════════════════ #
+
+def build_stills_timeline(scenes_data: list[dict], shot_plan: dict,
+                          audio_durations: list[float], out_path: str) -> str:
+    """Build a timeline.json from stills/manim shots + per-scene voice."""
+    tl = {"render_settings": {"resolution": [1920, 1080], "fps": 30},
+          "audio_timeline": [], "video_timeline": []}
+    cursor = 0.0
+    for i, scene in enumerate(scenes_data):
+        audio_path = os.path.join("cache", "audio", f"scene_{i}.wav")
+        adur = audio_durations[i] if i < len(audio_durations) else M._probe_duration(audio_path)
+        # audio entry
+        tl["audio_timeline"].append({
+            "track": "voice", "file": audio_path,
+            "start_time": round(cursor, 3), "end_time": round(cursor + adur, 3),
+        })
+        # video shots covering the scene window
+        shots = shot_plan.get(i, [])
+        if not shots:
+            # emergency: black clip
+            black = os.path.join("cache", "video", f"scene{i}_black.mp4")
+            if not os.path.exists(black):
+                subprocess.run(["ffmpeg", "-y", "-f", "lavfi", "-i",
+                                f"color=c=black:s=1920x1080:r=30:d={adur:.1f}",
+                                "-c:v", "libx264", "-preset", "fast", black],
+                               capture_output=True, text=True, timeout=60)
+            shots = [{"file": black, "duration": adur, "kind": "fallback"}]
+        t = cursor
+        for si, shot in enumerate(shots):
+            dur = shot["duration"]
+            tl["video_timeline"].append({
+                "layer": 1,
+                "file": shot["file"],
+                "start_time": round(t, 3),
+                "end_time": round(t + dur, 3),
+                "transition": "crossfade" if si > 0 else "fade",
+                "motion": "none",
+                "camera": "ken_burns" if shot["kind"] != "manim" else "static",
+                "beat_index": si,
+                "shot_type": "primary",
+            })
+            t += dur
+        cursor += adur
+
+    # extend final shot to cover any trailing audio
+    total_audio = sum(audio_durations)
+    last_video_end = tl["video_timeline"][-1]["end_time"] if tl["video_timeline"] else 0
+    if last_video_end < total_audio:
+        tl["video_timeline"][-1]["end_time"] = round(total_audio, 3)
+
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    with open(out_path, "w") as f:
+        json.dump(tl, f, indent=2)
+    return out_path
+
+
+def main():
+    ap = argparse.ArgumentParser(description="Stills-first documentary runner")
+    ap.add_argument("--topic", default="Voyager 1: the farthest human-made object")
+    ap.add_argument("--out", default=None)
+    ap.add_argument("--provider", default=None)
+    args = ap.parse_args()
+
+    topic = args.topic
+    slug = "voyager_stills"
+    out_dir = os.path.join("results", slug)
+    os.makedirs(out_dir, exist_ok=True)
+    output_path = args.out or os.path.join(out_dir, "voyager_stills.mp4")
+    mixed_path = os.path.join(out_dir, "voyager_stills_mixed.mp4")
+    timeline_path = os.path.join(out_dir, "timeline.json")
+    run_report = {"topic": topic, "started_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                  "strategy": "stills_first", "stages": {}}
+
+    mods = M._imports()
+    factory = mods["ProviderFactory"]()
+    provider_name = args.provider or "deepseek"
+    llm = factory.get_llm_provider(provider_name)
+    run_report["provider"] = provider_name
+
+    # ── Research + verify ──────────────────────────────────────────────
+    research = M.stage_research(topic, llm)
+    research = M.stage_fact_verification(research, llm)
+    M._write_json(os.path.join(out_dir, "research.json"), research)
+
+    # ── Script + review ────────────────────────────────────────────────
+    scenes_data = M.stage_script(topic, research, llm)
+    M._write_json(os.path.join(out_dir, "script_draft.json"), scenes_data)
+    scenes_data, review_report = M.stage_script_review(scenes_data, research, provider_name)
+    # Post-review word-budget enforcement (reviewers expand the script;
+    # compress back to the ~60s target).  Same fix as mission_run v1.1.
+    total_words = sum(len(s.get("narration", "").split()) for s in scenes_data)
+    if total_words > M.MAX_SCRIPT_WORDS:
+        print(f"  !! Post-review over budget ({total_words} words) — compressing")
+        compress = llm.generate_json(
+            "Condense this script to at most " + str(M.MAX_SCRIPT_WORDS) +
+            " words total, keeping all facts and the 5-scene structure. "
+            "Return ONLY the JSON array of scenes with title/narration/visual_goal/search_queries.\n" +
+            json.dumps({"scenes": scenes_data})[:6000]
+        )
+        try:
+            data2 = json.loads(compress)
+            scenes2 = data2.get("scenes", []) if isinstance(data2, dict) else (data2 if isinstance(data2, list) else [])
+            if len(scenes2) == 5 and sum(len(s.get("narration", "").split()) for s in scenes2) <= M.MAX_SCRIPT_WORDS + 10:
+                scenes_data = scenes2
+                print(f"  Compressed to {sum(len(s.get('narration','').split()) for s in scenes_data)} words")
+        except json.JSONDecodeError:
+            print("  !! Post-review compression failed — keeping reviewed script")
+    from src.utils.tts_normalize import normalize_narration
+    for s in scenes_data:
+        s["narration"] = normalize_narration(s.get("narration", ""))
+    M._write_json(os.path.join(out_dir, "script_review_report.json"), review_report)
+    M._write_json(os.path.join(out_dir, "script_final.json"), scenes_data)
+
+    # ── Stills-first visual planning ───────────────────────────────────
+    shot_plan, stills_stats = stage_stills_visuals(scenes_data, out_dir)
+    run_report["stages"]["visuals"] = stills_stats
+
+    # ── Narration ──────────────────────────────────────────────────────
+    os.makedirs("cache/audio", exist_ok=True)
+    audio_durations = []
+    for i, s in enumerate(scenes_data):
+        ap = os.path.join("cache", "audio", f"scene_{i}.wav")
+        mods["generate_voice"](s["narration"], ap)
+        audio_durations.append(M._probe_duration(ap))
+    print(f"  Voice tracks: {len(scenes_data)} (total {sum(audio_durations):.1f}s)")
+
+    # ── Timeline + render ──────────────────────────────────────────────
+    build_stills_timeline(scenes_data, shot_plan, audio_durations, timeline_path)
+    print(f"\n[12/16] RENDERING → {output_path}", flush=True)
+    t0 = time.time()
+    mods["MoviePyRenderer"]().render(timeline_path, output_path)
+    run_report["stages"]["render_v1"] = {
+        "duration_s": M._probe_duration(output_path),
+        "size_mb": round(os.path.getsize(output_path) / 1e6, 1),
+        "render_s": round(time.time() - t0, 1),
+    }
+
+    # ── Music ──────────────────────────────────────────────────────────
+    mix = M.stage_music_mix(output_path, "cache/music/cinematic.mp3", mixed_path)
+    run_report["stages"]["music_v1"] = mix
+    review_target = mixed_path if mix.get("mixed") else output_path
+
+    # ── Gemini review + improvement passes ─────────────────────────────
+    review = M.stage_video_review(review_target, scenes_data,
+                                  os.path.join(out_dir, "review_v1.json"))
+    run_report["stages"]["review_v1"] = {
+        "score": review.get("quality_score"),
+        "confidence": review.get("confidence"),
+        "model_used": review.get("_meta", {}).get("model_used"),
+    }
+    iteration = 1
+    max_iter = 3
+    while iteration < max_iter:
+        plan_dict = M.stage_improvement_plan(review, iteration + 1, out_dir, max_total=max_iter)
+        run_report["stages"][f"improve_pass_{iteration}"] = plan_dict
+        if plan_dict.get("stopped_early") or not plan_dict.get("applied"):
+            break
+        applied = M.stage_apply_improvements(plan_dict, timeline_path)
+        if not applied:
+            break
+        t0 = time.time()
+        mods["MoviePyRenderer"]().render(timeline_path, output_path)
+        run_report["stages"][f"render_v{iteration+1}"] = {
+            "duration_s": M._probe_duration(output_path),
+            "render_s": round(time.time() - t0, 1),
+        }
+        mix = M.stage_music_mix(output_path, "cache/music/cinematic.mp3", mixed_path)
+        review_target = mixed_path if mix.get("mixed") else output_path
+        review = M.stage_video_review(review_target, scenes_data,
+                                      os.path.join(out_dir, f"review_v{iteration+1}.json"))
+        run_report["stages"][f"review_v{iteration+1}"] = {
+            "score": review.get("quality_score"),
+            "confidence": review.get("confidence"),
+            "model_used": review.get("_meta", {}).get("model_used"),
+        }
+        iteration += 1
+
+    # ── Final + postmortem ─────────────────────────────────────────────
+    run_report["final"] = {
+        "output": review_target, "iterations": iteration,
+        "final_score": review.get("quality_score"),
+        "duration_s": M._probe_duration(review_target),
+        "visual_stats": stills_stats,
+    }
+    M._write_json(os.path.join(out_dir, "run_report.json"), run_report)
+
+    recorder = mods["PostmortemRecorder"]()
+    pm_path = recorder.record(
+        topic + " (stills-first)",
+        techniques_succeeded=[
+            "stills-first visual strategy: NASA/Wikimedia/AI Ken Burns + Manim beats",
+            f"manim scenes: {stills_stats.get('manim', 0)}, nasa: {stills_stats.get('nasa', 0)}, "
+            f"wikimedia: {stills_stats.get('wikimedia', 0)}, ai: {stills_stats.get('ai', 0)}",
+            f"Gemini review score {review.get('quality_score')}/100",
+        ],
+        techniques_failed=[
+            "stock-video director (pexels) deprioritized by design in stills mode",
+        ],
+        metrics={"final_score": review.get("quality_score"),
+                 "duration_s": M._probe_duration(review_target),
+                 **stills_stats},
+        artifacts={"video": review_target, "report": os.path.join(out_dir, "run_report.json")},
+    )
+    run_report["postmortem"] = pm_path
+    M._write_json(os.path.join(out_dir, "run_report.json"), run_report)
+
+    print("\n" + "=" * 64)
+    print(f"STILLS-FIRST RUN COMPLETE — {topic}")
+    print(f"  Video:  {review_target}")
+    print(f"  Score:  {review.get('quality_score')}/100 | Dur: {M._probe_duration(review_target):.1f}s")
+    print(f"  Sources: {stills_stats}")
+    print("=" * 64)
+
+
+if __name__ == "__main__":
+    main()

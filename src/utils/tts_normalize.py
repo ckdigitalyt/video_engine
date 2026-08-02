@@ -32,10 +32,17 @@ _ABBREVIATIONS = {
     "sec": "seconds", "sec.": "seconds", "min": "minutes", "hr": "hours",
     "hrs": "hours", "yr": "years", "yrs": "years",
     # misc
-    "nasa": "NASA", "esa": "ESA", "jpl": "JPL", "us": "U.S.",
+    "nasa": "NASA", "esa": "ESA", "jpl": "JPL",
     "vs.": "versus", "etc.": "etcetera", "e.g.": "for example",
     "i.e.": "that is", "approx.": "approximately",
     "km/h": "kilometers per hour", "light-years": "light-years",
+}
+
+# Uppercase-only expansions (applied case-sensitively so the pronoun
+# "us" is never expanded to "U.S." — fixes recurring review finding).
+_UPPER_ABBREVIATIONS = {
+    "US": "U.S.", "U.S": "U.S.", "USA": "U.S.A.", "UK": "U.K.",
+    "NASA": "NASA", "ESA": "ESA", "JPL": "JPL",
 }
 
 # Years: 1977 -> "nineteen seventy-seven"; 2000 -> "two thousand"; 2012 -> "twenty twelve"
@@ -98,6 +105,10 @@ def normalize_narration(text: str) -> str:
     # Expand abbreviations (word-boundary aware)
     for abbr, full in sorted(_ABBREVIATIONS.items(), key=lambda kv: -len(kv[0])):
         out = re.sub(rf"\b{re.escape(abbr)}\b", full, out, flags=re.IGNORECASE)
+
+    # Uppercase-only expansions (case-sensitive — never "us" -> "U.S.")
+    for abbr, full in sorted(_UPPER_ABBREVIATIONS.items(), key=lambda kv: -len(kv[0])):
+        out = re.sub(rf"\b{re.escape(abbr)}\b", full, out)
 
     # Dates: "Sept 5, 1977" / "September 5, 1977" -> spoken
     out = re.sub(

@@ -1,0 +1,59 @@
+{
+  "quality_score": 55,
+  "confidence": 0.95,
+  "strengths": [
+    "Clean and modern 2D timeline and trajectory animations",
+    "Clear, well-paced narration delivery",
+    "Strong emotional hook regarding the Golden Record and human curiosity"
+  ],
+  "weaknesses": [
+    "Inaccurate 3D models of the spacecraft that look like generic sci-fi ships rather than Voyager 1",
+    "Narrator mispronounces the word 'us' as 'U.S.' at 0:04",
+    "Fails to show the actual 'Pale Blue Dot' image during the corresponding narration segment, showing a generic colored blob instead",
+    "Factual error stating no other human object has crossed the heliopause"
+  ],
+  "prioritized_recommendations": [
+    {
+      "priority": "critical",
+      "category": "script_change",
+      "recommendation": "Re-record the narration at 0:04 to correctly pronounce 'us' instead of 'U.S.'."
+    },
+    {
+      "priority": "high",
+      "category": "new_asset",
+      "recommendation": "Replace the fictional spacecraft models at 0:00 and 0:33 with accurate 3D models or historical NASA illustrations of Voyager 1."
+    },
+    {
+      "priority": "high",
+      "category": "new_asset",
+      "recommendation": "Replace the abstract colored 3D blob at 0:38 with the actual historical 'Pale Blue Dot' photograph taken by Voyager 1."
+    },
+    {
+      "priority": "medium",
+      "category": "fact_change",
+      "recommendation": "Modify the script at 0:30 to say 'It was the first human object to cross that line' to account for Voyager 2 also entering interstellar space."
+    }
+  ],
+  "factual_issues": [
+    {
+      "claim": "No other human object has crossed that line.",
+      "issue": "Voyager 2 also crossed the heliopause into interstellar space in late 2018.",
+      "suggested_fix": "Change the narration to: 'It was the first human object to cross that line.'"
+    }
+  ],
+  "title_recommendations": [
+    "Voyager 1: The Lonely Explorer",
+    "Sailing Into the Interstellar Dark",
+    "The Most Distant Voice"
+  ],
+  "thumbnail_recommendation": {
+    "timestamp": "00:43",
+    "description": "A dramatic close-up of the golden record reflecting warm sunlight against a dark space background."
+  },
+  "overall_assessment": "The documentary features clean motion graphics but suffers from significant visual inaccuracies, using generic sci-fi spacecraft instead of Voyager 1. Correcting the narration mispronunciation and updating the factual claim about interstellar travel will greatly improve credibility.",
+  "_meta": {
+    "video": "results/voyager_stills/voyager_stills_mixed.mp4",
+    "model": "gemini-2.5-pro",
+    "elapsed_s": 34.0
+  }
+}
