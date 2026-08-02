@@ -33,7 +33,7 @@ def main():
     results = {}
     factory = ImageGenFactory()
 
-    for name in ("nvidia_nim", "siliconflow", "hf_serverless"):
+    for name in ("nvidia_nim", "pollinations", "siliconflow", "hf_serverless"):
         prov = factory.get(name)
         results[name] = {"available": prov.is_available()}
         if not prov.is_available():

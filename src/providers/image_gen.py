@@ -246,6 +246,48 @@ class HFServerlessProvider(ImageGenProvider):
 
 
 # ═══════════════════════════════════════════════════════════════════════ #
+# Pollinations (free, keyless image API)
+# ═══════════════════════════════════════════════════════════════════════ #
+
+
+class PollinationsProvider(ImageGenProvider):
+    """Pollinations.ai — free, keyless image generation (GET endpoint).
+
+    Endpoint: https://image.pollinations.ai/prompt/<prompt>?width=&height=&seed=
+    No API key required.  Supports model selection via ``model`` query param
+    (default FLUX-based).  Verified working 2026-08 (1.7s / 1024x576 JPEG).
+    """
+
+    name = "pollinations"
+
+    def __init__(self, base_url: Optional[str] = None):
+        self._base_url = base_url or get_config(
+            "image_gen.pollinations.base_url",
+            "https://image.pollinations.ai/prompt",
+        )
+
+    def is_available(self) -> bool:
+        return True  # keyless
+
+    def generate(self, prompt: str, output_path: str,
+                 width: int = 1024, height: int = 576,
+                 seed: Optional[int] = None) -> str:
+        import urllib.parse
+        params = {"width": width, "height": height, "nologo": "true"}
+        if seed is not None:
+            params["seed"] = seed
+        url = f"{self._base_url}/{urllib.parse.quote(prompt)}?" + urllib.parse.urlencode(params)
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=180) as resp:
+            raw = resp.read()
+        if not raw or raw[:3] == b"<ht":
+            raise RuntimeError(f"Pollinations returned non-image response ({len(raw)} bytes)")
+        Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+        Path(output_path).write_bytes(raw)
+        return output_path
+
+
+# ═══════════════════════════════════════════════════════════════════════ #
 # Factory
 # ═══════════════════════════════════════════════════════════════════════ #
 
@@ -253,6 +295,7 @@ _PROVIDERS: dict[str, type[ImageGenProvider]] = {
     "nvidia_nim": NvidiaNimProvider,
     "siliconflow": SiliconFlowProvider,
     "hf_serverless": HFServerlessProvider,
+    "pollinations": PollinationsProvider,
 }
 
 
