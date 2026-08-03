@@ -1,80 +1,86 @@
 [
   {
-    "title": "Where Light Dies",
-    "narration": "A shadow fifty-five million light-years away. First black hole ever seen. Its vast shadow could fit our solar system. Here, light gives up.",
-    "visual_goal": "Open on 2019 orange-ringed black hole, zoom to show dark void swallowing a solar system.",
+    "title": "The Shadow",
+    "narration": "In twenty nineteen, the Event Horizon Telescope released the first direct image of a black hole \u2014 M87*, a supermassive beast with a mass of billions of Suns.",
+    "visual_goal": "First-ever black hole image, then zoom into the dark center",
     "search_queries": [
-      "M87 black hole event horizon telescope",
-      "black hole solar system scale comparison"
+      "M87 black hole first image 2019",
+      "black hole shadow orange ring",
+      "Event Horizon Telescope M87"
     ],
     "emotion": "awe",
     "visual_style": "photorealistic",
     "sfx_events": [
       {
-        "trigger": "deep_space_drone",
-        "at": "after: A shadow"
+        "trigger": "impact_whoosh",
+        "at": "where space ends"
       }
     ]
   },
   {
-    "title": "The Invisible Giant",
-    "narration": "Einstein's nineteen fifteen math predicted it\u2014a ghost for a century. In twenty nineteen, an Earth-sized telescope caught it. In two thousand twenty-two, we saw Sagittarius A*: four million suns in a space smaller than Mercury's orbit. It still puzzles us.",
-    "visual_goal": "Show sepia Einstein photo, flash to pulsing 2022 Sgr A* image over Milky Way.",
+    "title": "The Frozen Edge",
+    "narration": "Look closer at that orange ring. That's the event horizon \u2014 the point where escape velocity equals the speed of light.",
+    "visual_goal": "Object stretching and freezing at the horizon, time distortion visual",
     "search_queries": [
-      "Albert Einstein relativity photo",
-      "Sagittarius A star 2022 image"
-    ],
-    "emotion": "revelation",
-    "visual_style": "sepia_cel",
-    "sfx_events": [
-      {
-        "trigger": "camera_shutter",
-        "at": "after: 2019"
-      }
-    ]
-  },
-  {
-    "title": "A Collision in Time",
-    "narration": "In twenty fifteen, we heard black holes collide\u2014thirty-six and twenty-nine suns. The chirp carried more energy than all stars. They shook spacetime, like ripples. That detection proved Einstein's waves\u2014a new sense: gravity.",
-    "visual_goal": "Animated gravitational waves distorting starfield, then two dark objects spiraling in 90s anime style.",
-    "search_queries": [
-      "gravitational waves ripples spacetime",
-      "binary black hole merger animation"
+      "black hole event horizon time dilation",
+      "frozen object at event horizon",
+      "spacetime warping black hole"
     ],
     "emotion": "tension",
     "visual_style": "90s_anime",
     "sfx_events": [
       {
-        "trigger": "low_tone_boom",
-        "at": "after: merged"
+        "trigger": "heartbeat_slow",
+        "at": "frozen forever"
       }
     ]
   },
   {
-    "title": "The Eraser",
-    "narration": "Black holes keep only mass, charge, spin. All else is erased forever. Hawking asked: can the universe forget so much? A book burned leaves ashes\u2014but black holes might destroy it completely. We still don't know.",
-    "visual_goal": "Paper sketch of a sphere wiping equations, then ghost-like Hawking with musical notes evaporating.",
+    "title": "The Ripple",
+    "narration": "In twenty fifteen, we heard a chirp \u2014 barely a second long. But it was the sound of two black holes.",
+    "visual_goal": "Gravitational wave animation, two spiraling black holes merging",
     "search_queries": [
-      "black hole no hair theorem",
-      "Stephen Hawking portrait"
+      "GW150914 black hole merger",
+      "gravitational waves LIGO animation",
+      "binary black hole collision"
     ],
-    "emotion": "somber",
-    "visual_style": "hand_drawn"
+    "emotion": "revelation",
+    "visual_style": "clean_vector",
+    "sfx_events": [
+      {
+        "trigger": "deep_boom",
+        "at": "collided"
+      }
+    ]
   },
   {
-    "title": "The Final Page",
-    "narration": "We can't touch it, but we saw it. That image is a door, not a destination. It holds secrets. The answer isn't in the image\u2014it's in the next question we haven't asked yet.",
-    "visual_goal": "Return to M87* image, fade to blank starry sky suggesting a waiting horizon.",
+    "title": "The Infant Giant",
+    "narration": "Then there's UHZ1 \u2014 a supermassive black hole seen just four hundred seventy million years after the Big Bang. The universe was only about three% of its current age.",
+    "visual_goal": "Early universe, bright quasar in dark space, distant galaxies",
     "search_queries": [
-      "M87 black hole close up",
-      "empty night sky stars"
+      "quasar UHZ1 early universe",
+      "most distant black hole Chandra",
+      "supermassive black hole early cosmos"
     ],
     "emotion": "wonder",
     "visual_style": "watercolor",
+    "sfx_events": []
+  },
+  {
+    "title": "The Question",
+    "narration": "A century ago, Schwarzschild's solution to Einstein's equations predicted them. In nineteen sixty-seven, John Wheeler gave them a name: black holes. In twenty fifteen, we heard them collide.",
+    "visual_goal": "Timeline of milestones, then final black hole silhouette against stars",
+    "search_queries": [
+      "black hole timeline history",
+      "Hawking information paradox",
+      "black hole silhouette stars"
+    ],
+    "emotion": "hopeful",
+    "visual_style": "sepia_cel",
     "sfx_events": [
       {
-        "trigger": "heartbeat",
-        "at": "after: paradox"
+        "trigger": "sparkle",
+        "at": "break it all"
       }
     ]
   }

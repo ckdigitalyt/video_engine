@@ -1,91 +1,86 @@
 [
   {
-    "title": "Where Light Dies",
-    "narration": "A shadow against a glowing ring. That is M87*. Its event horizon spans 19 billion kilometers. Our entire solar system could fit behind it. This is where space ends.",
-    "visual_goal": "Start on the iconic 2019 orange-ringed black hole image, then zoom in to show the dark void swallowing a stylized solar system for scale.",
+    "title": "The Shadow",
+    "narration": "2019. A glowing orange ring. The shadow of M87*, 6.5 billion times the Sun's mass. This is where space ends. How do we see the invisible?",
+    "visual_goal": "First-ever black hole image, then zoom into the dark center",
     "search_queries": [
-      "M87 black hole event horizon telescope",
-      "black hole solar system scale size comparison",
-      "black hole dark void animation",
-      "orange glowing ring space"
+      "M87 black hole first image 2019",
+      "black hole shadow orange ring",
+      "Event Horizon Telescope M87"
     ],
     "emotion": "awe",
     "visual_style": "photorealistic",
     "sfx_events": [
       {
-        "trigger": "deep_space_drone",
-        "at": "after: A shadow"
+        "trigger": "impact_whoosh",
+        "at": "where space ends"
       }
     ]
   },
   {
-    "title": "The Invisible Giant",
-    "narration": "Einstein predicted this in 1915. But we couldn't see one until 2019. Then, in 2022, we focused on our own center. Sagittarius A*. Four million suns in a space smaller than a star.",
-    "visual_goal": "Show a sepia-toned photo of Einstein, then flash-forward to the 2022 blurry image of Sgr A* pulsing over a Milky Way backdrop.",
+    "title": "The Frozen Edge",
+    "narration": "The event horizon. Escape velocity equals light speed. Time itself slows\u2014to a distant eye, anything falling in appears frozen forever.",
+    "visual_goal": "Object stretching and freezing at the horizon, time distortion visual",
     "search_queries": [
-      "Albert Einstein relativity photo",
-      "Sagittarius A star 2022 image",
-      "Milky Way center black hole",
-      "solar system vs black hole size"
-    ],
-    "emotion": "revelation",
-    "visual_style": "sepia_cel",
-    "sfx_events": [
-      {
-        "trigger": "camera_shutter",
-        "at": "after: 2019"
-      }
-    ]
-  },
-  {
-    "title": "A Collision in Time",
-    "narration": "The first image is a still life. But black holes move. In 2015, LIGO heard a collision. Two holes, 36 and 29 suns, spiraled and merged. Space itself rang.",
-    "visual_goal": "Show an animated gravitational wave ripple distorting a starfield, followed by two abstract dark objects spiraling into each other in a 90s anime style.",
-    "search_queries": [
-      "gravitational waves ripples spacetime",
-      "binary black hole merger animation",
-      "LIGO detector visualization",
-      "spacetime fabric distortion"
+      "black hole event horizon time dilation",
+      "frozen object at event horizon",
+      "spacetime warping black hole"
     ],
     "emotion": "tension",
     "visual_style": "90s_anime",
     "sfx_events": [
       {
-        "trigger": "low_tone_boom",
-        "at": "after: merged"
+        "trigger": "heartbeat_slow",
+        "at": "frozen forever"
       }
     ]
   },
   {
-    "title": "The Eraser",
-    "narration": "They erase the past. No hair, no scars. Only mass, charge, spin. But Hawking asked: does the universe remember? His 1974 radiation says the black hole forgets. Information is lost.",
-    "visual_goal": "A paper sketch of a featureless sphere wiping away complex equations, then a ghost-like Hawking concept image with musical notes evaporating from a black hole.",
+    "title": "The Ripple",
+    "narration": "2015. Two black holes\u201436 and 29 solar masses\u2014collided 1.3 billion light-years away. LIGO heard gravity ripple. Space itself rang like a bell.",
+    "visual_goal": "Gravitational wave animation, two spiraling black holes merging",
     "search_queries": [
-      "black hole no hair theorem",
-      "Stephen Hawking portrait",
-      "black hole evaporation concept",
-      "quantum information paradox"
+      "GW150914 black hole merger",
+      "gravitational waves LIGO animation",
+      "binary black hole collision"
     ],
-    "emotion": "somber",
-    "visual_style": "hand_drawn",
-    "sfx_events": []
+    "emotion": "revelation",
+    "visual_style": "clean_vector",
+    "sfx_events": [
+      {
+        "trigger": "deep_boom",
+        "at": "collided"
+      }
+    ]
   },
   {
-    "title": "The Final Page",
-    "narration": "The paradox remains. No answer yet. M87* is 55 million light-years away. The secrets are deep. But we have their picture. The ending? We are still writing it.",
-    "visual_goal": "Return to the first M87* image, but slowly fade to a blank starry sky, suggesting an unfinished page or a waiting horizon.",
+    "title": "The Infant Giant",
+    "narration": "470 million years after the Big Bang. Quasar UHZ1. A supermassive black hole, already billions of Suns. How did it grow so fast? That mystery remains.",
+    "visual_goal": "Early universe, bright quasar in dark space, distant galaxies",
     "search_queries": [
-      "M87 black hole close up",
-      "empty night sky stars",
-      "telescope looking at stars",
-      "unknown space mystery"
+      "quasar UHZ1 early universe",
+      "most distant black hole Chandra",
+      "supermassive black hole early cosmos"
     ],
     "emotion": "wonder",
     "visual_style": "watercolor",
+    "sfx_events": []
+  },
+  {
+    "title": "The Question",
+    "narration": "1916: predicted. 1967: named. 2015: heard. 2019: seen. Each step bends what we know. Tomorrow, the information paradox might break it all. Where does space end?",
+    "visual_goal": "Timeline of milestones, then final black hole silhouette against stars",
+    "search_queries": [
+      "black hole timeline history",
+      "Hawking information paradox",
+      "black hole silhouette stars"
+    ],
+    "emotion": "hopeful",
+    "visual_style": "sepia_cel",
     "sfx_events": [
       {
-        "trigger": "heartbeat",
-        "at": "after: paradox"
+        "trigger": "sparkle",
+        "at": "break it all"
       }
     ]
   }

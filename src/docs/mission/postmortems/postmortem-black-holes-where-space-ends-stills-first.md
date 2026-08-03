@@ -1,10 +1,10 @@
 # Postmortem — Black Holes: Where Space Ends (stills-first)
-**When:** 2026-08-03T16:17:15+00:00
+**When:** 2026-08-03T21:04:48+00:00
 
 ## Techniques that worked
 - stills-first visual strategy: NASA/Wikimedia/AI Ken Burns + Manim beats
-- manim scenes: 0, nasa: 1, wikimedia: 4, ai: 3
-- Gemini review score 82/100
+- manim scenes: 1, nasa: 1, wikimedia: 4, ai: 4
+- Gemini review score 85/100
 
 ## Techniques that failed
 - stock-video director (pexels) deprioritized by design in stills mode
@@ -27,15 +27,15 @@ _(none recorded)_
 ## Metrics
 ```json
 {
-  "final_score": 82,
-  "duration_s": 56.8,
-  "manim": 0,
+  "final_score": 85,
+  "duration_s": 50.2,
+  "manim": 1,
   "nasa": 1,
   "wikimedia": 4,
-  "ai": 3,
+  "ai": 4,
   "video_fallback": 0,
-  "rejected": 11,
-  "vision_checked": 4,
-  "deduped": 3
+  "rejected": 8,
+  "vision_checked": 3,
+  "deduped": 2
 }
 ```

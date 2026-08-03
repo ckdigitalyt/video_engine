@@ -1,28 +1,28 @@
 {
   "topic": "Black Holes: Where Space Ends",
-  "started_at": "2026-08-03T16:01:22Z",
+  "started_at": "2026-08-03T20:55:29Z",
   "strategy": "stills_first",
   "stages": {
     "visuals": {
-      "manim": 0,
+      "manim": 1,
       "nasa": 1,
       "wikimedia": 4,
-      "ai": 3,
+      "ai": 4,
       "video_fallback": 0,
-      "rejected": 11,
-      "vision_checked": 4,
-      "deduped": 3
+      "rejected": 8,
+      "vision_checked": 3,
+      "deduped": 2
     },
     "render_v1": {
-      "duration_s": 56.8,
-      "size_mb": 11.7,
-      "render_s": 75.3
+      "duration_s": 50.2,
+      "size_mb": 13.4,
+      "render_s": 59.5
     },
     "grade_v1": {
       "graded": true,
       "grain": 8,
-      "elapsed_s": 152.0,
-      "size_mb": 24.1
+      "elapsed_s": 107.1,
+      "size_mb": 25.7
     },
     "qa_v1": {
       "passed": true,
@@ -33,7 +33,7 @@
           "passed": true,
           "detail": "v=h264 a=aac",
           "metrics": {
-            "duration_s": 56.8,
+            "duration_s": 50.2,
             "resolution": [
               1920,
               1080
@@ -74,126 +74,63 @@
         {
           "name": "silence",
           "passed": true,
-          "detail": "max_volume=-5.4 dB (silence < -50.0 dB)",
+          "detail": "max_volume=-4.4 dB (silence < -50.0 dB)",
           "metrics": {
-            "max_db": -5.4,
-            "mean_db": -23.8
+            "max_db": -4.4,
+            "mean_db": -23.6
           }
         },
         {
           "name": "clipping",
           "passed": true,
-          "detail": "max_volume=-5.4 dB (clip >= -0.5 dB)",
+          "detail": "max_volume=-4.4 dB (clip >= -0.5 dB)",
           "metrics": {
-            "max_db": -5.4
+            "max_db": -4.4
           }
         }
       ]
     },
     "music_v1": {
       "mixed": true,
-      "elapsed_s": 16.3,
-      "size_mb": 24.7,
-      "mean_db": -16.3,
+      "elapsed_s": 12.2,
+      "size_mb": 26.2,
+      "mean_db": -16.5,
       "sfx": "sfx_timeline.wav",
       "sfx_events": [
         {
           "scene": 0,
-          "trigger": "deep boom",
-          "at_s": 3.52
+          "trigger": "impact_whoosh",
+          "at_s": 5.33
         },
         {
           "scene": 1,
-          "trigger": "rising whoosh",
-          "at_s": 13.74
+          "trigger": "heartbeat_slow",
+          "at_s": 14.62
         },
         {
           "scene": 2,
-          "trigger": "heartbeat thump",
-          "at_s": 26.59
-        },
-        {
-          "scene": 3,
-          "trigger": "sparkle fade",
-          "at_s": 39.06
+          "trigger": "deep_boom",
+          "at_s": 22.14
         },
         {
           "scene": 4,
-          "trigger": "deep boom",
-          "at_s": 51.07
+          "trigger": "sparkle",
+          "at_s": 43.32
         }
       ]
     },
     "review_v1": {
-      "score": 82,
+      "score": 85,
       "confidence": 0.95,
       "model_used": null
     },
     "improve_pass_1": {
       "iteration": 2,
-      "applied": [
-        {
-          "category": "audio_balance",
-          "detail": "[audio_balance][high] Re-record narration for 'Sagittarius A*' and 'M87*' to use the standard astronomical term 'star' instead of 'asterisk'.",
-          "source_rec": "Re-record narration for 'Sagittarius A*' and 'M87*' to use the standard astronomical term 'star' instead of 'asterisk'."
-        },
-        {
-          "category": "subtitles",
-          "detail": "[subtitles][low] Add high-quality, synchronized subtitles to improve accessibility and help viewers with complex terms like 'nanokelvin'.",
-          "source_rec": "Add high-quality, synchronized subtitles to improve accessibility and help viewers with complex terms like 'nanokelvin'."
-        }
-      ],
-      "flagged": [
-        "[script_change] Change the narration of 'ten caret sixty-seven' to 'ten to the sixty-seventh power' or 'ten to the power of sixty-seven' for mathematical accuracy.",
-        "[new_asset] Replace the 'Primordial Black Hole Lifetimes' infographic at 0:38 with a simpler animation showing a black hole slowly shrinking or emitting particles to represent Hawking radiation."
-      ],
-      "stopped_early": false,
-      "notes": "",
+      "applied": [],
+      "flagged": [],
+      "stopped_early": true,
+      "notes": "Quality target met (85 >= 85); no changes applied.",
       "elapsed_s": 0.0
-    },
-    "render_v2": {
-      "duration_s": 56.8,
-      "render_s": 77.5
-    },
-    "review_v2": {
-      "score": 82,
-      "confidence": 0.95,
-      "model_used": null
-    },
-    "improve_pass_2": {
-      "iteration": 3,
-      "applied": [
-        {
-          "category": "audio_balance",
-          "detail": "[audio_balance][high] Re-record the narration for 'M87*' and 'Sagittarius A*' to use the term 'star' instead of 'asterisk' to meet scientific documentary standards.",
-          "source_rec": "Re-record the narration for 'M87*' and 'Sagittarius A*' to use the term 'star' instead of 'asterisk' to meet scientific documentary standards."
-        },
-        {
-          "category": "zoom",
-          "detail": "[zoom][medium] Add a slow Ken Burns zoom-in on the M87* image at 00:01 to create a sense of approaching the event horizon.",
-          "source_rec": "Add a slow Ken Burns zoom-in on the M87* image at 00:01 to create a sense of approaching the event horizon."
-        },
-        {
-          "category": "music",
-          "detail": "[music][low] Increase the volume of the low-frequency 'thrum' during the merger description at 00:20 to emphasize the 'ripples' in spacetime.",
-          "source_rec": "Increase the volume of the low-frequency 'thrum' during the merger description at 00:20 to emphasize the 'ripples' in spacetime."
-        }
-      ],
-      "flagged": [
-        "[new_asset] Replace the 'Primordial Black Hole' chart at 00:38 with a simplified animation of a single black hole evaporating, focusing on the 10^67 year timeline mentioned in the script."
-      ],
-      "stopped_early": false,
-      "notes": "",
-      "elapsed_s": 0.0
-    },
-    "render_v3": {
-      "duration_s": 56.8,
-      "render_s": 76.4
-    },
-    "review_v3": {
-      "score": 82,
-      "confidence": 0.95,
-      "model_used": null
     }
   },
   "provider": "deepseek",
@@ -210,8 +147,7 @@
           "M87*",
           "m87",
           "black hole",
-          "shadow",
-          "event horizon"
+          "event horizon telescope image"
         ],
         "Event Horizon Telescope": [
           "Event Horizon Telescope",
@@ -219,214 +155,206 @@
         ]
       },
       "optional_entities": [
-        "Sagittarius A*",
-        "accretion disk",
-        "ring of light"
+        "galaxy M87",
+        "supermassive black hole",
+        "telescope array"
       ],
       "prohibited_entities": [
-        "Voyager 1",
-        "Jupiter",
-        "Apollo 11",
-        "LIGO",
-        "gravitational waves"
+        "Sagittarius A*",
+        "Milky Way",
+        "Interstellar (movie black hole)",
+        "Gargantua"
       ],
       "scene_intent": "reveal",
       "confidence": 1.0,
-      "visual_objective": "The viewer should see the iconic glowing orange ring with a dark central shadow, and feel the awe of witnessing humanity's first direct glimpse of a black hole \u2014 a cosmic door that gravity locks forever."
+      "visual_objective": "The viewer should see the iconic ring-like shadow of M87* and feel the awe of humanity's first direct glimpse of a black hole."
     },
     "1": {
       "beat_id": "scene1",
       "scene_id": 1,
       "required_entities": [
+        "M87*",
         "Sagittarius A*",
-        "Sun",
-        "Mercury"
+        "event horizon"
       ],
       "match_terms": {
+        "M87*": [
+          "M87*",
+          "M87",
+          "black hole M87"
+        ],
         "Sagittarius A*": [
           "Sagittarius A*",
-          "sgr a*",
-          "milky way galactic center"
+          "Sgr A*",
+          "galactic center black hole"
         ],
-        "Sun": [
-          "Sun",
-          "solar"
-        ],
-        "Mercury": [
-          "Mercury"
+        "event horizon": [
+          "event horizon",
+          "black hole shadow"
         ]
       },
       "optional_entities": [
-        "black hole",
+        "supermassive black hole",
         "accretion disk",
-        "event horizon"
+        "orange ring"
       ],
       "prohibited_entities": [
-        "M87*",
         "Voyager 1",
-        "Apollo 11"
+        "Mars",
+        "rocket launch",
+        "Earth from space",
+        "spaceship"
       ],
-      "scene_intent": "scale",
+      "scene_intent": "explanation",
       "confidence": 1.0,
-      "visual_objective": "The viewer should see a comparative scale from our Sun to Mercury against the backdrop of Sagittarius A*'s event horizon, feeling the immense compactness of the black hole's boundary."
+      "visual_objective": "The viewer should see the glowing orange ring of a black hole's event horizon, feeling the awe of cosmic gravity and the boundary where light itself cannot escape."
     },
     "2": {
       "beat_id": "scene2",
       "scene_id": 2,
       "required_entities": [
-        "GW150914",
         "LIGO",
-        "black hole merger"
+        "black hole"
       ],
       "match_terms": {
-        "GW150914": [
-          "GW150914",
-          "gravitational wave"
-        ],
         "LIGO": [
           "LIGO",
-          "laser interferometer"
+          "laser interferometer gravitational-wave observatory",
+          "gravitational wave detector"
         ],
-        "black hole merger": [
-          "black hole merger",
+        "black hole": [
+          "black hole",
           "merger",
-          "binary black hole"
+          "event horizon",
+          "gravitational waves"
         ]
       },
       "optional_entities": [
         "M87*",
         "Sagittarius A*",
-        "Event Horizon Telescope"
+        "chirp waveform"
       ],
       "prohibited_entities": [
-        "Einstein",
-        "spacecraft",
-        "rocket",
-        "planet",
-        "galaxy",
-        "wrong event"
+        "Voyager 1",
+        "Hubble Space Telescope",
+        "Apollo 11"
       ],
-      "scene_intent": "explanation",
+      "scene_intent": "hook",
       "confidence": 1.0,
-      "visual_objective": "The viewer should see the moment of cosmic impact\u2014two black holes merging\u2014and feel the awe of detecting ripples in spacetime, confirming Einstein's theory."
+      "visual_objective": "Show a brief, mysterious chirp on a waveform display, with the silhouette of two black holes merging in the background, conveying the awe of hearing the universe's first gravitational wave."
     },
     "3": {
       "beat_id": "scene3",
       "scene_id": 3,
       "required_entities": [
-        "black hole",
-        "Hawking radiation"
+        "UHZ1",
+        "black hole"
       ],
       "match_terms": {
+        "UHZ1": [
+          "UHZ1",
+          "UHZ-1"
+        ],
         "black hole": [
           "black hole",
-          "event horizon",
-          "M87",
-          "M87*",
-          "Sagittarius A*",
-          "singularity"
-        ],
-        "Hawking radiation": [
-          "Hawking radiation",
-          "hawking",
-          "radiation",
-          "quantum",
-          "evaporation"
+          "supermassive black hole",
+          "accretion disk",
+          "event horizon"
         ]
       },
       "optional_entities": [
-        "star",
-        "interstellar space",
-        "void"
+        "early universe",
+        "galaxy cluster",
+        "quasar"
       ],
       "prohibited_entities": [
-        "Sun",
-        "Earth",
-        "rocket",
-        "spacecraft",
-        "astronaut",
-        "galaxy"
+        "M87*",
+        "Sagittarius A*",
+        "Milky Way",
+        "Event Horizon Telescope image",
+        "2019 EHT black hole image"
       ],
-      "scene_intent": "scale",
+      "scene_intent": "reveal",
       "confidence": 1.0,
-      "visual_objective": "The viewer should see an isolation shot of a black hole against a starfield, evoking its extreme coldness and near-eternal lifespan, creating a feeling of immense, lonely cosmic time."
+      "visual_objective": "The viewer should see a distant, faint supermassive black hole or its accretion disk, conveying its extreme age and immense scale, evoking awe at the early universe."
     },
     "4": {
       "beat_id": "scene4",
       "scene_id": 4,
       "required_entities": [
-        "M87*",
-        "Sagittarius A*"
+        "black hole",
+        "event horizon"
       ],
       "match_terms": {
-        "M87*": [
-          "M87*",
+        "black hole": [
+          "black hole",
           "m87",
-          "black hole m87",
-          "event horizon telescope m87"
+          "sagittarius a*",
+          "supermassive black hole"
         ],
-        "Sagittarius A*": [
-          "Sagittarius A*",
-          "sagittarius a star",
-          "milky way black hole",
-          "galactic center black hole"
+        "event horizon": [
+          "event horizon",
+          "schwarzschild radius"
         ]
       },
       "optional_entities": [
-        "galaxy",
-        "milky way",
-        "event horizon telescope"
+        "schwarzschild",
+        "einstein equations",
+        "gravitational waves",
+        "LIGO"
       ],
       "prohibited_entities": [
-        "Voyager 1",
-        "Jupiter",
-        "Apollo 11",
-        "GW150914",
-        "Hubble Space Telescope"
+        "wormhole",
+        "white hole",
+        "interstellar (movie scene)",
+        "other celestial bodies like planets or stars not related to black holes"
       ],
-      "scene_intent": "hook",
+      "scene_intent": "explanation",
       "confidence": 1.0,
-      "visual_objective": "The viewer should see the two iconic black hole images (M87* and Sagittarius A*) side by side, feeling the awe of the unknown and the mystery of what lies beyond the edge."
+      "visual_objective": "The viewer should see a black hole's event horizon or an abstract representation of its gravitational pull, feeling the mystery and scale of these invisible cosmic objects."
     }
   },
   "camera_diversity": {
-    "moves": 8,
-    "entropy": 2.25,
-    "normalized_entropy": 0.969,
+    "moves": 9,
+    "entropy": 2.503,
+    "normalized_entropy": 0.968,
     "repetitive": false,
     "distribution": {
-      "reveal": 1,
-      "pull_out": 2,
+      "parallax": 1,
+      "reveal": 2,
       "crane_up": 1,
-      "parallax": 2,
+      "pan_right": 1,
+      "pull_out": 2,
       "push_in": 2
     }
   },
   "diversity": {
     "asset_diversity": 1.0,
-    "transition_diversity": 1.0,
-    "motion_diversity": 0.914,
-    "shot_duration_mean_s": 5.5,
-    "shot_duration_std_s": 0.0,
-    "shot_count": 10
+    "transition_diversity": 0.994,
+    "motion_diversity": 0.949,
+    "shot_duration_mean_s": 5.85,
+    "shot_duration_std_s": 1.12,
+    "shot_count": 11
   },
   "retention_diagnostic": {
-    "novelty_density_per_10s": 1.76,
-    "longest_hold_s": 7.9,
+    "novelty_density_per_10s": 2.19,
+    "longest_hold_s": 9.4,
     "dead_air_s": 0.0,
-    "shots": 10,
+    "shots": 11,
     "benchmark": {
       "hook_window_s": 15,
       "max_hold_s": 8.0,
       "target_novelty_per_10s": 1.5
     },
-    "flags": []
+    "flags": [
+      "longest hold 9.4s > 8s (drop-off risk)"
+    ]
   },
   "disclosure": {
     "synthetic_content": true,
     "disclosure_label": "AI-generated content: synthetic narration, AI-assisted visuals and sound design",
     "no_fakes_compliant": true,
-    "generated_at": "2026-08-03T16:11:56Z",
+    "generated_at": "2026-08-03T21:03:53Z",
     "pipeline": "jade-studio/v8"
   },
   "cleanup": {
@@ -437,74 +365,74 @@
     {
       "stage": "asset_gate",
       "severity": "info",
-      "detail": "11 assets rejected by Entity-Asset verification (correct behavior)"
+      "detail": "8 assets rejected by Entity-Asset verification (correct behavior)"
     },
     {
       "stage": "asset_dedup",
       "severity": "info",
-      "detail": "3 near-identical assets skipped (perceptual dedup)"
+      "detail": "2 near-identical assets skipped (perceptual dedup)"
     }
   ],
   "final": {
     "output": "results/black_holes__where_space_ends/black_holes__where_space_ends_mixed.mp4",
-    "iterations": 3,
-    "final_score": 82,
-    "duration_s": 56.8,
+    "iterations": 1,
+    "final_score": 85,
+    "duration_s": 50.2,
     "visual_stats": {
-      "manim": 0,
+      "manim": 1,
       "nasa": 1,
       "wikimedia": 4,
-      "ai": 3,
+      "ai": 4,
       "video_fallback": 0,
-      "rejected": 11,
-      "vision_checked": 4,
-      "deduped": 3
+      "rejected": 8,
+      "vision_checked": 3,
+      "deduped": 2
     }
   },
   "llm_usage_deepseek": {
     "stages": {
       "fact_verification": {
         "calls": 1,
-        "input": 1058,
-        "output": 1112,
+        "input": 1128,
+        "output": 1181,
         "cached": 0,
-        "cost_usd": 0.000459
+        "cost_usd": 0.000489
       },
       "research": {
         "calls": 1,
         "input": 200,
-        "output": 1404,
+        "output": 1415,
         "cached": 0,
-        "cost_usd": 0.000421
+        "cost_usd": 0.000424
       },
       "script": {
-        "calls": 1,
-        "input": 2230,
-        "output": 873,
+        "calls": 2,
+        "input": 3056,
+        "output": 1801,
         "cached": 0,
-        "cost_usd": 0.000557
+        "cost_usd": 0.000932
       },
       "script_review": {
         "calls": 15,
-        "input": 21771,
-        "output": 13333,
+        "input": 22273,
+        "output": 13149,
         "cached": 0,
-        "cost_usd": 0.006781
+        "cost_usd": 0.0068
       },
       "spec_build": {
         "calls": 5,
-        "input": 6021,
-        "output": 986,
+        "input": 5746,
+        "output": 912,
         "cached": 0,
-        "cost_usd": 0.001119
+        "cost_usd": 0.00106
       }
     },
     "total": {
-      "calls": 23,
-      "input": 31280,
-      "output": 17708,
+      "calls": 24,
+      "input": 32403,
+      "output": 18458,
       "cached": 0,
-      "cost_usd": 0.009337
+      "cost_usd": 0.009705
     }
   },
   "postmortem": "/home/ubuntu/video_engine/src/docs/mission/postmortems/postmortem-black-holes-where-space-ends-stills-first.md"
