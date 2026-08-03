@@ -1,91 +1,91 @@
 [
   {
-    "title": "The Shadow",
-    "narration": "In 2019, we saw a black hole's shadow for the first time. M87* weighs 6.5 billion suns. But why does its edge exist? The answer lies in a vanishing point.",
-    "visual_goal": "Show the iconic orange ring of M87* against darkness, then zoom into the center where light disappears.",
+    "title": "Where Light Dies",
+    "narration": "A shadow against a glowing ring. That is M87*. Its event horizon spans 19 billion kilometers. Our entire solar system could fit behind it. This is where space ends.",
+    "visual_goal": "Start on the iconic 2019 orange-ringed black hole image, then zoom in to show the dark void swallowing a stylized solar system for scale.",
     "search_queries": [
-      "M87 black hole first image",
-      "black hole shadow orange ring",
-      "event horizon telescope 2019"
+      "M87 black hole event horizon telescope",
+      "black hole solar system scale size comparison",
+      "black hole dark void animation",
+      "orange glowing ring space"
     ],
     "emotion": "awe",
     "visual_style": "photorealistic",
     "sfx_events": [
       {
-        "trigger": "deep boom",
-        "at": "shadow for the first time"
+        "trigger": "deep_space_drone",
+        "at": "after: A shadow"
       }
     ]
   },
   {
-    "title": "The Point of No Return",
-    "narration": "At the event horizon, escape velocity hits 299,792,458 meters per second\u2014light speed. Beyond this 0.08 AU sphere around Sagittarius A*, space itself ends. Nothing comes back.",
-    "visual_goal": "Animate the spherical boundary around the Milky Way's core, showing light rays bending and being trapped.",
+    "title": "The Invisible Giant",
+    "narration": "Einstein predicted this in 1915. But we couldn't see one until 2019. Then, in 2022, we focused on our own center. Sagittarius A*. Four million suns in a space smaller than a star.",
+    "visual_goal": "Show a sepia-toned photo of Einstein, then flash-forward to the 2022 blurry image of Sgr A* pulsing over a Milky Way backdrop.",
     "search_queries": [
-      "event horizon sphere animation",
-      "light bending black hole gravity",
-      "Sagittarius A star 0.08 AU"
+      "Albert Einstein relativity photo",
+      "Sagittarius A star 2022 image",
+      "Milky Way center black hole",
+      "solar system vs black hole size"
     ],
-    "emotion": "tension",
-    "visual_style": "clean_vector",
+    "emotion": "revelation",
+    "visual_style": "sepia_cel",
     "sfx_events": [
       {
-        "trigger": "rising whoosh",
-        "at": "space itself ends"
+        "trigger": "camera_shutter",
+        "at": "after: 2019"
       }
     ]
   },
   {
-    "title": "The Ripples",
-    "narration": "In 2015, LIGO heard two black holes collide. Their combined 62 solar masses rang spacetime like a bell. We've detected over 90 mergers since. These waves are echoes of swallowed stars.",
-    "visual_goal": "Visualize gravitational waves as ripples distorting a grid of stars, then show two spiraling masses merging.",
+    "title": "A Collision in Time",
+    "narration": "The first image is a still life. But black holes move. In 2015, LIGO heard a collision. Two holes, 36 and 29 suns, spiraled and merged. Space itself rang.",
+    "visual_goal": "Show an animated gravitational wave ripple distorting a starfield, followed by two abstract dark objects spiraling into each other in a 90s anime style.",
     "search_queries": [
-      "gravitational waves animation spacetime ripples",
-      "LIGO black hole merger simulation",
-      "GW150914 chirp"
+      "gravitational waves ripples spacetime",
+      "binary black hole merger animation",
+      "LIGO detector visualization",
+      "spacetime fabric distortion"
+    ],
+    "emotion": "tension",
+    "visual_style": "90s_anime",
+    "sfx_events": [
+      {
+        "trigger": "low_tone_boom",
+        "at": "after: merged"
+      }
+    ]
+  },
+  {
+    "title": "The Eraser",
+    "narration": "They erase the past. No hair, no scars. Only mass, charge, spin. But Hawking asked: does the universe remember? His 1974 radiation says the black hole forgets. Information is lost.",
+    "visual_goal": "A paper sketch of a featureless sphere wiping away complex equations, then a ghost-like Hawking concept image with musical notes evaporating from a black hole.",
+    "search_queries": [
+      "black hole no hair theorem",
+      "Stephen Hawking portrait",
+      "black hole evaporation concept",
+      "quantum information paradox"
+    ],
+    "emotion": "somber",
+    "visual_style": "hand_drawn",
+    "sfx_events": []
+  },
+  {
+    "title": "The Final Page",
+    "narration": "The paradox remains. No answer yet. M87* is 55 million light-years away. The secrets are deep. But we have their picture. The ending? We are still writing it.",
+    "visual_goal": "Return to the first M87* image, but slowly fade to a blank starry sky, suggesting an unfinished page or a waiting horizon.",
+    "search_queries": [
+      "M87 black hole close up",
+      "empty night sky stars",
+      "telescope looking at stars",
+      "unknown space mystery"
     ],
     "emotion": "wonder",
     "visual_style": "watercolor",
     "sfx_events": [
       {
-        "trigger": "heartbeat thump",
-        "at": "collide"
-      }
-    ]
-  },
-  {
-    "title": "The Temperature of Nothing",
-    "narration": "Hawking radiation gives a solar-mass hole a temperature of 0.00000006 kelvins. It will evaporate in 1.5\u00d710^67 years. The universe will be unrecognizable by then. Black holes are not forever.",
-    "visual_goal": "Show a faint glow around a black hole against a cold, starless background, with time-lapse of stars dying around it.",
-    "search_queries": [
-      "hawking radiation visual effect",
-      "cold empty space black hole glow",
-      "black hole evaporation time lapse"
-    ],
-    "emotion": "somber",
-    "visual_style": "sepia_cel",
-    "sfx_events": [
-      {
-        "trigger": "sparkle fade",
-        "at": "not forever"
-      }
-    ]
-  },
-  {
-    "title": "The Unseen Mass",
-    "narration": "A hundred million black holes drift through the Milky Way. We've imaged two. Sagittarius A*, 26,960 light-years away, holds our galaxy together. Where space ends, mystery begins.",
-    "visual_goal": "Pan across the Milky Way's star field, highlighting faint black hole candidates, then settle on the Sagittarius A* image from 2022.",
-    "search_queries": [
-      "milky way star field pan",
-      "sagittarius a star 2022 image",
-      "black holes distribution galaxy"
-    ],
-    "emotion": "revelation",
-    "visual_style": "hand_drawn",
-    "sfx_events": [
-      {
-        "trigger": "deep boom",
-        "at": "mystery begins"
+        "trigger": "heartbeat",
+        "at": "after: paradox"
       }
     ]
   }

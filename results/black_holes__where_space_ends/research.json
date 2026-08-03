@@ -8,160 +8,168 @@
       "year": 2019,
       "confidence": 1.0,
       "verified": true,
-      "verification_notes": "The EHT released the first image of M87*'s shadow on April 10, 2019."
+      "verification_notes": "The EHT released the first image of M87* on April 10, 2019."
     },
     {
-      "claim": "Mass of the supermassive black hole at the center of the Milky Way (Sagittarius A*)",
-      "value": 4154000.0,
-      "unit": "solar masses",
-      "source": "ESO / GRAVITY collaboration",
-      "year": 2020,
+      "claim": "Mass of the supermassive black hole at the center of galaxy M87, M87*",
+      "value": 6.5,
+      "unit": "billion solar masses",
+      "source": "NASA / EHT",
+      "year": 2019,
       "confidence": 0.98,
       "verified": true,
-      "verification_notes": "The GRAVITY collaboration (ESO) and others report a mass of about 4.15 million solar masses, consistent with this value."
+      "verification_notes": "The EHT team measured M87*'s mass as 6.5 \u00b1 0.7 billion solar masses, confirmed by subsequent studies."
     },
     {
-      "claim": "Distance to Sagittarius A* from Earth",
-      "value": 26960,
-      "unit": "light-years",
-      "source": "NASA / ESA",
-      "year": 2020,
-      "confidence": 0.95,
-      "verified": true,
-      "verification_notes": "Recent estimates (e.g., from EHT and GRAVITY) place Sagittarius A* at about 26,960 light-years (8.2 kpc)."
-    },
-    {
-      "claim": "Radius of the event horizon (Schwarzschild radius) of Sagittarius A*",
-      "value": 0.08,
-      "unit": "astronomical units (AU)",
-      "source": "NASA / Caltech (derived from mass)",
-      "year": 2020,
-      "confidence": 0.9,
-      "verified": true,
-      "verification_notes": "For a 4.15e6 solar mass black hole, Schwarzschild radius \u2248 0.08 AU (about 12 million km). Correct."
-    },
-    {
-      "claim": "Mass of the black hole in M87 (M87*)",
-      "value": 6500000000.0,
-      "unit": "solar masses",
-      "source": "Event Horizon Telescope Collaboration",
+      "claim": "Distance to M87* from Earth",
+      "value": 55,
+      "unit": "million light-years",
+      "source": "NASA / ESO",
       "year": 2019,
-      "confidence": 1.0,
-      "verified": true,
-      "verification_notes": "EHTC 2019 paper gives a mass of about 6.5e9 solar masses, though later refined estimates range from 6.2 to 7.0e9."
-    },
-    {
-      "claim": "First detection of gravitational waves from a black hole merger (GW150914)",
-      "value": 2015,
-      "unit": "year",
-      "source": "LIGO / Virgo Collaboration",
-      "year": 2015,
-      "confidence": 1.0,
-      "verified": true,
-      "verification_notes": "LIGO detected GW150914 on September 14, 2015, announced in 2016."
-    },
-    {
-      "claim": "Mass of the first detected merging black holes (GW150914) \u2013 combined",
-      "value": 62,
-      "unit": "solar masses",
-      "source": "LIGO / Virgo Collaboration",
-      "year": 2016,
-      "confidence": 1.0,
-      "verified": true,
-      "verification_notes": "The combined mass of the two black holes (36 and 29 solar masses) is approximately 62 solar masses."
-    },
-    {
-      "claim": "Event horizon radius of a 10 solar mass black hole",
-      "value": 29.6,
-      "unit": "kilometers",
-      "source": "NASA (derived from Schwarzschild formula)",
-      "year": 2021,
       "confidence": 0.99,
       "verified": true,
-      "verification_notes": "Schwarzschild radius = 2GM/c^2 \u2248 29.6 km for 10 solar masses. Correct."
+      "verification_notes": "M87 is approximately 55 million light-years from Earth, consistent with multiple astronomical measurements."
     },
     {
-      "claim": "Number of gravitational wave events detected (black hole mergers) as of 2024 (GWTC-3)",
-      "value": 90,
-      "unit": "events",
-      "source": "LIGO / Virgo / KAGRA Collaboration",
-      "year": 2024,
-      "confidence": 0.6,
-      "verified": false,
-      "verification_notes": "GWTC-3 (released in 2021) includes ~90 confident events total (including NS mergers). As of 2024, the total number of black hole merger candidates exceeds 200 (from GWTC-4 and ongoing runs). The '90' is dated and undercounts current detections."
+      "claim": "Event horizon radius (Schwarzschild radius) of M87*",
+      "value": 19,
+      "unit": "billion kilometers",
+      "source": "NASA / EHT",
+      "year": 2019,
+      "confidence": 0.95,
+      "verified": true,
+      "verification_notes": "For a non-rotating black hole of 6.5 billion solar masses, the Schwarzschild radius is about 19 billion km (\u2248 12.7 AU)."
     },
     {
-      "claim": "First image of Sagittarius A* released by the Event Horizon Telescope",
+      "claim": "First image of Sagittarius A* (our galaxy's central black hole) released",
       "value": 2022,
       "unit": "year",
-      "source": "Event Horizon Telescope Collaboration",
+      "source": "EHT / NASA",
       "year": 2022,
       "confidence": 1.0,
       "verified": true,
       "verification_notes": "The EHT released the first image of Sagittarius A* on May 12, 2022."
     },
     {
-      "claim": "Hawking radiation temperature of a solar-mass black hole",
-      "value": 6e-08,
-      "unit": "kelvins",
-      "source": "NASA (derived from Hawking 1974)",
-      "year": 2020,
+      "claim": "Mass of Sagittarius A*, the Milky Way's central black hole",
+      "value": 4.154,
+      "unit": "million solar masses",
+      "source": "EHT / NASA",
+      "year": 2022,
       "confidence": 0.99,
       "verified": true,
-      "verification_notes": "For a 1 solar mass black hole, T = \u210fc^3/(8\u03c0GMk_B) \u2248 6e-8 K. Correct."
+      "verification_notes": "The EHT team and other measurements give Sgr A*'s mass as about 4.15 million solar masses (4.154 \u00b1 0.014 million)."
     },
     {
-      "claim": "Time it takes for a solar-mass black hole to evaporate via Hawking radiation (theoretical)",
-      "value": 1.5e+67,
-      "unit": "years",
-      "source": "NASA / Caltech (derived calculation)",
-      "year": 2020,
-      "confidence": 0.85,
+      "claim": "Gravitational waves first directly detected from a black hole merger (GW150914)",
+      "value": 2015,
+      "unit": "year",
+      "source": "LIGO / NSF",
+      "year": 2015,
+      "confidence": 1.0,
+      "verified": true,
+      "verification_notes": "LIGO detected gravitational waves from GW150914 on September 14, 2015, announced in February 2016."
+    },
+    {
+      "claim": "Masses of the two black holes in GW150914 (approx. 36 and 29 solar masses, merged to ~62)",
+      "value": 36,
+      "unit": "solar masses",
+      "source": "LIGO / Caltech / MIT",
+      "year": 2016,
+      "confidence": 0.99,
+      "verified": true,
+      "verification_notes": "The LIGO/Virgo paper reports primary mass 36+5/\u22124 solar masses, secondary 29+4/\u22124 solar masses, final mass 62+4/\u22124 solar masses (approx). The claim's values are consistent."
+    },
+    {
+      "claim": "Theory of general relativity, predicting black holes, published by Albert Einstein",
+      "value": 1915,
+      "unit": "year",
+      "source": "Einstein / Max Planck Institute",
+      "year": 1915,
+      "confidence": 1.0,
+      "verified": true,
+      "verification_notes": "Einstein published the general theory of relativity in November 1915 (while the final field equations appeared in 1915, the full theory was presented in 1915)."
+    },
+    {
+      "claim": "Term 'black hole' coined by physicist John Archibald Wheeler",
+      "value": 1967,
+      "unit": "year",
+      "source": "NASA / APS Physics",
+      "year": 1967,
+      "confidence": 0.98,
+      "verified": true,
+      "verification_notes": "Wheeler popularized the term in 1967, though he later acknowledged it may have been used earlier informally."
+    },
+    {
+      "claim": "Cygnus X-1, first strong candidate for a black hole, discovered via X-ray emission",
+      "value": 1964,
+      "unit": "year",
+      "source": "NASA / Chandra",
+      "year": 1964,
+      "confidence": 0.97,
+      "verified": true,
+      "verification_notes": "Cygnus X-1 was discovered in 1964 by a sounding rocket experiment, and its black hole nature was confirmed later."
+    },
+    {
+      "claim": "Largest known stellar-mass black hole in the Milky Way: LB-1 (approx. 70 solar masses)",
+      "value": 70,
+      "unit": "solar masses",
+      "source": "Chinese Academy of Sciences / Nature",
+      "year": 2019,
+      "confidence": 0.3,
       "verified": false,
-      "verification_notes": "The standard evaporation time for a solar-mass black hole is ~2e67 years, not 1.5e67. The given value is off by roughly 25%, likely a rounding or calculation error."
+      "verification_notes": "The LB-1 claim of ~70 solar masses was retracted; subsequent analysis found a much lower mass (likely ~9 solar masses). The largest known stellar-mass BH in the Milky Way is now Gaia BH3 (~33 solar masses)."
     },
     {
-      "claim": "Number of known black holes in the Milky Way (estimated)",
-      "value": 100000000,
-      "unit": "black holes",
-      "source": "NASA (estimates based on stellar evolution)",
-      "year": 2021,
-      "confidence": 0.7,
-      "verified": false,
-      "verification_notes": "This is an estimate, not 'known.' The number of stellar-mass black holes in the Milky Way is estimated at ~100 million (1e8), but only a few dozen have been confirmed. The phrasing is misleading."
-    },
-    {
-      "claim": "Speed of light at the event horizon (in a black hole) \u2013 escape velocity reaches c",
-      "value": 299792458,
-      "unit": "m/s",
-      "source": "NASA / fundamental physics",
-      "year": 2020,
+      "claim": "Black holes can have no 'hair' --- only mass, charge, and angular momentum (no-hair theorem)",
+      "value": 3,
+      "unit": "properties",
+      "source": "Stephen Hawking / Branden Carter / Werner Israel (via NASA)",
+      "year": 1973,
       "confidence": 0.95,
       "verified": true,
-      "verification_notes": "In general relativity, the escape velocity at the event horizon equals the speed of light (in vacuum), though in GR velocity isn't a local concept for escape; the statement is a common valid approximation."
+      "verification_notes": "The no-hair theorem, developed in the 1960s-70s by Israel, Carter, Hawking, and Robinson, states that stationary black holes are fully described by mass, charge, and angular momentum."
+    },
+    {
+      "claim": "Hawking radiation predicts black holes slowly emit energy and eventually evaporate",
+      "value": 1974,
+      "unit": "year",
+      "source": "Stephen Hawking / NASA",
+      "year": 1974,
+      "confidence": 0.9,
+      "verified": true,
+      "verification_notes": "Hawking's 1974 paper proposed that black holes emit thermal radiation due to quantum effects near the event horizon, leading to gradual mass loss and evaporation over cosmic timescales."
+    },
+    {
+      "claim": "Black hole information paradox remains unresolved (controversy)",
+      "value": null,
+      "unit": "none",
+      "source": "NASA / Caltech",
+      "year": 2025,
+      "confidence": 0.9,
+      "verified": true,
+      "verification_notes": "While there have been many proposed solutions (e.g., holography, firewalls, island formulas), no universally accepted resolution has been established as of 2025; it is still an active research area."
     }
   ],
   "hook_ideas": [
-    "What happens when you cross the point of no return? The event horizon \u2013 a boundary where even light cannot escape.",
-    "The black hole at the center of our galaxy has the mass of 4 million suns, but its shadow is smaller than our solar system.",
-    "A teaspoon of black hole material would weigh billions of tons \u2013 but it doesn't physically exist, it's a spacetime singularity.",
-    "The gravitational waves from a black hole merger travel across the universe, warping space itself \u2013 we detected them in 2015."
+    "Open with: 'What if space doesn't end, but twists into a one-way door?'",
+    "Show the first image of M87* as a glowing orange ring, then ask: 'This is the edge of reality.'",
+    "Start with a ticking clock: 'In a black hole, time stops at the event horizon \u2014 but only for an outside observer.'"
   ],
   "misconceptions": [
-    "Black holes are not cosmic vacuum cleaners; they do not suck in everything around them. They behave like any other mass gravitationally, just more extreme.",
-    "Time does not stop at the event horizon; it slows down relative to a distant observer, but for an infalling object, time passes normally.",
-    "Black holes are not 'empty holes' \u2013 they are extremely dense regions of spacetime, and the singularity is not a point in space but a boundary in time for an infalling observer.",
-    "You cannot escape a black hole even if you move at the speed of light after crossing the event horizon \u2013 all paths lead to the singularity."
+    "Black holes are not cosmic vacuum cleaners; they don't suck everything in, they only pull matter within their event horizon.",
+    "Space does not literally 'end' at a black hole \u2014 the event horizon is not a physical wall; it's a boundary where escape velocity exceeds the speed of light.",
+    "Black holes don't have infinite density; the singularity is a mathematical point where our physics breaks down, but observations are limited to outside the horizon."
   ],
   "key_sources": [
-    "NASA \u2013 Black Holes (science.nasa.gov/astrophysics/focus-areas/black-holes)",
-    "Event Horizon Telescope Collaboration (eventhorizontelescope.org)",
-    "LIGO Scientific Collaboration (ligo.org)",
-    "ESO \u2013 Sagittarius A* / GRAVITY (eso.org)",
-    "Physical Review Letters \u2013 GW150914 (2016)",
-    "The Nobel Prize in Physics 2020 \u2013 Roger Penrose, Reinhard Genzel, Andrea Ghez (nobelprize.org)"
+    "Event Horizon Telescope Collaboration (EHT) \u2014 first images of M87* and Sgr A*",
+    "NASA - Black Hole 101 and fact sheets",
+    "LIGO Scientific Collaboration (GW150914 announcement)",
+    "European Southern Observatory (ESO) \u2014 M87* press releases",
+    "Nature / Science publications on black hole masses and evolution",
+    "Stephen Hawking's 1974 paper on black hole radiation"
   ],
-  "_elapsed_s": 8.4,
+  "_elapsed_s": 10.3,
   "_verification_failed": false,
-  "_verification_elapsed_s": 6.2
+  "_verification_elapsed_s": 8.8
 }

@@ -198,7 +198,8 @@ TOPIC_MANIM = {
     "pulsar":  {"explanation": "pulsar_lighthouse", "journey": "pulsar_lighthouse",
                  "scale": "pulsar_density", "emotion": "pulsar_lighthouse"},
     "black_holes": {"explanation": "black_hole_lensing", "structure": "black_hole_lensing",
-                 "emotion": "black_hole_lensing", "journey": "black_hole_lensing"},
+                 "emotion": "black_hole_lensing", "journey": "black_hole_lensing",
+                 "scale": "black_hole_lensing"},
 }
 
 # Which topic a given text belongs to (keyword hints, general-purpose).
@@ -312,8 +313,9 @@ def _manim_scene_for(scene_text: str, intent: str = "default") -> str:
         if intent == key and key in mapping:
             return MANIM_SCENES[mapping[key]]
         # also trigger on scale words even when intent is generic
-        if key == "scale" and any(k in scene_text.lower() for k in
-                                  ("how big", "how far", "million", "billion", "fit inside", "size")):
+        if (key == "scale" and key in mapping and
+                any(k in scene_text.lower() for k in
+                    ("how big", "how far", "million", "billion", "fit inside", "size"))):
             return MANIM_SCENES[mapping[key]]
     return ""
 
