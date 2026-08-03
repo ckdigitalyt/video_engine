@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-08-03T04:07:35Z",
-  "total_render_s": 76.13,
-  "shot_count": 11,
+  "generated_at": "2026-08-03T06:23:14Z",
+  "total_render_s": 77.48,
+  "shot_count": 12,
   "shots": [
     {
       "scene_id": 0,
@@ -16,35 +16,34 @@
         "beat_id": "scene0",
         "scene_id": 0,
         "required_entities": [
-          "pulsar",
+          "PSR J1748-2446ad",
           "neutron star"
         ],
         "match_terms": {
-          "pulsar": [
-            "pulsar",
+          "PSR J1748-2446ad": [
             "PSR J1748-2446ad",
-            "PSR B1937+21"
+            "j1748-2446ad",
+            "716 hz pulsar"
           ],
           "neutron star": [
             "neutron star",
-            "neutron-star"
+            "pulsar",
+            "pulsar star"
           ]
         },
         "optional_entities": [
-          "interplanetary scintillation array",
-          "Jocelyn Bell Burnell",
-          "Large Magellanic Cloud"
+          "PSR B1937+21",
+          "Large Magellanic Cloud",
+          "Interplanetary Scintillation Array"
         ],
         "prohibited_entities": [
+          "PSR B0529-66",
           "black hole",
-          "white dwarf",
-          "Sun",
-          "Earth",
-          "galaxy"
+          "white dwarf"
         ],
-        "scene_intent": "hook",
+        "scene_intent": "explanation",
         "confidence": 1.0,
-        "visual_objective": "The viewer should see a rapidly spinning, flashing point of light in deep space, feeling the awe of an extreme cosmic object that defies death by pulsing relentlessly."
+        "visual_objective": "The viewer should see a rapidly spinning, compact neutron star with energetic beams, feeling awe at its extreme speed and cosmic endurance."
       },
       "shot_duration_s": 6.1,
       "narration_duration_s": 12.8,
@@ -61,8 +60,8 @@
       "shot_index": 1,
       "asset_path": "results/pulsars__the_universe_s_lighthouses/shots/scene0_0.mp4",
       "asset_source": "nasa",
-      "asset_title": "Pulsar Artist Concept",
-      "query_used": "pulsar",
+      "asset_title": "Different Types of Neutron Stars (Illustration)",
+      "query_used": "neutron star",
       "verification": {
         "asset_path": "cache/stills/pulsars__the_universe_s_lighthouses/scene0_0.jpg",
         "beat_id": "scene0",
@@ -71,11 +70,11 @@
         "signal_scores": {
           "metadata": {
             "score": 0.7,
-            "evidence": "hits=['pulsar'], bans=[]"
+            "evidence": "hits=['neutron star'], bans=[]"
           },
           "captions": {
             "score": 0.8,
-            "evidence": "hits=['pulsar'], bans=[]"
+            "evidence": "hits=['neutron star'], bans=[]"
           },
           "filename": {
             "score": 0.2,
@@ -83,15 +82,15 @@
           },
           "provider_tags": {
             "score": 0.75,
-            "evidence": "tags=['pulsar'], hits=['pulsar'], bans=[]"
+            "evidence": "tags=['neutron star'], hits=['neutron star'], bans=[]"
           }
         },
         "matched_required": [
-          "pulsar"
+          "neutron star"
         ],
         "violated_prohibited": [],
         "missing_required": [
-          "neutron star"
+          "PSR J1748-2446ad"
         ],
         "vision_check": null,
         "reasons": [
@@ -102,35 +101,34 @@
         "beat_id": "scene0",
         "scene_id": 0,
         "required_entities": [
-          "pulsar",
+          "PSR J1748-2446ad",
           "neutron star"
         ],
         "match_terms": {
-          "pulsar": [
-            "pulsar",
+          "PSR J1748-2446ad": [
             "PSR J1748-2446ad",
-            "PSR B1937+21"
+            "j1748-2446ad",
+            "716 hz pulsar"
           ],
           "neutron star": [
             "neutron star",
-            "neutron-star"
+            "pulsar",
+            "pulsar star"
           ]
         },
         "optional_entities": [
-          "interplanetary scintillation array",
-          "Jocelyn Bell Burnell",
-          "Large Magellanic Cloud"
+          "PSR B1937+21",
+          "Large Magellanic Cloud",
+          "Interplanetary Scintillation Array"
         ],
         "prohibited_entities": [
+          "PSR B0529-66",
           "black hole",
-          "white dwarf",
-          "Sun",
-          "Earth",
-          "galaxy"
+          "white dwarf"
         ],
-        "scene_intent": "hook",
+        "scene_intent": "explanation",
         "confidence": 1.0,
-        "visual_objective": "The viewer should see a rapidly spinning, flashing point of light in deep space, feeling the awe of an extreme cosmic object that defies death by pulsing relentlessly."
+        "visual_objective": "The viewer should see a rapidly spinning, compact neutron star with energetic beams, feeling awe at its extreme speed and cosmic endurance."
       },
       "shot_duration_s": 5.5,
       "narration_duration_s": 12.8,
@@ -152,8 +150,8 @@
       "shot_index": 2,
       "asset_path": "results/pulsars__the_universe_s_lighthouses/shots/scene0_1.mp4",
       "asset_source": "wikimedia",
-      "asset_title": "File:Pulsar Walibi Belgium overzicht.jpg",
-      "query_used": "pulsar",
+      "asset_title": "File:Illustration of relative sizes of Grand Canyon, neutron star and quark star (2002-0211-more-4).tiff",
+      "query_used": "neutron star",
       "verification": {
         "asset_path": "cache/stills/pulsars__the_universe_s_lighthouses/scene0_1.jpg",
         "beat_id": "scene0",
@@ -162,11 +160,11 @@
         "signal_scores": {
           "metadata": {
             "score": 0.7,
-            "evidence": "hits=['pulsar'], bans=[]"
+            "evidence": "hits=['neutron star'], bans=[]"
           },
           "captions": {
             "score": 0.8,
-            "evidence": "hits=['pulsar'], bans=[]"
+            "evidence": "hits=['neutron star'], bans=[]"
           },
           "filename": {
             "score": 0.2,
@@ -174,15 +172,15 @@
           },
           "provider_tags": {
             "score": 0.75,
-            "evidence": "tags=['pulsar'], hits=['pulsar'], bans=[]"
+            "evidence": "tags=['neutron star'], hits=['neutron star'], bans=[]"
           }
         },
         "matched_required": [
-          "pulsar"
+          "neutron star"
         ],
         "violated_prohibited": [],
         "missing_required": [
-          "neutron star"
+          "PSR J1748-2446ad"
         ],
         "vision_check": null,
         "reasons": [
@@ -193,35 +191,34 @@
         "beat_id": "scene0",
         "scene_id": 0,
         "required_entities": [
-          "pulsar",
+          "PSR J1748-2446ad",
           "neutron star"
         ],
         "match_terms": {
-          "pulsar": [
-            "pulsar",
+          "PSR J1748-2446ad": [
             "PSR J1748-2446ad",
-            "PSR B1937+21"
+            "j1748-2446ad",
+            "716 hz pulsar"
           ],
           "neutron star": [
             "neutron star",
-            "neutron-star"
+            "pulsar",
+            "pulsar star"
           ]
         },
         "optional_entities": [
-          "interplanetary scintillation array",
-          "Jocelyn Bell Burnell",
-          "Large Magellanic Cloud"
+          "PSR B1937+21",
+          "Large Magellanic Cloud",
+          "Interplanetary Scintillation Array"
         ],
         "prohibited_entities": [
+          "PSR B0529-66",
           "black hole",
-          "white dwarf",
-          "Sun",
-          "Earth",
-          "galaxy"
+          "white dwarf"
         ],
-        "scene_intent": "hook",
+        "scene_intent": "explanation",
         "confidence": 1.0,
-        "visual_objective": "The viewer should see a rapidly spinning, flashing point of light in deep space, feeling the awe of an extreme cosmic object that defies death by pulsing relentlessly."
+        "visual_objective": "The viewer should see a rapidly spinning, compact neutron star with energetic beams, feeling awe at its extreme speed and cosmic endurance."
       },
       "shot_duration_s": 5.5,
       "narration_duration_s": 12.8,
@@ -241,10 +238,64 @@
       "scene_id": 1,
       "beat_index": 0,
       "shot_index": 0,
+      "asset_path": "cache/manim/pulsar_lighthouse.mp4",
+      "asset_source": "manim",
+      "asset_title": "",
+      "query_used": "",
+      "verification": null,
+      "entity_spec": {
+        "beat_id": "scene1",
+        "scene_id": 1,
+        "required_entities": [
+          "Jocelyn Bell Burnell",
+          "pulsar"
+        ],
+        "match_terms": {
+          "Jocelyn Bell Burnell": [
+            "Jocelyn Bell Burnell",
+            "bell burnell",
+            "jocelyn bell"
+          ],
+          "pulsar": [
+            "pulsar",
+            "neutron star",
+            "little green men",
+            "lgm-1",
+            "lgm1"
+          ]
+        },
+        "optional_entities": [
+          "Interplanetary Scintillation Array",
+          "chart recorder",
+          "radio telescope"
+        ],
+        "prohibited_entities": [
+          "Voyager",
+          "Hubble Space Telescope",
+          "Apollo mission",
+          "Mars rover"
+        ],
+        "scene_intent": "explanation",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see and feel the moment of discovery, with Jocelyn Bell Burnell examining a chart that reveals the regular pulse of the first pulsar, evoking awe at the cosmic lighthouse."
+      },
+      "shot_duration_s": 8.8,
+      "narration_duration_s": 18.09,
+      "camera_motion": "static",
+      "motion_params": {},
+      "transition": "fade",
+      "timeline_start_s": 12.8,
+      "timeline_end_s": 21.6,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 1,
+      "beat_index": 0,
+      "shot_index": 1,
       "asset_path": "results/pulsars__the_universe_s_lighthouses/shots/scene1_0.mp4",
       "asset_source": "wikimedia",
       "asset_title": "File:Susan Jocelyn Bell (Burnell), 1967.jpg",
-      "query_used": "Jocelyn Bell Burnell",
+      "query_used": "Jocelyn Bell Burnell 1967",
       "verification": {
         "asset_path": "cache/stills/pulsars__the_universe_s_lighthouses/scene1_0.jpg",
         "beat_id": "scene1",
@@ -265,7 +316,7 @@
           },
           "provider_tags": {
             "score": 0.75,
-            "evidence": "tags=['Jocelyn Bell Burnell'], hits=['Jocelyn Bell Burnell'], bans=[]"
+            "evidence": "tags=['Jocelyn Bell Burnell 1967'], hits=['Jocelyn Bell Burnell'], bans=[]"
           }
         },
         "matched_required": [
@@ -290,361 +341,34 @@
         "match_terms": {
           "Jocelyn Bell Burnell": [
             "Jocelyn Bell Burnell",
-            "jocelyn bell",
-            "bell burnell"
+            "bell burnell",
+            "jocelyn bell"
           ],
           "pulsar": [
             "pulsar",
             "neutron star",
-            "scruff"
+            "little green men",
+            "lgm-1",
+            "lgm1"
           ]
         },
         "optional_entities": [
           "Interplanetary Scintillation Array",
-          "Mullard Radio Astronomy Observatory",
-          "radio telescope",
-          "Earth"
-        ],
-        "prohibited_entities": [
-          "Voyager 1",
-          "PSR J1748-2446ad",
-          "PSR B1937+21",
-          "Large Magellanic Cloud",
-          "Antony Hewish (if shown as the sole discoverer)"
-        ],
-        "scene_intent": "hook",
-        "confidence": 1.0,
-        "visual_objective": "The viewer should see a mid-century, archival feel of a young woman astronomer at a radio telescope chart recorder, with an abstract blinking signal visualized as a lighthouse beam sweeping across, conveying the wonder and human element of an accidental cosmic discovery."
-      },
-      "shot_duration_s": 5.5,
-      "narration_duration_s": 13.01,
-      "camera_motion": "parallax",
-      "motion_params": {
-        "zoom_start": 1.2,
-        "zoom_end": 1.05,
-        "pan_x": 50,
-        "pan_y": -30
-      },
-      "transition": "fade",
-      "timeline_start_s": 12.8,
-      "timeline_end_s": 25.81,
-      "render_duration_s": 0.0
-    },
-    {
-      "scene_id": 2,
-      "beat_index": 0,
-      "shot_index": 0,
-      "asset_path": "results/pulsars__the_universe_s_lighthouses/shots/scene2_0.mp4",
-      "asset_source": "nasa",
-      "asset_title": "Different Types of Neutron Stars (Illustration)",
-      "query_used": "neutron star",
-      "verification": {
-        "asset_path": "cache/stills/pulsars__the_universe_s_lighthouses/scene2_0.jpg",
-        "beat_id": "scene2",
-        "passed": true,
-        "score": 0.64,
-        "signal_scores": {
-          "metadata": {
-            "score": 0.7,
-            "evidence": "hits=['neutron star'], bans=[]"
-          },
-          "captions": {
-            "score": 0.8,
-            "evidence": "hits=['neutron star'], bans=[]"
-          },
-          "filename": {
-            "score": 0.2,
-            "evidence": "hits=[], bans=[]"
-          },
-          "provider_tags": {
-            "score": 0.75,
-            "evidence": "tags=['neutron star'], hits=['neutron star'], bans=[]"
-          }
-        },
-        "matched_required": [
-          "neutron star"
-        ],
-        "violated_prohibited": [],
-        "missing_required": [
-          "pulsar"
-        ],
-        "vision_check": null,
-        "reasons": [
-          "signals confirm (score=0.64)"
-        ]
-      },
-      "entity_spec": {
-        "beat_id": "scene2",
-        "scene_id": 2,
-        "required_entities": [
-          "pulsar",
-          "neutron star"
-        ],
-        "match_terms": {
-          "pulsar": [
-            "pulsar",
-            "pulsating star"
-          ],
-          "neutron star": [
-            "neutron star"
-          ]
-        },
-        "optional_entities": [
-          "PSR J1748-2446ad",
-          "PSR B1937+21",
-          "Vela Pulsar",
-          "Crab Pulsar",
+          "chart recorder",
           "radio telescope"
         ],
         "prohibited_entities": [
-          "white dwarf",
-          "black hole",
-          "Earth (as a visible object)",
-          "dentist's drill (as an object on screen)"
-        ],
-        "scene_intent": "scale",
-        "confidence": 1.0,
-        "visual_objective": "The viewer should see a spinning neutron star with beams of radiation, feeling the awe of its extreme density and speed, contrasting cosmic scale with familiar comparisons."
-      },
-      "shot_duration_s": 5.5,
-      "narration_duration_s": 13.27,
-      "camera_motion": "pull_out",
-      "motion_params": {
-        "zoom_start": 1.22,
-        "zoom_end": 1.0,
-        "pan_x": 0,
-        "pan_y": 0
-      },
-      "transition": "fade",
-      "timeline_start_s": 25.81,
-      "timeline_end_s": 31.31,
-      "render_duration_s": 0.0
-    },
-    {
-      "scene_id": 2,
-      "beat_index": 0,
-      "shot_index": 1,
-      "asset_path": "results/pulsars__the_universe_s_lighthouses/shots/scene2_1.mp4",
-      "asset_source": "wikimedia",
-      "asset_title": "File:Neutron Star simulation.png",
-      "query_used": "neutron star",
-      "verification": {
-        "asset_path": "cache/stills/pulsars__the_universe_s_lighthouses/scene2_1.jpg",
-        "beat_id": "scene2",
-        "passed": true,
-        "score": 0.64,
-        "signal_scores": {
-          "metadata": {
-            "score": 0.7,
-            "evidence": "hits=['neutron star'], bans=[]"
-          },
-          "captions": {
-            "score": 0.8,
-            "evidence": "hits=['neutron star'], bans=[]"
-          },
-          "filename": {
-            "score": 0.2,
-            "evidence": "hits=[], bans=[]"
-          },
-          "provider_tags": {
-            "score": 0.75,
-            "evidence": "tags=['neutron star'], hits=['neutron star'], bans=[]"
-          }
-        },
-        "matched_required": [
-          "neutron star"
-        ],
-        "violated_prohibited": [],
-        "missing_required": [
-          "pulsar"
-        ],
-        "vision_check": null,
-        "reasons": [
-          "signals confirm (score=0.64)"
-        ]
-      },
-      "entity_spec": {
-        "beat_id": "scene2",
-        "scene_id": 2,
-        "required_entities": [
-          "pulsar",
-          "neutron star"
-        ],
-        "match_terms": {
-          "pulsar": [
-            "pulsar",
-            "pulsating star"
-          ],
-          "neutron star": [
-            "neutron star"
-          ]
-        },
-        "optional_entities": [
-          "PSR J1748-2446ad",
-          "PSR B1937+21",
-          "Vela Pulsar",
-          "Crab Pulsar",
-          "radio telescope"
-        ],
-        "prohibited_entities": [
-          "white dwarf",
-          "black hole",
-          "Earth (as a visible object)",
-          "dentist's drill (as an object on screen)"
-        ],
-        "scene_intent": "scale",
-        "confidence": 1.0,
-        "visual_objective": "The viewer should see a spinning neutron star with beams of radiation, feeling the awe of its extreme density and speed, contrasting cosmic scale with familiar comparisons."
-      },
-      "shot_duration_s": 5.5,
-      "narration_duration_s": 13.27,
-      "camera_motion": "crane_up",
-      "motion_params": {
-        "zoom_start": 1.05,
-        "zoom_end": 1.18,
-        "pan_x": 0,
-        "pan_y": -60
-      },
-      "transition": "crossfade",
-      "timeline_start_s": 31.31,
-      "timeline_end_s": 39.08,
-      "render_duration_s": 0.0
-    },
-    {
-      "scene_id": 3,
-      "beat_index": 0,
-      "shot_index": 0,
-      "asset_path": "cache/manim/pulsar_lighthouse.mp4",
-      "asset_source": "manim",
-      "asset_title": "",
-      "query_used": "",
-      "verification": null,
-      "entity_spec": {
-        "beat_id": "scene3",
-        "scene_id": 3,
-        "required_entities": [
-          "pulsar",
-          "planet"
-        ],
-        "match_terms": {
-          "pulsar": [
-            "pulsar",
-            "neutron star",
-            "timing array"
-          ],
-          "planet": [
-            "planet",
-            "exoplanet"
-          ]
-        },
-        "optional_entities": [
-          "gravitational wave",
-          "Earth",
-          "telescope",
-          "radio observatory"
-        ],
-        "prohibited_entities": [
-          "specific named spacecraft (e.g., Voyager 1)",
-          "Jupiter",
-          "rocket",
-          "astronaut",
-          "Moon landing",
-          "any exoplanet system shown as directly imaged"
+          "Voyager",
+          "Hubble Space Telescope",
+          "Apollo mission",
+          "Mars rover"
         ],
         "scene_intent": "explanation",
         "confidence": 1.0,
-        "visual_objective": "The viewer should visualize pulsars as precise cosmic clocks and feel the surprise of a hidden planet disrupting their rhythm, culminating in the awe of space-time ripples detected across the galaxy."
-      },
-      "shot_duration_s": 8.8,
-      "narration_duration_s": 16.02,
-      "camera_motion": "static",
-      "motion_params": {},
-      "transition": "fade",
-      "timeline_start_s": 39.08,
-      "timeline_end_s": 47.88,
-      "render_duration_s": 0.0
-    },
-    {
-      "scene_id": 3,
-      "beat_index": 0,
-      "shot_index": 1,
-      "asset_path": "results/pulsars__the_universe_s_lighthouses/shots/scene3_0.mp4",
-      "asset_source": "nasa",
-      "asset_title": "Proposed Missions - Terrestrial Planet Finder",
-      "query_used": "planet",
-      "verification": {
-        "asset_path": "cache/stills/pulsars__the_universe_s_lighthouses/scene3_0.jpg",
-        "beat_id": "scene3",
-        "passed": true,
-        "score": 0.64,
-        "signal_scores": {
-          "metadata": {
-            "score": 0.7,
-            "evidence": "hits=['planet'], bans=[]"
-          },
-          "captions": {
-            "score": 0.8,
-            "evidence": "hits=['planet'], bans=[]"
-          },
-          "filename": {
-            "score": 0.2,
-            "evidence": "hits=[], bans=[]"
-          },
-          "provider_tags": {
-            "score": 0.75,
-            "evidence": "tags=['planet'], hits=['planet'], bans=[]"
-          }
-        },
-        "matched_required": [
-          "planet"
-        ],
-        "violated_prohibited": [],
-        "missing_required": [
-          "pulsar"
-        ],
-        "vision_check": null,
-        "reasons": [
-          "signals confirm (score=0.64)"
-        ]
-      },
-      "entity_spec": {
-        "beat_id": "scene3",
-        "scene_id": 3,
-        "required_entities": [
-          "pulsar",
-          "planet"
-        ],
-        "match_terms": {
-          "pulsar": [
-            "pulsar",
-            "neutron star",
-            "timing array"
-          ],
-          "planet": [
-            "planet",
-            "exoplanet"
-          ]
-        },
-        "optional_entities": [
-          "gravitational wave",
-          "Earth",
-          "telescope",
-          "radio observatory"
-        ],
-        "prohibited_entities": [
-          "specific named spacecraft (e.g., Voyager 1)",
-          "Jupiter",
-          "rocket",
-          "astronaut",
-          "Moon landing",
-          "any exoplanet system shown as directly imaged"
-        ],
-        "scene_intent": "explanation",
-        "confidence": 1.0,
-        "visual_objective": "The viewer should visualize pulsars as precise cosmic clocks and feel the surprise of a hidden planet disrupting their rhythm, culminating in the awe of space-time ripples detected across the galaxy."
+        "visual_objective": "The viewer should see and feel the moment of discovery, with Jocelyn Bell Burnell examining a chart that reveals the regular pulse of the first pulsar, evoking awe at the cosmic lighthouse."
       },
       "shot_duration_s": 5.5,
-      "narration_duration_s": 16.02,
+      "narration_duration_s": 18.09,
       "camera_motion": "pan_right",
       "motion_params": {
         "zoom_start": 1.12,
@@ -653,31 +377,31 @@
         "pan_y": 0
       },
       "transition": "crossfade",
-      "timeline_start_s": 47.88,
-      "timeline_end_s": 53.38,
+      "timeline_start_s": 21.6,
+      "timeline_end_s": 27.1,
       "render_duration_s": 0.0
     },
     {
-      "scene_id": 3,
+      "scene_id": 1,
       "beat_index": 0,
       "shot_index": 2,
-      "asset_path": "results/pulsars__the_universe_s_lighthouses/shots/scene3_1.mp4",
-      "asset_source": "ai",
-      "asset_title": "",
-      "query_used": "Photorealistic documentary image: The viewer should visualize pulsars as precise cosmic clocks and feel the surprise of a hidden planet disrupting their rhythm, culminating in the awe of space-time ripples detected across the galaxy., cinematic, high detail",
+      "asset_path": "results/pulsars__the_universe_s_lighthouses/shots/scene1_1.mp4",
+      "asset_source": "nasa",
+      "asset_title": "Pulsar Artist Concept",
+      "query_used": "pulsar",
       "verification": {
-        "asset_path": "cache/stills/pulsars__the_universe_s_lighthouses/scene3_1.jpg",
-        "beat_id": "scene3",
+        "asset_path": "cache/stills/pulsars__the_universe_s_lighthouses/scene1_1.jpg",
+        "beat_id": "scene1",
         "passed": true,
-        "score": 0.43,
+        "score": 0.64,
         "signal_scores": {
           "metadata": {
-            "score": 0.3,
-            "evidence": "hits=[], bans=[]"
+            "score": 0.7,
+            "evidence": "hits=['pulsar'], bans=[]"
           },
           "captions": {
-            "score": 0.5,
-            "evidence": "no text"
+            "score": 0.8,
+            "evidence": "hits=['pulsar'], bans=[]"
           },
           "filename": {
             "score": 0.2,
@@ -685,18 +409,256 @@
           },
           "provider_tags": {
             "score": 0.75,
-            "evidence": "tags=['Photorealistic documentary image: The viewer should visualize pulsars as precise cosmic clocks and feel the surprise of a hidden planet disrupting their rhythm, culminating in the awe of space-time ripples detected across the galaxy., cinematic, high detail'], hits=['pulsar', 'planet'], bans=[]"
+            "evidence": "tags=['pulsar'], hits=['pulsar'], bans=[]"
           }
         },
         "matched_required": [
-          "pulsar",
-          "planet"
+          "pulsar"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [
+          "Jocelyn Bell Burnell"
+        ],
+        "vision_check": null,
+        "reasons": [
+          "signals confirm (score=0.64)"
+        ]
+      },
+      "entity_spec": {
+        "beat_id": "scene1",
+        "scene_id": 1,
+        "required_entities": [
+          "Jocelyn Bell Burnell",
+          "pulsar"
+        ],
+        "match_terms": {
+          "Jocelyn Bell Burnell": [
+            "Jocelyn Bell Burnell",
+            "bell burnell",
+            "jocelyn bell"
+          ],
+          "pulsar": [
+            "pulsar",
+            "neutron star",
+            "little green men",
+            "lgm-1",
+            "lgm1"
+          ]
+        },
+        "optional_entities": [
+          "Interplanetary Scintillation Array",
+          "chart recorder",
+          "radio telescope"
+        ],
+        "prohibited_entities": [
+          "Voyager",
+          "Hubble Space Telescope",
+          "Apollo mission",
+          "Mars rover"
+        ],
+        "scene_intent": "explanation",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see and feel the moment of discovery, with Jocelyn Bell Burnell examining a chart that reveals the regular pulse of the first pulsar, evoking awe at the cosmic lighthouse."
+      },
+      "shot_duration_s": 5.5,
+      "narration_duration_s": 18.09,
+      "camera_motion": "pull_out",
+      "motion_params": {
+        "zoom_start": 1.22,
+        "zoom_end": 1.0,
+        "pan_x": 0,
+        "pan_y": 0
+      },
+      "transition": "crossfade",
+      "timeline_start_s": 27.1,
+      "timeline_end_s": 32.6,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 2,
+      "beat_index": 0,
+      "shot_index": 0,
+      "asset_path": "results/pulsars__the_universe_s_lighthouses/shots/scene2_0.mp4",
+      "asset_source": "ai",
+      "asset_title": "",
+      "query_used": "Photorealistic documentary image: The viewer should see a dense, rapidly spinning point of light or a stellar remnant, feeling the incredible density and speed described in the narration., cinematic, high detail",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [
+          "neutron star",
+          "pulsar"
         ],
         "violated_prohibited": [],
         "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene2",
+        "scene_id": 2,
+        "required_entities": [
+          "neutron star",
+          "pulsar"
+        ],
+        "match_terms": {
+          "neutron star": [
+            "neutron star",
+            "pulsar",
+            "star"
+          ],
+          "pulsar": [
+            "pulsar",
+            "neutron star",
+            "rotating star"
+          ]
+        },
+        "optional_entities": [
+          "spinning star",
+          "dense matter",
+          "gravitational field"
+        ],
+        "prohibited_entities": [
+          "black hole",
+          "white dwarf",
+          "Earth",
+          "dentist's drill"
+        ],
+        "scene_intent": "explanation",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see a dense, rapidly spinning point of light or a stellar remnant, feeling the incredible density and speed described in the narration."
+      },
+      "shot_duration_s": 5.5,
+      "narration_duration_s": 13.27,
+      "camera_motion": "reveal",
+      "motion_params": {
+        "zoom_start": 1.25,
+        "zoom_end": 1.0,
+        "pan_x": 0,
+        "pan_y": 0
+      },
+      "transition": "fade",
+      "timeline_start_s": 30.89,
+      "timeline_end_s": 36.39,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 2,
+      "beat_index": 0,
+      "shot_index": 1,
+      "asset_path": "results/pulsars__the_universe_s_lighthouses/shots/scene2_variant_1.mp4",
+      "asset_source": "ai",
+      "asset_title": "",
+      "query_used": "Photorealistic documentary image: The viewer should see a dense, rapidly spinning point of light or a stellar remnant, feeling the incredible density and speed described in the narration., cinematic, high detail",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [
+          "neutron star",
+          "pulsar"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene2",
+        "scene_id": 2,
+        "required_entities": [
+          "neutron star",
+          "pulsar"
+        ],
+        "match_terms": {
+          "neutron star": [
+            "neutron star",
+            "pulsar",
+            "star"
+          ],
+          "pulsar": [
+            "pulsar",
+            "neutron star",
+            "rotating star"
+          ]
+        },
+        "optional_entities": [
+          "spinning star",
+          "dense matter",
+          "gravitational field"
+        ],
+        "prohibited_entities": [
+          "black hole",
+          "white dwarf",
+          "Earth",
+          "dentist's drill"
+        ],
+        "scene_intent": "explanation",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see a dense, rapidly spinning point of light or a stellar remnant, feeling the incredible density and speed described in the narration."
+      },
+      "shot_duration_s": 5.5,
+      "narration_duration_s": 13.27,
+      "camera_motion": "push_in",
+      "motion_params": {
+        "zoom_start": 1.25,
+        "zoom_end": 1.22,
+        "pan_x": 0,
+        "pan_y": 0
+      },
+      "transition": "crossfade",
+      "timeline_start_s": 36.39,
+      "timeline_end_s": 44.16,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 3,
+      "beat_index": 0,
+      "shot_index": 0,
+      "asset_path": "results/pulsars__the_universe_s_lighthouses/shots/scene3_0.mp4",
+      "asset_source": "nasa",
+      "asset_title": "Giant Exoplanet and Debris Disk (Artist's Concept)",
+      "query_used": "exoplanet",
+      "verification": {
+        "asset_path": "cache/stills/pulsars__the_universe_s_lighthouses/scene3_0.jpg",
+        "beat_id": "scene3",
+        "passed": true,
+        "score": 0.64,
+        "signal_scores": {
+          "metadata": {
+            "score": 0.7,
+            "evidence": "hits=['exoplanet'], bans=[]"
+          },
+          "captions": {
+            "score": 0.8,
+            "evidence": "hits=['exoplanet'], bans=[]"
+          },
+          "filename": {
+            "score": 0.2,
+            "evidence": "hits=[], bans=[]"
+          },
+          "provider_tags": {
+            "score": 0.75,
+            "evidence": "tags=['exoplanet'], hits=['exoplanet'], bans=[]"
+          }
+        },
+        "matched_required": [
+          "exoplanet"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [
+          "pulsar"
+        ],
         "vision_check": null,
         "reasons": [
-          "metadata-only accept (score=0.43); vision broken"
+          "signals confirm (score=0.64)"
         ]
       },
       "entity_spec": {
@@ -704,36 +666,34 @@
         "scene_id": 3,
         "required_entities": [
           "pulsar",
-          "planet"
+          "exoplanet"
         ],
         "match_terms": {
           "pulsar": [
             "pulsar",
             "neutron star",
-            "timing array"
+            "pulsar timing array"
           ],
-          "planet": [
+          "exoplanet": [
+            "exoplanet",
             "planet",
-            "exoplanet"
+            "extrasolar planet"
           ]
         },
         "optional_entities": [
-          "gravitational wave",
-          "Earth",
-          "telescope",
-          "radio observatory"
+          "PSR B1937+21",
+          "PSR J1748-2446ad",
+          "gravitational waves"
         ],
         "prohibited_entities": [
-          "specific named spacecraft (e.g., Voyager 1)",
+          "Voyager 1",
           "Jupiter",
-          "rocket",
-          "astronaut",
-          "Moon landing",
-          "any exoplanet system shown as directly imaged"
+          "Apollo 11",
+          "Hubble Space Telescope"
         ],
         "scene_intent": "explanation",
         "confidence": 1.0,
-        "visual_objective": "The viewer should visualize pulsars as precise cosmic clocks and feel the surprise of a hidden planet disrupting their rhythm, culminating in the awe of space-time ripples detected across the galaxy."
+        "visual_objective": "The viewer should see a rapidly pulsing neutron star with rhythmic flashes, then the subtle wobble of a distant planet detected through timing variations, conveying the precision of pulsar timing as a cosmic detective tool."
       },
       "shot_duration_s": 5.5,
       "narration_duration_s": 16.02,
@@ -744,203 +704,71 @@
         "pan_x": 0,
         "pan_y": 0
       },
-      "transition": "crossfade",
-      "timeline_start_s": 53.38,
-      "timeline_end_s": 58.88,
-      "render_duration_s": 0.0
-    },
-    {
-      "scene_id": 4,
-      "beat_index": 0,
-      "shot_index": 0,
-      "asset_path": "results/pulsars__the_universe_s_lighthouses/shots/scene4_0.mp4",
-      "asset_source": "nasa",
-      "asset_title": "The Earth & Moon",
-      "query_used": "Earth",
-      "verification": {
-        "asset_path": "cache/stills/pulsars__the_universe_s_lighthouses/scene4_0.jpg",
-        "beat_id": "scene4",
-        "passed": true,
-        "score": 0.64,
-        "signal_scores": {
-          "metadata": {
-            "score": 0.7,
-            "evidence": "hits=['Earth'], bans=[]"
-          },
-          "captions": {
-            "score": 0.8,
-            "evidence": "hits=['Earth'], bans=[]"
-          },
-          "filename": {
-            "score": 0.2,
-            "evidence": "hits=[], bans=[]"
-          },
-          "provider_tags": {
-            "score": 0.75,
-            "evidence": "tags=['Earth'], hits=['Earth'], bans=[]"
-          }
-        },
-        "matched_required": [
-          "Earth"
-        ],
-        "violated_prohibited": [],
-        "missing_required": [
-          "pulsar",
-          "gravitational wave"
-        ],
-        "vision_check": null,
-        "reasons": [
-          "signals confirm (score=0.64)"
-        ]
-      },
-      "entity_spec": {
-        "beat_id": "scene4",
-        "scene_id": 4,
-        "required_entities": [
-          "pulsar",
-          "Earth",
-          "gravitational wave"
-        ],
-        "match_terms": {
-          "pulsar": [
-            "pulsar",
-            "neutron star",
-            "pulsar timing array",
-            "millisecond pulsar"
-          ],
-          "Earth": [
-            "Earth",
-            "earth from space",
-            "planet earth"
-          ],
-          "gravitational wave": [
-            "gravitational wave",
-            "ligo",
-            "gravitational waves",
-            "gravity wave"
-          ]
-        },
-        "optional_entities": [
-          "radio telescope",
-          "Atacama Large Millimeter Array (ALMA)",
-          "observatory",
-          "Milky Way"
-        ],
-        "prohibited_entities": [
-          "Voyager 1",
-          "Apollo 11",
-          "Saturn V rocket",
-          "Sputnik 1",
-          "Hubble Space Telescope (unless shown as a generic observatory, but not the focus)"
-        ],
-        "scene_intent": "explanation",
-        "confidence": 1.0,
-        "visual_objective": "The viewer should see pulsars as cosmic lighthouses whose rhythmic beams are being used like a precise cosmic clock network, and feel the awe of humanity using these dying stars to detect ripples in spacetime."
-      },
-      "shot_duration_s": 5.5,
-      "narration_duration_s": 13.76,
-      "camera_motion": "reveal",
-      "motion_params": {
-        "zoom_start": 1.25,
-        "zoom_end": 1.0,
-        "pan_x": 0,
-        "pan_y": 0
-      },
       "transition": "fade",
-      "timeline_start_s": 55.1,
-      "timeline_end_s": 60.6,
+      "timeline_start_s": 44.16,
+      "timeline_end_s": 49.66,
       "render_duration_s": 0.0
     },
     {
-      "scene_id": 4,
+      "scene_id": 3,
       "beat_index": 0,
       "shot_index": 1,
-      "asset_path": "results/pulsars__the_universe_s_lighthouses/shots/scene4_1.mp4",
-      "asset_source": "wikimedia",
-      "asset_title": "File:The Earth seen from Apollo 17.jpg",
-      "query_used": "Earth",
+      "asset_path": "results/pulsars__the_universe_s_lighthouses/shots/scene3_1.mp4",
+      "asset_source": "ai",
+      "asset_title": "",
+      "query_used": "Photorealistic documentary image: The viewer should see a rapidly pulsing neutron star with rhythmic flashes, then the subtle wobble of a distant planet detected through timing variations, conveying the precision of pulsar timing as a cosmic detective tool., cinematic, high detail",
       "verification": {
-        "asset_path": "cache/stills/pulsars__the_universe_s_lighthouses/scene4_1.jpg",
-        "beat_id": "scene4",
         "passed": true,
-        "score": 0.64,
-        "signal_scores": {
-          "metadata": {
-            "score": 0.7,
-            "evidence": "hits=['Earth'], bans=[]"
-          },
-          "captions": {
-            "score": 0.8,
-            "evidence": "hits=['Earth'], bans=[]"
-          },
-          "filename": {
-            "score": 0.2,
-            "evidence": "hits=[], bans=[]"
-          },
-          "provider_tags": {
-            "score": 0.75,
-            "evidence": "tags=['Earth'], hits=['Earth'], bans=[]"
-          }
-        },
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
         "matched_required": [
-          "Earth"
+          "pulsar",
+          "exoplanet"
         ],
         "violated_prohibited": [],
-        "missing_required": [
-          "pulsar",
-          "gravitational wave"
-        ],
-        "vision_check": null,
-        "reasons": [
-          "signals confirm (score=0.64)"
-        ]
+        "missing_required": [],
+        "vision_check": null
       },
       "entity_spec": {
-        "beat_id": "scene4",
-        "scene_id": 4,
+        "beat_id": "scene3",
+        "scene_id": 3,
         "required_entities": [
           "pulsar",
-          "Earth",
-          "gravitational wave"
+          "exoplanet"
         ],
         "match_terms": {
           "pulsar": [
             "pulsar",
             "neutron star",
-            "pulsar timing array",
-            "millisecond pulsar"
+            "pulsar timing array"
           ],
-          "Earth": [
-            "Earth",
-            "earth from space",
-            "planet earth"
-          ],
-          "gravitational wave": [
-            "gravitational wave",
-            "ligo",
-            "gravitational waves",
-            "gravity wave"
+          "exoplanet": [
+            "exoplanet",
+            "planet",
+            "extrasolar planet"
           ]
         },
         "optional_entities": [
-          "radio telescope",
-          "Atacama Large Millimeter Array (ALMA)",
-          "observatory",
-          "Milky Way"
+          "PSR B1937+21",
+          "PSR J1748-2446ad",
+          "gravitational waves"
         ],
         "prohibited_entities": [
           "Voyager 1",
+          "Jupiter",
           "Apollo 11",
-          "Saturn V rocket",
-          "Sputnik 1",
-          "Hubble Space Telescope (unless shown as a generic observatory, but not the focus)"
+          "Hubble Space Telescope"
         ],
         "scene_intent": "explanation",
         "confidence": 1.0,
-        "visual_objective": "The viewer should see pulsars as cosmic lighthouses whose rhythmic beams are being used like a precise cosmic clock network, and feel the awe of humanity using these dying stars to detect ripples in spacetime."
+        "visual_objective": "The viewer should see a rapidly pulsing neutron star with rhythmic flashes, then the subtle wobble of a distant planet detected through timing variations, conveying the precision of pulsar timing as a cosmic detective tool."
       },
       "shot_duration_s": 5.5,
-      "narration_duration_s": 13.76,
+      "narration_duration_s": 16.02,
       "camera_motion": "pan_right",
       "motion_params": {
         "zoom_start": 1.12,
@@ -949,8 +777,170 @@
         "pan_y": 0
       },
       "transition": "crossfade",
-      "timeline_start_s": 60.6,
-      "timeline_end_s": 68.86,
+      "timeline_start_s": 49.66,
+      "timeline_end_s": 60.18,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 4,
+      "beat_index": 0,
+      "shot_index": 0,
+      "asset_path": "results/pulsars__the_universe_s_lighthouses/shots/scene4_0.mp4",
+      "asset_source": "ai",
+      "asset_title": "",
+      "query_used": "Photorealistic documentary image: The viewer should see a rhythmic, mesmerizing visualization of pulsar beams sweeping across space, with quickening and slowing pulses that visually convey the precision clocks winding down, creating a sense of awe and cosmic listening., cinematic, high detail",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [
+          "pulsar",
+          "PSR J1748-2446ad",
+          "PSR B1937+21"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene4",
+        "scene_id": 4,
+        "required_entities": [
+          "pulsar",
+          "PSR J1748-2446ad",
+          "PSR B1937+21"
+        ],
+        "match_terms": {
+          "pulsar": [
+            "pulsar",
+            "neutron star",
+            "pulse"
+          ],
+          "PSR J1748-2446ad": [
+            "PSR J1748-2446ad",
+            "J1748-2446ad",
+            "716 Hz pulsar"
+          ],
+          "PSR B1937+21": [
+            "PSR B1937+21",
+            "B1937+21",
+            "first millisecond pulsar"
+          ]
+        },
+        "optional_entities": [
+          "Interplanetary Scintillation Array",
+          "Large Magellanic Cloud",
+          "Jocelyn Bell Burnell"
+        ],
+        "prohibited_entities": [
+          "black hole",
+          "white dwarf",
+          "red giant",
+          "Voyager 1",
+          "Cassini",
+          "Jupiter"
+        ],
+        "scene_intent": "explanation",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see a rhythmic, mesmerizing visualization of pulsar beams sweeping across space, with quickening and slowing pulses that visually convey the precision clocks winding down, creating a sense of awe and cosmic listening."
+      },
+      "shot_duration_s": 5.5,
+      "narration_duration_s": 13.76,
+      "camera_motion": "pull_out",
+      "motion_params": {
+        "zoom_start": 1.22,
+        "zoom_end": 1.0,
+        "pan_x": 0,
+        "pan_y": 0
+      },
+      "transition": "fade",
+      "timeline_start_s": 60.18,
+      "timeline_end_s": 65.68,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 4,
+      "beat_index": 0,
+      "shot_index": 1,
+      "asset_path": "results/pulsars__the_universe_s_lighthouses/shots/scene4_variant_1.mp4",
+      "asset_source": "ai",
+      "asset_title": "",
+      "query_used": "Photorealistic documentary image: The viewer should see a rhythmic, mesmerizing visualization of pulsar beams sweeping across space, with quickening and slowing pulses that visually convey the precision clocks winding down, creating a sense of awe and cosmic listening., cinematic, high detail",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [
+          "pulsar",
+          "PSR J1748-2446ad",
+          "PSR B1937+21"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene4",
+        "scene_id": 4,
+        "required_entities": [
+          "pulsar",
+          "PSR J1748-2446ad",
+          "PSR B1937+21"
+        ],
+        "match_terms": {
+          "pulsar": [
+            "pulsar",
+            "neutron star",
+            "pulse"
+          ],
+          "PSR J1748-2446ad": [
+            "PSR J1748-2446ad",
+            "J1748-2446ad",
+            "716 Hz pulsar"
+          ],
+          "PSR B1937+21": [
+            "PSR B1937+21",
+            "B1937+21",
+            "first millisecond pulsar"
+          ]
+        },
+        "optional_entities": [
+          "Interplanetary Scintillation Array",
+          "Large Magellanic Cloud",
+          "Jocelyn Bell Burnell"
+        ],
+        "prohibited_entities": [
+          "black hole",
+          "white dwarf",
+          "red giant",
+          "Voyager 1",
+          "Cassini",
+          "Jupiter"
+        ],
+        "scene_intent": "explanation",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see a rhythmic, mesmerizing visualization of pulsar beams sweeping across space, with quickening and slowing pulses that visually convey the precision clocks winding down, creating a sense of awe and cosmic listening."
+      },
+      "shot_duration_s": 5.5,
+      "narration_duration_s": 13.76,
+      "camera_motion": "push_in",
+      "motion_params": {
+        "zoom_start": 1.22,
+        "zoom_end": 1.22,
+        "pan_x": 0,
+        "pan_y": 0
+      },
+      "transition": "crossfade",
+      "timeline_start_s": 65.68,
+      "timeline_end_s": 73.94,
       "render_duration_s": 0.0
     }
   ]

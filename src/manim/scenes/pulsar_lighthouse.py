@@ -47,8 +47,10 @@ class PulsarLighthouse(Scene):
             Rotate(group, angle=2 * PI, about_point=star.get_center(), run_time=1.6),
         )
 
-        # Label
-        spin = Text("30 ROTATIONS EVERY SECOND", font_size=24, color=BEAM)
+        # Label — generic, factually safe (LGM-1 rotates once per 1.337 s;
+        # the fastest known pulsar up to 716 Hz — no single number fits
+        # every pulsar, and scene context varies).
+        spin = Text("SPINNING AT BREAKNECK SPEED", font_size=24, color=BEAM)
         spin.to_edge(DOWN, buff=1.4)
         self.play(FadeIn(spin, shift=UP * 0.15), run_time=0.7)
 

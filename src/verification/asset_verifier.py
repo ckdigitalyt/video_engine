@@ -28,6 +28,25 @@ from typing import Optional
 from .entity_spec import EntitySpec, VerificationResult
 
 
+# Off-topic / domain-mismatch signals.  When an asset's metadata contains
+# any of these, the asset is rejected REGARDLESS of entity-token matches —
+# a title like "File:Pulsar Walibi Belgium overzicht.jpg" (a roller coaster
+# at Walibi Belgium) contains the entity token "pulsar" yet is not an
+# astronomical pulsar.  General, topic-free guard.
+OFF_TOPIC_SIGNALS = [
+    "roller coaster", "rollercoaster", "amusement", "theme park",
+    "walibi", "water park", "fairground", "ferris wheel", "carousel",
+    "bumper car", "fun park", "pleasure park", "trampoline",
+    "playground", "kiddie", "festival", "concert", "stadium",
+]
+
+# When the query itself already carries domain context (e.g. "pulsar
+# astronomy") we don't apply the off-topic guard to description text —
+# only to the title — to avoid false rejections of legit assets.
+_QUERY_HAS_CONTEXT_RE = re.compile(
+    r"(astronomy|star|space|galaxy|cosmic|universe|nebula|solar|planet|astrophys)", re.I)
+
+
 def _norm(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", " ", (text or "").lower()).strip()
 
@@ -112,6 +131,25 @@ class AssetVerifier:
             " ".join(tags or []), query_used,
         ])
 
+        # ── Domain relevance guard (off-topic metadata) ────────────────
+        # A required-entity token match is NOT sufficient: an amusement-park
+        # roller coaster named "Pulsar" must never illustrate a pulsar scene.
+        # When vision is unavailable this is the ONLY signal that can catch
+        # such semantic mismatches, so it is treated as fatal.
+        evidence_all = " ".join([title, description, filename, provider,
+                                 " ".join(tags or []), query_used])
+        evidence_norm = _norm(evidence_all)
+        bare_query = not _QUERY_HAS_CONTEXT_RE.search(query_used or "")
+        off_topic_hits = [
+            sig for sig in OFF_TOPIC_SIGNALS
+            if sig in evidence_norm and (bare_query or sig in _norm(title))
+        ]
+        if off_topic_hits:
+            res.violated_prohibited.append(f"off-topic:{off_topic_hits[0]}")
+            res.reasons.append(
+                f"fatal: off-topic metadata signal ({off_topic_hits[0]}) — "
+                f"entity token alone is insufficient")
+
         # Prohibited entities are always fatal: any signal detecting a ban
         for ent in spec.prohibited_entities:
             if self._ban_in_signals(ent, signals):
@@ -158,11 +196,16 @@ class AssetVerifier:
                     self._vision_broken = True
                     print(f"  [vision] circuit breaker tripped after "
                           f"{self._vision_error_streak} errors")
-                res.passed = (not res.violated_prohibited) and (res.score >= 0.4)
+                # Vision down: metadata decides, but ONLY with a strong
+                # score AND at least one required entity matched.  Off-topic
+                # violations (set above) remain fatal.  This closes the hole
+                # where a 0.34 metadata match sailed through on quota errors.
+                strong = res.score >= 0.55 and bool(res.matched_required)
+                res.passed = (not res.violated_prohibited) and strong
                 res.reasons.append(
                     f"vision unavailable ({vision.get('error','')[:40]}); "
                     f"metadata fallback score={res.score:.2f} "
-                    f"(low-confidence accept)"
+                    f"({'strong accept' if res.passed else 'REJECT — insufficient evidence'})"
                 )
                 return res
             # Vision ran successfully
@@ -180,8 +223,10 @@ class AssetVerifier:
             return res
 
         # No vision available: metadata decides, but NEVER block the pipeline
-        # on infrastructure.  Prohibited violations still fatal.
-        if not res.violated_prohibited and res.score >= 0.4:
+        # on infrastructure.  Prohibited/off-topic violations still fatal;
+        # weak scores (< 0.55) or missing required entities are rejected.
+        strong = res.score >= 0.55 and (not spec.required_entities or bool(res.matched_required))
+        if not res.violated_prohibited and strong:
             res.passed = True
             res.reasons.append(f"metadata-only accept (score={res.score:.2f}); "
                                f"vision {'broken' if self._vision_broken else 'disabled'}")

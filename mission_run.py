@@ -537,14 +537,104 @@ def stage_render(result_scenes, timeline_path: str, output_path: str,
             "render_s": round(time.time() - t0, 1), "output": output_path}
 
 
-def stage_music_mix(video_path: str, music_path: str, out_path: str,
-                    music_volume_db: float = -6.0) -> dict:
-    """Stage 11: mix a music bed under the narration with sidechain ducking.
+def _synth_bed(duration: float, out_path: str, seed: int = 7) -> str:
+    """Synthesize an audible ambient pad bed (fallback when the configured
+    music file is dead/silent).  Layered detuned sines + slow tremolo +
+    faint pink noise — clearly audible, no silence risk."""
+    import random
+    rnd = random.Random(seed)
+    freqs = [110.0, 164.81, 220.0, 277.18]  # A2 E3 A3 C#4 (A major-ish pad)
+    parts = []
+    for i, f in enumerate(freqs):
+        detune = 1.0 + rnd.uniform(-0.004, 0.004)
+        parts.append(
+            f"sine=frequency={f * detune:.2f}:duration={duration:.2f}:sample_rate=44100"
+        )
+    # one lowpass-filtered pink noise layer for warmth
+    noise = (
+        f"anoisesrc=color=pink:duration={duration:.2f}:sample_rate=44100:amplitude=0.06,"
+        f"lowpass=f=500,volume=0.35"
+    )
+    inputs = "+".join(parts)
+    cmd = [
+        "ffmpeg", "-y",
+        "-f", "lavfi", "-i", f"{inputs}",
+        "-f", "lavfi", "-i", noise,
+        "-filter_complex",
+        "[0:a][1:a]amix=inputs=2:normalize=0,volume=0.35,"
+        "tremolo=f=0.15:d=0.7,afade=t=in:d=2,afade=t=out:st="
+        f"{max(0.0, duration - 3):.2f}:d=3[aout]",
+        "-map", "[aout]", "-c:a", "pcm_s16le", out_path,
+    ]
+    r = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+    if r.returncode != 0 or not os.path.exists(out_path):
+        print(f"  !! synth bed generation failed: {r.stderr[-300:]}")
+        return ""
+    return out_path
 
-    Fixes (v6):
-      - silent music bed detection (dead mp3 -> fall back to synth bed)
+
+def _synth_pulsar_sfx(duration: float, out_path: str, period_s: float = 1.337) -> str:
+    """Synthesize a pulsar 'heartbeat' SFX track: rhythmic radio blips at
+    the classic PSR B1919+21 cadence (~1.337 s), with a soft static bed.
+    This is the thematic SFX layer reviewers asked for (ambient effects,
+    not just voice + music).  Output is a quiet WAV to be ducked under
+    narration."""
+    import math
+    import random
+    import array
+    import wave
+    sr = 44100
+    n = int(duration * sr)
+    samples = [0.0] * n
+    rnd = random.Random(42)
+    for i in range(n):
+        samples[i] = rnd.uniform(-1, 1) * 0.006
+    blip_dur = 0.09
+    blip_freq = 1215.0  # radio-ish tone
+    t0 = 0.3
+    while t0 < duration:
+        start = int(t0 * sr)
+        for j in range(int(blip_dur * sr)):
+            idx = start + j
+            if idx >= n:
+                break
+            env = math.exp(-j / (0.028 * sr)) * 0.5
+            samples[idx] += math.sin(2 * math.pi * blip_freq * j / sr) * env * 0.22
+        t0 += period_s
+    peak = max(1e-9, max(abs(s) for s in samples))
+    scale = 0.7 / peak
+    buf = array.array("h", (int(max(-1.0, min(1.0, s * scale)) * 32767) for s in samples))
+    with wave.open(out_path, "wb") as w:
+        w.setnchannels(1)
+        w.setsampwidth(2)
+        w.setframerate(sr)
+        w.writeframes(buf.tobytes())
+    return out_path
+
+
+def _check_bed_audible(bed_path: str, min_mean_db: float = -40.0) -> bool:
+    """Return True if the music bed has real audible content."""
+    import re as _re
+    probe = subprocess.run(
+        ["ffmpeg", "-i", bed_path, "-af", "volumedetect", "-f", "null", "-"],
+        capture_output=True, text=True, timeout=30,
+    )
+    m = _re.search(r"mean_volume: ([-.\d]+) dB", probe.stderr)
+    mean_db = float(m.group(1)) if m else -99.0
+    return mean_db > min_mean_db
+
+
+def stage_music_mix(video_path: str, music_path: str, out_path: str,
+                    music_volume_db: float = -6.0, sfx_path: str = "") -> dict:
+    """Stage 11: mix a music bed + optional SFX under narration with
+    sidechain ducking.
+
+    Fixes (v7):
+      - silent music bed detection (dead mp3 -> synth ambient pad)
+      - optional thematic SFX layer (pulsar heartbeat blips) as a 3rd track
       - amix normalize=0 (was halving the voice, making audio near-inaudible)
       - loudnorm to streaming standard (-14 LUFS, TP -1.5 dB)
+      - post-mix verification that the bed is actually audible
     """
     print(f"\n[11/16] MUSIC & SOUND (ffmpeg sidechain ducking, bed={os.path.basename(music_path)})", flush=True)
     t0 = time.time()
@@ -558,41 +648,80 @@ def stage_music_mix(video_path: str, music_path: str, out_path: str,
         capture_output=True, text=True, timeout=30,
     )
     import re as _re
-    m = _re.search(r"max_volume: ([-\.\d]+) dB", probe.stderr)
+    m = _re.search(r"max_volume: ([-.\d]+) dB", probe.stderr)
     max_db = float(m.group(1)) if m else 0.0
+    alt = os.path.join(os.path.dirname(music_path), "cinematic_bed.wav")
     if max_db < -60.0:
-        alt = os.path.join(os.path.dirname(music_path), "cinematic_bed.wav")
-        if os.path.exists(alt):
+        if os.path.exists(alt) and _check_bed_audible(alt):
             print(f"  !! {os.path.basename(music_path)} is silent ({max_db:.0f} dB) — using synth bed")
             music_path = alt
         else:
-            print(f"  !! music bed silent ({max_db:.0f} dB) and no fallback — skipping mix")
-            return {"mixed": False, "reason": "silent bed"}
+            print(f"  !! {os.path.basename(music_path)} is silent ({max_db:.0f} dB) — generating audible synth pad")
+            dur_est = _probe_duration(video_path)
+            music_path = _synth_bed(dur_est, alt)
+            if not music_path:
+                return {"mixed": False, "reason": "silent bed, synth failed"}
 
     dur = _probe_duration(video_path)
     vol = 10 ** (music_volume_db / 20.0) if music_volume_db else 1.0
-    cmd = [
-        "ffmpeg", "-y",
-        "-i", video_path,
-        "-i", music_path,
-        "-filter_complex",
-        (
-            f"[1:a]aloop=loop=-1:size=2e9,atrim=0:{dur:.3f},volume={vol:.3f}[bed];"
-            f"[bed][0:a]sidechaincompress=threshold=0.03:ratio=6:attack=25:release=500[duck];"
-            f"[0:a][duck]amix=inputs=2:duration=first:dropout_transition=0:normalize=0,alimiter=limit=0.89,loudnorm=I=-14:TP=-1.5:LRA=11[aout]"
-        ),
-        "-map", "0:v", "-map", "[aout]",
-        "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",
-        "-shortest",
-        out_path,
-    ]
+    # SFX layer (optional): pulsar heartbeat blips, kept quiet under voice
+    sfx_used = ""
+    if sfx_path and os.path.exists(sfx_path):
+        sfx_used = sfx_path
+        print(f"  [sfx] thematic SFX layer: {os.path.basename(sfx_path)}")
+
+    if sfx_used:
+        cmd = [
+            "ffmpeg", "-y",
+            "-i", video_path,
+            "-i", music_path,
+            "-i", sfx_used,
+            "-filter_complex",
+            (
+                f"[1:a]aloop=loop=-1:size=2e9,atrim=0:{dur:.3f},volume={vol:.3f}[bed];"
+                f"[2:a]aloop=loop=-1:size=2e9,atrim=0:{dur:.3f},volume=0.5[sfx];"
+                f"[bed][sfx]amix=inputs=2:duration=first:normalize=0[bedmix];"
+                f"[bedmix][0:a]sidechaincompress=threshold=0.03:ratio=6:attack=25:release=500[duck];"
+                f"[0:a][duck]amix=inputs=2:duration=first:dropout_transition=0:normalize=0,alimiter=limit=0.89,loudnorm=I=-14:TP=-1.5:LRA=11[aout]"
+            ),
+            "-map", "0:v", "-map", "[aout]",
+            "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",
+            "-shortest",
+            out_path,
+        ]
+    else:
+        cmd = [
+            "ffmpeg", "-y",
+            "-i", video_path,
+            "-i", music_path,
+            "-filter_complex",
+            (
+                f"[1:a]aloop=loop=-1:size=2e9,atrim=0:{dur:.3f},volume={vol:.3f}[bed];"
+                f"[bed][0:a]sidechaincompress=threshold=0.03:ratio=6:attack=25:release=500[duck];"
+                f"[0:a][duck]amix=inputs=2:duration=first:dropout_transition=0:normalize=0,alimiter=limit=0.89,loudnorm=I=-14:TP=-1.5:LRA=11[aout]"
+            ),
+            "-map", "0:v", "-map", "[aout]",
+            "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",
+            "-shortest",
+            out_path,
+        ]
     r = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
     if r.returncode != 0:
         print(f"  !! ffmpeg music mix failed: {r.stderr[-400:]}")
         return {"mixed": False, "reason": r.stderr[-200:]}
     size_mb = os.path.getsize(out_path) / 1e6 if os.path.exists(out_path) else 0
-    print(f"  Music mixed (ducked under narration): {_probe_duration(out_path):.1f}s, {size_mb:.1f} MB")
-    return {"mixed": True, "elapsed_s": round(time.time() - t0, 1), "size_mb": round(size_mb, 1)}
+    # Post-mix verification: loudness sanity (mix should NOT be voice-only)
+    ver = subprocess.run(
+        ["ffmpeg", "-i", out_path, "-af", "volumedetect", "-f", "null", "-"],
+        capture_output=True, text=True, timeout=30,
+    )
+    m2 = _re.search(r"mean_volume: ([-.\d]+) dB", ver.stderr)
+    mean_db = float(m2.group(1)) if m2 else None
+    ok = mean_db is not None and -30.0 < mean_db < -5.0
+    print(f"  Music mixed (ducked under narration): {_probe_duration(out_path):.1f}s, {size_mb:.1f} MB, "
+          f"mean={mean_db} dB {'✓' if ok else '⚠ check mix'}")
+    return {"mixed": True, "elapsed_s": round(time.time() - t0, 1), "size_mb": round(size_mb, 1),
+            "mean_db": mean_db, "sfx": os.path.basename(sfx_used) if sfx_used else None}
 
 
 # ═══════════════════════════════════════════════════════════════════════ #

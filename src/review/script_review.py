@@ -74,7 +74,14 @@ PERSONAS: dict[str, dict] = {
             "Check EVERY claim against the provided research facts and sources. "
             "Flag unsupported claims, exaggerations, false precision, and "
             "outdated figures. Cite which research fact supports or contradicts "
-            "each claim. Never let an unverified number reach air."
+            "each claim. Never let an unverified number reach air.\n"
+            "Pay special attention to: (1) named nicknames and quotations — the "
+            "chart anomaly Jocelyn Bell noticed was called 'scruff', but the "
+            "signal itself was jokingly nicknamed LGM-1 ('Little Green Men'); "
+            "do not conflate the two. (2) attribution — who said/did what, when. "
+            "(3) units and magnitudes (radius vs diameter, km vs miles). "
+            "(4) dates. When a claim is a paraphrase of a source, ensure the "
+            "paraphrase preserves the source's meaning exactly."
         ),
     },
     "documentary_editor": {

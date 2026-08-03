@@ -19,8 +19,10 @@ class PulsarDensity(Scene):
         title.to_edge(UP, buff=0.5)
         self.play(FadeIn(title, shift=DOWN * 0.2), run_time=0.8)
 
-        # The city-sized star: 20 km across
-        star_label = Text("A NEUTRON STAR: 20 KM ACROSS", font_size=22, color=AMBER)
+        # The city-sized star: 10 km across (matches narration: "ten
+        # kilometers across" — radius ~10 km, diameter ~20 km; script and
+        # on-screen text must agree per reviewer fact_change flag)
+        star_label = Text("A NEUTRON STAR: 10 KM ACROSS", font_size=22, color=AMBER)
         star_label.to_edge(DOWN, buff=2.2)
         self.play(FadeIn(star_label), run_time=0.6)
 

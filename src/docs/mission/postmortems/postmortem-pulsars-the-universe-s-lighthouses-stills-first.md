@@ -1,10 +1,10 @@
 # Postmortem — Pulsars: the universe's lighthouses (stills-first)
-**When:** 2026-08-03T04:08:25+00:00
+**When:** 2026-08-03T06:24:13+00:00
 
 ## Techniques that worked
 - stills-first visual strategy: NASA/Wikimedia/AI Ken Burns + Manim beats
-- manim scenes: 2, nasa: 4, wikimedia: 4, ai: 1
-- Gemini review score 78/100
+- manim scenes: 2, nasa: 3, wikimedia: 2, ai: 3
+- Gemini review score 68/100
 
 ## Techniques that failed
 - stock-video director (pexels) deprioritized by design in stills mode
@@ -27,15 +27,15 @@ _(none recorded)_
 ## Metrics
 ```json
 {
-  "final_score": 78,
-  "duration_s": 68.866667,
+  "final_score": 68,
+  "duration_s": 73.966667,
   "manim": 2,
-  "nasa": 4,
-  "wikimedia": 4,
-  "ai": 1,
+  "nasa": 3,
+  "wikimedia": 2,
+  "ai": 3,
   "video_fallback": 0,
-  "rejected": 2,
+  "rejected": 8,
   "vision_checked": 2,
-  "deduped": 8
+  "deduped": 7
 }
 ```

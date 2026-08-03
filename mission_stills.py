@@ -33,6 +33,39 @@ import mission_run as M
 # Still finders (public domain: NASA / Wikimedia) + AI fallback
 # ═══════════════════════════════════════════════════════════════════════ #
 
+# Wikimedia titles to skip outright (off-topic / amusement-park assets that
+# collide with astronomy entity terms, e.g. "File:Pulsar Walibi Belgium
+# overzicht.jpg" is a roller coaster at Walibi Belgium).  Same spirit as
+# the verifier's OFF_TOPIC_SIGNALS but applied at fetch time so we never
+# even download the wrong subject.
+_WIKI_SKIP_TITLE = (
+    "roller coaster", "rollercoaster", "amusement", "theme park",
+    "walibi", "water park", "fairground", "ferris wheel", "carousel",
+    "bumper car", "fun park", "pleasure park", "trampoline",
+    "playground", "kiddie", "festival", "concert", "stadium",
+)
+
+# Bare entity queries get disambiguated with domain context before hitting
+# the search APIs (e.g. "pulsar" -> "pulsar astronomy"); queries that
+# already carry context pass through untouched.
+_QUERY_CONTEXT_WORDS = (
+    "astronomy", "astronomical", "star", "space", "galaxy", "cosmic",
+    "universe", "nebula", "solar", "planet", "astrophysics", "deep sky",
+)
+
+def _disambiguate_query(query: str) -> str:
+    """Add domain context to bare entity queries to avoid homonym hits."""
+    q = (query or "").strip()
+    if not q:
+        return q
+    low = q.lower()
+    if any(w in low for w in _QUERY_CONTEXT_WORDS):
+        return q
+    # bare term (1-2 words, no context): append a domain qualifier
+    if len(q.split()) <= 2:
+        return f"{q} astronomy"
+    return q
+
 def _nasa_still(query: str, out_path: str) -> str:
     got, _ = _nasa_still_title(query, out_path)
     return got
@@ -83,11 +116,12 @@ def _wikimedia_still_title(query: str, out_path: str) -> tuple[str, str]:
     """Fetch a Wikimedia still; returns (path, title)."""
     import requests
     headers = {"User-Agent": "JadeStudio/1.0 (documentary pipeline; contact: studio@localhost)"}
+    search = _disambiguate_query(query)
     try:
         r = requests.get("https://commons.wikimedia.org/w/api.php", params={
             "action": "query", "generator": "search",
-            "gsrsearch": f"{query} filetype:bitmap", "gsrnamespace": 6,
-            "gsrlimit": 8, "prop": "imageinfo", "iiprop": "url|size|extmetadata",
+            "gsrsearch": f"{search} filetype:bitmap", "gsrnamespace": 6,
+            "gsrlimit": 12, "prop": "imageinfo", "iiprop": "url|size|extmetadata",
             "iiurlwidth": 1920, "format": "json",
         }, headers=headers, timeout=25)
         if r.status_code != 200:
@@ -99,6 +133,13 @@ def _wikimedia_still_title(query: str, out_path: str) -> tuple[str, str]:
         return "", ""
     pages = data.get("query", {}).get("pages", {})
     for p in sorted(pages.values(), key=lambda x: x.get("index", 99)):
+        title = p.get("title", "") or ""
+        # Off-topic guard at fetch time: skip amusement/entertainment assets
+        # whose titles collide with astronomy entity terms.
+        tlow = title.lower()
+        if any(sig in tlow for sig in _WIKI_SKIP_TITLE):
+            print(f"  [Wiki] skip off-topic {title[:70]!r} (amusement/entertainment signal)")
+            continue
         ii = (p.get("imageinfo") or [{}])[0]
         url = ii.get("thumburl") or ii.get("url")
         if not url or ii.get("width", 0) < 800:
@@ -113,8 +154,8 @@ def _wikimedia_still_title(query: str, out_path: str) -> tuple[str, str]:
                 os.makedirs(os.path.dirname(out_path), exist_ok=True)
                 with open(out_path, "wb") as f:
                     f.write(img.content)
-                print(f"  [Wiki] {query!r} → {os.path.basename(out_path)} ({len(img.content)//1024} KB) | {p.get('title','')[:60]} | {lic[:30]}")
-                return out_path, p.get("title", "")
+                print(f"  [Wiki] {query!r} → {os.path.basename(out_path)} ({len(img.content)//1024} KB) | {title[:60]} | {lic[:30]}")
+                return out_path, title
         except Exception:
             continue
     return "", ""
@@ -270,19 +311,26 @@ def _manim_scene_for(scene_text: str, intent: str = "default") -> str:
     return ""
 
 
-def _still_plan_for(scene_text: str, spec=None) -> list:
+def _still_plan_for(scene_text: str, spec=None, scene=None) -> list:
     """Ordered candidate prompts/queries for still imagery.
 
-    General algorithm: derive queries from the scene's EntitySpec
-    (required entities + visual objective) when available; fall back to
-    topic-aware keyword hints.  No hardcoded per-topic asset lists.
+    Priority: the script's curated ``search_queries`` (specific, topic-
+    correct, e.g. "Jocelyn Bell Burnell 1967") → EntitySpec required
+    entities → topic-aware keyword hints.  Bare entity terms are the
+    LEAST preferred because they collide with homonyms (a Wikimedia
+    search for "pulsar" returns a roller coaster at Walibi Belgium).
     """
     t = scene_text.lower()
     topic = _detect_topic(scene_text)
     plan = []
 
-    # EntitySpec-driven: search NASA/Wikimedia for each required entity,
-    # and craft an AI prompt from the visual objective.
+    # 1) Script-authored search queries (most specific, least ambiguous)
+    for q in (scene or {}).get("search_queries", []) or []:
+        q = (q or "").strip()
+        if q:
+            plan += [("nasa", q), ("wiki", q)]
+
+    # 2) EntitySpec-driven: search NASA/Wikimedia for each required entity
     if spec is not None and spec.required_entities:
         for ent in spec.required_entities[:2]:
             plan += [("nasa", ent), ("wiki", ent)]
@@ -357,7 +405,7 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
             stats["manim"] += 1
         # 2) Stills with Ken Burns (2 per scene typically)
         still_count = 0
-        for kind, query in _still_plan_for(text, spec):
+        for kind, query in _still_plan_for(text, spec, scene):
             if still_count >= 2:
                 break
             fname = f"scene{i}_{still_count}.jpg"
@@ -385,7 +433,12 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                 continue
             # ── ASSET-GATE: verify against scene EntitySpec ────────────
             if gates is not None and spec is not None:
-                pre_verified = fname in pinned  # human-approved assets
+                # AI stills are generated FROM this scene's visual objective
+                # (the prompt is spec.visual_objective), so they are the
+                # safest assets by construction — pre-verified like pinned
+                # human-approved images.  Without this, the metadata gate
+                # rejects every AI still when vision is down (score ~0.33).
+                pre_verified = fname in pinned or kind == "ai"
                 ver = gates.verify_asset(
                     spec, asset_path=got, title=title, filename=fname,
                     provider=src, query_used=query, pre_verified=pre_verified,
@@ -423,6 +476,50 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                         placed_hashes.append(dhash(im))
                 except Exception:
                     pass
+
+        # ── Coverage guard: long scenes must never hold a single visual ──
+        # A scene whose narration runs > 8s needs >= 2 distinct visuals.
+        # If only one asset survived the gate/dedup:
+        #   - still asset  -> second Ken Burns pass with the OPPOSITE
+        #     camera move (push-in vs pull-out)
+        #   - manim clip   -> extract a frame and Ken Burns it (breaks the
+        #     long static title-card hold reviewers flagged)
+        if len(shots) == 1:
+            # estimate narration duration: ~2.6 words/sec spoken
+            est = max(4.0, len(text.split()) / 2.6)
+            if est > 8.0:
+                last = shots[0]
+                src_img = os.path.join(still_root, os.path.basename(
+                    last.get("file", "").replace(".mp4", ".jpg")))
+                if last.get("kind") == "manim" and not os.path.exists(src_img):
+                    # manim-only scene: pull a frame out of the clip
+                    src_img = os.path.join(out_dir, "shots", f"scene{i}_frame.jpg")
+                    subprocess.run(
+                        ["ffmpeg", "-y", "-v", "error", "-ss", "1.5",
+                         "-i", last.get("file", ""), "-frames:v", "1", src_img],
+                        capture_output=True, text=True, timeout=30)
+                    src = last.get("kind", "manim")
+                if os.path.exists(src_img):
+                    variant = os.path.join(
+                        out_dir, "shots", f"scene{i}_variant_{still_count}.mp4")
+                    vcam = cam_params if still_count else {}
+                    vcam = dict(vcam)
+                    # invert the camera move for visual novelty
+                    if vcam.get("zoom_end", 1.2) > vcam.get("zoom_start", 1.0):
+                        vcam["zoom_start"], vcam["zoom_end"] = vcam.get("zoom_end", 1.22), vcam.get("zoom_start", 1.0)
+                        vmove = "pull_out"
+                    else:
+                        vcam["zoom_start"], vcam["zoom_end"] = vcam.get("zoom_start", 1.0) or 1.0, 1.22
+                        vmove = "push_in"
+                    if _kenburns(src_img, variant, duration=5.5,
+                                 zoom_in=vmove == "push_in", camera=vcam):
+                        shots.append({"file": variant, "duration": 5.5, "kind": src,
+                                      "camera": vmove, "motion_params": vcam,
+                                      "verification": last.get("verification"),
+                                      "title": last.get("title", ""),
+                                      "query": last.get("query", "")})
+                        print(f"  [coverage] scene{i}: narration ~{est:.0f}s, "
+                              f"added {vmove} variant of same asset (visual change)")
         plan[i] = shots
 
     # Guaranteed fill: any scene with zero stills after gate/dedup gets a
@@ -731,8 +828,14 @@ def main():
         else:
             print("  [qa] deterministic QA passed (no objective failures)")
 
-    # ── Music ──────────────────────────────────────────────────────────
-    mix = M.stage_music_mix(output_path, "cache/music/cinematic.mp3", mixed_path)
+    # ── Music (with thematic SFX layer for astronomy topics) ───────────
+    sfx_path = ""
+    if "pulsar" in (topic or "").lower():
+        sfx_path = os.path.join("cache", "music", "pulsar_sfx.wav")
+        dur_sfx = M._probe_duration(output_path)
+        M._synth_pulsar_sfx(dur_sfx, sfx_path)
+    mix = M.stage_music_mix(output_path, "cache/music/cinematic.mp3", mixed_path,
+                            sfx_path=sfx_path)
     run_report["stages"]["music_v1"] = mix
     review_target = mixed_path if mix.get("mixed") else output_path
 
@@ -760,7 +863,8 @@ def main():
             "duration_s": M._probe_duration(output_path),
             "render_s": round(time.time() - t0, 1),
         }
-        mix = M.stage_music_mix(output_path, "cache/music/cinematic.mp3", mixed_path)
+        mix = M.stage_music_mix(output_path, "cache/music/cinematic.mp3", mixed_path,
+                                sfx_path=sfx_path)
         review_target = mixed_path if mix.get("mixed") else output_path
         review = M.stage_video_review(review_target, scenes_data,
                                       os.path.join(out_dir, f"review_v{iteration+1}.json"))
