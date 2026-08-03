@@ -42,6 +42,30 @@ MAX_SCRIPT_WORDS = 165
 # are expanded once to hit the target runtime.
 MIN_SCRIPT_WORDS = 140
 
+# Metadata fields the script stage emits per scene (v8: emotion for vocal
+# modulation, visual_style for the Jade imagery layer, sfx_events for the
+# event-driven sound-design timeline).  Expansion/compression rewrites must
+# preserve these — LLM rewrites only return title/narration/visual_goal/
+# search_queries, so we merge the originals back in.
+_SCENE_META_FIELDS = ("emotion", "visual_style", "sfx_events")
+
+
+def _merge_scene_meta(original: list[dict], replacement: list[dict]) -> list[dict]:
+    """Carry per-scene metadata from *original* onto *replacement* scenes
+    (matched by index).  Keeps emotion/visual_style/sfx_events alive across
+    LLM rewrite steps that only emit narration + search fields."""
+    out = []
+    for i, s in enumerate(replacement or []):
+        s = dict(s)
+        if i < len(original):
+            for k in _SCENE_META_FIELDS:
+                if k not in s or s.get(k) in (None, [], ""):
+                    v = (original[i] or {}).get(k)
+                    if v not in (None, [], ""):
+                        s[k] = v
+        out.append(s)
+    return out
+
 # ═══════════════════════════════════════════════════════════════════════ #
 # Stage imports (lazy where heavy)
 # ═══════════════════════════════════════════════════════════════════════ #
@@ -184,20 +208,39 @@ Topic: {topic}
 
 Use the verified facts below — every number must come from them. Do NOT invent facts.
 
-Rules:
-- Strong hook in scene 0 (first 5 seconds, curiosity without clickbait)
-- Emotional progression: wonder → journey → revelation → resonance
-- Write for SPOKEN narration; short punchy sentences (~30 words per scene)
-- No filler, no repetition, no generic AI phrasing (no "delve", "unlock the secrets", "vast tapestry")
-- Memorable closing line
-- Each scene ~12 seconds of narration
+RETENTION RULES (2026 platform benchmarks — these are hard constraints):
+- GOLDEN WINDOW: the single most striking fact or image must land within the
+  first 15 seconds. Never open with greetings, channel branding, or slow
+  preamble ("Welcome back… today we will discuss…"). Start mid-action.
+- HOOK-DELIVER CYCLE: each scene opens with a micro-hook (question, tension,
+  contrast, stakes) then delivers value fast; no scene is a flat recital.
+- OPEN LOOPS: scene 0 plants an open question/mystery; it must be answered
+  only in a later scene, keeping viewers watching.
+- PACE: a new visual/audio stimulus every few seconds — no scene holds one
+  idea longer than ~12s. Short punchy sentences (~30 words per scene).
+- No filler, no repetition, no generic AI phrasing (no "delve", "unlock the
+  secrets", "vast tapestry"). Memorable closing line.
+- SEMANTIC PARITY: opening narration must mirror the video title/thumbnail
+  promise exactly (no bait).
 
-Respond STRICT JSON:
+OUTPUT FORMAT: STRICT JSON with per-scene metadata the pipeline uses for
+visual style, vocal emotion and sound design:
 {{
   "scenes": [
-    {{"title": "...", "narration": "...", "visual_goal": "<what the viewer should see>", "search_queries": ["3-5 stock search terms for visuals"]}}
+    {{
+      "title": "...",
+      "narration": "...",
+      "visual_goal": "<what the viewer should see>",
+      "search_queries": ["3-5 stock search terms"],
+      "emotion": "<wonder|tension|revelation|awe|nostalgia|hopeful|somber>",
+      "visual_style": "<ghibli|hand_drawn|90s_anime|sepia_cel|watercolor|clean_vector|photorealistic>",
+      "sfx_events": [{{"trigger": "<sound id>", "at": "<after: word/phrase from narration>"}}]
+    }}
   ]
 }}
+Use sfx_events sparingly (0-2 per scene) at true dramatic beats (launch,
+impact, reveal, whoosh, heartbeat, sparkle, boom, riser). `at` must reference
+a real phrase in that scene's narration.
 
 FACTS:
 {facts}"""
@@ -240,7 +283,7 @@ def stage_script(topic: str, research: dict, provider) -> list[dict]:
             scenes2 = data2.get("scenes", []) if isinstance(data2, dict) else (data2 if isinstance(data2, list) else [])
             w2 = sum(len(s.get("narration", "").split()) for s in scenes2)
             if len(scenes2) == 5 and w2 >= MIN_SCRIPT_WORDS and w2 <= MAX_SCRIPT_WORDS + 15:
-                scenes = scenes2
+                scenes = _merge_scene_meta(scenes, scenes2)
                 total_words = w2
                 print(f"  Expanded to {total_words} words (~{total_words * 0.4:.0f}s)")
         except json.JSONDecodeError:
@@ -258,7 +301,7 @@ def stage_script(topic: str, research: dict, provider) -> list[dict]:
                 scenes2 = data2.get("scenes", []) if isinstance(data2, dict) else (data2 if isinstance(data2, list) else [])
                 w2 = sum(len(s.get("narration", "").split()) for s in scenes2)
                 if len(scenes2) == 5 and w2 >= MIN_SCRIPT_WORDS and w2 <= MAX_SCRIPT_WORDS + 15:
-                    scenes = scenes2
+                    scenes = _merge_scene_meta(scenes, scenes2)
                     total_words = w2
                     print(f"  Expanded to {total_words} words (~{total_words * 0.4:.0f}s)")
             except json.JSONDecodeError:
@@ -275,7 +318,7 @@ def stage_script(topic: str, research: dict, provider) -> list[dict]:
             data2 = json.loads(compress)
             scenes2 = data2.get("scenes", []) if isinstance(data2, dict) else (data2 if isinstance(data2, list) else [])
             if len(scenes2) == 5 and sum(len(s.get("narration", "").split()) for s in scenes2) <= MAX_SCRIPT_WORDS + 10:
-                scenes = scenes2
+                scenes = _merge_scene_meta(scenes, scenes2)
                 print(f"  Compressed to {sum(len(s.get('narration','').split()) for s in scenes)} words")
         except json.JSONDecodeError:
             print("  !! Compression failed — keeping draft")
@@ -589,6 +632,36 @@ def stage_render(result_scenes, timeline_path: str, output_path: str,
             "render_s": round(time.time() - t0, 1), "output": output_path}
 
 
+def stage_cinematic_grade(video_path: str, out_path: str,
+                          grain: int = 8, strength: float = 1.0) -> dict:
+    """Organic texture pass (v8): simulate physical optics over the pristine
+    AI render — fine film grain + subtle chromatic aberration + unified
+    cinematic color grade.  Masks the synthetic 'too clean' look while
+    keeping detail (grain is intentionally subtle; QA unaffected)."""
+    print(f"  [grade] organic texture pass (grain={grain}, strength={strength})", flush=True)
+    t0 = time.time()
+    dur = _probe_duration(video_path)
+    # noise: temporal+spatial film grain; rgbashift: slight chromatic
+    # aberration; eq/curves: cinematic grade; vignette: lens falloff.
+    vf = (
+        f"noise=alls={grain}:allf=t+u,"
+        f"rgbashift=rh=1:bh=-1,"
+        f"eq=contrast={1.0 + 0.04 * strength}:saturation={1.0 + 0.06 * strength}:"
+        f"brightness={0.01 * strength},"
+        f"vignette=PI/5"
+    )
+    cmd = ["ffmpeg", "-y", "-i", video_path, "-vf", vf,
+           "-c:v", "libx264", "-preset", "fast", "-crf", "20",
+           "-c:a", "copy", "-movflags", "+faststart", out_path]
+    r = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+    if r.returncode != 0 or not os.path.exists(out_path):
+        print(f"  !! grade pass failed: {r.stderr[-300:]}")
+        return {"graded": False, "reason": r.stderr[-200:]}
+    print(f"  Graded {_probe_duration(out_path):.1f}s ({round(time.time()-t0,1)}s)")
+    return {"graded": True, "grain": grain, "elapsed_s": round(time.time() - t0, 1),
+            "size_mb": round(os.path.getsize(out_path) / 1e6, 1)}
+
+
 def _synth_bed(duration: float, out_path: str, seed: int = 7) -> str:
     """Synthesize an audible ambient pad bed (fallback when the configured
     music file is dead/silent).  Layered detuned sines + slow tremolo +
@@ -676,6 +749,228 @@ def _check_bed_audible(bed_path: str, min_mean_db: float = -40.0) -> bool:
     return mean_db > min_mean_db
 
 
+# ═══════════════════════════════════════════════════════════════════════ #
+# Event-driven sound design (v8)
+# ═══════════════════════════════════════════════════════════════════════ #
+# The script stage now emits `sfx_events` per scene (trigger + "at" phrase).
+# This stage synthesizes a localized SFX library (no external assets, works
+# offline on CPU) and splices hits at timestamps derived from narration
+# timing.  Combined with the voice-EQ + refined-ducking mix below this
+# replaces the old "single voice + looping bed" monotony.
+
+_SFX_SYNTH_PARAMS = {
+    "whoosh":    {"kind": "noise_sweep", "f0": 300, "f1": 3800, "dur": 0.7, "gain": 0.30},
+    "boom":      {"kind": "impact",     "f0": 70,  "f1": 45,   "dur": 1.6, "gain": 0.42},
+    "impact":    {"kind": "impact",     "f0": 120, "f1": 60,   "dur": 0.9, "gain": 0.35},
+    "sparkle":   {"kind": "sparkle",    "f0": 2600, "f1": 4200, "dur": 1.1, "gain": 0.16},
+    "riser":     {"kind": "riser",      "f0": 200, "f1": 2400, "dur": 1.6, "gain": 0.22},
+    "tick":      {"kind": "tick",       "f0": 1800, "f1": 1800, "dur": 0.08, "gain": 0.30},
+    "heartbeat": {"kind": "heartbeat",  "f0": 65,  "f1": 50,   "dur": 1.2, "gain": 0.30},
+    "launch":    {"kind": "launch",     "f0": 40,  "f1": 120,  "dur": 3.0, "gain": 0.38},
+    "reveal":    {"kind": "riser",      "f0": 300, "f1": 3200, "dur": 2.2, "gain": 0.26},
+    "drone":     {"kind": "drone",      "f0": 55,  "f1": 55,   "dur": 2.0, "gain": 0.18},
+}
+
+
+def _synth_sfx_event(trigger: str, duration: float = None, sr: int = 44100) -> tuple[list, float]:
+    """Synthesize one SFX hit as (samples, sr).  Deterministic, offline,
+    CPU-only.  Unrecognized triggers fall back to a neutral tick."""
+    import math
+    import random
+    p = _SFX_SYNTH_PARAMS.get(trigger, _SFX_SYNTH_PARAMS["tick"])
+    d = p["dur"] if duration is None else min(duration, p["dur"] + 0.5)
+    n = int(d * sr)
+    kind = p["kind"]
+    rnd = random.Random(hash(trigger) & 0xFFFF)
+    out = [0.0] * n
+    f0, f1 = p["f0"], p["f1"]
+
+    if kind == "noise_sweep":
+        # band-passed noise with rising center frequency
+        for i in range(n):
+            t = i / sr
+            f = f0 + (f1 - f0) * (i / n)
+            phase = 2 * math.pi * f * t
+            out[i] = (rnd.uniform(-1, 1) * 0.6 + 0.4 * math.sin(phase)) * math.sin(math.pi * i / n)
+    elif kind == "impact":
+        for i in range(n):
+            t = i / sr
+            f = f0 + (f1 - f0) * (i / n)
+            env = math.exp(-4.5 * i / n)
+            out[i] = (math.sin(2 * math.pi * f * t) * 0.7 + rnd.uniform(-1, 1) * 0.3) * env
+    elif kind == "sparkle":
+        for i in range(n):
+            t = i / sr
+            env = math.exp(-2.2 * i / n)
+            out[i] = (math.sin(2 * math.pi * f0 * t) * 0.5 +
+                      math.sin(2 * math.pi * f1 * t) * 0.3) * env * (0.6 + 0.4 * math.sin(2 * math.pi * 6 * t))
+    elif kind == "riser":
+        for i in range(n):
+            t = i / sr
+            f = f0 + (f1 - f0) * (i / n) ** 2
+            env = (i / n) ** 1.5
+            out[i] = math.sin(2 * math.pi * f * t) * env
+    elif kind == "tick":
+        for i in range(n):
+            env = math.exp(-14 * i / n)
+            out[i] = math.sin(2 * math.pi * f0 * i / sr) * env
+    elif kind == "heartbeat":
+        # lub-dub double thump
+        for i in range(n):
+            t = i / sr
+            env = math.exp(-10 * ((t % 0.55) / 0.55)) if (t % 0.55) < 0.55 else 0
+            out[i] = math.sin(2 * math.pi * f0 * t) * env * (1.2 if (t % 0.55) < 0.2 else 0.7)
+    elif kind == "launch":
+        for i in range(n):
+            t = i / sr
+            f = f0 + (f1 - f0) * (i / n)
+            env = 0.35 + 0.65 * (i / n)
+            out[i] = (math.sin(2 * math.pi * f * t) * 0.6 + rnd.uniform(-1, 1) * 0.4) * env * math.exp(-0.3 * i / n)
+    elif kind == "drone":
+        for i in range(n):
+            t = i / sr
+            out[i] = (math.sin(2 * math.pi * f0 * t) * 0.7 +
+                      math.sin(2 * math.pi * f0 * 1.5 * t) * 0.3) * 0.8
+    else:
+        for i in range(n):
+            out[i] = math.sin(2 * math.pi * f0 * i / sr) * math.exp(-10 * i / n)
+
+    gain = p["gain"]
+    # 8ms fade in/out to avoid clicks
+    fade = int(0.008 * sr)
+    for i in range(min(fade, n)):
+        out[i] *= i / fade
+        out[n - 1 - i] *= i / fade
+    return [s * gain for s in out], sr
+
+
+def build_sfx_timeline(scenes: list[dict], audio_durations: list[float],
+                       out_path: str) -> tuple[str, list[dict]]:
+    """Place scripted SFX events onto a timeline by matching each event's
+    `at` phrase to its word position within the scene narration.
+
+    Returns (wav_path, events_placed) where events_placed is a list of
+    {scene, trigger, at_s} for the run report."""
+    import wave
+    import array as _array
+    sr = 44100
+    total = max(0.5, sum(audio_durations))
+    n = int(total * sr)
+    bed = [0.0] * n
+    events_placed = []
+    cursor = 0.0
+    for i, sc in enumerate(scenes):
+        dur = audio_durations[i] if i < len(audio_durations) else 5.0
+        words = (sc.get("narration") or "").split()
+        for ev in (sc.get("sfx_events") or [])[:2]:
+            trig = (ev.get("trigger") or "tick").strip().lower()
+            at = (ev.get("at") or "").lower()
+            # map phrase -> fractional position in narration
+            frac = 0.5
+            if at and words:
+                atw = [w for w in at.replace("after", "").replace(":", "").split() if w]
+                if atw:
+                    joined = " ".join(words).lower()
+                    idx = joined.find(" ".join(atw[:3]).lower())
+                    if idx >= 0:
+                        frac = min(0.92, max(0.05, idx / max(1, len(joined))))
+            t_at = cursor + frac * dur
+            samples, _ = _synth_sfx_event(trig)
+            start = int(t_at * sr)
+            for j, s in enumerate(samples):
+                k = start + j
+                if 0 <= k < n:
+                    bed[k] += s
+            events_placed.append({"scene": i, "trigger": trig,
+                                  "at_s": round(t_at, 2)})
+        cursor += dur
+    # normalize to avoid clipping
+    peak = max(1e-9, max(abs(s) for s in bed))
+    scale = min(1.0, 0.85 / peak) if peak > 0.85 else 1.0
+    buf = _array.array("h", (int(max(-1.0, min(1.0, s * scale)) * 32767) for s in bed))
+    with wave.open(out_path, "wb") as w:
+        w.setnchannels(1)
+        w.setsampwidth(2)
+        w.setframerate(sr)
+        w.writeframes(buf.tobytes())
+    return out_path, events_placed
+
+
+def stage_narration_dynamic(scenes: list[dict], cache_audio: str,
+                            provider: str = "edge") -> tuple[list[float], dict]:
+    """Dynamic narration: sentence-level rate/pitch modulation by scene
+    emotion (edge-tts supports per-sentence rate/pitch), falling back to
+    flat Kokoro when edge is unavailable.  Returns (durations, stats).
+
+    v8: replaces the flat single-call TTS so delivery isn't monotone."""
+    import re as _re
+    os.makedirs(cache_audio, exist_ok=True)
+    durations = []
+    stats = {"provider": provider, "modulated_sentences": 0, "fallbacks": 0}
+    _EMO_RATE = {"wonder": "+8%", "tension": "+4%", "revelation": "+10%",
+                 "awe": "+6%", "nostalgia": "-4%", "hopeful": "+4%",
+                 "somber": "-8%"}
+    _EMO_PITCH = {"wonder": "+2Hz", "tension": "-1Hz", "revelation": "+4Hz",
+                  "awe": "+3Hz", "nostalgia": "-2Hz", "hopeful": "+1Hz",
+                  "somber": "-4Hz"}
+
+    def _sentences(text: str) -> list[str]:
+        parts = _re.split(r"(?<=[.!?])\s+", (text or "").strip())
+        return [p for p in parts if p.strip()]
+
+    for i, sc in enumerate(scenes):
+        ap = os.path.join(cache_audio, f"scene_{i}.wav")
+        emo = (sc.get("emotion") or "wonder").strip().lower()
+        sents = _sentences(sc.get("narration"))
+        try:
+            if provider == "edge" and len(sents) > 1:
+                # edge-tts per-sentence with emotion-driven rate/pitch
+                import asyncio
+                import edge_tts
+                rate = _EMO_RATE.get(emo, "+0%")
+                pitch = _EMO_PITCH.get(emo, "+0Hz")
+
+                async def _gen():
+                    chunks = []
+                    for s in sents:
+                        comm = edge_tts.Communicate(
+                            s, "en-US-ChristopherNeural",
+                            rate=rate, pitch=pitch)
+                        tmp = ap + f".{len(chunks)}.mp3"
+                        await comm.save(tmp)
+                        chunks.append(tmp)
+                    # concat via ffmpeg
+                    lst = os.path.join(cache_audio, f"scene_{i}.lst")
+                    with open(lst, "w") as f:
+                        for c in chunks:
+                            f.write(f"file '{os.path.abspath(c)}'\n")
+                    subprocess.run(
+                        ["ffmpeg", "-y", "-f", "concat", "-safe", "0",
+                         "-i", lst, "-ar", "44100", "-ac", "2",
+                         "-c:a", "pcm_s16le", ap],
+                        capture_output=True, text=True, timeout=120)
+                    for c in chunks:
+                        if os.path.exists(c):
+                            os.remove(c)
+                    if os.path.exists(lst):
+                        os.remove(lst)
+
+                asyncio.run(_gen())
+                stats["modulated_sentences"] += len(sents)
+            else:
+                from audio_engine import generate_voice
+                generate_voice(sc.get("narration"), ap)
+                stats["provider"] = "kokoro"
+        except Exception as e:  # noqa: BLE001
+            print(f"  !! dynamic narration failed for scene {i} ({str(e)[:80]}) — Kokoro fallback")
+            stats["fallbacks"] += 1
+            from audio_engine import generate_voice
+            generate_voice(sc.get("narration"), ap)
+            stats["provider"] = "kokoro"
+        durations.append(_probe_duration(ap) if os.path.exists(ap) else 5.0)
+    return durations, stats
+
+
 def stage_music_mix(video_path: str, music_path: str, out_path: str,
                     music_volume_db: float = -6.0, sfx_path: str = "") -> dict:
     """Stage 11: mix a music bed + optional SFX under narration with
@@ -716,11 +1011,21 @@ def stage_music_mix(video_path: str, music_path: str, out_path: str,
 
     dur = _probe_duration(video_path)
     vol = 10 ** (music_volume_db / 20.0) if music_volume_db else 1.0
-    # SFX layer (optional): pulsar heartbeat blips, kept quiet under voice
+    # Voice EQ (two-pole peaking per sound-design spec): cut muddy low-end
+    # at 100 Hz, boost vocal presence at 3 kHz so the voice cuts through
+    # the bed + SFX without clipping.
+    VOICE_EQ = "equalizer=f=100:t=q:w=1:g=-3,equalizer=f=3000:t=q:w=1:g=2"
+    # Sidechain params from the 2026 sound-design spec (natural, not jarring).
+    # NOTE: sidechaincompress in this ffmpeg build refuses a LABELED pad as
+    # its sidechain input ("matches no streams") — always feed it the raw
+    # [0:a] voice stream; the EQ'd [voice] pad is used only for the final
+    # amix.  Verified with targeted ffmpeg tests (v8 fix).
+    SIDECHAIN = "threshold=0.0625:ratio=4:attack=20:release=250"
+    # SFX layer (optional): event-driven timeline built from script sfx_events
     sfx_used = ""
     if sfx_path and os.path.exists(sfx_path):
         sfx_used = sfx_path
-        print(f"  [sfx] thematic SFX layer: {os.path.basename(sfx_path)}")
+        print(f"  [sfx] event-driven SFX timeline: {os.path.basename(sfx_path)}")
 
     if sfx_used:
         cmd = [
@@ -730,11 +1035,12 @@ def stage_music_mix(video_path: str, music_path: str, out_path: str,
             "-i", sfx_used,
             "-filter_complex",
             (
+                f"[0:a]{VOICE_EQ}[voice];"
                 f"[1:a]aloop=loop=-1:size=2e9,atrim=0:{dur:.3f},volume={vol:.3f}[bed];"
-                f"[2:a]aloop=loop=-1:size=2e9,atrim=0:{dur:.3f},volume=0.5[sfx];"
+                f"[2:a]aloop=loop=-1:size=2e9,atrim=0:{dur:.3f},volume=0.8[sfx];"
                 f"[bed][sfx]amix=inputs=2:duration=first:normalize=0[bedmix];"
-                f"[bedmix][0:a]sidechaincompress=threshold=0.03:ratio=6:attack=25:release=500[duck];"
-                f"[0:a][duck]amix=inputs=2:duration=first:dropout_transition=0:normalize=0,alimiter=limit=0.89,loudnorm=I=-14:TP=-1.5:LRA=11[aout]"
+                f"[bedmix][0:a]sidechaincompress={SIDECHAIN}[duck];"
+                f"[voice][duck]amix=inputs=2:duration=first:dropout_transition=0:normalize=0,alimiter=limit=0.89,loudnorm=I=-14:TP=-1.5:LRA=11[aout]"
             ),
             "-map", "0:v", "-map", "[aout]",
             "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",
@@ -748,9 +1054,10 @@ def stage_music_mix(video_path: str, music_path: str, out_path: str,
             "-i", music_path,
             "-filter_complex",
             (
+                f"[0:a]{VOICE_EQ}[voice];"
                 f"[1:a]aloop=loop=-1:size=2e9,atrim=0:{dur:.3f},volume={vol:.3f}[bed];"
-                f"[bed][0:a]sidechaincompress=threshold=0.03:ratio=6:attack=25:release=500[duck];"
-                f"[0:a][duck]amix=inputs=2:duration=first:dropout_transition=0:normalize=0,alimiter=limit=0.89,loudnorm=I=-14:TP=-1.5:LRA=11[aout]"
+                f"[bed][0:a]sidechaincompress={SIDECHAIN}[duck];"
+                f"[voice][duck]amix=inputs=2:duration=first:dropout_transition=0:normalize=0,alimiter=limit=0.89,loudnorm=I=-14:TP=-1.5:LRA=11[aout]"
             ),
             "-map", "0:v", "-map", "[aout]",
             "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",
@@ -979,7 +1286,7 @@ def main():
             data2 = json.loads(compress)
             scenes2 = data2.get("scenes", []) if isinstance(data2, dict) else (data2 if isinstance(data2, list) else [])
             if len(scenes2) == 5 and sum(len(s.get("narration", "").split()) for s in scenes2) <= MAX_SCRIPT_WORDS + 10:
-                scenes_data = scenes2
+                scenes_data = _merge_scene_meta(scenes_data, scenes2)
                 print(f"  Compressed to {sum(len(s.get('narration','').split()) for s in scenes_data)} words")
         except json.JSONDecodeError:
             print("  !! Post-review compression failed — keeping reviewed script")

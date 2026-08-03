@@ -89,7 +89,10 @@ def _upload_and_review(video_path: str, script_text: str, model: str = "gemini-2
 
     # Model fallback chain: preferred pro model first, then flash models
     # (quota varies per key/plan; flash models are broadly available).
-    model_chain = [model, "gemini-3.5-flash", "gemini-3-flash-preview", "gemini-2.5-flash"]
+    # Model fallback chain: critical review first (Gemini 3.1 pro per studio
+    # policy), then flash models (quota varies per key/plan).
+    model_chain = [model, "gemini-3.1-pro", "gemini-3.5-flash",
+                   "gemini-3-flash-preview", "gemini-2.5-flash"]
     model_chain = list(dict.fromkeys(model_chain))  # dedupe, keep order
     last_err: Exception | None = None
     for m in model_chain:

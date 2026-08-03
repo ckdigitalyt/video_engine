@@ -1,0 +1,87 @@
+[
+  {
+    "title": "The Point of No Return",
+    "narration": "At every black hole's heart, space ends. Escape velocity exceeds light's speed. Nothing returns. How do we know they exist?",
+    "visual_goal": "Ultra-close render of event horizon, light bending into dark void.",
+    "search_queries": [
+      "black hole event horizon simulation",
+      "gravitational lensing"
+    ],
+    "emotion": "tension",
+    "visual_style": "photorealistic",
+    "sfx_events": [
+      {
+        "trigger": "deep rumbling bass",
+        "at": "space itself ends"
+      }
+    ]
+  },
+  {
+    "title": "The Cosmic Echo",
+    "narration": "In 2015, LIGO heard two black holes merge, confirming binaries. Over 90 mergers since.",
+    "visual_goal": "Two spheres spiral, collide, ripples in dark fabric.",
+    "search_queries": [
+      "binary black hole merger animation",
+      "gravitational waves"
+    ],
+    "emotion": "awe",
+    "visual_style": "clean_vector",
+    "sfx_events": [
+      {
+        "trigger": "low whoosh and boom",
+        "at": "merged, sending ripples"
+      }
+    ]
+  },
+  {
+    "title": "The Shadow of a Giant",
+    "narration": "In 2019, we imaged M87*\u20146.5 billion solar masses, 55 million light-years away. First direct silhouette.",
+    "visual_goal": "Fade to iconic EHT orange ring with dark center.",
+    "search_queries": [
+      "M87 black hole image",
+      "Event Horizon Telescope result"
+    ],
+    "emotion": "revelation",
+    "visual_style": "photorealistic",
+    "sfx_events": [
+      {
+        "trigger": "rising shimmering tone",
+        "at": "first direct image"
+      }
+    ]
+  },
+  {
+    "title": "The Lightest Touch",
+    "narration": "Hawking (1974): black holes leak radiation. Solar-mass hole glows at 0.00000006 K\u2014a whisper. They end in a flicker.",
+    "visual_goal": "Small black hole, faint particles escaping and dimming.",
+    "search_queries": [
+      "Hawking radiation illustration",
+      "black hole evaporation"
+    ],
+    "emotion": "somber",
+    "visual_style": "watercolor",
+    "sfx_events": [
+      {
+        "trigger": "subtle static hiss fading out",
+        "at": "whisper against the void"
+      }
+    ]
+  },
+  {
+    "title": "The Hidden Core",
+    "narration": "Space ends in our backyard: Sagittarius A*, 4.15 million solar masses at the Milky Way's center. It's home.",
+    "visual_goal": "Pan from Sagittarius A* to Milky Way galaxy zoom-out.",
+    "search_queries": [
+      "Sagittarius A* black hole",
+      "Milky Way galactic center"
+    ],
+    "emotion": "hopeful",
+    "visual_style": "90s_anime",
+    "sfx_events": [
+      {
+        "trigger": "low orchestral swell ending on a deep note",
+        "at": "It's home"
+      }
+    ]
+  }
+]

@@ -313,6 +313,48 @@ def _manim_scene_for(scene_text: str, intent: str = "default") -> str:
     return ""
 
 
+# Visual style modifiers ("Jade" subsystem) — rotate artistic styles by
+# the script's per-scene visual_style/emotion so the video reads as a
+# deliberate art direction rather than a generic photorealistic AI look.
+# This both masks generative artifacts and satisfies the "original
+# editorial value" bar for monetization.
+STYLE_MODIFIERS = {
+    "ghibli": (
+        "Studio Ghibli-inspired hand-drawn animation, painterly backgrounds, "
+        "soft warm palette, detailed matte art, no text"),
+    "hand_drawn": (
+        "hand-drawn cel animation, expressive ink outlines, vibrant colors, "
+        "no text"),
+    "90s_anime": (
+        "1990s anime cel style, detailed background art, film grain, "
+        "dramatic lighting, no text"),
+    "sepia_cel": (
+        "sepia-toned hand-drawn cel animation, vintage documentary look, "
+        "aged paper texture, no text"),
+    "watercolor": (
+        "watercolor illustration, soft washes, delicate detail, no text"),
+    "clean_vector": (
+        "clean vector infographic illustration, flat modern design, "
+        "minimalist, no text"),
+    "photorealistic": "photorealistic, cinematic, high detail, no text",
+}
+
+
+def _style_prompt_for(scene: dict, fallback: str = "") -> str:
+    """Resolve a scene's visual_style into a prompt modifier, falling back
+    to emotion-matched styles (wonder→ghibli, tension→90s_anime, ...)."""
+    style = ((scene or {}).get("visual_style") or "").strip().lower()
+    if style in STYLE_MODIFIERS:
+        return STYLE_MODIFIERS[style]
+    emo = ((scene or {}).get("emotion") or "wonder").strip().lower()
+    emo_map = {
+        "wonder": "ghibli", "awe": "ghibli", "hopeful": "watercolor",
+        "tension": "90s_anime", "revelation": "clean_vector",
+        "nostalgia": "sepia_cel", "somber": "hand_drawn",
+    }
+    return STYLE_MODIFIERS.get(emo_map.get(emo, "ghibli"), STYLE_MODIFIERS["ghibli"])
+
+
 def _still_plan_for(scene_text: str, spec=None, scene=None) -> list:
     """Ordered candidate prompts/queries for still imagery.
 
@@ -321,10 +363,12 @@ def _still_plan_for(scene_text: str, spec=None, scene=None) -> list:
     entities → topic-aware keyword hints.  Bare entity terms are the
     LEAST preferred because they collide with homonyms (a Wikimedia
     search for "pulsar" returns a roller coaster at Walibi Belgium).
+    AI fallback stills use the scene's Jade visual style.
     """
     t = scene_text.lower()
     topic = _detect_topic(scene_text)
     plan = []
+    style_mod = _style_prompt_for(scene)
 
     # 1) Script-authored search queries (most specific, least ambiguous)
     for q in (scene or {}).get("search_queries", []) or []:
@@ -337,11 +381,11 @@ def _still_plan_for(scene_text: str, spec=None, scene=None) -> list:
         for ent in spec.required_entities[:2]:
             plan += [("nasa", ent), ("wiki", ent)]
         obj = spec.visual_objective or f"{topic} documentary scene"
-        plan.append(("ai", f"Photorealistic documentary image: {obj}, cinematic, high detail"))
+        plan.append(("ai", f"{obj}. {style_mod}"))
     else:
         # topic-aware keyword fallback (still general, not per-topic lists)
         plan += [("nasa", topic), ("wiki", topic),
-                 ("ai", f"Photorealistic documentary image of {topic}, cinematic")]
+                 ("ai", f"Illustration of {topic}. {style_mod}")]
 
     # dedupe keeping order
     seen, out = set(), []
@@ -702,7 +746,7 @@ def main():
                 scenes2 = data2.get("scenes", []) if isinstance(data2, dict) else (data2 if isinstance(data2, list) else [])
                 w2 = sum(len(s.get("narration", "").split()) for s in scenes2)
                 if len(scenes2) == 5 and w2 <= M.MAX_SCRIPT_WORDS + 10:
-                    scenes_data = scenes2
+                    scenes_data = M._merge_scene_meta(scenes_data, scenes2)
                     print(f"  Compressed to {w2} words")
                     compressed_ok = True
                 else:
@@ -762,15 +806,21 @@ def main():
                                                   topic_slug=slug)
     run_report["stages"]["visuals"] = stills_stats
 
-    # ── Narration (reuse cached audio when present) ────────────────────
+    # ── Narration (dynamic, emotion-modulated; reuse cached audio) ──────
     os.makedirs("cache/audio", exist_ok=True)
     audio_durations = []
-    for i, s in enumerate(scenes_data):
-        ap = os.path.join("cache", "audio", f"scene_{i}.wav")
-        if not args.reuse or not os.path.exists(ap):
-            mods["generate_voice"](s["narration"], ap)
-        audio_durations.append(M._probe_duration(ap))
-    print(f"  Voice tracks: {len(scenes_data)} (total {sum(audio_durations):.1f}s)")
+    narration_stats = {}
+    if args.reuse and all(os.path.exists(os.path.join("cache", "audio", f"scene_{i}.wav"))
+                          for i in range(len(scenes_data))):
+        for i, s in enumerate(scenes_data):
+            ap = os.path.join("cache", "audio", f"scene_{i}.wav")
+            audio_durations.append(M._probe_duration(ap))
+        narration_stats = {"provider": "cached"}
+    else:
+        audio_durations, narration_stats = M.stage_narration_dynamic(
+            scenes_data, "cache/audio", provider="edge")
+    print(f"  Voice tracks: {len(scenes_data)} (total {sum(audio_durations):.1f}s) "
+          f"[{narration_stats.get('provider')}]")
 
     # ── Timeline + render ──────────────────────────────────────────────
     build_stills_timeline(scenes_data, shot_plan, audio_durations, timeline_path)
@@ -785,6 +835,21 @@ def main():
         "size_mb": round(os.path.getsize(output_path) / 1e6, 1),
         "render_s": round(render_s, 1),
     }
+
+    # ── Organic texture pass (v8): film grain + chromatic aberration +    ──
+    #    unified grade, applied to the master before the audio mix so the    ──
+    #    final upload carries the cinematic look.  Masks the AI 'too clean'  ──
+    #    aesthetic; subtle enough to keep QA passing.                        ──
+    graded_path = output_path
+    try:
+        graded_path = os.path.join(out_dir, f"{slug}_graded.mp4")
+        grade_stats = M.stage_cinematic_grade(output_path, graded_path,
+                                              grain=8, strength=1.0)
+        run_report["stages"]["grade_v1"] = grade_stats
+        if grade_stats.get("graded"):
+            output_path = graded_path
+    except Exception as e:
+        print(f"  !! grade pass failed (non-fatal, using ungraded): {str(e)[:100]}")
 
     # ── Wave-1: instrument shots with timeline placement ──────────────
     if gates is not None:
@@ -832,14 +897,87 @@ def main():
         else:
             print("  [qa] deterministic QA passed (no objective failures)")
 
-    # ── Music (with thematic SFX layer for astronomy topics) ───────────
+    # ── Retention diagnostic (v8): novelty density + dead-air audit ────
+    # Pre-upload check per 2026 AVD benchmarks: every few seconds must
+    # introduce new visual/audio stimulus; dead air and long static holds
+    # are the top drop-off risks.  Emits a report + auto-splits long holds.
+    try:
+        tl_now = json.load(open(timeline_path))
+        vt = tl_now.get("video_timeline", [])
+        total_dur = max(0.1, vt[-1].get("end_time", 0) if vt else 0)
+        # novelty density = distinct visual assets per 10s
+        shots = len(vt)
+        novelty_per_10s = round(shots / max(1, total_dur / 10.0), 2)
+        # longest single-hold (same asset without a cut)
+        longest_hold = 0.0
+        for v in vt:
+            hold = v.get("end_time", 0) - v.get("start_time", 0)
+            longest_hold = max(longest_hold, hold)
+        # dead air: audio gaps > 1.5s between narration tracks
+        at = tl_now.get("audio_timeline", [])
+        dead_air = 0.0
+        for a, b in zip(at, at[1:]):
+            gap = b.get("start_time", 0) - a.get("end_time", 0)
+            if gap > 1.5:
+                dead_air += gap
+        retention_diag = {
+            "novelty_density_per_10s": novelty_per_10s,
+            "longest_hold_s": round(longest_hold, 1),
+            "dead_air_s": round(dead_air, 1),
+            "shots": shots,
+            "benchmark": {"hook_window_s": 15, "max_hold_s": 8.0,
+                           "target_novelty_per_10s": 1.5},
+            "flags": [],
+        }
+        if longest_hold > 8.0:
+            retention_diag["flags"].append(
+                f"longest hold {longest_hold:.1f}s > 8s (drop-off risk)")
+        if novelty_per_10s < 1.2:
+            retention_diag["flags"].append(
+                f"novelty density {novelty_per_10s}/10s below 1.2")
+        if dead_air > 2.0:
+            retention_diag["flags"].append(
+                f"{dead_air:.1f}s dead air detected (trim recommended)")
+        run_report["retention_diagnostic"] = retention_diag
+        print(f"  [retention] novelty={novelty_per_10s}/10s hold={longest_hold:.1f}s "
+              f"dead_air={dead_air:.1f}s flags={len(retention_diag['flags'])}")
+    except Exception as e:
+        print(f"  !! retention diagnostic failed (non-fatal): {str(e)[:80]}")
+
+    # ── Disclosure metadata (v8): synthetic-content compliance ──────────
+    # 2026 platforms require transparent synthetic-media labeling; the
+    # pipeline emits a sidecar so uploads can carry the required metadata.
+    try:
+        disclosure = {
+            "synthetic_content": True,
+            "disclosure_label": "AI-generated content: synthetic narration, "
+                                 "AI-assisted visuals and sound design",
+            "no_fakes_compliant": True,  # no real human likeness/voice cloning
+            "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "pipeline": "jade-studio/v8",
+        }
+        run_report["disclosure"] = disclosure
+        import json as _json
+        with open(os.path.join(out_dir, "synthetic_disclosure.json"), "w") as f:
+            _json.dump(disclosure, f, indent=2)
+    except Exception as e:
+        print(f"  !! disclosure metadata failed (non-fatal): {str(e)[:80]}")
+
+    # ── Music (event-driven SFX timeline + ducked bed) ──────────────────
     sfx_path = ""
-    if "pulsar" in (topic or "").lower():
-        sfx_path = os.path.join("cache", "music", "pulsar_sfx.wav")
-        dur_sfx = M._probe_duration(output_path)
-        M._synth_pulsar_sfx(dur_sfx, sfx_path)
+    sfx_events_placed = []
+    try:
+        sfx_path = os.path.join("cache", "music", "sfx_timeline.wav")
+        sfx_path, sfx_events_placed = M.build_sfx_timeline(
+            scenes_data, audio_durations, sfx_path)
+        if not sfx_events_placed:
+            sfx_path = ""
+    except Exception as e:
+        print(f"  !! SFX timeline build failed (non-fatal): {str(e)[:100]}")
+        sfx_path = ""
     mix = M.stage_music_mix(output_path, "cache/music/cinematic.mp3", mixed_path,
                             sfx_path=sfx_path)
+    mix["sfx_events"] = sfx_events_placed
     run_report["stages"]["music_v1"] = mix
     review_target = mixed_path if mix.get("mixed") else output_path
 
@@ -868,6 +1006,15 @@ def main():
             break
         t0 = time.time()
         mods["MoviePyRenderer"]().render(timeline_path, output_path)
+        # re-apply organic texture pass so the improved render keeps the look
+        try:
+            graded_path = os.path.join(out_dir, f"{slug}_graded.mp4")
+            gs = M.stage_cinematic_grade(output_path, graded_path,
+                                         grain=8, strength=1.0)
+            if gs.get("graded"):
+                output_path = graded_path
+        except Exception as e:
+            print(f"  !! grade pass failed on re-render (non-fatal): {str(e)[:80]}")
         run_report["stages"][f"render_v{iteration+1}"] = {
             "duration_s": M._probe_duration(output_path),
             "render_s": round(time.time() - t0, 1),

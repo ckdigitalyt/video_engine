@@ -1,0 +1,429 @@
+{
+  "topic": "Black Holes: Where Space Ends",
+  "started_at": "2026-08-03T14:01:54Z",
+  "strategy": "stills_first",
+  "stages": {
+    "visuals": {
+      "manim": 0,
+      "nasa": 4,
+      "wikimedia": 6,
+      "ai": 0,
+      "video_fallback": 0,
+      "rejected": 9,
+      "vision_checked": 2,
+      "deduped": 1
+    },
+    "render_v1": {
+      "duration_s": 51.833333,
+      "size_mb": 19.3,
+      "render_s": 76.0
+    },
+    "grade_v1": {
+      "graded": true,
+      "grain": 8,
+      "elapsed_s": 133.3,
+      "size_mb": 27.7
+    },
+    "qa_v1": {
+      "passed": true,
+      "blocking_failures": [],
+      "checks": [
+        {
+          "name": "encoding",
+          "passed": true,
+          "detail": "v=h264 a=aac",
+          "metrics": {
+            "duration_s": 51.833333,
+            "resolution": [
+              1920,
+              1080
+            ]
+          }
+        },
+        {
+          "name": "resolution",
+          "passed": true,
+          "detail": "1920x1080",
+          "metrics": {}
+        },
+        {
+          "name": "repeated_assets",
+          "passed": true,
+          "detail": "no repeats",
+          "metrics": {
+            "repeats": {}
+          }
+        },
+        {
+          "name": "frozen_shots",
+          "passed": true,
+          "detail": "no frozen shots",
+          "metrics": {
+            "frozen_runs": [],
+            "frames_sampled": 4
+          }
+        },
+        {
+          "name": "excessive_static",
+          "passed": true,
+          "detail": "longest static window: 0.0s (limit 8.0s)",
+          "metrics": {
+            "longest_static_s": 0
+          }
+        },
+        {
+          "name": "silence",
+          "passed": true,
+          "detail": "max_volume=-4.9 dB (silence < -50.0 dB)",
+          "metrics": {
+            "max_db": -4.9,
+            "mean_db": -23.7
+          }
+        },
+        {
+          "name": "clipping",
+          "passed": true,
+          "detail": "max_volume=-4.9 dB (clip >= -0.5 dB)",
+          "metrics": {
+            "max_db": -4.9
+          }
+        }
+      ]
+    },
+    "music_v1": {
+      "mixed": true,
+      "elapsed_s": 14.1,
+      "size_mb": 27.5,
+      "mean_db": -16.4,
+      "sfx": "sfx_timeline.wav",
+      "sfx_events": [
+        {
+          "scene": 0,
+          "trigger": "deep rumbling bass",
+          "at_s": 4.79
+        },
+        {
+          "scene": 1,
+          "trigger": "low whoosh and boom",
+          "at_s": 15.02
+        },
+        {
+          "scene": 2,
+          "trigger": "rising shimmering tone",
+          "at_s": 24.79
+        },
+        {
+          "scene": 3,
+          "trigger": "subtle static hiss fading out",
+          "at_s": 34.97
+        },
+        {
+          "scene": 4,
+          "trigger": "low orchestral swell ending on a deep note",
+          "at_s": 45.53
+        }
+      ]
+    },
+    "review_v1": {
+      "score": 88,
+      "confidence": 0.95,
+      "model_used": null
+    },
+    "improve_pass_1": {
+      "iteration": 2,
+      "applied": [],
+      "flagged": [],
+      "stopped_early": true,
+      "notes": "Quality target met (88 >= 85); no changes applied.",
+      "elapsed_s": 0.0
+    }
+  },
+  "provider": "deepseek",
+  "entity_specs": {
+    "0": {
+      "beat_id": "scene0",
+      "scene_id": 0,
+      "required_entities": [
+        "black hole"
+      ],
+      "match_terms": {
+        "black hole": [
+          "black hole",
+          "event horizon",
+          "M87",
+          "Sagittarius A*"
+        ]
+      },
+      "optional_entities": [
+        "GW150914",
+        "LIGO",
+        "Event Horizon Telescope"
+      ],
+      "prohibited_entities": [
+        "Earth",
+        "Moon",
+        "Mars",
+        "Voyager 1",
+        "Apollo 11"
+      ],
+      "scene_intent": "hook",
+      "confidence": 1.0,
+      "visual_objective": "The viewer should be drawn into the mysterious and extreme nature of black holes, seeing a dark, warped space that feels both awe-inspiring and ominous."
+    },
+    "1": {
+      "beat_id": "scene1",
+      "scene_id": 1,
+      "required_entities": [
+        "black hole",
+        "LIGO"
+      ],
+      "match_terms": {
+        "black hole": [
+          "black hole",
+          "binary black hole",
+          "GW150914",
+          "merger"
+        ],
+        "LIGO": [
+          "LIGO",
+          "laser interferometer",
+          "gravitational wave detector"
+        ]
+      },
+      "optional_entities": [
+        "wave",
+        "spectrogram",
+        "interferometer"
+      ],
+      "prohibited_entities": [
+        "telescope",
+        "event horizon telescope",
+        "M87*",
+        "Sagittarius A*"
+      ],
+      "scene_intent": "hook",
+      "confidence": 1.0,
+      "visual_objective": "The viewer should see the violent cosmic event of two black holes colliding and the subsequent ripple that reaches Earth, feeling the awe of a distant, once-silent catastrophe becoming audible."
+    },
+    "2": {
+      "beat_id": "scene2",
+      "scene_id": 2,
+      "required_entities": [
+        "Event Horizon Telescope",
+        "M87*",
+        "Earth"
+      ],
+      "match_terms": {
+        "Event Horizon Telescope": [
+          "Event Horizon Telescope",
+          "EHT"
+        ],
+        "M87*": [
+          "M87*",
+          "m87",
+          "black hole shadow"
+        ],
+        "Earth": [
+          "Earth"
+        ]
+      },
+      "optional_entities": [
+        "LIGO",
+        "gravitational wave"
+      ],
+      "prohibited_entities": [
+        "Sagittarius A*",
+        "Voyager 1",
+        "Jupiter",
+        "Milky Way",
+        "Hawking radiation"
+      ],
+      "scene_intent": "explanation",
+      "confidence": 1.0,
+      "visual_objective": "The viewer should see the immense scale comparison between Earth and the virtual Earth-sized telescope array, feeling the awe of human ingenuity in capturing a black hole's shadow."
+    },
+    "3": {
+      "beat_id": "scene3",
+      "scene_id": 3,
+      "required_entities": [
+        "Stephen Hawking",
+        "black hole"
+      ],
+      "match_terms": {
+        "Stephen Hawking": [
+          "Stephen Hawking",
+          "hawking"
+        ],
+        "black hole": [
+          "black hole",
+          "event horizon"
+        ]
+      },
+      "optional_entities": [
+        "M87*",
+        "Sagittarius A*"
+      ],
+      "prohibited_entities": [
+        "Voyager 1",
+        "Jupiter",
+        "Apollo 11",
+        "Earth"
+      ],
+      "scene_intent": "explanation",
+      "confidence": 1.0,
+      "visual_objective": "The viewer should see a visualization of a black hole with a faint glow at its event horizon, conveying the concept of Hawking radiation, and feel a sense of awe and understanding of this subtle cosmic process."
+    },
+    "4": {
+      "beat_id": "scene4",
+      "scene_id": 4,
+      "required_entities": [
+        "Karl Schwarzschild",
+        "Einstein"
+      ],
+      "match_terms": {
+        "Karl Schwarzschild": [
+          "Karl Schwarzschild",
+          "schwarzschild"
+        ],
+        "Einstein": [
+          "Einstein",
+          "albert einstein"
+        ]
+      },
+      "optional_entities": [
+        "black hole",
+        "gravitational wave"
+      ],
+      "prohibited_entities": [
+        "GW150914",
+        "M87*",
+        "Sagittarius A*",
+        "LIGO",
+        "Event Horizon Telescope"
+      ],
+      "scene_intent": "explanation",
+      "confidence": 1.0,
+      "visual_objective": "The viewer should see a historical or scientific depiction of Schwarzschild and Einstein, feeling the foundational nature of their work."
+    }
+  },
+  "camera_diversity": {
+    "moves": 10,
+    "entropy": 2.122,
+    "normalized_entropy": 0.914,
+    "repetitive": false,
+    "distribution": {
+      "parallax": 1,
+      "pan_right": 2,
+      "push_in": 4,
+      "reveal": 2,
+      "pull_out": 1
+    }
+  },
+  "diversity": {
+    "asset_diversity": 1.0,
+    "transition_diversity": 1.0,
+    "motion_diversity": 0.914,
+    "shot_duration_mean_s": 5.5,
+    "shot_duration_std_s": 0.0,
+    "shot_count": 10
+  },
+  "retention_diagnostic": {
+    "novelty_density_per_10s": 1.93,
+    "longest_hold_s": 6.2,
+    "dead_air_s": 0.0,
+    "shots": 10,
+    "benchmark": {
+      "hook_window_s": 15,
+      "max_hold_s": 8.0,
+      "target_novelty_per_10s": 1.5
+    },
+    "flags": []
+  },
+  "disclosure": {
+    "synthetic_content": true,
+    "disclosure_label": "AI-generated content: synthetic narration, AI-assisted visuals and sound design",
+    "no_fakes_compliant": true,
+    "generated_at": "2026-08-03T14:11:06Z",
+    "pipeline": "jade-studio/v8"
+  },
+  "degradations": [
+    {
+      "stage": "fact_verification",
+      "severity": "warning",
+      "detail": "verification output did not match any claims"
+    },
+    {
+      "stage": "asset_gate",
+      "severity": "info",
+      "detail": "9 assets rejected by Entity-Asset verification (correct behavior)"
+    },
+    {
+      "stage": "asset_dedup",
+      "severity": "info",
+      "detail": "1 near-identical assets skipped (perceptual dedup)"
+    }
+  ],
+  "final": {
+    "output": "results/black_holes__where_space_ends/black_holes__where_space_ends_mixed.mp4",
+    "iterations": 1,
+    "final_score": 88,
+    "duration_s": 50.3,
+    "visual_stats": {
+      "manim": 0,
+      "nasa": 4,
+      "wikimedia": 6,
+      "ai": 0,
+      "video_fallback": 0,
+      "rejected": 9,
+      "vision_checked": 2,
+      "deduped": 1
+    }
+  },
+  "llm_usage_deepseek": {
+    "stages": {
+      "fact_verification": {
+        "calls": 1,
+        "input": 1072,
+        "output": 942,
+        "cached": 0,
+        "cost_usd": 0.000414
+      },
+      "research": {
+        "calls": 1,
+        "input": 200,
+        "output": 1430,
+        "cached": 0,
+        "cost_usd": 0.000428
+      },
+      "script": {
+        "calls": 2,
+        "input": 2603,
+        "output": 1412,
+        "cached": 0,
+        "cost_usd": 0.00076
+      },
+      "script_review": {
+        "calls": 15,
+        "input": 20675,
+        "output": 13590,
+        "cached": 0,
+        "cost_usd": 0.0067
+      },
+      "spec_build": {
+        "calls": 5,
+        "input": 5961,
+        "output": 806,
+        "cached": 0,
+        "cost_usd": 0.00106
+      }
+    },
+    "total": {
+      "calls": 24,
+      "input": 30511,
+      "output": 18180,
+      "cached": 0,
+      "cost_usd": 0.009362
+    }
+  },
+  "postmortem": "/home/ubuntu/video_engine/src/docs/mission/postmortems/postmortem-black-holes-where-space-ends-stills-first.md"
+}

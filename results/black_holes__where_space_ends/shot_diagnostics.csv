@@ -1,0 +1,11 @@
+scene_id,beat_index,shot_index,asset_path,asset_source,asset_title,query_used,shot_duration_s,narration_duration_s,camera_motion,transition,timeline_start_s,timeline_end_s,verified
+0,0,0,results/black_holes__where_space_ends/shots/scene0_0.mp4,nasa,Behemoth Black Hole Found in an Unlikely Place,black hole event horizon simulation,5.5,9.58,push_in,fade,0.0,5.5,True
+0,0,1,results/black_holes__where_space_ends/shots/scene0_1.mp4,wikimedia,File:Computer simulation illustrating how a black hole looks like at different wavelengths (eso2411c).tiff,black hole event horizon simulation,5.5,9.58,reveal,crossfade,5.5,11.0,True
+1,0,0,results/black_holes__where_space_ends/shots/scene1_0.mp4,wikimedia,File:Black Hole Outflows From Centaurus A.jpg,black hole,5.5,10.9,parallax,fade,9.58,15.08,True
+1,0,1,results/black_holes__where_space_ends/shots/scene1_1.mp4,nasa,Black Holes Collide,LIGO,5.5,10.9,push_in,crossfade,15.08,20.58,True
+2,0,0,results/black_holes__where_space_ends/shots/scene2_0.mp4,wikimedia,File:Apjlab0ec7f3 EHT-image-of-M87-black-hole.jpg,Event Horizon Telescope result,5.5,8.64,reveal,fade,20.47,25.97,True
+2,0,1,results/black_holes__where_space_ends/shots/scene2_1.mp4,wikimedia,File:M87 Core- Spooktacular M87 (2004-m87b - m87b int).tiff,M87*,5.5,8.64,pan_right,crossfade,25.97,31.47,True
+3,0,0,results/black_holes__where_space_ends/shots/scene3_0.mp4,nasa,Stephen Hawking NASA 50th,Stephen Hawking,5.5,11.71,push_in,fade,29.11,34.61,True
+3,0,1,results/black_holes__where_space_ends/shots/scene3_1.mp4,wikimedia,File:Stephen hawking 2008 nasa.jpg,Stephen Hawking,5.5,11.71,pull_out,crossfade,34.61,40.82,True
+4,0,0,results/black_holes__where_space_ends/shots/scene4_0.mp4,nasa,Einstein and Einstein A: A Study in Crater Morphology,Einstein,5.5,9.41,push_in,fade,40.82,46.32,True
+4,0,1,results/black_holes__where_space_ends/shots/scene4_1.mp4,wikimedia,File:Quantum Physics; Bose Einstein condensate (5940505475).jpg,Einstein,5.5,9.41,pan_right,crossfade,46.32,51.82,True

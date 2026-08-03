@@ -1,0 +1,158 @@
+{
+  "facts": [
+    {
+      "claim": "First detection of gravitational waves from a black hole merger (GW150914), confirming a binary black hole system.",
+      "value": 2015,
+      "unit": "year",
+      "source": "LIGO/Virgo Collaboration",
+      "year": 2016,
+      "confidence": 1.0,
+      "verified": true
+    },
+    {
+      "claim": "Mass of the supermassive black hole at the center of the Milky Way (Sagittarius A*) based on stellar orbits.",
+      "value": 4154000.0,
+      "unit": "solar masses",
+      "source": "European Southern Observatory (ESO)",
+      "year": 2022,
+      "confidence": 0.95,
+      "verified": true
+    },
+    {
+      "claim": "First direct image of a black hole shadow (M87*) captured by the Event Horizon Telescope.",
+      "value": 2019,
+      "unit": "year",
+      "source": "Event Horizon Telescope (EHT)",
+      "year": 2019,
+      "confidence": 1.0,
+      "verified": true
+    },
+    {
+      "claim": "Distance to the black hole M87* from Earth.",
+      "value": 55000000.0,
+      "unit": "light-years",
+      "source": "NASA/Event Horizon Telescope",
+      "year": 2019,
+      "confidence": 1.0,
+      "verified": true
+    },
+    {
+      "claim": "Mass of M87* black hole.",
+      "value": 6500000000.0,
+      "unit": "solar masses",
+      "source": "Event Horizon Telescope",
+      "year": 2019,
+      "confidence": 0.95,
+      "verified": true
+    },
+    {
+      "claim": "Radius of the event horizon (Schwarzschild radius) for a stellar-mass black hole of 10 solar masses.",
+      "value": 30,
+      "unit": "kilometers",
+      "source": "NASA (derived from general relativity)",
+      "year": 2024,
+      "confidence": 1.0,
+      "verified": true
+    },
+    {
+      "claim": "Number of black hole mergers detected by LIGO/Virgo as of the third observing run (O3).",
+      "value": 90,
+      "unit": "mergers",
+      "source": "LIGO/Virgo Collaboration",
+      "year": 2021,
+      "confidence": 0.9,
+      "verified": true
+    },
+    {
+      "claim": "Year Stephen Hawking proposed that black holes emit radiation (Hawking radiation).",
+      "value": 1974,
+      "unit": "year",
+      "source": "Physical Review D (Hawking)",
+      "year": 1974,
+      "confidence": 1.0,
+      "verified": true
+    },
+    {
+      "claim": "Predicted temperature of a solar-mass black hole due to Hawking radiation.",
+      "value": 6e-08,
+      "unit": "Kelvin",
+      "source": "NASA (astrophysics facts)",
+      "year": 2020,
+      "confidence": 0.9,
+      "verified": true
+    },
+    {
+      "claim": "Number of black holes discovered in a study of gravitational wave data (catalog GWTC-3).",
+      "value": 90,
+      "unit": "events",
+      "source": "LIGO/Virgo/KAGRA Collaboration",
+      "year": 2021,
+      "confidence": 0.95,
+      "verified": true
+    },
+    {
+      "claim": "Speed of light limit for escape from a black hole's event horizon (escape velocity > c).",
+      "value": 299792458,
+      "unit": "meters per second",
+      "source": "NASA",
+      "year": 2022,
+      "confidence": 1.0,
+      "verified": true
+    },
+    {
+      "claim": "Year Karl Schwarzschild derived the first exact solution of Einstein's field equations describing a black hole.",
+      "value": 1916,
+      "unit": "year",
+      "source": "Prussian Academy of Sciences",
+      "year": 1916,
+      "confidence": 1.0,
+      "verified": true
+    },
+    {
+      "claim": "Year the first stellar-mass black hole, Cygnus X-1, was confirmed (discovered 1964, confirmed via orbit).",
+      "value": 1971,
+      "unit": "year",
+      "source": "NASA",
+      "year": 1971,
+      "confidence": 0.9,
+      "verified": true
+    },
+    {
+      "claim": "Mass of Cygnus X-1's black hole (updated from parallax measurements).",
+      "value": 21.2,
+      "unit": "solar masses",
+      "source": "ESA (XMM-Newton) / NASA",
+      "year": 2021,
+      "confidence": 0.9,
+      "verified": true
+    }
+  ],
+  "hook_ideas": [
+    "What if a black hole is a place where time becomes a direction, not a stream?",
+    "The first image of a black hole was a blurry orange ring \u2013 but it took 10,000 scientists and a telescope the size of Earth.",
+    "Your hair falls into a black hole and turns into a paradox \u2013 that's called the 'information paradox'.",
+    "The nearest known black hole is only about 1,500 light-years away \u2013 but it's invisible.",
+    "If you fell into a black hole, you'd be 'spaghettified' \u2013 but the universe might never see it happen due to time dilation."
+  ],
+  "misconceptions": [
+    "Black holes are not cosmic vacuum cleaners \u2013 they only pull things in within a certain radius; orbits at a distance are stable.",
+    "Not all black holes have an 'event horizon' that you can see \u2013 we only infer them from their effects on light and matter.",
+    "The 'nothing escapes' rule applies to the event horizon, but quantum effects (Hawking radiation) suggest black holes slowly lose mass.",
+    "Black holes do not 'suck' \u2013 they warp spacetime; matter falls in only if it has insufficient angular momentum to orbit.",
+    "The 'where space ends' framing is misleading \u2013 a black hole is a region of spacetime, not a boundary in space."
+  ],
+  "key_sources": [
+    "NASA \u2013 Black Holes (nasa.gov)",
+    "Event Horizon Telescope (eventhorizontelescope.org)",
+    "LIGO/Virgo Collaboration (ligo.org)",
+    "European Space Agency (esa.int)",
+    "Physical Review D (Hawking, 1974) \u2013 accessed via APS",
+    "Caltech/MIT \u2013 LIGO official documentation",
+    "European Southern Observatory \u2013 Galactic Center research"
+  ],
+  "_elapsed_s": 12.2,
+  "_verification_failed": true,
+  "_verification_error": "verification output did not match any claims",
+  "_verification_severity": "warning",
+  "_verification_elapsed_s": 7.2
+}
