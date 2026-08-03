@@ -142,6 +142,8 @@ MANIM_SCENES = {
     "voyager_trajectory": "cache/manim/voyager_trajectory.mp4",
     "sun_scale": "cache/manim/sun_scale.mp4",
     "sun_layers": "cache/manim/sun_layers.mp4",
+    "pulsar_lighthouse": "cache/manim/pulsar_lighthouse.mp4",
+    "pulsar_density": "cache/manim/pulsar_density.mp4",
 }
 
 # Topic -> Manim scenes (intent-mapped).  General registry: adding a new
@@ -151,14 +153,22 @@ TOPIC_MANIM = {
                  "journey": "voyager_trajectory"},
     "sun":     {"scale": "sun_scale", "explanation": "sun_layers",
                  "structure": "sun_layers"},
+    "pulsar":  {"explanation": "pulsar_lighthouse", "journey": "pulsar_lighthouse",
+                 "scale": "pulsar_density", "emotion": "pulsar_lighthouse"},
 }
 
-# Which topic a given text belongs to (keyword hints, general-purpose)
+# Which topic a given text belongs to (keyword hints, general-purpose).
+# NOTE: hints must be DISJOINT and avoid physics-unit false positives:
+# - "star" is NOT a sun hint (pulsar narration says "this star")
+# - "solar" alone is NOT a sun hint ("solar masses" is a unit used for
+#   neutron stars) — only compound solar terms trigger the sun topic.
 _TOPIC_HINTS = {
     "voyager": ("voyager", "spacecraft", "golden record", "pale blue dot",
                  "jupiter", "saturn", "heliopause"),
-    "sun":     ("sun", "solar", "fusion", "star", "photosphere",
-                 "sunlight", "solar system's star"),
+    "sun":     ("solar system", "solar wind", "solar flare", "solar cycle",
+                 "sunlight", "photosphere", "the sun fuses", "sun's"),
+    "pulsar":  ("pulsar", "neutron star", "lighthouse", "spins", "rotating",
+                 "beam", "dense", "teaspoon", "magnetar", "supernova remnant"),
 }
 
 # Pinned stills: real NASA assets that must NOT be overwritten by the
@@ -587,14 +597,41 @@ def main():
                 "Return ONLY the JSON array of scenes with title/narration/visual_goal/search_queries.\n" +
                 json.dumps({"scenes": scenes_data})[:6000]
             )
+            compressed_ok = False
             try:
                 data2 = json.loads(compress)
                 scenes2 = data2.get("scenes", []) if isinstance(data2, dict) else (data2 if isinstance(data2, list) else [])
-                if len(scenes2) == 5 and sum(len(s.get("narration", "").split()) for s in scenes2) <= M.MAX_SCRIPT_WORDS + 10:
+                w2 = sum(len(s.get("narration", "").split()) for s in scenes2)
+                if len(scenes2) == 5 and w2 <= M.MAX_SCRIPT_WORDS + 10:
                     scenes_data = scenes2
-                    print(f"  Compressed to {sum(len(s.get('narration','').split()) for s in scenes_data)} words")
+                    print(f"  Compressed to {w2} words")
+                    compressed_ok = True
+                else:
+                    print(f"  !! Compression output invalid (scenes={len(scenes2)}, words={w2}) — deterministic trim")
             except json.JSONDecodeError:
-                print("  !! Post-review compression failed — keeping reviewed script")
+                print("  !! Post-review compression JSON failed — deterministic trim")
+            # Deterministic hard-trim fallback (never silently keep an
+            # over-budget script): truncate each scene's narration to a
+            # proportional word budget, cutting at sentence boundaries.
+            if not compressed_ok:
+                budget = int(M.MAX_SCRIPT_WORDS * 0.9)
+                per_scene = max(8, budget // len(scenes_data))
+                for s in scenes_data:
+                    n = s.get("narration", "")
+                    words = n.split()
+                    if len(words) > per_scene:
+                        # cut at sentence boundary near the limit
+                        truncated = words[:per_scene]
+                        text = " ".join(truncated)
+                        cut = text.rfind(". ")
+                        if cut > len(text) * 0.5:
+                            text = text[:cut + 1]
+                        else:
+                            cut = text.rfind(", ")
+                            text = text[:cut] + "." if cut > 0 else text + "."
+                        s["narration"] = text
+                tw = sum(len(s.get("narration", "").split()) for s in scenes_data)
+                print(f"  Deterministic trim → {tw} words")
         from src.utils.tts_normalize import normalize_narration, apply_prosody
         for s in scenes_data:
             s["narration"] = normalize_narration(s.get("narration", ""))
