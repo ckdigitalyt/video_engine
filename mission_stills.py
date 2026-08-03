@@ -1036,6 +1036,30 @@ def main():
             break
         iteration += 1
 
+    # ── Interim-asset cleanup (studio policy: keep only the final video) ──
+    # Every run produces several mp4s (raw render, graded master, final mix)
+    # plus a shots/ dir of Ken Burns clips.  Only the final _mixed master is
+    # a deliverable — remove the rest so results/<slug>/ stays clean.
+    try:
+        import glob as _glob
+        kept = None
+        for f in _glob.glob(os.path.join(out_dir, "*.mp4")):
+            if f == mixed_path:
+                kept = f
+                continue
+            os.remove(f)
+            print(f"  [cleanup] removed interim {os.path.basename(f)}")
+        shots_dir = os.path.join(out_dir, "shots")
+        if os.path.isdir(shots_dir):
+            shutil.rmtree(shots_dir, ignore_errors=True)
+            print("  [cleanup] removed interim shots/ dir")
+        run_report["cleanup"] = {
+            "policy": "keep-final-only",
+            "kept": os.path.basename(kept) if kept else None,
+        }
+    except Exception as e:
+        print(f"  !! interim cleanup failed (non-fatal): {str(e)[:100]}")
+
     # ── Final + postmortem ─────────────────────────────────────────────
     # ── Degradations report (iteration guidance #3: no silent degradation) ──
     degradations = []
