@@ -1,0 +1,391 @@
+{
+  "topic": "Mars: The Red Planet",
+  "started_at": "2026-08-03T12:07:52Z",
+  "strategy": "stills_first",
+  "stages": {
+    "visuals": {
+      "manim": 0,
+      "nasa": 6,
+      "wikimedia": 4,
+      "ai": 0,
+      "video_fallback": 0,
+      "rejected": 6,
+      "vision_checked": 5,
+      "deduped": 1
+    },
+    "render_v1": {
+      "duration_s": 73.133333,
+      "size_mb": 12.9,
+      "render_s": 90.0
+    },
+    "qa_v1": {
+      "passed": true,
+      "blocking_failures": [],
+      "checks": [
+        {
+          "name": "encoding",
+          "passed": true,
+          "detail": "v=h264 a=aac",
+          "metrics": {
+            "duration_s": 73.133333,
+            "resolution": [
+              1920,
+              1080
+            ]
+          }
+        },
+        {
+          "name": "resolution",
+          "passed": true,
+          "detail": "1920x1080",
+          "metrics": {}
+        },
+        {
+          "name": "repeated_assets",
+          "passed": true,
+          "detail": "no repeats",
+          "metrics": {
+            "repeats": {}
+          }
+        },
+        {
+          "name": "frozen_shots",
+          "passed": true,
+          "detail": "no frozen shots",
+          "metrics": {
+            "frozen_runs": [],
+            "frames_sampled": 5
+          }
+        },
+        {
+          "name": "excessive_static",
+          "passed": true,
+          "detail": "longest static window: 0.0s (limit 8.0s)",
+          "metrics": {
+            "longest_static_s": 0
+          }
+        },
+        {
+          "name": "silence",
+          "passed": true,
+          "detail": "max_volume=-7.8 dB (silence < -50.0 dB)",
+          "metrics": {
+            "max_db": -7.8,
+            "mean_db": -24.5
+          }
+        },
+        {
+          "name": "clipping",
+          "passed": true,
+          "detail": "max_volume=-7.8 dB (clip >= -0.5 dB)",
+          "metrics": {
+            "max_db": -7.8
+          }
+        }
+      ]
+    },
+    "music_v1": {
+      "mixed": true,
+      "elapsed_s": 14.1,
+      "size_mb": 13.6,
+      "mean_db": -16.2,
+      "sfx": null
+    },
+    "review_v1": {
+      "score": 72,
+      "confidence": 0.9,
+      "model_used": null
+    },
+    "improve_pass_1": {
+      "iteration": 2,
+      "applied": [
+        {
+          "category": "color",
+          "detail": "[color][low] Apply a consistent LUT to unify historical and modern footage.",
+          "source_rec": "Apply a consistent LUT to unify historical and modern footage."
+        }
+      ],
+      "flagged": [
+        "[new_asset] Replace prototype wheel at 0:47 with actual Curiosity mission footage.",
+        "[new_scene] Replace smoke at 0:33 with a landing sequence animation."
+      ],
+      "stopped_early": false,
+      "notes": "",
+      "elapsed_s": 0.0
+    }
+  },
+  "provider": "deepseek",
+  "entity_specs": {
+    "0": {
+      "beat_id": "scene0",
+      "scene_id": 0,
+      "required_entities": [
+        "Mars",
+        "Curiosity rover"
+      ],
+      "match_terms": {
+        "Mars": [
+          "Mars",
+          "red planet",
+          "martian surface"
+        ],
+        "Curiosity rover": [
+          "Curiosity rover",
+          "curiosity",
+          "mars rover curiosity"
+        ]
+      },
+      "optional_entities": [
+        "Mariner 4",
+        "Ingenuity helicopter"
+      ],
+      "prohibited_entities": [
+        "Earth",
+        "Venus",
+        "Apollo 11",
+        "Space Shuttle"
+      ],
+      "scene_intent": "hook",
+      "confidence": 1.0,
+      "visual_objective": "The viewer should see Mars' desolate, rust-red landscape with a rover (like Curiosity) exploring, feeling the intrigue of a familiar yet alien world that draws us to explore."
+    },
+    "1": {
+      "beat_id": "scene1",
+      "scene_id": 1,
+      "required_entities": [
+        "Mars",
+        "Mariner 4"
+      ],
+      "match_terms": {
+        "Mars": [
+          "Mars",
+          "red planet"
+        ],
+        "Mariner 4": [
+          "Mariner 4",
+          "mariner iv"
+        ]
+      },
+      "optional_entities": [
+        "craters",
+        "spacecraft"
+      ],
+      "prohibited_entities": [
+        "canals",
+        "Mars 3",
+        "Curiosity",
+        "Ingenuity",
+        "Earth"
+      ],
+      "scene_intent": "explanation",
+      "confidence": 1.0,
+      "visual_objective": "Show the viewer the vast distance to Mars and the historic Mariner 4 flyby, evoking a sense of discovery and the shift from myth to reality."
+    },
+    "2": {
+      "beat_id": "scene2",
+      "scene_id": 2,
+      "required_entities": [
+        "Mars 3",
+        "Mars"
+      ],
+      "match_terms": {
+        "Mars 3": [
+          "Mars 3",
+          "mars3",
+          "mars-3"
+        ],
+        "Mars": [
+          "Mars",
+          "red planet"
+        ]
+      },
+      "optional_entities": [
+        "Soviet Union",
+        "spacecraft"
+      ],
+      "prohibited_entities": [
+        "Mariner 4",
+        "Curiosity",
+        "Ingenuity",
+        "Earth"
+      ],
+      "scene_intent": "explanation",
+      "confidence": 1.0,
+      "visual_objective": "Show the silent, desolate surface of Mars with a faint, brief signal\u2014evoking the fragility and triumph of that first 14-second contact."
+    },
+    "3": {
+      "beat_id": "scene3",
+      "scene_id": 3,
+      "required_entities": [
+        "Curiosity",
+        "Ingenuity"
+      ],
+      "match_terms": {
+        "Curiosity": [
+          "Curiosity",
+          "mars rover curiosity"
+        ],
+        "Ingenuity": [
+          "Ingenuity",
+          "ingenuity helicopter",
+          "mars helicopter"
+        ]
+      },
+      "optional_entities": [
+        "Mars",
+        "Mars surface",
+        "Mars rover tracks",
+        "Mars landscape"
+      ],
+      "prohibited_entities": [
+        "Voyager",
+        "Opportunity",
+        "Spirit",
+        "Sojourner",
+        "Pathfinder",
+        "Moon"
+      ],
+      "scene_intent": "journey",
+      "confidence": 1.0,
+      "visual_objective": "The viewer should see a sequence of Mars rovers and helicopters (Curiosity, Ingenuity, Perseverance) in action, conveying the progression of robotic exploration and the anticipation of human arrival."
+    },
+    "4": {
+      "beat_id": "scene4",
+      "scene_id": 4,
+      "required_entities": [
+        "Olympus Mons",
+        "Valles Marineris",
+        "Mars"
+      ],
+      "match_terms": {
+        "Olympus Mons": [
+          "Olympus Mons",
+          "olympus"
+        ],
+        "Valles Marineris": [
+          "Valles Marineris",
+          "mariner valley"
+        ],
+        "Mars": [
+          "Mars",
+          "red planet"
+        ]
+      },
+      "optional_entities": [
+        "Everest",
+        "Grand Canyon",
+        "NASA astronaut"
+      ],
+      "prohibited_entities": [
+        "Earth",
+        "Moon",
+        "Venus",
+        "Jupiter",
+        "Space Shuttle",
+        "Apollo mission"
+      ],
+      "scene_intent": "scale",
+      "confidence": 1.0,
+      "visual_objective": "The viewer should see the towering scale of Olympus Mons and the vast chasm of Valles Marineris, feeling the immense size of Mars as a frontier that dwarfs Earth's landmarks, yet will soon be walked by humans."
+    }
+  },
+  "camera_diversity": {
+    "moves": 10,
+    "entropy": 2.922,
+    "normalized_entropy": 0.974,
+    "repetitive": false,
+    "distribution": {
+      "orbit": 1,
+      "push_in": 2,
+      "crane_up": 1,
+      "pan_right": 1,
+      "tracking": 1,
+      "reveal": 2,
+      "parallax": 1,
+      "pull_out": 1
+    }
+  },
+  "diversity": {
+    "asset_diversity": 1.0,
+    "transition_diversity": 1.0,
+    "motion_diversity": 0.974,
+    "shot_duration_mean_s": 5.5,
+    "shot_duration_std_s": 0.0,
+    "shot_count": 10
+  },
+  "degradations": [
+    {
+      "stage": "asset_gate",
+      "severity": "info",
+      "detail": "6 assets rejected by Entity-Asset verification (correct behavior)"
+    },
+    {
+      "stage": "asset_dedup",
+      "severity": "info",
+      "detail": "1 near-identical assets skipped (perceptual dedup)"
+    }
+  ],
+  "final": {
+    "output": "results/mars__the_red_planet/mars__the_red_planet_mixed.mp4",
+    "iterations": 1,
+    "final_score": 72,
+    "duration_s": 73.133333,
+    "visual_stats": {
+      "manim": 0,
+      "nasa": 6,
+      "wikimedia": 4,
+      "ai": 0,
+      "video_fallback": 0,
+      "rejected": 6,
+      "vision_checked": 5,
+      "deduped": 1
+    }
+  },
+  "llm_usage_deepseek": {
+    "stages": {
+      "fact_verification": {
+        "calls": 1,
+        "input": 1177,
+        "output": 1291,
+        "cached": 0,
+        "cost_usd": 0.000526
+      },
+      "research": {
+        "calls": 1,
+        "input": 198,
+        "output": 1557,
+        "cached": 0,
+        "cost_usd": 0.000464
+      },
+      "script": {
+        "calls": 2,
+        "input": 2586,
+        "output": 1413,
+        "cached": 0,
+        "cost_usd": 0.000758
+      },
+      "script_review": {
+        "calls": 15,
+        "input": 20599,
+        "output": 12284,
+        "cached": 0,
+        "cost_usd": 0.006323
+      },
+      "spec_build": {
+        "calls": 5,
+        "input": 5993,
+        "output": 859,
+        "cached": 0,
+        "cost_usd": 0.00108
+      }
+    },
+    "total": {
+      "calls": 24,
+      "input": 30553,
+      "output": 17404,
+      "cached": 0,
+      "cost_usd": 0.009151
+    }
+  },
+  "postmortem": "/home/ubuntu/video_engine/src/docs/mission/postmortems/postmortem-mars-the-red-planet-stills-first.md"
+}

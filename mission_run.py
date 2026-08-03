@@ -33,8 +33,14 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from dotenv import load_dotenv
 load_dotenv()
 
+from src.providers.llm_provider import set_usage_stage, DeepSeekUsage
+
 TARGET_DURATION_S = 60.0
 MAX_SCRIPT_WORDS = 165
+# Minimum narration words for the ~60s target (~150-165 wpm spoken).
+# Scripts that come in well under this (e.g. a 106-word draft -> 37s video)
+# are expanded once to hit the target runtime.
+MIN_SCRIPT_WORDS = 140
 
 # ═══════════════════════════════════════════════════════════════════════ #
 # Stage imports (lazy where heavy)
@@ -61,6 +67,7 @@ def _imports():
     from src.review.script_review import ScriptReviewer
     from src.review.improvement_pass import ImprovementPass
     from src.memory.postmortem import PostmortemRecorder
+    from src.providers.llm_provider import set_usage_stage, DeepSeekUsage
 
     return {
         "Scene": Scene, "SceneNarration": SceneNarration, "VisualPlan": VisualPlan,
@@ -100,6 +107,7 @@ Respond in STRICT JSON (no markdown):
 
 
 def stage_research(topic: str, provider) -> dict:
+    set_usage_stage("research")
     print("\n[1/16] RESEARCH", flush=True)
     t0 = time.time()
     raw = provider.generate_json(RESEARCH_PROMPT.format(topic=topic))
@@ -115,6 +123,7 @@ def stage_research(topic: str, provider) -> dict:
 
 
 def stage_fact_verification(research: dict, provider) -> dict:
+    set_usage_stage("fact_verification")
     print("\n[2/16] FACT VERIFICATION", flush=True)
     t0 = time.time()
     facts = research.get("facts", [])
@@ -195,6 +204,7 @@ FACTS:
 
 
 def stage_script(topic: str, research: dict, provider) -> list[dict]:
+    set_usage_stage("script")
     print("\n[3/16] SCRIPT DEVELOPMENT", flush=True)
     t0 = time.time()
     facts_text = json.dumps(research.get("facts", []), indent=1)[:7000]
@@ -213,6 +223,46 @@ def stage_script(topic: str, research: dict, provider) -> list[dict]:
     total_words = sum(len(s.get("narration", "").split()) for s in scenes)
     print(f"  {len(scenes)} scenes drafted, {total_words} words "
           f"(~{total_words * 0.4:.0f}s at 150wpm)")
+    if total_words < MIN_SCRIPT_WORDS and len(scenes) == 5:
+        # Expand under-budget scripts once so the video hits the ~60s target
+        # instead of delivering a 35-40s short (reviewer feedback: pacing).
+        print(f"  !! Under word budget ({total_words} < {MIN_SCRIPT_WORDS}) — expanding once")
+        expand = provider.generate_json(
+            "Expand this documentary script to at least " + str(MIN_SCRIPT_WORDS) +
+            " words total (target ~" + str(MAX_SCRIPT_WORDS) + "), keeping all facts, "
+            "the 5-scene structure and every search query. Add depth, not filler — "
+            "one extra concrete detail or vivid sentence per scene. "
+            "Return ONLY the JSON array of scenes with title/narration/visual_goal/search_queries.\n" +
+            json.dumps({"scenes": scenes})[:6000]
+        )
+        try:
+            data2 = json.loads(expand)
+            scenes2 = data2.get("scenes", []) if isinstance(data2, dict) else (data2 if isinstance(data2, list) else [])
+            w2 = sum(len(s.get("narration", "").split()) for s in scenes2)
+            if len(scenes2) == 5 and w2 >= MIN_SCRIPT_WORDS and w2 <= MAX_SCRIPT_WORDS + 15:
+                scenes = scenes2
+                total_words = w2
+                print(f"  Expanded to {total_words} words (~{total_words * 0.4:.0f}s)")
+        except json.JSONDecodeError:
+            # Retry once with an explicit fence-stripping prompt (same
+            # pattern as research/script stages).
+            print("  !! Expansion JSON failed — retrying once")
+            expand = provider.generate_json(
+                "Return ONLY valid JSON (no markdown fences): the array of 5 "
+                "scenes with title/narration/visual_goal/search_queries, "
+                "expanded to at least " + str(MIN_SCRIPT_WORDS) + " words total.\n" +
+                json.dumps({"scenes": scenes})[:6000]
+            )
+            try:
+                data2 = json.loads(expand)
+                scenes2 = data2.get("scenes", []) if isinstance(data2, dict) else (data2 if isinstance(data2, list) else [])
+                w2 = sum(len(s.get("narration", "").split()) for s in scenes2)
+                if len(scenes2) == 5 and w2 >= MIN_SCRIPT_WORDS and w2 <= MAX_SCRIPT_WORDS + 15:
+                    scenes = scenes2
+                    total_words = w2
+                    print(f"  Expanded to {total_words} words (~{total_words * 0.4:.0f}s)")
+            except json.JSONDecodeError:
+                print("  !! Expansion JSON failed again — keeping draft")
     if total_words > MAX_SCRIPT_WORDS:
         print(f"  !! Over word budget ({total_words} > {MAX_SCRIPT_WORDS}) — compressing once")
         compress = provider.generate_json(
@@ -237,6 +287,7 @@ def stage_script(topic: str, research: dict, provider) -> list[dict]:
 # ═══════════════════════════════════════════════════════════════════════ #
 
 def stage_script_review(scenes: list[dict], research: dict, provider_name: str) -> tuple[list[dict], dict]:
+    set_usage_stage("script_review")
     print("\n[4/16] SCRIPT REVIEW (4 independent reviewers, ≤3 passes)", flush=True)
     t0 = time.time()
     reviewer = ScriptReviewer(provider_name=provider_name, max_passes=3)
@@ -277,6 +328,7 @@ def stage_script_review(scenes: list[dict], research: dict, provider_name: str) 
 def stage_storyboard_and_direct(
     topic: str, scenes_data: list[dict], lib, ep, llm,
 ) -> tuple[list, dict]:
+    set_usage_stage("storyboard_director")
     print("\n[5-9/16] STORYBOARD → VISUAL PLANNING → ASSET ROUTING → GENERATION → ANIMATION", flush=True)
     t0 = time.time()
 
@@ -750,6 +802,7 @@ def stage_video_review(video_path: str, scenes: list[dict], out_path: str) -> di
 
 def stage_improvement_plan(review: dict, iteration: int, out_dir: str,
                            max_total: int = 3, quality_target: int = 85) -> dict:
+    set_usage_stage("improvement_plan")
     print(f"\n[14/16] IMPROVEMENT PASS planning (iteration {iteration}/{max_total})", flush=True)
     t0 = time.time()
     imp = ImprovementPass(work_dir=out_dir, max_total_iterations=max_total,

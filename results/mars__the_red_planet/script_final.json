@@ -1,0 +1,52 @@
+[
+  {
+    "title": "A Rust-Colored Whisper",
+    "narration": "What if you stood on a world half Earth's size, with thin air and rust-red ground? That's Mars\u2014familiar yet alien. Why does this dead world call us back?",
+    "visual_goal": "Opening shot of Mars against black space, rotating, showing red surface and polar ice caps.",
+    "search_queries": [
+      "Mars planet full disk NASA",
+      "Mars surface rust color",
+      "Mars polar ice caps"
+    ]
+  },
+  {
+    "title": "The Long Road",
+    "narration": "Between fifty-four point six and four hundred one million kilometers away. In nineteen sixty-five, Mariner four flew past, returning twenty-two images\u2014revealing a cratered world, not canals. We sent a robot that changed our view. It went silent, leaving a whisper.",
+    "visual_goal": "Animation of Earth-to-Mars distance, then grainy black-and-white Mariner 4 images.",
+    "search_queries": [
+      "Mariner 4 first Mars flyby 1965",
+      "Earth to Mars distance animation",
+      "Mars first image 1964"
+    ]
+  },
+  {
+    "title": "First Touch",
+    "narration": "In nineteen seventy-one, Soviet Mars three made the first landing, transmitting for fourteen seconds before falling silent. That brief whisper proved we could reach the surface. We had touched\u2014enough to keep going.",
+    "visual_goal": "Illustration of Mars 3 lander on dusty surface, signal drop graphic.",
+    "search_queries": [
+      "Mars 3 lander 1971 Soviet",
+      "Mars 3 first landing silent",
+      "Mars dust storm surface"
+    ]
+  },
+  {
+    "title": "We Stayed",
+    "narration": "Every robot is a test. Curiosity rolled thirty kilometers since twenty twelve, finding ancient lakes. Ingenuity made seventy-two flights in thin air. Perseverance collects samples for Earth return. Each step rehearses for humans.",
+    "visual_goal": "Time-lapse of rover tracks, cut to Ingenuity flying, then sample tubes.",
+    "search_queries": [
+      "Curiosity rover Mars tracks",
+      "Ingenuity helicopter flight Mars",
+      "Perseverance sample collection"
+    ]
+  },
+  {
+    "title": "The Next Step",
+    "narration": "Olympus Mons towers twenty-one point nine kilometers\u2014two point five Everests. Valles Marineris swallows the Grand Canyon. NASA targets the 2030s. That first human footprint will weigh more than all Martian mountains\u2014ours by exploration.",
+    "visual_goal": "Aerial view of Olympus Mons and Valles Marineris, fade to rocket silhouette on horizon.",
+    "search_queries": [
+      "Olympus Mons volcano Mars",
+      "Valles Marineris canyon",
+      "future human Mars base concept"
+    ]
+  }
+]

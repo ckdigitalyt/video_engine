@@ -206,8 +206,10 @@ TOPIC_MANIM = {
 _TOPIC_HINTS = {
     "voyager": ("voyager", "spacecraft", "golden record", "pale blue dot",
                  "jupiter", "saturn", "heliopause"),
-    "sun":     ("solar system", "solar wind", "solar flare", "solar cycle",
-                 "sunlight", "photosphere", "the sun fuses", "sun's"),
+    "sun":     ("solar wind", "solar flare", "solar cycle", "solar corona",
+                 "solar surface", "sunlight", "photosphere", "chromosphere",
+                 "the sun fuses", "the sun's", "sun's core", "sun's surface",
+                 "our star"),
     "pulsar":  ("pulsar", "neutron star", "lighthouse", "spins", "rotating",
                  "beam", "dense", "teaspoon", "magnetar", "supernova remnant"),
 }
@@ -748,6 +750,8 @@ def main():
     specs = None
     try:
         from src.pipeline.engine_gates import EngineGates
+        from src.providers.llm_provider import set_usage_stage
+        set_usage_stage("spec_build")
         gates = EngineGates(llm_provider=llm, vision_enabled=True)
         specs = gates.build_scene_specs(scenes_data, research.get("facts", []))
         run_report["entity_specs"] = {str(k): v.to_dict() for k, v in specs.items()}
@@ -840,15 +844,20 @@ def main():
     review_target = mixed_path if mix.get("mixed") else output_path
 
     # ── Gemini review + improvement passes ─────────────────────────────
-    review = M.stage_video_review(review_target, scenes_data,
-                                  os.path.join(out_dir, "review_v1.json"))
-    run_report["stages"]["review_v1"] = {
-        "score": review.get("quality_score"),
-        "confidence": review.get("confidence"),
-        "model_used": review.get("_meta", {}).get("model_used"),
-    }
+    review = None
+    try:
+        review = M.stage_video_review(review_target, scenes_data,
+                                      os.path.join(out_dir, "review_v1.json"))
+        run_report["stages"]["review_v1"] = {
+            "score": review.get("quality_score"),
+            "confidence": review.get("confidence"),
+            "model_used": review.get("_meta", {}).get("model_used"),
+        }
+    except Exception as e:
+        print(f"  !! video review failed (non-fatal, continuing): {str(e)[:120]}")
+        run_report["stages"]["review_v1"] = {"error": str(e)[:200]}
     iteration = 1
-    max_iter = 3
+    max_iter = 1 if review is None else 3
     while iteration < max_iter:
         plan_dict = M.stage_improvement_plan(review, iteration + 1, out_dir, max_total=max_iter)
         run_report["stages"][f"improve_pass_{iteration}"] = plan_dict
@@ -866,13 +875,18 @@ def main():
         mix = M.stage_music_mix(output_path, "cache/music/cinematic.mp3", mixed_path,
                                 sfx_path=sfx_path)
         review_target = mixed_path if mix.get("mixed") else output_path
-        review = M.stage_video_review(review_target, scenes_data,
-                                      os.path.join(out_dir, f"review_v{iteration+1}.json"))
-        run_report["stages"][f"review_v{iteration+1}"] = {
-            "score": review.get("quality_score"),
-            "confidence": review.get("confidence"),
-            "model_used": review.get("_meta", {}).get("model_used"),
-        }
+        try:
+            review = M.stage_video_review(review_target, scenes_data,
+                                          os.path.join(out_dir, f"review_v{iteration+1}.json"))
+            run_report["stages"][f"review_v{iteration+1}"] = {
+                "score": review.get("quality_score"),
+                "confidence": review.get("confidence"),
+                "model_used": review.get("_meta", {}).get("model_used"),
+            }
+        except Exception as e:
+            print(f"  !! re-review failed (non-fatal): {str(e)[:120]}")
+            run_report["stages"][f"review_v{iteration+1}"] = {"error": str(e)[:200]}
+            break
         iteration += 1
 
     # ── Final + postmortem ─────────────────────────────────────────────
@@ -916,6 +930,21 @@ def main():
         "duration_s": M._probe_duration(review_target),
         "visual_stats": stills_stats,
     }
+    # ── DeepSeek usage + cost report (per-stage, whole run) ────────────
+    try:
+        from src.providers.llm_provider import DeepSeekUsage
+        usage = DeepSeekUsage.summary()
+        run_report["llm_usage_deepseek"] = usage
+        tot = usage["total"]
+        print("\n[DEEPSEEK USAGE — this run]")
+        print(f"  calls: {tot['calls']} | input: {tot['input']:,} tok "
+              f"(cached {tot['cached']:,}) | output: {tot['output']:,} tok")
+        print(f"  estimated cost: ${tot['cost_usd']:.4f}")
+        for stage, row in usage["stages"].items():
+            print(f"    {stage:20s} calls={row['calls']:3d} in={row['input']:>7,} "
+                  f"out={row['output']:>6,} cost=${row['cost_usd']:.4f}")
+    except Exception as e:
+        print(f"  !! usage report failed (non-fatal): {str(e)[:80]}")
     M._write_json(os.path.join(out_dir, "run_report.json"), run_report)
 
     recorder = mods["PostmortemRecorder"]()
