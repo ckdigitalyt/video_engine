@@ -923,8 +923,14 @@ def stage_narration_dynamic(scenes: list[dict], cache_audio: str,
         emo = (sc.get("emotion") or "wonder").strip().lower()
         sents = _sentences(sc.get("narration"))
         try:
-            if provider == "edge" and len(sents) > 1:
-                # edge-tts per-sentence with emotion-driven rate/pitch
+            if provider == "edge":
+                # edge-tts per-sentence with emotion-driven rate/pitch.
+                # BUGFIX (2026-08-03): the old `and len(sents) > 1` guard
+                # made single-sentence scenes fall through to the flat
+                # Kokoro path, so a video could START in a deep Kokoro
+                # voice and switch to the edge voice mid-video.  Edge now
+                # voices every scene (single-sentence scenes included);
+                # Kokoro remains an exception-only fallback.
                 import asyncio
                 import edge_tts
                 rate = _EMO_RATE.get(emo, "+0%")

@@ -185,6 +185,7 @@ MANIM_SCENES = {
     "sun_layers": "cache/manim/sun_layers.mp4",
     "pulsar_lighthouse": "cache/manim/pulsar_lighthouse.mp4",
     "pulsar_density": "cache/manim/pulsar_density.mp4",
+    "black_hole_lensing": "cache/manim/black_hole_lensing.mp4",
 }
 
 # Topic -> Manim scenes (intent-mapped).  General registry: adding a new
@@ -196,6 +197,8 @@ TOPIC_MANIM = {
                  "structure": "sun_layers"},
     "pulsar":  {"explanation": "pulsar_lighthouse", "journey": "pulsar_lighthouse",
                  "scale": "pulsar_density", "emotion": "pulsar_lighthouse"},
+    "black_holes": {"explanation": "black_hole_lensing", "structure": "black_hole_lensing",
+                 "emotion": "black_hole_lensing", "journey": "black_hole_lensing"},
 }
 
 # Which topic a given text belongs to (keyword hints, general-purpose).
@@ -212,6 +215,8 @@ _TOPIC_HINTS = {
                  "our star"),
     "pulsar":  ("pulsar", "neutron star", "lighthouse", "spins", "rotating",
                  "beam", "dense", "teaspoon", "magnetar", "supernova remnant"),
+    "black_holes": ("black hole", "event horizon", "singularity", "accretion",
+                 "spacetime", "lensing", "photon ring", "gravitational"),
 }
 
 # Pinned stills: real NASA assets that must NOT be overwritten by the
@@ -313,12 +318,23 @@ def _manim_scene_for(scene_text: str, intent: str = "default") -> str:
     return ""
 
 
-# Visual style modifiers ("Jade" subsystem) — rotate artistic styles by
-# the script's per-scene visual_style/emotion so the video reads as a
-# deliberate art direction rather than a generic photorealistic AI look.
-# This both masks generative artifacts and satisfies the "original
-# editorial value" bar for monetization.
+# Visual style modifiers ("Jade" subsystem).
+#
+# STUDIO DECISION (2026-08-03): consistency over rotation.  ckdigital
+# asked for ONE fixed style + ONE color combination used for every
+# cartoon/stylized shot, so the video reads as a single art direction
+# instead of a mix of unrelated styles.  All non-photoreal AI stills now
+# use FIXED_JADE_STYLE (+ its fixed palette) regardless of scene emotion;
+# the per-emotion rotation below is kept only as a fallback for scenes
+# that carry an explicit visual_style that is NOT in the fixed set.
+FIXED_JADE_STYLE = (
+    "hand-painted cinematic concept art, painterly brushwork, rich depth, "
+    "warm amber and deep teal color palette with soft cream highlights, "
+    "consistent lighting and color grade, no text"
+)
+
 STYLE_MODIFIERS = {
+    "jade": FIXED_JADE_STYLE,
     "ghibli": (
         "Studio Ghibli-inspired hand-drawn animation, painterly backgrounds, "
         "soft warm palette, detailed matte art, no text"),
@@ -341,18 +357,19 @@ STYLE_MODIFIERS = {
 
 
 def _style_prompt_for(scene: dict, fallback: str = "") -> str:
-    """Resolve a scene's visual_style into a prompt modifier, falling back
-    to emotion-matched styles (wonder→ghibli, tension→90s_anime, ...)."""
+    """Resolve a scene's visual_style into a prompt modifier.
+
+    v8.1 (2026-08-03): consistency override — unless the scene explicitly
+    asks for a photorealistic look, return the single fixed Jade style so
+    every stylized shot shares one art direction and color palette.
+    """
     style = ((scene or {}).get("visual_style") or "").strip().lower()
-    if style in STYLE_MODIFIERS:
+    if style == "photorealistic":
+        return STYLE_MODIFIERS["photorealistic"]
+    if style and style in STYLE_MODIFIERS and style in ("jade",):
         return STYLE_MODIFIERS[style]
-    emo = ((scene or {}).get("emotion") or "wonder").strip().lower()
-    emo_map = {
-        "wonder": "ghibli", "awe": "ghibli", "hopeful": "watercolor",
-        "tension": "90s_anime", "revelation": "clean_vector",
-        "nostalgia": "sepia_cel", "somber": "hand_drawn",
-    }
-    return STYLE_MODIFIERS.get(emo_map.get(emo, "ghibli"), STYLE_MODIFIERS["ghibli"])
+    # Consistency override: all cartoon shots share the fixed Jade style.
+    return FIXED_JADE_STYLE
 
 
 def _still_plan_for(scene_text: str, spec=None, scene=None) -> list:
