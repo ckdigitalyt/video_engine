@@ -381,7 +381,15 @@ def _still_plan_for(scene_text: str, spec=None, scene=None) -> list:
         for ent in spec.required_entities[:2]:
             plan += [("nasa", ent), ("wiki", ent)]
         obj = spec.visual_objective or f"{topic} documentary scene"
-        plan.append(("ai", f"{obj}. {style_mod}"))
+        # Stylized "Jade" shot FIRST when the scene requests a non-photoreal
+        # art direction — otherwise NASA/Wikimedia real photos fill every
+        # slot and the stylization never renders (reviewer: "no cartoon /
+        # animation / hand-drawn images in the video").
+        style = ((scene or {}).get("visual_style") or "").strip().lower()
+        if style and style != "photorealistic":
+            plan.insert(0, ("ai", f"{obj}. {style_mod}"))
+        else:
+            plan.append(("ai", f"{obj}. {style_mod}"))
     else:
         # topic-aware keyword fallback (still general, not per-topic lists)
         plan += [("nasa", topic), ("wiki", topic),
@@ -1005,16 +1013,23 @@ def main():
         if not applied:
             break
         t0 = time.time()
-        mods["MoviePyRenderer"]().render(timeline_path, output_path)
+        # Render to the RAW path first (never into graded_path — the grade
+        # pass needs distinct input/output files; rendering into graded.mp4
+        # then grading it onto itself makes ffmpeg exit "same as Input #0").
+        raw_render = os.path.join(out_dir, f"{slug}.mp4")
+        mods["MoviePyRenderer"]().render(timeline_path, raw_render)
         # re-apply organic texture pass so the improved render keeps the look
         try:
             graded_path = os.path.join(out_dir, f"{slug}_graded.mp4")
-            gs = M.stage_cinematic_grade(output_path, graded_path,
+            gs = M.stage_cinematic_grade(raw_render, graded_path,
                                          grain=8, strength=1.0)
             if gs.get("graded"):
                 output_path = graded_path
+            else:
+                output_path = raw_render
         except Exception as e:
             print(f"  !! grade pass failed on re-render (non-fatal): {str(e)[:80]}")
+            output_path = raw_render
         run_report["stages"][f"render_v{iteration+1}"] = {
             "duration_s": M._probe_duration(output_path),
             "render_s": round(time.time() - t0, 1),

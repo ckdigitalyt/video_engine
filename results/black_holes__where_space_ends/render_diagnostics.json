@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-08-03T14:10:54Z",
-  "total_render_s": 76.0,
+  "generated_at": "2026-08-03T16:11:45Z",
+  "total_render_s": 75.35,
   "shot_count": 10,
   "shots": [
     {
@@ -8,22 +8,22 @@
       "beat_index": 0,
       "shot_index": 0,
       "asset_path": "results/black_holes__where_space_ends/shots/scene0_0.mp4",
-      "asset_source": "nasa",
-      "asset_title": "Behemoth Black Hole Found in an Unlikely Place",
-      "query_used": "black hole event horizon simulation",
+      "asset_source": "wikimedia",
+      "asset_title": "File:Black hole - Messier 87.jpg",
+      "query_used": "M87 black hole first image",
       "verification": {
         "asset_path": "cache/stills/black_holes__where_space_ends/scene0_0.jpg",
         "beat_id": "scene0",
         "passed": true,
-        "score": 0.64,
+        "score": 0.34,
         "signal_scores": {
           "metadata": {
-            "score": 0.7,
-            "evidence": "hits=['black hole'], bans=[]"
+            "score": 0.3,
+            "evidence": "hits=[], bans=[]"
           },
           "captions": {
-            "score": 0.8,
-            "evidence": "hits=['black hole'], bans=[]"
+            "score": 0.2,
+            "evidence": "hits=[], bans=[]"
           },
           "filename": {
             "score": 0.2,
@@ -31,55 +31,68 @@
           },
           "provider_tags": {
             "score": 0.75,
-            "evidence": "tags=['black hole event horizon simulation'], hits=['black hole'], bans=[]"
+            "evidence": "tags=['M87 black hole first image'], hits=['M87*'], bans=[]"
           }
         },
         "matched_required": [
-          "black hole"
+          "M87*"
         ],
         "violated_prohibited": [],
-        "missing_required": [],
-        "vision_check": null,
+        "missing_required": [
+          "Event Horizon Telescope"
+        ],
+        "vision_check": {
+          "subject": "The first direct image of the supermassive black hole M87* captured by the Event Horizon Telescope.",
+          "passed": true,
+          "notes": "The image successfully reveals the accretion disk and shadow of the supermassive black hole M87*, which was captured by the Event Horizon Telescope (EHT). None of the prohibited subjects are present.",
+          "model": "gemini-3.5-flash"
+        },
         "reasons": [
-          "signals confirm (score=0.64)"
+          "vision check confirmed"
         ]
       },
       "entity_spec": {
         "beat_id": "scene0",
         "scene_id": 0,
         "required_entities": [
-          "black hole"
+          "M87*",
+          "Event Horizon Telescope"
         ],
         "match_terms": {
-          "black hole": [
+          "M87*": [
+            "M87*",
+            "m87",
             "black hole",
-            "event horizon",
-            "M87",
-            "Sagittarius A*"
+            "shadow",
+            "event horizon"
+          ],
+          "Event Horizon Telescope": [
+            "Event Horizon Telescope",
+            "eht"
           ]
         },
         "optional_entities": [
-          "GW150914",
-          "LIGO",
-          "Event Horizon Telescope"
+          "Sagittarius A*",
+          "accretion disk",
+          "ring of light"
         ],
         "prohibited_entities": [
-          "Earth",
-          "Moon",
-          "Mars",
           "Voyager 1",
-          "Apollo 11"
+          "Jupiter",
+          "Apollo 11",
+          "LIGO",
+          "gravitational waves"
         ],
-        "scene_intent": "hook",
+        "scene_intent": "reveal",
         "confidence": 1.0,
-        "visual_objective": "The viewer should be drawn into the mysterious and extreme nature of black holes, seeing a dark, warped space that feels both awe-inspiring and ominous."
+        "visual_objective": "The viewer should see the iconic glowing orange ring with a dark central shadow, and feel the awe of witnessing humanity's first direct glimpse of a black hole \u2014 a cosmic door that gravity locks forever."
       },
       "shot_duration_s": 5.5,
-      "narration_duration_s": 9.58,
-      "camera_motion": "push_in",
+      "narration_duration_s": 7.04,
+      "camera_motion": "reveal",
       "motion_params": {
-        "zoom_start": 1.0,
-        "zoom_end": 1.22,
+        "zoom_start": 1.25,
+        "zoom_end": 1.0,
         "pan_x": 0,
         "pan_y": 0
       },
@@ -94,374 +107,11 @@
       "shot_index": 1,
       "asset_path": "results/black_holes__where_space_ends/shots/scene0_1.mp4",
       "asset_source": "wikimedia",
-      "asset_title": "File:Computer simulation illustrating how a black hole looks like at different wavelengths (eso2411c).tiff",
-      "query_used": "black hole event horizon simulation",
-      "verification": {
-        "asset_path": "cache/stills/black_holes__where_space_ends/scene0_1.jpg",
-        "beat_id": "scene0",
-        "passed": true,
-        "score": 0.64,
-        "signal_scores": {
-          "metadata": {
-            "score": 0.7,
-            "evidence": "hits=['black hole'], bans=[]"
-          },
-          "captions": {
-            "score": 0.8,
-            "evidence": "hits=['black hole'], bans=[]"
-          },
-          "filename": {
-            "score": 0.2,
-            "evidence": "hits=[], bans=[]"
-          },
-          "provider_tags": {
-            "score": 0.75,
-            "evidence": "tags=['black hole event horizon simulation'], hits=['black hole'], bans=[]"
-          }
-        },
-        "matched_required": [
-          "black hole"
-        ],
-        "violated_prohibited": [],
-        "missing_required": [],
-        "vision_check": null,
-        "reasons": [
-          "signals confirm (score=0.64)"
-        ]
-      },
-      "entity_spec": {
-        "beat_id": "scene0",
-        "scene_id": 0,
-        "required_entities": [
-          "black hole"
-        ],
-        "match_terms": {
-          "black hole": [
-            "black hole",
-            "event horizon",
-            "M87",
-            "Sagittarius A*"
-          ]
-        },
-        "optional_entities": [
-          "GW150914",
-          "LIGO",
-          "Event Horizon Telescope"
-        ],
-        "prohibited_entities": [
-          "Earth",
-          "Moon",
-          "Mars",
-          "Voyager 1",
-          "Apollo 11"
-        ],
-        "scene_intent": "hook",
-        "confidence": 1.0,
-        "visual_objective": "The viewer should be drawn into the mysterious and extreme nature of black holes, seeing a dark, warped space that feels both awe-inspiring and ominous."
-      },
-      "shot_duration_s": 5.5,
-      "narration_duration_s": 9.58,
-      "camera_motion": "reveal",
-      "motion_params": {
-        "zoom_start": 1.25,
-        "zoom_end": 1.0,
-        "pan_x": 0,
-        "pan_y": 0
-      },
-      "transition": "crossfade",
-      "timeline_start_s": 5.5,
-      "timeline_end_s": 11.0,
-      "render_duration_s": 0.0
-    },
-    {
-      "scene_id": 1,
-      "beat_index": 0,
-      "shot_index": 0,
-      "asset_path": "results/black_holes__where_space_ends/shots/scene1_0.mp4",
-      "asset_source": "wikimedia",
-      "asset_title": "File:Black Hole Outflows From Centaurus A.jpg",
-      "query_used": "black hole",
-      "verification": {
-        "asset_path": "cache/stills/black_holes__where_space_ends/scene1_0.jpg",
-        "beat_id": "scene1",
-        "passed": true,
-        "score": 0.64,
-        "signal_scores": {
-          "metadata": {
-            "score": 0.7,
-            "evidence": "hits=['black hole'], bans=[]"
-          },
-          "captions": {
-            "score": 0.8,
-            "evidence": "hits=['black hole'], bans=[]"
-          },
-          "filename": {
-            "score": 0.2,
-            "evidence": "hits=[], bans=[]"
-          },
-          "provider_tags": {
-            "score": 0.75,
-            "evidence": "tags=['black hole'], hits=['black hole'], bans=[]"
-          }
-        },
-        "matched_required": [
-          "black hole"
-        ],
-        "violated_prohibited": [],
-        "missing_required": [
-          "LIGO"
-        ],
-        "vision_check": null,
-        "reasons": [
-          "signals confirm (score=0.64)"
-        ]
-      },
-      "entity_spec": {
-        "beat_id": "scene1",
-        "scene_id": 1,
-        "required_entities": [
-          "black hole",
-          "LIGO"
-        ],
-        "match_terms": {
-          "black hole": [
-            "black hole",
-            "binary black hole",
-            "GW150914",
-            "merger"
-          ],
-          "LIGO": [
-            "LIGO",
-            "laser interferometer",
-            "gravitational wave detector"
-          ]
-        },
-        "optional_entities": [
-          "wave",
-          "spectrogram",
-          "interferometer"
-        ],
-        "prohibited_entities": [
-          "telescope",
-          "event horizon telescope",
-          "M87*",
-          "Sagittarius A*"
-        ],
-        "scene_intent": "hook",
-        "confidence": 1.0,
-        "visual_objective": "The viewer should see the violent cosmic event of two black holes colliding and the subsequent ripple that reaches Earth, feeling the awe of a distant, once-silent catastrophe becoming audible."
-      },
-      "shot_duration_s": 5.5,
-      "narration_duration_s": 10.9,
-      "camera_motion": "parallax",
-      "motion_params": {
-        "zoom_start": 1.2,
-        "zoom_end": 1.05,
-        "pan_x": 50,
-        "pan_y": -30
-      },
-      "transition": "fade",
-      "timeline_start_s": 9.58,
-      "timeline_end_s": 15.08,
-      "render_duration_s": 0.0
-    },
-    {
-      "scene_id": 1,
-      "beat_index": 0,
-      "shot_index": 1,
-      "asset_path": "results/black_holes__where_space_ends/shots/scene1_1.mp4",
-      "asset_source": "nasa",
-      "asset_title": "Black Holes Collide",
-      "query_used": "LIGO",
-      "verification": {
-        "asset_path": "cache/stills/black_holes__where_space_ends/scene1_1.jpg",
-        "beat_id": "scene1",
-        "passed": true,
-        "score": 0.64,
-        "signal_scores": {
-          "metadata": {
-            "score": 0.7,
-            "evidence": "hits=['black hole'], bans=[]"
-          },
-          "captions": {
-            "score": 0.8,
-            "evidence": "hits=['black hole'], bans=[]"
-          },
-          "filename": {
-            "score": 0.2,
-            "evidence": "hits=[], bans=[]"
-          },
-          "provider_tags": {
-            "score": 0.75,
-            "evidence": "tags=['LIGO'], hits=['LIGO'], bans=[]"
-          }
-        },
-        "matched_required": [
-          "black hole",
-          "LIGO"
-        ],
-        "violated_prohibited": [],
-        "missing_required": [],
-        "vision_check": null,
-        "reasons": [
-          "signals confirm (score=0.64)"
-        ]
-      },
-      "entity_spec": {
-        "beat_id": "scene1",
-        "scene_id": 1,
-        "required_entities": [
-          "black hole",
-          "LIGO"
-        ],
-        "match_terms": {
-          "black hole": [
-            "black hole",
-            "binary black hole",
-            "GW150914",
-            "merger"
-          ],
-          "LIGO": [
-            "LIGO",
-            "laser interferometer",
-            "gravitational wave detector"
-          ]
-        },
-        "optional_entities": [
-          "wave",
-          "spectrogram",
-          "interferometer"
-        ],
-        "prohibited_entities": [
-          "telescope",
-          "event horizon telescope",
-          "M87*",
-          "Sagittarius A*"
-        ],
-        "scene_intent": "hook",
-        "confidence": 1.0,
-        "visual_objective": "The viewer should see the violent cosmic event of two black holes colliding and the subsequent ripple that reaches Earth, feeling the awe of a distant, once-silent catastrophe becoming audible."
-      },
-      "shot_duration_s": 5.5,
-      "narration_duration_s": 10.9,
-      "camera_motion": "push_in",
-      "motion_params": {
-        "zoom_start": 1.0,
-        "zoom_end": 1.22,
-        "pan_x": 0,
-        "pan_y": 0
-      },
-      "transition": "crossfade",
-      "timeline_start_s": 15.08,
-      "timeline_end_s": 20.58,
-      "render_duration_s": 0.0
-    },
-    {
-      "scene_id": 2,
-      "beat_index": 0,
-      "shot_index": 0,
-      "asset_path": "results/black_holes__where_space_ends/shots/scene2_0.mp4",
-      "asset_source": "wikimedia",
-      "asset_title": "File:Apjlab0ec7f3 EHT-image-of-M87-black-hole.jpg",
-      "query_used": "Event Horizon Telescope result",
-      "verification": {
-        "asset_path": "cache/stills/black_holes__where_space_ends/scene2_0.jpg",
-        "beat_id": "scene2",
-        "passed": true,
-        "score": 0.64,
-        "signal_scores": {
-          "metadata": {
-            "score": 0.7,
-            "evidence": "hits=['M87*'], bans=[]"
-          },
-          "captions": {
-            "score": 0.8,
-            "evidence": "hits=['M87*'], bans=[]"
-          },
-          "filename": {
-            "score": 0.2,
-            "evidence": "hits=[], bans=[]"
-          },
-          "provider_tags": {
-            "score": 0.75,
-            "evidence": "tags=['Event Horizon Telescope result'], hits=['Event Horizon Telescope'], bans=[]"
-          }
-        },
-        "matched_required": [
-          "Event Horizon Telescope",
-          "M87*"
-        ],
-        "violated_prohibited": [],
-        "missing_required": [
-          "Earth"
-        ],
-        "vision_check": null,
-        "reasons": [
-          "signals confirm (score=0.64)"
-        ]
-      },
-      "entity_spec": {
-        "beat_id": "scene2",
-        "scene_id": 2,
-        "required_entities": [
-          "Event Horizon Telescope",
-          "M87*",
-          "Earth"
-        ],
-        "match_terms": {
-          "Event Horizon Telescope": [
-            "Event Horizon Telescope",
-            "EHT"
-          ],
-          "M87*": [
-            "M87*",
-            "m87",
-            "black hole shadow"
-          ],
-          "Earth": [
-            "Earth"
-          ]
-        },
-        "optional_entities": [
-          "LIGO",
-          "gravitational wave"
-        ],
-        "prohibited_entities": [
-          "Sagittarius A*",
-          "Voyager 1",
-          "Jupiter",
-          "Milky Way",
-          "Hawking radiation"
-        ],
-        "scene_intent": "explanation",
-        "confidence": 1.0,
-        "visual_objective": "The viewer should see the immense scale comparison between Earth and the virtual Earth-sized telescope array, feeling the awe of human ingenuity in capturing a black hole's shadow."
-      },
-      "shot_duration_s": 5.5,
-      "narration_duration_s": 8.64,
-      "camera_motion": "reveal",
-      "motion_params": {
-        "zoom_start": 1.25,
-        "zoom_end": 1.0,
-        "pan_x": 0,
-        "pan_y": 0
-      },
-      "transition": "fade",
-      "timeline_start_s": 20.47,
-      "timeline_end_s": 25.97,
-      "render_duration_s": 0.0
-    },
-    {
-      "scene_id": 2,
-      "beat_index": 0,
-      "shot_index": 1,
-      "asset_path": "results/black_holes__where_space_ends/shots/scene2_1.mp4",
-      "asset_source": "wikimedia",
       "asset_title": "File:M87 Core- Spooktacular M87 (2004-m87b - m87b int).tiff",
       "query_used": "M87*",
       "verification": {
-        "asset_path": "cache/stills/black_holes__where_space_ends/scene2_1.jpg",
-        "beat_id": "scene2",
+        "asset_path": "cache/stills/black_holes__where_space_ends/scene0_1.jpg",
+        "beat_id": "scene0",
         "passed": true,
         "score": 0.64,
         "signal_scores": {
@@ -487,8 +137,7 @@
         ],
         "violated_prohibited": [],
         "missing_required": [
-          "Event Horizon Telescope",
-          "Earth"
+          "Event Horizon Telescope"
         ],
         "vision_check": null,
         "reasons": [
@@ -496,220 +145,43 @@
         ]
       },
       "entity_spec": {
-        "beat_id": "scene2",
-        "scene_id": 2,
+        "beat_id": "scene0",
+        "scene_id": 0,
         "required_entities": [
-          "Event Horizon Telescope",
           "M87*",
-          "Earth"
+          "Event Horizon Telescope"
         ],
         "match_terms": {
-          "Event Horizon Telescope": [
-            "Event Horizon Telescope",
-            "EHT"
-          ],
           "M87*": [
             "M87*",
             "m87",
-            "black hole shadow"
+            "black hole",
+            "shadow",
+            "event horizon"
           ],
-          "Earth": [
-            "Earth"
+          "Event Horizon Telescope": [
+            "Event Horizon Telescope",
+            "eht"
           ]
         },
         "optional_entities": [
-          "LIGO",
-          "gravitational wave"
-        ],
-        "prohibited_entities": [
           "Sagittarius A*",
-          "Voyager 1",
-          "Jupiter",
-          "Milky Way",
-          "Hawking radiation"
-        ],
-        "scene_intent": "explanation",
-        "confidence": 1.0,
-        "visual_objective": "The viewer should see the immense scale comparison between Earth and the virtual Earth-sized telescope array, feeling the awe of human ingenuity in capturing a black hole's shadow."
-      },
-      "shot_duration_s": 5.5,
-      "narration_duration_s": 8.64,
-      "camera_motion": "pan_right",
-      "motion_params": {
-        "zoom_start": 1.12,
-        "zoom_end": 1.12,
-        "pan_x": 60,
-        "pan_y": 0
-      },
-      "transition": "crossfade",
-      "timeline_start_s": 25.97,
-      "timeline_end_s": 31.47,
-      "render_duration_s": 0.0
-    },
-    {
-      "scene_id": 3,
-      "beat_index": 0,
-      "shot_index": 0,
-      "asset_path": "results/black_holes__where_space_ends/shots/scene3_0.mp4",
-      "asset_source": "nasa",
-      "asset_title": "Stephen Hawking NASA 50th",
-      "query_used": "Stephen Hawking",
-      "verification": {
-        "asset_path": "cache/stills/black_holes__where_space_ends/scene3_0.jpg",
-        "beat_id": "scene3",
-        "passed": true,
-        "score": 0.64,
-        "signal_scores": {
-          "metadata": {
-            "score": 0.7,
-            "evidence": "hits=['Stephen Hawking'], bans=[]"
-          },
-          "captions": {
-            "score": 0.8,
-            "evidence": "hits=['Stephen Hawking'], bans=[]"
-          },
-          "filename": {
-            "score": 0.2,
-            "evidence": "hits=[], bans=[]"
-          },
-          "provider_tags": {
-            "score": 0.75,
-            "evidence": "tags=['Stephen Hawking'], hits=['Stephen Hawking'], bans=[]"
-          }
-        },
-        "matched_required": [
-          "Stephen Hawking"
-        ],
-        "violated_prohibited": [],
-        "missing_required": [
-          "black hole"
-        ],
-        "vision_check": null,
-        "reasons": [
-          "signals confirm (score=0.64)"
-        ]
-      },
-      "entity_spec": {
-        "beat_id": "scene3",
-        "scene_id": 3,
-        "required_entities": [
-          "Stephen Hawking",
-          "black hole"
-        ],
-        "match_terms": {
-          "Stephen Hawking": [
-            "Stephen Hawking",
-            "hawking"
-          ],
-          "black hole": [
-            "black hole",
-            "event horizon"
-          ]
-        },
-        "optional_entities": [
-          "M87*",
-          "Sagittarius A*"
+          "accretion disk",
+          "ring of light"
         ],
         "prohibited_entities": [
           "Voyager 1",
           "Jupiter",
           "Apollo 11",
-          "Earth"
+          "LIGO",
+          "gravitational waves"
         ],
-        "scene_intent": "explanation",
+        "scene_intent": "reveal",
         "confidence": 1.0,
-        "visual_objective": "The viewer should see a visualization of a black hole with a faint glow at its event horizon, conveying the concept of Hawking radiation, and feel a sense of awe and understanding of this subtle cosmic process."
+        "visual_objective": "The viewer should see the iconic glowing orange ring with a dark central shadow, and feel the awe of witnessing humanity's first direct glimpse of a black hole \u2014 a cosmic door that gravity locks forever."
       },
       "shot_duration_s": 5.5,
-      "narration_duration_s": 11.71,
-      "camera_motion": "push_in",
-      "motion_params": {
-        "zoom_start": 1.0,
-        "zoom_end": 1.22,
-        "pan_x": 0,
-        "pan_y": 0
-      },
-      "transition": "fade",
-      "timeline_start_s": 29.11,
-      "timeline_end_s": 34.61,
-      "render_duration_s": 0.0
-    },
-    {
-      "scene_id": 3,
-      "beat_index": 0,
-      "shot_index": 1,
-      "asset_path": "results/black_holes__where_space_ends/shots/scene3_1.mp4",
-      "asset_source": "wikimedia",
-      "asset_title": "File:Stephen hawking 2008 nasa.jpg",
-      "query_used": "Stephen Hawking",
-      "verification": {
-        "asset_path": "cache/stills/black_holes__where_space_ends/scene3_1.jpg",
-        "beat_id": "scene3",
-        "passed": true,
-        "score": 0.64,
-        "signal_scores": {
-          "metadata": {
-            "score": 0.7,
-            "evidence": "hits=['Stephen Hawking'], bans=[]"
-          },
-          "captions": {
-            "score": 0.8,
-            "evidence": "hits=['Stephen Hawking'], bans=[]"
-          },
-          "filename": {
-            "score": 0.2,
-            "evidence": "hits=[], bans=[]"
-          },
-          "provider_tags": {
-            "score": 0.75,
-            "evidence": "tags=['Stephen Hawking'], hits=['Stephen Hawking'], bans=[]"
-          }
-        },
-        "matched_required": [
-          "Stephen Hawking"
-        ],
-        "violated_prohibited": [],
-        "missing_required": [
-          "black hole"
-        ],
-        "vision_check": null,
-        "reasons": [
-          "signals confirm (score=0.64)"
-        ]
-      },
-      "entity_spec": {
-        "beat_id": "scene3",
-        "scene_id": 3,
-        "required_entities": [
-          "Stephen Hawking",
-          "black hole"
-        ],
-        "match_terms": {
-          "Stephen Hawking": [
-            "Stephen Hawking",
-            "hawking"
-          ],
-          "black hole": [
-            "black hole",
-            "event horizon"
-          ]
-        },
-        "optional_entities": [
-          "M87*",
-          "Sagittarius A*"
-        ],
-        "prohibited_entities": [
-          "Voyager 1",
-          "Jupiter",
-          "Apollo 11",
-          "Earth"
-        ],
-        "scene_intent": "explanation",
-        "confidence": 1.0,
-        "visual_objective": "The viewer should see a visualization of a black hole with a faint glow at its event horizon, conveying the concept of Hawking radiation, and feel a sense of awe and understanding of this subtle cosmic process."
-      },
-      "shot_duration_s": 5.5,
-      "narration_duration_s": 11.71,
+      "narration_duration_s": 7.04,
       "camera_motion": "pull_out",
       "motion_params": {
         "zoom_start": 1.22,
@@ -718,31 +190,106 @@
         "pan_y": 0
       },
       "transition": "crossfade",
-      "timeline_start_s": 34.61,
-      "timeline_end_s": 40.82,
+      "timeline_start_s": 5.5,
+      "timeline_end_s": 11.0,
       "render_duration_s": 0.0
     },
     {
-      "scene_id": 4,
+      "scene_id": 1,
       "beat_index": 0,
       "shot_index": 0,
-      "asset_path": "results/black_holes__where_space_ends/shots/scene4_0.mp4",
-      "asset_source": "nasa",
-      "asset_title": "Einstein and Einstein A: A Study in Crater Morphology",
-      "query_used": "Einstein",
+      "asset_path": "results/black_holes__where_space_ends/shots/scene1_0.mp4",
+      "asset_source": "ai",
+      "asset_title": "",
+      "query_used": "The viewer should see a comparative scale from our Sun to Mercury against the backdrop of Sagittarius A*'s event horizon, feeling the immense compactness of the black hole's boundary.. clean vector infographic illustration, flat modern design, minimalist, no text",
       "verification": {
-        "asset_path": "cache/stills/black_holes__where_space_ends/scene4_0.jpg",
-        "beat_id": "scene4",
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [
+          "Sagittarius A*",
+          "Sun",
+          "Mercury"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene1",
+        "scene_id": 1,
+        "required_entities": [
+          "Sagittarius A*",
+          "Sun",
+          "Mercury"
+        ],
+        "match_terms": {
+          "Sagittarius A*": [
+            "Sagittarius A*",
+            "sgr a*",
+            "milky way galactic center"
+          ],
+          "Sun": [
+            "Sun",
+            "solar"
+          ],
+          "Mercury": [
+            "Mercury"
+          ]
+        },
+        "optional_entities": [
+          "black hole",
+          "accretion disk",
+          "event horizon"
+        ],
+        "prohibited_entities": [
+          "M87*",
+          "Voyager 1",
+          "Apollo 11"
+        ],
+        "scene_intent": "scale",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see a comparative scale from our Sun to Mercury against the backdrop of Sagittarius A*'s event horizon, feeling the immense compactness of the black hole's boundary."
+      },
+      "shot_duration_s": 5.5,
+      "narration_duration_s": 13.39,
+      "camera_motion": "parallax",
+      "motion_params": {
+        "zoom_start": 1.2,
+        "zoom_end": 1.05,
+        "pan_x": 50,
+        "pan_y": -30
+      },
+      "transition": "fade",
+      "timeline_start_s": 7.04,
+      "timeline_end_s": 12.54,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 1,
+      "beat_index": 0,
+      "shot_index": 1,
+      "asset_path": "results/black_holes__where_space_ends/shots/scene1_1.mp4",
+      "asset_source": "nasa",
+      "asset_title": "Sun Shines in High-Energy X-rays",
+      "query_used": "Sun",
+      "verification": {
+        "asset_path": "cache/stills/black_holes__where_space_ends/scene1_1.jpg",
+        "beat_id": "scene1",
         "passed": true,
         "score": 0.64,
         "signal_scores": {
           "metadata": {
             "score": 0.7,
-            "evidence": "hits=['Einstein'], bans=[]"
+            "evidence": "hits=['Sun'], bans=[]"
           },
           "captions": {
             "score": 0.8,
-            "evidence": "hits=['Einstein'], bans=[]"
+            "evidence": "hits=['Sun'], bans=[]"
           },
           "filename": {
             "score": 0.2,
@@ -750,15 +297,16 @@
           },
           "provider_tags": {
             "score": 0.75,
-            "evidence": "tags=['Einstein'], hits=['Einstein'], bans=[]"
+            "evidence": "tags=['Sun'], hits=['Sun'], bans=[]"
           }
         },
         "matched_required": [
-          "Einstein"
+          "Sun"
         ],
         "violated_prohibited": [],
         "missing_required": [
-          "Karl Schwarzschild"
+          "Sagittarius A*",
+          "Mercury"
         ],
         "vision_check": null,
         "reasons": [
@@ -766,39 +314,122 @@
         ]
       },
       "entity_spec": {
-        "beat_id": "scene4",
-        "scene_id": 4,
+        "beat_id": "scene1",
+        "scene_id": 1,
         "required_entities": [
-          "Karl Schwarzschild",
-          "Einstein"
+          "Sagittarius A*",
+          "Sun",
+          "Mercury"
         ],
         "match_terms": {
-          "Karl Schwarzschild": [
-            "Karl Schwarzschild",
-            "schwarzschild"
+          "Sagittarius A*": [
+            "Sagittarius A*",
+            "sgr a*",
+            "milky way galactic center"
           ],
-          "Einstein": [
-            "Einstein",
-            "albert einstein"
+          "Sun": [
+            "Sun",
+            "solar"
+          ],
+          "Mercury": [
+            "Mercury"
           ]
         },
         "optional_entities": [
           "black hole",
-          "gravitational wave"
+          "accretion disk",
+          "event horizon"
         ],
         "prohibited_entities": [
+          "M87*",
+          "Voyager 1",
+          "Apollo 11"
+        ],
+        "scene_intent": "scale",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see a comparative scale from our Sun to Mercury against the backdrop of Sagittarius A*'s event horizon, feeling the immense compactness of the black hole's boundary."
+      },
+      "shot_duration_s": 5.5,
+      "narration_duration_s": 13.39,
+      "camera_motion": "crane_up",
+      "motion_params": {
+        "zoom_start": 1.05,
+        "zoom_end": 1.18,
+        "pan_x": 0,
+        "pan_y": -60
+      },
+      "transition": "crossfade",
+      "timeline_start_s": 12.54,
+      "timeline_end_s": 20.43,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 2,
+      "beat_index": 0,
+      "shot_index": 0,
+      "asset_path": "results/black_holes__where_space_ends/shots/scene2_0.mp4",
+      "asset_source": "ai",
+      "asset_title": "",
+      "query_used": "The viewer should see the moment of cosmic impact\u2014two black holes merging\u2014and feel the awe of detecting ripples in spacetime, confirming Einstein's theory.. watercolor illustration, soft washes, delicate detail, no text",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [
           "GW150914",
+          "LIGO",
+          "black hole merger"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene2",
+        "scene_id": 2,
+        "required_entities": [
+          "GW150914",
+          "LIGO",
+          "black hole merger"
+        ],
+        "match_terms": {
+          "GW150914": [
+            "GW150914",
+            "gravitational wave"
+          ],
+          "LIGO": [
+            "LIGO",
+            "laser interferometer"
+          ],
+          "black hole merger": [
+            "black hole merger",
+            "merger",
+            "binary black hole"
+          ]
+        },
+        "optional_entities": [
           "M87*",
           "Sagittarius A*",
-          "LIGO",
           "Event Horizon Telescope"
+        ],
+        "prohibited_entities": [
+          "Einstein",
+          "spacecraft",
+          "rocket",
+          "planet",
+          "galaxy",
+          "wrong event"
         ],
         "scene_intent": "explanation",
         "confidence": 1.0,
-        "visual_objective": "The viewer should see a historical or scientific depiction of Schwarzschild and Einstein, feeling the foundational nature of their work."
+        "visual_objective": "The viewer should see the moment of cosmic impact\u2014two black holes merging\u2014and feel the awe of detecting ripples in spacetime, confirming Einstein's theory."
       },
       "shot_duration_s": 5.5,
-      "narration_duration_s": 9.41,
+      "narration_duration_s": 12.31,
       "camera_motion": "push_in",
       "motion_params": {
         "zoom_start": 1.0,
@@ -807,31 +438,189 @@
         "pan_y": 0
       },
       "transition": "fade",
-      "timeline_start_s": 40.82,
-      "timeline_end_s": 46.32,
+      "timeline_start_s": 20.43,
+      "timeline_end_s": 25.93,
       "render_duration_s": 0.0
     },
     {
-      "scene_id": 4,
+      "scene_id": 2,
       "beat_index": 0,
       "shot_index": 1,
-      "asset_path": "results/black_holes__where_space_ends/shots/scene4_1.mp4",
+      "asset_path": "results/black_holes__where_space_ends/shots/scene2_variant_1.mp4",
       "asset_source": "wikimedia",
-      "asset_title": "File:Quantum Physics; Bose Einstein condensate (5940505475).jpg",
-      "query_used": "Einstein",
+      "asset_title": "",
+      "query_used": "The viewer should see the moment of cosmic impact\u2014two black holes merging\u2014and feel the awe of detecting ripples in spacetime, confirming Einstein's theory.. watercolor illustration, soft washes, delicate detail, no text",
       "verification": {
-        "asset_path": "cache/stills/black_holes__where_space_ends/scene4_1.jpg",
-        "beat_id": "scene4",
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [
+          "GW150914",
+          "LIGO",
+          "black hole merger"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene2",
+        "scene_id": 2,
+        "required_entities": [
+          "GW150914",
+          "LIGO",
+          "black hole merger"
+        ],
+        "match_terms": {
+          "GW150914": [
+            "GW150914",
+            "gravitational wave"
+          ],
+          "LIGO": [
+            "LIGO",
+            "laser interferometer"
+          ],
+          "black hole merger": [
+            "black hole merger",
+            "merger",
+            "binary black hole"
+          ]
+        },
+        "optional_entities": [
+          "M87*",
+          "Sagittarius A*",
+          "Event Horizon Telescope"
+        ],
+        "prohibited_entities": [
+          "Einstein",
+          "spacecraft",
+          "rocket",
+          "planet",
+          "galaxy",
+          "wrong event"
+        ],
+        "scene_intent": "explanation",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see the moment of cosmic impact\u2014two black holes merging\u2014and feel the awe of detecting ripples in spacetime, confirming Einstein's theory."
+      },
+      "shot_duration_s": 5.5,
+      "narration_duration_s": 12.31,
+      "camera_motion": "pull_out",
+      "motion_params": {
+        "zoom_start": 1.22,
+        "zoom_end": 1.0,
+        "pan_x": 0,
+        "pan_y": 0
+      },
+      "transition": "crossfade",
+      "timeline_start_s": 25.93,
+      "timeline_end_s": 32.74,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 3,
+      "beat_index": 0,
+      "shot_index": 0,
+      "asset_path": "results/black_holes__where_space_ends/shots/scene3_0.mp4",
+      "asset_source": "ai",
+      "asset_title": "",
+      "query_used": "The viewer should see an isolation shot of a black hole against a starfield, evoking its extreme coldness and near-eternal lifespan, creating a feeling of immense, lonely cosmic time.. sepia-toned hand-drawn cel animation, vintage documentary look, aged paper texture, no text",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [
+          "black hole",
+          "Hawking radiation"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene3",
+        "scene_id": 3,
+        "required_entities": [
+          "black hole",
+          "Hawking radiation"
+        ],
+        "match_terms": {
+          "black hole": [
+            "black hole",
+            "event horizon",
+            "M87",
+            "M87*",
+            "Sagittarius A*",
+            "singularity"
+          ],
+          "Hawking radiation": [
+            "Hawking radiation",
+            "hawking",
+            "radiation",
+            "quantum",
+            "evaporation"
+          ]
+        },
+        "optional_entities": [
+          "star",
+          "interstellar space",
+          "void"
+        ],
+        "prohibited_entities": [
+          "Sun",
+          "Earth",
+          "rocket",
+          "spacecraft",
+          "astronaut",
+          "galaxy"
+        ],
+        "scene_intent": "scale",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see an isolation shot of a black hole against a starfield, evoking its extreme coldness and near-eternal lifespan, creating a feeling of immense, lonely cosmic time."
+      },
+      "shot_duration_s": 5.5,
+      "narration_duration_s": 12.62,
+      "camera_motion": "pull_out",
+      "motion_params": {
+        "zoom_start": 1.22,
+        "zoom_end": 1.0,
+        "pan_x": 0,
+        "pan_y": 0
+      },
+      "transition": "fade",
+      "timeline_start_s": 32.74,
+      "timeline_end_s": 38.24,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 3,
+      "beat_index": 0,
+      "shot_index": 1,
+      "asset_path": "results/black_holes__where_space_ends/shots/scene3_1.mp4",
+      "asset_source": "wikimedia",
+      "asset_title": "File:Primordial black holes infographic.jpg",
+      "query_used": "black hole evaporation",
+      "verification": {
+        "asset_path": "cache/stills/black_holes__where_space_ends/scene3_1.jpg",
+        "beat_id": "scene3",
         "passed": true,
         "score": 0.64,
         "signal_scores": {
           "metadata": {
             "score": 0.7,
-            "evidence": "hits=['Einstein'], bans=[]"
+            "evidence": "hits=['black hole'], bans=[]"
           },
           "captions": {
             "score": 0.8,
-            "evidence": "hits=['Einstein'], bans=[]"
+            "evidence": "hits=['black hole'], bans=[]"
           },
           "filename": {
             "score": 0.2,
@@ -839,16 +628,112 @@
           },
           "provider_tags": {
             "score": 0.75,
-            "evidence": "tags=['Einstein'], hits=['Einstein'], bans=[]"
+            "evidence": "tags=['black hole evaporation'], hits=['black hole'], bans=[]"
           }
         },
         "matched_required": [
-          "Einstein"
+          "black hole",
+          "Hawking radiation"
         ],
         "violated_prohibited": [],
-        "missing_required": [
-          "Karl Schwarzschild"
+        "missing_required": [],
+        "vision_check": null,
+        "reasons": [
+          "signals confirm (score=0.64)"
+        ]
+      },
+      "entity_spec": {
+        "beat_id": "scene3",
+        "scene_id": 3,
+        "required_entities": [
+          "black hole",
+          "Hawking radiation"
         ],
+        "match_terms": {
+          "black hole": [
+            "black hole",
+            "event horizon",
+            "M87",
+            "M87*",
+            "Sagittarius A*",
+            "singularity"
+          ],
+          "Hawking radiation": [
+            "Hawking radiation",
+            "hawking",
+            "radiation",
+            "quantum",
+            "evaporation"
+          ]
+        },
+        "optional_entities": [
+          "star",
+          "interstellar space",
+          "void"
+        ],
+        "prohibited_entities": [
+          "Sun",
+          "Earth",
+          "rocket",
+          "spacecraft",
+          "astronaut",
+          "galaxy"
+        ],
+        "scene_intent": "scale",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see an isolation shot of a black hole against a starfield, evoking its extreme coldness and near-eternal lifespan, creating a feeling of immense, lonely cosmic time."
+      },
+      "shot_duration_s": 5.5,
+      "narration_duration_s": 12.62,
+      "camera_motion": "parallax",
+      "motion_params": {
+        "zoom_start": 1.2,
+        "zoom_end": 1.05,
+        "pan_x": 50,
+        "pan_y": -30
+      },
+      "transition": "crossfade",
+      "timeline_start_s": 38.24,
+      "timeline_end_s": 45.37,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 4,
+      "beat_index": 0,
+      "shot_index": 0,
+      "asset_path": "results/black_holes__where_space_ends/shots/scene4_0.mp4",
+      "asset_source": "wikimedia",
+      "asset_title": "File:A view of the Milky Way supermassive black hole Sagittarius A* in polarised light (eso2406a).jpg",
+      "query_used": "sagittarius a 2022 image",
+      "verification": {
+        "asset_path": "cache/stills/black_holes__where_space_ends/scene4_0.jpg",
+        "beat_id": "scene4",
+        "passed": true,
+        "score": 0.64,
+        "signal_scores": {
+          "metadata": {
+            "score": 0.7,
+            "evidence": "hits=['Sagittarius A*'], bans=[]"
+          },
+          "captions": {
+            "score": 0.8,
+            "evidence": "hits=['Sagittarius A*'], bans=[]"
+          },
+          "filename": {
+            "score": 0.2,
+            "evidence": "hits=[], bans=[]"
+          },
+          "provider_tags": {
+            "score": 0.75,
+            "evidence": "tags=['sagittarius a 2022 image'], hits=['Sagittarius A*'], bans=[]"
+          }
+        },
+        "matched_required": [
+          "M87*",
+          "Sagittarius A*"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
         "vision_check": null,
         "reasons": [
           "signals confirm (score=0.64)"
@@ -858,46 +743,144 @@
         "beat_id": "scene4",
         "scene_id": 4,
         "required_entities": [
-          "Karl Schwarzschild",
-          "Einstein"
+          "M87*",
+          "Sagittarius A*"
         ],
         "match_terms": {
-          "Karl Schwarzschild": [
-            "Karl Schwarzschild",
-            "schwarzschild"
+          "M87*": [
+            "M87*",
+            "m87",
+            "black hole m87",
+            "event horizon telescope m87"
           ],
-          "Einstein": [
-            "Einstein",
-            "albert einstein"
+          "Sagittarius A*": [
+            "Sagittarius A*",
+            "sagittarius a star",
+            "milky way black hole",
+            "galactic center black hole"
           ]
         },
         "optional_entities": [
-          "black hole",
-          "gravitational wave"
+          "galaxy",
+          "milky way",
+          "event horizon telescope"
         ],
         "prohibited_entities": [
+          "Voyager 1",
+          "Jupiter",
+          "Apollo 11",
           "GW150914",
-          "M87*",
-          "Sagittarius A*",
-          "LIGO",
-          "Event Horizon Telescope"
+          "Hubble Space Telescope"
         ],
-        "scene_intent": "explanation",
+        "scene_intent": "hook",
         "confidence": 1.0,
-        "visual_objective": "The viewer should see a historical or scientific depiction of Schwarzschild and Einstein, feeling the foundational nature of their work."
+        "visual_objective": "The viewer should see the two iconic black hole images (M87* and Sagittarius A*) side by side, feeling the awe of the unknown and the mystery of what lies beyond the edge."
       },
       "shot_duration_s": 5.5,
-      "narration_duration_s": 9.41,
-      "camera_motion": "pan_right",
+      "narration_duration_s": 11.4,
+      "camera_motion": "push_in",
       "motion_params": {
-        "zoom_start": 1.12,
-        "zoom_end": 1.12,
-        "pan_x": 60,
+        "zoom_start": 1.0,
+        "zoom_end": 1.22,
+        "pan_x": 0,
+        "pan_y": 0
+      },
+      "transition": "fade",
+      "timeline_start_s": 45.37,
+      "timeline_end_s": 50.87,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 4,
+      "beat_index": 0,
+      "shot_index": 1,
+      "asset_path": "results/black_holes__where_space_ends/shots/scene4_variant_1.mp4",
+      "asset_source": "wikimedia",
+      "asset_title": "File:A view of the Milky Way supermassive black hole Sagittarius A* in polarised light (eso2406a).jpg",
+      "query_used": "sagittarius a 2022 image",
+      "verification": {
+        "asset_path": "cache/stills/black_holes__where_space_ends/scene4_0.jpg",
+        "beat_id": "scene4",
+        "passed": true,
+        "score": 0.64,
+        "signal_scores": {
+          "metadata": {
+            "score": 0.7,
+            "evidence": "hits=['Sagittarius A*'], bans=[]"
+          },
+          "captions": {
+            "score": 0.8,
+            "evidence": "hits=['Sagittarius A*'], bans=[]"
+          },
+          "filename": {
+            "score": 0.2,
+            "evidence": "hits=[], bans=[]"
+          },
+          "provider_tags": {
+            "score": 0.75,
+            "evidence": "tags=['sagittarius a 2022 image'], hits=['Sagittarius A*'], bans=[]"
+          }
+        },
+        "matched_required": [
+          "M87*",
+          "Sagittarius A*"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null,
+        "reasons": [
+          "signals confirm (score=0.64)"
+        ]
+      },
+      "entity_spec": {
+        "beat_id": "scene4",
+        "scene_id": 4,
+        "required_entities": [
+          "M87*",
+          "Sagittarius A*"
+        ],
+        "match_terms": {
+          "M87*": [
+            "M87*",
+            "m87",
+            "black hole m87",
+            "event horizon telescope m87"
+          ],
+          "Sagittarius A*": [
+            "Sagittarius A*",
+            "sagittarius a star",
+            "milky way black hole",
+            "galactic center black hole"
+          ]
+        },
+        "optional_entities": [
+          "galaxy",
+          "milky way",
+          "event horizon telescope"
+        ],
+        "prohibited_entities": [
+          "Voyager 1",
+          "Jupiter",
+          "Apollo 11",
+          "GW150914",
+          "Hubble Space Telescope"
+        ],
+        "scene_intent": "hook",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see the two iconic black hole images (M87* and Sagittarius A*) side by side, feeling the awe of the unknown and the mystery of what lies beyond the edge."
+      },
+      "shot_duration_s": 5.5,
+      "narration_duration_s": 11.4,
+      "camera_motion": "pull_out",
+      "motion_params": {
+        "zoom_start": 1.22,
+        "zoom_end": 1.0,
+        "pan_x": 0,
         "pan_y": 0
       },
       "transition": "crossfade",
-      "timeline_start_s": 46.32,
-      "timeline_end_s": 51.82,
+      "timeline_start_s": 50.87,
+      "timeline_end_s": 56.77,
       "render_duration_s": 0.0
     }
   ]

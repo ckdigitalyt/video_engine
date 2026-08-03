@@ -1,86 +1,86 @@
 [
   {
-    "title": "The Point of No Return",
-    "narration": "Pull up a chair. We're going to a place where time stops, light bends, and every path collapses into one silent point\u2014a black hole.",
-    "visual_goal": "Ultra-close render of event horizon, light bending into dark void.",
+    "title": "The Shadow",
+    "narration": "In twenty nineteen, we captured a black hole's shadow on a glowing ring\u2014the boundary where gravity locks the door.",
+    "visual_goal": "Show M87*'s orange ring, then zoom into dark center.",
     "search_queries": [
-      "black hole event horizon simulation",
-      "gravitational lensing"
+      "M87 black hole first image",
+      "black hole shadow"
     ],
-    "emotion": "tension",
+    "emotion": "awe",
     "visual_style": "photorealistic",
     "sfx_events": [
       {
-        "trigger": "deep rumbling bass",
+        "trigger": "deep boom",
+        "at": "shadow for the first time"
+      }
+    ]
+  },
+  {
+    "title": "The Point of No Return",
+    "narration": "Sagittarius A*, our galaxy's core, has an event horizon of point zero eight astronomical units\u2014the distance from Sun to Mercury. To escape, you'd need to outrun light, impossible.",
+    "visual_goal": "Animate sphere, light rays bending and trapped.",
+    "search_queries": [
+      "event horizon sphere",
+      "Sagittarius A 0.08 AU"
+    ],
+    "emotion": "tension",
+    "visual_style": "clean_vector",
+    "sfx_events": [
+      {
+        "trigger": "rising whoosh",
         "at": "space itself ends"
       }
     ]
   },
   {
-    "title": "The Cosmic Echo",
-    "narration": "In twenty fifteen, two black holes smashed together a billion light-years away. The shockwave traveled all that way, shaking a machine on Earth\u2014and became a sound.",
-    "visual_goal": "Two spheres spiral, collide, ripples in dark fabric.",
+    "title": "The Ripples",
+    "narration": "In twenty fifteen, two black holes (thirty-six and twenty-nine solar masses) merged, sending ripples that stretched Earth. We've detected ninety+ such events, confirming Einstein.",
+    "visual_goal": "Ripples distort star grid, two masses merge.",
     "search_queries": [
-      "binary black hole merger animation",
-      "gravitational waves"
+      "gravitational waves animation",
+      "LIGO merger"
     ],
-    "emotion": "awe",
-    "visual_style": "clean_vector",
-    "sfx_events": [
-      {
-        "trigger": "low whoosh and boom",
-        "at": "merged, sending ripples"
-      }
-    ]
-  },
-  {
-    "title": "The Shadow of a Giant",
-    "narration": "Sound tells us black holes exist. But seeing one requires a telescope the size of Earth. In twenty nineteen.",
-    "visual_goal": "Fade to iconic EHT orange ring with dark center.",
-    "search_queries": [
-      "M87 black hole image",
-      "Event Horizon Telescope result"
-    ],
-    "emotion": "revelation",
-    "visual_style": "photorealistic",
-    "sfx_events": [
-      {
-        "trigger": "rising shimmering tone",
-        "at": "first direct image"
-      }
-    ]
-  },
-  {
-    "title": "The Lightest Touch",
-    "narration": "But black holes are not forever. In nineteen seventy-four, Stephen Hawking showed they leak radiation\u2014a faint glow from the edge of the event horizon itself.",
-    "visual_goal": "Small black hole, faint particles escaping and dimming.",
-    "search_queries": [
-      "Hawking radiation illustration",
-      "black hole evaporation"
-    ],
-    "emotion": "somber",
+    "emotion": "wonder",
     "visual_style": "watercolor",
     "sfx_events": [
       {
-        "trigger": "subtle static hiss fading out",
-        "at": "whisper against the void"
+        "trigger": "heartbeat thump",
+        "at": "collide"
       }
     ]
   },
   {
-    "title": "The Hidden Core",
-    "narration": "And this isn\u2019t just some distant theory. In nineteen sixteen, Karl Schwarzschild first described these objects using Einstein\u2019s equations.",
-    "visual_goal": "Pan from Sagittarius A* to Milky Way galaxy zoom-out.",
+    "title": "The Temperature of Nothing",
+    "narration": "Black holes leak Hawking radiation. A solar-mass hole is sixty nanokelvin, taking ten^sixty-seven years to evaporate\u2014long after all stars fade.",
+    "visual_goal": "Faint glow, stars dying in time-lapse.",
     "search_queries": [
-      "Sagittarius A* black hole",
-      "Milky Way galactic center"
+      "hawking radiation visual",
+      "black hole evaporation"
     ],
-    "emotion": "hopeful",
-    "visual_style": "90s_anime",
+    "emotion": "somber",
+    "visual_style": "sepia_cel",
     "sfx_events": [
       {
-        "trigger": "low orchestral swell ending on a deep note",
-        "at": "It's home"
+        "trigger": "sparkle fade",
+        "at": "not forever"
+      }
+    ]
+  },
+  {
+    "title": "The Unseen Mass",
+    "narration": "Our galaxy hosts ~one hundred million black holes, but we've imaged only two: M87* and Sagittarius A*. What lies beyond the edge remains unknown.",
+    "visual_goal": "Pan Milky Way, settle on Sagittarius A* image.",
+    "search_queries": [
+      "milky way star field",
+      "sagittarius a 2022 image"
+    ],
+    "emotion": "revelation",
+    "visual_style": "hand_drawn",
+    "sfx_events": [
+      {
+        "trigger": "deep boom",
+        "at": "mystery begins"
       }
     ]
   }

@@ -1,0 +1,60 @@
+{
+  "quality_score": 82,
+  "confidence": 0.95,
+  "strengths": [
+    "High-quality cinematic visuals and animations.",
+    "Clear, professional narration with excellent pacing.",
+    "Strong hook and logical flow through complex astrophysical concepts.",
+    "Effective use of sound design to emphasize the scale of cosmic events."
+  ],
+  "weaknesses": [
+    "Factual error regarding the distance comparison for Sagittarius A*.",
+    "Visual at 0:13 depicts a star rather than a black hole, which may confuse the audience during a discussion on event horizons.",
+    "The infographic at 0:38 is too dense for the short duration it is on screen.",
+    "Lack of on-screen subtitles for accessibility and retention."
+  ],
+  "prioritized_recommendations": [
+    {
+      "priority": "critical",
+      "category": "fact_change",
+      "recommendation": "Correct the comparison in Scene 1. 0.08 AU is approximately 12 million km, whereas Mercury is ~58 million km (0.39 AU) from the Sun. Suggest changing the script to 'about one-fifth the distance from the Sun to Mercury'."
+    },
+    {
+      "priority": "high",
+      "category": "visual_relevance",
+      "recommendation": "Replace the star visual at 0:13 with a scale diagram or a more accurate black hole visualization to avoid misleading the viewer into thinking Sgr A* looks like a main-sequence star."
+    },
+    {
+      "priority": "medium",
+      "category": "subtitles",
+      "recommendation": "Add burned-in or CC subtitles to improve engagement and help viewers parse technical terms like 'nanokelvin' and 'Schwarzschild'."
+    },
+    {
+      "priority": "medium",
+      "category": "new_asset",
+      "recommendation": "Simplify the infographic at 0:38. Focus only on the 'Solar Mass' comparison mentioned in the narration rather than showing the entire primordial black hole chart."
+    }
+  ],
+  "factual_issues": [
+    {
+      "claim": "Sagittarius A*... has an event horizon of point zero eight astronomical units\u2014the distance from Sun to Mercury.",
+      "issue": "Mercury's average distance from the Sun is approximately 0.39 AU, not 0.08 AU.",
+      "suggested_fix": "Change the comparison to 'about one-fifth the distance from the Sun to Mercury' or 'roughly 12 million kilometers'."
+    }
+  ],
+  "title_recommendations": [
+    "Black Holes: The Edge of Existence",
+    "Beyond the Event Horizon: Mapping the Void",
+    "The 100 Million: Our Galaxy's Hidden Giants"
+  ],
+  "thumbnail_recommendation": {
+    "timestamp": "00:45",
+    "description": "The high-contrast, swirling orange accretion disk of the black hole against a deep black void, providing a striking and recognizable 'interstellar' style image."
+  },
+  "overall_assessment": "A visually stunning and well-narrated documentary short that effectively communicates the awe of black holes. While the production value is high, a significant factual error in the distance comparison and some cluttered infographics slightly detract from its educational authority. Correcting the Mercury comparison is essential for a 'world-class' studio release.",
+  "_meta": {
+    "video": "results/black_holes__where_space_ends/black_holes__where_space_ends_mixed.mp4",
+    "model": "gemini-2.5-pro",
+    "elapsed_s": 38.7
+  }
+}

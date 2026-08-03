@@ -1,86 +1,91 @@
 [
   {
-    "title": "The Point of No Return",
-    "narration": "At every black hole's heart, space ends. Escape velocity exceeds light's speed. Nothing returns. How do we know they exist?",
-    "visual_goal": "Ultra-close render of event horizon, light bending into dark void.",
+    "title": "The Shadow",
+    "narration": "In 2019, we saw a black hole's shadow for the first time. M87* weighs 6.5 billion suns. But why does its edge exist? The answer lies in a vanishing point.",
+    "visual_goal": "Show the iconic orange ring of M87* against darkness, then zoom into the center where light disappears.",
     "search_queries": [
-      "black hole event horizon simulation",
-      "gravitational lensing"
+      "M87 black hole first image",
+      "black hole shadow orange ring",
+      "event horizon telescope 2019"
     ],
-    "emotion": "tension",
+    "emotion": "awe",
     "visual_style": "photorealistic",
     "sfx_events": [
       {
-        "trigger": "deep rumbling bass",
+        "trigger": "deep boom",
+        "at": "shadow for the first time"
+      }
+    ]
+  },
+  {
+    "title": "The Point of No Return",
+    "narration": "At the event horizon, escape velocity hits 299,792,458 meters per second\u2014light speed. Beyond this 0.08 AU sphere around Sagittarius A*, space itself ends. Nothing comes back.",
+    "visual_goal": "Animate the spherical boundary around the Milky Way's core, showing light rays bending and being trapped.",
+    "search_queries": [
+      "event horizon sphere animation",
+      "light bending black hole gravity",
+      "Sagittarius A star 0.08 AU"
+    ],
+    "emotion": "tension",
+    "visual_style": "clean_vector",
+    "sfx_events": [
+      {
+        "trigger": "rising whoosh",
         "at": "space itself ends"
       }
     ]
   },
   {
-    "title": "The Cosmic Echo",
-    "narration": "In 2015, LIGO heard two black holes merge, confirming binaries. Over 90 mergers since.",
-    "visual_goal": "Two spheres spiral, collide, ripples in dark fabric.",
+    "title": "The Ripples",
+    "narration": "In 2015, LIGO heard two black holes collide. Their combined 62 solar masses rang spacetime like a bell. We've detected over 90 mergers since. These waves are echoes of swallowed stars.",
+    "visual_goal": "Visualize gravitational waves as ripples distorting a grid of stars, then show two spiraling masses merging.",
     "search_queries": [
-      "binary black hole merger animation",
-      "gravitational waves"
+      "gravitational waves animation spacetime ripples",
+      "LIGO black hole merger simulation",
+      "GW150914 chirp"
     ],
-    "emotion": "awe",
-    "visual_style": "clean_vector",
-    "sfx_events": [
-      {
-        "trigger": "low whoosh and boom",
-        "at": "merged, sending ripples"
-      }
-    ]
-  },
-  {
-    "title": "The Shadow of a Giant",
-    "narration": "In 2019, we imaged M87*\u20146.5 billion solar masses, 55 million light-years away. First direct silhouette.",
-    "visual_goal": "Fade to iconic EHT orange ring with dark center.",
-    "search_queries": [
-      "M87 black hole image",
-      "Event Horizon Telescope result"
-    ],
-    "emotion": "revelation",
-    "visual_style": "photorealistic",
-    "sfx_events": [
-      {
-        "trigger": "rising shimmering tone",
-        "at": "first direct image"
-      }
-    ]
-  },
-  {
-    "title": "The Lightest Touch",
-    "narration": "Hawking (1974): black holes leak radiation. Solar-mass hole glows at 0.00000006 K\u2014a whisper. They end in a flicker.",
-    "visual_goal": "Small black hole, faint particles escaping and dimming.",
-    "search_queries": [
-      "Hawking radiation illustration",
-      "black hole evaporation"
-    ],
-    "emotion": "somber",
+    "emotion": "wonder",
     "visual_style": "watercolor",
     "sfx_events": [
       {
-        "trigger": "subtle static hiss fading out",
-        "at": "whisper against the void"
+        "trigger": "heartbeat thump",
+        "at": "collide"
       }
     ]
   },
   {
-    "title": "The Hidden Core",
-    "narration": "Space ends in our backyard: Sagittarius A*, 4.15 million solar masses at the Milky Way's center. It's home.",
-    "visual_goal": "Pan from Sagittarius A* to Milky Way galaxy zoom-out.",
+    "title": "The Temperature of Nothing",
+    "narration": "Hawking radiation gives a solar-mass hole a temperature of 0.00000006 kelvins. It will evaporate in 1.5\u00d710^67 years. The universe will be unrecognizable by then. Black holes are not forever.",
+    "visual_goal": "Show a faint glow around a black hole against a cold, starless background, with time-lapse of stars dying around it.",
     "search_queries": [
-      "Sagittarius A* black hole",
-      "Milky Way galactic center"
+      "hawking radiation visual effect",
+      "cold empty space black hole glow",
+      "black hole evaporation time lapse"
     ],
-    "emotion": "hopeful",
-    "visual_style": "90s_anime",
+    "emotion": "somber",
+    "visual_style": "sepia_cel",
     "sfx_events": [
       {
-        "trigger": "low orchestral swell ending on a deep note",
-        "at": "It's home"
+        "trigger": "sparkle fade",
+        "at": "not forever"
+      }
+    ]
+  },
+  {
+    "title": "The Unseen Mass",
+    "narration": "A hundred million black holes drift through the Milky Way. We've imaged two. Sagittarius A*, 26,960 light-years away, holds our galaxy together. Where space ends, mystery begins.",
+    "visual_goal": "Pan across the Milky Way's star field, highlighting faint black hole candidates, then settle on the Sagittarius A* image from 2022.",
+    "search_queries": [
+      "milky way star field pan",
+      "sagittarius a star 2022 image",
+      "black holes distribution galaxy"
+    ],
+    "emotion": "revelation",
+    "visual_style": "hand_drawn",
+    "sfx_events": [
+      {
+        "trigger": "deep boom",
+        "at": "mystery begins"
       }
     ]
   }

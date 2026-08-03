@@ -1,0 +1,63 @@
+{
+  "quality_score": 82,
+  "confidence": 0.95,
+  "strengths": [
+    "High-fidelity visual assets that match the cosmic scale of the topic.",
+    "Excellent pacing; the script moves through complex concepts without feeling rushed.",
+    "Clear audio recording with professional-grade vocal clarity."
+  ],
+  "weaknesses": [
+    "Incorrect pronunciation of astronomical symbols ('asterisk' vs 'star').",
+    "The infographic at 00:38 is too information-dense for the short duration of the scene.",
+    "Visual at 00:38 focuses on 'Primordial' black holes while the script discusses 'Solar-mass' holes, creating a slight contextual mismatch."
+  ],
+  "prioritized_recommendations": [
+    {
+      "priority": "high",
+      "category": "audio_balance",
+      "recommendation": "Re-record the narration for 'M87*' and 'Sagittarius A*' to use the term 'star' instead of 'asterisk' to meet scientific documentary standards."
+    },
+    {
+      "priority": "medium",
+      "category": "new_asset",
+      "recommendation": "Replace the 'Primordial Black Hole' chart at 00:38 with a simplified animation of a single black hole evaporating, focusing on the 10^67 year timeline mentioned in the script."
+    },
+    {
+      "priority": "medium",
+      "category": "zoom",
+      "recommendation": "Add a slow Ken Burns zoom-in on the M87* image at 00:01 to create a sense of approaching the event horizon."
+    },
+    {
+      "priority": "low",
+      "category": "music",
+      "recommendation": "Increase the volume of the low-frequency 'thrum' during the merger description at 00:20 to emphasize the 'ripples' in spacetime."
+    }
+  ],
+  "factual_issues": [
+    {
+      "claim": "M87* and Sagittarius A*",
+      "issue": "The narrator pronounces the '*' as 'asterisk'. In astrophysics, the asterisk denotes 'star' (e.g., Sgr A-star).",
+      "suggested_fix": "Change narration to 'M87 star' and 'Sagittarius A star'."
+    },
+    {
+      "claim": "A solar-mass hole... taking ten^sixty-seven years to evaporate",
+      "issue": "The visual at 00:38 displays a chart for 'Primordial Black Holes'. While the math in the script is correct for a solar-mass hole, primordial holes are a distinct category of black holes formed in the early universe.",
+      "suggested_fix": "Update the visual title to 'Black Hole Evaporation Scales' or remove the 'Primordial' label."
+    }
+  ],
+  "title_recommendations": [
+    "The Shadow of the Abyss: Mapping Black Holes",
+    "Beyond the Event Horizon: The Secrets of Sgr A*",
+    "Einstein's Ripples: The Reality of Black Holes"
+  ],
+  "thumbnail_recommendation": {
+    "timestamp": "00:01",
+    "description": "The high-contrast orange glowing ring of the M87* black hole shadow, centered with bold white text overlay: 'BEYOND THE EDGE'."
+  },
+  "overall_assessment": "A visually compelling and well-structured short documentary. The technical quality of the visuals is high, but the production is slightly undermined by non-standard astronomical pronunciation. Addressing the infographic density and the 'asterisk' pronunciation would elevate this to a world-class standard.",
+  "_meta": {
+    "video": "results/black_holes__where_space_ends/black_holes__where_space_ends_mixed.mp4",
+    "model": "gemini-2.5-pro",
+    "elapsed_s": 40.4
+  }
+}
