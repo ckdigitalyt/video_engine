@@ -9,7 +9,12 @@ The pipeline selects a provider by config ``voices.provider``
 ("kokoro" | "edge") so engines are interchangeable without redesign.
 """
 
+import json
 import os
+import select
+import subprocess
+import sys
+import time
 import soundfile as sf
 from abc import ABC, abstractmethod
 
@@ -29,11 +34,161 @@ class TTSProvider(ABC):
         ...
 
 
+# ── Chatterbox (Resemble AI, MIT) — primary expressive narrator ───────────
+# Runs in an ISOLATED venv (venv-cb) because chatterbox-tts pins
+# numpy 1.26.4/torch 2.6.0 while the pipeline venv runs numpy 2.5.1.
+# A persistent worker keeps the model loaded (KEEP_MODEL_LOADED
+# equivalent) and serves JSON-lines requests (see scripts/chatterbox_worker.py).
+# Supports native paralinguistic tags ([laugh], [chuckle], [sigh]...) and
+# per-scene emotion control via exaggeration + cfg_weight (expert doc §1.3).
+
+# Emotion -> (exaggeration, cfg_weight) per expert doc §1.3:
+# high-energy hook: exaggeration=0.8, cfg_weight=0.3 (lively read);
+# somber/factual:   exaggeration=0.4, cfg_weight=0.7 (steady);
+# wonder/awe/reveal: mid-high exaggeration, moderate CFG.
+CHATTERBOX_EMOTION_PARAMS = {
+    "hook":       (0.8, 0.3),
+    "tension":    (0.7, 0.4),
+    "revelation": (0.6, 0.5),
+    "wonder":     (0.6, 0.5),
+    "awe":        (0.6, 0.5),
+    "hopeful":    (0.6, 0.5),
+    "nostalgia":  (0.4, 0.6),
+    "somber":     (0.4, 0.7),
+    "explanation": (0.4, 0.7),
+    "default":    (0.5, 0.5),
+}
+
+# Paralinguistic tags Chatterbox speaks natively (expert doc §1.3).
+CHATTERBOX_TAGS = ("[laugh]", "[sigh]", "[cough]", "[chuckle]",
+                    "[gasp]", "[whisper]", "[groan]", "[hmm]", "[mm]",
+                    "[yawn]", "[sniff]", "[breath]")
+
+
+def strip_paralinguistic_tags(text: str) -> str:
+    """Remove [tag] markers (for engines that would read them literally)."""
+    import re
+    return re.sub(r"\[[a-zA-Z ]+\]", "", text or "").strip()
+
+
+class ChatterboxProvider(TTSProvider):
+    """Expressive TTS via Resemble AI Chatterbox (isolated worker)."""
+
+    name = "chatterbox"
+
+    def __init__(self, exaggeration: float = 0.5, cfg_weight: float = 0.5,
+                 worker_python: str = "venv-cb/bin/python",
+                 worker_script: str = "scripts/chatterbox_worker.py"):
+        self._default_exaggeration = exaggeration
+        self._default_cfg_weight = cfg_weight
+        self._worker_python = worker_python
+        self._worker_script = worker_script
+        self._proc: subprocess.Popen | None = None
+        self._req_id = 0
+
+    # ── Worker lifecycle ───────────────────────────────────────────────
+
+    def _ensure_worker(self) -> subprocess.Popen:
+        if self._proc is None or self._proc.poll() is not None:
+            print("[chatterbox] starting persistent worker (model load ~17s)...")
+            root = os.path.dirname(os.path.dirname(os.path.dirname(
+                os.path.abspath(__file__))))
+            self._proc = subprocess.Popen(
+                [os.path.join(root, self._worker_python),
+                 os.path.join(root, self._worker_script)],
+                stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                stderr=subprocess.DEVNULL, text=True, bufsize=1,
+            )
+            # wait for readiness (worker prints "model ready" to stderr,
+            # which we devnull; poll until stdin accepts or timeout)
+            time.sleep(1.0)
+        return self._proc
+
+    def _kill_worker(self):
+        if self._proc is not None and self._proc.poll() is None:
+            try:
+                self._proc.kill()
+            except Exception:
+                pass
+        self._proc = None
+
+    def shutdown(self):
+        self._kill_worker()
+
+    # ── TTSProvider API ────────────────────────────────────────────────
+
+    def generate_voice(self, text: str, output_path: str,
+                       exaggeration: float | None = None,
+                       cfg_weight: float | None = None) -> None:
+        """Synthesize *text* (whole semantic chunk — NOT sentence-by-
+        sentence, per expert §1.2 contextual chunking) to *output_path*."""
+        proc = self._ensure_worker()
+        req = {
+            "id": self._req_id,
+            "text": (text or "").strip(),
+            "out": os.path.abspath(output_path),
+            "exaggeration": exaggeration if exaggeration is not None
+                             else self._default_exaggeration,
+            "cfg_weight": cfg_weight if cfg_weight is not None
+                          else self._default_cfg_weight,
+        }
+        self._req_id += 1
+        try:
+            proc.stdin.write(json.dumps(req) + "\n")
+            proc.stdin.flush()
+            # blocking read with a generous timeout (CPU generation is slow).
+            # Robust protocol: skip any non-JSON stray lines (e.g. library
+            # log lines the model prints to stdout at load) and only accept
+            # a response matching this request id.
+            deadline = time.time() + 900
+            resp = None
+            while time.time() < deadline:
+                r, _, _ = select.select([proc.stdout], [], [], 5.0)
+                if r:
+                    line = proc.stdout.readline()
+                    if not line:
+                        if proc.poll() is not None:
+                            raise RuntimeError("chatterbox worker died")
+                        continue
+                    try:
+                        candidate = json.loads(line)
+                    except json.JSONDecodeError:
+                        continue  # stray log line — keep reading
+                    if candidate.get("id") == req["id"]:
+                        resp = candidate
+                        break
+                elif proc.poll() is not None:
+                    raise RuntimeError("chatterbox worker died")
+            if resp is None:
+                raise TimeoutError("chatterbox generation timed out")
+            if not resp.get("ok"):
+                raise RuntimeError(resp.get("error", "generation failed"))
+            if not os.path.exists(output_path):
+                raise RuntimeError("chatterbox produced no audio file")
+            print(f"  [chatterbox] {resp.get('duration_s', 0):.1f}s audio "
+                  f"in {resp.get('elapsed_s', 0):.1f}s "
+                  f"(ex={req['exaggeration']}, cfg={req['cfg_weight']})")
+        except Exception as e:  # noqa: BLE001
+            self._kill_worker()
+            raise RuntimeError(f"chatterbox TTS failed: {e}") from e
+
+
 # ── Factory ────────────────────────────────────────────────────────────────
 
 def get_tts_provider(name: str | None = None) -> TTSProvider:
-    """Resolve the configured TTS provider (config voices.provider)."""
-    provider_name = name or get_config("voices.provider", "kokoro")
+    """Resolve the configured TTS provider (config voices.provider).
+
+    ``chatterbox`` (primary, per expert spec): expressive flow-matching
+    narrator with emotion exaggeration + paralinguistic tags.  Falls
+    back to edge/kokoro when the worker venv is unavailable.
+    """
+    provider_name = name or get_config("voices.provider", "chatterbox")
+    if provider_name == "chatterbox":
+        try:
+            return ChatterboxProvider()
+        except Exception as e:  # noqa: BLE001
+            print(f"  !! chatterbox unavailable ({e}) — falling back to edge")
+            return EdgeTTSProvider()
     if provider_name == "edge":
         return EdgeTTSProvider()
     return KokoroProvider()

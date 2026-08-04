@@ -857,10 +857,13 @@ def main():
     # ── v9 (Jade spec §1/§2): lock narrator voice + visual identity ──
     # Single voice + single style for the WHOLE episode, decided once
     # here and persisted so re-renders/improvement passes cannot drift.
+    # Primary narrator = Chatterbox (expert spec: expressive flow-matching
+    # TTS with emotion exaggeration + paralinguistic tags); edge/kokoro
+    # remain exception-only fallbacks inside stage_narration_dynamic.
     from src.qa.voice_lock import lock_voice
     from src.director.style_bible import create_style_bible
-    voice_lock = lock_voice(provider="edge",
-                            voice_id="en-US-ChristopherNeural",
+    voice_lock = lock_voice(provider="chatterbox",
+                            voice_id="resemble",
                             speaker_id="jade-narrator-001").reset_episode()
     style_bible = create_style_bible("jade").reset_episode()
     run_report["voice_lock"] = voice_lock.to_dict()
@@ -897,7 +900,8 @@ def main():
         narration_stats = {"provider": "cached"}
     else:
         audio_durations, narration_stats = M.stage_narration_dynamic(
-            scenes_data, "cache/audio", provider="edge", voice_lock=voice_lock)
+            scenes_data, "cache/audio", provider="chatterbox",
+            voice_lock=voice_lock)
     print(f"  Voice tracks: {len(scenes_data)} (total {sum(audio_durations):.1f}s) "
           f"[{narration_stats.get('provider')}]")
 

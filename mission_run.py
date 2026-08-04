@@ -47,7 +47,7 @@ MIN_SCRIPT_WORDS = 140
 # event-driven sound-design timeline).  Expansion/compression rewrites must
 # preserve these — LLM rewrites only return title/narration/visual_goal/
 # search_queries, so we merge the originals back in.
-_SCENE_META_FIELDS = ("emotion", "visual_style", "sfx_events")
+_SCENE_META_FIELDS = ("emotion", "visual_style", "sfx_events", "para_tags")
 
 
 def _merge_scene_meta(original: list[dict], replacement: list[dict]) -> list[dict]:
@@ -234,13 +234,19 @@ visual style, vocal emotion and sound design:
       "search_queries": ["3-5 stock search terms"],
       "emotion": "<wonder|tension|revelation|awe|nostalgia|hopeful|somber>",
       "visual_style": "<ghibli|hand_drawn|90s_anime|sepia_cel|watercolor|clean_vector|photorealistic>",
-      "sfx_events": [{{"trigger": "<sound id>", "at": "<after: word/phrase from narration>"}}]
+      "sfx_events": [{{"trigger": "<sound id>", "at": "<after: word/phrase from narration>"}}],
+      "para_tags": ["<optional: [laugh] | [sigh] | [chuckle] | [gasp] | [whisper] — insert 0-2 organically>"]
     }}
   ]
 }}
 Use sfx_events sparingly (0-2 per scene) at true dramatic beats (launch,
 impact, reveal, whoosh, heartbeat, sparkle, boom, riser). `at` must reference
 a real phrase in that scene's narration.
+
+PARALINGUISTIC TAGS (v9, for the expressive narrator): add 0-2 natural human
+tags like [chuckle], [sigh], [laugh], [gasp] per scene where a real presenter
+would react — never forced, never more than 2. Leave the array empty for
+straightforward factual scenes. The tags are spoken by the narrator engine.
 
 FACTS:
 {facts}"""
@@ -915,7 +921,8 @@ def stage_narration_dynamic(scenes: list[dict], cache_audio: str,
     import re as _re
     os.makedirs(cache_audio, exist_ok=True)
     durations = []
-    stats = {"provider": provider, "modulated_sentences": 0, "fallbacks": 0}
+    stats = {"provider": provider, "modulated_sentences": 0, "fallbacks": 0,
+             "emotion_params": {}}
     # Locked narrator identity (single voice per episode).
     locked_voice = "en-US-ChristopherNeural"  # Edge default (matches lock)
     if voice_lock is not None:
@@ -935,70 +942,133 @@ def stage_narration_dynamic(scenes: list[dict], cache_audio: str,
         ap = os.path.join(cache_audio, f"scene_{i}.wav")
         emo = (sc.get("emotion") or "wonder").strip().lower()
         sents = _sentences(sc.get("narration"))
-        try:
-            if provider == "edge":
-                # edge-tts per-sentence with emotion-driven rate/pitch.
-                # BUGFIX (2026-08-03): the old `and len(sents) > 1` guard
-                # made single-sentence scenes fall through to the flat
-                # Kokoro path, so a video could START in a deep Kokoro
-                # voice and switch to the edge voice mid-video.  Edge now
-                # voices every scene (single-sentence scenes included);
-                # Kokoro remains an exception-only fallback.
-                import asyncio
-                import edge_tts
-                rate = _EMO_RATE.get(emo, "+0%")
-                pitch = _EMO_PITCH.get(emo, "+0Hz")
-
-                async def _gen():
-                    chunks = []
-                    for s in sents:
-                        comm = edge_tts.Communicate(
-                            s, locked_voice,
-                            rate=rate, pitch=pitch)
-                        tmp = ap + f".{len(chunks)}.mp3"
-                        await comm.save(tmp)
-                        chunks.append(tmp)
-                    # concat via ffmpeg
-                    lst = os.path.join(cache_audio, f"scene_{i}.lst")
-                    with open(lst, "w") as f:
-                        for c in chunks:
-                            f.write(f"file '{os.path.abspath(c)}'\n")
-                    subprocess.run(
-                        ["ffmpeg", "-y", "-f", "concat", "-safe", "0",
-                         "-i", lst, "-ar", "44100", "-ac", "2",
-                         "-c:a", "pcm_s16le", ap],
-                        capture_output=True, text=True, timeout=120)
-                    for c in chunks:
-                        if os.path.exists(c):
-                            os.remove(c)
-                    if os.path.exists(lst):
-                        os.remove(lst)
-
-                asyncio.run(_gen())
-                stats["modulated_sentences"] += len(sents)
+        # Chatterbox speaks the scripted paralinguistic tags; edge/kokoro
+        # must NEVER see them (they would read "[chuckle]" literally).
+        sents_clean = [strip_paralinguistic_tags(s) for s in sents]
+        # ── Chatterbox (primary, per expert doc §1.3) ──────────────
+        # Whole-scene semantic chunk (NOT sentence-by-sentence — the
+        # root cause of the old prosody/fallback bug, expert §1.2);
+        # emotion drives exaggeration/cfg_weight; paralinguistic tags
+        # ([chuckle], [sigh]...) pass through natively.
+        if provider == "chatterbox":
+            from src.providers.tts_provider import (
+                ChatterboxProvider,
+                CHATTERBOX_EMOTION_PARAMS,
+            )
+            try:
+                ex, cfg = CHATTERBOX_EMOTION_PARAMS.get(
+                    emo, CHATTERBOX_EMOTION_PARAMS["default"])
+                cb = ChatterboxProvider()
+                # Inject the scriptwriter's organic tags at natural
+                # sentence boundaries (expert doc §1.3).
+                tagged = _inject_para_tags(
+                    sc.get("narration"), sc.get("para_tags") or [])
+                cb.generate_voice(tagged, ap, exaggeration=ex, cfg_weight=cfg)
+                cb.shutdown()
+                stats["provider"] = "chatterbox"
+                stats["emotion_params"][emo] = (ex, cfg)
+                stats["para_tags_used"] = stats.get("para_tags_used", 0) + \
+                    len(sc.get("para_tags") or [])
                 if voice_lock is not None:
-                    voice_lock.record_scene(i, "edge", locked_voice)
-            else:
-                from audio_engine import generate_voice
-                generate_voice(sc.get("narration"), ap)
-                stats["provider"] = "kokoro"
-                if voice_lock is not None:
-                    # Explicit override: flat Kokoro voice differs in timbre.
-                    voice_lock.record_scene(i, "kokoro", "bm_george",
-                                            override=True, reason="provider!=edge")
-        except Exception as e:  # noqa: BLE001
-            print(f"  !! dynamic narration failed for scene {i} ({str(e)[:80]}) — Kokoro fallback")
-            stats["fallbacks"] += 1
+                    voice_lock.record_scene(i, "chatterbox", "resemble")
+            except Exception as e:  # noqa: BLE001
+                print(f"  !! chatterbox failed for scene {i} ({str(e)[:80]}) — edge fallback")
+                stats["fallbacks"] += 1
+                provider = "edge"
+                _edge_gen(i, ap, sents_clean, emo, voice_lock, stats, cache_audio)
+            durations.append(_probe_duration(ap) if os.path.exists(ap) else 5.0)
+            continue
+        if provider == "edge":
+            _edge_gen(i, ap, sents_clean, emo, voice_lock, stats, cache_audio)
+        else:
             from audio_engine import generate_voice
-            generate_voice(sc.get("narration"), ap)
+            generate_voice(strip_paralinguistic_tags(sc.get("narration")), ap)
             stats["provider"] = "kokoro"
             if voice_lock is not None:
-                voice_lock.record_scene(i, "kokoro", "bm_george",
-                                        override=True, reason=str(e)[:60])
+                voice_lock.record_scene(i, "kokoro", "bm_george")
         durations.append(_probe_duration(ap) if os.path.exists(ap) else 5.0)
     if voice_lock is not None:
         voice_lock.save()
     return durations, stats
+
+
+def _inject_para_tags(text: str, tags: list) -> str:
+    """Insert scripted paralinguistic tags at natural sentence boundaries.
+    Tags alternate between the first and last sentence so delivery feels
+    organic, never mechanical.  Unknown/empty tags are ignored."""
+    import re as _re
+    tags = [t.strip() for t in (tags or []) if isinstance(t, str) and t.strip()]
+    if not tags or not text:
+        return text
+    sents = [s.strip() for s in _re.split(r"(?<=[.!?])\s+", (text or "").strip())
+             if s.strip()]
+    if not sents:
+        return text
+    out = list(sents)
+    for idx, tag in enumerate(tags):
+        if not _re.fullmatch(r"\[[A-Za-z ]+\]", tag):
+            continue
+        if idx % 2 == 0 and len(out) > 1:
+            out[0] = f"{out[0]} {tag}"
+        elif len(out) > 1:
+            out[-1] = f"{tag} {out[-1]}"
+        else:
+            out[0] = f"{out[0]} {tag}"
+    return " ".join(out)
+
+
+def _edge_gen(i, ap, sents, emo, voice_lock, stats, cache_audio):
+    """Edge TTS per-sentence emotion-modulated generation (v8 path)."""
+    import asyncio
+    import edge_tts
+    import os
+    _EMO_RATE = {"wonder": "+8%", "tension": "+4%", "revelation": "+10%",
+                 "awe": "+6%", "nostalgia": "-4%", "hopeful": "+4%",
+                 "somber": "-8%"}
+    _EMO_PITCH = {"wonder": "+2Hz", "tension": "-1Hz", "revelation": "+4Hz",
+                  "awe": "+3Hz", "nostalgia": "-2Hz", "hopeful": "+1Hz",
+                  "somber": "-4Hz"}
+    rate = _EMO_RATE.get(emo, "+0%")
+    pitch = _EMO_PITCH.get(emo, "+0Hz")
+    locked_voice = voice_lock.voice_id if voice_lock is not None \
+        else "en-US-ChristopherNeural"
+
+    async def _gen():
+        chunks = []
+        for s in sents:
+            comm = edge_tts.Communicate(s, locked_voice, rate=rate, pitch=pitch)
+            tmp = ap + f".{len(chunks)}.mp3"
+            await comm.save(tmp)
+            chunks.append(tmp)
+        lst = os.path.join(cache_audio, f"scene_{i}.lst")
+        with open(lst, "w") as f:
+            for c in chunks:
+                f.write(f"file '{os.path.abspath(c)}'\n")
+        subprocess.run(
+            ["ffmpeg", "-y", "-f", "concat", "-safe", "0",
+             "-i", lst, "-ar", "44100", "-ac", "2",
+             "-c:a", "pcm_s16le", ap],
+            capture_output=True, text=True, timeout=120)
+        for c in chunks:
+            if os.path.exists(c):
+                os.remove(c)
+        if os.path.exists(lst):
+            os.remove(lst)
+
+    try:
+        asyncio.run(_gen())
+        stats["modulated_sentences"] += len(sents)
+        if voice_lock is not None:
+            voice_lock.record_scene(i, "edge", locked_voice)
+    except Exception as e:  # noqa: BLE001
+        print(f"  !! edge narration failed for scene {i} ({str(e)[:80]}) — Kokoro fallback")
+        stats["fallbacks"] += 1
+        from audio_engine import generate_voice
+        generate_voice(" ".join(sents), ap)
+        stats["provider"] = "kokoro"
+        if voice_lock is not None:
+            voice_lock.record_scene(i, "kokoro", "bm_george",
+                                    override=True, reason=str(e)[:60])
 
 
 def stage_music_mix(video_path: str, music_path: str, out_path: str,

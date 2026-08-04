@@ -3,16 +3,41 @@
 Implemented 2026-08-04 in `video_engine` (branch `jade`), commit v9.
 Every spec section → concrete module/gate. Deterministic checks need no LLM.
 
-## 1) Narration and voice synthesis — `src/qa/voice_lock.py`
-- `lock_voice()` selects+persists ONE narrator (provider, voice_id, speaker_id,
-  rate/pitch) at project start → `cache/voice_lock.json`.
-- `stage_narration_dynamic()` (mission_run.py) records the actual per-scene
-  voice; a fallback to a different engine is logged as an EXPLICIT override,
-  never silent (§1 "never swap without explicit override").
-- QA: `check_voice_switching()` (per-scene provider/voice vs lock),
-  `check_loudness_consistency()` (RMS spread across scenes — catches timbre
-  drift). Wired into both the pre-render and publish gates.
-- `reset_episode()` clears per-scene records between episodes.
+## 1) Narration and voice synthesis — `src/qa/voice_lock.py` + Chatterbox
+- **Primary narrator: Chatterbox** (Resemble AI, MIT) per the expert TTS
+  spec (§1.3): expressive flow-matching TTS with emotion exaggeration +
+  native paralinguistic tags ([laugh], [chuckle], [sigh]...).
+  - `scripts/chatterbox_worker.py` — persistent worker in an ISOLATED venv
+    (venv-cb) because chatterbox-tts pins numpy 1.26.4/torch 2.6.0 while
+    the pipeline venv runs numpy 2.5.1; model stays loaded between scenes
+    (KEEP_MODEL_LOADED equivalent).  Output is 24 kHz WAV with PerTh
+    watermark (expert §1.3).
+  - `src/providers/tts_provider.py::ChatterboxProvider` — JSON-lines
+    protocol to the worker (robust to stray log lines, matches req id),
+    emotion → (exaggeration, cfg_weight) table (`CHATTERBOX_EMOTION_PARAMS`:
+    hook 0.8/0.3 lively, somber 0.4/0.7 steady, per §1.3).
+  - Whole-scene semantic chunks (NOT sentence-by-sentence — the root
+    cause of the old prosody/fallback bug, expert §1.2).
+  - Scriptwriter emits `para_tags` (0-2 organic tags per scene); injected
+    at natural sentence boundaries; edge/kokoro STRIP tags so they never
+    read "[chuckle]" literally.
+- **Voice lock** (`src/qa/voice_lock.py`): `lock_voice()` selects+persists
+  ONE narrator (chatterbox/resemble in the stills runner) at project start
+  → `cache/voice_lock.json`; per-scene voice recording with explicit
+  overrides; `check_voice_switching()` + `check_loudness_consistency()`
+  QA; `reset_episode()`.
+- Fallback chain per expert §1: Chatterbox (primary) → Edge (fallback) →
+  Kokoro (emergency, CPU-safe).  A fallback is recorded on the lock as an
+  explicit override, never silent.
+
+### Chatterbox on this box (measured 2026-08-04)
+- CPU-only (4 cores, no GPU): RTF ≈ 12-14x real-time (8.6s audio in ~110s).
+  A full 60s video adds ~12-15 min of narration time on top of the ~15 min
+  render.  Model load ~17s, kept loaded across scenes.
+- Needs venv-cb (`python -m venv venv-cb && venv-cb/bin/pip install chatterbox-tts`)
+  plus `setuptools<81` for pkg_resources (setuptools 83 dropped it).
+- The chatterbox-tts package exposes `ChatterboxTTS.from_pretrained("cpu")`
+  (import name `chatterbox`, not `chatterbox_tts`).
 
 ## 2) Visual consistency — `src/director/style_bible.py`
 - `create_style_bible()` locks ONE style per episode (palette + modifier +
