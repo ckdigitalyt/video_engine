@@ -115,3 +115,28 @@ Runs on the final mixed video; `publish_ready` = no blocking failures:
 - Smoke test: `scripts/smoke_v9_gates.py` (validates all gates + negative
   cases against real artifacts: black_holes/mars videos pass every real
   check; injected bad style token is correctly caught).
+
+---
+
+## v10 Addendum — Expert Refinement Pass (2026-08-04)
+
+Implemented the 12-point expert instruction set ("better documentary
+comprehension").  All changes are topic-free and reusable (rec 12).
+
+| Rec | Expert requirement | Implementation |
+|-----|-------------------|----------------|
+| 1 | Pacing over speed; space after key facts | `src/cinematic/pacing_engine.py`: per-role WPM bands (hook 158, explanation 138, conclusion 142), comprehension-risk scoring; SCRIPT_PROMPT pacing guidance; pre-render **pacing gate** blocks rushed scenes |
+| 2 | Adaptive voice dynamics, not uniform | `_voice_params()` blends emotion + role into Chatterbox exaggeration/cfg (hook energetic ≤0.9, explanation clear 0.3/0.8); per-role pause density |
+| 3 | Language-aware text normalization | `tts_normalize.py` v10: `apply_language_layer()` (units, symbols, en-dash ranges, ±, &), `apply_pacing_pauses()` (clause-level breathing), fixed latent percent regex bug (`%\b` never matched) |
+| 4 | Publication-safe audio mix | Publish-gate **loudness_master** check: integrated -16..-11 LUFS, TP ≤ -1.0 dBTP, no clipping, LRA ≤ 20 (verified on Moon: -14.5 LUFS / -1.1 TP / LRA 1.7) |
+| 5 | Tighten hook, only opening window | Stills planner: scene 0 holds 3.0–3.5s (vs 4.5–5.5s later scenes) — brisk cuts, then comprehensible pace |
+| 6 | Semantic alignment, beat-level intent | Pre-render **semantic_alignment** gate: deterministic token overlap between each shot's query/title and its scene narration (pre-verified/pinned exempt) |
+| 7 | Subject accuracy strict | Reuses §3/§7 asset gates (EntitySpec multi-signal + vision); semantic gate rejects decorative-but-wrong shots |
+| 8 | Visual novelty within long beats | Retained: CameraDirector diversity, perceptual dedup, coverage-guard variant shots; hook window adds turnover |
+| 9 | Preserve motion-graphics gains | Unchanged: Manim kinetic validation + registration gates intact |
+| 10 | Failure-aware, no silent fallback | `run_report["pacing"]` + degradations entries for rushed/high-risk scenes; pre-render block failures recorded in errors[] |
+| 11 | Postmortem learns from pacing failures | `audit_pacing()` metrics (wpm, risk, role bands) into run_report + postmortem metrics (avg_wpm, rushed_scene_count) |
+| 12 | Extensible | Everything driven by role/intent keywords + config; zero per-topic branches |
+
+Verified on the Moon run artifacts: semantic_alignment PASS, loudness PASS,
+pacing gate correctly blocked a genuinely rushed scene (175 wpm > 172).

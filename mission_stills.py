@@ -577,7 +577,13 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                     continue
             # ── CAMERA: intent-driven motion (diversity-aware) ─────────
             clip = os.path.join(out_dir, "shots", fname.replace(".jpg", ".mp4"))
-            dur = 5.5 if len(shots) < 3 else 4.5
+            # v10 (rec 5): the HOOK window (scene 0) cuts faster — shorter
+            # holds (~3.5s) and more visual turnover; later scenes ease
+            # into the comprehensible pace (~4.5-5.5s holds).
+            if i == 0:
+                dur = 3.5 if len(shots) < 3 else 3.0
+            else:
+                dur = 5.5 if len(shots) < 3 else 4.5
             cam = gates.camera_decision(intent) if gates is not None else {
                 "move": "push_in" if still_count % 2 == 0 else "pull_out",
                 "params": {},
@@ -942,13 +948,15 @@ def main():
     # ── v9 (Jade spec §9): DETERMINISTIC PRE-RENDER GATE ─────────────
     # Blocks render on objective plan failures: voice switching, style
     # drift, off-topic assets, invalid/non-kinetic Manim, long holds,
-    # dead air, missing audio.  Fail-closed by design.
+    # dead air, missing audio.  v10 adds pacing + semantic-alignment.
     from src.qa.jade_gates import PreRenderGate
     pre_gate = PreRenderGate().run(
         timeline_path=timeline_path,
         audio_dir="cache/audio",
         voice_lock=voice_lock,
         style_bible=style_bible,
+        scenes_data=scenes_data,
+        audio_durations=audio_durations,
     )
     run_report["stages"]["pre_render_gate"] = pre_gate
     _pre_blockers = pre_gate.get("blocking_failures", [])
@@ -1259,6 +1267,21 @@ def main():
             "stage": "music", "severity": "warning",
             "detail": "music mix failed or no bed available",
         })
+    # ── v10 (rec 10/11): pacing failures are exposed, never silent ────
+    from src.cinematic.pacing_engine import audit_pacing
+    pacing_audit = audit_pacing(scenes_data, audio_durations)
+    run_report["pacing"] = pacing_audit
+    for row in pacing_audit["high_risk_scenes"]:
+        degradations.append({
+            "stage": "pacing", "severity": "warning",
+            "detail": f"scene {row['scene']}: {'; '.join(row['flags'])}",
+        })
+    if run_report.get("stages", {}).get("pre_render_gate", {}).get("blocking_failures"):
+        degradations.append({
+            "stage": "pre_render_gate", "severity": "error",
+            "detail": "blocking failures: " + str(
+                run_report["stages"]["pre_render_gate"]["blocking_failures"]),
+        })
     run_report["degradations"] = degradations
 
     run_report["final"] = {
@@ -1298,6 +1321,8 @@ def main():
         ],
         metrics={"final_score": review.get("quality_score"),
                  "duration_s": M._probe_duration(review_target),
+                 "avg_wpm": pacing_audit.get("avg_wpm"),
+                 "rushed_scene_count": pacing_audit.get("rushed_scene_count"),
                  **stills_stats},
         artifacts={"video": review_target, "report": os.path.join(out_dir, "run_report.json")},
     )

@@ -234,6 +234,10 @@ RETENTION RULES (2026 platform benchmarks — these are hard constraints):
   only in a later scene, keeping viewers watching.
 - PACE: a new visual/audio stimulus every few seconds — no scene holds one
   idea longer than ~12s. Short punchy sentences (~30 words per scene).
+- PACING IS A QUALITY METRIC (v10): match delivery to content. Hook scene:
+  energetic but still easy to follow. Explanatory/technical scenes: slower,
+  shorter sentences, leave space after key facts, numbers, dates and units.
+  Vary sentence rhythm — never a flat wall of equally-long sentences.
 - No filler, no repetition, no generic AI phrasing (no "delve", "unlock the
   secrets", "vast tapestry"). Memorable closing line.
 - SEMANTIC PARITY: opening narration must mirror the video title/thumbnail
@@ -977,6 +981,7 @@ def stage_narration_dynamic(scenes: list[dict], cache_audio: str,
     for i, sc in enumerate(scenes):
         ap = os.path.join(cache_audio, f"scene_{i}.wav")
         emo = (sc.get("emotion") or "wonder").strip().lower()
+        role = _role_for_scene(i, len(scenes), sc.get("narration"))
         sents = _sentences(sc.get("narration"))
         # Chatterbox speaks the scripted paralinguistic tags; edge/kokoro
         # must NEVER see them (they would read "[chuckle]" literally).
@@ -984,21 +989,30 @@ def stage_narration_dynamic(scenes: list[dict], cache_audio: str,
         # ── Chatterbox (primary, per expert doc §1.3) ──────────────
         # Whole-scene semantic chunk (NOT sentence-by-sentence — the
         # root cause of the old prosody/fallback bug, expert §1.2);
-        # emotion drives exaggeration/cfg_weight; paralinguistic tags
-        # ([chuckle], [sigh]...) pass through natively.
+        # emotion + role drive exaggeration/cfg_weight (v10 rec 2:
+        # adaptive dynamics — hook energetic, explanation clear/slower);
+        # paralinguistic tags ([chuckle], [sigh]...) pass through natively.
         # v9.1: ONE ChatterboxProvider for the whole run (model stays
         # loaded across scenes — no 17s reload per scene).
         if provider == "chatterbox":
             try:
-                ex, cfg = CHATTERBOX_EMOTION_PARAMS.get(
-                    emo, CHATTERBOX_EMOTION_PARAMS["default"])
+                ex, cfg = _voice_params(emo, role)
                 # Inject the scriptwriter's organic tags at natural
                 # sentence boundaries (expert doc §1.3).
                 tagged = _inject_para_tags(
                     sc.get("narration"), sc.get("para_tags") or [])
+                # v10 (rec 1/3): language-aware pauses before TTS so
+                # technical scenes breathe — space after key facts.
+                from src.utils.tts_normalize import apply_pacing_pauses
+                pause_density = {
+                    "hook": "light", "exploration": "medium",
+                    "explanation": "heavy", "climax": "medium",
+                    "conclusion": "heavy",
+                }.get(role, "medium")
+                tagged = apply_pacing_pauses(tagged, pause_density)
                 cb.generate_voice(tagged, ap, exaggeration=ex, cfg_weight=cfg)
                 stats["provider"] = "chatterbox"
-                stats["emotion_params"][emo] = (ex, cfg)
+                stats["emotion_params"][f"{emo}/{role}"] = (ex, cfg)
                 stats["para_tags_used"] = stats.get("para_tags_used", 0) + \
                     len(sc.get("para_tags") or [])
                 if voice_lock is not None:
@@ -1027,6 +1041,44 @@ def stage_narration_dynamic(scenes: list[dict], cache_audio: str,
     if voice_lock is not None:
         voice_lock.save()
     return durations, stats
+
+
+def _role_for_scene(i: int, total: int, text: str) -> str:
+    """Assign a pacing role per scene position + content (v10, rec 1/2).
+    Scene 0 is the hook; the finale is the conclusion; dense technical
+    scenes become 'explanation' (slower, clearer); the rest explore."""
+    if total <= 1:
+        return "default"
+    if i == 0:
+        return "hook"
+    if i == total - 1:
+        return "conclusion"
+    if i == total - 2:
+        return "climax"
+    from src.cinematic.pacing_engine import technical_density
+    if technical_density(text or "") > 0.5:
+        return "explanation"
+    return "exploration"
+
+
+def _voice_params(emo: str, role: str) -> tuple[float, float]:
+    """Blend emotion + role into (exaggeration, cfg_weight) (rec 2).
+    Hook keeps high energy but stays comprehensible; explanation/conclusion
+    drop exaggeration and raise cfg for clarity (authoritative narrator,
+    not a fast performer)."""
+    ex, cfg = CHATTERBOX_EMOTION_PARAMS.get(emo, CHATTERBOX_EMOTION_PARAMS["default"])
+    if role == "hook":
+        ex = min(0.9, ex + 0.15)
+        cfg = max(0.25, cfg - 0.05)
+    elif role == "explanation":
+        ex = max(0.3, ex - 0.2)
+        cfg = min(0.8, cfg + 0.15)
+    elif role == "conclusion":
+        ex = max(0.3, ex - 0.1)
+        cfg = min(0.8, cfg + 0.1)
+    elif role == "climax":
+        ex = min(0.85, ex + 0.1)
+    return round(ex, 2), round(cfg, 2)
 
 
 def _inject_para_tags(text: str, tags: list) -> str:
@@ -1477,9 +1529,16 @@ def main():
 
     # ── v9 (Jade spec §9): DETERMINISTIC PRE-RENDER GATE ─────────────
     from src.qa.jade_gates import PreRenderGate
+    # v10: pacing + semantic-alignment gates need per-scene narration
+    # durations — probe the generated voice tracks.
+    _audio_durs = []
+    for _s in scenes_data:
+        _ap = os.path.join(cache_audio, f"scene_{_s.get('scene_id', len(_audio_durs))}.wav")
+        _audio_durs.append(_probe_duration(_ap) if os.path.exists(_ap) else 0.0)
     _pre_gate = PreRenderGate().run(
         timeline_path=timeline_path, audio_dir=cache_audio,
-        voice_lock=voice_lock, style_bible=style_bible)
+        voice_lock=voice_lock, style_bible=style_bible,
+        scenes_data=scenes_data, audio_durations=_audio_durs)
     run_report["stages"]["pre_render_gate"] = _pre_gate
     if _pre_gate.get("blocking_failures"):
         print("  !! PRE-RENDER GATE BLOCKED: " +

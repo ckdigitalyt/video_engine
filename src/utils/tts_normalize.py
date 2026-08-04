@@ -131,11 +131,99 @@ def apply_prosody(text: str, intent: str = "default") -> str:
     return out
 
 
+# ── Language-aware units & symbols (v10, expert rec 3) ──────────────
+# Extends the abbreviation table with the units/symbols documentary
+# scripts actually use; applied before generic number conversion so
+# "1.3 million km" becomes "one point three million kilometers".
+_LANG_UNITS = {
+    "km/s": "kilometers per second", "km/h": "kilometers per hour",
+    "m/s": "meters per second", "mph": "miles per hour",
+    "light-years": "light-years", "light-year": "light-year",
+    "light-seconds": "light-seconds", "light-minutes": "light-minutes",
+    "million": "million", "billion": "billion", "trillion": "trillion",
+    "ghz": "gigahertz", "mhz": "megahertz", "khz": "kilohertz", "hz": "hertz",
+    "mb": "megabytes", "gb": "gigabytes", "tb": "terabytes",
+    "kbps": "kilobits per second", "mbps": "megabits per second",
+    "psi": "pounds per square inch", "bar": "bar",
+    "n": "newtons", "j": "joules", "w": "watts", "kw": "kilowatts",
+    "mw": "megawatts", "gw": "gigawatts",
+    "volts": "volts", "kv": "kilovolts",
+    "sq km": "square kilometers", "sq km": "square kilometers",
+    "fps": "frames per second", "rpm": "revolutions per minute",
+}
+
+_LANG_SYMBOLS = [
+    (r"\s*&\s*", " and "),
+    (r"\s*\+\s*", " plus "),
+    (r"\s*=\s*", " equals "),
+    (r"\s*±\s*", " plus or minus "),
+    (r"\s*→\s*", " to "),
+    (r"\s*–\s*(?=\d)", " to "),   # en-dash numeric range: 24–26 -> 24 to 26
+    (r"\s*—\s*", ", "),           # em-dash -> pause
+    (r"\bvs\.?\b", " versus "),
+    (r"\bapprox\.?\b", " approximately "),
+]
+
+
+def apply_language_layer(text: str) -> str:
+    """Language-aware preprocessing: unit words, math/typography symbols,
+    numeric ranges — before number-to-word conversion (rec 3)."""
+    if not text:
+        return text
+    out = text
+    # unit words attached to numbers: "1.3 million km" -> "1.3 million kilometers"
+    for unit, full in sorted(_LANG_UNITS.items(), key=lambda kv: -len(kv[0])):
+        out = re.sub(rf"\b(\d+(?:\.\d+)?)\s*{re.escape(unit)}\b",
+                     lambda m, u=full: f"{m.group(1)} {u}", out,
+                     flags=re.IGNORECASE)
+    for pat, repl in _LANG_SYMBOLS:
+        out = re.sub(pat, repl, out)
+    return out
+
+
+_TECH_RE = re.compile(
+    r"\d+(?:\.\d+)?\s*(?:million|billion|trillion|thousand)?\s*(?:km|kg|m|s|au|w|mw|hz|ghz|mhz|kbps|mph|°[cf])\b"
+    r"|\b(?:19|20)\d{2}\b"
+    r"|[×x^%°]",
+    re.IGNORECASE,
+)
+
+
+def apply_pacing_pauses(text: str, pause_density: str = "medium") -> str:
+    """Insert natural spoken pauses for comprehension (rec 1/3).
+
+    heavy  : after every sentence containing a number/unit/year, and before
+             the final clause (space after key facts)
+    medium : pause after sentences with technical terms
+    light  : no inserted pauses (hook keeps momentum)
+    """
+    if not text or pause_density == "light":
+        return text
+    sents = [s.strip() for s in re.split(r"(?<=[.!?])\s+", text) if s.strip()]
+    if len(sents) < 2:
+        return text
+    out = []
+    for i, s in enumerate(sents):
+        out.append(s)
+        if i == len(sents) - 1:
+            break
+        technical = bool(_TECH_RE.search(s))
+        if pause_density == "heavy" and technical:
+            out.append("... ")
+        elif pause_density == "heavy" and len(s.split()) > 16:
+            out.append("... ")
+        elif pause_density == "medium" and technical and len(s.split()) > 12:
+            out.append("... ")
+    # avoid double spaces / stray ellipsis spacing
+    joined = " ".join(out)
+    return re.sub(r"\s+", " ", joined)
+
+
 def normalize_narration(text: str) -> str:
     """Normalize a narration string for spoken TTS delivery."""
     if not text:
         return text
-    out = text
+    out = apply_language_layer(text)
 
     # Temperature units BEFORE generic numbers: "127°C" -> "one hundred
     # twenty-seven degrees Celsius" (Chatterbox read raw °C as "jerry C").
@@ -197,8 +285,9 @@ def normalize_narration(text: str) -> str:
     )
 
     # Percentages: "23%" -> "twenty-three percent"
+    # (no trailing \b — % is a non-word char; boundary must be lookahead)
     out = re.sub(
-        r"\b(\d+(?:\.\d+)?)%\b",
+        r"\b(\d+(?:\.\d+)?)%(?=\s|[.,;:!?]|$)",
         lambda m: f"{_decimal_to_words(m.group(1))} percent",
         out,
     )

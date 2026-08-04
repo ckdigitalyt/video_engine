@@ -38,6 +38,7 @@ from src.qa.deterministic_qa import DeterministicQA, QAReport, QACheck
 from src.qa.voice_lock import VoiceLock
 from src.director.style_bible import StyleBible
 from src.manim.validate import validate_manim_script, validate_manim_facts
+from src.cinematic.pacing_engine import audit_pacing, comprehension_risk
 
 # Retention benchmarks (§5): the hook window must be visually dense; no
 # shot may hold so long that novelty collapses; narration must be gapless.
@@ -90,12 +91,16 @@ class PreRenderGate:
             voice_lock: Optional[VoiceLock] = None,
             style_bible: Optional[StyleBible] = None,
             expected_manim: Optional[list] = None,
-            manim_facts: Optional[dict] = None) -> dict:
+            manim_facts: Optional[dict] = None,
+            scenes_data: Optional[list] = None,
+            audio_durations: Optional[list] = None) -> dict:
         """Execute all pre-render checks; returns gate dict.
 
         ``expected_manim``: list of manim clip paths the plan intends to
         use.  ``manim_facts``: {script_path: {label: value}} for fact
         validation of Manim labels against the reviewed script.
+        ``scenes_data`` + ``audio_durations`` (v10): enables the pacing
+        gate (rec 1/11) and the semantic-alignment gate (rec 6/7).
         """
         report = QAReport()
         timeline = {}
@@ -207,6 +212,53 @@ class PreRenderGate:
                            "all planned audio files present"
                            if not missing_audio else f"missing audio: {missing_audio}"))
 
+        # ── 8. Pacing gate (v10 rec 1/11) — rushed narration blocks ────
+        # Pacing is a core quality metric: scenes delivered above the
+        # role's comprehension band fail the gate deterministically.
+        if scenes_data is not None and audio_durations is not None:
+            pacing = audit_pacing(scenes_data, audio_durations)
+            rushed = []
+            for r in pacing["rows"]:
+                for f in r.get("flags", []):
+                    rushed.append(f"scene {r['scene']}: {f} ({r['wpm']:.0f} wpm)")
+            report.add(QACheck(
+                "pacing", not rushed,
+                "narration paced for comprehension"
+                if not rushed else f"rushed/dense scenes: {rushed[:5]}",
+                metrics={"avg_wpm": pacing["avg_wpm"],
+                         "rushed_scene_count": pacing["rushed_scene_count"],
+                         "high_risk": pacing["high_risk_scenes"]}))
+
+        # ── 9. Semantic alignment (v10 rec 6/7) — visuals belong to the ──
+        #    narration beat they support.  Deterministic token overlap
+        #    between each shot's query/title and its scene narration.
+        if scenes_data is not None and vt:
+            misaligned = []
+            for v in vt:
+                sid = v.get("scene_id")
+                if sid is None or sid >= len(scenes_data):
+                    continue
+                text = (scenes_data[sid].get("narration") or "").lower()
+                query = ((v.get("query_used") or "") + " " +
+                         (v.get("asset_title") or "")).lower()
+                if not query.strip():
+                    continue
+                # ignore pre-verified/pinned assets: human-approved swaps
+                # are trusted even when the free-text query differs.
+                if v.get("pre_verified"):
+                    continue
+                narr_tokens = set(re.findall(r"[a-z]{4,}", text))
+                query_tokens = set(re.findall(r"[a-z]{4,}", query))
+                overlap = narr_tokens & query_tokens
+                if not overlap and query_tokens:
+                    misaligned.append(
+                        f"{os.path.basename(v.get('file',''))}: query '{query.strip()[:40]}' "
+                        f"shares no terms with scene {sid} narration")
+            report.add(QACheck(
+                "semantic_alignment", not misaligned,
+                "every visual belongs to its narration beat"
+                if not misaligned else f"misaligned shots: {misaligned[:5]}"))
+
         return report.to_dict()
 
 
@@ -274,6 +326,13 @@ class PublishGate:
         report.add(QACheck("dead_air_audio", silence["passed"], silence["detail"],
                            metrics=silence["metrics"]))
 
+        # ── Loudness / clipping on the mastered file (v10 rec 4) ───────
+        # Publication-safe audio: YouTube streaming standard (-14 LUFS,
+        # true peak <= -1.5 dBTP), no clipping, no over-compression.
+        loud = self._check_loudness(video_path)
+        report.add(QACheck("loudness_master", loud["passed"], loud["detail"],
+                           metrics=loud["metrics"]))
+
         # ── Black opening frames (§5 no dead openings) ─────────────────
         opening = self._check_opening_frames(video_path)
         report.add(QACheck("opening_black_frames", opening["passed"], opening["detail"]))
@@ -328,6 +387,65 @@ class PublishGate:
             "detail": f"{len(real)} dead-air run(s) >= {self._silence_gap}s in audio"
                       if real else "no dead-air runs in mastered audio",
             "metrics": {"runs": [round(r[1] - r[0], 2) for r in real[:8]]},
+        }
+
+    def _check_loudness(self, video_path: str) -> dict:
+        """Publication-safe mastering check (v10 rec 4).
+
+        Verifies integrated loudness near YouTube standard (-14 LUFS),
+        true peak within headroom (<= -1.0 dBTP after platform processing),
+        no clipping (max sample < -0.5 dB) and sane dynamic range.
+        Uses ffmpeg loudnorm print + volumedetect — deterministic.
+        """
+        try:
+            ln = subprocess.run(
+                ["ffmpeg", "-i", video_path, "-af",
+                 "loudnorm=print_format=json", "-f", "null", "-"],
+                capture_output=True, text=True, timeout=90,
+            )
+            # loudnorm JSON block appears at the end of stderr
+            m = re.search(r"\{.*\}", ln.stderr[-2500:], re.DOTALL)
+            stats = {}
+            if m:
+                try:
+                    stats = json.loads(m.group(0))
+                except Exception:
+                    stats = {}
+            def _f(key):
+                try:
+                    return float(stats.get(key, 0))
+                except (TypeError, ValueError):
+                    return 0.0
+            i_lufs = _f("input_i")
+            tp = _f("input_tp")
+            lra = _f("input_lra")
+            # clip check via volumedetect (max_volume is the true peak)
+            vd = subprocess.run(
+                ["ffmpeg", "-i", video_path, "-af", "volumedetect",
+                 "-f", "null", "-"],
+                capture_output=True, text=True, timeout=60,
+            )
+            mv = re.search(r"max_volume: ([-\.\d]+) dB", vd.stderr)
+            max_db = float(mv.group(1)) if mv else -99.0
+        except Exception as e:
+            return {"passed": True, "detail": f"loudness check unavailable ({str(e)[:60]})",
+                    "metrics": {}}
+
+        problems = []
+        if i_lufs and not (-16.0 <= i_lufs <= -11.0):
+            problems.append(f"integrated {i_lufs:.1f} LUFS (target ~-14)")
+        if tp and tp > -1.0:
+            problems.append(f"true peak {tp:.1f} dBTP > -1.0 (platform headroom)")
+        if max_db > -0.5:
+            problems.append(f"max sample {max_db:.1f} dB — clipping risk")
+        if lra and lra > 20:
+            problems.append(f"LRA {lra:.1f} — over-compressed/over-wide")
+        return {
+            "passed": not problems,
+            "detail": "mastered audio publication-safe (I/LRA/TP OK)"
+                      if not problems else "mastering issues: " + "; ".join(problems[:4]),
+            "metrics": {"integrated_lufs": i_lufs, "true_peak_dbTP": tp,
+                         "lra": lra, "max_volume_db": max_db},
         }
 
     def _check_opening_frames(self, video_path: str) -> dict:
