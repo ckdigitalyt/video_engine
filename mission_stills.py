@@ -683,10 +683,12 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
         topic = _detect_topic(text) or "documentary"
         fname = f"scene{i}_fill.jpg"
         out = os.path.join(still_root, fname)
-        got, src, title = _nasa_still_title(topic, out)
+        got, title = _nasa_still_title(topic, out)
+        src = "nasa"
         if not got:
-            got, src, title = _ai_still(
-                f"Photorealistic documentary image of {topic}, cinematic", out), "ai", ""
+            got = _ai_still(
+                f"Photorealistic documentary image of {topic}, cinematic", out)
+            src, title = "ai", ""
         if got and os.path.exists(got):
             clip = os.path.join(out_dir, "shots", fname.replace(".jpg", ".mp4"))
             cam = gates.camera_decision(intent) if gates is not None else {"move": "push_in", "params": {}}
