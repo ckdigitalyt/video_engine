@@ -705,9 +705,9 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                 plan[i] = [{"file": clip, "duration": 6.0, "kind": src,
                             "camera": cam.get("move", "push_in"),
                             "motion_params": cam_params, "title": title,
-                            "query": topic}]
+                            "query": fill_q}]
                 stats[src] = stats.get(src, 0) + 1
-                print(f"  [fill] scene{i} filled with {src} still ({topic})")
+                print(f"  [fill] scene{i} filled with {src} still ({fill_q})")
 
     print(f"  Shots planned: " + ", ".join(f"scene{i}: {len(v)}" for i, v in plan.items()))
     print(f"  Sources: {stats} ({(time.time()-t0):.1f}s)")
