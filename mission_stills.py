@@ -680,14 +680,21 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                 stats["manim"] += 1
                 print(f"  [fill] scene{i} filled with Manim {os.path.basename(manim)}")
                 continue
-        topic = _detect_topic(text) or "documentary"
+        # v10.1 (rec 7): fill MUST use the scene's own curated queries —
+        # _detect_topic() matched "voyager" for a Europa scene (hint:
+        # "spacecraft"), placing a wrong-subject Voyager model image.
+        # Subject accuracy beats generic fill: a simple correct image is
+        # better than a cinematic wrong one.
+        fill_queries = (scene or {}).get("search_queries") or []
+        fill_q = next((q for q in fill_queries if isinstance(q, str) and q.strip()),
+                      None) or (topic_slug.replace("_", " "))
         fname = f"scene{i}_fill.jpg"
         out = os.path.join(still_root, fname)
-        got, title = _nasa_still_title(topic, out)
+        got, title = _nasa_still_title(fill_q, out)
         src = "nasa"
         if not got:
             got = _ai_still(
-                f"Photorealistic documentary image of {topic}, cinematic", out)
+                f"Photorealistic documentary image of {fill_q}, cinematic", out)
             src, title = "ai", ""
         if got and os.path.exists(got):
             clip = os.path.join(out_dir, "shots", fname.replace(".jpg", ".mp4"))
@@ -705,6 +712,88 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
     print(f"  Shots planned: " + ", ".join(f"scene{i}: {len(v)}" for i, v in plan.items()))
     print(f"  Sources: {stats} ({(time.time()-t0):.1f}s)")
     return plan, stats
+
+
+# ═══════════════════════════════════════════════════════════════════════ #
+# Pacing padding (v10 rec 1/11)
+# ═══════════════════════════════════════════════════════════════════════ #
+
+def _pace_pad_scenes(scenes_data: list[dict], audio_dir: str,
+                     audio_durations: list[float]) -> list[float]:
+    """Insert pauses at sentence boundaries so delivered narration lands
+    inside its role's comprehension band (expert rec 1/11: pacing is a
+    quality metric; leave space after key facts).
+
+    Chatterbox speaks ~195-205 wpm natively vs the ~150 wpm documentary
+    pace the word budget assumes, so scenes come out rushed (Europa run:
+    every scene 171-243 wpm).  This deterministically adds distributed
+    silence at sentence gaps to bring WPM into band — no re-synthesis.
+    """
+    import re as _re
+    import numpy as _np
+    import soundfile as _sf
+    from src.cinematic.pacing_engine import (
+        measure_speech_rate, role_for, ROLE_PACING,
+    )
+    updated = []
+    for i, sc in enumerate(scenes_data):
+        text = sc.get("narration") or ""
+        ap = os.path.join(audio_dir, f"scene_{i}.wav")
+        if not os.path.exists(ap):
+            continue
+        dur = audio_durations[i] if i < len(audio_durations) else M._probe_duration(ap)
+        wpm = measure_speech_rate(text, dur)
+        role = role_for(sc.get("intent") or sc.get("scene_intent") or "")
+        band = ROLE_PACING[role]
+        if wpm <= band["max_wpm"] or dur <= 0:
+            continue
+        words = len(text.split())
+        target_dur = words / (band["target_wpm"] / 60.0)
+        pad_s = max(0.0, target_dur - dur)
+        pad_s = min(pad_s, dur * 0.45)  # cap: never more than +45% length
+        if pad_s < 0.3:
+            continue
+        sents = [s.strip() for s in _re.split(r"(?<=[.!?])\s+", text) if s.strip()]
+        if len(sents) < 2:
+            continue
+        try:
+            data, sr = _sf.read(ap, dtype="float32")
+        except Exception as e:  # noqa: BLE001
+            print(f"  [pacing] !! read failed scene {i}: {str(e)[:60]}")
+            continue
+        total_words = words or 1
+        boundaries = []
+        cum = 0
+        for s in sents[:-1]:
+            cum += len(s.split())
+            boundaries.append(min(0.98, cum / total_words))
+        gap_s = pad_s / len(boundaries)
+        chunks = []
+        prev = 0
+        n = len(data)
+        for frac in boundaries:
+            idx = int(n * frac)
+            chunks.append(data[prev:idx])
+            chunks.append(_np.zeros(int(sr * gap_s), dtype="float32"))
+            prev = idx
+        chunks.append(data[prev:])
+        out = _np.concatenate(chunks) if chunks else data
+        try:
+            _sf.write(ap, out, sr)
+        except Exception as e:  # noqa: BLE001
+            print(f"  [pacing] !! write failed scene {i}: {str(e)[:60]}")
+            continue
+        new_dur = len(out) / sr
+        if i < len(audio_durations):
+            audio_durations[i] = new_dur
+        updated.append({"scene": i, "role": role, "wpm_before": round(wpm, 1),
+                        "wpm_after": round(measure_speech_rate(text, new_dur), 1),
+                        "pad_s": round(gap_s * len(boundaries), 2)})
+    if updated:
+        print("  [pacing] padded " + ", ".join(
+            f"s{r['scene']}:{r['wpm_before']:.0f}->{r['wpm_after']:.0f}wpm"
+            for r in updated))
+    return audio_durations
 
 
 # ═══════════════════════════════════════════════════════════════════════ #
@@ -949,6 +1038,12 @@ def main():
     print(f"  Voice tracks: {len(scenes_data)} (total {sum(audio_durations):.1f}s) "
           f"[{narration_stats.get('provider')}]")
 
+    # ── v10 (rec 1/11): PACING PADDING — if Chatterbox delivered a scene
+    # faster than its role's comprehension band, insert pauses at sentence
+    # boundaries so narration lands inside the band (space after key
+    # facts).  Deterministic fix for "narration feels too fast".
+    audio_durations = _pace_pad_scenes(scenes_data, "cache/audio", audio_durations)
+
     # ── Timeline + render ──────────────────────────────────────────────
     build_stills_timeline(scenes_data, shot_plan, audio_durations, timeline_path)
 
@@ -970,6 +1065,18 @@ def main():
     if _pre_blockers:
         print("  !! PRE-RENDER GATE BLOCKED: " + str(_pre_blockers))
         run_report["errors"].append(f"pre-render gate blocked: {_pre_blockers}")
+        # v10.1 (rec 10): gates are fail-closed — never ship a video the
+        # deterministic gates rejected.  Hard-abort instead of rendering
+        # a blocked plan (Europa run exposed: gates logged, pipeline
+        # rendered anyway -> 84s rushed video shipped as 'publish-ready').
+        run_report["final"] = {
+            "output": None, "iterations": 0,
+            "error": f"pre-render gate blocked: {_pre_blockers}",
+            "duration_s": 0,
+        }
+        M._write_json(os.path.join(out_dir, "run_report.json"), run_report)
+        print("  ABORT: no render — fix plan failures and re-run.")
+        sys.exit(2)
     else:
         print("  [gate] pre-render deterministic gate PASSED (render allowed)")
 

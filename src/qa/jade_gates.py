@@ -232,6 +232,14 @@ class PreRenderGate:
         # ── 9. Semantic alignment (v10 rec 6/7) — visuals belong to the ──
         #    narration beat they support.  Deterministic token overlap
         #    between each shot's query/title and its scene narration.
+        #    v10.1: skip STRUCTURAL queries — visual_goal fallbacks like
+        #    "The viewer should see Galileo's discovery of..." are intent
+        #    descriptions, not asset searches; matching them against
+        #    narration token-by-token produces false misalignment.
+        _STRUCTURAL = re.compile(
+            r"^(the viewer should see|viewer should|show|depict|illustrat|visuals? for|visual goal|scene \d|image of)",
+            re.IGNORECASE,
+        )
         if scenes_data is not None and vt:
             misaligned = []
             for v in vt:
@@ -246,6 +254,9 @@ class PreRenderGate:
                 # ignore pre-verified/pinned assets: human-approved swaps
                 # are trusted even when the free-text query differs.
                 if v.get("pre_verified"):
+                    continue
+                # skip structural/intent queries (visual_goal fallbacks)
+                if _STRUCTURAL.match(query.strip()):
                     continue
                 narr_tokens = set(re.findall(r"[a-z]{4,}", text))
                 query_tokens = set(re.findall(r"[a-z]{4,}", query))
