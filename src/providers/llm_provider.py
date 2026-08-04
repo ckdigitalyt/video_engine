@@ -153,7 +153,10 @@ class DeepSeekProvider(LLMProvider):
             # cache hits; absent => assume full cache miss)
             det = um.get("input_token_details") or um.get("prompt_tokens_details") or {}
             if isinstance(det, dict):
-                cached = int(det.get("cached_tokens", 0) or 0)
+                # langchain surfaces DeepSeek's prompt_cache_hit_tokens as
+                # input_token_details.cache_read (snake_case); some providers
+                # use cached_tokens. Accept both.
+                cached = int(det.get("cache_read") or det.get("cached_tokens") or 0)
             DeepSeekUsage.record(inp, out, cached)
         except Exception:
             pass  # accounting must never break generation
