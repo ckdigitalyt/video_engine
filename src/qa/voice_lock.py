@@ -195,15 +195,19 @@ def lock_voice(provider: str = "edge", voice_id: str = "en-US-ChristopherNeural"
                force: bool = False) -> VoiceLock:
     """Select and lock the narrator voice once at project start.
 
-    If a lock already exists and matches, reuse it (idempotent).  If it
-    exists but differs, ``force`` decides: reuse the existing lock (the
-    episode keeps ONE voice — preferred) or replace it explicitly.
+    If a lock already exists with the SAME provider/voice, reuse it
+    (idempotent).  If it exists but with a DIFFERENT narrator, the new
+    request wins — a stale identity (e.g. an earlier smoke test locking
+    edge while the run narrates with chatterbox) must never leave the
+    episode's voice lock contradicting the actual narration, which would
+    false-fail the voice_switching QA gate.
     """
     existing = VoiceLock.load(lock_path)
     if existing and not force:
-        return existing
-    if existing and force and existing.provider == provider and existing.voice_id == voice_id:
-        return existing
+        if existing.provider == provider and existing.voice_id == voice_id:
+            return existing
+        print(f"  [voice-lock] replacing stale lock "
+              f"{existing.provider}/{existing.voice_id} → {provider}/{voice_id}")
     vl = VoiceLock(provider=provider, voice_id=voice_id, speaker_id=speaker_id,
                    rate=rate, pitch=pitch, lock_path=lock_path)
     vl.save()

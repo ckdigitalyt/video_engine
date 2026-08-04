@@ -1,0 +1,11 @@
+[duration] target=120s scenes=10 words 282-330
+[asset_router] Loaded env vars from /home/ubuntu/video_engine/.env
+
+[1/16] RESEARCH
+  15 facts, 5 sources (10.0s)
+
+[2/16] FACT VERIFICATION
+  !! Verification pass failed (verification output did not match any claims) — fallback confidence used. [degradation exposed in run_report]
+  Verified 15/15 facts
+
+[3/16] SCRIPT DEVELOPMENT

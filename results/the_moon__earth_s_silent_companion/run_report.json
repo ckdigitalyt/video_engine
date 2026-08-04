@@ -1,0 +1,868 @@
+{
+  "topic": "The Moon: Earth's Silent Companion",
+  "started_at": "2026-08-04T08:38:20Z",
+  "strategy": "stills_first",
+  "stages": {
+    "visuals": {
+      "manim": 1,
+      "nasa": 0,
+      "wikimedia": 0,
+      "ai": 0,
+      "video_fallback": 0,
+      "rejected": 0,
+      "vision_checked": 0,
+      "deduped": 16,
+      "cached": 18
+    },
+    "pre_render_gate": {
+      "passed": false,
+      "blocking_failures": [
+        "shot_hold"
+      ],
+      "checks": [
+        {
+          "name": "voice_switching",
+          "passed": true,
+          "detail": "single locked voice",
+          "metrics": {}
+        },
+        {
+          "name": "voice_loudness_consistency",
+          "passed": true,
+          "detail": "per-scene RMS spread 2.2 dB (limit 6.0 dB)",
+          "metrics": {}
+        },
+        {
+          "name": "style_drift",
+          "passed": true,
+          "detail": "0 placed stills, 0 drifted",
+          "metrics": {}
+        },
+        {
+          "name": "off_topic_assets",
+          "passed": true,
+          "detail": "no unverified assets in timeline",
+          "metrics": {}
+        },
+        {
+          "name": "manim_registration",
+          "passed": true,
+          "detail": "no Manim planned for this episode",
+          "metrics": {}
+        },
+        {
+          "name": "manim_kinetic",
+          "passed": true,
+          "detail": "placed Manim scenes are motion-rich",
+          "metrics": {}
+        },
+        {
+          "name": "shot_hold",
+          "passed": false,
+          "detail": "longest shot 10.3s (limit 10.0s)",
+          "metrics": {
+            "longest_hold_s": 10.3
+          }
+        },
+        {
+          "name": "dead_air",
+          "passed": true,
+          "detail": "no narration gaps > 2.0s",
+          "metrics": {
+            "dead_air_gaps_s": []
+          }
+        },
+        {
+          "name": "generation_complete",
+          "passed": true,
+          "detail": "all planned audio files present",
+          "metrics": {}
+        }
+      ]
+    },
+    "render_v1": {
+      "duration_s": 115.666667,
+      "size_mb": 21.7,
+      "render_s": 130.3
+    },
+    "grade_v1": {
+      "graded": true,
+      "grain": 8,
+      "elapsed_s": 251.4,
+      "size_mb": 51.9
+    },
+    "qa_v1": {
+      "passed": true,
+      "blocking_failures": [],
+      "checks": [
+        {
+          "name": "encoding",
+          "passed": true,
+          "detail": "v=h264 a=aac",
+          "metrics": {
+            "duration_s": 115.666667,
+            "resolution": [
+              1920,
+              1080
+            ]
+          }
+        },
+        {
+          "name": "resolution",
+          "passed": true,
+          "detail": "1920x1080",
+          "metrics": {}
+        },
+        {
+          "name": "repeated_assets",
+          "passed": true,
+          "detail": "no repeats",
+          "metrics": {
+            "repeats": {}
+          }
+        },
+        {
+          "name": "frozen_shots",
+          "passed": true,
+          "detail": "no frozen shots",
+          "metrics": {
+            "frozen_runs": [],
+            "frames_sampled": 8
+          }
+        },
+        {
+          "name": "excessive_static",
+          "passed": true,
+          "detail": "longest static window: 0.0s (limit 8.0s)",
+          "metrics": {
+            "longest_static_s": 0
+          }
+        },
+        {
+          "name": "silence",
+          "passed": true,
+          "detail": "max_volume=-2.7 dB (silence < -50.0 dB)",
+          "metrics": {
+            "max_db": -2.7,
+            "mean_db": -20.2
+          }
+        },
+        {
+          "name": "clipping",
+          "passed": true,
+          "detail": "max_volume=-2.7 dB (clip >= -0.5 dB)",
+          "metrics": {
+            "max_db": -2.7
+          }
+        }
+      ]
+    },
+    "music_v1": {
+      "mixed": true,
+      "elapsed_s": 28.5,
+      "size_mb": 51.1,
+      "mean_db": -17.0,
+      "sfx": "sfx_timeline.wav",
+      "sfx_events": [
+        {
+          "scene": 0,
+          "trigger": "riser",
+          "at_s": 7.9
+        },
+        {
+          "scene": 0,
+          "trigger": "boom",
+          "at_s": 5.3
+        },
+        {
+          "scene": 1,
+          "trigger": "whoosh",
+          "at_s": 17.34
+        },
+        {
+          "scene": 2,
+          "trigger": "sparkle",
+          "at_s": 34.36
+        },
+        {
+          "scene": 3,
+          "trigger": "boom",
+          "at_s": 44.72
+        },
+        {
+          "scene": 5,
+          "trigger": "riser",
+          "at_s": 66.36
+        },
+        {
+          "scene": 6,
+          "trigger": "whoosh",
+          "at_s": 76.64
+        },
+        {
+          "scene": 8,
+          "trigger": "heartbeat",
+          "at_s": 98.56
+        },
+        {
+          "scene": 9,
+          "trigger": "heartbeat",
+          "at_s": 108.14
+        }
+      ]
+    },
+    "review_v1": {
+      "score": 68,
+      "confidence": 0.95,
+      "model_used": null
+    },
+    "improve_pass_1": {
+      "iteration": 2,
+      "applied": [
+        {
+          "category": "color",
+          "detail": "[color][medium] Apply a unified color grade to bridge archival footage and AI-generated scenes.",
+          "source_rec": "Apply a unified color grade to bridge archival footage and AI-generated scenes."
+        },
+        {
+          "category": "transitions",
+          "detail": "[transitions][low] Smooth the jump cut at 00:47 with a subtle cross-fade or motion blur.",
+          "source_rec": "Smooth the jump cut at 00:47 with a subtle cross-fade or motion blur."
+        }
+      ],
+      "flagged": [
+        "[unclassified] Standardize typography for all data overlays to improve visual continuity."
+      ],
+      "stopped_early": false,
+      "notes": "",
+      "elapsed_s": 0.0
+    },
+    "render_v2": {
+      "duration_s": 115.666667,
+      "render_s": 384.5
+    },
+    "review_v2": {
+      "score": 72,
+      "confidence": 0.9,
+      "model_used": null
+    },
+    "improve_pass_2": {
+      "iteration": 3,
+      "applied": [
+        {
+          "category": "color",
+          "detail": "[color][high] Color grade the sequence at 01:33 to remove red/orange hues; it currently looks like a Martian landscape.",
+          "source_rec": "Color grade the sequence at 01:33 to remove red/orange hues; it currently looks like a Martian landscape."
+        },
+        {
+          "category": "pacing",
+          "detail": "[pacing][medium] Insert 0.5s pauses between Scene 5 and Scene 6 to allow temperature data to be processed by the viewer.",
+          "source_rec": "Insert 0.5s pauses between Scene 5 and Scene 6 to allow temperature data to be processed by the viewer."
+        }
+      ],
+      "flagged": [
+        "[new_asset] Replace the chemical maps at 01:27 with a mass-distribution diagram to better align with the narration."
+      ],
+      "stopped_early": false,
+      "notes": "",
+      "elapsed_s": 0.0
+    }
+  },
+  "errors": [
+    "pre-render gate blocked: ['shot_hold']"
+  ],
+  "provider": "deepseek",
+  "voice_lock": {
+    "provider": "chatterbox",
+    "voice_id": "resemble",
+    "speaker_id": "jade-narrator-001",
+    "rate": "+0%",
+    "pitch": "+0Hz",
+    "scene_voices": {
+      "0": "resemble",
+      "1": "resemble",
+      "2": "resemble",
+      "3": "resemble",
+      "4": "resemble",
+      "5": "resemble",
+      "6": "resemble",
+      "7": "resemble",
+      "8": "resemble",
+      "9": "resemble"
+    },
+    "scene_providers": {
+      "0": "chatterbox",
+      "1": "chatterbox",
+      "2": "chatterbox",
+      "3": "chatterbox",
+      "4": "chatterbox",
+      "5": "chatterbox",
+      "6": "chatterbox",
+      "7": "chatterbox",
+      "8": "chatterbox",
+      "9": "chatterbox"
+    },
+    "overrides": []
+  },
+  "style_bible": {
+    "style_name": "jade",
+    "style_modifier": "hand-painted cinematic concept art, painterly brushwork, rich depth, warm amber and deep teal color palette with soft cream highlights, consistent lighting and color grade, no text",
+    "palette": [
+      "#F5F0E1",
+      "#C97B4A",
+      "#2F4858",
+      "#86A8A6",
+      "#1B2631"
+    ],
+    "reference_frame_prompt": "",
+    "subject_sheet": [],
+    "placed_style_tokens": {}
+  },
+  "entity_specs": {
+    "0": {
+      "beat_id": "scene0",
+      "scene_id": 0,
+      "required_entities": [
+        "Luna 2",
+        "Moon"
+      ],
+      "match_terms": {
+        "Luna 2": [
+          "Luna 2",
+          "luna ii",
+          "lunik 2"
+        ],
+        "Moon": [
+          "Moon",
+          "lunar",
+          "luna"
+        ]
+      },
+      "optional_entities": [
+        "impact crater",
+        "spacecraft debris"
+      ],
+      "prohibited_entities": [
+        "Apollo 11",
+        "Earth",
+        "astronaut",
+        "sound"
+      ],
+      "scene_intent": "hook",
+      "confidence": 1.0,
+      "visual_objective": "The viewer should see the silent, motionless Moon and the impact point of Luna 2, feeling the eerie stillness of the first contact with another world."
+    },
+    "1": {
+      "beat_id": "scene1",
+      "scene_id": 1,
+      "required_entities": [
+        "Apollo 11",
+        "Neil Armstrong",
+        "Moon"
+      ],
+      "match_terms": {
+        "Apollo 11": [
+          "Apollo 11",
+          "lunar module",
+          "saturn v",
+          "apollo 11 mission"
+        ],
+        "Neil Armstrong": [
+          "Neil Armstrong",
+          "armstrong",
+          "astronaut on moon"
+        ],
+        "Moon": [
+          "Moon",
+          "lunar surface",
+          "lunar"
+        ]
+      },
+      "optional_entities": [
+        "Apollo 17",
+        "lunar rover",
+        "Earth"
+      ],
+      "prohibited_entities": [
+        "Mars",
+        "International Space Station",
+        "Voyager 1",
+        "Space Shuttle",
+        "Apollo 13"
+      ],
+      "scene_intent": "hook",
+      "confidence": 1.0,
+      "visual_objective": "Show the iconic journey of Apollo 11 and the lunar surface, evoking awe for humanity's brief lunar visits and a question of why we stopped."
+    },
+    "2": {
+      "beat_id": "scene2",
+      "scene_id": 2,
+      "required_entities": [
+        "Moon",
+        "Apollo 11",
+        "lunar rock"
+      ],
+      "match_terms": {
+        "Moon": [
+          "Moon",
+          "lunar",
+          "luna",
+          "earth's moon"
+        ],
+        "Apollo 11": [
+          "Apollo 11",
+          "apollo xi",
+          "saturn v apollo"
+        ],
+        "lunar rock": [
+          "lunar rock",
+          "lunar sample",
+          "moon rock",
+          "basalt",
+          "regolith",
+          "apollo sample"
+        ]
+      },
+      "optional_entities": [
+        "384400 km diagram",
+        "Earth",
+        "impact crater / giant impact artist render",
+        "astronaut footprint"
+      ],
+      "prohibited_entities": [
+        "Apollo 12",
+        "Mars",
+        "Voyager",
+        "space shuttle",
+        "ISS",
+        "Comet"
+      ],
+      "scene_intent": "explanation",
+      "confidence": 1.0,
+      "visual_objective": "The viewer should see the Moon as a constant, ancient presence, then be drawn into the mystery of its violent origin through the tangible evidence of lunar samples."
+    },
+    "3": {
+      "beat_id": "scene3",
+      "scene_id": 3,
+      "required_entities": [
+        "Earth",
+        "Moon",
+        "Theia"
+      ],
+      "match_terms": {
+        "Earth": [
+          "Earth",
+          "pale blue dot"
+        ],
+        "Moon": [
+          "Moon",
+          "lunar"
+        ],
+        "Theia": [
+          "Theia",
+          "giant impact hypothesis"
+        ]
+      },
+      "optional_entities": [
+        "Mars-sized body",
+        "debris disk",
+        "Apollo 11"
+      ],
+      "prohibited_entities": [
+        "Voyager 1",
+        "Jupiter",
+        "Saturn",
+        "Mars (as the impacting body)"
+      ],
+      "scene_intent": "explanation",
+      "confidence": 1.0,
+      "visual_objective": "The viewer should see the violent collision of a Mars-sized body (Theia) with early Earth, followed by coalescing debris forming the Moon, feeling the scale and drama of the event."
+    },
+    "4": {
+      "beat_id": "scene4",
+      "scene_id": 4,
+      "required_entities": [
+        "Moon",
+        "Moon",
+        "Moon"
+      ],
+      "match_terms": {
+        "Moon": [
+          "Moon",
+          "lunar",
+          "luna",
+          "earth's moon"
+        ]
+      },
+      "optional_entities": [
+        "Earth",
+        "Apollo 11",
+        "Lunar module"
+      ],
+      "prohibited_entities": [
+        "Mars",
+        "Moons of other planets",
+        "Spacecraft other than Moon-related (e.g., Voyager, ISS)"
+      ],
+      "scene_intent": "explanation",
+      "confidence": 1.0,
+      "visual_objective": "Show the Moon slowly rotating with one hemisphere always facing Earth, emphasizing its constant face and the contrast of its hidden side, to convey the mystery of synchronous rotation and the extreme conditions on the surface."
+    },
+    "5": {
+      "beat_id": "scene5",
+      "scene_id": 5,
+      "required_entities": [
+        "Moon"
+      ],
+      "match_terms": {
+        "Moon": [
+          "Moon",
+          "lunar",
+          "luna"
+        ]
+      },
+      "optional_entities": [
+        "sun",
+        "Earth",
+        "Apollo 11",
+        "Antarctica"
+      ],
+      "prohibited_entities": [
+        "Mars",
+        "Venus",
+        "International Space Station",
+        "Comet",
+        "Asteroid"
+      ],
+      "scene_intent": "explanation",
+      "confidence": 1.0,
+      "visual_objective": "The viewer should see the stark, barren lunar surface under extreme glare and then in deep shadow, feeling the harsh temperature contrast and silence."
+    },
+    "6": {
+      "beat_id": "scene6",
+      "scene_id": 6,
+      "required_entities": [
+        "Moon"
+      ],
+      "match_terms": {
+        "Moon": [
+          "Moon",
+          "lunar",
+          "luna"
+        ]
+      },
+      "optional_entities": [
+        "astronaut",
+        "Earth",
+        "Apollo 11"
+      ],
+      "prohibited_entities": [
+        "Mars",
+        "Jupiter",
+        "International Space Station",
+        "Saturn V rocket"
+      ],
+      "scene_intent": "explanation",
+      "confidence": 1.0,
+      "visual_objective": "The viewer should see the Moon as a low-gravity world, feeling the contrast between human scale and lunar conditions\u2014emphasized by a slow, weightless jump or a figure standing on the regolith, with Earth visible in the distance to reinforce the gravity difference."
+    },
+    "7": {
+      "beat_id": "scene7",
+      "scene_id": 7,
+      "required_entities": [
+        "Moon"
+      ],
+      "match_terms": {
+        "Moon": [
+          "Moon",
+          "lunar",
+          "luna"
+        ]
+      },
+      "optional_entities": [
+        "Apollo 11",
+        "Lunar surface"
+      ],
+      "prohibited_entities": [
+        "Earth",
+        "Mars",
+        "Sun",
+        "clouds",
+        "wind"
+      ],
+      "scene_intent": "scale",
+      "confidence": 1.0,
+      "visual_objective": "The viewer should see the Moon as a massive, silent, barren sphere in space, feeling its immense size and emptiness without any atmospheric features."
+    },
+    "8": {
+      "beat_id": "scene8",
+      "scene_id": 8,
+      "required_entities": [
+        "Apollo 11",
+        "Moon"
+      ],
+      "match_terms": {
+        "Apollo 11": [
+          "Apollo 11",
+          "apollo",
+          "saturn v",
+          "lunar module",
+          "eagle"
+        ],
+        "Moon": [
+          "Moon",
+          "lunar",
+          "luna"
+        ]
+      },
+      "optional_entities": [
+        "Apollo 12",
+        "Apollo 17",
+        "astronaut footprint",
+        "lunar surface"
+      ],
+      "prohibited_entities": [
+        "Mars",
+        "International Space Station",
+        "Voyager",
+        "Saturn (planet)",
+        "Space Shuttle"
+      ],
+      "scene_intent": "emotion",
+      "confidence": 1.0,
+      "visual_objective": "Show the Moon in a vast, silent, and empty way, with a single fleeting human presence (like a footprint or a distant Apollo lander) to evoke the loneliness and abandonment after the last human visit."
+    },
+    "9": {
+      "beat_id": "scene9",
+      "scene_id": 9,
+      "required_entities": [
+        "Moon",
+        "Apollo 11"
+      ],
+      "match_terms": {
+        "Moon": [
+          "Moon",
+          "lunar",
+          "luna"
+        ],
+        "Apollo 11": [
+          "Apollo 11",
+          "apollo",
+          "lunar module",
+          "eagle"
+        ]
+      },
+      "optional_entities": [
+        "Earth",
+        "astronaut footprint",
+        "lunar surface"
+      ],
+      "prohibited_entities": [
+        "Mars",
+        "Voyager 1",
+        "International Space Station"
+      ],
+      "scene_intent": "emotion",
+      "confidence": 1.0,
+      "visual_objective": "The viewer should see the Moon in isolation, with a sense of silence and mystery, perhaps with a subtle nod to Apollo 11's legacy, feeling both awe and the unanswered question of humanity's lunar future."
+    }
+  },
+  "camera_diversity": {
+    "moves": 18,
+    "entropy": 2.441,
+    "normalized_entropy": 0.944,
+    "repetitive": false,
+    "distribution": {
+      "reveal": 5,
+      "push_in": 4,
+      "crane_up": 1,
+      "pull_out": 3,
+      "pan_right": 3,
+      "parallax": 2
+    }
+  },
+  "diversity": {
+    "asset_diversity": 1.0,
+    "transition_diversity": 0.998,
+    "motion_diversity": 0.92,
+    "shot_duration_mean_s": 5.71,
+    "shot_duration_std_s": 0.96,
+    "shot_count": 21
+  },
+  "retention_diagnostic": {
+    "novelty_density_per_10s": 1.82,
+    "longest_hold_s": 10.3,
+    "dead_air_s": 0.0,
+    "shots": 21,
+    "benchmark": {
+      "hook_window_s": 15,
+      "max_hold_s": 8.0,
+      "target_novelty_per_10s": 1.5
+    },
+    "flags": [
+      "longest hold 10.3s > 8s (drop-off risk)"
+    ]
+  },
+  "disclosure": {
+    "synthetic_content": true,
+    "disclosure_label": "AI-generated content: synthetic narration, AI-assisted visuals and sound design",
+    "no_fakes_compliant": true,
+    "generated_at": "2026-08-04T09:09:33Z",
+    "pipeline": "jade-studio/v8"
+  },
+  "publish_gate": {
+    "passed": true,
+    "blocking_failures": [],
+    "checks": [
+      {
+        "name": "encoding",
+        "passed": true,
+        "detail": "v=h264 a=aac",
+        "metrics": {
+          "duration_s": 111.7,
+          "resolution": [
+            1920,
+            1080
+          ]
+        }
+      },
+      {
+        "name": "resolution",
+        "passed": true,
+        "detail": "1920x1080",
+        "metrics": {}
+      },
+      {
+        "name": "repeated_assets",
+        "passed": true,
+        "detail": "no repeats",
+        "metrics": {
+          "repeats": {}
+        }
+      },
+      {
+        "name": "frozen_shots",
+        "passed": true,
+        "detail": "no frozen shots",
+        "metrics": {
+          "frozen_runs": [],
+          "frames_sampled": 8
+        }
+      },
+      {
+        "name": "excessive_static",
+        "passed": true,
+        "detail": "longest static window: 0.0s (limit 8.0s)",
+        "metrics": {
+          "longest_static_s": 0
+        }
+      },
+      {
+        "name": "silence",
+        "passed": true,
+        "detail": "max_volume=-1.1 dB (silence < -50.0 dB)",
+        "metrics": {
+          "max_db": -1.1,
+          "mean_db": -17.0
+        }
+      },
+      {
+        "name": "clipping",
+        "passed": true,
+        "detail": "max_volume=-1.1 dB (clip >= -0.5 dB)",
+        "metrics": {
+          "max_db": -1.1
+        }
+      },
+      {
+        "name": "hook_strength",
+        "passed": true,
+        "detail": "hook window (15s): 2 distinct visuals (need >= 2)",
+        "metrics": {
+          "distinct_in_hook": 2,
+          "shots_in_hook": 2
+        }
+      },
+      {
+        "name": "voice_consistency",
+        "passed": true,
+        "detail": "single locked voice",
+        "metrics": {}
+      },
+      {
+        "name": "style_locked",
+        "passed": true,
+        "detail": "0 placed stills, 0 drifted",
+        "metrics": {}
+      },
+      {
+        "name": "manim_registered",
+        "passed": true,
+        "detail": "1 Manim clip(s) in final timeline",
+        "metrics": {}
+      },
+      {
+        "name": "dead_air_audio",
+        "passed": true,
+        "detail": "no dead-air runs in mastered audio",
+        "metrics": {
+          "runs": []
+        }
+      },
+      {
+        "name": "opening_black_frames",
+        "passed": true,
+        "detail": "opening mean luma 255.0 (black < 12.0)",
+        "metrics": {}
+      }
+    ],
+    "publish_ready": true
+  },
+  "cleanup": {
+    "policy": "keep-final-only",
+    "kept": "the_moon__earth_s_silent_companion_mixed.mp4"
+  },
+  "degradations": [
+    {
+      "stage": "asset_dedup",
+      "severity": "info",
+      "detail": "16 near-identical assets skipped (perceptual dedup)"
+    }
+  ],
+  "final": {
+    "output": "results/the_moon__earth_s_silent_companion/the_moon__earth_s_silent_companion_mixed.mp4",
+    "iterations": 2,
+    "final_score": 72,
+    "duration_s": 111.7,
+    "visual_stats": {
+      "manim": 1,
+      "nasa": 0,
+      "wikimedia": 0,
+      "ai": 0,
+      "video_fallback": 0,
+      "rejected": 0,
+      "vision_checked": 0,
+      "deduped": 16,
+      "cached": 18
+    }
+  },
+  "llm_usage_deepseek": {
+    "stages": {
+      "spec_build": {
+        "calls": 10,
+        "input": 12524,
+        "output": 1688,
+        "cached": 0,
+        "cost_usd": 0.002226
+      }
+    },
+    "total": {
+      "calls": 10,
+      "input": 12524,
+      "output": 1688,
+      "cached": 0,
+      "cost_usd": 0.002226
+    }
+  },
+  "postmortem": "/home/ubuntu/video_engine/src/docs/mission/postmortems/postmortem-the-moon-earth-s-silent-companion-stills-first.md"
+}

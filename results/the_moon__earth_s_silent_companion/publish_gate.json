@@ -1,0 +1,108 @@
+{
+  "passed": true,
+  "blocking_failures": [],
+  "checks": [
+    {
+      "name": "encoding",
+      "passed": true,
+      "detail": "v=h264 a=aac",
+      "metrics": {
+        "duration_s": 111.7,
+        "resolution": [
+          1920,
+          1080
+        ]
+      }
+    },
+    {
+      "name": "resolution",
+      "passed": true,
+      "detail": "1920x1080",
+      "metrics": {}
+    },
+    {
+      "name": "repeated_assets",
+      "passed": true,
+      "detail": "no repeats",
+      "metrics": {
+        "repeats": {}
+      }
+    },
+    {
+      "name": "frozen_shots",
+      "passed": true,
+      "detail": "no frozen shots",
+      "metrics": {
+        "frozen_runs": [],
+        "frames_sampled": 8
+      }
+    },
+    {
+      "name": "excessive_static",
+      "passed": true,
+      "detail": "longest static window: 0.0s (limit 8.0s)",
+      "metrics": {
+        "longest_static_s": 0
+      }
+    },
+    {
+      "name": "silence",
+      "passed": true,
+      "detail": "max_volume=-1.1 dB (silence < -50.0 dB)",
+      "metrics": {
+        "max_db": -1.1,
+        "mean_db": -17.0
+      }
+    },
+    {
+      "name": "clipping",
+      "passed": true,
+      "detail": "max_volume=-1.1 dB (clip >= -0.5 dB)",
+      "metrics": {
+        "max_db": -1.1
+      }
+    },
+    {
+      "name": "hook_strength",
+      "passed": true,
+      "detail": "hook window (15s): 2 distinct visuals (need >= 2)",
+      "metrics": {
+        "distinct_in_hook": 2,
+        "shots_in_hook": 2
+      }
+    },
+    {
+      "name": "voice_consistency",
+      "passed": true,
+      "detail": "single locked voice",
+      "metrics": {}
+    },
+    {
+      "name": "style_locked",
+      "passed": true,
+      "detail": "0 placed stills, 0 drifted",
+      "metrics": {}
+    },
+    {
+      "name": "manim_registered",
+      "passed": true,
+      "detail": "1 Manim clip(s) in final timeline",
+      "metrics": {}
+    },
+    {
+      "name": "dead_air_audio",
+      "passed": true,
+      "detail": "no dead-air runs in mastered audio",
+      "metrics": {
+        "runs": []
+      }
+    },
+    {
+      "name": "opening_black_frames",
+      "passed": true,
+      "detail": "opening mean luma 255.0 (black < 12.0)",
+      "metrics": {}
+    }
+  ],
+  "publish_ready": true
+}

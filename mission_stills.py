@@ -186,6 +186,7 @@ MANIM_SCENES = {
     "pulsar_lighthouse": "cache/manim/pulsar_lighthouse.mp4",
     "pulsar_density": "cache/manim/pulsar_density.mp4",
     "black_hole_lensing": "cache/manim/black_hole_lensing.mp4",
+    "moon_phases": "cache/manim/moon_phases.mp4",
 }
 
 # Topic -> Manim scenes (intent-mapped).  General registry: adding a new
@@ -200,6 +201,9 @@ TOPIC_MANIM = {
     "black_holes": {"explanation": "black_hole_lensing", "structure": "black_hole_lensing",
                  "emotion": "black_hole_lensing", "journey": "black_hole_lensing",
                  "scale": "black_hole_lensing"},
+    "moon":    {"explanation": "moon_phases", "journey": "moon_phases",
+                 "emotion": "moon_phases", "scale": "moon_phases",
+                 "structure": "moon_phases"},
 }
 
 # Which topic a given text belongs to (keyword hints, general-purpose).
@@ -218,6 +222,9 @@ _TOPIC_HINTS = {
                  "beam", "dense", "teaspoon", "magnetar", "supernova remnant"),
     "black_holes": ("black hole", "event horizon", "singularity", "accretion",
                  "spacetime", "lensing", "photon ring", "gravitational"),
+    "moon":    ("the moon", "lunar", "moon's", "apollo", "craters",
+                 "maria", "regolith", "tidal locking", "moon phases",
+                 "earth's companion"),
 }
 
 # Pinned stills: real NASA assets that must NOT be overwritten by the
@@ -515,7 +522,13 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
             fname = f"scene{i}_{still_count}.jpg"
             out = os.path.join(still_root, fname)
             got, src, title = "", "", ""
-            if fname in pinned and os.path.exists(out) and os.path.getsize(out) > 15000:
+            # v9.1: reuse topic-scoped cached stills from an interrupted run
+            # (same safety bar as pinned: existing file > 15 KB).  Avoids
+            # re-downloading every still after a crash/rerun.
+            if os.path.exists(out) and os.path.getsize(out) > 15000:
+                got, src, title = out, "cached", "cached still"
+                print(f"  [CACHE] {fname} reused from topic cache")
+            elif fname in pinned and os.path.exists(out) and os.path.getsize(out) > 15000:
                 got, src = out, "nasa_pinned"
                 title = pinned[fname]
                 print(f"  [PIN] {fname} kept ({pinned[fname]})")
@@ -545,7 +558,13 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                 # safest assets by construction — pre-verified like pinned
                 # human-approved images.  Without this, the metadata gate
                 # rejects every AI still when vision is down (score ~0.33).
-                pre_verified = fname in pinned or kind == "ai"
+                # Cached stills were already verified against this topic's
+                # EntitySpecs on their first fetch — treat as pre-verified
+                # too (otherwise a rerun re-rejects them with a placeholder
+                # title and the scene stalls).  NOTE: check ``src`` not
+                # ``kind`` — the cache-reuse branch sets src="cached" while
+                # kind still reflects the plan tuple ("nasa"/"wiki"/"ai").
+                pre_verified = fname in pinned or src in ("ai", "cached")
                 ver = gates.verify_asset(
                     spec, asset_path=got, title=title, filename=fname,
                     provider=src, query_used=query, pre_verified=pre_verified,
@@ -757,9 +776,14 @@ def main():
     ap.add_argument("--topic", default="Voyager 1: the farthest human-made object")
     ap.add_argument("--out", default=None)
     ap.add_argument("--provider", default=None)
+    ap.add_argument("--target-seconds", type=float, default=None,
+                    help="Target narration runtime in seconds (scales scenes+words; default 60)")
     ap.add_argument("--reuse", action="store_true",
                     help="Reuse cached script/stills/audio from a previous run (A/B motion re-render)")
     args = ap.parse_args()
+
+    if args.target_seconds:
+        M.set_target_duration(args.target_seconds)
 
     topic = args.topic
     slug = "".join(c if c.isalnum() else "_" for c in topic.lower())[:40].strip("_")
@@ -769,7 +793,7 @@ def main():
     mixed_path = os.path.join(out_dir, f"{slug}_mixed.mp4")
     timeline_path = os.path.join(out_dir, "timeline.json")
     run_report = {"topic": topic, "started_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-                  "strategy": "stills_first", "stages": {}}
+                  "strategy": "stills_first", "stages": {}, "errors": []}
 
     mods = M._imports()
     factory = mods["ProviderFactory"]()
@@ -801,7 +825,7 @@ def main():
             print(f"  !! Post-review over budget ({total_words} words) — compressing")
             compress = llm.generate_json(
                 "Condense this script to at most " + str(M.MAX_SCRIPT_WORDS) +
-                " words total, keeping all facts and the 5-scene structure. "
+                " words total, keeping all facts and the " + str(M.SCENE_COUNT) + "-scene structure. "
                 "Return ONLY the JSON array of scenes with title/narration/visual_goal/search_queries.\n" +
                 json.dumps({"scenes": scenes_data})[:6000]
             )
@@ -810,7 +834,7 @@ def main():
                 data2 = json.loads(compress)
                 scenes2 = data2.get("scenes", []) if isinstance(data2, dict) else (data2 if isinstance(data2, list) else [])
                 w2 = sum(len(s.get("narration", "").split()) for s in scenes2)
-                if len(scenes2) == 5 and w2 <= M.MAX_SCRIPT_WORDS + 10:
+                if len(scenes2) == M.SCENE_COUNT and w2 <= M.MAX_SCRIPT_WORDS + 10:
                     scenes_data = M._merge_scene_meta(scenes_data, scenes2)
                     print(f"  Compressed to {w2} words")
                     compressed_ok = True
@@ -897,7 +921,14 @@ def main():
         for i, s in enumerate(scenes_data):
             ap = os.path.join("cache", "audio", f"scene_{i}.wav")
             audio_durations.append(M._probe_duration(ap))
-        narration_stats = {"provider": "cached"}
+            # v9.1: cached audio was Chatterbox-generated — record it on
+            # the voice lock so the pre-render gate isn't vacuous and the
+            # episode's identity stays truthful.
+            if voice_lock is not None:
+                voice_lock.record_scene(i, "chatterbox", "resemble")
+        if voice_lock is not None:
+            voice_lock.save()
+        narration_stats = {"provider": "cached(chatterbox)"}
     else:
         audio_durations, narration_stats = M.stage_narration_dynamic(
             scenes_data, "cache/audio", provider="chatterbox",

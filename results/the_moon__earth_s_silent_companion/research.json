@@ -1,0 +1,166 @@
+{
+  "facts": [
+    {
+      "claim": "Average distance from Earth to Moon",
+      "value": 384400,
+      "unit": "km",
+      "source": "NASA",
+      "year": 2024,
+      "confidence": 0.99,
+      "verified": true,
+      "verification_notes": "The commonly cited average distance is about 384,400 km, consistent with NASA data."
+    },
+    {
+      "claim": "Escape velocity from Moon's surface",
+      "value": 2.38,
+      "unit": "km/s",
+      "source": "NASA",
+      "year": 2024,
+      "confidence": 0.99,
+      "verified": true,
+      "verification_notes": "The escape velocity from the Moon is approximately 2.38 km/s."
+    },
+    {
+      "claim": "Surface gravity of Moon (relative to Earth's)",
+      "value": 0.1654,
+      "unit": "g",
+      "source": "NASA",
+      "year": 2024,
+      "confidence": 0.99,
+      "verified": true,
+      "verification_notes": "Moon's surface gravity is about 1.62 m/s\u00b2, which is 0.1654 times Earth's 9.8 m/s\u00b2."
+    },
+    {
+      "claim": "Time for Apollo 11 crew to reach Moon after launch",
+      "value": 76,
+      "unit": "hours",
+      "source": "NASA",
+      "year": 1969,
+      "confidence": 0.98,
+      "verified": true,
+      "verification_notes": "Apollo 11 took approximately 76 hours from launch to lunar orbit insertion."
+    },
+    {
+      "claim": "Year of first human landing on the Moon (Apollo 11)",
+      "value": 1969,
+      "unit": "year",
+      "source": "NASA",
+      "year": 1969,
+      "confidence": 1.0,
+      "verified": true,
+      "verification_notes": "Apollo 11 landed on July 20, 1969."
+    },
+    {
+      "claim": "Number of humans who have walked on the Moon (as of 2024)",
+      "value": 12,
+      "unit": "people",
+      "source": "NASA",
+      "year": 2024,
+      "confidence": 1.0,
+      "verified": true,
+      "verification_notes": "Twelve astronauts walked on the Moon from Apollo 11 to Apollo 17."
+    },
+    {
+      "claim": "Mass of the Moon",
+      "value": 7.342,
+      "unit": "10^22 kg",
+      "source": "NASA",
+      "year": 2024,
+      "confidence": 0.99,
+      "verified": true,
+      "verification_notes": "The Moon's mass is 7.342 \u00d7 10^22 kg, a well-established value."
+    },
+    {
+      "claim": "Equatorial radius of the Moon",
+      "value": 1737.4,
+      "unit": "km",
+      "source": "NASA",
+      "year": 2024,
+      "confidence": 0.99,
+      "verified": true,
+      "verification_notes": "The Moon's equatorial radius is approximately 1737.4 km."
+    },
+    {
+      "claim": "Synchronous rotation period (sidereal) of the Moon",
+      "value": 27.32,
+      "unit": "days",
+      "source": "NASA",
+      "year": 2024,
+      "confidence": 0.99,
+      "verified": true,
+      "verification_notes": "The sidereal rotation period is about 27.32 days."
+    },
+    {
+      "claim": "Age of the Moon (from Apollo sample dating)",
+      "value": 4.5,
+      "unit": "billion years",
+      "source": "NASA",
+      "year": 2024,
+      "confidence": 0.95,
+      "verified": true,
+      "verification_notes": "Radiometric dating of Apollo samples indicates the Moon is about 4.5 billion years old, consistent with the solar system's age."
+    },
+    {
+      "claim": "Temperature range on the Moon (equator, daylight vs night)",
+      "value": -173,
+      "unit": "\u00b0C (min)",
+      "source": "NASA",
+      "year": 2024,
+      "confidence": 0.97,
+      "verified": true,
+      "verification_notes": "The minimum temperature at the equator can drop to about -173\u00b0C during the lunar night."
+    },
+    {
+      "claim": "Total mass of lunar regolith returned by Apollo missions",
+      "value": 382,
+      "unit": "kg",
+      "source": "NASA",
+      "year": 2024,
+      "confidence": 1.0,
+      "verified": true,
+      "verification_notes": "Apollo missions returned about 382 kg of lunar samples."
+    },
+    {
+      "claim": "First human on the Moon: Neil Armstrong (Apollo 11)",
+      "value": 1,
+      "unit": "person",
+      "source": "NASA",
+      "year": 1969,
+      "confidence": 1.0,
+      "verified": true,
+      "verification_notes": "Neil Armstrong was the first person to walk on the Moon on July 20, 1969."
+    },
+    {
+      "claim": "First spacecraft to reach Moon (Luna 2, 1959)",
+      "value": 1959,
+      "unit": "year",
+      "source": "NASA",
+      "year": 1959,
+      "confidence": 1.0,
+      "verified": true,
+      "verification_notes": "Luna 2 was the first spacecraft to reach the Moon in 1959."
+    }
+  ],
+  "hook_ideas": [
+    "A silent companion: the Moon is slowly moving away from Earth at 3.8 cm per year \u2014 enough to shift a two-hour documentary into a 30-second beat.",
+    "The Moon's near and far sides look so different that a major mystery remains: why is the near side covered in dark basaltic plains?",
+    "12 humans walked on the Moon \u2014 less than the number of people who have been in space for more than 6 months at a time.",
+    "The Moon is the only other world where humans have left footprints \u2014 but those footprints will last for millions of years due to no wind or water."
+  ],
+  "misconceptions": [
+    "The Moon has no dark side \u2014 it has a far side, but it receives as much sunlight as the near side over a month.",
+    "The Moon is not the main cause of earthquakes (tidal forces are real but minor; most quakes are tectonic).",
+    "It is a myth that a full moon causes mental health breakdowns \u2014 extensive studies show no statistical correlation.",
+    "The Moon is not slowly shrinking out of existence \u2014 it is, but at a glacial pace (about 50 m in radius over the last few billion years)."
+  ],
+  "key_sources": [
+    "NASA - Moon Fact Sheet (2024)",
+    "NASA - Apollo Mission Archives (2024)",
+    "ESA - Lunar Exploration (2024)",
+    "International Astronomical Union - Gazetteer of Planetary Nomenclature (2024)",
+    "Nature Geoscience - 'The Moon's receding speed' (2020)"
+  ],
+  "_elapsed_s": 9.0,
+  "_verification_failed": false,
+  "_verification_elapsed_s": 4.7
+}

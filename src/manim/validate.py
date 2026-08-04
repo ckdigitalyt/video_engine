@@ -136,8 +136,17 @@ def validate_manim_script(script_path: str) -> ManimValidation:
 
     # ── 3. Required structure: Scene subclass with construct ───────────
     scene_classes = [n for n in tree.body if isinstance(n, ast.ClassDef)
-                     and any(isinstance(b, ast.Name) and b.id == "Scene"
+                     and any((isinstance(b, ast.Name) and b.id == "Scene") or
+                             (isinstance(b, ast.Attribute) and b.attr == "Scene")
+                             or (isinstance(b, ast.Name) and "Scene" in b.id)
                              for b in n.bases)]
+    # Accept common Scene subclasses too (MovingCameraScene, ZoomedScene,
+    # ThreeDScene, VectorScene, ...) — all inherit from Scene and render
+    # identically for our purposes.
+    if not scene_classes:
+        scene_classes = [n for n in tree.body if isinstance(n, ast.ClassDef)
+                         and any(isinstance(b, ast.Name) and "Scene" in b.id
+                                 for b in n.bases)]
     if not scene_classes:
         v.errors.append("no Scene subclass found")
         return v

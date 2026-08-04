@@ -1,0 +1,233 @@
+[duration] target=120s scenes=10 words 282-330
+[asset_router] Loaded env vars from /home/ubuntu/video_engine/.env
+  [reuse] Loading cached script_final.json + cached stills/audio
+  [spec] scene0: intent=reveal req=['Luna 2', 'Moon'] prohib=['Apollo 11', 'Buzz Aldrin', 'Neil Armstrong']
+  [spec] scene1: intent=emotion req=['Apollo 11', 'Neil Armstrong', 'Moon'] prohib=['Apollo 13', 'International Space Station', 'Mars']
+  [spec] scene2: intent=explanation req=['Moon', 'Apollo 11', 'Moon rock'] prohib=['Mars', 'Voyager 1', 'International Space Station']
+  [spec] scene3: intent=explanation req=['Moon', 'Mars-sized body', 'Earth'] prohib=['Saturn', 'Jupiter', 'Mars rover']
+  [spec] scene4: intent=explanation req=['Moon'] prohib=['Mars', 'Sun', 'International Space Station']
+  [spec] scene5: intent=explanation req=['Moon'] prohib=['Mars', 'Venus', 'Earthrise (if depicted as seen from lunar surface)']
+  [spec] scene6: intent=explanation req=['Moon'] prohib=['Mars', 'Jupiter', 'Apollo 11']
+  [spec] scene7: intent=scale req=['Moon', 'Apollo 11'] prohib=['Mars', 'International Space Station', 'Saturn V rocket']
+  [spec] scene8: intent=exploration req=['Apollo 11', 'Moon'] prohib=['Mars', 'Voyager', 'International Space Station']
+  [spec] scene9: intent=emotion req=['Moon'] prohib=['Mars', 'Sun', 'spacecraft other than Apollo 11']
+
+[5-9/16] STILLS-FIRST VISUAL PLANNING (NASA/Wikimedia/AI + Manim)
+  [CACHE] scene0_0.jpg reused from topic cache
+  [gate] !! REJECT scene0_0.jpg: ['vision unavailable (Extra data: line 7 column 1 (char 438)); metadata fallback score=0.34 (REJECT — insufficient evidence)']
+  [gate] rejected scene0_0.jpg (['vision unavailable (Extra data: line 7 column 1 (char 438)); metadata fallback score=0.34 (REJECT — insufficient evidence)'])
+  [CACHE] scene0_0.jpg reused from topic cache
+  [gate] !! REJECT scene0_0.jpg: ['fatal: vision check failed (Apollo 11 landing site on the Moon)']
+  [gate] rejected scene0_0.jpg (['fatal: vision check failed (Apollo 11 landing site on the Moon)'])
+  [CACHE] scene0_0.jpg reused from topic cache
+  [gate] !! REJECT scene0_0.jpg: ["vision unavailable (429 RESOURCE_EXHAUSTED. {'error': {'code); metadata fallback score=0.34 (REJECT — insufficient evidence)"]
+  [gate] rejected scene0_0.jpg (["vision unavailable (429 RESOURCE_EXHAUSTED. {'error': {'code); metadata fallback score=0.34 (REJECT — insufficient evidence)"])
+  [CACHE] scene0_0.jpg reused from topic cache
+  [gate] !! REJECT scene0_0.jpg: ['fatal: vision check failed (Apollo 11 landing site on the Moon)']
+  [gate] rejected scene0_0.jpg (['fatal: vision check failed (Apollo 11 landing site on the Moon)'])
+  [CACHE] scene0_0.jpg reused from topic cache
+  [gate] !! REJECT scene0_0.jpg: ["vision unavailable (429 RESOURCE_EXHAUSTED. {'error': {'code); metadata fallback score=0.24 (REJECT — insufficient evidence)"]
+  [gate] rejected scene0_0.jpg (["vision unavailable (429 RESOURCE_EXHAUSTED. {'error': {'code); metadata fallback score=0.24 (REJECT — insufficient evidence)"])
+  [CACHE] scene0_0.jpg reused from topic cache
+  [gate] !! REJECT scene0_0.jpg: ['fatal: vision check failed (Apollo 11 landing site on the Moon showing the Lunar Module descent stage)']
+  [gate] rejected scene0_0.jpg (['fatal: vision check failed (Apollo 11 landing site on the Moon showing the Lunar Module descent stage)'])
+  [CACHE] scene0_0.jpg reused from topic cache
+  [gate] !! REJECT scene0_0.jpg: ["vision unavailable (429 RESOURCE_EXHAUSTED. {'error': {'code); metadata fallback score=0.34 (REJECT — insufficient evidence)"]
+  [gate] rejected scene0_0.jpg (["vision unavailable (429 RESOURCE_EXHAUSTED. {'error': {'code); metadata fallback score=0.34 (REJECT — insufficient evidence)"])
+  [CACHE] scene0_0.jpg reused from topic cache
+  [vision] circuit breaker tripped after 2 errors
+  [gate] !! REJECT scene0_0.jpg: ["vision unavailable (429 RESOURCE_EXHAUSTED. {'error': {'code); metadata fallback score=0.34 (REJECT — insufficient evidence)"]
+  [gate] rejected scene0_0.jpg (["vision unavailable (429 RESOURCE_EXHAUSTED. {'error': {'code); metadata fallback score=0.34 (REJECT — insufficient evidence)"])
+  [CACHE] scene0_0.jpg reused from topic cache
+  [gate] !! REJECT scene0_0.jpg: ["unverified: score=0.34, missing=['Luna 2']"]
+  [gate] rejected scene0_0.jpg (["unverified: score=0.34, missing=['Luna 2']"])
+  [CACHE] scene0_0.jpg reused from topic cache
+  [gate] !! REJECT scene0_0.jpg: ["unverified: score=0.34, missing=['Luna 2']"]
+  [gate] rejected scene0_0.jpg (["unverified: score=0.34, missing=['Luna 2']"])
+  [CACHE] scene0_0.jpg reused from topic cache
+  [coverage] scene0: narration ~16s, added push_in variant of same asset (visual change)
+  [CACHE] scene1_0.jpg reused from topic cache
+  [gate] !! REJECT scene1_0.jpg: ["unverified: score=0.34, missing=['Neil Armstrong', 'Moon']"]
+  [gate] rejected scene1_0.jpg (["unverified: score=0.34, missing=['Neil Armstrong', 'Moon']"])
+  [CACHE] scene1_0.jpg reused from topic cache
+  [gate] !! REJECT scene1_0.jpg: ["unverified: score=0.34, missing=['Neil Armstrong', 'Moon']"]
+  [gate] rejected scene1_0.jpg (["unverified: score=0.34, missing=['Neil Armstrong', 'Moon']"])
+  [CACHE] scene1_0.jpg reused from topic cache
+  [gate] !! REJECT scene1_0.jpg: ["unverified: score=0.34, missing=['Apollo 11']"]
+  [gate] rejected scene1_0.jpg (["unverified: score=0.34, missing=['Apollo 11']"])
+  [CACHE] scene1_0.jpg reused from topic cache
+  [gate] !! REJECT scene1_0.jpg: ["unverified: score=0.34, missing=['Apollo 11']"]
+  [gate] rejected scene1_0.jpg (["unverified: score=0.34, missing=['Apollo 11']"])
+  [CACHE] scene1_0.jpg reused from topic cache
+  [gate] !! REJECT scene1_0.jpg: ["unverified: score=0.24, missing=['Apollo 11', 'Neil Armstrong']"]
+  [gate] rejected scene1_0.jpg (["unverified: score=0.24, missing=['Apollo 11', 'Neil Armstrong']"])
+  [CACHE] scene1_0.jpg reused from topic cache
+  [gate] !! REJECT scene1_0.jpg: ["unverified: score=0.24, missing=['Apollo 11', 'Neil Armstrong']"]
+  [gate] rejected scene1_0.jpg (["unverified: score=0.24, missing=['Apollo 11', 'Neil Armstrong']"])
+  [CACHE] scene1_0.jpg reused from topic cache
+  [gate] !! REJECT scene1_0.jpg: ["unverified: score=0.34, missing=['Neil Armstrong', 'Moon']"]
+  [gate] rejected scene1_0.jpg (["unverified: score=0.34, missing=['Neil Armstrong', 'Moon']"])
+  [CACHE] scene1_0.jpg reused from topic cache
+  [gate] !! REJECT scene1_0.jpg: ["unverified: score=0.34, missing=['Neil Armstrong', 'Moon']"]
+  [gate] rejected scene1_0.jpg (["unverified: score=0.34, missing=['Neil Armstrong', 'Moon']"])
+  [CACHE] scene1_0.jpg reused from topic cache
+  [gate] !! REJECT scene1_0.jpg: ["unverified: score=0.34, missing=['Apollo 11', 'Moon']"]
+  [gate] rejected scene1_0.jpg (["unverified: score=0.34, missing=['Apollo 11', 'Moon']"])
+  [CACHE] scene1_0.jpg reused from topic cache
+  [gate] !! REJECT scene1_0.jpg: ["unverified: score=0.34, missing=['Apollo 11', 'Moon']"]
+  [gate] rejected scene1_0.jpg (["unverified: score=0.34, missing=['Apollo 11', 'Moon']"])
+  [CACHE] scene1_0.jpg reused from topic cache
+  [coverage] scene1: narration ~13s, added push_in variant of same asset (visual change)
+  [CACHE] scene2_0.jpg reused from topic cache
+  [CACHE] scene2_1.jpg reused from topic cache
+  [gate] !! REJECT scene2_1.jpg: ["unverified: score=0.34, missing=['Apollo 11', 'Moon rock']"]
+  [gate] rejected scene2_1.jpg (["unverified: score=0.34, missing=['Apollo 11', 'Moon rock']"])
+  [CACHE] scene2_1.jpg reused from topic cache
+  [gate] !! REJECT scene2_1.jpg: ["unverified: score=0.34, missing=['Apollo 11', 'Moon rock']"]
+  [gate] rejected scene2_1.jpg (["unverified: score=0.34, missing=['Apollo 11', 'Moon rock']"])
+  [CACHE] scene2_1.jpg reused from topic cache
+  [gate] !! REJECT scene2_1.jpg: ["unverified: score=0.34, missing=['Apollo 11', 'Moon rock']"]
+  [gate] rejected scene2_1.jpg (["unverified: score=0.34, missing=['Apollo 11', 'Moon rock']"])
+  [CACHE] scene2_1.jpg reused from topic cache
+  [gate] !! REJECT scene2_1.jpg: ["unverified: score=0.34, missing=['Apollo 11', 'Moon rock']"]
+  [gate] rejected scene2_1.jpg (["unverified: score=0.34, missing=['Apollo 11', 'Moon rock']"])
+  [CACHE] scene2_1.jpg reused from topic cache
+  [gate] !! REJECT scene2_1.jpg: ["unverified: score=0.34, missing=['Apollo 11', 'Moon rock']"]
+  [gate] rejected scene2_1.jpg (["unverified: score=0.34, missing=['Apollo 11', 'Moon rock']"])
+  [CACHE] scene2_1.jpg reused from topic cache
+  [gate] !! REJECT scene2_1.jpg: ["unverified: score=0.34, missing=['Apollo 11', 'Moon rock']"]
+  [gate] rejected scene2_1.jpg (["unverified: score=0.34, missing=['Apollo 11', 'Moon rock']"])
+  [CACHE] scene2_1.jpg reused from topic cache
+  [gate] !! REJECT scene2_1.jpg: ["unverified: score=0.34, missing=['Apollo 11', 'Moon rock']"]
+  [gate] rejected scene2_1.jpg (["unverified: score=0.34, missing=['Apollo 11', 'Moon rock']"])
+  [CACHE] scene2_1.jpg reused from topic cache
+  [gate] !! REJECT scene2_1.jpg: ["unverified: score=0.34, missing=['Apollo 11', 'Moon rock']"]
+  [gate] rejected scene2_1.jpg (["unverified: score=0.34, missing=['Apollo 11', 'Moon rock']"])
+  [CACHE] scene2_1.jpg reused from topic cache
+  [gate] !! REJECT scene2_1.jpg: ["unverified: score=0.34, missing=['Moon', 'Moon rock']"]
+  [gate] rejected scene2_1.jpg (["unverified: score=0.34, missing=['Moon', 'Moon rock']"])
+  [CACHE] scene2_1.jpg reused from topic cache
+  [gate] !! REJECT scene2_1.jpg: ["unverified: score=0.34, missing=['Moon', 'Moon rock']"]
+  [gate] rejected scene2_1.jpg (["unverified: score=0.34, missing=['Moon', 'Moon rock']"])
+  [AI] nvidia_nim: scene3_0.jpg (134 KB)
+  [CACHE] scene3_1.jpg reused from topic cache
+  [gate] !! REJECT scene3_1.jpg: ["unverified: score=0.24, missing=['Moon', 'Earth']"]
+  [gate] rejected scene3_1.jpg (["unverified: score=0.24, missing=['Moon', 'Earth']"])
+  [CACHE] scene3_1.jpg reused from topic cache
+  [gate] !! REJECT scene3_1.jpg: ["unverified: score=0.24, missing=['Moon', 'Earth']"]
+  [gate] rejected scene3_1.jpg (["unverified: score=0.24, missing=['Moon', 'Earth']"])
+  [CACHE] scene3_1.jpg reused from topic cache
+  [gate] !! REJECT scene3_1.jpg: ["unverified: score=0.34, missing=['Mars-sized body', 'Earth']"]
+  [gate] rejected scene3_1.jpg (["unverified: score=0.34, missing=['Mars-sized body', 'Earth']"])
+  [CACHE] scene3_1.jpg reused from topic cache
+  [gate] !! REJECT scene3_1.jpg: ["unverified: score=0.34, missing=['Mars-sized body', 'Earth']"]
+  [gate] rejected scene3_1.jpg (["unverified: score=0.34, missing=['Mars-sized body', 'Earth']"])
+  [CACHE] scene3_1.jpg reused from topic cache
+  [gate] !! REJECT scene3_1.jpg: ["unverified: score=0.24, missing=['Mars-sized body', 'Earth']"]
+  [gate] rejected scene3_1.jpg (["unverified: score=0.24, missing=['Mars-sized body', 'Earth']"])
+  [CACHE] scene3_1.jpg reused from topic cache
+  [gate] !! REJECT scene3_1.jpg: ["unverified: score=0.24, missing=['Mars-sized body', 'Earth']"]
+  [gate] rejected scene3_1.jpg (["unverified: score=0.24, missing=['Mars-sized body', 'Earth']"])
+  [CACHE] scene3_1.jpg reused from topic cache
+  [gate] !! REJECT scene3_1.jpg: ["unverified: score=0.34, missing=['Mars-sized body', 'Earth']"]
+  [gate] rejected scene3_1.jpg (["unverified: score=0.34, missing=['Mars-sized body', 'Earth']"])
+  [CACHE] scene3_1.jpg reused from topic cache
+  [gate] !! REJECT scene3_1.jpg: ["unverified: score=0.34, missing=['Mars-sized body', 'Earth']"]
+  [gate] rejected scene3_1.jpg (["unverified: score=0.34, missing=['Mars-sized body', 'Earth']"])
+  [CACHE] scene3_1.jpg reused from topic cache
+  [gate] !! REJECT scene3_1.jpg: ["unverified: score=0.34, missing=['Moon', 'Earth']"]
+  [gate] rejected scene3_1.jpg (["unverified: score=0.34, missing=['Moon', 'Earth']"])
+  [CACHE] scene3_1.jpg reused from topic cache
+  [gate] !! REJECT scene3_1.jpg: ["unverified: score=0.34, missing=['Moon', 'Earth']"]
+  [gate] rejected scene3_1.jpg (["unverified: score=0.34, missing=['Moon', 'Earth']"])
+  [CACHE] scene4_0.jpg reused from topic cache
+  [CACHE] scene4_1.jpg reused from topic cache
+  [gate] !! REJECT scene4_1.jpg: ['unverified: score=0.34, missing=[]']
+  [gate] rejected scene4_1.jpg (['unverified: score=0.34, missing=[]'])
+  [CACHE] scene4_1.jpg reused from topic cache
+  [gate] !! REJECT scene4_1.jpg: ['unverified: score=0.34, missing=[]']
+  [gate] rejected scene4_1.jpg (['unverified: score=0.34, missing=[]'])
+  [CACHE] scene4_1.jpg reused from topic cache
+  [gate] !! REJECT scene4_1.jpg: ['unverified: score=0.24, missing=[]']
+  [gate] rejected scene4_1.jpg (['unverified: score=0.24, missing=[]'])
+  [CACHE] scene4_1.jpg reused from topic cache
+  [gate] !! REJECT scene4_1.jpg: ['unverified: score=0.24, missing=[]']
+  [gate] rejected scene4_1.jpg (['unverified: score=0.24, missing=[]'])
+  [CACHE] scene4_1.jpg reused from topic cache
+  [gate] !! REJECT scene4_1.jpg: ['unverified: score=0.34, missing=[]']
+  [gate] rejected scene4_1.jpg (['unverified: score=0.34, missing=[]'])
+  [CACHE] scene4_1.jpg reused from topic cache
+  [gate] !! REJECT scene4_1.jpg: ['unverified: score=0.34, missing=[]']
+  [gate] rejected scene4_1.jpg (['unverified: score=0.34, missing=[]'])
+  [CACHE] scene4_1.jpg reused from topic cache
+  [gate] !! REJECT scene4_1.jpg: ['unverified: score=0.34, missing=[]']
+  [gate] rejected scene4_1.jpg (['unverified: score=0.34, missing=[]'])
+  [CACHE] scene4_1.jpg reused from topic cache
+  [gate] !! REJECT scene4_1.jpg: ['unverified: score=0.34, missing=[]']
+  [gate] rejected scene4_1.jpg (['unverified: score=0.34, missing=[]'])
+  [coverage] scene4: narration ~10s, added push_in variant of same asset (visual change)
+  [CACHE] scene5_0.jpg reused from topic cache
+  [gate] !! REJECT scene5_0.jpg: ['unverified: score=0.34, missing=[]']
+  [gate] rejected scene5_0.jpg (['unverified: score=0.34, missing=[]'])
+  [CACHE] scene5_0.jpg reused from topic cache
+  [gate] !! REJECT scene5_0.jpg: ['unverified: score=0.34, missing=[]']
+  [gate] rejected scene5_0.jpg (['unverified: score=0.34, missing=[]'])
+  [CACHE] scene5_0.jpg reused from topic cache
+  [gate] !! REJECT scene5_0.jpg: ['unverified: score=0.24, missing=[]']
+  [gate] rejected scene5_0.jpg (['unverified: score=0.24, missing=[]'])
+  [CACHE] scene5_0.jpg reused from topic cache
+  [gate] !! REJECT scene5_0.jpg: ['unverified: score=0.24, missing=[]']
+  [gate] rejected scene5_0.jpg (['unverified: score=0.24, missing=[]'])
+  [CACHE] scene5_0.jpg reused from topic cache
+  [gate] !! REJECT scene5_0.jpg: ['unverified: score=0.34, missing=[]']
+  [gate] rejected scene5_0.jpg (['unverified: score=0.34, missing=[]'])
+  [CACHE] scene5_0.jpg reused from topic cache
+  [gate] !! REJECT scene5_0.jpg: ['unverified: score=0.34, missing=[]']
+  [gate] rejected scene5_0.jpg (['unverified: score=0.34, missing=[]'])
+  [CACHE] scene5_0.jpg reused from topic cache
+  [gate] !! REJECT scene5_0.jpg: ['unverified: score=0.34, missing=[]']
+  [gate] rejected scene5_0.jpg (['unverified: score=0.34, missing=[]'])
+  [CACHE] scene5_0.jpg reused from topic cache
+  [gate] !! REJECT scene5_0.jpg: ['unverified: score=0.34, missing=[]']
+  [gate] rejected scene5_0.jpg (['unverified: score=0.34, missing=[]'])
+  [CACHE] scene5_0.jpg reused from topic cache
+  [coverage] scene5: narration ~10s, added pull_out variant of same asset (visual change)
+  [CACHE] scene6_0.jpg reused from topic cache
+  [CACHE] scene6_1.jpg reused from topic cache
+  [gate] !! REJECT scene6_1.jpg: ['unverified: score=0.34, missing=[]']
+  [gate] rejected scene6_1.jpg (['unverified: score=0.34, missing=[]'])
+  [CACHE] scene6_1.jpg reused from topic cache
+  [gate] !! REJECT scene6_1.jpg: ['unverified: score=0.34, missing=[]']
+  [gate] rejected scene6_1.jpg (['unverified: score=0.34, missing=[]'])
+  [CACHE] scene6_1.jpg reused from topic cache
+  [gate] !! REJECT scene6_1.jpg: ['unverified: score=0.24, missing=[]']
+  [gate] rejected scene6_1.jpg (['unverified: score=0.24, missing=[]'])
+  [CACHE] scene6_1.jpg reused from topic cache
+  [gate] !! REJECT scene6_1.jpg: ['unverified: score=0.24, missing=[]']
+  [gate] rejected scene6_1.jpg (['unverified: score=0.24, missing=[]'])
+  [CACHE] scene6_1.jpg reused from topic cache
+  [gate] !! REJECT scene6_1.jpg: ['unverified: score=0.34, missing=[]']
+  [gate] rejected scene6_1.jpg (['unverified: score=0.34, missing=[]'])
+  [CACHE] scene6_1.jpg reused from topic cache
+  [gate] !! REJECT scene6_1.jpg: ['unverified: score=0.34, missing=[]']
+  [gate] rejected scene6_1.jpg (['unverified: score=0.34, missing=[]'])
+  [CACHE] scene6_1.jpg reused from topic cache
+  [gate] !! REJECT scene6_1.jpg: ['unverified: score=0.34, missing=[]']
+  [gate] rejected scene6_1.jpg (['unverified: score=0.34, missing=[]'])
+  [CACHE] scene6_1.jpg reused from topic cache
+  [gate] !! REJECT scene6_1.jpg: ['unverified: score=0.34, missing=[]']
+  [gate] rejected scene6_1.jpg (['unverified: score=0.34, missing=[]'])
+  [coverage] scene6: narration ~11s, added push_in variant of same asset (visual change)
+  [CACHE] scene7_0.jpg reused from topic cache
+  [CACHE] scene7_1.jpg reused from topic cache
+  [gate] !! REJECT scene7_1.jpg: ["unverified: score=0.34, missing=['Apollo 11']"]
+  [gate] rejected scene7_1.jpg (["unverified: score=0.34, missing=['Apollo 11']"])
+  [CACHE] scene7_1.jpg reused from topic cache
+  [gate] !! REJECT scene7_1.jpg: ["unverified: score=0.34, missing=['Apollo 11']"]
+  [gate] rejected scene7_1.jpg (["unverified: score=0.34, missing=['Apollo 11']"])
+  [CACHE] scene7_1.jpg reused from topic cache
+  [gate] !! REJECT scene7_1.jpg: ["unverified: score=0.24, missing=['Apollo 11']"]
+  [gate] rejected scene7_1.jpg (["unverified: score=0.24, missing=['Apollo 11']"])
+  [CACHE] scene7_1.jpg reused from topic cache
+  [gate] !! REJECT scene7_1.jpg: ["unverified: score=0.24, missing=['Apollo 11']"]
+  [gate] rejected scene7_1.jpg (["unverified: score=0.24, missing=['Apollo 11']"])

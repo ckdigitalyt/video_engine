@@ -1,0 +1,80 @@
+[duration] target=120s scenes=10 words 282-330
+[asset_router] Loaded env vars from /home/ubuntu/video_engine/.env
+  [reuse] Loading cached script_final.json + cached stills/audio
+  [spec] scene0: intent=reveal req=['Luna 2', 'Moon'] prohib=['Apollo 11', 'Saturn V rocket', 'astronauts']
+  [spec] scene1: intent=journey req=['Apollo 11', 'Moon', 'Neil Armstrong'] prohib=['Apollo 10', 'Apollo 12', 'Mars']
+  [spec] scene2: intent=hook req=['Moon', 'Apollo 11', 'lunar rock'] prohib=['Mars', 'Voyager 1', 'International Space Station']
+  [spec] scene3: intent=explanation req=['Mars', 'Earth', 'Moon'] prohib=['Apollo 11', 'Saturn V rocket', 'Neil Armstrong']
+  [spec] scene4: intent=explanation req=['Moon', 'Apollo 11'] prohib=['other planet (e.g., Mars)', 'spacecraft that never went to the Moon (e.g., Space Shuttle)']
+  [spec] scene5: intent=explanation req=['Moon'] prohib=['Earth', 'Mars', 'Antarctica']
+  [spec] scene6: intent=explanation req=['Moon', 'astronaut'] prohib=['Mars', 'Jupiter', 'International Space Station']
+  [spec] scene7: intent=scale req=['Moon', 'Earth'] prohib=['Mars', 'Mars rover', 'Venus']
+  [spec] scene8: intent=hook req=['Apollo 11'] prohib=['Voyager 1', 'Mars rover', 'Space Shuttle']
+  [spec] scene9: intent=emotion req=['Moon', 'Earth'] prohib=['Mars', 'Venus', 'Sun']
+
+[5-9/16] STILLS-FIRST VISUAL PLANNING (NASA/Wikimedia/AI + Manim)
+  [CACHE] scene0_0.jpg reused from topic cache
+  [CACHE] scene0_1.jpg reused from topic cache
+  [CACHE] scene1_0.jpg reused from topic cache
+  [CACHE] scene1_1.jpg reused from topic cache
+  [CACHE] scene2_0.jpg reused from topic cache
+  [CACHE] scene2_1.jpg reused from topic cache
+  [CACHE] scene3_0.jpg reused from topic cache
+  [CACHE] scene3_1.jpg reused from topic cache
+  [CACHE] scene4_0.jpg reused from topic cache
+  [CACHE] scene4_1.jpg reused from topic cache
+  [CACHE] scene5_0.jpg reused from topic cache
+  [Wiki] 'Moon surface temperature extremes' → scene5_1.jpg (362 KB) | File:August 2010 CME SDO Multi-Wavelength.jpg | PUBLIC DOMAIN
+  [gate] !! REJECT scene5_1.jpg: ["vision unavailable (429 RESOURCE_EXHAUSTED. {'error': {'code); metadata fallback score=0.34 (REJECT — insufficient evidence)"]
+  [gate] rejected scene5_1.jpg (["vision unavailable (429 RESOURCE_EXHAUSTED. {'error': {'code); metadata fallback score=0.34 (REJECT — insufficient evidence)"])
+  [CACHE] scene5_1.jpg reused from topic cache
+  [CACHE] scene6_0.jpg reused from topic cache
+  [CACHE] scene6_1.jpg reused from topic cache
+  [CACHE] scene7_0.jpg reused from topic cache
+  [CACHE] scene7_1.jpg reused from topic cache
+  [CACHE] scene8_0.jpg reused from topic cache
+  [CACHE] scene8_1.jpg reused from topic cache
+  [dedup] skipped scene8_1.jpg (perceptually identical to a placed still)
+  [CACHE] scene8_1.jpg reused from topic cache
+  [dedup] skipped scene8_1.jpg (perceptually identical to a placed still)
+  [CACHE] scene8_1.jpg reused from topic cache
+  [dedup] skipped scene8_1.jpg (perceptually identical to a placed still)
+  [CACHE] scene8_1.jpg reused from topic cache
+  [dedup] skipped scene8_1.jpg (perceptually identical to a placed still)
+  [CACHE] scene8_1.jpg reused from topic cache
+  [dedup] skipped scene8_1.jpg (perceptually identical to a placed still)
+  [CACHE] scene8_1.jpg reused from topic cache
+  [dedup] skipped scene8_1.jpg (perceptually identical to a placed still)
+  [CACHE] scene9_0.jpg reused from topic cache
+  [NASA] 'Moon' → scene9_1.jpg (248 KB) | Nearside of the Moon
+  [dedup] skipped scene9_1.jpg (perceptually identical to a placed still)
+  [CACHE] scene9_1.jpg reused from topic cache
+  [dedup] skipped scene9_1.jpg (perceptually identical to a placed still)
+  [CACHE] scene9_1.jpg reused from topic cache
+  [dedup] skipped scene9_1.jpg (perceptually identical to a placed still)
+  [CACHE] scene9_1.jpg reused from topic cache
+  [dedup] skipped scene9_1.jpg (perceptually identical to a placed still)
+  [CACHE] scene9_1.jpg reused from topic cache
+  [dedup] skipped scene9_1.jpg (perceptually identical to a placed still)
+  Shots planned: scene0: 2, scene1: 3, scene2: 2, scene3: 2, scene4: 2, scene5: 2, scene6: 2, scene7: 2, scene8: 1, scene9: 1
+  Sources: {'manim': 1, 'nasa': 0, 'wikimedia': 0, 'ai': 0, 'video_fallback': 0, 'rejected': 1, 'vision_checked': 1, 'deduped': 11, 'cached': 18} (148.5s)
+[chatterbox] starting persistent worker (model load ~17s)...
+  [chatterbox] 12.6s audio in 293.5s (ex=0.7, cfg=0.4)
+  [chatterbox] 11.4s audio in 129.1s (ex=0.6, cfg=0.5)
+  [chatterbox] 12.0s audio in 138.8s (ex=0.6, cfg=0.5)
+  [chatterbox] 6.7s audio in 77.1s (ex=0.6, cfg=0.5)
+  [chatterbox] 10.1s audio in 116.0s (ex=0.4, cfg=0.7)
+  [chatterbox] 11.0s audio in 125.2s (ex=0.7, cfg=0.4)
+  [chatterbox] 10.1s audio in 114.9s (ex=0.6, cfg=0.5)
+  [chatterbox] 10.1s audio in 117.1s (ex=0.4, cfg=0.7)
+  [chatterbox] 2.7s audio in 41.3s (ex=0.4, cfg=0.6)
+  [chatterbox] 5.0s audio in 62.2s (ex=0.6, cfg=0.5)
+  Voice tracks: 10 (total 91.6s) [chatterbox]
+  !! PRE-RENDER GATE BLOCKED: ['voice_switching']
+Traceback (most recent call last):
+  File "/home/ubuntu/video_engine/mission_stills.py", line 1309, in <module>
+    main()
+  File "/home/ubuntu/video_engine/mission_stills.py", line 950, in main
+    run_report["errors"].append(f"pre-render gate blocked: {_pre_blockers}")
+    ~~~~~~~~~~^^^^^^^^^^
+KeyError: 'errors'

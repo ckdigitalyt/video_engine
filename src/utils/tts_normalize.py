@@ -137,6 +137,43 @@ def normalize_narration(text: str) -> str:
         return text
     out = text
 
+    # Temperature units BEFORE generic numbers: "127°C" -> "one hundred
+    # twenty-seven degrees Celsius" (Chatterbox read raw °C as "jerry C").
+    out = re.sub(
+        r"\b(\d+(?:\.\d+)?)°\s*C\b",
+        lambda m: f"{_decimal_to_words(m.group(1))} degrees Celsius",
+        out, flags=re.IGNORECASE,
+    )
+    out = re.sub(
+        r"\b(\d+(?:\.\d+)?)°\s*F\b",
+        lambda m: f"{_decimal_to_words(m.group(1))} degrees Fahrenheit",
+        out, flags=re.IGNORECASE,
+    )
+
+    # Scientific notation: "7.3×10^22" / "7.3 x 10^22" -> "seven point
+    # three times ten to the twenty-two" (Chatterbox garbled ^/× symbols).
+    out = re.sub(
+        r"\b(\d+(?:\.\d+)?)\s*[×xX*]\s*10\s*[\^\^]\s*(\d+)\b",
+        lambda m: f"{_decimal_to_words(m.group(1))} times ten to the "
+                  f"{_number_to_words(int(m.group(2))) if int(m.group(2)) < 100 else m.group(2)}",
+        out,
+    )
+    out = re.sub(
+        r"\b(\d+(?:\.\d+)?)e([+-]?\d+)\b",
+        lambda m: f"{_decimal_to_words(m.group(1))} times ten to the "
+                  f"{_number_to_words(abs(int(m.group(2)))) if abs(int(m.group(2))) < 100 else m.group(2)}",
+        out, flags=re.IGNORECASE,
+    )
+
+    # Fractions: "one/six" -> "one sixth" (slash math reads terribly).
+    out = re.sub(
+        r"\b(one|two|three|four|five|six|seven|eight|nine|ten|\d+)\s*[/]\s*(one|two|three|four|five|six|seven|eight|nine|ten|\d+)\b",
+        lambda m: f"{m.group(1)} {_fraction_word(m.group(2))}",
+        out, flags=re.IGNORECASE,
+    )
+
+    # Tilde before numbers: "~16.7" -> "about sixteen point seven".
+    out = re.sub(r"~\s*(\d+(?:\.\d+)?)", lambda m: f"about {m.group(1)}", out)
     # Expand abbreviations (word-boundary aware)
     for abbr, full in sorted(_ABBREVIATIONS.items(), key=lambda kv: -len(kv[0])):
         out = re.sub(rf"\b{re.escape(abbr)}\b", full, out, flags=re.IGNORECASE)
@@ -187,10 +224,57 @@ def normalize_narration(text: str) -> str:
         out,
     )
 
+    # ── Second pass: symbols attached to WORD numbers (the first pass
+    #    only caught digit forms).  "twenty-seven°C", "~seven",
+    #    "three×10^22", "one/six" all survive pass 1 because the numbers
+    #    have already become words by the time the symbol rules run.
+    out = re.sub(
+        r"([a-z]+(?:[- ]?[a-z]+)?)°\s*C\b",
+        lambda m: f"{m.group(1)} degrees Celsius", out, flags=re.IGNORECASE,
+    )
+    out = re.sub(
+        r"([a-z]+(?:[- ]?[a-z]+)?)°\s*F\b",
+        lambda m: f"{m.group(1)} degrees Fahrenheit", out, flags=re.IGNORECASE,
+    )
+    out = re.sub(r"~\s*([a-z-]+)\b", r"about \1", out, flags=re.IGNORECASE)
+    # word-number × 10^word-number (e.g. "three times ten to the twenty-two")
+    out = re.sub(
+        r"\b([a-z-]+)\s*[×xX*]\s*ten\s*[\^\^]\s*([a-z-]+)\b",
+        lambda m: f"{m.group(1)} times ten to the {m.group(2)}", out,
+        flags=re.IGNORECASE,
+    )
+    # fraction word forms: "one sixths" -> "one sixth", "two sixths" stays
+    out = re.sub(
+        r"\b(one|two|three|four|five|six|seven|eight|nine|ten|\d+)\s+(\w+ths)\b",
+        lambda m: f"{m.group(1)} {_fraction_singular(m.group(1), m.group(2))}",
+        out, flags=re.IGNORECASE,
+    )
+
     # Fix spacing artifacts
     out = re.sub(r"\s{2,}", " ", out)
     out = re.sub(r"\s+([,.;:!?])", r"\1", out)
     return out.strip()
+
+
+def _fraction_singular(numerator: str, ths_word: str) -> str:
+    """'one sixths' -> 'one sixth'; plural stays for other numerators."""
+    if numerator.strip().lower() in ("one", "1"):
+        return ths_word[:-1]  # drop the s
+    return ths_word
+
+
+def _fraction_word(s: str) -> str:
+    """Map a denominator to its spoken ordinal ('six' -> 'sixth')."""
+    words = {"one": "first", "two": "halves", "three": "thirds",
+             "four": "fourths", "five": "fifths", "six": "sixths",
+             "seven": "sevenths", "eight": "eighths", "nine": "ninths",
+             "ten": "tenths"}
+    low = s.lower()
+    if low in words:
+        return words[low]
+    if low.isdigit() and int(low) <= 20:
+        return _number_to_words(int(low)) + "ths"
+    return s
 
 
 def _decimal_to_words(s: str) -> str:

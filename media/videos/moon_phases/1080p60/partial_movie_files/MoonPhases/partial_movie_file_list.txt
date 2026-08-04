@@ -1,0 +1,8 @@
+# This file is used internally by FFMPEG.
+file 'file:/home/ubuntu/video_engine/media/videos/moon_phases/1080p60/partial_movie_files/MoonPhases/1932428738_3942799913_223132457.mp4'
+file 'file:/home/ubuntu/video_engine/media/videos/moon_phases/1080p60/partial_movie_files/MoonPhases/3395203541_3655621686_875228661.mp4'
+file 'file:/home/ubuntu/video_engine/media/videos/moon_phases/1080p60/partial_movie_files/MoonPhases/3395203541_621109769_3437384151.mp4'
+file 'file:/home/ubuntu/video_engine/media/videos/moon_phases/1080p60/partial_movie_files/MoonPhases/3688687582_3081908073_3600244290.mp4'
+file 'file:/home/ubuntu/video_engine/media/videos/moon_phases/1080p60/partial_movie_files/MoonPhases/4247917051_2438897289_1833670033.mp4'
+file 'file:/home/ubuntu/video_engine/media/videos/moon_phases/1080p60/partial_movie_files/MoonPhases/4247917051_2306304140_2838709963.mp4'
+file 'file:/home/ubuntu/video_engine/media/videos/moon_phases/1080p60/partial_movie_files/MoonPhases/4247917051_3107384903_754015405.mp4'

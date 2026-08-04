@@ -34,6 +34,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from src.providers.llm_provider import set_usage_stage, DeepSeekUsage
+from src.providers.tts_provider import strip_paralinguistic_tags
 
 TARGET_DURATION_S = 60.0
 MAX_SCRIPT_WORDS = 165
@@ -41,6 +42,21 @@ MAX_SCRIPT_WORDS = 165
 # Scripts that come in well under this (e.g. a 106-word draft -> 37s video)
 # are expanded once to hit the target runtime.
 MIN_SCRIPT_WORDS = 140
+# Scene count scales with target duration: 5 scenes per 60s.
+SCENE_COUNT = 5
+
+
+def set_target_duration(seconds: float):
+    """Scale scene count + word budget with the requested runtime.
+    Called by both runners (mission_run / mission_stills) so a 2-minute
+    video gets ~10 scenes and a proportional narration word budget."""
+    global TARGET_DURATION_S, MAX_SCRIPT_WORDS, MIN_SCRIPT_WORDS, SCENE_COUNT
+    TARGET_DURATION_S = max(30.0, float(seconds))
+    SCENE_COUNT = max(3, int(round(TARGET_DURATION_S / 12.0)))  # ~12s per scene
+    MAX_SCRIPT_WORDS = int(TARGET_DURATION_S * 2.75)   # ~165 wpm
+    MIN_SCRIPT_WORDS = int(TARGET_DURATION_S * 2.35)   # ~140 wpm
+    print(f"[duration] target={TARGET_DURATION_S:.0f}s scenes={SCENE_COUNT} "
+          f"words {MIN_SCRIPT_WORDS}-{MAX_SCRIPT_WORDS}")
 
 # Metadata fields the script stage emits per scene (v8: emotion for vocal
 # modulation, visual_style for the Jade imagery layer, sfx_events for the
@@ -201,7 +217,7 @@ FACTS:
 # ═══════════════════════════════════════════════════════════════════════ #
 
 SCRIPT_PROMPT = """You are a world-class documentary scriptwriter. Write a documentary script
-of EXACTLY 5 scenes for a video with a TOTAL spoken runtime of about
+of EXACTLY {SCENES} scenes for a video with a TOTAL spoken runtime of about
 {TARGET} seconds ({MAX_WORDS} words maximum, spoken pace ~150 wpm).
 
 Topic: {topic}
@@ -260,6 +276,7 @@ def stage_script(topic: str, research: dict, provider) -> list[dict]:
     prompt = SCRIPT_PROMPT.format(
         topic=topic, facts=facts_text,
         TARGET=int(TARGET_DURATION_S), MAX_WORDS=MAX_SCRIPT_WORDS,
+        SCENES=SCENE_COUNT,
     )
     raw = provider.generate_json(prompt)
     try:
@@ -272,14 +289,14 @@ def stage_script(topic: str, research: dict, provider) -> list[dict]:
     total_words = sum(len(s.get("narration", "").split()) for s in scenes)
     print(f"  {len(scenes)} scenes drafted, {total_words} words "
           f"(~{total_words * 0.4:.0f}s at 150wpm)")
-    if total_words < MIN_SCRIPT_WORDS and len(scenes) == 5:
-        # Expand under-budget scripts once so the video hits the ~60s target
-        # instead of delivering a 35-40s short (reviewer feedback: pacing).
+    if total_words < MIN_SCRIPT_WORDS and len(scenes) == SCENE_COUNT:
+        # Expand under-budget scripts once so the video hits the target
+        # runtime instead of delivering a 35-40s short (reviewer feedback: pacing).
         print(f"  !! Under word budget ({total_words} < {MIN_SCRIPT_WORDS}) — expanding once")
         expand = provider.generate_json(
             "Expand this documentary script to at least " + str(MIN_SCRIPT_WORDS) +
             " words total (target ~" + str(MAX_SCRIPT_WORDS) + "), keeping all facts, "
-            "the 5-scene structure and every search query. Add depth, not filler — "
+            "the " + str(SCENE_COUNT) + "-scene structure and every search query. Add depth, not filler — "
             "one extra concrete detail or vivid sentence per scene. "
             "Return ONLY the JSON array of scenes with title/narration/visual_goal/search_queries.\n" +
             json.dumps({"scenes": scenes})[:6000]
@@ -288,7 +305,7 @@ def stage_script(topic: str, research: dict, provider) -> list[dict]:
             data2 = json.loads(expand)
             scenes2 = data2.get("scenes", []) if isinstance(data2, dict) else (data2 if isinstance(data2, list) else [])
             w2 = sum(len(s.get("narration", "").split()) for s in scenes2)
-            if len(scenes2) == 5 and w2 >= MIN_SCRIPT_WORDS and w2 <= MAX_SCRIPT_WORDS + 15:
+            if len(scenes2) == SCENE_COUNT and w2 >= MIN_SCRIPT_WORDS and w2 <= MAX_SCRIPT_WORDS + 15:
                 scenes = _merge_scene_meta(scenes, scenes2)
                 total_words = w2
                 print(f"  Expanded to {total_words} words (~{total_words * 0.4:.0f}s)")
@@ -297,8 +314,9 @@ def stage_script(topic: str, research: dict, provider) -> list[dict]:
             # pattern as research/script stages).
             print("  !! Expansion JSON failed — retrying once")
             expand = provider.generate_json(
-                "Return ONLY valid JSON (no markdown fences): the array of 5 "
-                "scenes with title/narration/visual_goal/search_queries, "
+                "Return ONLY valid JSON (no markdown fences): the array of " +
+                str(SCENE_COUNT) +
+                " scenes with title/narration/visual_goal/search_queries, "
                 "expanded to at least " + str(MIN_SCRIPT_WORDS) + " words total.\n" +
                 json.dumps({"scenes": scenes})[:6000]
             )
@@ -306,7 +324,7 @@ def stage_script(topic: str, research: dict, provider) -> list[dict]:
                 data2 = json.loads(expand)
                 scenes2 = data2.get("scenes", []) if isinstance(data2, dict) else (data2 if isinstance(data2, list) else [])
                 w2 = sum(len(s.get("narration", "").split()) for s in scenes2)
-                if len(scenes2) == 5 and w2 >= MIN_SCRIPT_WORDS and w2 <= MAX_SCRIPT_WORDS + 15:
+                if len(scenes2) == SCENE_COUNT and w2 >= MIN_SCRIPT_WORDS and w2 <= MAX_SCRIPT_WORDS + 15:
                     scenes = _merge_scene_meta(scenes, scenes2)
                     total_words = w2
                     print(f"  Expanded to {total_words} words (~{total_words * 0.4:.0f}s)")
@@ -316,14 +334,14 @@ def stage_script(topic: str, research: dict, provider) -> list[dict]:
         print(f"  !! Over word budget ({total_words} > {MAX_SCRIPT_WORDS}) — compressing once")
         compress = provider.generate_json(
             "Condense this script to at most " + str(MAX_SCRIPT_WORDS) +
-            " words total, keeping all facts and the 5-scene structure. "
+            " words total, keeping all facts and the " + str(SCENE_COUNT) + "-scene structure. "
             "Return ONLY the JSON array of scenes with title/narration/visual_goal/search_queries.\n" +
             json.dumps({"scenes": scenes})[:6000]
         )
         try:
             data2 = json.loads(compress)
             scenes2 = data2.get("scenes", []) if isinstance(data2, dict) else (data2 if isinstance(data2, list) else [])
-            if len(scenes2) == 5 and sum(len(s.get("narration", "").split()) for s in scenes2) <= MAX_SCRIPT_WORDS + 10:
+            if len(scenes2) == SCENE_COUNT and sum(len(s.get("narration", "").split()) for s in scenes2) <= MAX_SCRIPT_WORDS + 10:
                 scenes = _merge_scene_meta(scenes, scenes2)
                 print(f"  Compressed to {sum(len(s.get('narration','').split()) for s in scenes)} words")
         except json.JSONDecodeError:
@@ -938,6 +956,22 @@ def stage_narration_dynamic(scenes: list[dict], cache_audio: str,
         parts = _re.split(r"(?<=[.!?])\s+", (text or "").strip())
         return [p for p in parts if p.strip()]
 
+    # One Chatterbox model for the whole run (loaded once, reused across
+    # scenes — CPU load ~17s once, not per scene).  Falls back to edge on
+    # any failure; provider switch is recorded on the voice lock.
+    cb = None
+    if provider == "chatterbox":
+        try:
+            from src.providers.tts_provider import (
+                ChatterboxProvider,
+                CHATTERBOX_EMOTION_PARAMS,
+            )
+            cb = ChatterboxProvider()
+        except Exception as e:  # noqa: BLE001
+            print(f"  !! chatterbox init failed ({str(e)[:80]}) — edge fallback")
+            provider = "edge"
+            stats["provider"] = "edge"
+
     for i, sc in enumerate(scenes):
         ap = os.path.join(cache_audio, f"scene_{i}.wav")
         emo = (sc.get("emotion") or "wonder").strip().lower()
@@ -950,21 +984,17 @@ def stage_narration_dynamic(scenes: list[dict], cache_audio: str,
         # root cause of the old prosody/fallback bug, expert §1.2);
         # emotion drives exaggeration/cfg_weight; paralinguistic tags
         # ([chuckle], [sigh]...) pass through natively.
+        # v9.1: ONE ChatterboxProvider for the whole run (model stays
+        # loaded across scenes — no 17s reload per scene).
         if provider == "chatterbox":
-            from src.providers.tts_provider import (
-                ChatterboxProvider,
-                CHATTERBOX_EMOTION_PARAMS,
-            )
             try:
                 ex, cfg = CHATTERBOX_EMOTION_PARAMS.get(
                     emo, CHATTERBOX_EMOTION_PARAMS["default"])
-                cb = ChatterboxProvider()
                 # Inject the scriptwriter's organic tags at natural
                 # sentence boundaries (expert doc §1.3).
                 tagged = _inject_para_tags(
                     sc.get("narration"), sc.get("para_tags") or [])
                 cb.generate_voice(tagged, ap, exaggeration=ex, cfg_weight=cfg)
-                cb.shutdown()
                 stats["provider"] = "chatterbox"
                 stats["emotion_params"][emo] = (ex, cfg)
                 stats["para_tags_used"] = stats.get("para_tags_used", 0) + \
@@ -987,6 +1017,11 @@ def stage_narration_dynamic(scenes: list[dict], cache_audio: str,
             if voice_lock is not None:
                 voice_lock.record_scene(i, "kokoro", "bm_george")
         durations.append(_probe_duration(ap) if os.path.exists(ap) else 5.0)
+    if cb is not None:
+        try:
+            cb.shutdown()
+        except Exception:
+            pass
     if voice_lock is not None:
         voice_lock.save()
     return durations, stats
@@ -1338,10 +1373,15 @@ def main():
     ap.add_argument("--topic", default="Voyager 1: the farthest human-made object")
     ap.add_argument("--out", default=None, help="Output video path")
     ap.add_argument("--provider", default=None, help="LLM provider (deepseek|gemini)")
+    ap.add_argument("--target-seconds", type=float, default=TARGET_DURATION_S,
+                    help="Target narration runtime in seconds (scales scenes+words)")
     ap.add_argument("--max-render-iterations", type=int, default=3)
     ap.add_argument("--music", default="cache/music/cinematic.mp3")
     ap.add_argument("--music-db", type=float, default=-6.0)
     args = ap.parse_args()
+
+    # v9.1: scale scene count + word budget with the requested duration
+    set_target_duration(args.target_seconds)
 
     mods = _imports()
     topic = args.topic
@@ -1383,14 +1423,14 @@ def main():
         print(f"  !! Post-review over budget ({total_words} words) — compressing")
         compress = llm.generate_json(
             "Condense this script to at most " + str(MAX_SCRIPT_WORDS) +
-            " words total, keeping all facts and the 5-scene structure. "
+            " words total, keeping all facts and the " + str(SCENE_COUNT) + "-scene structure. "
             "Return ONLY the JSON array of scenes with title/narration/visual_goal/search_queries.\n" +
             json.dumps({"scenes": scenes_data})[:6000]
         )
         try:
             data2 = json.loads(compress)
             scenes2 = data2.get("scenes", []) if isinstance(data2, dict) else (data2 if isinstance(data2, list) else [])
-            if len(scenes2) == 5 and sum(len(s.get("narration", "").split()) for s in scenes2) <= MAX_SCRIPT_WORDS + 10:
+            if len(scenes2) == SCENE_COUNT and sum(len(s.get("narration", "").split()) for s in scenes2) <= MAX_SCRIPT_WORDS + 10:
                 scenes_data = _merge_scene_meta(scenes_data, scenes2)
                 print(f"  Compressed to {sum(len(s.get('narration','').split()) for s in scenes_data)} words")
         except json.JSONDecodeError:
