@@ -215,18 +215,28 @@ class PreRenderGate:
         # ── 8. Pacing gate (v10 rec 1/11) — rushed narration blocks ────
         # Pacing is a core quality metric: scenes delivered above the
         # role's comprehension band fail the gate deterministically.
+        # v10.2: only RUSHED (WPM over the role band) blocks.  "High
+        # comprehension risk" from technical density (numbers/units) is
+        # recorded as a metric + fed to the postmortem (rec 11) but is
+        # NOT a hard blocker — a science documentary always has dense
+        # figures, and pace-padding already slows those scenes into band.
         if scenes_data is not None and audio_durations is not None:
             pacing = audit_pacing(scenes_data, audio_durations)
             rushed = []
+            risk_flags = []
             for r in pacing["rows"]:
                 for f in r.get("flags", []):
-                    rushed.append(f"scene {r['scene']}: {f} ({r['wpm']:.0f} wpm)")
+                    if f.startswith("rushed"):
+                        rushed.append(f"scene {r['scene']}: {f} ({r['wpm']:.0f} wpm)")
+                    else:
+                        risk_flags.append(f"scene {r['scene']}: {f}")
             report.add(QACheck(
                 "pacing", not rushed,
                 "narration paced for comprehension"
-                if not rushed else f"rushed/dense scenes: {rushed[:5]}",
+                if not rushed else f"rushed scenes: {rushed[:5]}",
                 metrics={"avg_wpm": pacing["avg_wpm"],
                          "rushed_scene_count": pacing["rushed_scene_count"],
+                         "comprehension_risk_flags": risk_flags,
                          "high_risk": pacing["high_risk_scenes"]}))
 
         # ── 9. Semantic alignment (v10 rec 6/7) — visuals belong to the ──

@@ -728,6 +728,12 @@ def _pace_pad_scenes(scenes_data: list[dict], audio_dir: str,
     pace the word budget assumes, so scenes come out rushed (Europa run:
     every scene 171-243 wpm).  This deterministically adds distributed
     silence at sentence gaps to bring WPM into band — no re-synthesis.
+
+    v10.3: iterates (pad -> re-measure -> pad) so very rushed scenes
+    converge into band instead of being capped short by one pass
+    (Europa v12 scene 7: 236 -> 163 wpm, still 3 over the 160 band).
+    Single-sentence scenes fall back to clause splits, then one mid-
+    scene pause.
     """
     import re as _re
     import numpy as _np
@@ -741,57 +747,73 @@ def _pace_pad_scenes(scenes_data: list[dict], audio_dir: str,
         ap = os.path.join(audio_dir, f"scene_{i}.wav")
         if not os.path.exists(ap):
             continue
-        dur = audio_durations[i] if i < len(audio_durations) else M._probe_duration(ap)
-        wpm = measure_speech_rate(text, dur)
         role = role_for(sc.get("intent") or sc.get("scene_intent") or "")
         band = ROLE_PACING[role]
-        if wpm <= band["max_wpm"] or dur <= 0:
-            continue
         words = len(text.split())
-        target_dur = words / (band["target_wpm"] / 60.0)
-        pad_s = max(0.0, target_dur - dur)
-        pad_s = min(pad_s, dur * 0.45)  # cap: never more than +45% length
-        if pad_s < 0.3:
+        if words == 0:
             continue
-        sents = [s.strip() for s in _re.split(r"(?<=[.!?])\s+", text) if s.strip()]
-        if len(sents) < 2:
-            continue
-        try:
-            data, sr = _sf.read(ap, dtype="float32")
-        except Exception as e:  # noqa: BLE001
-            print(f"  [pacing] !! read failed scene {i}: {str(e)[:60]}")
-            continue
-        total_words = words or 1
-        boundaries = []
-        cum = 0
-        for s in sents[:-1]:
-            cum += len(s.split())
-            boundaries.append(min(0.98, cum / total_words))
-        gap_s = pad_s / len(boundaries)
-        chunks = []
-        prev = 0
-        n = len(data)
-        for frac in boundaries:
-            idx = int(n * frac)
-            chunks.append(data[prev:idx])
-            chunks.append(_np.zeros(int(sr * gap_s), dtype="float32"))
-            prev = idx
-        chunks.append(data[prev:])
-        out = _np.concatenate(chunks) if chunks else data
-        try:
-            _sf.write(ap, out, sr)
-        except Exception as e:  # noqa: BLE001
-            print(f"  [pacing] !! write failed scene {i}: {str(e)[:60]}")
-            continue
-        new_dur = len(out) / sr
+        for _pass in range(3):  # iterate until in band or no progress
+            dur = audio_durations[i] if i < len(audio_durations) else M._probe_duration(ap)
+            wpm = measure_speech_rate(text, dur)
+            if wpm <= band["max_wpm"] or dur <= 0:
+                break
+            target_dur = words / (band["target_wpm"] / 60.0)
+            pad_s = max(0.0, target_dur - dur)
+            pad_s = min(pad_s, dur * 0.45)  # cap per pass: +45% length
+            if pad_s < 0.3:
+                break
+            sents = [s.strip() for s in _re.split(r"(?<=[.!?])\s+", text) if s.strip()]
+            if len(sents) < 2:
+                sents = [s.strip() for s in _re.split(r"(?<=[,;:])\s+", text) if s.strip()]
+            try:
+                data, sr = _sf.read(ap, dtype="float32")
+            except Exception as e:  # noqa: BLE001
+                print(f"  [pacing] !! read failed scene {i}: {str(e)[:60]}")
+                break
+            total_words = words or 1
+            boundaries = []
+            cum = 0
+            for s in sents[:-1]:
+                cum += len(s.split())
+                boundaries.append(min(0.98, cum / total_words))
+            if not boundaries:
+                boundaries = [0.55]  # single-clause scene: one mid-scene pause
+            gap_s = pad_s / len(boundaries)
+            chunks = []
+            prev = 0
+            n = len(data)
+            for frac in boundaries:
+                idx = int(n * frac)
+                chunks.append(data[prev:idx])
+                chunks.append(_np.zeros(int(sr * gap_s), dtype="float32"))
+                prev = idx
+            chunks.append(data[prev:])
+            out = _np.concatenate(chunks) if chunks else data
+            try:
+                _sf.write(ap, out, sr)
+            except Exception as e:  # noqa: BLE001
+                print(f"  [pacing] !! write failed scene {i}: {str(e)[:60]}")
+                break
+            new_dur = len(out) / sr
+            if i < len(audio_durations):
+                audio_durations[i] = new_dur
         if i < len(audio_durations):
-            audio_durations[i] = new_dur
-        updated.append({"scene": i, "role": role, "wpm_before": round(wpm, 1),
-                        "wpm_after": round(measure_speech_rate(text, new_dur), 1),
-                        "pad_s": round(gap_s * len(boundaries), 2)})
+            dur = audio_durations[i]
+            wpm = measure_speech_rate(text, dur)
+            if wpm > band["max_wpm"]:
+                print(f"  [pacing] scene {i} still {wpm:.0f} wpm > {band['max_wpm']:.0f} "
+                      f"({role}) after {_pass+1} pass(es)")
+            elif _pass > 0 or wpm < 200:
+                pass
+        # record outcome once
+        dur = audio_durations[i] if i < len(audio_durations) else M._probe_duration(ap)
+        wpm = measure_speech_rate(text, dur)
+        if wpm > 0 and _pass > 0:
+            updated.append({"scene": i, "role": role,
+                            "wpm_after": round(wpm, 1)})
     if updated:
-        print("  [pacing] padded " + ", ".join(
-            f"s{r['scene']}:{r['wpm_before']:.0f}->{r['wpm_after']:.0f}wpm"
+        print("  [pacing] " + ", ".join(
+            f"s{r['scene']}:{r['wpm_after']:.0f}wpm({r['role']})"
             for r in updated))
     return audio_durations
 
@@ -1006,6 +1028,15 @@ def main():
         specs = gates.build_scene_specs(scenes_data, research.get("facts", []))
         run_report["entity_specs"] = {str(k): v.to_dict() for k, v in specs.items()}
         run_report["camera_diversity"] = gates.camera_diversity()
+        # v10.2: stamp per-scene intent from the EntitySpec onto the scene
+        # dicts so pace-padding, pacing audit and the pre-render gate all
+        # score the SAME role band.  (v12 run: padding used 'default' band
+        # (max 172) while the gate scored explanation scenes at max 160 —
+        # scenes 2/4/5/6/7 were left rushed and the gate correctly aborted.)
+        for _i, _s in enumerate(scenes_data):
+            _spec = (specs or {}).get(_i)
+            if _spec is not None and getattr(_spec, "scene_intent", None):
+                _s["intent"] = _spec.scene_intent
     except Exception as e:
         print(f"  !! gates init failed (continuing un-gated): {str(e)[:100]}")
     shot_plan, stills_stats = stage_stills_visuals(scenes_data, out_dir, gates, specs,
