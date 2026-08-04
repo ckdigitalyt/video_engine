@@ -1,0 +1,74 @@
+{
+  "passed": false,
+  "blocking_failures": [
+    "frozen_shots",
+    "excessive_static"
+  ],
+  "checks": [
+    {
+      "name": "encoding",
+      "passed": true,
+      "detail": "v=h264 a=aac",
+      "metrics": {
+        "duration_s": 122.733333,
+        "resolution": [
+          1920,
+          1080
+        ]
+      }
+    },
+    {
+      "name": "resolution",
+      "passed": true,
+      "detail": "1920x1080",
+      "metrics": {}
+    },
+    {
+      "name": "repeated_assets",
+      "passed": true,
+      "detail": "no repeats",
+      "metrics": {
+        "repeats": {}
+      }
+    },
+    {
+      "name": "frozen_shots",
+      "passed": false,
+      "detail": "frozen runs (>= 2.5s): [(45.0, 15)]",
+      "metrics": {
+        "frozen_runs": [
+          [
+            45.0,
+            15
+          ]
+        ],
+        "frames_sampled": 9
+      }
+    },
+    {
+      "name": "excessive_static",
+      "passed": false,
+      "detail": "longest static window: 15.0s (limit 8.0s)",
+      "metrics": {
+        "longest_static_s": 15
+      }
+    },
+    {
+      "name": "silence",
+      "passed": true,
+      "detail": "max_volume=-7.6 dB (silence < -50.0 dB)",
+      "metrics": {
+        "max_db": -7.6,
+        "mean_db": -24.4
+      }
+    },
+    {
+      "name": "clipping",
+      "passed": true,
+      "detail": "max_volume=-7.6 dB (clip >= -0.5 dB)",
+      "metrics": {
+        "max_db": -7.6
+      }
+    }
+  ]
+}

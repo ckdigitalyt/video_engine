@@ -159,7 +159,13 @@ def audit_pacing(scenes: list[dict], audio_durations: list[float]) -> dict:
     for i, s in enumerate(scenes):
         text = s.get("narration") or ""
         dur = audio_durations[i] if i < len(audio_durations) else 0.0
-        intent = s.get("intent") or s.get("scene_intent") or "default"
+        intent = s.get("intent") or s.get("scene_intent") or ""
+        if not intent:
+            # Script scenes don't carry an intent field; derive the role
+            # positionally (hook/conclusion/climax/explanation) exactly
+            # like _role_for_scene in mission_run (v10 fix: Europa run
+            # mis-banded scene 0 as 'default' -> false pacing failure).
+            intent = _positional_role(i, len(scenes), text)
         wpm = measure_speech_rate(text, dur)
         risk = comprehension_risk(text, intent, actual_wpm=wpm or None)
         profile = ROLE_PACING[role_for(intent)]
@@ -184,3 +190,18 @@ def audit_pacing(scenes: list[dict], audio_durations: list[float]) -> dict:
             max(1, sum(1 for r in rows if r["wpm"])), 1),
         "rushed_scene_count": len(high_risk),
     }
+
+
+def _positional_role(i: int, total: int, text: str) -> str:
+    """Positional role fallback (mirrors mission_run._role_for_scene)."""
+    if total <= 1:
+        return "default"
+    if i == 0:
+        return "hook"
+    if i == total - 1:
+        return "conclusion"
+    if i == total - 2:
+        return "climax"
+    if technical_density(text or "") > 0.5:
+        return "explanation"
+    return "exploration"

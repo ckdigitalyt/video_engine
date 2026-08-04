@@ -1,0 +1,153 @@
+{
+  "facts": [
+    {
+      "claim": "Europa is the sixth-largest moon in the solar system and the fourth-largest of Jupiter's moons.",
+      "value": 3121.6,
+      "unit": "km",
+      "source": "NASA",
+      "year": 2024,
+      "confidence": 1.0,
+      "verified": true,
+      "verification_notes": "According to NASA, Europa is the sixth-largest moon in the solar system and the fourth-largest of Jupiter's moons."
+    },
+    {
+      "claim": "Europa orbits Jupiter at an average distance of about 671,000 kilometers.",
+      "value": 671000,
+      "unit": "km",
+      "source": "NASA",
+      "year": 2024,
+      "confidence": 1.0,
+      "verified": true,
+      "verification_notes": "NASA states Europa's average orbital distance from Jupiter is approximately 671,000 km."
+    },
+    {
+      "claim": "Europa's orbital period around Jupiter is approximately 3.55 Earth days.",
+      "value": 3.55,
+      "unit": "days",
+      "source": "NASA",
+      "year": 2024,
+      "confidence": 1.0,
+      "verified": true,
+      "verification_notes": "NASA lists Europa's orbital period as about 3.55 Earth days."
+    },
+    {
+      "claim": "Europa's surface temperature averages about 110 Kelvin (approximately -160 degrees Celsius).",
+      "value": 110,
+      "unit": "K",
+      "source": "NASA",
+      "year": 2024,
+      "confidence": 1.0,
+      "verified": true,
+      "verification_notes": "NASA reports average surface temperature around 110 K, equivalent to about -160\u00b0C."
+    },
+    {
+      "claim": "Europa's subsurface ocean is estimated to contain more than twice the amount of water as all of Earth's oceans combined.",
+      "value": null,
+      "unit": null,
+      "source": "NASA",
+      "year": 2024,
+      "confidence": 0.9,
+      "verified": true,
+      "verification_notes": "NASA estimates Europa's ocean has more than twice the water of Earth's oceans."
+    },
+    {
+      "claim": "The estimated depth of Europa's subsurface ocean is between 60 and 150 kilometers.",
+      "value": null,
+      "unit": "km",
+      "source": "NASA",
+      "year": 2024,
+      "confidence": 0.85,
+      "verified": true,
+      "verification_notes": "NASA cites ocean depth estimates ranging from 60 to 150 km."
+    },
+    {
+      "claim": "Data from NASA's Galileo spacecraft (orbiting Jupiter from 1995 to 2003) provided strong evidence for a subsurface ocean on Europa.",
+      "value": null,
+      "unit": null,
+      "source": "NASA",
+      "year": 2003,
+      "confidence": 1.0,
+      "verified": true,
+      "verification_notes": "Galileo mission data during 1995-2003 gave strong evidence for a subsurface ocean."
+    },
+    {
+      "claim": "Europa's surface is marked by linear cracks and ridges, with relatively few impact craters, indicating a geologically young and active surface.",
+      "value": null,
+      "unit": null,
+      "source": "NASA",
+      "year": 1997,
+      "confidence": 0.9,
+      "verified": true,
+      "verification_notes": "NASA notes Europa's surface features and few craters suggest a young, active surface."
+    },
+    {
+      "claim": "NASA's Europa Clipper mission, launched in October 2024, is expected to arrive at Jupiter in April 2030.",
+      "value": null,
+      "unit": null,
+      "source": "NASA",
+      "year": 2024,
+      "confidence": 1.0,
+      "verified": true,
+      "verification_notes": "NASA confirms Europa Clipper launched in Oct 2024 and is set to arrive in April 2030."
+    },
+    {
+      "claim": "Scientists estimate that Europa's surface may be only 20 to 180 million years old, which is very young in geological terms compared to the age of the solar system (4.6 billion years).",
+      "value": null,
+      "unit": "million years",
+      "source": "NASA",
+      "year": 2024,
+      "confidence": 0.8,
+      "verified": true,
+      "verification_notes": "NASA estimates surface age between 20-180 million years, geologically young."
+    },
+    {
+      "claim": "Europa is tidally locked with Jupiter, meaning the same hemisphere always faces the planet.",
+      "value": null,
+      "unit": null,
+      "source": "NASA",
+      "year": 2024,
+      "confidence": 1.0,
+      "verified": true,
+      "verification_notes": "NASA confirms tidal locking, showing one hemisphere always faces Jupiter."
+    },
+    {
+      "claim": "The tidal flexing caused by Europa's eccentric orbit (eccentricity of about 0.009) is considered the primary heat source for its subsurface ocean.",
+      "value": 0.009,
+      "unit": null,
+      "source": "NASA",
+      "year": 2024,
+      "confidence": 0.9,
+      "verified": true,
+      "verification_notes": "NASA identifies tidal heating from eccentric orbit as primary heat source; eccentricity ~0.009."
+    },
+    {
+      "claim": "Europa's surface is composed primarily of water ice, with possible salts and sulfuric acid compounds.",
+      "value": null,
+      "unit": null,
+      "source": "NASA",
+      "year": 2024,
+      "confidence": 0.85,
+      "verified": true,
+      "verification_notes": "NASA states surface is mostly water ice, with possible salts and sulfuric acid."
+    }
+  ],
+  "hook_ideas": [
+    "What if there is an ocean world in our solar system with more water than Earth? Meet Europa.",
+    "Could Europa hold the key to finding life beyond Earth? Explore the evidence.",
+    "Jupiter's icy moon Europa might be the most promising place to search for alien life."
+  ],
+  "misconceptions": [
+    "Europa's ocean is not directly visible; it is hidden beneath a thick ice shell.",
+    "Europa is not the only moon with a subsurface ocean; several moons in the outer solar system are candidates.",
+    "The surface of Europa is not smooth; it is covered with cracks, ridges, and chaotic terrains."
+  ],
+  "key_sources": [
+    "NASA Solar System Exploration: Europa",
+    "NASA Europa Clipper mission page",
+    "Jet Propulsion Laboratory (JPL) \u2013 Europa Clipper",
+    "ESA \u2013 Exploring Europa (mention if applicable)"
+  ],
+  "_elapsed_s": 6.5,
+  "_verification_failed": false,
+  "_verification_elapsed_s": 4.5
+}

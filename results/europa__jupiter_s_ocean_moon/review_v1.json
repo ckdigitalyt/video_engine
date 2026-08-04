@@ -1,0 +1,65 @@
+{
+  "quality_score": 68,
+  "confidence": 0.95,
+  "strengths": [
+    "Professional and engaging narration with excellent pacing and clarity.",
+    "Compelling script structure that moves logically from physical mechanics to exploration history and future goals.",
+    "Effective use of atmospheric music that enhances the sense of mystery without overpowering the voiceover.",
+    "High-quality AI-generated landscapes that visualize the alien environment of Europa's surface."
+  ],
+  "weaknesses": [
+    "Significant visual-factual mismatches: showing the Earth-Moon system while discussing Jupiter's moons.",
+    "Misleading imagery: including a human astronaut for a robotic mission (Europa Clipper).",
+    "Inaccurate diagrams: the gravity-assist chart shows a trajectory toward Saturn, which is irrelevant to the Jupiter-focused script.",
+    "Inconsistent visual style, mixing realistic NASA footage with stylized AI art and generic sci-fi landscapes."
+  ],
+  "prioritized_recommendations": [
+    {
+      "priority": "critical",
+      "category": "fact_change",
+      "recommendation": "Replace the 'Earth-Moon system' animation at 0:44 with a diagram showing Europa orbiting Jupiter to match the narration about tidal locking and eccentricity."
+    },
+    {
+      "priority": "high",
+      "category": "new_asset",
+      "recommendation": "Remove the shot of the human astronaut at 1:32. Replace it with a 3D render or NASA animation of the Europa Clipper spacecraft to avoid implying a crewed mission."
+    },
+    {
+      "priority": "high",
+      "category": "shot_order",
+      "recommendation": "Replace the landscape at 0:20 which features two suns; Europa orbits Jupiter in a single-star system. This breaks immersion for science-literate viewers."
+    },
+    {
+      "priority": "medium",
+      "category": "new_asset",
+      "recommendation": "Update the gravity-assist diagram at 1:03 to show the actual VEEGA (Venus-Earth-Earth Gravity Assist) path for Galileo or the Mars-Earth assist for Clipper, rather than a path toward Saturn."
+    }
+  ],
+  "factual_issues": [
+    {
+      "claim": "Europa's orbit and tidal flexing",
+      "issue": "The visual at 0:44 explicitly labels and shows the Earth-Moon system.",
+      "suggested_fix": "Use a Manim animation showing Jupiter at the center with Europa's elliptical orbit."
+    },
+    {
+      "claim": "Europa Clipper mission",
+      "issue": "Visual at 1:32 shows a human astronaut, but Clipper is an uncrewed robotic probe.",
+      "suggested_fix": "Use footage of the spacecraft assembly or a space render of the probe."
+    }
+  ],
+  "title_recommendations": [
+    "The Hidden Ocean of Europa",
+    "Jupiter's Moon: The Search for Alien Life",
+    "Europa Clipper: Peering Beneath the Ice"
+  ],
+  "thumbnail_recommendation": {
+    "timestamp": "01:12",
+    "description": "A high-contrast shot of the cracked icy surface of Europa with the massive, banded disk of Jupiter looming on the horizon."
+  },
+  "overall_assessment": "The documentary features a top-tier script and narration that effectively builds curiosity about the search for life. However, it is severely undermined by 'hallucinated' visuals and generic stock footage that contradict the scientific facts being presented. Correcting the orbital diagrams and removing misleading human-spaceflight imagery is essential for maintaining credibility.",
+  "_meta": {
+    "video": "results/europa__jupiter_s_ocean_moon/europa__jupiter_s_ocean_moon_mixed.mp4",
+    "model": "gemini-2.5-pro",
+    "elapsed_s": 42.1
+  }
+}

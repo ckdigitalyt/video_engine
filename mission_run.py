@@ -35,6 +35,7 @@ load_dotenv()
 
 from src.providers.llm_provider import set_usage_stage, DeepSeekUsage
 from src.providers.tts_provider import strip_paralinguistic_tags
+from src.providers.tts_provider import CHATTERBOX_EMOTION_PARAMS  # noqa: E402 — module-level for _voice_params()
 
 TARGET_DURATION_S = 60.0
 MAX_SCRIPT_WORDS = 165

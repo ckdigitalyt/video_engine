@@ -611,47 +611,52 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
 
         # ── Coverage guard: long scenes must never hold a single visual ──
         # A scene whose narration runs > 8s needs >= 2 distinct visuals.
-        # If only one asset survived the gate/dedup:
-        #   - still asset  -> second Ken Burns pass with the OPPOSITE
-        #     camera move (push-in vs pull-out)
-        #   - manim clip   -> extract a frame and Ken Burns it (breaks the
-        #     long static title-card hold reviewers flagged)
-        if len(shots) == 1:
+        # If the placed shots' TOTAL duration is shorter than the narration
+        # estimate (e.g. hook scene: 3x 3.0-3.5s shots vs 15.8s narration),
+        # add Ken Burns variant(s) with the OPPOSITE camera move so the
+        # timeline never stretches one shot into a long frozen hold
+        # (v10 fix: Europa run froze 15s at 45s).
+        est = max(4.0, len(text.split()) / 2.6)
+        placed_total = sum(sh.get("duration", 0) for sh in shots)
+        # Add variants (opposite camera) until the scene is visually
+        # covered or we hit 4 shots — prevents one-shot freeze stretches.
+        while shots and est > placed_total + 1.5 and est > 8.0 and len(shots) < 4:
             # estimate narration duration: ~2.6 words/sec spoken
-            est = max(4.0, len(text.split()) / 2.6)
-            if est > 8.0:
-                last = shots[0]
-                src_img = os.path.join(still_root, os.path.basename(
-                    last.get("file", "").replace(".mp4", ".jpg")))
-                if last.get("kind") == "manim" and not os.path.exists(src_img):
-                    # manim-only scene: pull a frame out of the clip
-                    src_img = os.path.join(out_dir, "shots", f"scene{i}_frame.jpg")
-                    subprocess.run(
-                        ["ffmpeg", "-y", "-v", "error", "-ss", "1.5",
-                         "-i", last.get("file", ""), "-frames:v", "1", src_img],
-                        capture_output=True, text=True, timeout=30)
-                    src = last.get("kind", "manim")
-                if os.path.exists(src_img):
-                    variant = os.path.join(
-                        out_dir, "shots", f"scene{i}_variant_{still_count}.mp4")
-                    vcam = cam_params if still_count else {}
-                    vcam = dict(vcam)
-                    # invert the camera move for visual novelty
-                    if vcam.get("zoom_end", 1.2) > vcam.get("zoom_start", 1.0):
-                        vcam["zoom_start"], vcam["zoom_end"] = vcam.get("zoom_end", 1.22), vcam.get("zoom_start", 1.0)
-                        vmove = "pull_out"
-                    else:
-                        vcam["zoom_start"], vcam["zoom_end"] = vcam.get("zoom_start", 1.0) or 1.0, 1.22
-                        vmove = "push_in"
-                    if _kenburns(src_img, variant, duration=5.5,
-                                 zoom_in=vmove == "push_in", camera=vcam):
-                        shots.append({"file": variant, "duration": 5.5, "kind": src,
-                                      "camera": vmove, "motion_params": vcam,
-                                      "verification": last.get("verification"),
-                                      "title": last.get("title", ""),
-                                      "query": last.get("query", "")})
-                        print(f"  [coverage] scene{i}: narration ~{est:.0f}s, "
-                              f"added {vmove} variant of same asset (visual change)")
+            last = shots[-1]
+            src_img = os.path.join(still_root, os.path.basename(
+                last.get("file", "").replace(".mp4", ".jpg")))
+            if last.get("kind") == "manim" and not os.path.exists(src_img):
+                # manim-only scene: pull a frame out of the clip
+                src_img = os.path.join(out_dir, "shots", f"scene{i}_frame.jpg")
+                subprocess.run(
+                    ["ffmpeg", "-y", "-v", "error", "-ss", "1.5",
+                     "-i", last.get("file", ""), "-frames:v", "1", src_img],
+                    capture_output=True, text=True, timeout=30)
+                src = last.get("kind", "manim")
+            if os.path.exists(src_img):
+                variant = os.path.join(
+                    out_dir, "shots", f"scene{i}_variant_{still_count}.mp4")
+                vcam = cam_params if still_count else {}
+                vcam = dict(vcam)
+                # invert the camera move for visual novelty
+                if vcam.get("zoom_end", 1.2) > vcam.get("zoom_start", 1.0):
+                    vcam["zoom_start"], vcam["zoom_end"] = vcam.get("zoom_end", 1.22), vcam.get("zoom_start", 1.0)
+                    vmove = "pull_out"
+                else:
+                    vcam["zoom_start"], vcam["zoom_end"] = vcam.get("zoom_start", 1.0) or 1.0, 1.22
+                    vmove = "push_in"
+                if _kenburns(src_img, variant, duration=5.5,
+                             zoom_in=vmove == "push_in", camera=vcam):
+                    shots.append({"file": variant, "duration": 5.5, "kind": src,
+                                  "camera": vmove, "motion_params": vcam,
+                                  "verification": last.get("verification"),
+                                  "title": last.get("title", ""),
+                                  "query": last.get("query", "")})
+                    placed_total += 5.5
+                    print(f"  [coverage] scene{i}: narration ~{est:.0f}s, "
+                          f"added {vmove} variant (total {placed_total:.1f}s)")
+            else:
+                break
         plan[i] = shots
 
     # Guaranteed fill: any scene with zero stills after gate/dedup gets a

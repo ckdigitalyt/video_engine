@@ -1,0 +1,183 @@
+[
+  {
+    "title": "The Hidden Ocean",
+    "narration": "Beneath a cracked ice shell, an ocean holds twice the water of all Earth's seas. But here, 671,000 kilometers from Jupiter, it stays liquid. How?",
+    "visual_goal": "A dramatic zoom into Europa's cracked ice surface, then a cutaway revealing a dark, vast ocean below.",
+    "search_queries": [
+      "Europa surface cracks",
+      "Europa subsurface ocean",
+      "Jupiter moon Europa"
+    ],
+    "emotion": "tension",
+    "visual_style": "photorealistic",
+    "sfx_events": [],
+    "para_tags": []
+  },
+  {
+    "title": "Jupiter's Grip",
+    "narration": "Europa is tidally locked, so one side always faces Jupiter. Its orbit is slightly lopsided. Each pass stretches the moon, flexing its interior.",
+    "visual_goal": "Show Europa orbiting Jupiter with an exaggerated eccentric orbit, flexing and straining.",
+    "search_queries": [
+      "Europa orbit Jupiter",
+      "tidal flexing moon",
+      "Jupiter moon orbit animation"
+    ],
+    "emotion": "wonder",
+    "visual_style": "clean_vector",
+    "sfx_events": [
+      {
+        "trigger": "stretch",
+        "at": "stretches the moon"
+      }
+    ],
+    "para_tags": []
+  },
+  {
+    "title": "The Heat Engine",
+    "narration": "That friction generates heat. An eccentricity of 0.009 seems tiny, but it's enough to keep an ocean liquid, 60 to 150 kilometers deep.",
+    "visual_goal": "Diagram showing tidal flexing generating heat, with an arrow indicating heat rising to the ocean.",
+    "search_queries": [
+      "tidal heating diagram",
+      "Europa internal heat",
+      "subsurface ocean depth"
+    ],
+    "emotion": "revelation",
+    "visual_style": "clean_vector",
+    "sfx_events": [
+      {
+        "trigger": "whoosh",
+        "at": "keeps an ocean liquid"
+      }
+    ],
+    "para_tags": []
+  },
+  {
+    "title": "A Young Surface",
+    "narration": "This world is geologically alive. Few craters. Long, linear cracks. Scientists say the surface is only 20 to 180 million years old.",
+    "visual_goal": "Slow pan across Europa's surface, highlighting cracks and ridges with minimal craters.",
+    "search_queries": [
+      "Europa surface ridges",
+      "Europa young surface",
+      "Europa cracks close up"
+    ],
+    "emotion": "awe",
+    "visual_style": "photorealistic",
+    "sfx_events": [],
+    "para_tags": []
+  },
+  {
+    "title": "The First Evidence",
+    "narration": "In 1995, Galileo arrived. For eight years, it orbited Jupiter. Its data pointed to a hidden ocean, changing everything.",
+    "visual_goal": "Historic footage of Galileo spacecraft, then a cut to its magnetometer readings showing a induced field.",
+    "search_queries": [
+      "Galileo spacecraft",
+      "Galileo mission Jupiter",
+      "Europa magnetic field evidence"
+    ],
+    "emotion": "nostalgia",
+    "visual_style": "photorealistic",
+    "sfx_events": [
+      {
+        "trigger": "beep",
+        "at": "orbited Jupiter"
+      }
+    ],
+    "para_tags": []
+  },
+  {
+    "title": "The Clues",
+    "narration": "Ice, salts, sulfuric acid. Tidal heating. A magnetic field that flickers. All puzzle pieces pointing to a vast, salty ocean.",
+    "visual_goal": "Montage of Europa's surface composition, tidal flexing, and magnetic field lines, with subtle puzzle-like assembly.",
+    "search_queries": [
+      "Europa surface composition",
+      "Europa magnetic field",
+      "Europa ocean evidence"
+    ],
+    "emotion": "revelation",
+    "visual_style": "watercolor",
+    "sfx_events": [],
+    "para_tags": []
+  },
+  {
+    "title": "The Deep Ocean",
+    "narration": "More than twice the water of all Earth's oceans. The depth? 60 to 150 kilometers. There, in the dark, could life exist?",
+    "visual_goal": "A cross-section of Europa showing a deep ocean, with faint bioluminescent specks in the dark.",
+    "search_queries": [
+      "Europa ocean cross section",
+      "deep ocean life",
+      "Europa subsurface ocean depth"
+    ],
+    "emotion": "hopeful",
+    "visual_style": "watercolor",
+    "sfx_events": [
+      {
+        "trigger": "underwater",
+        "at": "in the dark"
+      }
+    ],
+    "para_tags": []
+  },
+  {
+    "title": "The Clock Ticks",
+    "narration": "In October 2024, Europa Clipper launched. Its journey takes six years. Arrival at Jupiter? April 2030.",
+    "visual_goal": "Launch footage of Europa Clipper, then a fast-forward animation of its trajectory to Jupiter.",
+    "search_queries": [
+      "Europa Clipper launch",
+      "Europa Clipper trajectory",
+      "spacecraft launch 2024"
+    ],
+    "emotion": "tension",
+    "visual_style": "photorealistic",
+    "sfx_events": [
+      {
+        "trigger": "boom",
+        "at": "launched"
+      },
+      {
+        "trigger": "riser",
+        "at": "six years"
+      }
+    ],
+    "para_tags": []
+  },
+  {
+    "title": "The Arrival",
+    "narration": "In April 2030, the probe will begin its close flybys. Peering through the ice, searching for answers.",
+    "visual_goal": "Europa Clipper flying over Europa's surface, with instruments scanning the ice.",
+    "search_queries": [
+      "Europa Clipper flyby",
+      "Europa Clipper mission 2030",
+      "spacecraft Europa"
+    ],
+    "emotion": "awe",
+    "visual_style": "photorealistic",
+    "sfx_events": [
+      {
+        "trigger": "whoosh",
+        "at": "flybys"
+      }
+    ],
+    "para_tags": []
+  },
+  {
+    "title": "The Question",
+    "narration": "If that ocean has the chemistry, the heat, and the time \u2014 4.6 billion years \u2014 could life have found a foothold? [gasp] We are about to find out.",
+    "visual_goal": "A hopeful image of Europa's surface with a subtle glow from beneath, hinting at life.",
+    "search_queries": [
+      "Europa life potential",
+      "ocean moon hopeful",
+      "Europa future mission"
+    ],
+    "emotion": "hopeful",
+    "visual_style": "watercolor",
+    "sfx_events": [
+      {
+        "trigger": "sparkle",
+        "at": "find out"
+      }
+    ],
+    "para_tags": [
+      "[gasp]"
+    ]
+  }
+]
