@@ -12,13 +12,30 @@ from contextvars import ContextVar
 from typing import Optional
 
 from langchain_openai import ChatOpenAI
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, SystemMessage
 
 from google import genai
 import PIL.Image
 
 from src.utils.config import get_config
 
+
+# ── DeepSeek prefix caching (cost optimisation) ─────────────────────────────
+# DeepSeek bills cache hits at 1/50th of the miss rate (disk prefix cache,
+# TTL hours→days) and matches on EXACT input-prefix equality. The single
+# biggest cost lever is therefore a STABLE leading system message: every call
+# that starts with the same bytes reuses the cached prefix, so call N+1 in a
+# run (and calls on later runs within the TTL) pay the hit rate instead of
+# the miss rate for the whole static body. Keep this constant byte-identical
+# — no timestamps, no topic, no dynamic content.
+DEEPSEEK_SYSTEM_PROMPT = (
+    "You are the production engine for ckdigital's documentary video pipeline. "
+    "You produce factual, precise, verifiable content for short documentaries. "
+    "Hard rules: never invent numbers, sources, or dates; only use facts given "
+    "in the request; follow the exact output schema requested; output ONLY valid "
+    "JSON without markdown fences when JSON is requested; no commentary outside "
+    "the JSON payload."
+)
 
 # ── Usage accounting (per-run DeepSeek token/cost measurement) ─────────────
 # Class-level so every provider instance (pipeline + reviewer factories)
@@ -67,11 +84,13 @@ class DeepSeekUsage:
                 billed_input * DEEPSEEK_PRICE_INPUT_MISS
                 + r["cached"] * DEEPSEEK_PRICE_INPUT_HIT
                 + r["output"] * DEEPSEEK_PRICE_OUTPUT, 6)
+            r["hit_rate"] = round(r["cached"] / max(1, r["input"]), 4)
             stages[stage] = r
             for k in ("calls", "input", "output", "cached"):
                 tot[k] += r[k]
             tot["cost_usd"] += r["cost_usd"]
         tot["cost_usd"] = round(tot["cost_usd"], 6)
+        tot["hit_rate"] = round(tot["cached"] / max(1, tot["input"]), 4)
         return {"stages": stages, "total": tot}
 
     @classmethod
@@ -118,7 +137,12 @@ class DeepSeekProvider(LLMProvider):
         )
 
     def generate_text(self, prompt: str, image_path: Optional[str] = None, **kwargs) -> str:
-        response = self._llm.invoke([HumanMessage(content=prompt)])
+        # Stable system prefix first → DeepSeek prefix-cache hits on every call
+        # after the first (and across runs within the cache TTL).
+        response = self._llm.invoke([
+            SystemMessage(content=DEEPSEEK_SYSTEM_PROMPT),
+            HumanMessage(content=prompt),
+        ])
         # ── Usage accounting (DeepSeek token/cost measurement) ──────────
         try:
             um = getattr(response, "usage_metadata", None) or {}

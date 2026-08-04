@@ -127,7 +127,7 @@ def _imports():
 # ═══════════════════════════════════════════════════════════════════════ #
 
 RESEARCH_PROMPT = """You are a documentary research lead. Produce a rigorous fact pack for a
-one-minute documentary on: {topic}
+one-minute documentary.
 
 Requirements:
 - 8-15 verified facts, each with: claim, value (number), unit, source (organisation, e.g. NASA/ESA/Wikipedia), year
@@ -143,7 +143,9 @@ Respond in STRICT JSON (no markdown):
   "hook_ideas": ["..."],
   "misconceptions": ["..."],
   "key_sources": ["..."]
-}}"""
+}}
+
+TOPIC: {topic}"""
 
 
 def stage_research(topic: str, provider) -> dict:
@@ -220,8 +222,6 @@ SCRIPT_PROMPT = """You are a world-class documentary scriptwriter. Write a docum
 of EXACTLY {SCENES} scenes for a video with a TOTAL spoken runtime of about
 {TARGET} seconds ({MAX_WORDS} words maximum, spoken pace ~150 wpm).
 
-Topic: {topic}
-
 Use the verified facts below — every number must come from them. Do NOT invent facts.
 
 RETENTION RULES (2026 platform benchmarks — these are hard constraints):
@@ -265,7 +265,9 @@ would react — never forced, never more than 2. Leave the array empty for
 straightforward factual scenes. The tags are spoken by the narrator engine.
 
 FACTS:
-{facts}"""
+{facts}
+
+TOPIC: {topic}"""
 
 
 def stage_script(topic: str, research: dict, provider) -> list[dict]:
@@ -1562,6 +1564,23 @@ def main():
         "final_score": review.get("quality_score"),
         "duration_s": _probe_duration(final_video),
     }
+    # ── DeepSeek usage + cache-hit report (per-stage, whole run) ──────
+    try:
+        from src.providers.llm_provider import DeepSeekUsage
+        usage = DeepSeekUsage.summary()
+        run_report["llm_usage_deepseek"] = usage
+        tot = usage["total"]
+        print("\n[DEEPSEEK USAGE — this run]")
+        print(f"  calls: {tot['calls']} | input: {tot['input']:,} tok "
+              f"(cached {tot['cached']:,} → hit {tot.get('hit_rate', 0):.0%}) | "
+              f"output: {tot['output']:,} tok")
+        print(f"  estimated cost: ${tot['cost_usd']:.4f}")
+        for stage, row in usage["stages"].items():
+            print(f"    {stage:20s} calls={row['calls']:3d} in={row['input']:>7,} "
+                  f"cached={row['cached']:>6,} out={row['output']:>6,} "
+                  f"cost=${row['cost_usd']:.4f}")
+    except Exception as e:
+        print(f"  !! usage report failed (non-fatal): {str(e)[:80]}")
     _write_json(os.path.join(out_dir, "run_report.json"), run_report)
 
     recorder = mods["PostmortemRecorder"]()
