@@ -702,12 +702,37 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
             cam_params = cam.get("params", {}) or {}
             zoom_in = cam_params.get("zoom_end", 1.2) > cam_params.get("zoom_start", 1.0)
             if _kenburns(got, clip, duration=6.0, zoom_in=zoom_in, camera=cam_params):
-                plan[i] = [{"file": clip, "duration": 6.0, "kind": src,
-                            "camera": cam.get("move", "push_in"),
-                            "motion_params": cam_params, "title": title,
-                            "query": fill_q}]
+                fill_shots = [{"file": clip, "duration": 6.0, "kind": src,
+                               "camera": cam.get("move", "push_in"),
+                               "motion_params": cam_params, "title": title,
+                               "query": fill_q}]
+                # v10.4: fill scenes must also satisfy the coverage guard —
+                # a single 6.0s fill shot stretched to a 10.7s narration
+                # window trips the shot_hold gate (v14 run blocked).
+                fest = max(4.0, len(text.split()) / 2.6)
+                fplaced = 6.0
+                fcount = 1
+                while fest > fplaced + 1.5 and fest > 8.0 and fcount < 4:
+                    vcam = dict(cam_params) if cam_params else {}
+                    if vcam.get("zoom_end", 1.2) > vcam.get("zoom_start", 1.0):
+                        vcam["zoom_start"], vcam["zoom_end"] = vcam.get("zoom_end", 1.22), vcam.get("zoom_start", 1.0)
+                        vmove = "pull_out"
+                    else:
+                        vcam["zoom_start"], vcam["zoom_end"] = vcam.get("zoom_start", 1.0) or 1.0, 1.22
+                        vmove = "push_in"
+                    variant = os.path.join(out_dir, "shots", f"scene{i}_variant_{fcount}.mp4")
+                    if _kenburns(got, variant, duration=5.5, zoom_in=vmove == "push_in", camera=vcam):
+                        fill_shots.append({"file": variant, "duration": 5.5, "kind": src,
+                                           "camera": vmove, "motion_params": vcam,
+                                           "title": title, "query": fill_q})
+                        fplaced += 5.5
+                        fcount += 1
+                    else:
+                        break
+                plan[i] = fill_shots
                 stats[src] = stats.get(src, 0) + 1
-                print(f"  [fill] scene{i} filled with {src} still ({fill_q})")
+                print(f"  [fill] scene{i} filled with {src} still ({fill_q}) "
+                      f"({len(fill_shots)} shot(s))")
 
     print(f"  Shots planned: " + ", ".join(f"scene{i}: {len(v)}" for i, v in plan.items()))
     print(f"  Sources: {stats} ({(time.time()-t0):.1f}s)")
@@ -822,6 +847,55 @@ def _pace_pad_scenes(scenes_data: list[dict], audio_dir: str,
 # Timeline + render
 # ═══════════════════════════════════════════════════════════════════════ #
 
+def _append_coverage_variant(tl: dict, last: dict, scene_end: float,
+                              scene_id: int, out_path: str) -> None:
+    """Cover narration remainder past MAX_SHOT_HOLD_S with an opposite-
+    camera Ken Burns variant built from the same source still (fallback:
+    extract a frame from the clip itself).  Keeps the timeline free of
+    both black gaps (frozen/static) and over-long holds (shot_hold)."""
+    import subprocess as _sp
+    out_dir = os.path.dirname(out_path)
+    fname = os.path.basename(last.get("file", ""))
+    stem = os.path.splitext(fname)[0]
+    src_img = os.path.join(out_dir, "stills", stem + ".jpg")
+    if not os.path.exists(src_img):
+        src_img = os.path.join(out_dir, "shots", stem + ".jpg")
+    if not os.path.exists(src_img) and os.path.exists(last.get("file", "")):
+        src_img = os.path.join(out_dir, "shots", f"scene{scene_id}_covframe.jpg")
+        _sp.run(["ffmpeg", "-y", "-v", "error", "-ss", "1.0",
+                 "-i", last.get("file", ""), "-frames:v", "1", src_img],
+                capture_output=True, text=True, timeout=30)
+    if not os.path.exists(src_img):
+        return  # cannot build a variant; keep capped shot (gate reports it)
+    variant = os.path.join(out_dir, "shots", f"scene{scene_id}_covvar.mp4")
+    mp = dict(last.get("motion_params") or {})
+    if mp.get("zoom_end", 1.2) > mp.get("zoom_start", 1.0):
+        mp["zoom_start"], mp["zoom_end"] = mp.get("zoom_end", 1.22), mp.get("zoom_start", 1.0)
+    else:
+        mp["zoom_start"], mp["zoom_end"] = mp.get("zoom_start", 1.0) or 1.0, 1.22
+    dur = round(scene_end - last["end_time"], 3)
+    if dur <= 0.3:
+        return
+    if not _kenburns(src_img, variant, duration=dur, zoom_in=mp["zoom_end"] > mp["zoom_start"], camera=mp):
+        return
+    tl["video_timeline"].append({
+        "layer": 1, "file": variant,
+        "start_time": last["end_time"],
+        "end_time": round(scene_end, 3),
+        "transition": "crossfade", "motion": "none",
+        "camera": "ken_burns", "beat_index": 1, "shot_type": "variant",
+        "camera_move": "pull_out" if mp["zoom_end"] < mp["zoom_start"] else "push_in",
+        "motion_params": mp,
+        "asset_source": last.get("asset_source", ""),
+        "asset_title": last.get("asset_title", ""),
+        "query_used": last.get("query_used", ""),
+        "scene_id": scene_id,
+        "verification_passed": last.get("verification_passed", True),
+        "verification_reasons": last.get("verification_reasons", []),
+        "pre_verified": last.get("pre_verified", False),
+    })
+
+
 def build_stills_timeline(scenes_data: list[dict], shot_plan: dict,
                           audio_durations: list[float], out_path: str) -> str:
     """Build a timeline.json from stills/manim shots + per-scene voice."""
@@ -875,12 +949,19 @@ def build_stills_timeline(scenes_data: list[dict], shot_plan: dict,
             entry["pre_verified"] = bool(ver.get("pre_verified", False))
             tl["video_timeline"].append(entry)
             t += dur
-        # Per-scene coverage: stretch the last shot of this scene to cover
-        # the full narration window.  Otherwise a scene whose shots sum to
-        # less than its audio duration leaves a black gap (QA: frozen/static).
+        # Per-scene coverage: cover the full narration window.  Never hold
+        # a single shot beyond MAX_SHOT_HOLD_S — cap it and add an
+        # opposite-camera Ken Burns variant to cover the remainder
+        # (v10.4: v14 stretched scene3_fill to 10.7s > 10s cap).
         scene_end = cursor + adur
         if tl["video_timeline"] and t < scene_end:
-            tl["video_timeline"][-1]["end_time"] = round(scene_end, 3)
+            last = tl["video_timeline"][-1]
+            max_end = round(last["start_time"] + MAX_SHOT_HOLD_S, 3)
+            if scene_end <= max_end:
+                last["end_time"] = round(scene_end, 3)
+            else:
+                last["end_time"] = max_end
+                _append_coverage_variant(tl, last, scene_end, i, out_path)
         cursor += adur
 
     # extend final shot to cover any trailing audio
