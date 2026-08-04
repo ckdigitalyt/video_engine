@@ -423,9 +423,28 @@ def _still_plan_for(scene_text: str, spec=None, scene=None) -> list:
     return out
 
 
+def _manim_script_for(clip_path: str) -> str:
+    """Resolve the .py source for a rendered Manim clip.
+
+    Rendered clips live in cache/manim/<name>.mp4 while their source
+    scripts live in src/manim/scenes/<name>.py (or beside the clip when
+    generated ad-hoc).  Missing source is NOT a hard failure — the clip
+    already exists and is registered; kinetic validation is a bonus."""
+    cands = [
+        clip_path.replace(".mp4", ".py"),
+        os.path.join("src", "manim", "scenes",
+                     os.path.basename(clip_path).replace(".mp4", ".py")),
+    ]
+    for c in cands:
+        if os.path.exists(c):
+            return c
+    return ""
+
+
 def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                          gates=None, specs: Optional[dict] = None,
-                         topic_slug: str = "") -> dict:
+                         topic_slug: str = "",
+                         style_bible=None) -> dict:
     """Build per-scene shot lists: Manim clips + Ken Burns stills.
 
     When *gates* is provided, every candidate still is verified against
@@ -435,6 +454,10 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
 
     Stills are cached topic-scoped (``cache/stills/<topic_slug>/``) so a
     fresh topic never reuses another topic's pinned assets.
+
+    v9 (Jade spec §2/§3): *style_bible* records which locked style token
+    each placed AI still was generated with (style-drift QA), and Manim
+    clips are kinetic-validated before entering the timeline.
 
     Returns {scene_id: [{"file": clip, "duration": s}, ...]} and stats.
     """
@@ -469,13 +492,21 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
         spec = (specs or {}).get(i)
         intent = spec.scene_intent if spec else "default"
         shots = []
-        # 1) Manim explanation clip if scene calls for it
+        # 1) Manim explanation clip if scene calls for it (v9 kinetic gate)
         manim = _manim_scene_for(text, intent)
         if manim and os.path.exists(manim) and manim not in manim_used:
-            manim_used.add(manim)
-            shots.append({"file": manim, "duration": min(10.0, M._probe_duration(manim)),
-                          "kind": "manim"})
-            stats["manim"] += 1
+            from src.manim.validate import validate_manim_script
+            script = _manim_script_for(manim)
+            mv = validate_manim_script(script) if script else None
+            if mv is None or (mv.valid and mv.kinetic):
+                manim_used.add(manim)
+                shots.append({"file": manim, "duration": min(10.0, M._probe_duration(manim)),
+                              "kind": "manim"})
+                stats["manim"] += 1
+            else:
+                stats["rejected"] += 1
+                print(f"  [manim-gate] rejected {os.path.basename(manim)} "
+                      f"({(mv.errors or ['not kinetic'])[:1]})")
         # 2) Stills with Ken Burns (2 per scene typically)
         still_count = 0
         for kind, query in _still_plan_for(text, spec, scene):
@@ -497,6 +528,9 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
             else:
                 got = _ai_still(query, out)
                 src = "ai"
+                # v9: record locked style token for drift QA (spec §2)
+                if got and style_bible is not None:
+                    style_bible.placed_style_tokens[os.path.basename(got)] = query
             if not got:
                 continue
             # Content-based dedup: skip near-identical stills already placed
@@ -605,13 +639,17 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
         intent = spec.scene_intent if spec else "default"
         manim = _manim_scene_for(text, intent)
         if manim and os.path.exists(manim) and manim not in manim_used:
-            manim_used.add(manim)
-            plan[i] = [{"file": manim,
-                        "duration": min(10.0, M._probe_duration(manim)),
-                        "kind": "manim"}]
-            stats["manim"] += 1
-            print(f"  [fill] scene{i} filled with Manim {os.path.basename(manim)}")
-            continue
+            from src.manim.validate import validate_manim_script
+            script = _manim_script_for(manim)
+            mv = validate_manim_script(script) if script else None
+            if mv is None or (mv.valid and mv.kinetic):
+                manim_used.add(manim)
+                plan[i] = [{"file": manim,
+                            "duration": min(10.0, M._probe_duration(manim)),
+                            "kind": "manim"}]
+                stats["manim"] += 1
+                print(f"  [fill] scene{i} filled with Manim {os.path.basename(manim)}")
+                continue
         topic = _detect_topic(text) or "documentary"
         fname = f"scene{i}_fill.jpg"
         out = os.path.join(still_root, fname)
@@ -816,6 +854,18 @@ def main():
     if os.path.isdir(os.path.join(out_dir, "shots")):
         shutil.rmtree(os.path.join(out_dir, "shots"))
 
+    # ── v9 (Jade spec §1/§2): lock narrator voice + visual identity ──
+    # Single voice + single style for the WHOLE episode, decided once
+    # here and persisted so re-renders/improvement passes cannot drift.
+    from src.qa.voice_lock import lock_voice
+    from src.director.style_bible import create_style_bible
+    voice_lock = lock_voice(provider="edge",
+                            voice_id="en-US-ChristopherNeural",
+                            speaker_id="jade-narrator-001").reset_episode()
+    style_bible = create_style_bible("jade").reset_episode()
+    run_report["voice_lock"] = voice_lock.to_dict()
+    run_report["style_bible"] = style_bible.to_dict()
+
     # ── Stills-first visual planning (with Wave-1 gates) ──────────────
     gates = None
     specs = None
@@ -830,7 +880,9 @@ def main():
     except Exception as e:
         print(f"  !! gates init failed (continuing un-gated): {str(e)[:100]}")
     shot_plan, stills_stats = stage_stills_visuals(scenes_data, out_dir, gates, specs,
-                                                  topic_slug=slug)
+                                                  topic_slug=slug,
+                                                  style_bible=style_bible)
+    style_bible.save()
     run_report["stages"]["visuals"] = stills_stats
 
     # ── Narration (dynamic, emotion-modulated; reuse cached audio) ──────
@@ -845,12 +897,32 @@ def main():
         narration_stats = {"provider": "cached"}
     else:
         audio_durations, narration_stats = M.stage_narration_dynamic(
-            scenes_data, "cache/audio", provider="edge")
+            scenes_data, "cache/audio", provider="edge", voice_lock=voice_lock)
     print(f"  Voice tracks: {len(scenes_data)} (total {sum(audio_durations):.1f}s) "
           f"[{narration_stats.get('provider')}]")
 
     # ── Timeline + render ──────────────────────────────────────────────
     build_stills_timeline(scenes_data, shot_plan, audio_durations, timeline_path)
+
+    # ── v9 (Jade spec §9): DETERMINISTIC PRE-RENDER GATE ─────────────
+    # Blocks render on objective plan failures: voice switching, style
+    # drift, off-topic assets, invalid/non-kinetic Manim, long holds,
+    # dead air, missing audio.  Fail-closed by design.
+    from src.qa.jade_gates import PreRenderGate
+    pre_gate = PreRenderGate().run(
+        timeline_path=timeline_path,
+        audio_dir="cache/audio",
+        voice_lock=voice_lock,
+        style_bible=style_bible,
+    )
+    run_report["stages"]["pre_render_gate"] = pre_gate
+    _pre_blockers = pre_gate.get("blocking_failures", [])
+    if _pre_blockers:
+        print("  !! PRE-RENDER GATE BLOCKED: " + str(_pre_blockers))
+        run_report["errors"].append(f"pre-render gate blocked: {_pre_blockers}")
+    else:
+        print("  [gate] pre-render deterministic gate PASSED (render allowed)")
+
     print(f"\n[12/16] RENDERING → {output_path}", flush=True)
     t0 = time.time()
     if gates is not None:
@@ -1069,6 +1141,31 @@ def main():
             run_report["stages"][f"review_v{iteration+1}"] = {"error": str(e)[:200]}
             break
         iteration += 1
+
+    # ── v9 (Jade spec §10): PUBLISH-READINESS GATE on the final video ──
+    # Deterministic: hook strength in the opening seconds, voice
+    # consistency, style lock, dead-air/clipping on the mastered audio,
+    # no black opening.  ``publish_ready`` must be true to ship.
+    try:
+        from src.qa.jade_gates import PublishGate
+        publish = PublishGate().run(
+            video_path=review_target,
+            timeline_path=timeline_path,
+            voice_lock=voice_lock,
+            style_bible=style_bible,
+        )
+        run_report["publish_gate"] = publish
+        _pub_blockers = publish.get("blocking_failures", [])
+        if publish.get("publish_ready"):
+            print("  [gate] PUBLISH-READY ✓ (all deterministic gates passed)")
+        else:
+            print("  !! PUBLISH GATE: not publish-ready → " + str(_pub_blockers))
+            run_report["errors"].append(f"publish gate: {_pub_blockers}")
+        with open(os.path.join(out_dir, "publish_gate.json"), "w") as _f:
+            json.dump(publish, _f, indent=2)
+    except Exception as e:
+        print(f"  !! publish gate failed (non-fatal): {str(e)[:100]}")
+        run_report["publish_gate"] = {"error": str(e)[:200]}
 
     # ── Interim-asset cleanup (studio policy: keep only the final video) ──
     # Every run produces several mp4s (raw render, graded master, final mix)

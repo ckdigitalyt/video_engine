@@ -1,0 +1,195 @@
+"""
+style_bible.py — Locked visual identity per episode (Jade Operating Spec §2, §9).
+
+One video = one visual universe.  A StyleBible is created once at project
+start and every still / AI image / grade in the episode must conform:
+
+  * one canonical palette (hex list)
+  * one canonical reference frame prompt (the "look" anchor)
+  * one locked style modifier appended to every AI still prompt
+  * one character/subject sheet (per-episode, optional)
+
+The bible is persisted to cache/style_bible.json so re-renders and
+improvement passes reuse the SAME identity (no drift between iterations).
+
+QA gates exported:
+  * ``check_style_drift`` — every placed AI still must carry the locked
+    style token in its prompt/query record (rejects scenes that fell back
+    to a different art direction or un-styled default prompts).
+  * ``check_palette`` — dominant colors of generated stills should fall
+    near the canonical palette (loose check; logs deviation, flags only
+    gross drift like a full-saturation foreign look).
+"""
+
+from __future__ import annotations
+
+import json
+import os
+from dataclasses import dataclass, field
+from typing import Optional
+
+DEFAULT_BIBLE_PATH = "cache/style_bible.json"
+
+# One fixed Jade art direction for every stylized shot (studio decision
+# 2026-08-03 + v8.1).  The bible's style_modifier is this exact token, so
+# every AI still in the episode carries the same look.
+DEFAULT_STYLE_MODIFIER = (
+    "hand-painted cinematic concept art, painterly brushwork, rich depth, "
+    "warm amber and deep teal color palette with soft cream highlights, "
+    "consistent lighting and color grade, no text"
+)
+
+DEFAULT_PALETTE = ["#F5F0E1", "#C97B4A", "#2F4858", "#86A8A6", "#1B2631"]
+
+# Token that must appear in every styled prompt (used by drift QA).
+STYLE_TOKEN = "hand-painted"
+
+
+@dataclass
+class StyleBible:
+    """Locked visual identity for one episode."""
+
+    style_name: str = "jade"
+    style_modifier: str = DEFAULT_STYLE_MODIFIER
+    palette: list = field(default_factory=lambda: list(DEFAULT_PALETTE))
+    reference_frame_prompt: str = ""
+    subject_sheet: list = field(default_factory=list)
+    bible_path: str = DEFAULT_BIBLE_PATH
+    # record of which style token each placed still was generated with
+    placed_style_tokens: dict = field(default_factory=dict)  # shot file -> token
+
+    # ── Persistence ────────────────────────────────────────────────────
+
+    def to_dict(self) -> dict:
+        return {
+            "style_name": self.style_name,
+            "style_modifier": self.style_modifier,
+            "palette": self.palette,
+            "reference_frame_prompt": self.reference_frame_prompt,
+            "subject_sheet": self.subject_sheet,
+            "placed_style_tokens": self.placed_style_tokens,
+        }
+
+    def save(self) -> str:
+        os.makedirs(os.path.dirname(self.bible_path) or ".", exist_ok=True)
+        with open(self.bible_path, "w") as f:
+            json.dump(self.to_dict(), f, indent=2)
+        return self.bible_path
+
+    @classmethod
+    def load(cls, bible_path: str = DEFAULT_BIBLE_PATH) -> Optional["StyleBible"]:
+        if not os.path.exists(bible_path):
+            return None
+        try:
+            with open(bible_path) as f:
+                d = json.load(f)
+            return cls(
+                style_name=d.get("style_name", "jade"),
+                style_modifier=d.get("style_modifier", DEFAULT_STYLE_MODIFIER),
+                palette=d.get("palette", list(DEFAULT_PALETTE)),
+                reference_frame_prompt=d.get("reference_frame_prompt", ""),
+                subject_sheet=d.get("subject_sheet", []),
+                bible_path=bible_path,
+                placed_style_tokens=d.get("placed_style_tokens", {}),
+            )
+        except Exception:
+            return None
+
+    # ── Prompt helpers ─────────────────────────────────────────────────
+
+    def styled_prompt(self, base: str, photoreal: bool = False) -> str:
+        """Append the locked style modifier (or the photoreal identity)."""
+        if photoreal:
+            return f"{base}. photorealistic, cinematic, high detail, no text"
+        return f"{base}. {self.style_modifier}"
+
+    def reset_episode(self) -> "StyleBible":
+        """Clear per-episode placed-token records (identity persists).
+        Prevents a previous topic's stills from false-failing drift QA."""
+        self.placed_style_tokens = {}
+        self.save()
+        return self
+
+    # ── QA checks ──────────────────────────────────────────────────────
+
+    def check_style_drift(self, placed: Optional[dict] = None) -> dict:
+        """§2 'Do not rotate styles by scene emotion' / §9 'style drift'.
+
+        Every placed AI still's recorded prompt token must contain the
+        locked style token.  Any shot placed with a different or missing
+        art direction = drift (fails the gate).
+        """
+        placed = placed if placed is not None else self.placed_style_tokens
+        drifted = []
+        for fname, token in (placed or {}).items():
+            tok = (token or "").lower()
+            if STYLE_TOKEN not in tok and "photorealistic" not in tok:
+                drifted.append(f"{os.path.basename(fname)}:{token[:40]}")
+        return {
+            "passed": not drifted,
+            "detail": f"{len(placed or {})} placed stills, 0 drifted"
+                      if not drifted else f"style drift: {drifted[:6]}",
+            "metrics": {"placed": len(placed or {}), "drifted": drifted[:8]},
+        }
+
+    def check_palette(self, image_paths: list) -> dict:
+        """Loose dominant-color check against the canonical palette.
+
+        Computes average hue of each still; flags only gross drift (an
+        image whose dominant color is far from every palette color).
+        Not a hard render block — palette is a quality hint, but gross
+        drift is logged for the review pass.
+        """
+        try:
+            from PIL import Image
+            import numpy as np
+        except Exception:
+            return {"passed": True, "detail": "palette check unavailable (PIL/numpy)",
+                    "metrics": {}}
+        pal_rgb = []
+        for hx in self.palette:
+            hx = hx.lstrip("#")
+            if len(hx) == 6:
+                pal_rgb.append(tuple(int(hx[i:i + 2], 16) for i in (0, 2, 4)))
+        if not pal_rgb:
+            return {"passed": True, "detail": "no palette defined", "metrics": {}}
+
+        def _dist(c1, c2):
+            return sum((a - b) ** 2 for a, b in zip(c1, c2)) ** 0.5
+
+        min_dists = []
+        for p in image_paths:
+            if not os.path.exists(p):
+                continue
+            try:
+                with Image.open(p).convert("RGB").resize((64, 64)) as im:
+                    arr = np.asarray(im).reshape(-1, 3)
+                    mean = tuple(float(x) for x in arr.mean(axis=0))
+                min_dists.append(min(_dist(mean, c) for c in pal_rgb))
+            except Exception:
+                continue
+        if not min_dists:
+            return {"passed": True, "detail": "no stills to palette-check",
+                    "metrics": {"checked": 0}}
+        worst = max(min_dists)
+        # 441 = distance to an opposite hue in RGB cube (~255*sqrt(3)).
+        return {
+            "passed": worst < 330.0,
+            "detail": (f"dominant-color distance from palette: max {worst:.0f}/441 "
+                       f"({len(min_dists)} stills)") if worst < 330.0
+                      else f"gross palette drift (max {worst:.0f}/441) — review needed",
+            "metrics": {"checked": len(min_dists), "max_dist": round(worst, 1)},
+        }
+
+
+def create_style_bible(style_name: str = "jade",
+                       bible_path: str = DEFAULT_BIBLE_PATH,
+                       force: bool = False) -> StyleBible:
+    """Lock the episode's visual identity once at project start."""
+    existing = StyleBible.load(bible_path)
+    if existing and not force:
+        return existing
+    sb = StyleBible(style_name=style_name, bible_path=bible_path)
+    sb.save()
+    print(f"  [style-bible] '{style_name}' locked → {bible_path}")
+    return sb

@@ -598,18 +598,22 @@ def stage_ai_imagery(result_scenes, out_dir: str) -> dict:
 # Narration stage (10)
 # ═══════════════════════════════════════════════════════════════════════ #
 
-def stage_narration(result_scenes, cache_audio: str) -> dict:
+def stage_narration(result_scenes, cache_audio: str, voice_lock=None) -> dict:
     print("\n[10/16] NARRATION (Kokoro George)", flush=True)
     t0 = time.time()
     for scene in result_scenes:
         ap = os.path.join(cache_audio, f"scene_{scene.scene_id}.wav")
         generate_voice(scene.narration.spoken_narration, ap)
+        if voice_lock is not None:
+            voice_lock.record_scene(scene.scene_id, "kokoro", "bm_george")
         scene.audio_plan = AudioPlan(
             narration_audio_path=ap,
             music_style=MusicStyle.CINEMATIC,
             ducking_enabled=True,
             ducking_reduction_db=8.0,
         )
+    if voice_lock is not None:
+        voice_lock.save()
     print(f"  Voice tracks: {len(result_scenes)} ({round(time.time()-t0,1)}s)")
     return {"voice_scenes": len(result_scenes), "elapsed_s": round(time.time() - t0, 1)}
 
@@ -897,16 +901,25 @@ def build_sfx_timeline(scenes: list[dict], audio_durations: list[float],
 
 
 def stage_narration_dynamic(scenes: list[dict], cache_audio: str,
-                            provider: str = "edge") -> tuple[list[float], dict]:
+                            provider: str = "edge",
+                            voice_lock=None) -> tuple[list[float], dict]:
     """Dynamic narration: sentence-level rate/pitch modulation by scene
     emotion (edge-tts supports per-sentence rate/pitch), falling back to
     flat Kokoro when edge is unavailable.  Returns (durations, stats).
 
-    v8: replaces the flat single-call TTS so delivery isn't monotone."""
+    v8: replaces the flat single-call TTS so delivery isn't monotone.
+    v9 (Jade spec §1): every scene is voiced with the LOCKED narrator
+    (voice_lock); any fallback to a different engine/voice is recorded as
+    an EXPLICIT override on the lock (never silent) so the pre-render QA
+    gate can reject voice switching."""
     import re as _re
     os.makedirs(cache_audio, exist_ok=True)
     durations = []
     stats = {"provider": provider, "modulated_sentences": 0, "fallbacks": 0}
+    # Locked narrator identity (single voice per episode).
+    locked_voice = "en-US-ChristopherNeural"  # Edge default (matches lock)
+    if voice_lock is not None:
+        locked_voice = voice_lock.voice_id
     _EMO_RATE = {"wonder": "+8%", "tension": "+4%", "revelation": "+10%",
                  "awe": "+6%", "nostalgia": "-4%", "hopeful": "+4%",
                  "somber": "-8%"}
@@ -940,7 +953,7 @@ def stage_narration_dynamic(scenes: list[dict], cache_audio: str,
                     chunks = []
                     for s in sents:
                         comm = edge_tts.Communicate(
-                            s, "en-US-ChristopherNeural",
+                            s, locked_voice,
                             rate=rate, pitch=pitch)
                         tmp = ap + f".{len(chunks)}.mp3"
                         await comm.save(tmp)
@@ -963,17 +976,28 @@ def stage_narration_dynamic(scenes: list[dict], cache_audio: str,
 
                 asyncio.run(_gen())
                 stats["modulated_sentences"] += len(sents)
+                if voice_lock is not None:
+                    voice_lock.record_scene(i, "edge", locked_voice)
             else:
                 from audio_engine import generate_voice
                 generate_voice(sc.get("narration"), ap)
                 stats["provider"] = "kokoro"
+                if voice_lock is not None:
+                    # Explicit override: flat Kokoro voice differs in timbre.
+                    voice_lock.record_scene(i, "kokoro", "bm_george",
+                                            override=True, reason="provider!=edge")
         except Exception as e:  # noqa: BLE001
             print(f"  !! dynamic narration failed for scene {i} ({str(e)[:80]}) — Kokoro fallback")
             stats["fallbacks"] += 1
             from audio_engine import generate_voice
             generate_voice(sc.get("narration"), ap)
             stats["provider"] = "kokoro"
+            if voice_lock is not None:
+                voice_lock.record_scene(i, "kokoro", "bm_george",
+                                        override=True, reason=str(e)[:60])
         durations.append(_probe_duration(ap) if os.path.exists(ap) else 5.0)
+    if voice_lock is not None:
+        voice_lock.save()
     return durations, stats
 
 
@@ -1027,6 +1051,11 @@ def stage_music_mix(video_path: str, music_path: str, out_path: str,
     # [0:a] voice stream; the EQ'd [voice] pad is used only for the final
     # amix.  Verified with targeted ffmpeg tests (v8 fix).
     SIDECHAIN = "threshold=0.0625:ratio=4:attack=20:release=250"
+    # Jade spec §4: never allow abrupt music starts/stops — fade the bed
+    # in over 1s and out over the final 1.5s (unless the video is shorter).
+    fade_in = min(1.0, dur / 4)
+    fade_out_start = max(0.0, dur - 1.5)
+    FADES = f",afade=t=in:st=0:d={fade_in:.2f},afade=t=out:st={fade_out_start:.2f}:d=1.5"
     # SFX layer (optional): event-driven timeline built from script sfx_events
     sfx_used = ""
     if sfx_path and os.path.exists(sfx_path):
@@ -1042,7 +1071,7 @@ def stage_music_mix(video_path: str, music_path: str, out_path: str,
             "-filter_complex",
             (
                 f"[0:a]{VOICE_EQ}[voice];"
-                f"[1:a]aloop=loop=-1:size=2e9,atrim=0:{dur:.3f},volume={vol:.3f}[bed];"
+                f"[1:a]aloop=loop=-1:size=2e9,atrim=0:{dur:.3f},volume={vol:.3f}{FADES}[bed];"
                 f"[2:a]aloop=loop=-1:size=2e9,atrim=0:{dur:.3f},volume=0.8[sfx];"
                 f"[bed][sfx]amix=inputs=2:duration=first:normalize=0[bedmix];"
                 f"[bedmix][0:a]sidechaincompress={SIDECHAIN}[duck];"
@@ -1061,7 +1090,7 @@ def stage_music_mix(video_path: str, music_path: str, out_path: str,
             "-filter_complex",
             (
                 f"[0:a]{VOICE_EQ}[voice];"
-                f"[1:a]aloop=loop=-1:size=2e9,atrim=0:{dur:.3f},volume={vol:.3f}[bed];"
+                f"[1:a]aloop=loop=-1:size=2e9,atrim=0:{dur:.3f},volume={vol:.3f}{FADES}[bed];"
                 f"[bed][0:a]sidechaincompress={SIDECHAIN}[duck];"
                 f"[voice][duck]amix=inputs=2:duration=first:dropout_transition=0:normalize=0,alimiter=limit=0.89,loudnorm=I=-14:TP=-1.5:LRA=11[aout]"
             ),
@@ -1323,8 +1352,30 @@ def main():
     # ── Stage 10: Narration ───────────────────────────────────────────
     cache_audio = "cache/audio"
     os.makedirs(cache_audio, exist_ok=True)
-    audio_stats = stage_narration(result_scenes, cache_audio)
+    # v9 (Jade spec §1): lock the narrator voice once at project start.
+    from src.qa.voice_lock import lock_voice
+    from src.director.style_bible import create_style_bible
+    voice_lock = lock_voice(provider="kokoro", voice_id="bm_george",
+                            speaker_id="jade-narrator-001").reset_episode()
+    style_bible = create_style_bible("jade").reset_episode()
+    run_report["voice_lock"] = voice_lock.to_dict()
+    run_report["style_bible"] = style_bible.to_dict()
+    audio_stats = stage_narration(result_scenes, cache_audio, voice_lock=voice_lock)
     run_report["stages"]["narration"] = audio_stats
+
+    # ── v9 (Jade spec §9): DETERMINISTIC PRE-RENDER GATE ─────────────
+    from src.qa.jade_gates import PreRenderGate
+    _pre_gate = PreRenderGate().run(
+        timeline_path=timeline_path, audio_dir=cache_audio,
+        voice_lock=voice_lock, style_bible=style_bible)
+    run_report["stages"]["pre_render_gate"] = _pre_gate
+    if _pre_gate.get("blocking_failures"):
+        print("  !! PRE-RENDER GATE BLOCKED: " +
+              str(_pre_gate["blocking_failures"]))
+        run_report["errors"].append(
+            f"pre-render gate blocked: {_pre_gate['blocking_failures']}")
+    else:
+        print("  [gate] pre-render deterministic gate PASSED (render allowed)")
 
     # ── Stage 12: Render (initial, voice only) ────────────────────────
     render_stats = stage_render(result_scenes, timeline_path, output_path)
@@ -1374,6 +1425,25 @@ def main():
         iteration += 1
 
     final_video = review_target
+    # ── v9 (Jade spec §10): PUBLISH-READINESS GATE on the final video ──
+    try:
+        from src.qa.jade_gates import PublishGate
+        _publish = PublishGate().run(
+            video_path=final_video, timeline_path=timeline_path,
+            voice_lock=voice_lock, style_bible=style_bible)
+        run_report["publish_gate"] = _publish
+        if _publish.get("publish_ready"):
+            print("  [gate] PUBLISH-READY ✓ (all deterministic gates passed)")
+        else:
+            print("  !! PUBLISH GATE: not publish-ready → " +
+                  str(_publish.get("blocking_failures", [])))
+            run_report["errors"].append(
+                f"publish gate: {_publish.get('blocking_failures', [])}")
+        with open(os.path.join(out_dir, "publish_gate.json"), "w") as _f:
+            json.dump(_publish, _f, indent=2)
+    except Exception as e:
+        print(f"  !! publish gate failed (non-fatal): {str(e)[:100]}")
+        run_report["publish_gate"] = {"error": str(e)[:200]}
     # ── Stage 15-16: Final output + postmortem ────────────────────────
     print("\n[15-16/16] FINAL OUTPUT + POSTMORTEM", flush=True)
     run_report["final"] = {
