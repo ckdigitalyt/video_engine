@@ -1075,13 +1075,21 @@ def stage_narration_dynamic(scenes: list[dict], cache_audio: str,
                     "conclusion": "heavy",
                 }.get(role, "medium")
                 tagged = apply_pacing_pauses(tagged, pause_density)
-                cb.generate_voice(tagged, ap, exaggeration=ex, cfg_weight=cfg)
+                # Optional voice cloning (2026): a reference clip at
+                # voices.chatterbox.audio_prompt clones that voice's timbre
+                # + pacing for every scene (None = built-in default voice).
+                from src.utils.config import get_config
+                audio_prompt = get_config("voices.chatterbox.audio_prompt", None)
+                cb.generate_voice(tagged, ap, exaggeration=ex, cfg_weight=cfg,
+                                  audio_prompt=audio_prompt)
                 stats["provider"] = "chatterbox"
                 stats["emotion_params"][f"{emo}/{role}"] = (ex, cfg)
                 stats["para_tags_used"] = stats.get("para_tags_used", 0) + \
                     len(sc.get("para_tags") or [])
                 if voice_lock is not None:
                     voice_lock.record_scene(i, "chatterbox", "resemble")
+                if audio_prompt:
+                    stats["cloned_voice"] = os.path.basename(audio_prompt)
             except Exception as e:  # noqa: BLE001
                 print(f"  !! chatterbox failed for scene {i} ({str(e)[:80]}) — edge fallback")
                 stats["fallbacks"] += 1

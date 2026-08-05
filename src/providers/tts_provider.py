@@ -119,9 +119,14 @@ class ChatterboxProvider(TTSProvider):
 
     def generate_voice(self, text: str, output_path: str,
                        exaggeration: float | None = None,
-                       cfg_weight: float | None = None) -> None:
+                       cfg_weight: float | None = None,
+                       audio_prompt: str | None = None) -> None:
         """Synthesize *text* (whole semantic chunk — NOT sentence-by-
-        sentence, per expert §1.2 contextual chunking) to *output_path*."""
+        sentence, per expert §1.2 contextual chunking) to *output_path*.
+
+        audio_prompt: optional path to a 10-30s reference WAV — Chatterbox
+        clones that voice's timbre + pacing (voice cloning).  When None the
+        model's built-in default voice is used."""
         proc = self._ensure_worker()
         req = {
             "id": self._req_id,
@@ -132,6 +137,8 @@ class ChatterboxProvider(TTSProvider):
             "cfg_weight": cfg_weight if cfg_weight is not None
                           else self._default_cfg_weight,
         }
+        if audio_prompt:
+            req["audio_prompt"] = os.path.abspath(audio_prompt)
         self._req_id += 1
         try:
             proc.stdin.write(json.dumps(req) + "\n")

@@ -1,6 +1,13 @@
 # voices.yaml — TTS (Kokoro) and audio mixing settings
 
 voices:
+  chatterbox:
+    # Optional voice-cloning reference clip (10-30s clean speech WAV/MP3).
+    # When set, Chatterbox clones this voice's timbre + pacing for every
+    # scene (e.g. a licensed deep documentary narrator).  None/empty =
+    # built-in default voice ("resemble").
+    audio_prompt: ""
+
   kokoro:
     # Kokoro ONNX model file
     model: "kokoro-v0_19.onnx"

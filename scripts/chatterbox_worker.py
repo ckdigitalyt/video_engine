@@ -7,7 +7,8 @@ KEEP_MODEL_LOADED), then serves JSON-lines requests on stdin/stdout:
 
   REQUEST  (one line):  {"id": 0, "text": "...", "out": "/abs/path.wav",
                          "exaggeration": 0.5, "cfg_weight": 0.5,
-                         "temperature": 0.8, "voice": "resemble"}
+                         "temperature": 0.8, "voice": "resemble",
+                         "audio_prompt": "/abs/ref.wav"}   # optional clone ref
   RESPONSE (one line):  {"id": 0, "ok": true, "duration_s": 8.6,
                          "sr": 24000, "elapsed_s": 110.0}
                         or {"id": 0, "ok": false, "error": "..."}
@@ -55,6 +56,7 @@ def main():
             t1 = time.time()
             audio = model.generate(
                 text,
+                audio_prompt_path=req.get("audio_prompt") or None,
                 exaggeration=float(req.get("exaggeration", 0.5)),
                 cfg_weight=float(req.get("cfg_weight", 0.5)),
                 temperature=float(req.get("temperature", 0.8)),
