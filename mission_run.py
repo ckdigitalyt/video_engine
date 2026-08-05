@@ -702,6 +702,10 @@ def stage_cinematic_grade(video_path: str, out_path: str,
     )
     cmd = ["ffmpeg", "-y", "-i", video_path, "-filter_complex", vf,
            "-map", "[out]",
+           # Preserve the master's audio stream — mapping only [out] drops
+           # it, and the later music-mix stage then fails with
+           # "matches no streams" on [0:a] (graded master had NO audio).
+           "-map", "0:a?",
            "-c:v", "libx264", "-preset", "fast", "-crf", "20",
            "-c:a", "copy", "-movflags", "+faststart", out_path]
     r = subprocess.run(cmd, capture_output=True, text=True, timeout=600)

@@ -190,9 +190,12 @@ class PreRenderGate:
         # ── 5. Shot hold / retention (§5/§9 shot hold too long) ────────
         holds = [v.get("end_time", 0) - v.get("start_time", 0) for v in vt]
         longest = max(holds) if holds else 0.0
-        report.add(QACheck("shot_hold", longest <= self._max_hold,
-                           f"longest shot {longest:.1f}s (limit {self._max_hold}s)",
-                           metrics={"longest_hold_s": round(longest, 2)}))
+        # float-epsilon tolerance: a 4.000000000000002s hold is a rounding
+        # artifact of start/end both being rounded to 3dp, NOT a real
+        # violation of the 4.0s cap — never fail-closed on binary dust.
+        report.add(QACheck("shot_hold", longest <= self._max_hold + 1e-6,
+                           f"longest shot {longest:.3f}s (limit {self._max_hold}s)",
+                           metrics={"longest_hold_s": round(longest, 3)}))
 
         # ── 6. Dead-air in narration timeline (§5/§9 dead-air gap) ─────
         gaps = []
@@ -259,7 +262,21 @@ class PreRenderGate:
                 sid = v.get("scene_id")
                 if sid is None or sid >= len(scenes_data):
                     continue
-                text = (scenes_data[sid].get("narration") or "").lower()
+                sc = scenes_data[sid]
+                # Token pool = narration + visual goal + script-approved
+                # search queries.  A shot is aligned if its query shares
+                # terms with ANY of them — the visual metaphor legitimately
+                # differs from narration phrasing ("clock at 7" for
+                # "seven hours of sleep"), and search_queries are
+                # script-authored, so a shot using one is aligned by
+                # construction.  Truly off-topic fallbacks (cached space
+                # footage in a sleep scene) still fail: their queries
+                # never appear in this scene's approved vocabulary.
+                text = " ".join([
+                    sc.get("narration") or "",
+                    sc.get("visual_goal") or "",
+                    " ".join(sc.get("search_queries") or []),
+                ]).lower()
                 query = ((v.get("query_used") or "") + " " +
                          (v.get("asset_title") or "")).lower()
                 if not query.strip():

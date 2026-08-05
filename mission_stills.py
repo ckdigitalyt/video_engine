@@ -28,6 +28,22 @@ load_dotenv()
 
 import mission_run as M
 
+# v11 recalibration: shot-hold / dead-air / hook constants live in the
+# QA gates module — import them here so build_stills_timeline enforces
+# the SAME caps the gates check (single source of truth).
+try:
+    from src.qa.jade_gates import (
+        MAX_SHOT_HOLD_S,
+        MAX_DEAD_AIR_S,
+        SILENCE_GAP_S,
+        HOOK_MIN_SHOTS,
+    )
+except Exception:  # pragma: no cover — defensive fallback
+    MAX_SHOT_HOLD_S = 4.0
+    MAX_DEAD_AIR_S = 0.5
+    SILENCE_GAP_S = 0.8
+    HOOK_MIN_SHOTS = 5
+
 
 # ═══════════════════════════════════════════════════════════════════════ #
 # Still finders (public domain: NASA / Wikimedia) + AI fallback
@@ -336,10 +352,13 @@ def _manim_scene_for(scene_text: str, intent: str = "default") -> str:
 # use FIXED_JADE_STYLE (+ its fixed palette) regardless of scene emotion;
 # the per-emotion rotation below is kept only as a fallback for scenes
 # that carry an explicit visual_style that is NOT in the fixed set.
+# 2026-08-05: channel direction — flat-vector Kurzgesagt-style (matches
+# style_bible DEFAULT_STYLE_MODIFIER + STYLE_TOKEN="flat-vector").
 FIXED_JADE_STYLE = (
-    "hand-painted cinematic concept art, painterly brushwork, rich depth, "
-    "warm amber and deep teal color palette with soft cream highlights, "
-    "consistent lighting and color grade, no text"
+    "flat-vector documentary illustration, clean geometric shapes, smooth "
+    "curves, bold flat color fills, deep navy background with high-saturation "
+    "cyan and orange accents, simple stylized human figures, minimal detail, "
+    "no text, no gradients, no photorealism"
 )
 
 STYLE_MODIFIERS = {
@@ -873,27 +892,41 @@ def _append_coverage_variant(tl: dict, last: dict, scene_end: float,
         mp["zoom_start"], mp["zoom_end"] = mp.get("zoom_end", 1.22), mp.get("zoom_start", 1.0)
     else:
         mp["zoom_start"], mp["zoom_end"] = mp.get("zoom_start", 1.0) or 1.0, 1.22
-    dur = round(scene_end - last["end_time"], 3)
-    if dur <= 0.3:
+    # Cap EVERY variant chunk at MAX_SHOT_HOLD_S: the narration remainder
+    # can exceed the hold limit (e.g. 11s scene → 4s primary + 4.48s
+    # remainder), and an uncapped single variant fails the shot_hold gate.
+    # Emit multiple capped chunks from the same source still.
+    remain = round(scene_end - last["end_time"], 3)
+    if remain <= 0.3:
         return
-    if not _kenburns(src_img, variant, duration=dur, zoom_in=mp["zoom_end"] > mp["zoom_start"], camera=mp):
-        return
-    tl["video_timeline"].append({
-        "layer": 1, "file": variant,
-        "start_time": last["end_time"],
-        "end_time": round(scene_end, 3),
-        "transition": "crossfade", "motion": "none",
-        "camera": "ken_burns", "beat_index": 1, "shot_type": "variant",
-        "camera_move": "pull_out" if mp["zoom_end"] < mp["zoom_start"] else "push_in",
-        "motion_params": mp,
-        "asset_source": last.get("asset_source", ""),
-        "asset_title": last.get("asset_title", ""),
-        "query_used": last.get("query_used", ""),
-        "scene_id": scene_id,
-        "verification_passed": last.get("verification_passed", True),
-        "verification_reasons": last.get("verification_reasons", []),
-        "pre_verified": last.get("pre_verified", False),
-    })
+    chunk_i = 0
+    cursor = last["end_time"]
+    while remain > 0.3:
+        dur = min(MAX_SHOT_HOLD_S, remain)
+        chunk_i += 1
+        vfile = os.path.join(out_dir, "shots",
+                             f"scene{scene_id}_covvar{chunk_i}.mp4")
+        if not _kenburns(src_img, vfile, duration=dur,
+                         zoom_in=mp["zoom_end"] > mp["zoom_start"], camera=mp):
+            return  # cannot build; keep capped primary (gate reports it)
+        tl["video_timeline"].append({
+            "layer": 1, "file": vfile,
+            "start_time": round(cursor, 3),
+            "end_time": round(cursor + dur, 3),
+            "transition": "crossfade", "motion": "none",
+            "camera": "ken_burns", "beat_index": 1, "shot_type": "variant",
+            "camera_move": "pull_out" if mp["zoom_end"] < mp["zoom_start"] else "push_in",
+            "motion_params": mp,
+            "asset_source": last.get("asset_source", ""),
+            "asset_title": last.get("asset_title", ""),
+            "query_used": last.get("query_used", ""),
+            "scene_id": scene_id,
+            "verification_passed": last.get("verification_passed", True),
+            "verification_reasons": last.get("verification_reasons", []),
+            "pre_verified": last.get("pre_verified", False),
+        })
+        cursor = round(cursor + dur, 3)
+        remain = round(scene_end - cursor, 3)
 
 
 def build_stills_timeline(scenes_data: list[dict], shot_plan: dict,
@@ -1029,8 +1062,10 @@ def main():
         if total_words > M.MAX_SCRIPT_WORDS:
             print(f"  !! Post-review over budget ({total_words} words) — compressing")
             compress = llm.generate_json(
-                "Condense this script to at most " + str(M.MAX_SCRIPT_WORDS) +
-                " words total, keeping all facts and the " + str(M.SCENE_COUNT) + "-scene structure. "
+                "Condense this script to between " + str(M.MIN_SCRIPT_WORDS) +
+                " and " + str(M.MAX_SCRIPT_WORDS) +
+                " words total (target ~" + str(int((M.MIN_SCRIPT_WORDS + M.MAX_SCRIPT_WORDS) / 2)) +
+                "), keeping all facts and the " + str(M.SCENE_COUNT) + "-scene structure. "
                 "Return ONLY the JSON array of scenes with title/narration/visual_goal/search_queries.\n" +
                 json.dumps({"scenes": scenes_data})[:6000]
             )
@@ -1039,20 +1074,25 @@ def main():
                 data2 = json.loads(compress)
                 scenes2 = data2.get("scenes", []) if isinstance(data2, dict) else (data2 if isinstance(data2, list) else [])
                 w2 = sum(len(s.get("narration", "").split()) for s in scenes2)
-                if len(scenes2) == M.SCENE_COUNT and w2 <= M.MAX_SCRIPT_WORDS + 10:
+                # Must stay inside the target word band (not just under the
+                # max — over-compressing to ~180 words yields an ~85s video
+                # when the target is 120s).
+                if len(scenes2) == M.SCENE_COUNT and M.MIN_SCRIPT_WORDS - 10 <= w2 <= M.MAX_SCRIPT_WORDS + 10:
                     scenes_data = M._merge_scene_meta(scenes_data, scenes2)
-                    print(f"  Compressed to {w2} words")
+                    print(f"  Compressed to {w2} words (in target band)")
                     compressed_ok = True
                 else:
-                    print(f"  !! Compression output invalid (scenes={len(scenes2)}, words={w2}) — deterministic trim")
+                    print(f"  !! Compression output out of band (scenes={len(scenes2)}, words={w2}) — deterministic trim")
             except json.JSONDecodeError:
                 print("  !! Post-review compression JSON failed — deterministic trim")
             # Deterministic hard-trim fallback (never silently keep an
             # over-budget script): truncate each scene's narration to a
             # proportional word budget, cutting at sentence boundaries.
+            # Target the TOP of the band (MAX words / scene count) so the
+            # trimmed script lands inside [MIN, MAX] — cutting to 0.9*MAX
+            # per-scene undershot to ~248 words (~99s) when target was 120s.
             if not compressed_ok:
-                budget = int(M.MAX_SCRIPT_WORDS * 0.9)
-                per_scene = max(8, budget // len(scenes_data))
+                per_scene = max(8, int(M.MAX_SCRIPT_WORDS / max(1, len(scenes_data))))
                 for s in scenes_data:
                     n = s.get("narration", "")
                     words = n.split()
@@ -1141,7 +1181,9 @@ def main():
             # the voice lock so the pre-render gate isn't vacuous and the
             # episode's identity stays truthful.
             if voice_lock is not None:
-                voice_lock.record_scene(i, "chatterbox", "resemble")
+                from src.utils.config import get_config as _gc
+                _vid = _gc("voices.chatterbox.voice_id", "kurzgesagt_like")
+                voice_lock.record_scene(i, "chatterbox", _vid)
         if voice_lock is not None:
             voice_lock.save()
         narration_stats = {"provider": "cached(chatterbox)"}

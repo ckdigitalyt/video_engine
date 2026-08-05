@@ -33,16 +33,20 @@ DEFAULT_BIBLE_PATH = "cache/style_bible.json"
 # One fixed Jade art direction for every stylized shot (studio decision
 # 2026-08-03 + v8.1).  The bible's style_modifier is this exact token, so
 # every AI still in the episode carries the same look.
+# 2026-08-05: channel direction switched to flat-vector documentary
+# illustration (Kurzgesagt-style): clean geometric shapes, flat fills,
+# deep navy background, high-saturation accents, no photorealism.
 DEFAULT_STYLE_MODIFIER = (
-    "hand-painted cinematic concept art, painterly brushwork, rich depth, "
-    "warm amber and deep teal color palette with soft cream highlights, "
-    "consistent lighting and color grade, no text"
+    "flat-vector documentary illustration, clean geometric shapes, smooth "
+    "curves, bold flat color fills, deep navy background with high-saturation "
+    "cyan and orange accents, simple stylized human figures, minimal detail, "
+    "no text, no gradients, no photorealism"
 )
 
-DEFAULT_PALETTE = ["#F5F0E1", "#C97B4A", "#2F4858", "#86A8A6", "#1B2631"]
+DEFAULT_PALETTE = ["#0B1220", "#22D3EE", "#F47F3F", "#A3E635", "#F0C4A8"]
 
 # Token that must appear in every styled prompt (used by drift QA).
-STYLE_TOKEN = "hand-painted"
+STYLE_TOKEN = "flat-vector"
 
 
 @dataclass
