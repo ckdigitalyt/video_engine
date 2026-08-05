@@ -482,36 +482,55 @@ def _still_plan_for(scene_text: str, spec=None, scene=None) -> list:
     LEAST preferred because they collide with homonyms (a Wikimedia
     search for "pulsar" returns a roller coaster at Walibi Belgium).
     AI fallback stills use the scene's Jade visual style.
+
+    v12.2: the channel direction is FLAT-VECTOR (Kurzgesagt-style).
+    Real photos (NASA/Wikimedia) are categorically wrong for that art
+    direction — two reviews in a row flagged "bronze axes", "a
+    motorcycle", "ancient ruins" leaking in.  When the locked style is
+    non-photoreal, every still slot is an AI-generated vector
+    illustration; stock photo sources are dropped entirely.
     """
     t = scene_text.lower()
     topic = _detect_topic(scene_text)
     plan = []
     style_mod = _style_prompt_for(scene)
+    style = ((scene or {}).get("visual_style") or "").strip().lower()
+    vector_direction = style and style != "photorealistic"
 
     # 1) Script-authored search queries (most specific, least ambiguous)
     for q in (scene or {}).get("search_queries", []) or []:
         q = (q or "").strip()
         if q:
-            plan += [("nasa", q), ("wiki", q)]
+            # v12.2: flat-vector direction → the query becomes the SUBJECT
+            # of an AI vector illustration, not a stock-photo search.
+            if vector_direction:
+                plan += [("ai", f"{q}. {style_mod}")]
+            else:
+                plan += [("nasa", q), ("wiki", q)]
 
     # 2) EntitySpec-driven: search NASA/Wikimedia for each required entity
     if spec is not None and spec.required_entities:
         for ent in spec.required_entities[:2]:
-            plan += [("nasa", ent), ("wiki", ent)]
+            if vector_direction:
+                plan += [("ai", f"{ent}. {style_mod}")]
+            else:
+                plan += [("nasa", ent), ("wiki", ent)]
         obj = spec.visual_objective or f"{topic} documentary scene"
         # Stylized "Jade" shot FIRST when the scene requests a non-photoreal
         # art direction — otherwise NASA/Wikimedia real photos fill every
         # slot and the stylization never renders (reviewer: "no cartoon /
         # animation / hand-drawn images in the video").
-        style = ((scene or {}).get("visual_style") or "").strip().lower()
-        if style and style != "photorealistic":
+        if vector_direction:
             plan.insert(0, ("ai", f"{obj}. {style_mod}"))
         else:
             plan.append(("ai", f"{obj}. {style_mod}"))
     else:
         # topic-aware keyword fallback (still general, not per-topic lists)
-        plan += [("nasa", topic), ("wiki", topic),
-                 ("ai", f"Illustration of {topic}. {style_mod}")]
+        if vector_direction:
+            plan += [("ai", f"Illustration of {topic}. {style_mod}")]
+        else:
+            plan += [("nasa", topic), ("wiki", topic),
+                     ("ai", f"Illustration of {topic}. {style_mod}")]
 
     # dedupe keeping order
     seen, out = set(), []

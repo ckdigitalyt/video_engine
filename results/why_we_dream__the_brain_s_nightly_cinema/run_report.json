@@ -1,6 +1,6 @@
 {
   "topic": "Why We Dream: The Brain's Nightly Cinema",
-  "started_at": "2026-08-05T22:34:32Z",
+  "started_at": "2026-08-05T23:33:27Z",
   "strategy": "stills_first",
   "stages": {
     "visuals": {
@@ -9,16 +9,14 @@
       "wikimedia": 0,
       "ai": 2,
       "video_fallback": 0,
-      "rejected": 7,
+      "rejected": 2,
       "vision_checked": 2,
-      "deduped": 33,
-      "cached": 13
+      "deduped": 41,
+      "cached": 15
     },
     "pre_render_gate": {
-      "passed": false,
-      "blocking_failures": [
-        "pacing"
-      ],
+      "passed": true,
+      "blocking_failures": [],
       "checks": [
         {
           "name": "voice_switching",
@@ -29,13 +27,13 @@
         {
           "name": "voice_loudness_consistency",
           "passed": true,
-          "detail": "per-scene RMS spread 1.7 dB (limit 12.0 dB)",
+          "detail": "per-scene RMS spread 1.5 dB (limit 12.0 dB)",
           "metrics": {}
         },
         {
           "name": "style_drift",
           "passed": true,
-          "detail": "3 placed stills, 0 drifted",
+          "detail": "1 placed stills, 0 drifted",
           "metrics": {}
         },
         {
@@ -80,38 +78,13 @@
         },
         {
           "name": "pacing",
-          "passed": false,
-          "detail": "rushed scenes: ['scene 4: rushed: 161 wpm > 160 (161 wpm)']",
+          "passed": true,
+          "detail": "narration paced for comprehension",
           "metrics": {
-            "avg_wpm": 146.6,
-            "rushed_scene_count": 1,
-            "comprehension_risk_flags": [
-              "scene 4: high comprehension risk"
-            ],
-            "high_risk": [
-              {
-                "scene": 4,
-                "flags": [
-                  "rushed: 161 wpm > 160",
-                  "high comprehension risk"
-                ],
-                "risk": {
-                  "score": 0.64,
-                  "signals": {
-                    "speech_rate": 0.36,
-                    "technical_density": 0.28,
-                    "sentence_length": 0.0
-                  },
-                  "wpm": 160.6,
-                  "role": "explanation",
-                  "band": [
-                    115,
-                    160
-                  ],
-                  "grade": "high"
-                }
-              }
-            ]
+            "avg_wpm": 144.2,
+            "rushed_scene_count": 0,
+            "comprehension_risk_flags": [],
+            "high_risk": []
           }
         },
         {
@@ -121,11 +94,171 @@
           "metrics": {}
         }
       ]
+    },
+    "render_v1": {
+      "duration_s": 121.333333,
+      "size_mb": 34.5,
+      "render_s": 169.0
+    },
+    "qa_v1": {
+      "passed": true,
+      "blocking_failures": [],
+      "checks": [
+        {
+          "name": "encoding",
+          "passed": true,
+          "detail": "v=h264 a=aac",
+          "metrics": {
+            "duration_s": 121.333333,
+            "resolution": [
+              1920,
+              1080
+            ]
+          }
+        },
+        {
+          "name": "resolution",
+          "passed": true,
+          "detail": "1920x1080",
+          "metrics": {}
+        },
+        {
+          "name": "repeated_assets",
+          "passed": true,
+          "detail": "no repeats",
+          "metrics": {
+            "repeats": {}
+          }
+        },
+        {
+          "name": "frozen_shots",
+          "passed": true,
+          "detail": "no frozen shots",
+          "metrics": {
+            "frozen_runs": [],
+            "frames_sampled": 9
+          }
+        },
+        {
+          "name": "excessive_static",
+          "passed": true,
+          "detail": "longest static window: 0.0s (limit 8.0s)",
+          "metrics": {
+            "longest_static_s": 0
+          }
+        },
+        {
+          "name": "silence",
+          "passed": true,
+          "detail": "max_volume=-3.2 dB (silence < -50.0 dB)",
+          "metrics": {
+            "max_db": -3.2,
+            "mean_db": -23.8
+          }
+        },
+        {
+          "name": "clipping",
+          "passed": true,
+          "detail": "max_volume=-3.2 dB (clip >= -0.5 dB)",
+          "metrics": {
+            "max_db": -3.2
+          }
+        }
+      ]
+    },
+    "music_v1": {
+      "mixed": true,
+      "elapsed_s": 27.2,
+      "size_mb": 35.8,
+      "mean_db": -16.3,
+      "sfx": "sfx_timeline.wav",
+      "sfx_events": [
+        {
+          "scene": 0,
+          "trigger": "film_projector_start",
+          "at_s": 4.1
+        },
+        {
+          "scene": 1,
+          "trigger": "ting_bell",
+          "at_s": 22.77
+        },
+        {
+          "scene": 2,
+          "trigger": "page_flip",
+          "at_s": 30.0
+        },
+        {
+          "scene": 3,
+          "trigger": "heartbeat",
+          "at_s": 44.12
+        },
+        {
+          "scene": 4,
+          "trigger": "glass_shatter",
+          "at_s": 52.0
+        },
+        {
+          "scene": 5,
+          "trigger": "soft_drone",
+          "at_s": 56.81
+        },
+        {
+          "scene": 6,
+          "trigger": "glitch_static",
+          "at_s": 73.96
+        },
+        {
+          "scene": 7,
+          "trigger": "sparkle",
+          "at_s": 91.08
+        },
+        {
+          "scene": 8,
+          "trigger": "soft_music_swell",
+          "at_s": 101.24
+        },
+        {
+          "scene": 9,
+          "trigger": "whoosh",
+          "at_s": 106.71
+        },
+        {
+          "scene": 9,
+          "trigger": "rising_hopeful_music",
+          "at_s": 118.71
+        }
+      ]
+    },
+    "review_v1": {
+      "score": 42,
+      "confidence": 0.95,
+      "model_used": null
+    },
+    "improve_pass_1": {
+      "iteration": 2,
+      "applied": [
+        {
+          "category": "color",
+          "detail": "[color][high] Apply a consistent color grade across all stock footage to unify the disparate visual styles (e.g., a cool, nocturnal blue tint).",
+          "source_rec": "Apply a consistent color grade across all stock footage to unify the disparate visual styles (e.g., a cool, nocturnal blue tint)."
+        },
+        {
+          "category": "subtitles",
+          "detail": "[subtitles][medium] Add burned-in subtitles or a CC track to improve retention of the scientific terms (REM, Hobson, McCarley).",
+          "source_rec": "Add burned-in subtitles or a CC track to improve retention of the scientific terms (REM, Hobson, McCarley)."
+        }
+      ],
+      "flagged": [
+        "[new_asset] Replace the bronze axes at 0:15 with footage of a 1950s sleep lab or a close-up of twitching eyes to match the Aserinsky/Kleitman discovery.",
+        "[new_asset] Remove the motorcycle at 1:47 and the ancient ruins at 1:41; replace with dream-like surrealist imagery or a person 'controlling' a dream environment."
+      ],
+      "stopped_early": false,
+      "notes": "",
+      "elapsed_s": 0.0
     }
   },
-  "errors": [
-    "pre-render gate blocked: ['pacing']"
-  ],
+  "errors": [],
   "provider": "deepseek",
   "voice_lock": {
     "provider": "chatterbox",
@@ -172,9 +305,7 @@
     "reference_frame_prompt": "",
     "subject_sheet": [],
     "placed_style_tokens": {
-      "scene0_1.jpg": "The viewer should see the brain's intense activity during sleep, highlighting the mystery of dream forgetting, and feel intrigued.. photorealistic, cinematic, high detail, no text",
-      "scene1_0.jpg": "The viewer should see two researchers in a 1950s university basement lab, observing a sleeping volunteer and noticing the rapid eye movements, conveying the moment of discovering REM sleep.. flat-vector documentary illustration, clean geometric shapes, smooth curves, bold flat color fills, deep navy background with high-saturation cyan and orange accents, simple stylized human figures, minimal detail, no text, no gradients, no photorealism",
-      "scene5_0.jpg": "The viewer should see a clear contrast between the dim, fragmented dreams of non-REM sleep and the vivid, story-like dreams of REM sleep, understanding the physiological distinction.. flat-vector documentary illustration, clean geometric shapes, smooth curves, bold flat color fills, deep navy background with high-saturation cyan and orange accents, simple stylized human figures, minimal detail, no text, no gradients, no photorealism"
+      "scene1_0.jpg": "Viewers should see a dim, vintage laboratory with two researchers observing a sleeping person as they realize the significance of rapid eye movements, feeling the thrill and mystery of a groundbreaking scientific finding.. flat-vector documentary illustration, clean geometric shapes, smooth curves, bold flat color fills, deep navy background with high-saturation cyan and orange accents, simple stylized human figures, minimal detail, no text, no gradients, no photorealism"
     }
   },
   "entity_specs": {
@@ -182,52 +313,9 @@
       "beat_id": "scene0",
       "scene_id": 0,
       "required_entities": [
-        "human brain",
         "Eugene Aserinsky",
-        "Nathaniel Kleitman"
-      ],
-      "match_terms": {
-        "human brain": [
-          "human brain",
-          "brain",
-          "cerebrum",
-          "brain activity"
-        ],
-        "Eugene Aserinsky": [
-          "Eugene Aserinsky",
-          "Aserinsky",
-          "REM discoverer"
-        ],
-        "Nathaniel Kleitman": [
-          "Nathaniel Kleitman",
-          "Kleitman",
-          "sleep researcher"
-        ]
-      },
-      "optional_entities": [
-        "Sigmund Freud",
-        "The Interpretation of Dreams",
-        "Allan Hobson",
-        "Robert McCarley",
-        "EEG recording",
-        "sleep cycle diagram"
-      ],
-      "prohibited_entities": [
-        "fMRI scan",
-        "digital EEG machine",
-        "Carl Jung",
-        "modern polysomnography equipment"
-      ],
-      "scene_intent": "hook",
-      "confidence": 1.0,
-      "visual_objective": "The viewer should see the brain's intense activity during sleep, highlighting the mystery of dream forgetting, and feel intrigued."
-    },
-    "1": {
-      "beat_id": "scene1",
-      "scene_id": 1,
-      "required_entities": [
-        "Eugene Aserinsky",
-        "Nathaniel Kleitman"
+        "Nathaniel Kleitman",
+        "The Interpretation of Dreams"
       ],
       "match_terms": {
         "Eugene Aserinsky": [
@@ -237,25 +325,74 @@
         "Nathaniel Kleitman": [
           "Nathaniel Kleitman",
           "Kleitman"
+        ],
+        "The Interpretation of Dreams": [
+          "The Interpretation of Dreams",
+          "Interpretation of Dreams",
+          "Traumdeutung",
+          "Die Traumdeutung",
+          "Freud book"
         ]
       },
       "optional_entities": [
-        "University of Chicago",
-        "sleeping volunteer",
-        "1950s laboratory equipment",
-        "electroencephalograph"
+        "EEG machine",
+        "human brain",
+        "sleeping person"
       ],
       "prohibited_entities": [
-        "Sigmund Freud",
-        "Harvard Medical School",
+        "MRI machine",
+        "fMRI",
+        "modern digital polysomnography",
+        "Carl Jung",
+        "Ivan Pavlov",
+        "polysomnography post\u20131970s"
+      ],
+      "scene_intent": "exploration",
+      "confidence": 1.0,
+      "visual_objective": "Viewers should see the pioneering figures and artifacts that unveiled the science of dreaming, sparking a sense of mystery and inquiry into the brain\u2019s nocturnal activity."
+    },
+    "1": {
+      "beat_id": "scene1",
+      "scene_id": 1,
+      "required_entities": [
+        "Eugene Aserinsky",
+        "Nathaniel Kleitman",
+        "University of Chicago"
+      ],
+      "match_terms": {
+        "Eugene Aserinsky": [
+          "Eugene Aserinsky",
+          "Aserinsky",
+          "Dr. Aserinsky"
+        ],
+        "Nathaniel Kleitman": [
+          "Nathaniel Kleitman",
+          "Kleitman",
+          "Dr. Kleitman"
+        ],
+        "University of Chicago": [
+          "University of Chicago",
+          "UChicago",
+          "Chicago lab",
+          "sleep laboratory"
+        ]
+      },
+      "optional_entities": [
+        "sleeping volunteer",
+        "EEG machine",
+        "The Interpretation of Dreams (book)"
+      ],
+      "prohibited_entities": [
+        "computer",
+        "modern polysomnography equipment",
         "Hobson",
         "McCarley",
-        "modern sleep lab",
-        "digital displays"
+        "brain MRI",
+        "lucid dream mask"
       ],
       "scene_intent": "reveal",
       "confidence": 1.0,
-      "visual_objective": "The viewer should see two researchers in a 1950s university basement lab, observing a sleeping volunteer and noticing the rapid eye movements, conveying the moment of discovering REM sleep."
+      "visual_objective": "Viewers should see a dim, vintage laboratory with two researchers observing a sleeping person as they realize the significance of rapid eye movements, feeling the thrill and mystery of a groundbreaking scientific finding."
     },
     "2": {
       "beat_id": "scene2",
@@ -267,133 +404,137 @@
       "match_terms": {
         "Sigmund Freud": [
           "Sigmund Freud",
-          "Freud"
+          "freud"
         ],
         "The Interpretation of Dreams": [
           "The Interpretation of Dreams",
-          "Interpretation of Dreams",
-          "Die Traumdeutung"
+          "interpretation of dreams",
+          "die traumdeutung"
         ]
       },
       "optional_entities": [
-        "sleeping person",
-        "dream imagery",
-        "antique book"
+        "Vienna"
       ],
       "prohibited_entities": [
         "Eugene Aserinsky",
         "Nathaniel Kleitman",
-        "REM sleep lab",
-        "polysomnography",
-        "activation-synthesis model",
+        "REM sleep",
+        "EEG",
+        "brain scan",
         "Hobson and McCarley"
       ],
       "scene_intent": "explanation",
       "confidence": 1.0,
-      "visual_objective": "Viewer sees a portrait of Sigmund Freud and his book, feeling the historical weight of early dream theory."
+      "visual_objective": "Viewer should see Sigmund Freud and his seminal book, evoking the era of early psychology and the hidden world of dreams."
     },
     "3": {
       "beat_id": "scene3",
       "scene_id": 3,
       "required_entities": [
+        "human brain"
+      ],
+      "match_terms": {
+        "human brain": [
+          "human brain",
+          "brain",
+          "brain scan",
+          "cerebrum"
+        ]
+      },
+      "optional_entities": [
+        "Eugene Aserinsky",
+        "Nathaniel Kleitman",
+        "Sigmund Freud",
+        "Allan Hobson",
+        "Robert McCarley",
+        "sleep lab"
+      ],
+      "prohibited_entities": [
+        "heart",
+        "dolphin",
+        "space shuttle"
+      ],
+      "scene_intent": "exploration",
+      "confidence": 1.0,
+      "visual_objective": "Viewer sees the brain cycling through REM sleep stages, each phase growing longer, and feels wonder at the brain's nightly inner journey."
+    },
+    "4": {
+      "beat_id": "scene4",
+      "scene_id": 4,
+      "required_entities": [
         "human brain",
-        "EEG"
+        "sleeping person"
       ],
       "match_terms": {
         "human brain": [
           "human brain",
           "brain",
           "cerebrum",
-          "gray matter"
+          "brain scan"
         ],
-        "EEG": [
-          "EEG",
-          "electroencephalogram",
-          "brain waves",
-          "electroencephalography"
+        "sleeping person": [
+          "sleeping person",
+          "person sleeping",
+          "sleep",
+          "man sleeping",
+          "woman sleeping",
+          "person in bed"
         ]
       },
       "optional_entities": [
-        "sleeping person",
-        "REM cycle diagram",
-        "polysomnogram"
-      ],
-      "prohibited_entities": [
-        "CT scan",
-        "MRI",
-        "fMRI",
-        "non-human brain",
-        "anachronistic sleep tracker",
-        "smartphone"
-      ],
-      "scene_intent": "journey",
-      "confidence": 1.0,
-      "visual_objective": "Viewer should see a journey through the brain's REM sleep cycles, feeling the lengthening phases and the brain's activity."
-    },
-    "4": {
-      "beat_id": "scene4",
-      "scene_id": 4,
-      "required_entities": [
-        "brain"
-      ],
-      "match_terms": {
-        "brain": [
-          "brain",
-          "human brain",
-          "brain activity",
-          "cerebrum"
-        ]
-      },
-      "optional_entities": [
-        "sleeping person",
         "alarm clock",
-        "bed",
-        "pillow",
-        "EEG cap"
+        "The Interpretation of Dreams book",
+        "dreamlike imagery"
       ],
       "prohibited_entities": [
-        "Eugene Aserinsky",
-        "Nathaniel Kleitman",
-        "Sigmund Freud",
-        "Allan Hobson",
-        "Robert McCarley"
+        "Sigmund Freud portrait",
+        "specific REM sleep chart",
+        "anachronistic technology like smartphone alarm"
       ],
-      "scene_intent": "reveal",
+      "scene_intent": "hook",
       "confidence": 1.0,
-      "visual_objective": "Viewer should see the brain's intricate neural network dissolving memories, evoking a sense of wonder about the mind's self-erasing mechanism."
+      "visual_objective": "Show a person transitioning from sleep to wakefulness, with dream imagery dissolving like vapor, evoking the mystery of why the brain would erase its own creative masterpiece."
     },
     "5": {
       "beat_id": "scene5",
       "scene_id": 5,
       "required_entities": [
-        "Eugene Aserinsky",
-        "Allan Hobson"
+        "human eye",
+        "sleeping person"
       ],
       "match_terms": {
-        "Eugene Aserinsky": [
-          "Eugene Aserinsky",
-          "Aserinsky",
-          "REM discoverer"
+        "human eye": [
+          "human eye",
+          "eye",
+          "eyes",
+          "close-up eye",
+          "eyeball",
+          "rapid eye movement"
         ],
-        "Allan Hobson": [
-          "Allan Hobson",
-          "J. Allan Hobson",
-          "Hobson",
-          "activation synthesis"
+        "sleeping person": [
+          "sleeping person",
+          "sleeping",
+          "person sleeping",
+          "human sleep",
+          "bed",
+          "sleep"
         ]
       },
       "optional_entities": [
-        "Nathaniel Kleitman",
-        "Robert McCarley",
-        "sleeping person",
-        "EEG machine"
+        "EEG machine",
+        "brain MRI scan",
+        "sleep lab equipment",
+        "dream thought bubble"
       ],
       "prohibited_entities": [
-        "Sigmund Freud's The Interpretation of Dreams book"
+        "person awake",
+        "open eyes",
+        "daylight outdoor scene",
+        "text-only slide"
       ],
       "scene_intent": "explanation",
       "confidence": 1.0,
-      "visual_objective": "The viewer should see a clear contrast between the dim, fragmented dreams of non-REM sleep and the vivid, story-like dreams of REM sleep, understanding the physiological distinction."
+      "visual_objective": "Viewer sees a close-up of a sleeping person's eyes moving rapidly, contrasting with dim, fragmentary dream blurbs, to feel the difference between non-REM and REM dreams."
     },
     "6": {
       "beat_id": "scene6",
@@ -406,165 +547,591 @@
         "Allan Hobson": [
           "Allan Hobson",
           "J. Allan Hobson",
-          "Hobson"
+          "Hobson",
+          "Dr. J. Allan Hobson"
         ],
         "Robert McCarley": [
           "Robert McCarley",
-          "R.W. McCarley",
-          "McCarley"
+          "Robert W. McCarley",
+          "McCarley",
+          "Dr. Robert McCarley"
         ]
       },
       "optional_entities": [
-        "human brain",
-        "EEG reading",
-        "sleep lab",
-        "synapse"
+        "Sigmund Freud",
+        "sleeping person",
+        "EEG machine",
+        "human brain"
       ],
       "prohibited_entities": [
-        "Sigmund Freud",
-        "Eugene Aserinsky",
-        "Nathaniel Kleitman",
-        "spacecraft",
-        "futuristic city",
-        "alien"
+        "fMRI machine",
+        "Freud and Hobson meeting",
+        "Aserinsky and Kleitman proposing activation-synthesis"
       ],
-      "scene_intent": "hook",
+      "scene_intent": "reveal",
       "confidence": 1.0,
-      "visual_objective": "Viewers see Hobson and McCarley or a brain amidst chaotic neural signals, feeling the tension between random static and meaningful solutions."
+      "visual_objective": "The viewer should see Hobson and McCarley, possibly in a 1977 lab, juxtaposed with ambiguous dream imagery, feeling the shock of a purely random brain theory that challenges deep meaning."
     },
     "7": {
       "beat_id": "scene7",
       "scene_id": 7,
       "required_entities": [
-        "human brain",
-        "sleep EEG"
+        "human brain"
       ],
       "match_terms": {
         "human brain": [
           "human brain",
           "brain",
           "cerebrum",
-          "brain illustration",
-          "brain scan"
-        ],
-        "sleep EEG": [
-          "sleep EEG",
-          "EEG",
-          "electroencephalogram",
-          "brain waves",
-          "polysomnogram",
-          "sleep recording"
+          "cerebral cortex",
+          "neocortex"
         ]
       },
       "optional_entities": [
-        "Eugene Aserinsky",
-        "Nathaniel Kleitman",
-        "Sigmund Freud",
-        "The Interpretation of Dreams",
-        "REM sleep visualization"
+        "sleeping person",
+        "bed",
+        "pillow",
+        "The Interpretation of Dreams book",
+        "EEG machine"
       ],
-      "prohibited_entities": [
-        "fMRI",
-        "CT scan",
-        "PET scan",
-        "Albert Einstein",
-        "modern digital brain model"
-      ],
-      "scene_intent": "reveal",
+      "prohibited_entities": [],
+      "scene_intent": "explanation",
       "confidence": 1.0,
-      "visual_objective": "Viewer should SEE a translucent, illuminated brain with synaptic connections sparking during sleep, overlaid with classic EEG waveforms; FEEL a sense of wonder at the brain\u2019s hidden, problem-solving power during rest."
+      "visual_objective": "Reveal the sleeping brain, with neural connections quietly illuminating to evoke its role as a silent problem-solver."
     },
     "8": {
       "beat_id": "scene8",
       "scene_id": 8,
       "required_entities": [
-        "Eugene Aserinsky",
-        "Nathaniel Kleitman"
+        "brain",
+        "sun"
       ],
       "match_terms": {
-        "Eugene Aserinsky": [
-          "Eugene Aserinsky",
-          "aserinsky"
+        "brain": [
+          "brain",
+          "cerebrum",
+          "human brain",
+          "neural activity"
         ],
-        "Nathaniel Kleitman": [
-          "Nathaniel Kleitman",
-          "kleitman"
+        "sun": [
+          "sun",
+          "sunrise",
+          "dawn",
+          "solar"
         ]
       },
       "optional_entities": [
-        "sleeping infant",
-        "polysomnogram chart",
-        "sunrise over calm landscape",
-        "The Interpretation of Dreams book",
-        "vintage sleep laboratory equipment"
+        "bed",
+        "pillow"
       ],
       "prohibited_entities": [
-        "modern digital sleep tracker",
-        "fMRI scanner",
-        "non-REM sleep hypnogram",
-        "representation of lucid dreaming"
+        "Sigmund Freud"
       ],
-      "scene_intent": "explanation",
+      "scene_intent": "emotion",
       "confidence": 1.0,
-      "visual_objective": "Viewer should see archival photographs of Aserinsky and Kleitman, linking the discovery of REM sleep to its modern understanding as an overnight emotional balm, and feel the historical weight of this therapeutic insight."
+      "visual_objective": "See a brain's emotional circuits soften during REM sleep, then a sunrise dissolving the sting of a past hurt, conveying a sense of healing and renewal."
     },
     "9": {
       "beat_id": "scene9",
       "scene_id": 9,
       "required_entities": [
-        "film projector",
-        "director's chair",
-        "human brain"
+        "Eugene Aserinsky",
+        "Nathaniel Kleitman",
+        "Sigmund Freud"
       ],
       "match_terms": {
-        "film projector": [
-          "film projector",
-          "movie projector",
-          "projector",
-          "cinema projector"
+        "Eugene Aserinsky": [
+          "Eugene Aserinsky",
+          "Aserinsky"
         ],
-        "director's chair": [
-          "director's chair",
-          "canvas chair",
-          "folding director chair"
+        "Nathaniel Kleitman": [
+          "Nathaniel Kleitman",
+          "Kleitman"
         ],
-        "human brain": [
-          "human brain",
-          "brain",
-          "cerebrum"
+        "Sigmund Freud": [
+          "Sigmund Freud",
+          "Freud"
         ]
       },
       "optional_entities": [
-        "Eugene Aserinsky",
-        "Nathaniel Kleitman",
-        "Sigmund Freud",
-        "The Interpretation of Dreams (book)",
         "Allan Hobson",
-        "Robert McCarley"
+        "Robert McCarley",
+        "The Interpretation of Dreams"
       ],
       "prohibited_entities": [
-        "modern digital projector",
-        "laptop",
-        "smartphone",
         "Carl Jung",
-        "Ivan Pavlov",
-        "modern sleep laboratory (post-2000 equipment)"
+        "modern digital polysomnography equipment",
+        "hypnosis induction"
       ],
       "scene_intent": "explanation",
       "confidence": 1.0,
-      "visual_objective": "The viewer should see a human brain visualized as a vintage film projector, with a director's chair nearby, to convey the metaphor that dreaming is an internal cinema where the mind edits emotions and solves problems for the waking world."
+      "visual_objective": "Viewer should see portraits or photographs of key dream researchers and feel the scientific progression toward understanding why we dream."
     }
   },
   "camera_diversity": {
-    "moves": 0,
-    "entropy": 0.0,
+    "moves": 17,
+    "entropy": 3.013,
+    "normalized_entropy": 0.951,
     "repetitive": false,
-    "distribution": {}
+    "distribution": {
+      "orbit": 2,
+      "crane_up": 1,
+      "reveal": 3,
+      "static": 1,
+      "push_in": 3,
+      "pan_left": 1,
+      "parallax": 1,
+      "pan_right": 3,
+      "pull_out": 2
+    }
   },
+  "diversity": {
+    "asset_diversity": 1.0,
+    "transition_diversity": 0.951,
+    "motion_diversity": 0.907,
+    "shot_duration_mean_s": 4.0,
+    "shot_duration_std_s": 0.22,
+    "shot_count": 27
+  },
+  "retention_diagnostic": {
+    "novelty_density_per_10s": 2.89,
+    "longest_hold_s": 4.9,
+    "dead_air_s": 0.0,
+    "shots": 35,
+    "benchmark": {
+      "hook_window_s": 15,
+      "max_hold_s": 4.0,
+      "target_novelty_per_10s": 1.5
+    },
+    "flags": [
+      "longest hold 4.9s > 4s (drop-off risk)"
+    ]
+  },
+  "disclosure": {
+    "synthetic_content": true,
+    "disclosure_label": "AI-generated content: synthetic narration, AI-assisted visuals and sound design",
+    "no_fakes_compliant": true,
+    "generated_at": "2026-08-05T23:54:49Z",
+    "pipeline": "jade-studio/v8"
+  },
+  "publish_gate": {
+    "passed": true,
+    "blocking_failures": [],
+    "checks": [
+      {
+        "name": "encoding",
+        "passed": true,
+        "detail": "v=h264 a=aac",
+        "metrics": {
+          "duration_s": 121.333333,
+          "resolution": [
+            1920,
+            1080
+          ]
+        }
+      },
+      {
+        "name": "resolution",
+        "passed": true,
+        "detail": "1920x1080",
+        "metrics": {}
+      },
+      {
+        "name": "repeated_assets",
+        "passed": true,
+        "detail": "no repeats",
+        "metrics": {
+          "repeats": {}
+        }
+      },
+      {
+        "name": "frozen_shots",
+        "passed": true,
+        "detail": "no frozen shots",
+        "metrics": {
+          "frozen_runs": [],
+          "frames_sampled": 9
+        }
+      },
+      {
+        "name": "excessive_static",
+        "passed": true,
+        "detail": "longest static window: 0.0s (limit 8.0s)",
+        "metrics": {
+          "longest_static_s": 0
+        }
+      },
+      {
+        "name": "silence",
+        "passed": true,
+        "detail": "max_volume=-1.2 dB (silence < -50.0 dB)",
+        "metrics": {
+          "max_db": -1.2,
+          "mean_db": -16.3
+        }
+      },
+      {
+        "name": "clipping",
+        "passed": true,
+        "detail": "max_volume=-1.2 dB (clip >= -0.5 dB)",
+        "metrics": {
+          "max_db": -1.2
+        }
+      },
+      {
+        "name": "hook_strength",
+        "passed": true,
+        "detail": "hook window (15s): 5 distinct visuals (need >= 5)",
+        "metrics": {
+          "distinct_in_hook": 5,
+          "shots_in_hook": 5
+        }
+      },
+      {
+        "name": "voice_consistency",
+        "passed": true,
+        "detail": "single locked voice",
+        "metrics": {}
+      },
+      {
+        "name": "style_locked",
+        "passed": true,
+        "detail": "1 placed stills, 0 drifted",
+        "metrics": {}
+      },
+      {
+        "name": "manim_registered",
+        "passed": true,
+        "detail": "3 Manim clip(s) in final timeline",
+        "metrics": {}
+      },
+      {
+        "name": "dead_air_audio",
+        "passed": true,
+        "detail": "no dead-air runs in mastered audio",
+        "metrics": {
+          "runs": []
+        }
+      },
+      {
+        "name": "loudness_master",
+        "passed": true,
+        "detail": "mastered audio publication-safe (I/LRA/TP OK)",
+        "metrics": {
+          "integrated_lufs": -14.3,
+          "true_peak_dbTP": -1.24,
+          "lra": 3.3,
+          "max_volume_db": -1.2
+        }
+      },
+      {
+        "name": "opening_black_frames",
+        "passed": true,
+        "detail": "opening mean luma 255.0 (black < 12.0)",
+        "metrics": {}
+      }
+    ],
+    "publish_ready": true
+  },
+  "cleanup": {
+    "policy": "keep-final-only",
+    "kept": "why_we_dream__the_brain_s_nightly_cinema_mixed.mp4"
+  },
+  "pacing": {
+    "rows": [
+      {
+        "scene": 0,
+        "words": 28,
+        "duration_s": 10.77,
+        "wpm": 156.0,
+        "intent": "exploration",
+        "role": "exploration",
+        "comprehension_risk": {
+          "score": 0.0,
+          "signals": {
+            "speech_rate": 0.0,
+            "technical_density": 0.0,
+            "sentence_length": 0.0
+          },
+          "wpm": 156.0,
+          "role": "exploration",
+          "band": [
+            128,
+            172
+          ],
+          "grade": "low"
+        },
+        "flags": []
+      },
+      {
+        "scene": 1,
+        "words": 36,
+        "duration_s": 15.23,
+        "wpm": 141.8,
+        "intent": "reveal",
+        "role": "explanation",
+        "comprehension_risk": {
+          "score": 0.0,
+          "signals": {
+            "speech_rate": 0.0,
+            "technical_density": 0.0,
+            "sentence_length": 0.0
+          },
+          "wpm": 141.8,
+          "role": "explanation",
+          "band": [
+            115,
+            160
+          ],
+          "grade": "low"
+        },
+        "flags": []
+      },
+      {
+        "scene": 2,
+        "words": 25,
+        "duration_s": 10.12,
+        "wpm": 148.3,
+        "intent": "explanation",
+        "role": "explanation",
+        "comprehension_risk": {
+          "score": 0.28,
+          "signals": {
+            "speech_rate": 0.0,
+            "technical_density": 0.28,
+            "sentence_length": 0.0
+          },
+          "wpm": 148.3,
+          "role": "explanation",
+          "band": [
+            115,
+            160
+          ],
+          "grade": "medium"
+        },
+        "flags": []
+      },
+      {
+        "scene": 3,
+        "words": 25,
+        "duration_s": 10.98,
+        "wpm": 136.6,
+        "intent": "exploration",
+        "role": "exploration",
+        "comprehension_risk": {
+          "score": 0.28,
+          "signals": {
+            "speech_rate": 0.0,
+            "technical_density": 0.28,
+            "sentence_length": 0.0
+          },
+          "wpm": 136.6,
+          "role": "exploration",
+          "band": [
+            128,
+            172
+          ],
+          "grade": "medium"
+        },
+        "flags": []
+      },
+      {
+        "scene": 4,
+        "words": 26,
+        "duration_s": 9.71,
+        "wpm": 160.6,
+        "intent": "hook",
+        "role": "hook",
+        "comprehension_risk": {
+          "score": 0.28,
+          "signals": {
+            "speech_rate": 0.0,
+            "technical_density": 0.28,
+            "sentence_length": 0.0
+          },
+          "wpm": 160.6,
+          "role": "hook",
+          "band": [
+            135,
+            182
+          ],
+          "grade": "medium"
+        },
+        "flags": []
+      },
+      {
+        "scene": 5,
+        "words": 22,
+        "duration_s": 9.15,
+        "wpm": 144.2,
+        "intent": "explanation",
+        "role": "explanation",
+        "comprehension_risk": {
+          "score": 0.0,
+          "signals": {
+            "speech_rate": 0.0,
+            "technical_density": 0.0,
+            "sentence_length": 0.0
+          },
+          "wpm": 144.2,
+          "role": "explanation",
+          "band": [
+            115,
+            160
+          ],
+          "grade": "low"
+        },
+        "flags": []
+      },
+      {
+        "scene": 6,
+        "words": 35,
+        "duration_s": 17.12,
+        "wpm": 122.7,
+        "intent": "reveal",
+        "role": "explanation",
+        "comprehension_risk": {
+          "score": 0.0,
+          "signals": {
+            "speech_rate": 0.0,
+            "technical_density": 0.0,
+            "sentence_length": 0.0
+          },
+          "wpm": 122.7,
+          "role": "explanation",
+          "band": [
+            115,
+            160
+          ],
+          "grade": "low"
+        },
+        "flags": []
+      },
+      {
+        "scene": 7,
+        "words": 25,
+        "duration_s": 10.16,
+        "wpm": 147.6,
+        "intent": "explanation",
+        "role": "explanation",
+        "comprehension_risk": {
+          "score": 0.0,
+          "signals": {
+            "speech_rate": 0.0,
+            "technical_density": 0.0,
+            "sentence_length": 0.0
+          },
+          "wpm": 147.6,
+          "role": "explanation",
+          "band": [
+            115,
+            160
+          ],
+          "grade": "low"
+        },
+        "flags": []
+      },
+      {
+        "scene": 8,
+        "words": 21,
+        "duration_s": 9.47,
+        "wpm": 133.0,
+        "intent": "emotion",
+        "role": "climax",
+        "comprehension_risk": {
+          "score": 0.28,
+          "signals": {
+            "speech_rate": 0.0,
+            "technical_density": 0.28,
+            "sentence_length": 0.0
+          },
+          "wpm": 133.0,
+          "role": "climax",
+          "band": [
+            130,
+            175
+          ],
+          "grade": "medium"
+        },
+        "flags": []
+      },
+      {
+        "scene": 9,
+        "words": 47,
+        "duration_s": 18.6,
+        "wpm": 151.6,
+        "intent": "explanation",
+        "role": "explanation",
+        "comprehension_risk": {
+          "score": 0.14,
+          "signals": {
+            "speech_rate": 0.0,
+            "technical_density": 0.14,
+            "sentence_length": 0.0
+          },
+          "wpm": 151.6,
+          "role": "explanation",
+          "band": [
+            115,
+            160
+          ],
+          "grade": "low"
+        },
+        "flags": []
+      }
+    ],
+    "high_risk_scenes": [],
+    "avg_wpm": 144.2,
+    "rushed_scene_count": 0
+  },
+  "degradations": [
+    {
+      "stage": "asset_gate",
+      "severity": "info",
+      "detail": "2 assets rejected by Entity-Asset verification (correct behavior)"
+    },
+    {
+      "stage": "asset_dedup",
+      "severity": "info",
+      "detail": "41 near-identical assets skipped (perceptual dedup)"
+    }
+  ],
   "final": {
-    "output": null,
-    "iterations": 0,
-    "error": "pre-render gate blocked: ['pacing']",
-    "duration_s": 0
-  }
+    "output": "results/why_we_dream__the_brain_s_nightly_cinema/why_we_dream__the_brain_s_nightly_cinema_mixed.mp4",
+    "iterations": 1,
+    "final_score": 42,
+    "duration_s": 121.333333,
+    "visual_stats": {
+      "manim": 3,
+      "nasa": 0,
+      "wikimedia": 0,
+      "ai": 2,
+      "video_fallback": 0,
+      "rejected": 2,
+      "vision_checked": 2,
+      "deduped": 41,
+      "cached": 15
+    }
+  },
+  "llm_usage_deepseek": {
+    "stages": {
+      "spec_build": {
+        "calls": 10,
+        "input": 11579,
+        "output": 20128,
+        "cached": 11136,
+        "cost_usd": 0.005729,
+        "hit_rate": 0.9617
+      }
+    },
+    "total": {
+      "calls": 10,
+      "input": 11579,
+      "output": 20128,
+      "cached": 11136,
+      "cost_usd": 0.005729,
+      "hit_rate": 0.9617
+    }
+  },
+  "postmortem": "/home/ubuntu/video_engine/src/docs/mission/postmortems/postmortem-why-we-dream-the-brain-s-nightly-cinema-stills-first.md"
 }

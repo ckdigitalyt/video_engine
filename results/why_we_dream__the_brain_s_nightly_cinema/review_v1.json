@@ -1,0 +1,90 @@
+{
+  "quality_score": 42,
+  "confidence": 0.95,
+  "strengths": [
+    "Professional narration with excellent pacing and clear articulation.",
+    "Strong script structure with a compelling hook and logical flow.",
+    "High-quality audio mixing; the background music is well-balanced and never competes with the voiceover."
+  ],
+  "weaknesses": [
+    "Severe visual irrelevance: several segments feature imagery completely unrelated to the narration (e.g., bronze axes at 0:15, a motorcycle at 1:47).",
+    "Lack of visual continuity: the video jumps between Manim animations, cinematic stock footage, and low-quality static photos without a cohesive style.",
+    "Missed opportunities for visual storytelling: the '1953 lab' and 'Freud' segments use placeholder-style visuals that do not support the historical context."
+  ],
+  "prioritized_recommendations": [
+    {
+      "priority": "critical",
+      "category": "new_asset",
+      "recommendation": "Replace the bronze axes at 0:15 with footage of a 1950s sleep lab or a close-up of twitching eyes to match the Aserinsky/Kleitman discovery."
+    },
+    {
+      "priority": "critical",
+      "category": "new_asset",
+      "recommendation": "Remove the motorcycle at 1:47 and the ancient ruins at 1:41; replace with dream-like surrealist imagery or a person 'controlling' a dream environment."
+    },
+    {
+      "priority": "high",
+      "category": "color",
+      "recommendation": "Apply a consistent color grade across all stock footage to unify the disparate visual styles (e.g., a cool, nocturnal blue tint)."
+    },
+    {
+      "priority": "medium",
+      "category": "subtitles",
+      "recommendation": "Add burned-in subtitles or a CC track to improve retention of the scientific terms (REM, Hobson, McCarley)."
+    }
+  ],
+  "factual_issues": [],
+  "title_recommendations": [
+    "The Secret Life of Your Sleeping Brain",
+    "Why Your Brain Erases 95% of Your Dreams",
+    "The Science of the Nightly Cinema"
+  ],
+  "thumbnail_recommendation": {
+    "timestamp": "01:37",
+    "description": "A high-quality cinematic shot of a woman sleeping in soft blue light, with a '95% Vanish' text overlay."
+  },
+  "overall_assessment": "The documentary features a world-class script and narration, but the visual execution is currently unacceptable for a professional studio. The inclusion of completely irrelevant assets like bronze axes and motorcycles during scientific explanations breaks viewer immersion and must be corrected.",
+  "atomic_rubrics": [
+    {
+      "t": "0:03",
+      "check": "a single clear visual subject is visible",
+      "pass": true
+    },
+    {
+      "t": "0:15",
+      "check": "the visual matches the narration playing at that moment",
+      "pass": false
+    },
+    {
+      "t": "0:30",
+      "check": "there is camera motion or an animated element (not a frozen frame)",
+      "pass": true
+    },
+    {
+      "t": "0:45",
+      "check": "no jarring cut or black frame",
+      "pass": true
+    },
+    {
+      "t": "1:00",
+      "check": "narration is audible and not clipped mid-sentence",
+      "pass": true
+    },
+    {
+      "t": "1:30",
+      "check": "visual style is consistent with the rest of the video",
+      "pass": false
+    },
+    {
+      "t": "1:45",
+      "check": "music does not overpower the voice",
+      "pass": true
+    }
+  ],
+  "rubric_pass_rate": 0.71,
+  "_meta": {
+    "video": "results/why_we_dream__the_brain_s_nightly_cinema/why_we_dream__the_brain_s_nightly_cinema_mixed.mp4",
+    "model": "gemini-2.5-pro",
+    "elapsed_s": 43.3
+  }
+}
