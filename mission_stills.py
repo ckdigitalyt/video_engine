@@ -577,13 +577,14 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                     continue
             # ── CAMERA: intent-driven motion (diversity-aware) ─────────
             clip = os.path.join(out_dir, "shots", fname.replace(".jpg", ".mp4"))
-            # v10 (rec 5): the HOOK window (scene 0) cuts faster — shorter
-            # holds (~3.5s) and more visual turnover; later scenes ease
-            # into the comprehensible pace (~4.5-5.5s holds).
+            # v10 (rec 5) + 2026 micro-beat recalibration: the HOOK window (scene 0)
+            # cuts fastest — 3.0-3.5s holds, maximum visual turnover; later
+            # scenes stay in the micro-beat band (3.5-4.0s) so no shot ever
+            # approaches the 4s hold cap (mobile-first retention).
             if i == 0:
                 dur = 3.5 if len(shots) < 3 else 3.0
             else:
-                dur = 5.5 if len(shots) < 3 else 4.5
+                dur = 4.0 if len(shots) < 3 else 3.5
             cam = gates.camera_decision(intent) if gates is not None else {
                 "move": "push_in" if still_count % 2 == 0 else "pull_out",
                 "params": {},
@@ -645,14 +646,14 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                 else:
                     vcam["zoom_start"], vcam["zoom_end"] = vcam.get("zoom_start", 1.0) or 1.0, 1.22
                     vmove = "push_in"
-                if _kenburns(src_img, variant, duration=5.5,
+                if _kenburns(src_img, variant, duration=4.0,
                              zoom_in=vmove == "push_in", camera=vcam):
-                    shots.append({"file": variant, "duration": 5.5, "kind": src,
+                    shots.append({"file": variant, "duration": 4.0, "kind": src,
                                   "camera": vmove, "motion_params": vcam,
                                   "verification": last.get("verification"),
                                   "title": last.get("title", ""),
                                   "query": last.get("query", "")})
-                    placed_total += 5.5
+                    placed_total += 4.0
                     print(f"  [coverage] scene{i}: narration ~{est:.0f}s, "
                           f"added {vmove} variant (total {placed_total:.1f}s)")
             else:
@@ -675,7 +676,7 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
             if mv is None or (mv.valid and mv.kinetic):
                 manim_used.add(manim)
                 plan[i] = [{"file": manim,
-                            "duration": min(10.0, M._probe_duration(manim)),
+                            "duration": min(4.0, M._probe_duration(manim)),
                             "kind": "manim"}]
                 stats["manim"] += 1
                 print(f"  [fill] scene{i} filled with Manim {os.path.basename(manim)}")
@@ -701,16 +702,15 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
             cam = gates.camera_decision(intent) if gates is not None else {"move": "push_in", "params": {}}
             cam_params = cam.get("params", {}) or {}
             zoom_in = cam_params.get("zoom_end", 1.2) > cam_params.get("zoom_start", 1.0)
-            if _kenburns(got, clip, duration=6.0, zoom_in=zoom_in, camera=cam_params):
-                fill_shots = [{"file": clip, "duration": 6.0, "kind": src,
+            if _kenburns(got, clip, duration=4.0, zoom_in=zoom_in, camera=cam_params):
+                fill_shots = [{"file": clip, "duration": 4.0, "kind": src,
                                "camera": cam.get("move", "push_in"),
                                "motion_params": cam_params, "title": title,
                                "query": fill_q}]
-                # v10.4: fill scenes must also satisfy the coverage guard —
-                # a single 6.0s fill shot stretched to a 10.7s narration
-                # window trips the shot_hold gate (v14 run blocked).
+                # v10.4 + 2026 recalibration: fill scenes must also satisfy the
+                # coverage guard AND the 4s micro-beat hold cap.
                 fest = max(4.0, len(text.split()) / 2.6)
-                fplaced = 6.0
+                fplaced = 4.0
                 fcount = 1
                 while fest > fplaced + 1.5 and fest > 8.0 and fcount < 4:
                     vcam = dict(cam_params) if cam_params else {}
@@ -721,11 +721,11 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                         vcam["zoom_start"], vcam["zoom_end"] = vcam.get("zoom_start", 1.0) or 1.0, 1.22
                         vmove = "push_in"
                     variant = os.path.join(out_dir, "shots", f"scene{i}_variant_{fcount}.mp4")
-                    if _kenburns(got, variant, duration=5.5, zoom_in=vmove == "push_in", camera=vcam):
-                        fill_shots.append({"file": variant, "duration": 5.5, "kind": src,
+                    if _kenburns(got, variant, duration=4.0, zoom_in=vmove == "push_in", camera=vcam):
+                        fill_shots.append({"file": variant, "duration": 4.0, "kind": src,
                                            "camera": vmove, "motion_params": vcam,
                                            "title": title, "query": fill_q})
-                        fplaced += 5.5
+                        fplaced += 4.0
                         fcount += 1
                     else:
                         break
@@ -1293,13 +1293,13 @@ def main():
             "longest_hold_s": round(longest_hold, 1),
             "dead_air_s": round(dead_air, 1),
             "shots": shots,
-            "benchmark": {"hook_window_s": 15, "max_hold_s": 8.0,
+            "benchmark": {"hook_window_s": 15, "max_hold_s": 4.0,
                            "target_novelty_per_10s": 1.5},
             "flags": [],
         }
-        if longest_hold > 8.0:
+        if longest_hold > 4.0:
             retention_diag["flags"].append(
-                f"longest hold {longest_hold:.1f}s > 8s (drop-off risk)")
+                f"longest hold {longest_hold:.1f}s > 4s (drop-off risk)")
         if novelty_per_10s < 1.2:
             retention_diag["flags"].append(
                 f"novelty density {novelty_per_10s}/10s below 1.2")
@@ -1336,15 +1336,31 @@ def main():
     sfx_events_placed = []
     try:
         sfx_path = os.path.join("cache", "music", "sfx_timeline.wav")
+        # §4.1 (2026): anchor SFX to VISUAL CUT timecodes from timeline.json
+        # instead of narration phrase positions — SFX must mark on-screen
+        # state changes, not commas in the script.
+        _cut_times = {}
+        if os.path.exists(timeline_path):
+            try:
+                with open(timeline_path) as _f:
+                    _tl = json.load(_f)
+                for _e in _tl.get("video_timeline", []):
+                    _sid = _e.get("scene_id")
+                    if _sid is not None:
+                        _cut_times.setdefault(_sid, []).append(
+                            float(_e.get("start_time", 0)))
+            except Exception:
+                _cut_times = {}
         sfx_path, sfx_events_placed = M.build_sfx_timeline(
-            scenes_data, audio_durations, sfx_path)
+            scenes_data, audio_durations, sfx_path, cut_times=_cut_times)
         if not sfx_events_placed:
             sfx_path = ""
     except Exception as e:
         print(f"  !! SFX timeline build failed (non-fatal): {str(e)[:100]}")
         sfx_path = ""
     mix = M.stage_music_mix(output_path, "cache/music/cinematic.mp3", mixed_path,
-                            sfx_path=sfx_path)
+                            sfx_path=sfx_path, scenes=scenes_data,
+                            audio_durations=audio_durations)
     mix["sfx_events"] = sfx_events_placed
     run_report["stages"]["music_v1"] = mix
     review_target = mixed_path if mix.get("mixed") else output_path
@@ -1395,7 +1411,8 @@ def main():
             "render_s": round(time.time() - t0, 1),
         }
         mix = M.stage_music_mix(output_path, "cache/music/cinematic.mp3", mixed_path,
-                                sfx_path=sfx_path)
+                                sfx_path=sfx_path, scenes=scenes_data,
+                                audio_durations=audio_durations)
         review_target = mixed_path if mix.get("mixed") else output_path
         try:
             review = M.stage_video_review(review_target, scenes_data,

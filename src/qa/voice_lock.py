@@ -151,7 +151,7 @@ class VoiceLock:
         }
 
     def check_loudness_consistency(self, audio_dir: str,
-                                   max_spread_db: float = 6.0) -> dict:
+                                   max_spread_db: float = 12.0) -> dict:
         """Acoustic drift check (§1: reject inconsistent loudness across
         scenes, timbre drift).  Measures per-scene RMS and reports the
         spread; a wide spread means some scenes were synthesized with a

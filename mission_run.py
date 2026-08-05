@@ -225,20 +225,30 @@ of EXACTLY {SCENES} scenes for a video with a TOTAL spoken runtime of about
 
 Use the verified facts below — every number must come from them. Do NOT invent facts.
 
-RETENTION RULES (2026 platform benchmarks — these are hard constraints):
-- GOLDEN WINDOW: the single most striking fact or image must land within the
-  first 15 seconds. Never open with greetings, channel branding, or slow
-  preamble ("Welcome back… today we will discuss…"). Start mid-action.
+RETENTION RULES (2026 platform benchmarks — mobile-first, micro-window):
+- MICRO-WINDOW HOOK: the single most striking fact or image must land within
+  the first 3-5 SECONDS (Indian mobile market: 15s is too slow — the decision
+  window is 3-5s). Start mid-action with a pattern interrupt. Never open with
+  greetings, channel branding, or slow preamble ("Welcome back… today we will
+  discuss…").
 - HOOK-DELIVER CYCLE: each scene opens with a micro-hook (question, tension,
   contrast, stakes) then delivers value fast; no scene is a flat recital.
 - OPEN LOOPS: scene 0 plants an open question/mystery; it must be answered
   only in a later scene, keeping viewers watching.
-- PACE: a new visual/audio stimulus every few seconds — no scene holds one
-  idea longer than ~12s. Short punchy sentences (~30 words per scene).
+- RE-ENGAGEMENT MICRO-HOOKS (2026): plant explicit micro-hooks at ~25% and
+  ~65% of the runtime (viewer fatigue milestones) — a fresh question or
+  stakes beat that pulls attention back.
+- MICRO-BEATS: every scene must be 3-5 seconds of screen time worth of
+  ideas — no scene holds one idea longer than ~5s. Short punchy sentences
+  (~30 words per scene). Visual holds of 3-5s per shot.
 - PACING IS A QUALITY METRIC (v10): match delivery to content. Hook scene:
   energetic but still easy to follow. Explanatory/technical scenes: slower,
   shorter sentences, leave space after key facts, numbers, dates and units.
   Vary sentence rhythm — never a flat wall of equally-long sentences.
+- CULTURAL TUNING: use high-context analogies and universally relatable
+  metaphors; prefer direct, vivid imagery over abstract descriptors. Where
+  natural for the niche, let sentence rhythm feel conversational and
+  energetic (mobile-native pacing) — not academic.
 - No filler, no repetition, no generic AI phrasing (no "delve", "unlock the
   secrets", "vast tapestry"). Memorable closing line.
 - SEMANTIC PARITY: opening narration must mirror the video title/thumbnail
@@ -676,16 +686,22 @@ def stage_cinematic_grade(video_path: str, out_path: str,
     print(f"  [grade] organic texture pass (grain={grain}, strength={strength})", flush=True)
     t0 = time.time()
     dur = _probe_duration(video_path)
-    # noise: temporal+spatial film grain; rgbashift: slight chromatic
-    # aberration; eq/curves: cinematic grade; vignette: lens falloff.
+    # noise: temporal+spatial film grain; rgbashift: chromatic aberration
+    # CONSTRAINED TO THE PERIPHERY (§5.3, 2026 recalibration): the CA shift
+    # is applied only outside the central 45%-radius circle (mobile-first
+    # sharpness — text and subject focus stay crisp); eq/curves: cinematic
+    # grade; vignette: lens falloff.
     vf = (
         f"noise=alls={grain}:allf=t+u,"
-        f"rgbashift=rh=1:bh=-1,"
-        f"eq=contrast={1.0 + 0.04 * strength}:saturation={1.0 + 0.06 * strength}:"
+        f"split=2[base][ca];"
+        f"[ca]rgbashift=rh=3:bh=-3[ca2];"
+        f"[base][ca2]blend=all_expr='if(lte(hypot(X-W/2,Y-H/2),H*0.45),A,B)'[sharp];"
+        f"[sharp]eq=contrast={1.0 + 0.04 * strength}:saturation={1.0 + 0.06 * strength}:"
         f"brightness={0.01 * strength},"
-        f"vignette=PI/5"
+        f"vignette=PI/5[out]"
     )
-    cmd = ["ffmpeg", "-y", "-i", video_path, "-vf", vf,
+    cmd = ["ffmpeg", "-y", "-i", video_path, "-filter_complex", vf,
+           "-map", "[out]",
            "-c:v", "libx264", "-preset", "fast", "-crf", "20",
            "-c:a", "copy", "-movflags", "+faststart", out_path]
     r = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
@@ -697,10 +713,18 @@ def stage_cinematic_grade(video_path: str, out_path: str,
             "size_mb": round(os.path.getsize(out_path) / 1e6, 1)}
 
 
-def _synth_bed(duration: float, out_path: str, seed: int = 7) -> str:
+def _synth_bed(duration: float, out_path: str, seed: int = 7,
+               scenes: list | None = None,
+               audio_durations: list | None = None) -> str:
     """Synthesize an audible ambient pad bed (fallback when the configured
     music file is dead/silent).  Layered detuned sines + slow tremolo +
-    faint pink noise — clearly audible, no silence risk."""
+    faint pink noise — clearly audible, no silence risk.
+
+    §4.2 (2026 recalibration): the bed now EVOLVES with the narrative arc —
+    per-scene volume automation driven by emotion metadata (tension/somber
+    pull the bed down so the viewer leans in; revelation/climax push it up
+    on payoff), plus a subtle high-BPM percussive pulse layer beneath the
+    pad (Indian short-form energy, low enough to never compete with voice)."""
     import random
     rnd = random.Random(seed)
     freqs = [110.0, 164.81, 220.0, 277.18]  # A2 E3 A3 C#4 (A major-ish pad)
@@ -715,17 +739,44 @@ def _synth_bed(duration: float, out_path: str, seed: int = 7) -> str:
         f"anoisesrc=color=pink:duration={duration:.2f}:sample_rate=44100:amplitude=0.06,"
         f"lowpass=f=500,volume=0.35"
     )
-    inputs = "+".join(parts)
-    cmd = [
-        "ffmpeg", "-y",
-        "-f", "lavfi", "-i", f"{inputs}",
-        "-f", "lavfi", "-i", noise,
-        "-filter_complex",
-        "[0:a][1:a]amix=inputs=2:normalize=0,volume=0.35,"
+    # §4.2: rhythmic pulse layer — 55 Hz thump gated at ~120 BPM, very quiet
+    pulse = f"sine=frequency=55:duration={duration:.2f}:sample_rate=44100"
+    # NOTE: this ffmpeg build rejects a `+`-joined multi-source lavfi input
+    # ("Error opening input file") — use one -f lavfi -i per source instead.
+    cmd = ["ffmpeg", "-y"]
+    for f in freqs:
+        cmd += ["-f", "lavfi", "-i",
+                f"sine=frequency={f:.2f}:duration={duration:.2f}:sample_rate=44100"]
+    cmd += ["-f", "lavfi", "-i", noise]
+    cmd += ["-f", "lavfi", "-i", pulse]
+    n_sines = len(freqs)  # inputs: 0..n_sines-1 = pad sines, n = noise, n+1 = pulse
+    # Emotion -> bed intensity (1.0 = neutral).  Tension/somber duck the bed
+    # (auditory vacuum, viewer leans in); revelation/awe/climax surge it.
+    _EMO_GAIN = {"wonder": 1.0, "awe": 1.1, "revelation": 1.15,
+                 "tension": 0.82, "climax": 1.2, "hopeful": 1.0,
+                 "nostalgia": 0.9, "somber": 0.78, "default": 1.0}
+    automation = ""
+    if scenes:
+        cursor = 0.0
+        clauses = []
+        for i, sc in enumerate(scenes):
+            d = (audio_durations or [])[i] if i < len(audio_durations or []) else 5.0
+            g = _EMO_GAIN.get((sc.get("emotion") or "default").strip().lower(), 1.0)
+            clauses.append(f"between(t,{cursor:.2f},{cursor + d:.2f})*{g:.2f}")
+            cursor += d
+        if clauses:
+            expr = "+".join(clauses)
+            automation = f",volume=volume='{expr}':eval=frame"
+    pad_in = "".join(f"[{i}:a]" for i in range(n_sines))
+    graph = (
+        f"{pad_in}amix=inputs={n_sines}:normalize=0,volume=0.35[pad];"
+        f"[pad][{n_sines}:a]amix=inputs=2:normalize=0[pad_n];"
+        f"[{n_sines + 1}:a]tremolo=f=2.0:d=1.0,volume=0.10[pulse_g];"
+        f"[pad_n][pulse_g]amix=inputs=2:normalize=0{automation},"
         "tremolo=f=0.15:d=0.7,afade=t=in:d=2,afade=t=out:st="
-        f"{max(0.0, duration - 3):.2f}:d=3[aout]",
-        "-map", "[aout]", "-c:a", "pcm_s16le", out_path,
-    ]
+        f"{max(0.0, duration - 3):.2f}:d=3[aout]"
+    )
+    cmd += ["-filter_complex", graph, "-map", "[aout]", "-c:a", "pcm_s16le", out_path]
     r = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
     if r.returncode != 0 or not os.path.exists(out_path):
         print(f"  !! synth bed generation failed: {r.stderr[-300:]}")
@@ -880,9 +931,16 @@ def _synth_sfx_event(trigger: str, duration: float = None, sr: int = 44100) -> t
 
 
 def build_sfx_timeline(scenes: list[dict], audio_durations: list[float],
-                       out_path: str) -> tuple[str, list[dict]]:
+                       out_path: str,
+                       cut_times: dict | None = None) -> tuple[str, list[dict]]:
     """Place scripted SFX events onto a timeline by matching each event's
     `at` phrase to its word position within the scene narration.
+
+    §4.1 (2026 recalibration): when `cut_times` (dict scene_id -> list of
+    ABSOLUTE visual cut seconds from timeline.json) is provided, events are
+    snapped to the nearest visual cut — SFX become spatial/temporal anchors
+    for visual state changes, never punctuation for text.  Falls back to
+    phrase-fraction placement when no cut times exist.
 
     Returns (wav_path, events_placed) where events_placed is a list of
     {scene, trigger, at_s} for the run report."""
@@ -897,6 +955,7 @@ def build_sfx_timeline(scenes: list[dict], audio_durations: list[float],
     for i, sc in enumerate(scenes):
         dur = audio_durations[i] if i < len(audio_durations) else 5.0
         words = (sc.get("narration") or "").split()
+        scene_cuts = sorted((cut_times or {}).get(i, []))
         for ev in (sc.get("sfx_events") or [])[:2]:
             trig = (ev.get("trigger") or "tick").strip().lower()
             at = (ev.get("at") or "").lower()
@@ -910,6 +969,11 @@ def build_sfx_timeline(scenes: list[dict], audio_durations: list[float],
                     if idx >= 0:
                         frac = min(0.92, max(0.05, idx / max(1, len(joined))))
             t_at = cursor + frac * dur
+            # §4.1: snap to nearest visual cut when the timeline is known
+            if scene_cuts:
+                in_scene = [c for c in scene_cuts if cursor - 0.25 <= c <= cursor + dur + 0.25]
+                if in_scene:
+                    t_at = min(in_scene, key=lambda c: abs(c - t_at))
             samples, _ = _synth_sfx_event(trig)
             start = int(t_at * sr)
             for j, s in enumerate(samples):
@@ -1162,7 +1226,9 @@ def _edge_gen(i, ap, sents, emo, voice_lock, stats, cache_audio):
 
 
 def stage_music_mix(video_path: str, music_path: str, out_path: str,
-                    music_volume_db: float = -6.0, sfx_path: str = "") -> dict:
+                    music_volume_db: float = -6.0, sfx_path: str = "",
+                    scenes: list | None = None,
+                    audio_durations: list | None = None) -> dict:
     """Stage 11: mix a music bed + optional SFX under narration with
     sidechain ducking.
 
@@ -1172,7 +1238,10 @@ def stage_music_mix(video_path: str, music_path: str, out_path: str,
       - amix normalize=0 (was halving the voice, making audio near-inaudible)
       - loudnorm to streaming standard (-14 LUFS, TP -1.5 dB)
       - post-mix verification that the bed is actually audible
-    """
+
+    2026 (§4.2): the synth bed fallback now receives scene emotion metadata
+    so the pad intensity follows the narrative arc (tension drops, payoff
+    surges) and carries a subtle rhythmic pulse layer."""
     print(f"\n[11/16] MUSIC & SOUND (ffmpeg sidechain ducking, bed={os.path.basename(music_path)})", flush=True)
     t0 = time.time()
     if not os.path.exists(music_path):
@@ -1195,22 +1264,27 @@ def stage_music_mix(video_path: str, music_path: str, out_path: str,
         else:
             print(f"  !! {os.path.basename(music_path)} is silent ({max_db:.0f} dB) — generating audible synth pad")
             dur_est = _probe_duration(video_path)
-            music_path = _synth_bed(dur_est, alt)
+            music_path = _synth_bed(dur_est, alt, scenes=scenes,
+                                    audio_durations=audio_durations)
             if not music_path:
                 return {"mixed": False, "reason": "silent bed, synth failed"}
 
     dur = _probe_duration(video_path)
     vol = 10 ** (music_volume_db / 20.0) if music_volume_db else 1.0
-    # Voice EQ (two-pole peaking per sound-design spec): cut muddy low-end
-    # at 100 Hz, boost vocal presence at 3 kHz so the voice cuts through
-    # the bed + SFX without clipping.
-    VOICE_EQ = "equalizer=f=100:t=q:w=1:g=-3,equalizer=f=3000:t=q:w=1:g=2"
-    # Sidechain params from the 2026 sound-design spec (natural, not jarring).
+    # Voice EQ (2026 recalibration, expert review §3.1): a rigid 100 Hz
+    # high-pass thins out the low-mid breathiness (200-500 Hz) that makes
+    # the synthetic voice feel human (sighs, laughter).  Replace the static
+    # cut with a GENTLE roll-off (subtle shelf) + keep the 3 kHz presence
+    # boost so the voice still cuts through the bed + SFX without clipping.
+    VOICE_EQ = "highpass=f=55,equalizer=f=3000:t=q:w=1:g=2"
+    # Sidechain params (2026 recalibration, expert review §3.2): duck ONLY
+    # the mid-range of the bed (500 Hz - 4 kHz, the voice's frequency home)
+    # with a fast attack (10-30 ms) and medium release (50-100 ms) so the
+    # bed "breathes" around speech instead of broadband pumping.  Ratio 3-4:1.
     # NOTE: sidechaincompress in this ffmpeg build refuses a LABELED pad as
     # its sidechain input ("matches no streams") — always feed it the raw
-    # [0:a] voice stream; the EQ'd [voice] pad is used only for the final
-    # amix.  Verified with targeted ffmpeg tests (v8 fix).
-    SIDECHAIN = "threshold=0.0625:ratio=4:attack=20:release=250"
+    # [0:a] voice stream; band-split pads are the MAIN input only.
+    SIDECHAIN = "threshold=0.0625:ratio=3.5:attack=20:release=80"
     # Jade spec §4: never allow abrupt music starts/stops — fade the bed
     # in over 1s and out over the final 1.5s (unless the video is shorter).
     fade_in = min(1.0, dur / 4)
@@ -1232,10 +1306,18 @@ def stage_music_mix(video_path: str, music_path: str, out_path: str,
             (
                 f"[0:a]{VOICE_EQ}[voice];"
                 f"[1:a]aloop=loop=-1:size=2e9,atrim=0:{dur:.3f},volume={vol:.3f}{FADES}[bed];"
+                # Multiband ducking (§3.2): split the bed into low/mid/high,
+                # sidechain-compress ONLY the mid band (500 Hz - 4 kHz) against
+                # the voice; bass + air pass untouched so the bed never pumps.
+                f"[bed]asplit=3[low_in][mid_in][high_in];"
+                f"[low_in]lowpass=f=500[low];"
+                f"[mid_in]bandpass=f=2250:w=3500[mid_raw];"
+                f"[high_in]highpass=f=4000[high];"
+                f"[mid_raw][0:a]sidechaincompress={SIDECHAIN}[mid];"
+                f"[low][mid][high]amix=inputs=3:normalize=0[bed_duck];"
                 f"[2:a]aloop=loop=-1:size=2e9,atrim=0:{dur:.3f},volume=0.8[sfx];"
-                f"[bed][sfx]amix=inputs=2:duration=first:normalize=0[bedmix];"
-                f"[bedmix][0:a]sidechaincompress={SIDECHAIN}[duck];"
-                f"[voice][duck]amix=inputs=2:duration=first:dropout_transition=0:normalize=0,alimiter=limit=0.89,loudnorm=I=-14:TP=-1.5:LRA=11[aout]"
+                f"[bed_duck][sfx]amix=inputs=2:duration=first:normalize=0[bedmix];"
+                f"[voice][bedmix]amix=inputs=2:duration=first:dropout_transition=0:normalize=0,alimiter=limit=0.89,loudnorm=I=-14:TP=-1.5:LRA=11[aout]"
             ),
             "-map", "0:v", "-map", "[aout]",
             "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",
@@ -1251,8 +1333,13 @@ def stage_music_mix(video_path: str, music_path: str, out_path: str,
             (
                 f"[0:a]{VOICE_EQ}[voice];"
                 f"[1:a]aloop=loop=-1:size=2e9,atrim=0:{dur:.3f},volume={vol:.3f}{FADES}[bed];"
-                f"[bed][0:a]sidechaincompress={SIDECHAIN}[duck];"
-                f"[voice][duck]amix=inputs=2:duration=first:dropout_transition=0:normalize=0,alimiter=limit=0.89,loudnorm=I=-14:TP=-1.5:LRA=11[aout]"
+                f"[bed]asplit=3[low_in][mid_in][high_in];"
+                f"[low_in]lowpass=f=500[low];"
+                f"[mid_in]bandpass=f=2250:w=3500[mid_raw];"
+                f"[high_in]highpass=f=4000[high];"
+                f"[mid_raw][0:a]sidechaincompress={SIDECHAIN}[mid];"
+                f"[low][mid][high]amix=inputs=3:normalize=0[bed_duck];"
+                f"[voice][bed_duck]amix=inputs=2:duration=first:dropout_transition=0:normalize=0,alimiter=limit=0.89,loudnorm=I=-14:TP=-1.5:LRA=11[aout]"
             ),
             "-map", "0:v", "-map", "[aout]",
             "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",

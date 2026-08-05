@@ -100,10 +100,20 @@ def three_track_mix(
     else:
         sfx_input = "[1:a]atrim=0:0.01,volume=0[sfx];"
 
+    # Multiband ducking (§3.2, 2026 recalibration): split the bed into
+    # low/mid/high bands and sidechain-compress ONLY the mid band
+    # (500 Hz - 4 kHz) against the narration.  Bass + air pass untouched,
+    # so the bed never "pumps" under speech.  Fast attack (20 ms) + medium
+    # release (80 ms) + 3.5:1 ratio per expert review.
     graph = (
         f"[1:a]aloop=loop=-1:size=2e9,atrim=0:{dur:.3f},volume={music_gain:.4f}[bed];"
-        f"[bed][0:a]sidechaincompress=threshold={duck_threshold}:ratio={duck_ratio}:"
-        f"attack=25:release=500[duck];"
+        f"[bed]asplit=3[low_in][mid_in][high_in];"
+        f"[low_in]lowpass=f=500[low];"
+        f"[mid_in]bandpass=f=2250:w=3500[mid_raw];"
+        f"[high_in]highpass=f=4000[high];"
+        f"[mid_raw][0:a]sidechaincompress=threshold={duck_threshold}:ratio={duck_ratio}:"
+        f"attack=20:release=80[mid];"
+        f"[low][mid][high]amix=inputs=3:normalize=0[duck];"
         f"{sfx_input}"
         f"[0:a][duck][sfx]amix=inputs=3:duration=first:dropout_transition=0:normalize=0,"
         f"alimiter=limit=0.89[aout]"

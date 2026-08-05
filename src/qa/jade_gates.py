@@ -40,13 +40,16 @@ from src.director.style_bible import StyleBible
 from src.manim.validate import validate_manim_script, validate_manim_facts
 from src.cinematic.pacing_engine import audit_pacing, comprehension_risk
 
-# Retention benchmarks (§5): the hook window must be visually dense; no
-# shot may hold so long that novelty collapses; narration must be gapless.
+# Retention benchmarks (§5, 2026 recalibration): the hook window must be
+# visually dense; no shot may hold so long that novelty collapses; narration
+# must be gapless.  Recalibrated per expert review 2026-08-05: mobile-first
+# Indian market — micro-window hook (3-5s decision), micro-beats (<=4s
+# holds), dead air <= 0.5s (2s of silence reads as "video over").
 HOOK_WINDOW_S = 15.0
-HOOK_MIN_SHOTS = 2          # distinct visuals in the opening window
-MAX_SHOT_HOLD_S = 10.0      # hard cap on a single shot's on-screen time
-MAX_DEAD_AIR_S = 2.0        # gap between narration blocks allowed
-SILENCE_GAP_S = 1.2         # silence run inside the final audio = dead air
+HOOK_MIN_SHOTS = 5          # distinct visuals in the opening window
+MAX_SHOT_HOLD_S = 4.0      # hard cap on a single shot's on-screen time
+MAX_DEAD_AIR_S = 0.5        # gap between narration blocks allowed
+SILENCE_GAP_S = 0.8         # silence run inside the final audio = dead air
 BLACK_FRAME_LUMA = 12.0     # mean luma below this = black/dead frame
 
 MANIM_CLIP_MARKERS = ("manim", "cache/manim")
