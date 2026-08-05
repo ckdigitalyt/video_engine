@@ -46,17 +46,22 @@ class TTSProvider(ABC):
 # high-energy hook: exaggeration=0.8, cfg_weight=0.3 (lively read);
 # somber/factual:   exaggeration=0.4, cfg_weight=0.7 (steady);
 # wonder/awe/reveal: mid-high exaggeration, moderate CFG.
+# Calm documentary band (channel direction 2026-08-05): warm-authoritative
+# General American narrator for US/global audiences.  Exaggeration stays
+# moderate (0.35-0.45) and cfg_weight low-ish (0.30-0.40) so delivery is
+# measured, trustworthy, easy to follow on a phone speaker — never
+# theatrical or hyper-emotive.  Baseline (0.40, 0.35) per voices.yaml.
 CHATTERBOX_EMOTION_PARAMS = {
-    "hook":       (0.8, 0.3),
-    "tension":    (0.7, 0.4),
-    "revelation": (0.6, 0.5),
-    "wonder":     (0.6, 0.5),
-    "awe":        (0.6, 0.5),
-    "hopeful":    (0.6, 0.5),
-    "nostalgia":  (0.4, 0.6),
-    "somber":     (0.4, 0.7),
-    "explanation": (0.4, 0.7),
-    "default":    (0.5, 0.5),
+    "hook":       (0.45, 0.32),
+    "tension":    (0.42, 0.33),
+    "revelation": (0.44, 0.32),
+    "wonder":     (0.42, 0.34),
+    "awe":        (0.44, 0.33),
+    "hopeful":    (0.41, 0.35),
+    "nostalgia":  (0.38, 0.37),
+    "somber":     (0.36, 0.39),
+    "explanation": (0.38, 0.38),
+    "default":    (0.40, 0.35),
 }
 
 # Paralinguistic tags Chatterbox speaks natively (expert doc §1.3).
@@ -76,11 +81,23 @@ class ChatterboxProvider(TTSProvider):
 
     name = "chatterbox"
 
-    def __init__(self, exaggeration: float = 0.5, cfg_weight: float = 0.5,
+    def __init__(self, exaggeration: float | None = None,
+                 cfg_weight: float | None = None,
                  worker_python: str = "venv-cb/bin/python",
                  worker_script: str = "scripts/chatterbox_worker.py"):
-        self._default_exaggeration = exaggeration
-        self._default_cfg_weight = cfg_weight
+        # Baseline from voices.yaml (calm documentary band: 0.40 / 0.35);
+        # explicit constructor args win over config.
+        try:
+            from src.utils.config import get_config
+            self._default_exaggeration = (
+                float(get_config("voices.chatterbox.exaggeration", 0.40))
+                if exaggeration is None else float(exaggeration))
+            self._default_cfg_weight = (
+                float(get_config("voices.chatterbox.cfg_weight", 0.35))
+                if cfg_weight is None else float(cfg_weight))
+        except Exception:
+            self._default_exaggeration = 0.40 if exaggeration is None else float(exaggeration)
+            self._default_cfg_weight = 0.35 if cfg_weight is None else float(cfg_weight)
         self._worker_python = worker_python
         self._worker_script = worker_script
         self._proc: subprocess.Popen | None = None

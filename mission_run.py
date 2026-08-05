@@ -1135,22 +1135,23 @@ def _role_for_scene(i: int, total: int, text: str) -> str:
 
 
 def _voice_params(emo: str, role: str) -> tuple[float, float]:
-    """Blend emotion + role into (exaggeration, cfg_weight) (rec 2).
-    Hook keeps high energy but stays comprehensible; explanation/conclusion
-    drop exaggeration and raise cfg for clarity (authoritative narrator,
-    not a fast performer)."""
+    """Blend emotion + role into (exaggeration, cfg_weight) for the calm
+    documentary profile (channel direction 2026-08-05): warm-authoritative,
+    measured.  Exaggeration stays in the 0.34-0.50 band and cfg_weight in
+    the 0.28-0.42 band — hook gets a hair more energy, explanation/
+    conclusion settle slightly for clarity; never theatrical."""
     ex, cfg = CHATTERBOX_EMOTION_PARAMS.get(emo, CHATTERBOX_EMOTION_PARAMS["default"])
     if role == "hook":
-        ex = min(0.9, ex + 0.15)
-        cfg = max(0.25, cfg - 0.05)
+        ex = min(0.50, ex + 0.04)
+        cfg = max(0.28, cfg - 0.03)
     elif role == "explanation":
-        ex = max(0.3, ex - 0.2)
-        cfg = min(0.8, cfg + 0.15)
+        ex = max(0.34, ex - 0.04)
+        cfg = min(0.42, cfg + 0.03)
     elif role == "conclusion":
-        ex = max(0.3, ex - 0.1)
-        cfg = min(0.8, cfg + 0.1)
+        ex = max(0.34, ex - 0.02)
+        cfg = min(0.42, cfg + 0.02)
     elif role == "climax":
-        ex = min(0.85, ex + 0.1)
+        ex = min(0.48, ex + 0.03)
     return round(ex, 2), round(cfg, 2)
 
 

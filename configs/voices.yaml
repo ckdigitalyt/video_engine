@@ -2,11 +2,20 @@
 
 voices:
   chatterbox:
-    # Optional voice-cloning reference clip (10-30s clean speech WAV/MP3).
-    # When set, Chatterbox clones this voice's timbre + pacing for every
-    # scene (e.g. a licensed deep documentary narrator).  None/empty =
-    # built-in default voice ("resemble").
+    # PRIMARY NARRATOR — English documentary, US/global audience.
+    # Channel direction 2026-08-05: warm, authoritative, clear, mature;
+    # General American documentary tone; NOT theatrical/gravelly.
+    # No celebrity cloning; audio_prompt stays empty (built-in voice).
+    # If a reference clip is added later: clean speech only, language
+    # must match the target (avoid accent transfer).
     audio_prompt: ""
+    # Calmer documentary band (docs: defaults 0.5/0.5; reduce cfg for
+    # pacing, keep exaggeration moderate):
+    cfg_weight: 0.35
+    exaggeration: 0.40
+    style: documentary
+    pacing: slightly_slow
+    tone: warm_authoritative
 
   kokoro:
     # Kokoro ONNX model file
