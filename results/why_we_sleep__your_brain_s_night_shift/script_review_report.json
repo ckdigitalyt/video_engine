@@ -4,30 +4,30 @@
       "pass": 1,
       "passed": false,
       "scores": {
-        "fact_reviewer": 8.5,
-        "documentary_editor": 7.5,
-        "retention_reviewer": 6.2,
-        "storytelling_reviewer": 8.5
+        "fact_reviewer": 7.5,
+        "documentary_editor": 7.8,
+        "retention_reviewer": 6.8,
+        "storytelling_reviewer": 7.2
       },
       "issue_counts": {
-        "critical": 1,
-        "major": 5,
-        "minor": 14
+        "critical": 4,
+        "major": 7,
+        "minor": 12
       }
     },
     {
       "pass": 2,
       "passed": false,
       "scores": {
-        "fact_reviewer": 8.5,
+        "fact_reviewer": 7.5,
         "documentary_editor": 7.8,
-        "retention_reviewer": 6.5,
-        "storytelling_reviewer": 7.4
+        "retention_reviewer": 7.2,
+        "storytelling_reviewer": 6.5
       },
       "issue_counts": {
         "critical": 1,
-        "major": 5,
-        "minor": 17
+        "major": 12,
+        "minor": 11
       }
     },
     {
@@ -35,17 +35,17 @@
       "passed": false,
       "scores": {
         "fact_reviewer": 8.5,
-        "documentary_editor": 8.2,
+        "documentary_editor": 6.9,
         "retention_reviewer": 7.5,
-        "storytelling_reviewer": 7.2
+        "storytelling_reviewer": 5.2
       },
       "issue_counts": {
         "critical": 0,
-        "major": 6,
-        "minor": 12
+        "major": 5,
+        "minor": 14
       }
     }
   ],
   "final_gate_passed": false,
-  "elapsed_s": 84.0
+  "elapsed_s": 136.3
 }

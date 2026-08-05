@@ -7,7 +7,7 @@
       "passed": true,
       "detail": "v=h264 a=aac",
       "metrics": {
-        "duration_s": 112.566667,
+        "duration_s": 106.666667,
         "resolution": [
           1920,
           1080
@@ -48,18 +48,18 @@
     {
       "name": "silence",
       "passed": true,
-      "detail": "max_volume=-2.7 dB (silence < -50.0 dB)",
+      "detail": "max_volume=-2.8 dB (silence < -50.0 dB)",
       "metrics": {
-        "max_db": -2.7,
-        "mean_db": -21.5
+        "max_db": -2.8,
+        "mean_db": -23.9
       }
     },
     {
       "name": "clipping",
       "passed": true,
-      "detail": "max_volume=-2.7 dB (clip >= -0.5 dB)",
+      "detail": "max_volume=-2.8 dB (clip >= -0.5 dB)",
       "metrics": {
-        "max_db": -2.7
+        "max_db": -2.8
       }
     }
   ]

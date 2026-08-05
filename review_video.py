@@ -59,6 +59,25 @@ Respond in STRICT JSON (no markdown fences) with this schema:
 SCRIPT:
 {script}
 
+ATOMIC RUBRIC CHECKS (v12 — decoupled preference optimization): in addition
+to the holistic score, sample the video at these exact timestamps and answer
+each as a strict boolean.  Timecodes are relative to the video start; if a
+timestamp exceeds video length, answer null.
+{{
+  "atomic_rubrics": [
+    {{"t": "0:03", "check": "a single clear visual subject is visible", "pass": true}},
+    {{"t": "0:15", "check": "the visual matches the narration playing at that moment", "pass": true}},
+    {{"t": "0:30", "check": "there is camera motion or an animated element (not a frozen frame)", "pass": true}},
+    {{"t": "0:45", "check": "no jarring cut or black frame", "pass": true}},
+    {{"t": "1:00", "check": "narration is audible and not clipped mid-sentence", "pass": true}},
+    {{"t": "1:30", "check": "visual style is consistent with the rest of the video", "pass": true}},
+    {{"t": "1:45", "check": "music does not overpower the voice", "pass": true}}
+  ],
+  "rubric_pass_rate": <float 0-1>
+}}
+Answer each rubric as pass: true/false (or null if out of range).  Base the
+holistic quality_score on the rubric outcomes plus your expert judgment.
+
 Be specific. Reference timestamps where useful. Prioritize fixes by impact."""
 
 

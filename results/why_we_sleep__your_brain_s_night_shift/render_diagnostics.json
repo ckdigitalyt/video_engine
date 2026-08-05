@@ -1,0 +1,1886 @@
+{
+  "generated_at": "2026-08-05T19:37:31Z",
+  "total_render_s": 156.6,
+  "shot_count": 28,
+  "shots": [
+    {
+      "scene_id": 0,
+      "beat_index": 0,
+      "shot_index": 0,
+      "asset_path": "results/why_we_sleep__your_brain_s_night_shift/shots/scene0_0.mp4",
+      "asset_source": "ai",
+      "asset_title": "",
+      "query_used": "The viewer should see the brain's night-time cleansing process, feeling wonder and understanding of the body's self-maintenance.. flat-vector documentary illustration, clean geometric shapes, smooth curves, bold flat color fills, deep navy background with high-saturation cyan and orange accents, simple stylized human figures, minimal detail, no text, no gradients, no photorealism",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [
+          "brain",
+          "sleep",
+          "glymphatic system"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene0",
+        "scene_id": 0,
+        "required_entities": [
+          "brain",
+          "sleep",
+          "glymphatic system"
+        ],
+        "match_terms": {
+          "brain": [
+            "brain",
+            "human brain"
+          ],
+          "sleep": [
+            "sleep",
+            "sleeping person",
+            "bed"
+          ],
+          "glymphatic system": [
+            "glymphatic system",
+            "glymphatic",
+            "perivascular channels",
+            "cerebrospinal fluid"
+          ]
+        },
+        "optional_entities": [
+          "circadian rhythm",
+          "clock"
+        ],
+        "prohibited_entities": [
+          "astronaut",
+          "spacecraft",
+          "moon"
+        ],
+        "scene_intent": "explanation",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see the brain's night-time cleansing process, feeling wonder and understanding of the body's self-maintenance."
+      },
+      "shot_duration_s": 3.5,
+      "narration_duration_s": 10.43,
+      "camera_motion": "push_in",
+      "motion_params": {
+        "zoom_start": 1.0,
+        "zoom_end": 1.22,
+        "pan_x": 0,
+        "pan_y": 0
+      },
+      "transition": "fade",
+      "timeline_start_s": 0.0,
+      "timeline_end_s": 3.5,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 0,
+      "beat_index": 0,
+      "shot_index": 1,
+      "asset_path": "results/why_we_sleep__your_brain_s_night_shift/shots/scene0_1.mp4",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "sleeping face close up",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [
+          "brain",
+          "sleep",
+          "glymphatic system"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene0",
+        "scene_id": 0,
+        "required_entities": [
+          "brain",
+          "sleep",
+          "glymphatic system"
+        ],
+        "match_terms": {
+          "brain": [
+            "brain",
+            "human brain"
+          ],
+          "sleep": [
+            "sleep",
+            "sleeping person",
+            "bed"
+          ],
+          "glymphatic system": [
+            "glymphatic system",
+            "glymphatic",
+            "perivascular channels",
+            "cerebrospinal fluid"
+          ]
+        },
+        "optional_entities": [
+          "circadian rhythm",
+          "clock"
+        ],
+        "prohibited_entities": [
+          "astronaut",
+          "spacecraft",
+          "moon"
+        ],
+        "scene_intent": "explanation",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see the brain's night-time cleansing process, feeling wonder and understanding of the body's self-maintenance."
+      },
+      "shot_duration_s": 3.5,
+      "narration_duration_s": 10.43,
+      "camera_motion": "reveal",
+      "motion_params": {
+        "zoom_start": 1.25,
+        "zoom_end": 1.0,
+        "pan_x": 0,
+        "pan_y": 0
+      },
+      "transition": "crossfade",
+      "timeline_start_s": 3.5,
+      "timeline_end_s": 7.0,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 0,
+      "beat_index": 0,
+      "shot_index": 2,
+      "asset_path": "results/why_we_sleep__your_brain_s_night_shift/shots/scene0_variant_2.mp4",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "sleeping face close up",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [
+          "brain",
+          "sleep",
+          "glymphatic system"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene0",
+        "scene_id": 0,
+        "required_entities": [
+          "brain",
+          "sleep",
+          "glymphatic system"
+        ],
+        "match_terms": {
+          "brain": [
+            "brain",
+            "human brain"
+          ],
+          "sleep": [
+            "sleep",
+            "sleeping person",
+            "bed"
+          ],
+          "glymphatic system": [
+            "glymphatic system",
+            "glymphatic",
+            "perivascular channels",
+            "cerebrospinal fluid"
+          ]
+        },
+        "optional_entities": [
+          "circadian rhythm",
+          "clock"
+        ],
+        "prohibited_entities": [
+          "astronaut",
+          "spacecraft",
+          "moon"
+        ],
+        "scene_intent": "explanation",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see the brain's night-time cleansing process, feeling wonder and understanding of the body's self-maintenance."
+      },
+      "shot_duration_s": 4.0,
+      "narration_duration_s": 10.43,
+      "camera_motion": "push_in",
+      "motion_params": {
+        "zoom_start": 1.25,
+        "zoom_end": 1.22,
+        "pan_x": 0,
+        "pan_y": 0
+      },
+      "transition": "crossfade",
+      "timeline_start_s": 7.0,
+      "timeline_end_s": 11.0,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 1,
+      "beat_index": 0,
+      "shot_index": 0,
+      "asset_path": "results/why_we_sleep__your_brain_s_night_shift/shots/scene1_0.mp4",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "The viewer should see a detailed, scientific visualization of the brain highlighting the suprachiasmatic nucleus, feeling the precision of biological timekeeping.. flat-vector documentary illustration, clean geometric shapes, smooth curves, bold flat color fills, deep navy background with high-saturation cyan and orange accents, simple stylized human figures, minimal detail, no text, no gradients, no photorealism",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [
+          "suprachiasmatic nucleus",
+          "brain"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene1",
+        "scene_id": 1,
+        "required_entities": [
+          "suprachiasmatic nucleus",
+          "brain"
+        ],
+        "match_terms": {
+          "suprachiasmatic nucleus": [
+            "suprachiasmatic nucleus",
+            "SCN",
+            "hypothalamus"
+          ],
+          "brain": [
+            "brain",
+            "human brain",
+            "anatomy"
+          ]
+        },
+        "optional_entities": [
+          "neurons",
+          "clock",
+          "sleep"
+        ],
+        "prohibited_entities": [
+          "explicit clock",
+          "digital clock",
+          "alarm clock",
+          "sundial"
+        ],
+        "scene_intent": "explanation",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see a detailed, scientific visualization of the brain highlighting the suprachiasmatic nucleus, feeling the precision of biological timekeeping."
+      },
+      "shot_duration_s": 4.0,
+      "narration_duration_s": 7.32,
+      "camera_motion": "push_in",
+      "motion_params": {
+        "zoom_start": 1.0,
+        "zoom_end": 1.22,
+        "pan_x": 0,
+        "pan_y": 0
+      },
+      "transition": "fade",
+      "timeline_start_s": 10.44,
+      "timeline_end_s": 14.44,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 1,
+      "beat_index": 0,
+      "shot_index": 1,
+      "asset_path": "results/why_we_sleep__your_brain_s_night_shift/shots/scene1_1.mp4",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "circadian rhythm animation",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [
+          "suprachiasmatic nucleus",
+          "brain"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene1",
+        "scene_id": 1,
+        "required_entities": [
+          "suprachiasmatic nucleus",
+          "brain"
+        ],
+        "match_terms": {
+          "suprachiasmatic nucleus": [
+            "suprachiasmatic nucleus",
+            "SCN",
+            "hypothalamus"
+          ],
+          "brain": [
+            "brain",
+            "human brain",
+            "anatomy"
+          ]
+        },
+        "optional_entities": [
+          "neurons",
+          "clock",
+          "sleep"
+        ],
+        "prohibited_entities": [
+          "explicit clock",
+          "digital clock",
+          "alarm clock",
+          "sundial"
+        ],
+        "scene_intent": "explanation",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see a detailed, scientific visualization of the brain highlighting the suprachiasmatic nucleus, feeling the precision of biological timekeeping."
+      },
+      "shot_duration_s": 4.0,
+      "narration_duration_s": 7.32,
+      "camera_motion": "pan_right",
+      "motion_params": {
+        "zoom_start": 1.12,
+        "zoom_end": 1.12,
+        "pan_x": 60,
+        "pan_y": 0
+      },
+      "transition": "crossfade",
+      "timeline_start_s": 14.44,
+      "timeline_end_s": 18.43,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 2,
+      "beat_index": 0,
+      "shot_index": 0,
+      "asset_path": "results/why_we_sleep__your_brain_s_night_shift/shots/scene2_0.mp4",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "The viewer should see a peaceful bedtime scene with a clock emphasizing the seven-hour benchmark, feeling the calm necessity of adequate sleep.. flat-vector documentary illustration, clean geometric shapes, smooth curves, bold flat color fills, deep navy background with high-saturation cyan and orange accents, simple stylized human figures, minimal detail, no text, no gradients, no photorealism",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [
+          "clock",
+          "bed"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene2",
+        "scene_id": 2,
+        "required_entities": [
+          "clock",
+          "bed"
+        ],
+        "match_terms": {
+          "clock": [
+            "clock",
+            "alarm clock",
+            "timepiece"
+          ],
+          "bed": [
+            "bed",
+            "bedroom",
+            "sleeping"
+          ]
+        },
+        "optional_entities": [
+          "moon",
+          "stars",
+          "night sky"
+        ],
+        "prohibited_entities": [
+          "smartphone",
+          "television"
+        ],
+        "scene_intent": "explanation",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see a peaceful bedtime scene with a clock emphasizing the seven-hour benchmark, feeling the calm necessity of adequate sleep."
+      },
+      "shot_duration_s": 4.0,
+      "narration_duration_s": 12.48,
+      "camera_motion": "pull_out",
+      "motion_params": {
+        "zoom_start": 1.22,
+        "zoom_end": 1.0,
+        "pan_x": 0,
+        "pan_y": 0
+      },
+      "transition": "fade",
+      "timeline_start_s": 17.75,
+      "timeline_end_s": 21.75,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 2,
+      "beat_index": 0,
+      "shot_index": 1,
+      "asset_path": "results/why_we_sleep__your_brain_s_night_shift/shots/scene2_1.mp4",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "clock at 7",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [
+          "clock",
+          "bed"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene2",
+        "scene_id": 2,
+        "required_entities": [
+          "clock",
+          "bed"
+        ],
+        "match_terms": {
+          "clock": [
+            "clock",
+            "alarm clock",
+            "timepiece"
+          ],
+          "bed": [
+            "bed",
+            "bedroom",
+            "sleeping"
+          ]
+        },
+        "optional_entities": [
+          "moon",
+          "stars",
+          "night sky"
+        ],
+        "prohibited_entities": [
+          "smartphone",
+          "television"
+        ],
+        "scene_intent": "explanation",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see a peaceful bedtime scene with a clock emphasizing the seven-hour benchmark, feeling the calm necessity of adequate sleep."
+      },
+      "shot_duration_s": 4.0,
+      "narration_duration_s": 12.48,
+      "camera_motion": "reveal",
+      "motion_params": {
+        "zoom_start": 1.25,
+        "zoom_end": 1.0,
+        "pan_x": 0,
+        "pan_y": 0
+      },
+      "transition": "crossfade",
+      "timeline_start_s": 21.75,
+      "timeline_end_s": 25.75,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 2,
+      "beat_index": 0,
+      "shot_index": 2,
+      "asset_path": "results/why_we_sleep__your_brain_s_night_shift/shots/scene2_variant_2.mp4",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "clock at 7",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [
+          "clock",
+          "bed"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene2",
+        "scene_id": 2,
+        "required_entities": [
+          "clock",
+          "bed"
+        ],
+        "match_terms": {
+          "clock": [
+            "clock",
+            "alarm clock",
+            "timepiece"
+          ],
+          "bed": [
+            "bed",
+            "bedroom",
+            "sleeping"
+          ]
+        },
+        "optional_entities": [
+          "moon",
+          "stars",
+          "night sky"
+        ],
+        "prohibited_entities": [
+          "smartphone",
+          "television"
+        ],
+        "scene_intent": "explanation",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see a peaceful bedtime scene with a clock emphasizing the seven-hour benchmark, feeling the calm necessity of adequate sleep."
+      },
+      "shot_duration_s": 4.0,
+      "narration_duration_s": 12.48,
+      "camera_motion": "push_in",
+      "motion_params": {
+        "zoom_start": 1.25,
+        "zoom_end": 1.22,
+        "pan_x": 0,
+        "pan_y": 0
+      },
+      "transition": "crossfade",
+      "timeline_start_s": 25.75,
+      "timeline_end_s": 29.75,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 3,
+      "beat_index": 0,
+      "shot_index": 0,
+      "asset_path": "results/why_we_sleep__your_brain_s_night_shift/shots/scene3_0.mp4",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "glymphatic system animation",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [
+          "brain"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene3",
+        "scene_id": 3,
+        "required_entities": [
+          "brain"
+        ],
+        "match_terms": {
+          "brain": [
+            "brain",
+            "human brain"
+          ]
+        },
+        "optional_entities": [
+          "sleep",
+          "neuron"
+        ],
+        "prohibited_entities": [
+          "heart",
+          "lungs"
+        ],
+        "scene_intent": "explanation",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see the brain's network during sleep and feel the wonder of its self-cleaning process."
+      },
+      "shot_duration_s": 4.0,
+      "narration_duration_s": 10.87,
+      "camera_motion": "pan_right",
+      "motion_params": {
+        "zoom_start": 1.12,
+        "zoom_end": 1.12,
+        "pan_x": 60,
+        "pan_y": 0
+      },
+      "transition": "fade",
+      "timeline_start_s": 30.23,
+      "timeline_end_s": 34.23,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 3,
+      "beat_index": 0,
+      "shot_index": 1,
+      "asset_path": "results/why_we_sleep__your_brain_s_night_shift/shots/scene3_1.mp4",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "glymphatic system animation",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [
+          "brain"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene3",
+        "scene_id": 3,
+        "required_entities": [
+          "brain"
+        ],
+        "match_terms": {
+          "brain": [
+            "brain",
+            "human brain"
+          ]
+        },
+        "optional_entities": [
+          "sleep",
+          "neuron"
+        ],
+        "prohibited_entities": [
+          "heart",
+          "lungs"
+        ],
+        "scene_intent": "explanation",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see the brain's network during sleep and feel the wonder of its self-cleaning process."
+      },
+      "shot_duration_s": 4.0,
+      "narration_duration_s": 10.87,
+      "camera_motion": "reveal",
+      "motion_params": {
+        "zoom_start": 1.25,
+        "zoom_end": 1.0,
+        "pan_x": 0,
+        "pan_y": 0
+      },
+      "transition": "crossfade",
+      "timeline_start_s": 34.23,
+      "timeline_end_s": 38.23,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 3,
+      "beat_index": 0,
+      "shot_index": 2,
+      "asset_path": "results/why_we_sleep__your_brain_s_night_shift/shots/scene3_variant_2.mp4",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "glymphatic system animation",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [
+          "brain"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene3",
+        "scene_id": 3,
+        "required_entities": [
+          "brain"
+        ],
+        "match_terms": {
+          "brain": [
+            "brain",
+            "human brain"
+          ]
+        },
+        "optional_entities": [
+          "sleep",
+          "neuron"
+        ],
+        "prohibited_entities": [
+          "heart",
+          "lungs"
+        ],
+        "scene_intent": "explanation",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see the brain's network during sleep and feel the wonder of its self-cleaning process."
+      },
+      "shot_duration_s": 4.0,
+      "narration_duration_s": 10.87,
+      "camera_motion": "push_in",
+      "motion_params": {
+        "zoom_start": 1.25,
+        "zoom_end": 1.22,
+        "pan_x": 0,
+        "pan_y": 0
+      },
+      "transition": "crossfade",
+      "timeline_start_s": 38.23,
+      "timeline_end_s": 42.23,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 4,
+      "beat_index": 0,
+      "shot_index": 0,
+      "asset_path": "results/why_we_sleep__your_brain_s_night_shift/shots/scene4_0.mp4",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "Show the extreme challenge of staying awake, emphasizing the toll on the body and the relentless passage of time.. flat-vector documentary illustration, clean geometric shapes, smooth curves, bold flat color fills, deep navy background with high-saturation cyan and orange accents, simple stylized human figures, minimal detail, no text, no gradients, no photorealism",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [
+          "Randy Gardner",
+          "clock",
+          "bed"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene4",
+        "scene_id": 4,
+        "required_entities": [
+          "Randy Gardner",
+          "clock",
+          "bed"
+        ],
+        "match_terms": {
+          "Randy Gardner": [
+            "Randy Gardner",
+            "gardner",
+            "sleep deprivation experiment"
+          ],
+          "clock": [
+            "clock",
+            "time",
+            "hour"
+          ],
+          "bed": [
+            "bed",
+            "sleeping",
+            "sleep"
+          ]
+        },
+        "optional_entities": [
+          "teenager",
+          "high school",
+          "project board",
+          "stopwatch"
+        ],
+        "prohibited_entities": [
+          "astronaut",
+          "spacecraft",
+          "planet",
+          "futuristic devices",
+          "modern electronics"
+        ],
+        "scene_intent": "hook",
+        "confidence": 1.0,
+        "visual_objective": "Show the extreme challenge of staying awake, emphasizing the toll on the body and the relentless passage of time."
+      },
+      "shot_duration_s": 4.0,
+      "narration_duration_s": 11.72,
+      "camera_motion": "parallax",
+      "motion_params": {
+        "zoom_start": 1.2,
+        "zoom_end": 1.05,
+        "pan_x": 50,
+        "pan_y": -30
+      },
+      "transition": "fade",
+      "timeline_start_s": 41.1,
+      "timeline_end_s": 45.1,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 4,
+      "beat_index": 0,
+      "shot_index": 1,
+      "asset_path": "results/why_we_sleep__your_brain_s_night_shift/shots/scene4_1.mp4",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "Randy Gardner 1964",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [
+          "Randy Gardner",
+          "clock",
+          "bed"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene4",
+        "scene_id": 4,
+        "required_entities": [
+          "Randy Gardner",
+          "clock",
+          "bed"
+        ],
+        "match_terms": {
+          "Randy Gardner": [
+            "Randy Gardner",
+            "gardner",
+            "sleep deprivation experiment"
+          ],
+          "clock": [
+            "clock",
+            "time",
+            "hour"
+          ],
+          "bed": [
+            "bed",
+            "sleeping",
+            "sleep"
+          ]
+        },
+        "optional_entities": [
+          "teenager",
+          "high school",
+          "project board",
+          "stopwatch"
+        ],
+        "prohibited_entities": [
+          "astronaut",
+          "spacecraft",
+          "planet",
+          "futuristic devices",
+          "modern electronics"
+        ],
+        "scene_intent": "hook",
+        "confidence": 1.0,
+        "visual_objective": "Show the extreme challenge of staying awake, emphasizing the toll on the body and the relentless passage of time."
+      },
+      "shot_duration_s": 4.0,
+      "narration_duration_s": 11.72,
+      "camera_motion": "push_in",
+      "motion_params": {
+        "zoom_start": 1.0,
+        "zoom_end": 1.22,
+        "pan_x": 0,
+        "pan_y": 0
+      },
+      "transition": "crossfade",
+      "timeline_start_s": 45.1,
+      "timeline_end_s": 49.1,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 4,
+      "beat_index": 0,
+      "shot_index": 2,
+      "asset_path": "results/why_we_sleep__your_brain_s_night_shift/shots/scene4_variant_2.mp4",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "Randy Gardner 1964",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [
+          "Randy Gardner",
+          "clock",
+          "bed"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene4",
+        "scene_id": 4,
+        "required_entities": [
+          "Randy Gardner",
+          "clock",
+          "bed"
+        ],
+        "match_terms": {
+          "Randy Gardner": [
+            "Randy Gardner",
+            "gardner",
+            "sleep deprivation experiment"
+          ],
+          "clock": [
+            "clock",
+            "time",
+            "hour"
+          ],
+          "bed": [
+            "bed",
+            "sleeping",
+            "sleep"
+          ]
+        },
+        "optional_entities": [
+          "teenager",
+          "high school",
+          "project board",
+          "stopwatch"
+        ],
+        "prohibited_entities": [
+          "astronaut",
+          "spacecraft",
+          "planet",
+          "futuristic devices",
+          "modern electronics"
+        ],
+        "scene_intent": "hook",
+        "confidence": 1.0,
+        "visual_objective": "Show the extreme challenge of staying awake, emphasizing the toll on the body and the relentless passage of time."
+      },
+      "shot_duration_s": 4.0,
+      "narration_duration_s": 11.72,
+      "camera_motion": "pull_out",
+      "motion_params": {
+        "zoom_start": 1.22,
+        "zoom_end": 1.0,
+        "pan_x": 0,
+        "pan_y": 0
+      },
+      "transition": "crossfade",
+      "timeline_start_s": 49.1,
+      "timeline_end_s": 53.1,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 5,
+      "beat_index": 0,
+      "shot_index": 0,
+      "asset_path": "results/why_we_sleep__your_brain_s_night_shift/shots/scene5_0.mp4",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "working memory",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene5",
+        "scene_id": 5,
+        "required_entities": [],
+        "match_terms": {},
+        "optional_entities": [
+          "brain",
+          "clock",
+          "bedroom",
+          "bed"
+        ],
+        "prohibited_entities": [
+          "any spacecraft",
+          "any planet",
+          "any specific landmark",
+          "any person"
+        ],
+        "scene_intent": "emotion",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see the restless, unfocused mind of a sleep-deprived person, feeling the struggle to concentrate and the heaviness of fatigue."
+      },
+      "shot_duration_s": 4.0,
+      "narration_duration_s": 13.64,
+      "camera_motion": "static",
+      "motion_params": {
+        "zoom_start": 1.0,
+        "zoom_end": 1.0,
+        "pan_x": 0,
+        "pan_y": 0
+      },
+      "transition": "fade",
+      "timeline_start_s": 52.82,
+      "timeline_end_s": 56.82,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 5,
+      "beat_index": 0,
+      "shot_index": 1,
+      "asset_path": "results/why_we_sleep__your_brain_s_night_shift/shots/scene5_1.mp4",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "working memory",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene5",
+        "scene_id": 5,
+        "required_entities": [],
+        "match_terms": {},
+        "optional_entities": [
+          "brain",
+          "clock",
+          "bedroom",
+          "bed"
+        ],
+        "prohibited_entities": [
+          "any spacecraft",
+          "any planet",
+          "any specific landmark",
+          "any person"
+        ],
+        "scene_intent": "emotion",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see the restless, unfocused mind of a sleep-deprived person, feeling the struggle to concentrate and the heaviness of fatigue."
+      },
+      "shot_duration_s": 4.0,
+      "narration_duration_s": 13.64,
+      "camera_motion": "push_in",
+      "motion_params": {
+        "zoom_start": 1.0,
+        "zoom_end": 1.22,
+        "pan_x": 0,
+        "pan_y": 0
+      },
+      "transition": "crossfade",
+      "timeline_start_s": 56.82,
+      "timeline_end_s": 60.82,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 5,
+      "beat_index": 0,
+      "shot_index": 2,
+      "asset_path": "results/why_we_sleep__your_brain_s_night_shift/shots/scene5_variant_2.mp4",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "working memory",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene5",
+        "scene_id": 5,
+        "required_entities": [],
+        "match_terms": {},
+        "optional_entities": [
+          "brain",
+          "clock",
+          "bedroom",
+          "bed"
+        ],
+        "prohibited_entities": [
+          "any spacecraft",
+          "any planet",
+          "any specific landmark",
+          "any person"
+        ],
+        "scene_intent": "emotion",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see the restless, unfocused mind of a sleep-deprived person, feeling the struggle to concentrate and the heaviness of fatigue."
+      },
+      "shot_duration_s": 4.0,
+      "narration_duration_s": 13.64,
+      "camera_motion": "pull_out",
+      "motion_params": {
+        "zoom_start": 1.22,
+        "zoom_end": 1.0,
+        "pan_x": 0,
+        "pan_y": 0
+      },
+      "transition": "crossfade",
+      "timeline_start_s": 60.82,
+      "timeline_end_s": 64.82,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 6,
+      "beat_index": 0,
+      "shot_index": 0,
+      "asset_path": "results/why_we_sleep__your_brain_s_night_shift/shots/scene6_0.mp4",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "EEG delta waves",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene6",
+        "scene_id": 6,
+        "required_entities": [],
+        "match_terms": {},
+        "optional_entities": [
+          "human brain",
+          "sleeping person",
+          "bed",
+          "clock"
+        ],
+        "prohibited_entities": [
+          "rocket",
+          "spacecraft",
+          "planet"
+        ],
+        "scene_intent": "explanation",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see a serene, calm scene of a sleeping person or a glowing brain with wave patterns, evoking a sense of peaceful processing and organization."
+      },
+      "shot_duration_s": 4.0,
+      "narration_duration_s": 10.4,
+      "camera_motion": "pull_out",
+      "motion_params": {
+        "zoom_start": 1.22,
+        "zoom_end": 1.0,
+        "pan_x": 0,
+        "pan_y": 0
+      },
+      "transition": "fade",
+      "timeline_start_s": 66.46,
+      "timeline_end_s": 70.46,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 6,
+      "beat_index": 0,
+      "shot_index": 1,
+      "asset_path": "results/why_we_sleep__your_brain_s_night_shift/shots/scene6_1.mp4",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "EEG delta waves",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene6",
+        "scene_id": 6,
+        "required_entities": [],
+        "match_terms": {},
+        "optional_entities": [
+          "human brain",
+          "sleeping person",
+          "bed",
+          "clock"
+        ],
+        "prohibited_entities": [
+          "rocket",
+          "spacecraft",
+          "planet"
+        ],
+        "scene_intent": "explanation",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see a serene, calm scene of a sleeping person or a glowing brain with wave patterns, evoking a sense of peaceful processing and organization."
+      },
+      "shot_duration_s": 4.0,
+      "narration_duration_s": 10.4,
+      "camera_motion": "pan_right",
+      "motion_params": {
+        "zoom_start": 1.12,
+        "zoom_end": 1.12,
+        "pan_x": 60,
+        "pan_y": 0
+      },
+      "transition": "crossfade",
+      "timeline_start_s": 70.46,
+      "timeline_end_s": 74.46,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 6,
+      "beat_index": 0,
+      "shot_index": 2,
+      "asset_path": "results/why_we_sleep__your_brain_s_night_shift/shots/scene6_variant_2.mp4",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "EEG delta waves",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene6",
+        "scene_id": 6,
+        "required_entities": [],
+        "match_terms": {},
+        "optional_entities": [
+          "human brain",
+          "sleeping person",
+          "bed",
+          "clock"
+        ],
+        "prohibited_entities": [
+          "rocket",
+          "spacecraft",
+          "planet"
+        ],
+        "scene_intent": "explanation",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see a serene, calm scene of a sleeping person or a glowing brain with wave patterns, evoking a sense of peaceful processing and organization."
+      },
+      "shot_duration_s": 4.0,
+      "narration_duration_s": 10.4,
+      "camera_motion": "push_in",
+      "motion_params": {
+        "zoom_start": 1.12,
+        "zoom_end": 1.22,
+        "pan_x": 60,
+        "pan_y": 0
+      },
+      "transition": "crossfade",
+      "timeline_start_s": 74.46,
+      "timeline_end_s": 78.46,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 7,
+      "beat_index": 0,
+      "shot_index": 0,
+      "asset_path": "results/why_we_sleep__your_brain_s_night_shift/shots/scene7_0.mp4",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "The viewer should see a person sleeping with noticeable eye movements, conveying the REM stage's distinctive features: eye darting, muscle limpness, and vivid dreams.. flat-vector documentary illustration, clean geometric shapes, smooth curves, bold flat color fills, deep navy background with high-saturation cyan and orange accents, simple stylized human figures, minimal detail, no text, no gradients, no photorealism",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [
+          "rapid eye movement",
+          "sleeping person"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene7",
+        "scene_id": 7,
+        "required_entities": [
+          "rapid eye movement",
+          "sleeping person"
+        ],
+        "match_terms": {
+          "rapid eye movement": [
+            "rapid eye movement",
+            "REM"
+          ],
+          "sleeping person": [
+            "sleeping person",
+            "sleeping",
+            "sleep",
+            "person sleeping",
+            "man sleeping",
+            "woman sleeping"
+          ]
+        },
+        "optional_entities": [
+          "dream",
+          "bed"
+        ],
+        "prohibited_entities": [
+          "awake person",
+          "non-REM sleep"
+        ],
+        "scene_intent": "explanation",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see a person sleeping with noticeable eye movements, conveying the REM stage's distinctive features: eye darting, muscle limpness, and vivid dreams."
+      },
+      "shot_duration_s": 4.0,
+      "narration_duration_s": 6.92,
+      "camera_motion": "pull_out",
+      "motion_params": {
+        "zoom_start": 1.22,
+        "zoom_end": 1.0,
+        "pan_x": 0,
+        "pan_y": 0
+      },
+      "transition": "fade",
+      "timeline_start_s": 76.86,
+      "timeline_end_s": 80.86,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 7,
+      "beat_index": 0,
+      "shot_index": 1,
+      "asset_path": "results/why_we_sleep__your_brain_s_night_shift/shots/scene7_1.mp4",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "REM sleep animation",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [
+          "rapid eye movement",
+          "sleeping person"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene7",
+        "scene_id": 7,
+        "required_entities": [
+          "rapid eye movement",
+          "sleeping person"
+        ],
+        "match_terms": {
+          "rapid eye movement": [
+            "rapid eye movement",
+            "REM"
+          ],
+          "sleeping person": [
+            "sleeping person",
+            "sleeping",
+            "sleep",
+            "person sleeping",
+            "man sleeping",
+            "woman sleeping"
+          ]
+        },
+        "optional_entities": [
+          "dream",
+          "bed"
+        ],
+        "prohibited_entities": [
+          "awake person",
+          "non-REM sleep"
+        ],
+        "scene_intent": "explanation",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see a person sleeping with noticeable eye movements, conveying the REM stage's distinctive features: eye darting, muscle limpness, and vivid dreams."
+      },
+      "shot_duration_s": 4.0,
+      "narration_duration_s": 6.92,
+      "camera_motion": "reveal",
+      "motion_params": {
+        "zoom_start": 1.25,
+        "zoom_end": 1.0,
+        "pan_x": 0,
+        "pan_y": 0
+      },
+      "transition": "crossfade",
+      "timeline_start_s": 80.86,
+      "timeline_end_s": 84.86,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 8,
+      "beat_index": 0,
+      "shot_index": 0,
+      "asset_path": "results/why_we_sleep__your_brain_s_night_shift/shots/scene8_0.mp4",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "The viewer should see a detailed, almost mechanical visualization of a brain actively refining its neural network\u2014synapses being selectively trimmed\u2014while feeling a sense of purposeful efficiency and wonder at the natural optimization process.. flat-vector documentary illustration, clean geometric shapes, smooth curves, bold flat color fills, deep navy background with high-saturation cyan and orange accents, simple stylized human figures, minimal detail, no text, no gradients, no photorealism",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [
+          "brain",
+          "synaptic pruning"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene8",
+        "scene_id": 8,
+        "required_entities": [
+          "brain",
+          "synaptic pruning"
+        ],
+        "match_terms": {
+          "brain": [
+            "brain",
+            "neurons",
+            "cerebral cortex"
+          ],
+          "synaptic pruning": [
+            "synaptic pruning",
+            "pruning",
+            "synapses",
+            "dendrites"
+          ]
+        },
+        "optional_entities": [
+          "sleep",
+          "neuron"
+        ],
+        "prohibited_entities": [
+          "heart",
+          "lungs",
+          "stomach",
+          "intestines",
+          "kidneys",
+          "liver"
+        ],
+        "scene_intent": "explanation",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see a detailed, almost mechanical visualization of a brain actively refining its neural network\u2014synapses being selectively trimmed\u2014while feeling a sense of purposeful efficiency and wonder at the natural optimization process."
+      },
+      "shot_duration_s": 4.0,
+      "narration_duration_s": 10.88,
+      "camera_motion": "pan_right",
+      "motion_params": {
+        "zoom_start": 1.12,
+        "zoom_end": 1.12,
+        "pan_x": 60,
+        "pan_y": 0
+      },
+      "transition": "fade",
+      "timeline_start_s": 83.78,
+      "timeline_end_s": 87.78,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 8,
+      "beat_index": 0,
+      "shot_index": 1,
+      "asset_path": "results/why_we_sleep__your_brain_s_night_shift/shots/scene8_1.mp4",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "synaptic pruning",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [
+          "brain",
+          "synaptic pruning"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene8",
+        "scene_id": 8,
+        "required_entities": [
+          "brain",
+          "synaptic pruning"
+        ],
+        "match_terms": {
+          "brain": [
+            "brain",
+            "neurons",
+            "cerebral cortex"
+          ],
+          "synaptic pruning": [
+            "synaptic pruning",
+            "pruning",
+            "synapses",
+            "dendrites"
+          ]
+        },
+        "optional_entities": [
+          "sleep",
+          "neuron"
+        ],
+        "prohibited_entities": [
+          "heart",
+          "lungs",
+          "stomach",
+          "intestines",
+          "kidneys",
+          "liver"
+        ],
+        "scene_intent": "explanation",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see a detailed, almost mechanical visualization of a brain actively refining its neural network\u2014synapses being selectively trimmed\u2014while feeling a sense of purposeful efficiency and wonder at the natural optimization process."
+      },
+      "shot_duration_s": 4.0,
+      "narration_duration_s": 10.88,
+      "camera_motion": "pull_out",
+      "motion_params": {
+        "zoom_start": 1.22,
+        "zoom_end": 1.0,
+        "pan_x": 0,
+        "pan_y": 0
+      },
+      "transition": "crossfade",
+      "timeline_start_s": 87.78,
+      "timeline_end_s": 91.78,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 8,
+      "beat_index": 0,
+      "shot_index": 2,
+      "asset_path": "results/why_we_sleep__your_brain_s_night_shift/shots/scene8_variant_2.mp4",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "synaptic pruning",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [
+          "brain",
+          "synaptic pruning"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene8",
+        "scene_id": 8,
+        "required_entities": [
+          "brain",
+          "synaptic pruning"
+        ],
+        "match_terms": {
+          "brain": [
+            "brain",
+            "neurons",
+            "cerebral cortex"
+          ],
+          "synaptic pruning": [
+            "synaptic pruning",
+            "pruning",
+            "synapses",
+            "dendrites"
+          ]
+        },
+        "optional_entities": [
+          "sleep",
+          "neuron"
+        ],
+        "prohibited_entities": [
+          "heart",
+          "lungs",
+          "stomach",
+          "intestines",
+          "kidneys",
+          "liver"
+        ],
+        "scene_intent": "explanation",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see a detailed, almost mechanical visualization of a brain actively refining its neural network\u2014synapses being selectively trimmed\u2014while feeling a sense of purposeful efficiency and wonder at the natural optimization process."
+      },
+      "shot_duration_s": 4.0,
+      "narration_duration_s": 10.88,
+      "camera_motion": "push_in",
+      "motion_params": {
+        "zoom_start": 1.22,
+        "zoom_end": 1.22,
+        "pan_x": 0,
+        "pan_y": 0
+      },
+      "transition": "crossfade",
+      "timeline_start_s": 91.78,
+      "timeline_end_s": 95.78,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 9,
+      "beat_index": 0,
+      "shot_index": 0,
+      "asset_path": "results/why_we_sleep__your_brain_s_night_shift/shots/scene9_0.mp4",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "heart health",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene9",
+        "scene_id": 9,
+        "required_entities": [],
+        "match_terms": {},
+        "optional_entities": [
+          "clock",
+          "bedroom",
+          "human silhouette",
+          "heart",
+          "brain"
+        ],
+        "prohibited_entities": [
+          "spacecraft",
+          "planet",
+          "rocket",
+          "historical event"
+        ],
+        "scene_intent": "explanation",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see a serene bedroom scene with a sleeping person and a clock, feeling the tension between rest and the consequences of sleep deprivation."
+      },
+      "shot_duration_s": 4.0,
+      "narration_duration_s": 11.36,
+      "camera_motion": "push_in",
+      "motion_params": {
+        "zoom_start": 1.0,
+        "zoom_end": 1.22,
+        "pan_x": 0,
+        "pan_y": 0
+      },
+      "transition": "fade",
+      "timeline_start_s": 94.66,
+      "timeline_end_s": 98.66,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 9,
+      "beat_index": 0,
+      "shot_index": 1,
+      "asset_path": "results/why_we_sleep__your_brain_s_night_shift/shots/scene9_1.mp4",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "heart health",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene9",
+        "scene_id": 9,
+        "required_entities": [],
+        "match_terms": {},
+        "optional_entities": [
+          "clock",
+          "bedroom",
+          "human silhouette",
+          "heart",
+          "brain"
+        ],
+        "prohibited_entities": [
+          "spacecraft",
+          "planet",
+          "rocket",
+          "historical event"
+        ],
+        "scene_intent": "explanation",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see a serene bedroom scene with a sleeping person and a clock, feeling the tension between rest and the consequences of sleep deprivation."
+      },
+      "shot_duration_s": 4.0,
+      "narration_duration_s": 11.36,
+      "camera_motion": "reveal",
+      "motion_params": {
+        "zoom_start": 1.25,
+        "zoom_end": 1.0,
+        "pan_x": 0,
+        "pan_y": 0
+      },
+      "transition": "crossfade",
+      "timeline_start_s": 98.66,
+      "timeline_end_s": 102.66,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 9,
+      "beat_index": 0,
+      "shot_index": 2,
+      "asset_path": "results/why_we_sleep__your_brain_s_night_shift/shots/scene9_variant_2.mp4",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "heart health",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene9",
+        "scene_id": 9,
+        "required_entities": [],
+        "match_terms": {},
+        "optional_entities": [
+          "clock",
+          "bedroom",
+          "human silhouette",
+          "heart",
+          "brain"
+        ],
+        "prohibited_entities": [
+          "spacecraft",
+          "planet",
+          "rocket",
+          "historical event"
+        ],
+        "scene_intent": "explanation",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see a serene bedroom scene with a sleeping person and a clock, feeling the tension between rest and the consequences of sleep deprivation."
+      },
+      "shot_duration_s": 4.0,
+      "narration_duration_s": 11.36,
+      "camera_motion": "push_in",
+      "motion_params": {
+        "zoom_start": 1.25,
+        "zoom_end": 1.22,
+        "pan_x": 0,
+        "pan_y": 0
+      },
+      "transition": "crossfade",
+      "timeline_start_s": 102.66,
+      "timeline_end_s": 106.66,
+      "render_duration_s": 0.0
+    }
+  ]
+}

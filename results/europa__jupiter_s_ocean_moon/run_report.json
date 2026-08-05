@@ -1,44 +1,39 @@
 {
   "topic": "Europa: Jupiter's Ocean Moon",
-  "started_at": "2026-08-04T14:42:10Z",
+  "started_at": "2026-08-04T21:26:02Z",
   "strategy": "stills_first",
   "stages": {
     "visuals": {
       "manim": 2,
-      "nasa": 11,
+      "nasa": 1,
       "wikimedia": 0,
-      "ai": 4,
+      "ai": 0,
       "video_fallback": 0,
-      "rejected": 3,
-      "vision_checked": 2,
+      "rejected": 0,
+      "vision_checked": 0,
       "deduped": 11,
-      "cached": 3
+      "cached": 18
     },
     "pre_render_gate": {
-      "passed": false,
-      "blocking_failures": [
-        "voice_switching",
-        "shot_hold",
-        "pacing",
-        "semantic_alignment"
-      ],
+      "passed": true,
+      "blocking_failures": [],
       "checks": [
         {
           "name": "voice_switching",
-          "passed": false,
-          "detail": "scene0: provider kokoro != locked chatterbox; scene0: voice bm_george != locked resemble; scene1: provider kokoro != locked chatterbox; scene1: voice bm_george != locked resemble; scene2: provider kokoro != locked chatterbox",
+          "passed": true,
+          "detail": "single locked voice",
           "metrics": {}
         },
         {
           "name": "voice_loudness_consistency",
           "passed": true,
-          "detail": "per-scene RMS spread 0.8 dB (limit 6.0 dB)",
+          "detail": "per-scene RMS spread 2.6 dB (limit 6.0 dB)",
           "metrics": {}
         },
         {
           "name": "style_drift",
           "passed": true,
-          "detail": "4 placed stills, 0 drifted",
+          "detail": "0 placed stills, 0 drifted",
           "metrics": {}
         },
         {
@@ -61,10 +56,10 @@
         },
         {
           "name": "shot_hold",
-          "passed": false,
-          "detail": "longest shot 13.0s (limit 10.0s)",
+          "passed": true,
+          "detail": "longest shot 10.0s (limit 10.0s)",
           "metrics": {
-            "longest_hold_s": 13.02
+            "longest_hold_s": 10.0
           }
         },
         {
@@ -83,70 +78,95 @@
         },
         {
           "name": "pacing",
-          "passed": false,
-          "detail": "rushed/dense scenes: ['scene 0: rushed: 175 wpm > 172 (175 wpm)', 'scene 0: high comprehension risk (175 wpm)', 'scene 8: high comprehension risk (151 wpm)', 'scene 9: rushed: 194 wpm > 172 (194 wpm)', 'scene 9: high comprehension risk (194 wpm)']",
+          "passed": true,
+          "detail": "narration paced for comprehension",
           "metrics": {
-            "avg_wpm": 154.1,
-            "rushed_scene_count": 3,
+            "avg_wpm": 154.6,
+            "rushed_scene_count": 4,
+            "comprehension_risk_flags": [
+              "scene 2: high comprehension risk",
+              "scene 4: high comprehension risk",
+              "scene 5: high comprehension risk",
+              "scene 6: high comprehension risk"
+            ],
             "high_risk": [
               {
-                "scene": 0,
-                "flags": [
-                  "rushed: 175 wpm > 172",
-                  "high comprehension risk"
-                ],
-                "risk": {
-                  "score": 0.79,
-                  "signals": {
-                    "speech_rate": 0.42,
-                    "technical_density": 0.37,
-                    "sentence_length": 0.0
-                  },
-                  "wpm": 175.0,
-                  "role": "default",
-                  "band": [
-                    128,
-                    172
-                  ],
-                  "grade": "high"
-                }
-              },
-              {
-                "scene": 8,
+                "scene": 2,
                 "flags": [
                   "high comprehension risk"
                 ],
                 "risk": {
-                  "score": 0.63,
+                  "score": 0.55,
                   "signals": {
                     "speech_rate": 0.0,
                     "technical_density": 0.55,
-                    "sentence_length": 0.08
+                    "sentence_length": 0.0
                   },
-                  "wpm": 151.2,
-                  "role": "default",
+                  "wpm": 155.4,
+                  "role": "explanation",
                   "band": [
-                    128,
-                    172
+                    115,
+                    160
                   ],
                   "grade": "high"
                 }
               },
               {
-                "scene": 9,
+                "scene": 4,
                 "flags": [
-                  "rushed: 194 wpm > 172",
                   "high comprehension risk"
                 ],
                 "risk": {
-                  "score": 1.0,
+                  "score": 0.55,
                   "signals": {
-                    "speech_rate": 0.9,
-                    "technical_density": 0.28,
+                    "speech_rate": 0.0,
+                    "technical_density": 0.55,
                     "sentence_length": 0.0
                   },
-                  "wpm": 194.2,
-                  "role": "default",
+                  "wpm": 150.0,
+                  "role": "explanation",
+                  "band": [
+                    115,
+                    160
+                  ],
+                  "grade": "high"
+                }
+              },
+              {
+                "scene": 5,
+                "flags": [
+                  "high comprehension risk"
+                ],
+                "risk": {
+                  "score": 0.84,
+                  "signals": {
+                    "speech_rate": 0.0,
+                    "technical_density": 0.55,
+                    "sentence_length": 0.29
+                  },
+                  "wpm": 140.6,
+                  "role": "explanation",
+                  "band": [
+                    115,
+                    160
+                  ],
+                  "grade": "high"
+                }
+              },
+              {
+                "scene": 6,
+                "flags": [
+                  "high comprehension risk"
+                ],
+                "risk": {
+                  "score": 0.8,
+                  "signals": {
+                    "speech_rate": 0.0,
+                    "technical_density": 0.55,
+                    "sentence_length": 0.25
+                  },
+                  "wpm": 138.0,
+                  "role": "exploration",
                   "band": [
                     128,
                     172
@@ -159,36 +179,33 @@
         },
         {
           "name": "semantic_alignment",
-          "passed": false,
-          "detail": "misaligned shots: [\"scene0_0.mp4: query 'europa surface cracks cracks and ridges ' shares no terms with scene 0 narration\", \"scene5_1.mp4: query 'europa surface composition night on euro' shares no terms with scene 5 narration\", \"scene8_1.mp4: query 'europa clipper mission 2030 europa clipp' shares no terms with scene 8 narration\"]",
+          "passed": true,
+          "detail": "every visual belongs to its narration beat",
           "metrics": {}
         }
       ]
     },
     "render_v1": {
-      "duration_s": 122.733333,
-      "size_mb": 18.2,
-      "render_s": 141.1
+      "duration_s": 112.566667,
+      "size_mb": 21.1,
+      "render_s": 150.6
     },
     "grade_v1": {
       "graded": true,
       "grain": 8,
-      "elapsed_s": 286.9,
-      "size_mb": 44.2
+      "elapsed_s": 275.8,
+      "size_mb": 46.5
     },
     "qa_v1": {
-      "passed": false,
-      "blocking_failures": [
-        "frozen_shots",
-        "excessive_static"
-      ],
+      "passed": true,
+      "blocking_failures": [],
       "checks": [
         {
           "name": "encoding",
           "passed": true,
           "detail": "v=h264 a=aac",
           "metrics": {
-            "duration_s": 122.733333,
+            "duration_s": 112.566667,
             "resolution": [
               1920,
               1080
@@ -211,122 +228,108 @@
         },
         {
           "name": "frozen_shots",
-          "passed": false,
-          "detail": "frozen runs (>= 2.5s): [(45.0, 15)]",
+          "passed": true,
+          "detail": "no frozen shots",
           "metrics": {
-            "frozen_runs": [
-              [
-                45.0,
-                15
-              ]
-            ],
-            "frames_sampled": 9
+            "frozen_runs": [],
+            "frames_sampled": 8
           }
         },
         {
           "name": "excessive_static",
-          "passed": false,
-          "detail": "longest static window: 15.0s (limit 8.0s)",
+          "passed": true,
+          "detail": "longest static window: 0.0s (limit 8.0s)",
           "metrics": {
-            "longest_static_s": 15
+            "longest_static_s": 0
           }
         },
         {
           "name": "silence",
           "passed": true,
-          "detail": "max_volume=-7.6 dB (silence < -50.0 dB)",
+          "detail": "max_volume=-2.7 dB (silence < -50.0 dB)",
           "metrics": {
-            "max_db": -7.6,
-            "mean_db": -24.4
+            "max_db": -2.7,
+            "mean_db": -21.5
           }
         },
         {
           "name": "clipping",
           "passed": true,
-          "detail": "max_volume=-7.6 dB (clip >= -0.5 dB)",
+          "detail": "max_volume=-2.7 dB (clip >= -0.5 dB)",
           "metrics": {
-            "max_db": -7.6
+            "max_db": -2.7
           }
         }
       ]
     },
     "music_v1": {
       "mixed": true,
-      "elapsed_s": 29.0,
-      "size_mb": 44.5,
-      "mean_db": -16.0,
+      "elapsed_s": 29.1,
+      "size_mb": 45.4,
+      "mean_db": -17.0,
       "sfx": "sfx_timeline.wav",
       "sfx_events": [
         {
+          "scene": 0,
+          "trigger": "crack",
+          "at_s": 0.67
+        },
+        {
           "scene": 1,
-          "trigger": "stretch",
-          "at_s": 29.87
+          "trigger": "whoosh",
+          "at_s": 15.44
         },
         {
           "scene": 2,
-          "trigger": "whoosh",
-          "at_s": 38.11
+          "trigger": "sparkle",
+          "at_s": 29.0
+        },
+        {
+          "scene": 3,
+          "trigger": "heartbeat",
+          "at_s": 40.16
         },
         {
           "scene": 4,
-          "trigger": "beep",
-          "at_s": 67.08
+          "trigger": "riser",
+          "at_s": 50.53
         },
         {
           "scene": 6,
-          "trigger": "underwater",
-          "at_s": 93.28
-        },
-        {
-          "scene": 7,
           "trigger": "boom",
-          "at_s": 98.71
-        },
-        {
-          "scene": 7,
-          "trigger": "riser",
-          "at_s": 99.51
+          "at_s": 71.62
         },
         {
           "scene": 8,
           "trigger": "whoosh",
-          "at_s": 107.45
+          "at_s": 90.65
         },
         {
           "scene": 9,
           "trigger": "sparkle",
-          "at_s": 119.97
+          "at_s": 102.02
         }
       ]
     },
     "review_v1": {
-      "score": 68,
-      "confidence": 0.95,
+      "score": 52,
+      "confidence": 0.9,
       "model_used": null
     },
     "improve_pass_1": {
       "iteration": 2,
-      "applied": [
-        {
-          "category": "shot_order",
-          "detail": "[shot_order][high] Replace the landscape at 0:20 which features two suns; Europa orbits Jupiter in a single-star system. This breaks immersion for science-literate viewers.",
-          "source_rec": "Replace the landscape at 0:20 which features two suns; Europa orbits Jupiter in a single-star system. This breaks immersion for science-literate viewers."
-        }
-      ],
+      "applied": [],
       "flagged": [
-        "[fact_change] Replace the 'Earth-Moon system' animation at 0:44 with a diagram showing Europa orbiting Jupiter to match the narration about tidal locking and eccentricity.",
-        "[new_asset] Remove the shot of the human astronaut at 1:32. Replace it with a 3D render or NASA animation of the Europa Clipper spacecraft to avoid implying a crewed mission.",
-        "[new_asset] Update the gravity-assist diagram at 1:03 to show the actual VEEGA (Venus-Earth-Earth Gravity Assist) path for Galileo or the Mars-Earth assist for Clipper, rather than a path toward Saturn."
+        "[new_asset] Replace the 'Inside the Sun' diagram at 00:24 with a graphic showing Europa's icy crust and surface temperatures.",
+        "[unclassified] Replace the Earth-Moon orbit diagram at 00:56 with a visual comparing Europa's ocean depth to the Mariana Trench.",
+        "[unclassified] Swap the exoplanet lineup at 00:35 with an animation of Europa orbiting Jupiter to illustrate tidal locking."
       ],
       "stopped_early": false,
       "notes": "",
       "elapsed_s": 0.0
     }
   },
-  "errors": [
-    "pre-render gate blocked: ['voice_switching', 'shot_hold', 'pacing', 'semantic_alignment']",
-    "publish gate: ['frozen_shots', 'excessive_static', 'voice_consistency']"
-  ],
+  "errors": [],
   "provider": "deepseek",
   "voice_lock": {
     "provider": "chatterbox",
@@ -335,91 +338,30 @@
     "rate": "+0%",
     "pitch": "+0Hz",
     "scene_voices": {
-      "0": "bm_george",
-      "1": "bm_george",
-      "2": "bm_george",
-      "3": "bm_george",
-      "4": "bm_george",
-      "5": "bm_george",
-      "6": "bm_george",
-      "7": "bm_george",
-      "8": "bm_george",
-      "9": "bm_george"
+      "0": "resemble",
+      "1": "resemble",
+      "2": "resemble",
+      "3": "resemble",
+      "4": "resemble",
+      "5": "resemble",
+      "6": "resemble",
+      "7": "resemble",
+      "8": "resemble",
+      "9": "resemble"
     },
     "scene_providers": {
-      "0": "kokoro",
-      "1": "kokoro",
-      "2": "kokoro",
-      "3": "kokoro",
-      "4": "kokoro",
-      "5": "kokoro",
-      "6": "kokoro",
-      "7": "kokoro",
-      "8": "kokoro",
-      "9": "kokoro"
+      "0": "chatterbox",
+      "1": "chatterbox",
+      "2": "chatterbox",
+      "3": "chatterbox",
+      "4": "chatterbox",
+      "5": "chatterbox",
+      "6": "chatterbox",
+      "7": "chatterbox",
+      "8": "chatterbox",
+      "9": "chatterbox"
     },
-    "overrides": [
-      {
-        "scene": 0,
-        "provider": "kokoro",
-        "voice_id": "bm_george",
-        "reason": "Invalid voice 'resemble'."
-      },
-      {
-        "scene": 1,
-        "provider": "kokoro",
-        "voice_id": "bm_george",
-        "reason": "Invalid voice 'resemble'."
-      },
-      {
-        "scene": 2,
-        "provider": "kokoro",
-        "voice_id": "bm_george",
-        "reason": "Invalid voice 'resemble'."
-      },
-      {
-        "scene": 3,
-        "provider": "kokoro",
-        "voice_id": "bm_george",
-        "reason": "Invalid voice 'resemble'."
-      },
-      {
-        "scene": 4,
-        "provider": "kokoro",
-        "voice_id": "bm_george",
-        "reason": "Invalid voice 'resemble'."
-      },
-      {
-        "scene": 5,
-        "provider": "kokoro",
-        "voice_id": "bm_george",
-        "reason": "Invalid voice 'resemble'."
-      },
-      {
-        "scene": 6,
-        "provider": "kokoro",
-        "voice_id": "bm_george",
-        "reason": "Invalid voice 'resemble'."
-      },
-      {
-        "scene": 7,
-        "provider": "kokoro",
-        "voice_id": "bm_george",
-        "reason": "Invalid voice 'resemble'."
-      },
-      {
-        "scene": 8,
-        "provider": "kokoro",
-        "voice_id": "bm_george",
-        "reason": "Invalid voice 'resemble'."
-      },
-      {
-        "scene": 9,
-        "provider": "kokoro",
-        "voice_id": "bm_george",
-        "reason": "Invalid voice 'resemble'."
-      }
-    ]
+    "overrides": []
   },
   "style_bible": {
     "style_name": "jade",
@@ -433,12 +375,7 @@
     ],
     "reference_frame_prompt": "",
     "subject_sheet": [],
-    "placed_style_tokens": {
-      "scene2_0.jpg": "The viewer should see Europa in detail, with a sense of its icy, cracked surface and feel the hidden warmth of an ocean beneath, hinting at the tidal forces at play.. hand-painted cinematic concept art, painterly brushwork, rich depth, warm amber and deep teal color palette with soft cream highlights, consistent lighting and color grade, no text",
-      "scene5_0.jpg": "Show Europa's icy cracked surface, with Jupiter looming in the background, while imagery of the Galileo spacecraft and scientific clues like salts and sulfuric acid convey the hidden ocean beneath.. hand-painted cinematic concept art, painterly brushwork, rich depth, warm amber and deep teal color palette with soft cream highlights, consistent lighting and color grade, no text",
-      "scene6_0.jpg": "The viewer should see Europa, a moon of Jupiter, with a sense of mystery and scale, feeling the possibility of hidden oceans and life.. hand-painted cinematic concept art, painterly brushwork, rich depth, warm amber and deep teal color palette with soft cream highlights, consistent lighting and color grade, no text",
-      "scene9_0.jpg": "Show Europa's icy, cracked surface with Jupiter looming in the background, conveying the mystery of its hidden ocean and the anticipation of discovery.. hand-painted cinematic concept art, painterly brushwork, rich depth, warm amber and deep teal color palette with soft cream highlights, consistent lighting and color grade, no text"
-    }
+    "placed_style_tokens": {}
   },
   "entity_specs": {
     "0": {
@@ -458,55 +395,54 @@
         ]
       },
       "optional_entities": [
-        "ocean",
-        "ice",
-        "cracks",
-        "ridges"
+        "ice shell",
+        "subsurface ocean"
       ],
       "prohibited_entities": [
         "Earth",
-        "Mars",
-        "Saturn",
         "Voyager 1",
-        "Cassini",
-        "Apollo"
+        "Cassini"
       ],
-      "scene_intent": "hook",
+      "scene_intent": "exploration",
       "confidence": 1.0,
-      "visual_objective": "The viewer should see the vast, icy surface of Europa with Jupiter looming in the background, feeling the wonder and mystery of a hidden ocean far from Earth."
+      "visual_objective": "The viewer should see Europa's cracked icy surface and imagine the dark ocean beneath, feeling the mystery and potential for life."
     },
     "1": {
       "beat_id": "scene1",
       "scene_id": 1,
       "required_entities": [
-        "Europa",
-        "Jupiter"
+        "Galileo Galilei",
+        "Jupiter",
+        "Europa"
       ],
       "match_terms": {
-        "Europa": [
-          "Europa",
-          "jupiter's moon europa"
+        "Galileo Galilei": [
+          "Galileo Galilei",
+          "galileo",
+          "galilei"
         ],
         "Jupiter": [
           "Jupiter"
+        ],
+        "Europa": [
+          "Europa"
         ]
       },
       "optional_entities": [
-        "Galileo spacecraft",
-        "Jupiter's magnetosphere",
-        "Europa's surface cracks"
+        "telescope",
+        "starfield",
+        "moon"
       ],
       "prohibited_entities": [
-        "Saturn",
-        "Mars",
-        "Earth",
         "Voyager 1",
         "Cassini",
-        "Apollo mission"
+        "New Horizons",
+        "Mars",
+        "Earth from space without context"
       ],
-      "scene_intent": "explanation",
+      "scene_intent": "hook",
       "confidence": 1.0,
-      "visual_objective": "The viewer should see Europa's orbit and its stretching motion, feeling the dynamic gravitational interaction with Jupiter."
+      "visual_objective": "The viewer should see Galileo's telescopic observation of a tiny dot near Jupiter, evoking the moment of discovery and the mystery of that faint point of light."
     },
     "2": {
       "beat_id": "scene2",
@@ -518,29 +454,30 @@
       "match_terms": {
         "Europa": [
           "Europa",
-          "jupiter's moon europa"
+          "jupiter moon",
+          "icy moon"
         ],
         "Jupiter": [
-          "Jupiter"
+          "Jupiter",
+          "gas giant"
         ]
       },
       "optional_entities": [
-        "Galileo spacecraft",
-        "subsurface ocean",
-        "ice shell",
-        "cracks and ridges"
+        "sunlight",
+        "ocean",
+        "ice"
       ],
       "prohibited_entities": [
         "Earth",
-        "Mars",
         "Saturn",
+        "Titan",
+        "Enceladus",
         "Voyager 1",
-        "Cassini",
-        "Apollo"
+        "Cassini"
       ],
       "scene_intent": "explanation",
       "confidence": 1.0,
-      "visual_objective": "The viewer should see Europa in detail, with a sense of its icy, cracked surface and feel the hidden warmth of an ocean beneath, hinting at the tidal forces at play."
+      "visual_objective": "The viewer should see Europa's bright icy surface against the dark of space, with a sense of its cold, hidden ocean beneath, evoking wonder at its potential for life."
     },
     "3": {
       "beat_id": "scene3",
@@ -559,171 +496,31 @@
         ]
       },
       "optional_entities": [
-        "Galileo spacecraft"
+        "subsurface ocean",
+        "tidal flexing"
       ],
       "prohibited_entities": [
-        "Earth",
-        "Mars",
-        "Voyager spacecraft",
-        "Cassini"
+        "Saturn",
+        "Moon (Earth's)",
+        "Mars"
       ],
-      "scene_intent": "scale",
+      "scene_intent": "explanation",
       "confidence": 1.0,
-      "visual_objective": "The viewer should see Europa's icy, cracked surface in the foreground with Jupiter looming in the background, conveying a sense of scale and recent geological activity."
+      "visual_objective": "The viewer should see Europa's locked rotation with Jupiter, visualizing the constant gravitational pull and the internal heating that keeps its ocean liquid."
     },
     "4": {
       "beat_id": "scene4",
       "scene_id": 4,
       "required_entities": [
-        "Galileo",
-        "Jupiter",
-        "Europa"
-      ],
-      "match_terms": {
-        "Galileo": [
-          "Galileo",
-          "galileo spacecraft",
-          "galileo orbiter"
-        ],
-        "Jupiter": [
-          "Jupiter"
-        ],
-        "Europa": [
-          "Europa"
-        ]
-      },
-      "optional_entities": [
-        "spacecraft",
-        "moon"
-      ],
-      "prohibited_entities": [
-        "Voyager",
-        "Cassini",
-        "New Horizons",
-        "Mars",
-        "Saturn",
-        "Earth"
-      ],
-      "scene_intent": "journey",
-      "confidence": 1.0,
-      "visual_objective": "The viewer should see the Galileo spacecraft arriving at Jupiter and orbiting it, feeling the anticipation and the monumental discovery of Europa's hidden ocean."
-    },
-    "5": {
-      "beat_id": "scene5",
-      "scene_id": 5,
-      "required_entities": [
-        "Europa",
-        "Jupiter",
-        "Galileo spacecraft"
-      ],
-      "match_terms": {
-        "Europa": [
-          "Europa",
-          "jupiter's moon"
-        ],
-        "Jupiter": [
-          "Jupiter",
-          "jupiter system"
-        ],
-        "Galileo spacecraft": [
-          "Galileo spacecraft",
-          "galileo"
-        ]
-      },
-      "optional_entities": [
-        "Jupiter's magnetic field",
-        "sulfuric acid",
-        "ice"
-      ],
-      "prohibited_entities": [
-        "Saturn",
-        "Titan",
-        "Enceladus",
-        "Cassini spacecraft",
-        "Voyager 1",
-        "Voyager 2"
-      ],
-      "scene_intent": "explanation",
-      "confidence": 1.0,
-      "visual_objective": "Show Europa's icy cracked surface, with Jupiter looming in the background, while imagery of the Galileo spacecraft and scientific clues like salts and sulfuric acid convey the hidden ocean beneath."
-    },
-    "6": {
-      "beat_id": "scene6",
-      "scene_id": 6,
-      "required_entities": [
-        "Europa",
-        "Jupiter",
-        "Galileo spacecraft"
-      ],
-      "match_terms": {
-        "Europa": [
-          "Europa",
-          "jupiter moon"
-        ],
-        "Jupiter": [
-          "Jupiter",
-          "gas giant"
-        ],
-        "Galileo spacecraft": [
-          "Galileo spacecraft",
-          "galileo"
-        ]
-      },
-      "optional_entities": [
-        "ocean",
-        "ice",
-        "subsurface"
-      ],
-      "prohibited_entities": [
-        "Saturn",
-        "Titan",
-        "Enceladus",
-        "Mars",
-        "Voyager",
-        "Cassini"
-      ],
-      "scene_intent": "hook",
-      "confidence": 1.0,
-      "visual_objective": "The viewer should see Europa, a moon of Jupiter, with a sense of mystery and scale, feeling the possibility of hidden oceans and life."
-    },
-    "7": {
-      "beat_id": "scene7",
-      "scene_id": 7,
-      "required_entities": [
-        "Europa Clipper",
-        "Jupiter"
-      ],
-      "match_terms": {
-        "Europa Clipper": [
-          "Europa Clipper",
-          "clipper"
-        ],
-        "Jupiter": [
-          "Jupiter"
-        ]
-      },
-      "optional_entities": [
-        "Europa",
-        "rocket",
-        "launch pad"
-      ],
-      "prohibited_entities": [
-        "Voyager 1",
-        "Cassini",
-        "Mars"
-      ],
-      "scene_intent": "journey",
-      "confidence": 1.0,
-      "visual_objective": "The viewer should see the Europa Clipper launching and traveling toward Jupiter, feeling the anticipation of a long journey."
-    },
-    "8": {
-      "beat_id": "scene8",
-      "scene_id": 8,
-      "required_entities": [
+        "Galileo spacecraft",
         "Europa",
         "Jupiter"
       ],
       "match_terms": {
+        "Galileo spacecraft": [
+          "Galileo spacecraft",
+          "galileo"
+        ],
         "Europa": [
           "Europa",
           "jupiter's moon europa"
@@ -733,118 +530,246 @@
         ]
       },
       "optional_entities": [
-        "Galileo spacecraft"
+        "ice",
+        "subsurface ocean",
+        "ocean"
       ],
       "prohibited_entities": [
-        "Saturn",
-        "Mars",
-        "Earth",
         "Voyager 1",
-        "Cassini"
+        "Cassini",
+        "Earth",
+        "Mars",
+        "Titan"
+      ],
+      "scene_intent": "reveal",
+      "confidence": 1.0,
+      "visual_objective": "The viewer should see the Galileo spacecraft approaching Europa, with Jupiter in the background, and feel the mystery of a hidden ocean beneath the icy surface, shifting with Jupiter's gravity."
+    },
+    "5": {
+      "beat_id": "scene5",
+      "scene_id": 5,
+      "required_entities": [
+        "Europa",
+        "Earth"
+      ],
+      "match_terms": {
+        "Europa": [
+          "Europa",
+          "jupiter's moon",
+          "jupiter moon"
+        ],
+        "Earth": [
+          "Earth",
+          "pale blue dot",
+          "earth's ocean",
+          "ocean"
+        ]
+      },
+      "optional_entities": [
+        "Mariana Trench",
+        "water",
+        "ice"
+      ],
+      "prohibited_entities": [
+        "Mars",
+        "Titan",
+        "Enceladus",
+        "Voyager 1"
+      ],
+      "scene_intent": "scale",
+      "confidence": 1.0,
+      "visual_objective": "The viewer should see Europa with its deep subsurface ocean contrasted with Earth's oceans and the Mariana Trench, feeling the awe of the enormous depth and scale."
+    },
+    "6": {
+      "beat_id": "scene6",
+      "scene_id": 6,
+      "required_entities": [
+        "Juno",
+        "Europa"
+      ],
+      "match_terms": {
+        "Juno": [
+          "Juno",
+          "juno spacecraft"
+        ],
+        "Europa": [
+          "Europa",
+          "europa moon"
+        ]
+      },
+      "optional_entities": [
+        "Jupiter"
+      ],
+      "prohibited_entities": [
+        "Voyager",
+        "Cassini",
+        "Io",
+        "Ganymede",
+        "Callisto",
+        "Earth"
       ],
       "scene_intent": "exploration",
       "confidence": 1.0,
-      "visual_objective": "The viewer should see a spacecraft approaching Europa, with Jupiter looming in the background, and feel the anticipation of discovering a hidden ocean beneath the icy crust."
+      "visual_objective": "Show Juno's close approach revealing Europa's fractured icy surface, evoking awe at the moon's chaotic and promising terrain."
+    },
+    "7": {
+      "beat_id": "scene7",
+      "scene_id": 7,
+      "required_entities": [
+        "Europa",
+        "Jupiter"
+      ],
+      "match_terms": {
+        "Europa": [
+          "Europa",
+          "jupiter's moon europa",
+          "moon europa"
+        ],
+        "Jupiter": [
+          "Jupiter",
+          "planet jupiter"
+        ]
+      },
+      "optional_entities": [
+        "icy surface",
+        "cracks",
+        "frozen landscape",
+        "space view"
+      ],
+      "prohibited_entities": [
+        "Earth",
+        "Mars",
+        "Voyager 1",
+        "Galileo spacecraft"
+      ],
+      "scene_intent": "explanation",
+      "confidence": 1.0,
+      "visual_objective": "The viewer should see Europa's slow rotation over its icy surface, with Jupiter looming in the background, and feel the awe of a distant, frozen world turning in silence."
+    },
+    "8": {
+      "beat_id": "scene8",
+      "scene_id": 8,
+      "required_entities": [
+        "Europa Clipper",
+        "Europa",
+        "Jupiter"
+      ],
+      "match_terms": {
+        "Europa Clipper": [
+          "Europa Clipper",
+          "clipper"
+        ],
+        "Europa": [
+          "Europa",
+          "moon"
+        ],
+        "Jupiter": [
+          "Jupiter"
+        ]
+      },
+      "optional_entities": [
+        "ocean",
+        "flyby"
+      ],
+      "prohibited_entities": [
+        "Voyager",
+        "Cassini",
+        "Mars",
+        "Earth"
+      ],
+      "scene_intent": "journey",
+      "confidence": 1.0,
+      "visual_objective": "The viewer should see the Europa Clipper spacecraft journeying toward Europa, with Jupiter in the background, and feel the anticipation of exploring a hidden ocean beneath the icy crust."
     },
     "9": {
       "beat_id": "scene9",
       "scene_id": 9,
       "required_entities": [
         "Europa",
-        "Jupiter",
-        "Galileo spacecraft"
+        "Jupiter"
       ],
       "match_terms": {
         "Europa": [
           "Europa",
-          "jupiter's moon"
+          "europa moon"
         ],
         "Jupiter": [
           "Jupiter"
-        ],
-        "Galileo spacecraft": [
-          "Galileo spacecraft",
-          "galileo"
         ]
       },
       "optional_entities": [
+        "Juno spacecraft",
+        "Galileo spacecraft",
         "ocean",
-        "ice shell",
-        "cracks",
-        "ridges"
+        "water"
       ],
       "prohibited_entities": [
-        "Saturn",
         "Mars",
-        "Earth",
-        "Voyager",
-        "Cassini"
+        "Enceladus",
+        "Titan",
+        "Earth (unless clearly as comparison)"
       ],
       "scene_intent": "exploration",
       "confidence": 1.0,
-      "visual_objective": "Show Europa's icy, cracked surface with Jupiter looming in the background, conveying the mystery of its hidden ocean and the anticipation of discovery."
+      "visual_objective": "Viewer should see Europa and Jupiter to feel the mystery and promise of exploring this alien ocean, evoking curiosity and anticipation."
     }
   },
   "camera_diversity": {
-    "moves": 18,
-    "entropy": 3.086,
-    "normalized_entropy": 0.974,
+    "moves": 19,
+    "entropy": 3.076,
+    "normalized_entropy": 0.97,
     "repetitive": false,
     "distribution": {
-      "pan_left": 2,
-      "pull_out": 1,
-      "reveal": 3,
-      "tracking": 2,
-      "parallax": 1,
-      "push_in": 3,
-      "tilt_up": 2,
+      "tilt_up": 1,
+      "tracking": 1,
       "orbit": 2,
-      "pan_right": 2
+      "pan_left": 2,
+      "pull_out": 2,
+      "reveal": 3,
+      "pan_right": 3,
+      "crane_up": 2,
+      "push_in": 3
     }
   },
   "diversity": {
     "asset_diversity": 1.0,
-    "transition_diversity": 0.998,
-    "motion_diversity": 0.985,
-    "shot_duration_mean_s": 5.74,
-    "shot_duration_std_s": 1.5,
-    "shot_count": 21
+    "transition_diversity": 0.971,
+    "motion_diversity": 0.926,
+    "shot_duration_mean_s": 5.51,
+    "shot_duration_std_s": 1.08,
+    "shot_count": 25
   },
   "retention_diagnostic": {
-    "novelty_density_per_10s": 1.71,
-    "longest_hold_s": 13.0,
+    "novelty_density_per_10s": 2.22,
+    "longest_hold_s": 10.0,
     "dead_air_s": 0.0,
-    "shots": 21,
+    "shots": 25,
     "benchmark": {
       "hook_window_s": 15,
       "max_hold_s": 8.0,
       "target_novelty_per_10s": 1.5
     },
     "flags": [
-      "longest hold 13.0s > 8s (drop-off risk)"
+      "longest hold 10.0s > 8s (drop-off risk)"
     ]
   },
   "disclosure": {
     "synthetic_content": true,
     "disclosure_label": "AI-generated content: synthetic narration, AI-assisted visuals and sound design",
     "no_fakes_compliant": true,
-    "generated_at": "2026-08-04T15:02:02Z",
+    "generated_at": "2026-08-04T21:36:06Z",
     "pipeline": "jade-studio/v8"
   },
   "publish_gate": {
-    "passed": false,
-    "blocking_failures": [
-      "frozen_shots",
-      "excessive_static",
-      "voice_consistency"
-    ],
+    "passed": true,
+    "blocking_failures": [],
     "checks": [
       {
         "name": "encoding",
         "passed": true,
         "detail": "v=h264 a=aac",
         "metrics": {
-          "duration_s": 120.7,
+          "duration_s": 108.1,
           "resolution": [
             1920,
             1080
@@ -867,62 +792,57 @@
       },
       {
         "name": "frozen_shots",
-        "passed": false,
-        "detail": "frozen runs (>= 2.5s): [(45.0, 15)]",
+        "passed": true,
+        "detail": "no frozen shots",
         "metrics": {
-          "frozen_runs": [
-            [
-              45.0,
-              15
-            ]
-          ],
-          "frames_sampled": 9
+          "frozen_runs": [],
+          "frames_sampled": 8
         }
       },
       {
         "name": "excessive_static",
-        "passed": false,
-        "detail": "longest static window: 15.0s (limit 8.0s)",
+        "passed": true,
+        "detail": "longest static window: 0.0s (limit 8.0s)",
         "metrics": {
-          "longest_static_s": 15
+          "longest_static_s": 0
         }
       },
       {
         "name": "silence",
         "passed": true,
-        "detail": "max_volume=-1.5 dB (silence < -50.0 dB)",
+        "detail": "max_volume=-1.0 dB (silence < -50.0 dB)",
         "metrics": {
-          "max_db": -1.5,
-          "mean_db": -16.0
+          "max_db": -1.0,
+          "mean_db": -17.0
         }
       },
       {
         "name": "clipping",
         "passed": true,
-        "detail": "max_volume=-1.5 dB (clip >= -0.5 dB)",
+        "detail": "max_volume=-1.0 dB (clip >= -0.5 dB)",
         "metrics": {
-          "max_db": -1.5
+          "max_db": -1.0
         }
       },
       {
         "name": "hook_strength",
         "passed": true,
-        "detail": "hook window (15s): 3 distinct visuals (need >= 2)",
+        "detail": "hook window (15s): 4 distinct visuals (need >= 2)",
         "metrics": {
-          "distinct_in_hook": 3,
-          "shots_in_hook": 3
+          "distinct_in_hook": 4,
+          "shots_in_hook": 4
         }
       },
       {
         "name": "voice_consistency",
-        "passed": false,
-        "detail": "scene0: provider kokoro != locked chatterbox; scene0: voice bm_george != locked resemble; scene1: provider kokoro != locked chatterbox; scene1: voice bm_george != locked resemble; scene2: provider kokoro != locked chatterbox",
+        "passed": true,
+        "detail": "single locked voice",
         "metrics": {}
       },
       {
         "name": "style_locked",
         "passed": true,
-        "detail": "4 placed stills, 0 drifted",
+        "detail": "0 placed stills, 0 drifted",
         "metrics": {}
       },
       {
@@ -944,10 +864,10 @@
         "passed": true,
         "detail": "mastered audio publication-safe (I/LRA/TP OK)",
         "metrics": {
-          "integrated_lufs": -13.95,
-          "true_peak_dbTP": -1.5,
-          "lra": 2.6,
-          "max_volume_db": -1.5
+          "integrated_lufs": -14.39,
+          "true_peak_dbTP": -1.03,
+          "lra": 2.7,
+          "max_volume_db": -1.0
         }
       },
       {
@@ -957,7 +877,7 @@
         "metrics": {}
       }
     ],
-    "publish_ready": false
+    "publish_ready": true
   },
   "cleanup": {
     "policy": "keep-final-only",
@@ -967,86 +887,11 @@
     "rows": [
       {
         "scene": 0,
-        "words": 41,
-        "duration_s": 14.06,
-        "wpm": 175.0,
-        "intent": "default",
-        "role": "default",
-        "comprehension_risk": {
-          "score": 0.79,
-          "signals": {
-            "speech_rate": 0.42,
-            "technical_density": 0.37,
-            "sentence_length": 0.0
-          },
-          "wpm": 175.0,
-          "role": "default",
-          "band": [
-            128,
-            172
-          ],
-          "grade": "high"
-        },
-        "flags": [
-          "rushed: 175 wpm > 172",
-          "high comprehension risk"
-        ]
-      },
-      {
-        "scene": 1,
-        "words": 46,
-        "duration_s": 18.52,
-        "wpm": 149.0,
-        "intent": "default",
-        "role": "default",
-        "comprehension_risk": {
-          "score": 0.22,
-          "signals": {
-            "speech_rate": 0.0,
-            "technical_density": 0.22,
-            "sentence_length": 0.0
-          },
-          "wpm": 149.0,
-          "role": "default",
-          "band": [
-            128,
-            172
-          ],
-          "grade": "low"
-        },
-        "flags": []
-      },
-      {
-        "scene": 2,
-        "words": 28,
-        "duration_s": 11.07,
-        "wpm": 151.7,
-        "intent": "default",
-        "role": "default",
-        "comprehension_risk": {
-          "score": 0.28,
-          "signals": {
-            "speech_rate": 0.0,
-            "technical_density": 0.28,
-            "sentence_length": 0.0
-          },
-          "wpm": 151.7,
-          "role": "default",
-          "band": [
-            128,
-            172
-          ],
-          "grade": "medium"
-        },
-        "flags": []
-      },
-      {
-        "scene": 3,
-        "words": 50,
-        "duration_s": 19.01,
-        "wpm": 157.8,
-        "intent": "default",
-        "role": "default",
+        "words": 34,
+        "duration_s": 12.12,
+        "wpm": 168.3,
+        "intent": "exploration",
+        "role": "exploration",
         "comprehension_risk": {
           "score": 0.18,
           "signals": {
@@ -1054,8 +899,8 @@
             "technical_density": 0.18,
             "sentence_length": 0.0
           },
-          "wpm": 157.8,
-          "role": "default",
+          "wpm": 168.3,
+          "role": "exploration",
           "band": [
             128,
             172
@@ -1065,36 +910,62 @@
         "flags": []
       },
       {
-        "scene": 4,
-        "words": 20,
-        "duration_s": 9.64,
-        "wpm": 124.4,
-        "intent": "default",
-        "role": "default",
+        "scene": 1,
+        "words": 34,
+        "duration_s": 11.28,
+        "wpm": 180.9,
+        "intent": "hook",
+        "role": "hook",
         "comprehension_risk": {
-          "score": 0.15,
+          "score": 0.18,
           "signals": {
-            "speech_rate": 0.15,
-            "technical_density": 0.0,
+            "speech_rate": 0.0,
+            "technical_density": 0.18,
             "sentence_length": 0.0
           },
-          "wpm": 124.4,
-          "role": "default",
+          "wpm": 180.9,
+          "role": "hook",
           "band": [
-            128,
-            172
+            135,
+            182
           ],
           "grade": "low"
         },
         "flags": []
       },
       {
-        "scene": 5,
-        "words": 35,
-        "duration_s": 14.1,
-        "wpm": 148.9,
-        "intent": "default",
-        "role": "default",
+        "scene": 2,
+        "words": 29,
+        "duration_s": 11.2,
+        "wpm": 155.4,
+        "intent": "explanation",
+        "role": "explanation",
+        "comprehension_risk": {
+          "score": 0.55,
+          "signals": {
+            "speech_rate": 0.0,
+            "technical_density": 0.55,
+            "sentence_length": 0.0
+          },
+          "wpm": 155.4,
+          "role": "explanation",
+          "band": [
+            115,
+            160
+          ],
+          "grade": "high"
+        },
+        "flags": [
+          "high comprehension risk"
+        ]
+      },
+      {
+        "scene": 3,
+        "words": 25,
+        "duration_s": 10.73,
+        "wpm": 139.8,
+        "intent": "explanation",
+        "role": "explanation",
         "comprehension_risk": {
           "score": 0.0,
           "signals": {
@@ -1102,8 +973,134 @@
             "technical_density": 0.0,
             "sentence_length": 0.0
           },
-          "wpm": 148.9,
-          "role": "default",
+          "wpm": 139.8,
+          "role": "explanation",
+          "band": [
+            115,
+            160
+          ],
+          "grade": "low"
+        },
+        "flags": []
+      },
+      {
+        "scene": 4,
+        "words": 26,
+        "duration_s": 10.4,
+        "wpm": 150.0,
+        "intent": "reveal",
+        "role": "explanation",
+        "comprehension_risk": {
+          "score": 0.55,
+          "signals": {
+            "speech_rate": 0.0,
+            "technical_density": 0.55,
+            "sentence_length": 0.0
+          },
+          "wpm": 150.0,
+          "role": "explanation",
+          "band": [
+            115,
+            160
+          ],
+          "grade": "high"
+        },
+        "flags": [
+          "high comprehension risk"
+        ]
+      },
+      {
+        "scene": 5,
+        "words": 25,
+        "duration_s": 10.67,
+        "wpm": 140.6,
+        "intent": "scale",
+        "role": "explanation",
+        "comprehension_risk": {
+          "score": 0.84,
+          "signals": {
+            "speech_rate": 0.0,
+            "technical_density": 0.55,
+            "sentence_length": 0.29
+          },
+          "wpm": 140.6,
+          "role": "explanation",
+          "band": [
+            115,
+            160
+          ],
+          "grade": "high"
+        },
+        "flags": [
+          "high comprehension risk"
+        ]
+      },
+      {
+        "scene": 6,
+        "words": 24,
+        "duration_s": 10.43,
+        "wpm": 138.0,
+        "intent": "exploration",
+        "role": "exploration",
+        "comprehension_risk": {
+          "score": 0.8,
+          "signals": {
+            "speech_rate": 0.0,
+            "technical_density": 0.55,
+            "sentence_length": 0.25
+          },
+          "wpm": 138.0,
+          "role": "exploration",
+          "band": [
+            128,
+            172
+          ],
+          "grade": "high"
+        },
+        "flags": [
+          "high comprehension risk"
+        ]
+      },
+      {
+        "scene": 7,
+        "words": 22,
+        "duration_s": 8.41,
+        "wpm": 157.0,
+        "intent": "explanation",
+        "role": "explanation",
+        "comprehension_risk": {
+          "score": 0.17,
+          "signals": {
+            "speech_rate": 0.0,
+            "technical_density": 0.0,
+            "sentence_length": 0.17
+          },
+          "wpm": 157.0,
+          "role": "explanation",
+          "band": [
+            115,
+            160
+          ],
+          "grade": "low"
+        },
+        "flags": []
+      },
+      {
+        "scene": 8,
+        "words": 27,
+        "duration_s": 10.8,
+        "wpm": 150.0,
+        "intent": "journey",
+        "role": "exploration",
+        "comprehension_risk": {
+          "score": 0.0,
+          "signals": {
+            "speech_rate": 0.0,
+            "technical_density": 0.0,
+            "sentence_length": 0.0
+          },
+          "wpm": 150.0,
+          "role": "exploration",
           "band": [
             128,
             172
@@ -1113,166 +1110,108 @@
         "flags": []
       },
       {
-        "scene": 6,
-        "words": 24,
-        "duration_s": 8.83,
-        "wpm": 163.0,
-        "intent": "default",
-        "role": "default",
-        "comprehension_risk": {
-          "score": 0.41,
-          "signals": {
-            "speech_rate": 0.0,
-            "technical_density": 0.41,
-            "sentence_length": 0.0
-          },
-          "wpm": 163.0,
-          "role": "default",
-          "band": [
-            128,
-            172
-          ],
-          "grade": "medium"
-        },
-        "flags": []
-      },
-      {
-        "scene": 7,
-        "words": 18,
-        "duration_s": 8.55,
-        "wpm": 126.2,
-        "intent": "default",
-        "role": "default",
-        "comprehension_risk": {
-          "score": 0.43,
-          "signals": {
-            "speech_rate": 0.15,
-            "technical_density": 0.28,
-            "sentence_length": 0.0
-          },
-          "wpm": 126.2,
-          "role": "default",
-          "band": [
-            128,
-            172
-          ],
-          "grade": "medium"
-        },
-        "flags": []
-      },
-      {
-        "scene": 8,
-        "words": 20,
-        "duration_s": 7.94,
-        "wpm": 151.2,
-        "intent": "default",
-        "role": "default",
-        "comprehension_risk": {
-          "score": 0.63,
-          "signals": {
-            "speech_rate": 0.0,
-            "technical_density": 0.55,
-            "sentence_length": 0.08
-          },
-          "wpm": 151.2,
-          "role": "default",
-          "band": [
-            128,
-            172
-          ],
-          "grade": "high"
-        },
-        "flags": [
-          "high comprehension risk"
-        ]
-      },
-      {
         "scene": 9,
-        "words": 29,
-        "duration_s": 8.96,
-        "wpm": 194.2,
-        "intent": "default",
-        "role": "default",
+        "words": 33,
+        "duration_s": 11.95,
+        "wpm": 165.7,
+        "intent": "exploration",
+        "role": "exploration",
         "comprehension_risk": {
-          "score": 1.0,
+          "score": 0.0,
           "signals": {
-            "speech_rate": 0.9,
-            "technical_density": 0.28,
+            "speech_rate": 0.0,
+            "technical_density": 0.0,
             "sentence_length": 0.0
           },
-          "wpm": 194.2,
-          "role": "default",
+          "wpm": 165.7,
+          "role": "exploration",
           "band": [
             128,
             172
           ],
-          "grade": "high"
+          "grade": "low"
         },
-        "flags": [
-          "rushed: 194 wpm > 172",
-          "high comprehension risk"
-        ]
+        "flags": []
       }
     ],
     "high_risk_scenes": [
       {
-        "scene": 0,
-        "flags": [
-          "rushed: 175 wpm > 172",
-          "high comprehension risk"
-        ],
-        "risk": {
-          "score": 0.79,
-          "signals": {
-            "speech_rate": 0.42,
-            "technical_density": 0.37,
-            "sentence_length": 0.0
-          },
-          "wpm": 175.0,
-          "role": "default",
-          "band": [
-            128,
-            172
-          ],
-          "grade": "high"
-        }
-      },
-      {
-        "scene": 8,
+        "scene": 2,
         "flags": [
           "high comprehension risk"
         ],
         "risk": {
-          "score": 0.63,
+          "score": 0.55,
           "signals": {
             "speech_rate": 0.0,
             "technical_density": 0.55,
-            "sentence_length": 0.08
+            "sentence_length": 0.0
           },
-          "wpm": 151.2,
-          "role": "default",
+          "wpm": 155.4,
+          "role": "explanation",
           "band": [
-            128,
-            172
+            115,
+            160
           ],
           "grade": "high"
         }
       },
       {
-        "scene": 9,
+        "scene": 4,
         "flags": [
-          "rushed: 194 wpm > 172",
           "high comprehension risk"
         ],
         "risk": {
-          "score": 1.0,
+          "score": 0.55,
           "signals": {
-            "speech_rate": 0.9,
-            "technical_density": 0.28,
+            "speech_rate": 0.0,
+            "technical_density": 0.55,
             "sentence_length": 0.0
           },
-          "wpm": 194.2,
-          "role": "default",
+          "wpm": 150.0,
+          "role": "explanation",
+          "band": [
+            115,
+            160
+          ],
+          "grade": "high"
+        }
+      },
+      {
+        "scene": 5,
+        "flags": [
+          "high comprehension risk"
+        ],
+        "risk": {
+          "score": 0.84,
+          "signals": {
+            "speech_rate": 0.0,
+            "technical_density": 0.55,
+            "sentence_length": 0.29
+          },
+          "wpm": 140.6,
+          "role": "explanation",
+          "band": [
+            115,
+            160
+          ],
+          "grade": "high"
+        }
+      },
+      {
+        "scene": 6,
+        "flags": [
+          "high comprehension risk"
+        ],
+        "risk": {
+          "score": 0.8,
+          "signals": {
+            "speech_rate": 0.0,
+            "technical_density": 0.55,
+            "sentence_length": 0.25
+          },
+          "wpm": 138.0,
+          "role": "exploration",
           "band": [
             128,
             172
@@ -1281,113 +1220,71 @@
         }
       }
     ],
-    "avg_wpm": 154.1,
-    "rushed_scene_count": 3
+    "avg_wpm": 154.6,
+    "rushed_scene_count": 4
   },
   "degradations": [
-    {
-      "stage": "asset_gate",
-      "severity": "info",
-      "detail": "3 assets rejected by Entity-Asset verification (correct behavior)"
-    },
     {
       "stage": "asset_dedup",
       "severity": "info",
       "detail": "11 near-identical assets skipped (perceptual dedup)"
     },
     {
-      "stage": "deterministic_qa",
-      "severity": "error",
-      "detail": "blocking failures: ['frozen_shots', 'excessive_static']"
+      "stage": "pacing",
+      "severity": "warning",
+      "detail": "scene 2: high comprehension risk"
     },
     {
       "stage": "pacing",
       "severity": "warning",
-      "detail": "scene 0: rushed: 175 wpm > 172; high comprehension risk"
+      "detail": "scene 4: high comprehension risk"
     },
     {
       "stage": "pacing",
       "severity": "warning",
-      "detail": "scene 8: high comprehension risk"
+      "detail": "scene 5: high comprehension risk"
     },
     {
       "stage": "pacing",
       "severity": "warning",
-      "detail": "scene 9: rushed: 194 wpm > 172; high comprehension risk"
-    },
-    {
-      "stage": "pre_render_gate",
-      "severity": "error",
-      "detail": "blocking failures: ['voice_switching', 'shot_hold', 'pacing', 'semantic_alignment']"
+      "detail": "scene 6: high comprehension risk"
     }
   ],
   "final": {
     "output": "results/europa__jupiter_s_ocean_moon/europa__jupiter_s_ocean_moon_mixed.mp4",
     "iterations": 1,
-    "final_score": 68,
-    "duration_s": 120.7,
+    "final_score": 52,
+    "duration_s": 108.1,
     "visual_stats": {
       "manim": 2,
-      "nasa": 11,
+      "nasa": 1,
       "wikimedia": 0,
-      "ai": 4,
+      "ai": 0,
       "video_fallback": 0,
-      "rejected": 3,
-      "vision_checked": 2,
+      "rejected": 0,
+      "vision_checked": 0,
       "deduped": 11,
-      "cached": 3
+      "cached": 18
     }
   },
   "llm_usage_deepseek": {
     "stages": {
-      "fact_verification": {
-        "calls": 1,
-        "input": 1025,
-        "output": 843,
-        "cached": 0,
-        "cost_usd": 0.00038,
-        "hit_rate": 0.0
-      },
-      "research": {
-        "calls": 1,
-        "input": 274,
-        "output": 1116,
-        "cached": 0,
-        "cost_usd": 0.000351,
-        "hit_rate": 0.0
-      },
-      "script": {
-        "calls": 2,
-        "input": 3664,
-        "output": 3628,
-        "cached": 0,
-        "cost_usd": 0.001529,
-        "hit_rate": 0.0
-      },
-      "script_review": {
-        "calls": 14,
-        "input": 19542,
-        "output": 10236,
-        "cached": 4736,
-        "cost_usd": 0.004952,
-        "hit_rate": 0.2423
-      },
       "spec_build": {
         "calls": 10,
-        "input": 11971,
-        "output": 1558,
-        "cached": 2048,
-        "cost_usd": 0.001831,
-        "hit_rate": 0.1711
+        "input": 12071,
+        "output": 1528,
+        "cached": 11520,
+        "cost_usd": 0.000537,
+        "hit_rate": 0.9544
       }
     },
     "total": {
-      "calls": 28,
-      "input": 36476,
-      "output": 17381,
-      "cached": 6784,
-      "cost_usd": 0.009043,
-      "hit_rate": 0.186
+      "calls": 10,
+      "input": 12071,
+      "output": 1528,
+      "cached": 11520,
+      "cost_usd": 0.000537,
+      "hit_rate": 0.9544
     }
   },
   "postmortem": "/home/ubuntu/video_engine/src/docs/mission/postmortems/postmortem-europa-jupiter-s-ocean-moon-stills-first.md"

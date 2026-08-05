@@ -1,50 +1,31 @@
 {
-  "generated_at": "2026-08-04T15:01:40Z",
-  "total_render_s": 141.12,
-  "shot_count": 21,
+  "generated_at": "2026-08-04T21:35:45Z",
+  "total_render_s": 150.56,
+  "shot_count": 25,
   "shots": [
     {
       "scene_id": 0,
       "beat_index": 0,
       "shot_index": 0,
       "asset_path": "results/europa__jupiter_s_ocean_moon/shots/scene0_0.mp4",
-      "asset_source": "nasa",
-      "asset_title": "Cracks and Ridges on Europa",
+      "asset_source": "cached",
+      "asset_title": "cached still",
       "query_used": "Europa surface cracks",
       "verification": {
-        "asset_path": "cache/stills/europa__jupiter_s_ocean_moon/scene0_0.jpg",
-        "beat_id": "scene0",
         "passed": true,
-        "score": 0.64,
-        "signal_scores": {
-          "metadata": {
-            "score": 0.7,
-            "evidence": "hits=['Europa'], bans=[]"
-          },
-          "captions": {
-            "score": 0.8,
-            "evidence": "hits=['Europa'], bans=[]"
-          },
-          "filename": {
-            "score": 0.2,
-            "evidence": "hits=[], bans=[]"
-          },
-          "provider_tags": {
-            "score": 0.75,
-            "evidence": "tags=['Europa surface cracks'], hits=['Europa'], bans=[]"
-          }
-        },
-        "matched_required": [
-          "Europa"
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
         ],
-        "violated_prohibited": [],
-        "missing_required": [
+        "matched_required": [
+          "Europa",
           "Jupiter"
         ],
-        "vision_check": null,
-        "reasons": [
-          "signals confirm (score=0.64)"
-        ]
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
       },
       "entity_spec": {
         "beat_id": "scene0",
@@ -63,31 +44,26 @@
           ]
         },
         "optional_entities": [
-          "ocean",
-          "ice",
-          "cracks",
-          "ridges"
+          "ice shell",
+          "subsurface ocean"
         ],
         "prohibited_entities": [
           "Earth",
-          "Mars",
-          "Saturn",
           "Voyager 1",
-          "Cassini",
-          "Apollo"
+          "Cassini"
         ],
-        "scene_intent": "hook",
+        "scene_intent": "exploration",
         "confidence": 1.0,
-        "visual_objective": "The viewer should see the vast, icy surface of Europa with Jupiter looming in the background, feeling the wonder and mystery of a hidden ocean far from Earth."
+        "visual_objective": "The viewer should see Europa's cracked icy surface and imagine the dark ocean beneath, feeling the mystery and potential for life."
       },
       "shot_duration_s": 3.5,
-      "narration_duration_s": 14.06,
-      "camera_motion": "push_in",
+      "narration_duration_s": 12.12,
+      "camera_motion": "orbit",
       "motion_params": {
-        "zoom_start": 1.0,
-        "zoom_end": 1.22,
-        "pan_x": 0,
-        "pan_y": 0
+        "zoom_start": 1.15,
+        "zoom_end": 1.15,
+        "pan_x": 80,
+        "pan_y": 20
       },
       "transition": "fade",
       "timeline_start_s": 0.0,
@@ -99,43 +75,24 @@
       "beat_index": 0,
       "shot_index": 1,
       "asset_path": "results/europa__jupiter_s_ocean_moon/shots/scene0_1.mp4",
-      "asset_source": "nasa",
-      "asset_title": "Oxygen Production at Europa (Illustration)",
-      "query_used": "Europa subsurface ocean",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "Europa surface cracks",
       "verification": {
-        "asset_path": "cache/stills/europa__jupiter_s_ocean_moon/scene0_1.jpg",
-        "beat_id": "scene0",
         "passed": true,
-        "score": 0.64,
-        "signal_scores": {
-          "metadata": {
-            "score": 0.7,
-            "evidence": "hits=['Europa'], bans=[]"
-          },
-          "captions": {
-            "score": 0.8,
-            "evidence": "hits=['Europa'], bans=[]"
-          },
-          "filename": {
-            "score": 0.2,
-            "evidence": "hits=[], bans=[]"
-          },
-          "provider_tags": {
-            "score": 0.75,
-            "evidence": "tags=['Europa subsurface ocean'], hits=['Europa'], bans=[]"
-          }
-        },
-        "matched_required": [
-          "Europa"
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
         ],
-        "violated_prohibited": [],
-        "missing_required": [
+        "matched_required": [
+          "Europa",
           "Jupiter"
         ],
-        "vision_check": null,
-        "reasons": [
-          "signals confirm (score=0.64)"
-        ]
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
       },
       "entity_spec": {
         "beat_id": "scene0",
@@ -154,82 +111,59 @@
           ]
         },
         "optional_entities": [
-          "ocean",
-          "ice",
-          "cracks",
-          "ridges"
+          "ice shell",
+          "subsurface ocean"
         ],
         "prohibited_entities": [
           "Earth",
-          "Mars",
-          "Saturn",
           "Voyager 1",
-          "Cassini",
-          "Apollo"
+          "Cassini"
         ],
-        "scene_intent": "hook",
+        "scene_intent": "exploration",
         "confidence": 1.0,
-        "visual_objective": "The viewer should see the vast, icy surface of Europa with Jupiter looming in the background, feeling the wonder and mystery of a hidden ocean far from Earth."
+        "visual_objective": "The viewer should see Europa's cracked icy surface and imagine the dark ocean beneath, feeling the mystery and potential for life."
       },
       "shot_duration_s": 3.5,
-      "narration_duration_s": 14.06,
-      "camera_motion": "reveal",
+      "narration_duration_s": 12.12,
+      "camera_motion": "pan_right",
       "motion_params": {
-        "zoom_start": 1.25,
-        "zoom_end": 1.0,
-        "pan_x": 0,
+        "zoom_start": 1.12,
+        "zoom_end": 1.12,
+        "pan_x": 60,
         "pan_y": 0
       },
       "transition": "crossfade",
       "timeline_start_s": 3.5,
-      "timeline_end_s": 14.06,
+      "timeline_end_s": 7.0,
       "render_duration_s": 0.0
     },
     {
-      "scene_id": 1,
+      "scene_id": 0,
       "beat_index": 0,
-      "shot_index": 0,
-      "asset_path": "results/europa__jupiter_s_ocean_moon/shots/scene1_0.mp4",
-      "asset_source": "nasa",
-      "asset_title": "Europa Clipper Artist's Concept",
-      "query_used": "Europa orbit Jupiter",
+      "shot_index": 2,
+      "asset_path": "results/europa__jupiter_s_ocean_moon/shots/scene0_variant_2.mp4",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "Europa surface cracks",
       "verification": {
-        "asset_path": "cache/stills/europa__jupiter_s_ocean_moon/scene1_0.jpg",
-        "beat_id": "scene1",
         "passed": true,
-        "score": 0.64,
-        "signal_scores": {
-          "metadata": {
-            "score": 0.7,
-            "evidence": "hits=['Europa'], bans=[]"
-          },
-          "captions": {
-            "score": 0.8,
-            "evidence": "hits=['Europa'], bans=[]"
-          },
-          "filename": {
-            "score": 0.2,
-            "evidence": "hits=[], bans=[]"
-          },
-          "provider_tags": {
-            "score": 0.75,
-            "evidence": "tags=['Europa orbit Jupiter'], hits=['Europa', 'Jupiter'], bans=[]"
-          }
-        },
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
         "matched_required": [
           "Europa",
           "Jupiter"
         ],
         "violated_prohibited": [],
         "missing_required": [],
-        "vision_check": null,
-        "reasons": [
-          "signals confirm (score=0.64)"
-        ]
+        "vision_check": null
       },
       "entity_spec": {
-        "beat_id": "scene1",
-        "scene_id": 1,
+        "beat_id": "scene0",
+        "scene_id": 0,
         "required_entities": [
           "Europa",
           "Jupiter"
@@ -244,34 +178,106 @@
           ]
         },
         "optional_entities": [
-          "Galileo spacecraft",
-          "Jupiter's magnetosphere",
-          "Europa's surface cracks"
+          "ice shell",
+          "subsurface ocean"
         ],
         "prohibited_entities": [
-          "Saturn",
-          "Mars",
           "Earth",
           "Voyager 1",
-          "Cassini",
-          "Apollo mission"
+          "Cassini"
         ],
-        "scene_intent": "explanation",
+        "scene_intent": "exploration",
         "confidence": 1.0,
-        "visual_objective": "The viewer should see Europa's orbit and its stretching motion, feeling the dynamic gravitational interaction with Jupiter."
+        "visual_objective": "The viewer should see Europa's cracked icy surface and imagine the dark ocean beneath, feeling the mystery and potential for life."
       },
       "shot_duration_s": 5.5,
-      "narration_duration_s": 18.52,
-      "camera_motion": "pan_right",
+      "narration_duration_s": 12.12,
+      "camera_motion": "push_in",
       "motion_params": {
         "zoom_start": 1.12,
-        "zoom_end": 1.12,
+        "zoom_end": 1.22,
         "pan_x": 60,
         "pan_y": 0
       },
+      "transition": "crossfade",
+      "timeline_start_s": 7.0,
+      "timeline_end_s": 12.5,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 1,
+      "beat_index": 0,
+      "shot_index": 0,
+      "asset_path": "results/europa__jupiter_s_ocean_moon/shots/scene1_0.mp4",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "The viewer should see Galileo's telescopic observation of a tiny dot near Jupiter, evoking the moment of discovery and the mystery of that faint point of light.. hand-painted cinematic concept art, painterly brushwork, rich depth, warm amber and deep teal color palette with soft cream highlights, consistent lighting and color grade, no text",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [
+          "Galileo Galilei",
+          "Jupiter",
+          "Europa"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene1",
+        "scene_id": 1,
+        "required_entities": [
+          "Galileo Galilei",
+          "Jupiter",
+          "Europa"
+        ],
+        "match_terms": {
+          "Galileo Galilei": [
+            "Galileo Galilei",
+            "galileo",
+            "galilei"
+          ],
+          "Jupiter": [
+            "Jupiter"
+          ],
+          "Europa": [
+            "Europa"
+          ]
+        },
+        "optional_entities": [
+          "telescope",
+          "starfield",
+          "moon"
+        ],
+        "prohibited_entities": [
+          "Voyager 1",
+          "Cassini",
+          "New Horizons",
+          "Mars",
+          "Earth from space without context"
+        ],
+        "scene_intent": "hook",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see Galileo's telescopic observation of a tiny dot near Jupiter, evoking the moment of discovery and the mystery of that faint point of light."
+      },
+      "shot_duration_s": 5.5,
+      "narration_duration_s": 11.28,
+      "camera_motion": "push_in",
+      "motion_params": {
+        "zoom_start": 1.0,
+        "zoom_end": 1.22,
+        "pan_x": 0,
+        "pan_y": 0
+      },
       "transition": "fade",
-      "timeline_start_s": 14.06,
-      "timeline_end_s": 19.56,
+      "timeline_start_s": 12.12,
+      "timeline_end_s": 17.62,
       "render_duration_s": 0.0
     },
     {
@@ -281,7 +287,7 @@
       "asset_path": "results/europa__jupiter_s_ocean_moon/shots/scene1_1.mp4",
       "asset_source": "cached",
       "asset_title": "cached still",
-      "query_used": "Jupiter moon orbit animation",
+      "query_used": "Galileo telescope Jupiter moons",
       "verification": {
         "passed": true,
         "score": 1.0,
@@ -291,8 +297,9 @@
           "human-approved (pinned)"
         ],
         "matched_required": [
-          "Europa",
-          "Jupiter"
+          "Galileo Galilei",
+          "Jupiter",
+          "Europa"
         ],
         "violated_prohibited": [],
         "missing_required": [],
@@ -302,200 +309,41 @@
         "beat_id": "scene1",
         "scene_id": 1,
         "required_entities": [
-          "Europa",
-          "Jupiter"
-        ],
-        "match_terms": {
-          "Europa": [
-            "Europa",
-            "jupiter's moon europa"
-          ],
-          "Jupiter": [
-            "Jupiter"
-          ]
-        },
-        "optional_entities": [
-          "Galileo spacecraft",
-          "Jupiter's magnetosphere",
-          "Europa's surface cracks"
-        ],
-        "prohibited_entities": [
-          "Saturn",
-          "Mars",
-          "Earth",
-          "Voyager 1",
-          "Cassini",
-          "Apollo mission"
-        ],
-        "scene_intent": "explanation",
-        "confidence": 1.0,
-        "visual_objective": "The viewer should see Europa's orbit and its stretching motion, feeling the dynamic gravitational interaction with Jupiter."
-      },
-      "shot_duration_s": 5.5,
-      "narration_duration_s": 18.52,
-      "camera_motion": "pull_out",
-      "motion_params": {
-        "zoom_start": 1.22,
-        "zoom_end": 1.0,
-        "pan_x": 0,
-        "pan_y": 0
-      },
-      "transition": "crossfade",
-      "timeline_start_s": 19.56,
-      "timeline_end_s": 32.58,
-      "render_duration_s": 0.0
-    },
-    {
-      "scene_id": 2,
-      "beat_index": 0,
-      "shot_index": 0,
-      "asset_path": "results/europa__jupiter_s_ocean_moon/shots/scene2_0.mp4",
-      "asset_source": "ai",
-      "asset_title": "",
-      "query_used": "The viewer should see Europa in detail, with a sense of its icy, cracked surface and feel the hidden warmth of an ocean beneath, hinting at the tidal forces at play.. hand-painted cinematic concept art, painterly brushwork, rich depth, warm amber and deep teal color palette with soft cream highlights, consistent lighting and color grade, no text",
-      "verification": {
-        "passed": true,
-        "score": 1.0,
-        "pre_verified": true,
-        "signal_scores": {},
-        "reasons": [
-          "human-approved (pinned)"
-        ],
-        "matched_required": [
-          "Europa",
-          "Jupiter"
-        ],
-        "violated_prohibited": [],
-        "missing_required": [],
-        "vision_check": null
-      },
-      "entity_spec": {
-        "beat_id": "scene2",
-        "scene_id": 2,
-        "required_entities": [
-          "Europa",
-          "Jupiter"
-        ],
-        "match_terms": {
-          "Europa": [
-            "Europa",
-            "jupiter's moon europa"
-          ],
-          "Jupiter": [
-            "Jupiter"
-          ]
-        },
-        "optional_entities": [
-          "Galileo spacecraft",
-          "subsurface ocean",
-          "ice shell",
-          "cracks and ridges"
-        ],
-        "prohibited_entities": [
-          "Earth",
-          "Mars",
-          "Saturn",
-          "Voyager 1",
-          "Cassini",
-          "Apollo"
-        ],
-        "scene_intent": "explanation",
-        "confidence": 1.0,
-        "visual_objective": "The viewer should see Europa in detail, with a sense of its icy, cracked surface and feel the hidden warmth of an ocean beneath, hinting at the tidal forces at play."
-      },
-      "shot_duration_s": 5.5,
-      "narration_duration_s": 11.07,
-      "camera_motion": "push_in",
-      "motion_params": {
-        "zoom_start": 1.0,
-        "zoom_end": 1.22,
-        "pan_x": 0,
-        "pan_y": 0
-      },
-      "transition": "fade",
-      "timeline_start_s": 32.58,
-      "timeline_end_s": 38.08,
-      "render_duration_s": 0.0
-    },
-    {
-      "scene_id": 2,
-      "beat_index": 0,
-      "shot_index": 1,
-      "asset_path": "results/europa__jupiter_s_ocean_moon/shots/scene2_1.mp4",
-      "asset_source": "nasa",
-      "asset_title": "Europa: Potential Volcanoes on the Seafloor",
-      "query_used": "Europa internal heat",
-      "verification": {
-        "asset_path": "cache/stills/europa__jupiter_s_ocean_moon/scene2_1.jpg",
-        "beat_id": "scene2",
-        "passed": true,
-        "score": 0.64,
-        "signal_scores": {
-          "metadata": {
-            "score": 0.7,
-            "evidence": "hits=['Europa'], bans=[]"
-          },
-          "captions": {
-            "score": 0.8,
-            "evidence": "hits=['Europa'], bans=[]"
-          },
-          "filename": {
-            "score": 0.2,
-            "evidence": "hits=[], bans=[]"
-          },
-          "provider_tags": {
-            "score": 0.75,
-            "evidence": "tags=['Europa internal heat'], hits=['Europa'], bans=[]"
-          }
-        },
-        "matched_required": [
+          "Galileo Galilei",
+          "Jupiter",
           "Europa"
         ],
-        "violated_prohibited": [],
-        "missing_required": [
-          "Jupiter"
-        ],
-        "vision_check": null,
-        "reasons": [
-          "signals confirm (score=0.64)"
-        ]
-      },
-      "entity_spec": {
-        "beat_id": "scene2",
-        "scene_id": 2,
-        "required_entities": [
-          "Europa",
-          "Jupiter"
-        ],
         "match_terms": {
-          "Europa": [
-            "Europa",
-            "jupiter's moon europa"
+          "Galileo Galilei": [
+            "Galileo Galilei",
+            "galileo",
+            "galilei"
           ],
           "Jupiter": [
             "Jupiter"
+          ],
+          "Europa": [
+            "Europa"
           ]
         },
         "optional_entities": [
-          "Galileo spacecraft",
-          "subsurface ocean",
-          "ice shell",
-          "cracks and ridges"
+          "telescope",
+          "starfield",
+          "moon"
         ],
         "prohibited_entities": [
-          "Earth",
-          "Mars",
-          "Saturn",
           "Voyager 1",
           "Cassini",
-          "Apollo"
+          "New Horizons",
+          "Mars",
+          "Earth from space without context"
         ],
-        "scene_intent": "explanation",
+        "scene_intent": "hook",
         "confidence": 1.0,
-        "visual_objective": "The viewer should see Europa in detail, with a sense of its icy, cracked surface and feel the hidden warmth of an ocean beneath, hinting at the tidal forces at play."
+        "visual_objective": "The viewer should see Galileo's telescopic observation of a tiny dot near Jupiter, evoking the moment of discovery and the mystery of that faint point of light."
       },
       "shot_duration_s": 5.5,
-      "narration_duration_s": 11.07,
+      "narration_duration_s": 11.28,
       "camera_motion": "reveal",
       "motion_params": {
         "zoom_start": 1.25,
@@ -504,219 +352,48 @@
         "pan_y": 0
       },
       "transition": "crossfade",
-      "timeline_start_s": 38.08,
-      "timeline_end_s": 43.65,
+      "timeline_start_s": 17.62,
+      "timeline_end_s": 23.12,
       "render_duration_s": 0.0
     },
     {
-      "scene_id": 3,
+      "scene_id": 1,
       "beat_index": 0,
-      "shot_index": 0,
-      "asset_path": "cache/manim/moon_phases.mp4",
-      "asset_source": "manim",
-      "asset_title": "",
-      "query_used": "",
-      "verification": null,
-      "entity_spec": {
-        "beat_id": "scene3",
-        "scene_id": 3,
-        "required_entities": [
-          "Europa",
-          "Jupiter"
+      "shot_index": 2,
+      "asset_path": "results/europa__jupiter_s_ocean_moon/shots/scene1_variant_2.mp4",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "Galileo telescope Jupiter moons",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
         ],
-        "match_terms": {
-          "Europa": [
-            "Europa",
-            "jupiter's moon europa"
-          ],
-          "Jupiter": [
-            "Jupiter"
-          ]
-        },
-        "optional_entities": [
-          "Galileo spacecraft"
-        ],
-        "prohibited_entities": [
-          "Earth",
-          "Mars",
-          "Voyager spacecraft",
-          "Cassini"
-        ],
-        "scene_intent": "scale",
-        "confidence": 1.0,
-        "visual_objective": "The viewer should see Europa's icy, cracked surface in the foreground with Jupiter looming in the background, conveying a sense of scale and recent geological activity."
-      },
-      "shot_duration_s": 10.0,
-      "narration_duration_s": 19.01,
-      "camera_motion": "static",
-      "motion_params": {},
-      "transition": "fade",
-      "timeline_start_s": 43.65,
-      "timeline_end_s": 53.65,
-      "render_duration_s": 0.0
-    },
-    {
-      "scene_id": 3,
-      "beat_index": 0,
-      "shot_index": 1,
-      "asset_path": "results/europa__jupiter_s_ocean_moon/shots/scene3_variant_0.mp4",
-      "asset_source": "manim",
-      "asset_title": "",
-      "query_used": "",
-      "verification": null,
-      "entity_spec": {
-        "beat_id": "scene3",
-        "scene_id": 3,
-        "required_entities": [
-          "Europa",
-          "Jupiter"
-        ],
-        "match_terms": {
-          "Europa": [
-            "Europa",
-            "jupiter's moon europa"
-          ],
-          "Jupiter": [
-            "Jupiter"
-          ]
-        },
-        "optional_entities": [
-          "Galileo spacecraft"
-        ],
-        "prohibited_entities": [
-          "Earth",
-          "Mars",
-          "Voyager spacecraft",
-          "Cassini"
-        ],
-        "scene_intent": "scale",
-        "confidence": 1.0,
-        "visual_objective": "The viewer should see Europa's icy, cracked surface in the foreground with Jupiter looming in the background, conveying a sense of scale and recent geological activity."
-      },
-      "shot_duration_s": 5.5,
-      "narration_duration_s": 19.01,
-      "camera_motion": "pull_out",
-      "motion_params": {
-        "zoom_start": 1.22,
-        "zoom_end": 1.0
-      },
-      "transition": "crossfade",
-      "timeline_start_s": 53.65,
-      "timeline_end_s": 62.66,
-      "render_duration_s": 0.0
-    },
-    {
-      "scene_id": 4,
-      "beat_index": 0,
-      "shot_index": 0,
-      "asset_path": "cache/manim/voyager_trajectory.mp4",
-      "asset_source": "manim",
-      "asset_title": "",
-      "query_used": "",
-      "verification": null,
-      "entity_spec": {
-        "beat_id": "scene4",
-        "scene_id": 4,
-        "required_entities": [
-          "Galileo",
+        "matched_required": [
+          "Galileo Galilei",
           "Jupiter",
           "Europa"
-        ],
-        "match_terms": {
-          "Galileo": [
-            "Galileo",
-            "galileo spacecraft",
-            "galileo orbiter"
-          ],
-          "Jupiter": [
-            "Jupiter"
-          ],
-          "Europa": [
-            "Europa"
-          ]
-        },
-        "optional_entities": [
-          "spacecraft",
-          "moon"
-        ],
-        "prohibited_entities": [
-          "Voyager",
-          "Cassini",
-          "New Horizons",
-          "Mars",
-          "Saturn",
-          "Earth"
-        ],
-        "scene_intent": "journey",
-        "confidence": 1.0,
-        "visual_objective": "The viewer should see the Galileo spacecraft arriving at Jupiter and orbiting it, feeling the anticipation and the monumental discovery of Europa's hidden ocean."
-      },
-      "shot_duration_s": 10.0,
-      "narration_duration_s": 9.64,
-      "camera_motion": "static",
-      "motion_params": {},
-      "transition": "fade",
-      "timeline_start_s": 62.66,
-      "timeline_end_s": 72.66,
-      "render_duration_s": 0.0
-    },
-    {
-      "scene_id": 4,
-      "beat_index": 0,
-      "shot_index": 1,
-      "asset_path": "results/europa__jupiter_s_ocean_moon/shots/scene4_0.mp4",
-      "asset_source": "nasa",
-      "asset_title": "STS-34 Galileo processing at KSC's SAEF-2 planetary spacecraft facility",
-      "query_used": "Galileo spacecraft",
-      "verification": {
-        "asset_path": "cache/stills/europa__jupiter_s_ocean_moon/scene4_0.jpg",
-        "beat_id": "scene4",
-        "passed": true,
-        "score": 0.64,
-        "signal_scores": {
-          "metadata": {
-            "score": 0.7,
-            "evidence": "hits=['Galileo'], bans=[]"
-          },
-          "captions": {
-            "score": 0.8,
-            "evidence": "hits=['Galileo'], bans=[]"
-          },
-          "filename": {
-            "score": 0.2,
-            "evidence": "hits=[], bans=[]"
-          },
-          "provider_tags": {
-            "score": 0.75,
-            "evidence": "tags=['Galileo spacecraft'], hits=['Galileo'], bans=[]"
-          }
-        },
-        "matched_required": [
-          "Galileo"
         ],
         "violated_prohibited": [],
-        "missing_required": [
-          "Jupiter",
-          "Europa"
-        ],
-        "vision_check": null,
-        "reasons": [
-          "signals confirm (score=0.64)"
-        ]
+        "missing_required": [],
+        "vision_check": null
       },
       "entity_spec": {
-        "beat_id": "scene4",
-        "scene_id": 4,
+        "beat_id": "scene1",
+        "scene_id": 1,
         "required_entities": [
-          "Galileo",
+          "Galileo Galilei",
           "Jupiter",
           "Europa"
         ],
         "match_terms": {
-          "Galileo": [
-            "Galileo",
-            "galileo spacecraft",
-            "galileo orbiter"
+          "Galileo Galilei": [
+            "Galileo Galilei",
+            "galileo",
+            "galilei"
           ],
           "Jupiter": [
             "Jupiter"
@@ -726,138 +403,96 @@
           ]
         },
         "optional_entities": [
-          "spacecraft",
+          "telescope",
+          "starfield",
           "moon"
         ],
         "prohibited_entities": [
-          "Voyager",
+          "Voyager 1",
           "Cassini",
           "New Horizons",
           "Mars",
-          "Saturn",
-          "Earth"
+          "Earth from space without context"
         ],
-        "scene_intent": "journey",
+        "scene_intent": "hook",
         "confidence": 1.0,
-        "visual_objective": "The viewer should see the Galileo spacecraft arriving at Jupiter and orbiting it, feeling the anticipation and the monumental discovery of Europa's hidden ocean."
+        "visual_objective": "The viewer should see Galileo's telescopic observation of a tiny dot near Jupiter, evoking the moment of discovery and the mystery of that faint point of light."
       },
       "shot_duration_s": 5.5,
-      "narration_duration_s": 9.64,
-      "camera_motion": "tracking",
+      "narration_duration_s": 11.28,
+      "camera_motion": "push_in",
       "motion_params": {
-        "zoom_start": 1.1,
-        "zoom_end": 1.1,
-        "pan_x": -80,
+        "zoom_start": 1.25,
+        "zoom_end": 1.22,
+        "pan_x": 0,
         "pan_y": 0
       },
       "transition": "crossfade",
-      "timeline_start_s": 72.66,
-      "timeline_end_s": 78.16,
+      "timeline_start_s": 23.12,
+      "timeline_end_s": 28.62,
       "render_duration_s": 0.0
     },
     {
-      "scene_id": 4,
+      "scene_id": 2,
       "beat_index": 0,
-      "shot_index": 2,
-      "asset_path": "results/europa__jupiter_s_ocean_moon/shots/scene4_1.mp4",
-      "asset_source": "nasa",
-      "asset_title": "Jupiter Temperatures--Broad Latitude",
-      "query_used": "Galileo mission Jupiter",
-      "verification": {
-        "asset_path": "cache/stills/europa__jupiter_s_ocean_moon/scene4_1.jpg",
-        "beat_id": "scene4",
-        "passed": true,
-        "score": 0.64,
-        "signal_scores": {
-          "metadata": {
-            "score": 0.7,
-            "evidence": "hits=['Jupiter'], bans=[]"
-          },
-          "captions": {
-            "score": 0.8,
-            "evidence": "hits=['Jupiter'], bans=[]"
-          },
-          "filename": {
-            "score": 0.2,
-            "evidence": "hits=[], bans=[]"
-          },
-          "provider_tags": {
-            "score": 0.75,
-            "evidence": "tags=['Galileo mission Jupiter'], hits=['Galileo', 'Jupiter'], bans=[]"
-          }
-        },
-        "matched_required": [
-          "Galileo",
+      "shot_index": 0,
+      "asset_path": "cache/manim/sun_layers.mp4",
+      "asset_source": "manim",
+      "asset_title": "",
+      "query_used": "",
+      "verification": null,
+      "entity_spec": {
+        "beat_id": "scene2",
+        "scene_id": 2,
+        "required_entities": [
+          "Europa",
           "Jupiter"
         ],
-        "violated_prohibited": [],
-        "missing_required": [
-          "Europa"
-        ],
-        "vision_check": null,
-        "reasons": [
-          "signals confirm (score=0.64)"
-        ]
-      },
-      "entity_spec": {
-        "beat_id": "scene4",
-        "scene_id": 4,
-        "required_entities": [
-          "Galileo",
-          "Jupiter",
-          "Europa"
-        ],
         "match_terms": {
-          "Galileo": [
-            "Galileo",
-            "galileo spacecraft",
-            "galileo orbiter"
+          "Europa": [
+            "Europa",
+            "jupiter moon",
+            "icy moon"
           ],
           "Jupiter": [
-            "Jupiter"
-          ],
-          "Europa": [
-            "Europa"
+            "Jupiter",
+            "gas giant"
           ]
         },
         "optional_entities": [
-          "spacecraft",
-          "moon"
+          "sunlight",
+          "ocean",
+          "ice"
         ],
         "prohibited_entities": [
-          "Voyager",
-          "Cassini",
-          "New Horizons",
-          "Mars",
+          "Earth",
           "Saturn",
-          "Earth"
+          "Titan",
+          "Enceladus",
+          "Voyager 1",
+          "Cassini"
         ],
-        "scene_intent": "journey",
+        "scene_intent": "explanation",
         "confidence": 1.0,
-        "visual_objective": "The viewer should see the Galileo spacecraft arriving at Jupiter and orbiting it, feeling the anticipation and the monumental discovery of Europa's hidden ocean."
+        "visual_objective": "The viewer should see Europa's bright icy surface against the dark of space, with a sense of its cold, hidden ocean beneath, evoking wonder at its potential for life."
       },
-      "shot_duration_s": 5.5,
-      "narration_duration_s": 9.64,
-      "camera_motion": "orbit",
-      "motion_params": {
-        "zoom_start": 1.15,
-        "zoom_end": 1.15,
-        "pan_x": 80,
-        "pan_y": 20
-      },
-      "transition": "crossfade",
-      "timeline_start_s": 78.16,
-      "timeline_end_s": 83.66,
+      "shot_duration_s": 4.8,
+      "narration_duration_s": 11.2,
+      "camera_motion": "static",
+      "motion_params": {},
+      "transition": "fade",
+      "timeline_start_s": 23.4,
+      "timeline_end_s": 28.2,
       "render_duration_s": 0.0
     },
     {
-      "scene_id": 5,
+      "scene_id": 2,
       "beat_index": 0,
-      "shot_index": 0,
-      "asset_path": "results/europa__jupiter_s_ocean_moon/shots/scene5_0.mp4",
-      "asset_source": "ai",
-      "asset_title": "",
-      "query_used": "Show Europa's icy cracked surface, with Jupiter looming in the background, while imagery of the Galileo spacecraft and scientific clues like salts and sulfuric acid convey the hidden ocean beneath.. hand-painted cinematic concept art, painterly brushwork, rich depth, warm amber and deep teal color palette with soft cream highlights, consistent lighting and color grade, no text",
+      "shot_index": 1,
+      "asset_path": "results/europa__jupiter_s_ocean_moon/shots/scene2_0.mp4",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "Europa surface ice",
       "verification": {
         "passed": true,
         "score": 1.0,
@@ -868,8 +503,462 @@
         ],
         "matched_required": [
           "Europa",
-          "Jupiter",
-          "Galileo spacecraft"
+          "Jupiter"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene2",
+        "scene_id": 2,
+        "required_entities": [
+          "Europa",
+          "Jupiter"
+        ],
+        "match_terms": {
+          "Europa": [
+            "Europa",
+            "jupiter moon",
+            "icy moon"
+          ],
+          "Jupiter": [
+            "Jupiter",
+            "gas giant"
+          ]
+        },
+        "optional_entities": [
+          "sunlight",
+          "ocean",
+          "ice"
+        ],
+        "prohibited_entities": [
+          "Earth",
+          "Saturn",
+          "Titan",
+          "Enceladus",
+          "Voyager 1",
+          "Cassini"
+        ],
+        "scene_intent": "explanation",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see Europa's bright icy surface against the dark of space, with a sense of its cold, hidden ocean beneath, evoking wonder at its potential for life."
+      },
+      "shot_duration_s": 5.5,
+      "narration_duration_s": 11.2,
+      "camera_motion": "pull_out",
+      "motion_params": {
+        "zoom_start": 1.22,
+        "zoom_end": 1.0,
+        "pan_x": 0,
+        "pan_y": 0
+      },
+      "transition": "crossfade",
+      "timeline_start_s": 28.2,
+      "timeline_end_s": 33.7,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 2,
+      "beat_index": 0,
+      "shot_index": 2,
+      "asset_path": "results/europa__jupiter_s_ocean_moon/shots/scene2_1.mp4",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "Europa surface ice",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [
+          "Europa",
+          "Jupiter"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene2",
+        "scene_id": 2,
+        "required_entities": [
+          "Europa",
+          "Jupiter"
+        ],
+        "match_terms": {
+          "Europa": [
+            "Europa",
+            "jupiter moon",
+            "icy moon"
+          ],
+          "Jupiter": [
+            "Jupiter",
+            "gas giant"
+          ]
+        },
+        "optional_entities": [
+          "sunlight",
+          "ocean",
+          "ice"
+        ],
+        "prohibited_entities": [
+          "Earth",
+          "Saturn",
+          "Titan",
+          "Enceladus",
+          "Voyager 1",
+          "Cassini"
+        ],
+        "scene_intent": "explanation",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see Europa's bright icy surface against the dark of space, with a sense of its cold, hidden ocean beneath, evoking wonder at its potential for life."
+      },
+      "shot_duration_s": 5.5,
+      "narration_duration_s": 11.2,
+      "camera_motion": "push_in",
+      "motion_params": {
+        "zoom_start": 1.0,
+        "zoom_end": 1.22,
+        "pan_x": 0,
+        "pan_y": 0
+      },
+      "transition": "crossfade",
+      "timeline_start_s": 33.7,
+      "timeline_end_s": 39.2,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 3,
+      "beat_index": 0,
+      "shot_index": 0,
+      "asset_path": "results/europa__jupiter_s_ocean_moon/shots/scene3_fill.mp4",
+      "asset_source": "nasa",
+      "asset_title": "TRAPPIST-1 Planet Lineup",
+      "query_used": "Europa tidal locking",
+      "verification": null,
+      "entity_spec": {
+        "beat_id": "scene3",
+        "scene_id": 3,
+        "required_entities": [
+          "Europa",
+          "Jupiter"
+        ],
+        "match_terms": {
+          "Europa": [
+            "Europa",
+            "jupiter's moon europa"
+          ],
+          "Jupiter": [
+            "Jupiter"
+          ]
+        },
+        "optional_entities": [
+          "subsurface ocean",
+          "tidal flexing"
+        ],
+        "prohibited_entities": [
+          "Saturn",
+          "Moon (Earth's)",
+          "Mars"
+        ],
+        "scene_intent": "explanation",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see Europa's locked rotation with Jupiter, visualizing the constant gravitational pull and the internal heating that keeps its ocean liquid."
+      },
+      "shot_duration_s": 6.0,
+      "narration_duration_s": 10.73,
+      "camera_motion": "pan_right",
+      "motion_params": {
+        "zoom_start": 1.12,
+        "zoom_end": 1.12,
+        "pan_x": 60,
+        "pan_y": 0
+      },
+      "transition": "fade",
+      "timeline_start_s": 34.6,
+      "timeline_end_s": 40.6,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 3,
+      "beat_index": 0,
+      "shot_index": 1,
+      "asset_path": "results/europa__jupiter_s_ocean_moon/shots/scene3_variant_1.mp4",
+      "asset_source": "nasa",
+      "asset_title": "TRAPPIST-1 Planet Lineup",
+      "query_used": "Europa tidal locking",
+      "verification": null,
+      "entity_spec": {
+        "beat_id": "scene3",
+        "scene_id": 3,
+        "required_entities": [
+          "Europa",
+          "Jupiter"
+        ],
+        "match_terms": {
+          "Europa": [
+            "Europa",
+            "jupiter's moon europa"
+          ],
+          "Jupiter": [
+            "Jupiter"
+          ]
+        },
+        "optional_entities": [
+          "subsurface ocean",
+          "tidal flexing"
+        ],
+        "prohibited_entities": [
+          "Saturn",
+          "Moon (Earth's)",
+          "Mars"
+        ],
+        "scene_intent": "explanation",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see Europa's locked rotation with Jupiter, visualizing the constant gravitational pull and the internal heating that keeps its ocean liquid."
+      },
+      "shot_duration_s": 5.5,
+      "narration_duration_s": 10.73,
+      "camera_motion": "push_in",
+      "motion_params": {
+        "zoom_start": 1.12,
+        "zoom_end": 1.22,
+        "pan_x": 60,
+        "pan_y": 0
+      },
+      "transition": "crossfade",
+      "timeline_start_s": 40.6,
+      "timeline_end_s": 46.1,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 4,
+      "beat_index": 0,
+      "shot_index": 0,
+      "asset_path": "results/europa__jupiter_s_ocean_moon/shots/scene4_0.mp4",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "The viewer should see the Galileo spacecraft approaching Europa, with Jupiter in the background, and feel the mystery of a hidden ocean beneath the icy surface, shifting with Jupiter's gravity.. hand-painted cinematic concept art, painterly brushwork, rich depth, warm amber and deep teal color palette with soft cream highlights, consistent lighting and color grade, no text",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [
+          "Galileo spacecraft",
+          "Europa",
+          "Jupiter"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene4",
+        "scene_id": 4,
+        "required_entities": [
+          "Galileo spacecraft",
+          "Europa",
+          "Jupiter"
+        ],
+        "match_terms": {
+          "Galileo spacecraft": [
+            "Galileo spacecraft",
+            "galileo"
+          ],
+          "Europa": [
+            "Europa",
+            "jupiter's moon europa"
+          ],
+          "Jupiter": [
+            "Jupiter"
+          ]
+        },
+        "optional_entities": [
+          "ice",
+          "subsurface ocean",
+          "ocean"
+        ],
+        "prohibited_entities": [
+          "Voyager 1",
+          "Cassini",
+          "Earth",
+          "Mars",
+          "Titan"
+        ],
+        "scene_intent": "reveal",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see the Galileo spacecraft approaching Europa, with Jupiter in the background, and feel the mystery of a hidden ocean beneath the icy surface, shifting with Jupiter's gravity."
+      },
+      "shot_duration_s": 5.5,
+      "narration_duration_s": 10.4,
+      "camera_motion": "crane_up",
+      "motion_params": {
+        "zoom_start": 1.05,
+        "zoom_end": 1.18,
+        "pan_x": 0,
+        "pan_y": -60
+      },
+      "transition": "fade",
+      "timeline_start_s": 45.33,
+      "timeline_end_s": 50.83,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 4,
+      "beat_index": 0,
+      "shot_index": 1,
+      "asset_path": "results/europa__jupiter_s_ocean_moon/shots/scene4_1.mp4",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "Galileo spacecraft Europa",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [
+          "Galileo spacecraft",
+          "Europa",
+          "Jupiter"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene4",
+        "scene_id": 4,
+        "required_entities": [
+          "Galileo spacecraft",
+          "Europa",
+          "Jupiter"
+        ],
+        "match_terms": {
+          "Galileo spacecraft": [
+            "Galileo spacecraft",
+            "galileo"
+          ],
+          "Europa": [
+            "Europa",
+            "jupiter's moon europa"
+          ],
+          "Jupiter": [
+            "Jupiter"
+          ]
+        },
+        "optional_entities": [
+          "ice",
+          "subsurface ocean",
+          "ocean"
+        ],
+        "prohibited_entities": [
+          "Voyager 1",
+          "Cassini",
+          "Earth",
+          "Mars",
+          "Titan"
+        ],
+        "scene_intent": "reveal",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see the Galileo spacecraft approaching Europa, with Jupiter in the background, and feel the mystery of a hidden ocean beneath the icy surface, shifting with Jupiter's gravity."
+      },
+      "shot_duration_s": 5.5,
+      "narration_duration_s": 10.4,
+      "camera_motion": "reveal",
+      "motion_params": {
+        "zoom_start": 1.25,
+        "zoom_end": 1.0,
+        "pan_x": 0,
+        "pan_y": 0
+      },
+      "transition": "crossfade",
+      "timeline_start_s": 50.83,
+      "timeline_end_s": 56.33,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 5,
+      "beat_index": 0,
+      "shot_index": 0,
+      "asset_path": "cache/manim/moon_phases.mp4",
+      "asset_source": "manim",
+      "asset_title": "",
+      "query_used": "",
+      "verification": null,
+      "entity_spec": {
+        "beat_id": "scene5",
+        "scene_id": 5,
+        "required_entities": [
+          "Europa",
+          "Earth"
+        ],
+        "match_terms": {
+          "Europa": [
+            "Europa",
+            "jupiter's moon",
+            "jupiter moon"
+          ],
+          "Earth": [
+            "Earth",
+            "pale blue dot",
+            "earth's ocean",
+            "ocean"
+          ]
+        },
+        "optional_entities": [
+          "Mariana Trench",
+          "water",
+          "ice"
+        ],
+        "prohibited_entities": [
+          "Mars",
+          "Titan",
+          "Enceladus",
+          "Voyager 1"
+        ],
+        "scene_intent": "scale",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see Europa with its deep subsurface ocean contrasted with Earth's oceans and the Mariana Trench, feeling the awe of the enormous depth and scale."
+      },
+      "shot_duration_s": 10.0,
+      "narration_duration_s": 10.67,
+      "camera_motion": "static",
+      "motion_params": {},
+      "transition": "fade",
+      "timeline_start_s": 55.73,
+      "timeline_end_s": 65.73,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 5,
+      "beat_index": 0,
+      "shot_index": 1,
+      "asset_path": "results/europa__jupiter_s_ocean_moon/shots/scene5_0.mp4",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "The viewer should see Europa with its deep subsurface ocean contrasted with Earth's oceans and the Mariana Trench, feeling the awe of the enormous depth and scale.. hand-painted cinematic concept art, painterly brushwork, rich depth, warm amber and deep teal color palette with soft cream highlights, consistent lighting and color grade, no text",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [
+          "Europa",
+          "Earth"
         ],
         "violated_prohibited": [],
         "missing_required": [],
@@ -880,159 +969,58 @@
         "scene_id": 5,
         "required_entities": [
           "Europa",
-          "Jupiter",
-          "Galileo spacecraft"
+          "Earth"
         ],
         "match_terms": {
           "Europa": [
             "Europa",
-            "jupiter's moon"
+            "jupiter's moon",
+            "jupiter moon"
           ],
-          "Jupiter": [
-            "Jupiter",
-            "jupiter system"
-          ],
-          "Galileo spacecraft": [
-            "Galileo spacecraft",
-            "galileo"
+          "Earth": [
+            "Earth",
+            "pale blue dot",
+            "earth's ocean",
+            "ocean"
           ]
         },
         "optional_entities": [
-          "Jupiter's magnetic field",
-          "sulfuric acid",
+          "Mariana Trench",
+          "water",
           "ice"
         ],
         "prohibited_entities": [
-          "Saturn",
+          "Mars",
           "Titan",
           "Enceladus",
-          "Cassini spacecraft",
-          "Voyager 1",
-          "Voyager 2"
+          "Voyager 1"
         ],
-        "scene_intent": "explanation",
+        "scene_intent": "scale",
         "confidence": 1.0,
-        "visual_objective": "Show Europa's icy cracked surface, with Jupiter looming in the background, while imagery of the Galileo spacecraft and scientific clues like salts and sulfuric acid convey the hidden ocean beneath."
+        "visual_objective": "The viewer should see Europa with its deep subsurface ocean contrasted with Earth's oceans and the Mariana Trench, feeling the awe of the enormous depth and scale."
       },
       "shot_duration_s": 5.5,
-      "narration_duration_s": 14.1,
-      "camera_motion": "push_in",
+      "narration_duration_s": 10.67,
+      "camera_motion": "pull_out",
       "motion_params": {
-        "zoom_start": 1.0,
-        "zoom_end": 1.22,
+        "zoom_start": 1.22,
+        "zoom_end": 1.0,
         "pan_x": 0,
         "pan_y": 0
       },
-      "transition": "fade",
-      "timeline_start_s": 72.3,
-      "timeline_end_s": 77.8,
+      "transition": "crossfade",
+      "timeline_start_s": 65.73,
+      "timeline_end_s": 71.23,
       "render_duration_s": 0.0
     },
     {
       "scene_id": 5,
       "beat_index": 0,
-      "shot_index": 1,
+      "shot_index": 2,
       "asset_path": "results/europa__jupiter_s_ocean_moon/shots/scene5_1.mp4",
-      "asset_source": "nasa",
-      "asset_title": "Night on Europa (Illustration)",
-      "query_used": "Europa surface composition",
-      "verification": {
-        "asset_path": "cache/stills/europa__jupiter_s_ocean_moon/scene5_1.jpg",
-        "beat_id": "scene5",
-        "passed": true,
-        "score": 0.64,
-        "signal_scores": {
-          "metadata": {
-            "score": 0.7,
-            "evidence": "hits=['Europa'], bans=[]"
-          },
-          "captions": {
-            "score": 0.8,
-            "evidence": "hits=['Europa'], bans=[]"
-          },
-          "filename": {
-            "score": 0.2,
-            "evidence": "hits=[], bans=[]"
-          },
-          "provider_tags": {
-            "score": 0.75,
-            "evidence": "tags=['Europa surface composition'], hits=['Europa'], bans=[]"
-          }
-        },
-        "matched_required": [
-          "Europa"
-        ],
-        "violated_prohibited": [],
-        "missing_required": [
-          "Jupiter",
-          "Galileo spacecraft"
-        ],
-        "vision_check": null,
-        "reasons": [
-          "signals confirm (score=0.64)"
-        ]
-      },
-      "entity_spec": {
-        "beat_id": "scene5",
-        "scene_id": 5,
-        "required_entities": [
-          "Europa",
-          "Jupiter",
-          "Galileo spacecraft"
-        ],
-        "match_terms": {
-          "Europa": [
-            "Europa",
-            "jupiter's moon"
-          ],
-          "Jupiter": [
-            "Jupiter",
-            "jupiter system"
-          ],
-          "Galileo spacecraft": [
-            "Galileo spacecraft",
-            "galileo"
-          ]
-        },
-        "optional_entities": [
-          "Jupiter's magnetic field",
-          "sulfuric acid",
-          "ice"
-        ],
-        "prohibited_entities": [
-          "Saturn",
-          "Titan",
-          "Enceladus",
-          "Cassini spacecraft",
-          "Voyager 1",
-          "Voyager 2"
-        ],
-        "scene_intent": "explanation",
-        "confidence": 1.0,
-        "visual_objective": "Show Europa's icy cracked surface, with Jupiter looming in the background, while imagery of the Galileo spacecraft and scientific clues like salts and sulfuric acid convey the hidden ocean beneath."
-      },
-      "shot_duration_s": 5.5,
-      "narration_duration_s": 14.1,
-      "camera_motion": "pan_right",
-      "motion_params": {
-        "zoom_start": 1.12,
-        "zoom_end": 1.12,
-        "pan_x": 60,
-        "pan_y": 0
-      },
-      "transition": "crossfade",
-      "timeline_start_s": 77.8,
-      "timeline_end_s": 86.4,
-      "render_duration_s": 0.0
-    },
-    {
-      "scene_id": 6,
-      "beat_index": 0,
-      "shot_index": 0,
-      "asset_path": "results/europa__jupiter_s_ocean_moon/shots/scene6_0.mp4",
-      "asset_source": "ai",
-      "asset_title": "",
-      "query_used": "The viewer should see Europa, a moon of Jupiter, with a sense of mystery and scale, feeling the possibility of hidden oceans and life.. hand-painted cinematic concept art, painterly brushwork, rich depth, warm amber and deep teal color palette with soft cream highlights, consistent lighting and color grade, no text",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "Europa cross-section ocean depth",
       "verification": {
         "passed": true,
         "score": 1.0,
@@ -1043,8 +1031,80 @@
         ],
         "matched_required": [
           "Europa",
-          "Jupiter",
-          "Galileo spacecraft"
+          "Earth"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene5",
+        "scene_id": 5,
+        "required_entities": [
+          "Europa",
+          "Earth"
+        ],
+        "match_terms": {
+          "Europa": [
+            "Europa",
+            "jupiter's moon",
+            "jupiter moon"
+          ],
+          "Earth": [
+            "Earth",
+            "pale blue dot",
+            "earth's ocean",
+            "ocean"
+          ]
+        },
+        "optional_entities": [
+          "Mariana Trench",
+          "water",
+          "ice"
+        ],
+        "prohibited_entities": [
+          "Mars",
+          "Titan",
+          "Enceladus",
+          "Voyager 1"
+        ],
+        "scene_intent": "scale",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see Europa with its deep subsurface ocean contrasted with Earth's oceans and the Mariana Trench, feeling the awe of the enormous depth and scale."
+      },
+      "shot_duration_s": 5.5,
+      "narration_duration_s": 10.67,
+      "camera_motion": "crane_up",
+      "motion_params": {
+        "zoom_start": 1.05,
+        "zoom_end": 1.18,
+        "pan_x": 0,
+        "pan_y": -60
+      },
+      "transition": "crossfade",
+      "timeline_start_s": 71.23,
+      "timeline_end_s": 76.73,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 6,
+      "beat_index": 0,
+      "shot_index": 0,
+      "asset_path": "results/europa__jupiter_s_ocean_moon/shots/scene6_0.mp4",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "Juno flyby Europa 2022",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [
+          "Juno",
+          "Europa"
         ],
         "violated_prohibited": [],
         "missing_required": [],
@@ -1054,53 +1114,46 @@
         "beat_id": "scene6",
         "scene_id": 6,
         "required_entities": [
-          "Europa",
-          "Jupiter",
-          "Galileo spacecraft"
+          "Juno",
+          "Europa"
         ],
         "match_terms": {
+          "Juno": [
+            "Juno",
+            "juno spacecraft"
+          ],
           "Europa": [
             "Europa",
-            "jupiter moon"
-          ],
-          "Jupiter": [
-            "Jupiter",
-            "gas giant"
-          ],
-          "Galileo spacecraft": [
-            "Galileo spacecraft",
-            "galileo"
+            "europa moon"
           ]
         },
         "optional_entities": [
-          "ocean",
-          "ice",
-          "subsurface"
+          "Jupiter"
         ],
         "prohibited_entities": [
-          "Saturn",
-          "Titan",
-          "Enceladus",
-          "Mars",
           "Voyager",
-          "Cassini"
+          "Cassini",
+          "Io",
+          "Ganymede",
+          "Callisto",
+          "Earth"
         ],
-        "scene_intent": "hook",
+        "scene_intent": "exploration",
         "confidence": 1.0,
-        "visual_objective": "The viewer should see Europa, a moon of Jupiter, with a sense of mystery and scale, feeling the possibility of hidden oceans and life."
+        "visual_objective": "Show Juno's close approach revealing Europa's fractured icy surface, evoking awe at the moon's chaotic and promising terrain."
       },
       "shot_duration_s": 5.5,
-      "narration_duration_s": 8.83,
-      "camera_motion": "parallax",
+      "narration_duration_s": 10.43,
+      "camera_motion": "pan_left",
       "motion_params": {
-        "zoom_start": 1.2,
-        "zoom_end": 1.05,
-        "pan_x": 50,
-        "pan_y": -30
+        "zoom_start": 1.12,
+        "zoom_end": 1.12,
+        "pan_x": -60,
+        "pan_y": 0
       },
       "transition": "fade",
-      "timeline_start_s": 86.4,
-      "timeline_end_s": 91.9,
+      "timeline_start_s": 66.4,
+      "timeline_end_s": 71.9,
       "render_duration_s": 0.0
     },
     {
@@ -1110,7 +1163,7 @@
       "asset_path": "results/europa__jupiter_s_ocean_moon/shots/scene6_1.mp4",
       "asset_source": "cached",
       "asset_title": "cached still",
-      "query_used": "deep ocean life",
+      "query_used": "Juno flyby Europa 2022",
       "verification": {
         "passed": true,
         "score": 1.0,
@@ -1120,9 +1173,8 @@
           "human-approved (pinned)"
         ],
         "matched_required": [
-          "Europa",
-          "Jupiter",
-          "Galileo spacecraft"
+          "Juno",
+          "Europa"
         ],
         "violated_prohibited": [],
         "missing_required": [],
@@ -1132,43 +1184,180 @@
         "beat_id": "scene6",
         "scene_id": 6,
         "required_entities": [
+          "Juno",
+          "Europa"
+        ],
+        "match_terms": {
+          "Juno": [
+            "Juno",
+            "juno spacecraft"
+          ],
+          "Europa": [
+            "Europa",
+            "europa moon"
+          ]
+        },
+        "optional_entities": [
+          "Jupiter"
+        ],
+        "prohibited_entities": [
+          "Voyager",
+          "Cassini",
+          "Io",
+          "Ganymede",
+          "Callisto",
+          "Earth"
+        ],
+        "scene_intent": "exploration",
+        "confidence": 1.0,
+        "visual_objective": "Show Juno's close approach revealing Europa's fractured icy surface, evoking awe at the moon's chaotic and promising terrain."
+      },
+      "shot_duration_s": 5.5,
+      "narration_duration_s": 10.43,
+      "camera_motion": "pan_right",
+      "motion_params": {
+        "zoom_start": 1.12,
+        "zoom_end": 1.12,
+        "pan_x": 60,
+        "pan_y": 0
+      },
+      "transition": "crossfade",
+      "timeline_start_s": 71.9,
+      "timeline_end_s": 77.4,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 7,
+      "beat_index": 0,
+      "shot_index": 0,
+      "asset_path": "results/europa__jupiter_s_ocean_moon/shots/scene7_0.mp4",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "The viewer should see Europa's slow rotation over its icy surface, with Jupiter looming in the background, and feel the awe of a distant, frozen world turning in silence.. hand-painted cinematic concept art, painterly brushwork, rich depth, warm amber and deep teal color palette with soft cream highlights, consistent lighting and color grade, no text",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [
           "Europa",
-          "Jupiter",
-          "Galileo spacecraft"
+          "Jupiter"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene7",
+        "scene_id": 7,
+        "required_entities": [
+          "Europa",
+          "Jupiter"
         ],
         "match_terms": {
           "Europa": [
             "Europa",
-            "jupiter moon"
+            "jupiter's moon europa",
+            "moon europa"
           ],
           "Jupiter": [
             "Jupiter",
-            "gas giant"
-          ],
-          "Galileo spacecraft": [
-            "Galileo spacecraft",
-            "galileo"
+            "planet jupiter"
           ]
         },
         "optional_entities": [
-          "ocean",
-          "ice",
-          "subsurface"
+          "icy surface",
+          "cracks",
+          "frozen landscape",
+          "space view"
         ],
         "prohibited_entities": [
-          "Saturn",
-          "Titan",
-          "Enceladus",
+          "Earth",
           "Mars",
-          "Voyager",
-          "Cassini"
+          "Voyager 1",
+          "Galileo spacecraft"
         ],
-        "scene_intent": "hook",
+        "scene_intent": "explanation",
         "confidence": 1.0,
-        "visual_objective": "The viewer should see Europa, a moon of Jupiter, with a sense of mystery and scale, feeling the possibility of hidden oceans and life."
+        "visual_objective": "The viewer should see Europa's slow rotation over its icy surface, with Jupiter looming in the background, and feel the awe of a distant, frozen world turning in silence."
       },
       "shot_duration_s": 5.5,
-      "narration_duration_s": 8.83,
+      "narration_duration_s": 8.41,
+      "camera_motion": "push_in",
+      "motion_params": {
+        "zoom_start": 1.0,
+        "zoom_end": 1.22,
+        "pan_x": 0,
+        "pan_y": 0
+      },
+      "transition": "fade",
+      "timeline_start_s": 76.84,
+      "timeline_end_s": 82.34,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 7,
+      "beat_index": 0,
+      "shot_index": 1,
+      "asset_path": "results/europa__jupiter_s_ocean_moon/shots/scene7_1.mp4",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "Europa rotation",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [
+          "Europa",
+          "Jupiter"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene7",
+        "scene_id": 7,
+        "required_entities": [
+          "Europa",
+          "Jupiter"
+        ],
+        "match_terms": {
+          "Europa": [
+            "Europa",
+            "jupiter's moon europa",
+            "moon europa"
+          ],
+          "Jupiter": [
+            "Jupiter",
+            "planet jupiter"
+          ]
+        },
+        "optional_entities": [
+          "icy surface",
+          "cracks",
+          "frozen landscape",
+          "space view"
+        ],
+        "prohibited_entities": [
+          "Earth",
+          "Mars",
+          "Voyager 1",
+          "Galileo spacecraft"
+        ],
+        "scene_intent": "explanation",
+        "confidence": 1.0,
+        "visual_objective": "The viewer should see Europa's slow rotation over its icy surface, with Jupiter looming in the background, and feel the awe of a distant, frozen world turning in silence."
+      },
+      "shot_duration_s": 5.5,
+      "narration_duration_s": 8.41,
       "camera_motion": "reveal",
       "motion_params": {
         "zoom_start": 1.25,
@@ -1177,181 +1366,8 @@
         "pan_y": 0
       },
       "transition": "crossfade",
-      "timeline_start_s": 91.9,
-      "timeline_end_s": 97.4,
-      "render_duration_s": 0.0
-    },
-    {
-      "scene_id": 7,
-      "beat_index": 0,
-      "shot_index": 0,
-      "asset_path": "results/europa__jupiter_s_ocean_moon/shots/scene7_0.mp4",
-      "asset_source": "nasa",
-      "asset_title": "NASA's SpaceX Europa Clipper Launch",
-      "query_used": "Europa Clipper launch",
-      "verification": {
-        "asset_path": "cache/stills/europa__jupiter_s_ocean_moon/scene7_0.jpg",
-        "beat_id": "scene7",
-        "passed": true,
-        "score": 0.64,
-        "signal_scores": {
-          "metadata": {
-            "score": 0.7,
-            "evidence": "hits=['Europa Clipper'], bans=[]"
-          },
-          "captions": {
-            "score": 0.8,
-            "evidence": "hits=['Europa Clipper'], bans=[]"
-          },
-          "filename": {
-            "score": 0.2,
-            "evidence": "hits=[], bans=[]"
-          },
-          "provider_tags": {
-            "score": 0.75,
-            "evidence": "tags=['Europa Clipper launch'], hits=['Europa Clipper'], bans=[]"
-          }
-        },
-        "matched_required": [
-          "Europa Clipper"
-        ],
-        "violated_prohibited": [],
-        "missing_required": [
-          "Jupiter"
-        ],
-        "vision_check": null,
-        "reasons": [
-          "signals confirm (score=0.64)"
-        ]
-      },
-      "entity_spec": {
-        "beat_id": "scene7",
-        "scene_id": 7,
-        "required_entities": [
-          "Europa Clipper",
-          "Jupiter"
-        ],
-        "match_terms": {
-          "Europa Clipper": [
-            "Europa Clipper",
-            "clipper"
-          ],
-          "Jupiter": [
-            "Jupiter"
-          ]
-        },
-        "optional_entities": [
-          "Europa",
-          "rocket",
-          "launch pad"
-        ],
-        "prohibited_entities": [
-          "Voyager 1",
-          "Cassini",
-          "Mars"
-        ],
-        "scene_intent": "journey",
-        "confidence": 1.0,
-        "visual_objective": "The viewer should see the Europa Clipper launching and traveling toward Jupiter, feeling the anticipation of a long journey."
-      },
-      "shot_duration_s": 5.5,
-      "narration_duration_s": 8.55,
-      "camera_motion": "tracking",
-      "motion_params": {
-        "zoom_start": 1.1,
-        "zoom_end": 1.1,
-        "pan_x": -80,
-        "pan_y": 0
-      },
-      "transition": "fade",
-      "timeline_start_s": 95.23,
-      "timeline_end_s": 100.73,
-      "render_duration_s": 0.0
-    },
-    {
-      "scene_id": 7,
-      "beat_index": 0,
-      "shot_index": 1,
-      "asset_path": "results/europa__jupiter_s_ocean_moon/shots/scene7_1.mp4",
-      "asset_source": "nasa",
-      "asset_title": "Europa Clipper's Trajectory to Jupiter",
-      "query_used": "Europa Clipper trajectory",
-      "verification": {
-        "asset_path": "cache/stills/europa__jupiter_s_ocean_moon/scene7_1.jpg",
-        "beat_id": "scene7",
-        "passed": true,
-        "score": 0.64,
-        "signal_scores": {
-          "metadata": {
-            "score": 0.7,
-            "evidence": "hits=['Europa Clipper', 'Jupiter'], bans=[]"
-          },
-          "captions": {
-            "score": 0.8,
-            "evidence": "hits=['Europa Clipper', 'Jupiter'], bans=[]"
-          },
-          "filename": {
-            "score": 0.2,
-            "evidence": "hits=[], bans=[]"
-          },
-          "provider_tags": {
-            "score": 0.75,
-            "evidence": "tags=['Europa Clipper trajectory'], hits=['Europa Clipper'], bans=[]"
-          }
-        },
-        "matched_required": [
-          "Europa Clipper",
-          "Jupiter"
-        ],
-        "violated_prohibited": [],
-        "missing_required": [],
-        "vision_check": null,
-        "reasons": [
-          "signals confirm (score=0.64)"
-        ]
-      },
-      "entity_spec": {
-        "beat_id": "scene7",
-        "scene_id": 7,
-        "required_entities": [
-          "Europa Clipper",
-          "Jupiter"
-        ],
-        "match_terms": {
-          "Europa Clipper": [
-            "Europa Clipper",
-            "clipper"
-          ],
-          "Jupiter": [
-            "Jupiter"
-          ]
-        },
-        "optional_entities": [
-          "Europa",
-          "rocket",
-          "launch pad"
-        ],
-        "prohibited_entities": [
-          "Voyager 1",
-          "Cassini",
-          "Mars"
-        ],
-        "scene_intent": "journey",
-        "confidence": 1.0,
-        "visual_objective": "The viewer should see the Europa Clipper launching and traveling toward Jupiter, feeling the anticipation of a long journey."
-      },
-      "shot_duration_s": 5.5,
-      "narration_duration_s": 8.55,
-      "camera_motion": "orbit",
-      "motion_params": {
-        "zoom_start": 1.15,
-        "zoom_end": 1.15,
-        "pan_x": 80,
-        "pan_y": 20
-      },
-      "transition": "crossfade",
-      "timeline_start_s": 100.73,
-      "timeline_end_s": 106.23,
+      "timeline_start_s": 82.34,
+      "timeline_end_s": 87.84,
       "render_duration_s": 0.0
     },
     {
@@ -1361,7 +1377,7 @@
       "asset_path": "results/europa__jupiter_s_ocean_moon/shots/scene8_0.mp4",
       "asset_source": "cached",
       "asset_title": "cached still",
-      "query_used": "Europa Clipper flyby",
+      "query_used": "The viewer should see the Europa Clipper spacecraft journeying toward Europa, with Jupiter in the background, and feel the anticipation of exploring a hidden ocean beneath the icy crust.. hand-painted cinematic concept art, painterly brushwork, rich depth, warm amber and deep teal color palette with soft cream highlights, consistent lighting and color grade, no text",
       "verification": {
         "passed": true,
         "score": 1.0,
@@ -1371,6 +1387,7 @@
           "human-approved (pinned)"
         ],
         "matched_required": [
+          "Europa Clipper",
           "Europa",
           "Jupiter"
         ],
@@ -1382,44 +1399,49 @@
         "beat_id": "scene8",
         "scene_id": 8,
         "required_entities": [
+          "Europa Clipper",
           "Europa",
           "Jupiter"
         ],
         "match_terms": {
+          "Europa Clipper": [
+            "Europa Clipper",
+            "clipper"
+          ],
           "Europa": [
             "Europa",
-            "jupiter's moon europa"
+            "moon"
           ],
           "Jupiter": [
             "Jupiter"
           ]
         },
         "optional_entities": [
-          "Galileo spacecraft"
+          "ocean",
+          "flyby"
         ],
         "prohibited_entities": [
-          "Saturn",
+          "Voyager",
+          "Cassini",
           "Mars",
-          "Earth",
-          "Voyager 1",
-          "Cassini"
+          "Earth"
         ],
-        "scene_intent": "exploration",
+        "scene_intent": "journey",
         "confidence": 1.0,
-        "visual_objective": "The viewer should see a spacecraft approaching Europa, with Jupiter looming in the background, and feel the anticipation of discovering a hidden ocean beneath the icy crust."
+        "visual_objective": "The viewer should see the Europa Clipper spacecraft journeying toward Europa, with Jupiter in the background, and feel the anticipation of exploring a hidden ocean beneath the icy crust."
       },
       "shot_duration_s": 5.5,
-      "narration_duration_s": 7.94,
-      "camera_motion": "tilt_up",
+      "narration_duration_s": 10.8,
+      "camera_motion": "tracking",
       "motion_params": {
-        "zoom_start": 1.12,
-        "zoom_end": 1.12,
-        "pan_x": 0,
-        "pan_y": -40
+        "zoom_start": 1.1,
+        "zoom_end": 1.1,
+        "pan_x": -80,
+        "pan_y": 0
       },
       "transition": "fade",
-      "timeline_start_s": 103.79,
-      "timeline_end_s": 109.29,
+      "timeline_start_s": 85.25,
+      "timeline_end_s": 90.75,
       "render_duration_s": 0.0
     },
     {
@@ -1427,86 +1449,73 @@
       "beat_index": 0,
       "shot_index": 1,
       "asset_path": "results/europa__jupiter_s_ocean_moon/shots/scene8_1.mp4",
-      "asset_source": "nasa",
-      "asset_title": "Europa Clipper Zooms Over Its Target of Study (Artist's Concept)",
-      "query_used": "Europa Clipper mission 2030",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "Europa Clipper spacecraft",
       "verification": {
-        "asset_path": "cache/stills/europa__jupiter_s_ocean_moon/scene8_1.jpg",
-        "beat_id": "scene8",
         "passed": true,
-        "score": 0.64,
-        "signal_scores": {
-          "metadata": {
-            "score": 0.7,
-            "evidence": "hits=['Europa'], bans=[]"
-          },
-          "captions": {
-            "score": 0.8,
-            "evidence": "hits=['Europa'], bans=[]"
-          },
-          "filename": {
-            "score": 0.2,
-            "evidence": "hits=[], bans=[]"
-          },
-          "provider_tags": {
-            "score": 0.75,
-            "evidence": "tags=['Europa Clipper mission 2030'], hits=['Europa'], bans=[]"
-          }
-        },
-        "matched_required": [
-          "Europa"
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
         ],
-        "violated_prohibited": [],
-        "missing_required": [
+        "matched_required": [
+          "Europa Clipper",
+          "Europa",
           "Jupiter"
         ],
-        "vision_check": null,
-        "reasons": [
-          "signals confirm (score=0.64)"
-        ]
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
       },
       "entity_spec": {
         "beat_id": "scene8",
         "scene_id": 8,
         "required_entities": [
+          "Europa Clipper",
           "Europa",
           "Jupiter"
         ],
         "match_terms": {
+          "Europa Clipper": [
+            "Europa Clipper",
+            "clipper"
+          ],
           "Europa": [
             "Europa",
-            "jupiter's moon europa"
+            "moon"
           ],
           "Jupiter": [
             "Jupiter"
           ]
         },
         "optional_entities": [
-          "Galileo spacecraft"
+          "ocean",
+          "flyby"
         ],
         "prohibited_entities": [
-          "Saturn",
+          "Voyager",
+          "Cassini",
           "Mars",
-          "Earth",
-          "Voyager 1",
-          "Cassini"
+          "Earth"
         ],
-        "scene_intent": "exploration",
+        "scene_intent": "journey",
         "confidence": 1.0,
-        "visual_objective": "The viewer should see a spacecraft approaching Europa, with Jupiter looming in the background, and feel the anticipation of discovering a hidden ocean beneath the icy crust."
+        "visual_objective": "The viewer should see the Europa Clipper spacecraft journeying toward Europa, with Jupiter in the background, and feel the anticipation of exploring a hidden ocean beneath the icy crust."
       },
       "shot_duration_s": 5.5,
-      "narration_duration_s": 7.94,
-      "camera_motion": "pan_left",
+      "narration_duration_s": 10.8,
+      "camera_motion": "orbit",
       "motion_params": {
-        "zoom_start": 1.12,
-        "zoom_end": 1.12,
-        "pan_x": -60,
-        "pan_y": 0
+        "zoom_start": 1.15,
+        "zoom_end": 1.15,
+        "pan_x": 80,
+        "pan_y": 20
       },
       "transition": "crossfade",
-      "timeline_start_s": 109.29,
-      "timeline_end_s": 114.79,
+      "timeline_start_s": 90.75,
+      "timeline_end_s": 96.25,
       "render_duration_s": 0.0
     },
     {
@@ -1514,9 +1523,9 @@
       "beat_index": 0,
       "shot_index": 0,
       "asset_path": "results/europa__jupiter_s_ocean_moon/shots/scene9_0.mp4",
-      "asset_source": "ai",
-      "asset_title": "",
-      "query_used": "Show Europa's icy, cracked surface with Jupiter looming in the background, conveying the mystery of its hidden ocean and the anticipation of discovery.. hand-painted cinematic concept art, painterly brushwork, rich depth, warm amber and deep teal color palette with soft cream highlights, consistent lighting and color grade, no text",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "Viewer should see Europa and Jupiter to feel the mystery and promise of exploring this alien ocean, evoking curiosity and anticipation.. hand-painted cinematic concept art, painterly brushwork, rich depth, warm amber and deep teal color palette with soft cream highlights, consistent lighting and color grade, no text",
       "verification": {
         "passed": true,
         "score": 1.0,
@@ -1527,8 +1536,7 @@
         ],
         "matched_required": [
           "Europa",
-          "Jupiter",
-          "Galileo spacecraft"
+          "Jupiter"
         ],
         "violated_prohibited": [],
         "missing_required": [],
@@ -1539,41 +1547,35 @@
         "scene_id": 9,
         "required_entities": [
           "Europa",
-          "Jupiter",
-          "Galileo spacecraft"
+          "Jupiter"
         ],
         "match_terms": {
           "Europa": [
             "Europa",
-            "jupiter's moon"
+            "europa moon"
           ],
           "Jupiter": [
             "Jupiter"
-          ],
-          "Galileo spacecraft": [
-            "Galileo spacecraft",
-            "galileo"
           ]
         },
         "optional_entities": [
+          "Juno spacecraft",
+          "Galileo spacecraft",
           "ocean",
-          "ice shell",
-          "cracks",
-          "ridges"
+          "water"
         ],
         "prohibited_entities": [
-          "Saturn",
           "Mars",
-          "Earth",
-          "Voyager",
-          "Cassini"
+          "Enceladus",
+          "Titan",
+          "Earth (unless clearly as comparison)"
         ],
         "scene_intent": "exploration",
         "confidence": 1.0,
-        "visual_objective": "Show Europa's icy, cracked surface with Jupiter looming in the background, conveying the mystery of its hidden ocean and the anticipation of discovery."
+        "visual_objective": "Viewer should see Europa and Jupiter to feel the mystery and promise of exploring this alien ocean, evoking curiosity and anticipation."
       },
       "shot_duration_s": 5.5,
-      "narration_duration_s": 8.96,
+      "narration_duration_s": 11.95,
       "camera_motion": "tilt_up",
       "motion_params": {
         "zoom_start": 1.12,
@@ -1582,8 +1584,8 @@
         "pan_y": -40
       },
       "transition": "fade",
-      "timeline_start_s": 111.72,
-      "timeline_end_s": 117.22,
+      "timeline_start_s": 96.05,
+      "timeline_end_s": 101.55,
       "render_duration_s": 0.0
     },
     {
@@ -1591,85 +1593,59 @@
       "beat_index": 0,
       "shot_index": 1,
       "asset_path": "results/europa__jupiter_s_ocean_moon/shots/scene9_1.mp4",
-      "asset_source": "nasa",
-      "asset_title": "Building a Nadir Deck for Europa Clipper",
-      "query_used": "Europa life potential",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "Europa ocean life",
       "verification": {
-        "asset_path": "cache/stills/europa__jupiter_s_ocean_moon/scene9_1.jpg",
-        "beat_id": "scene9",
         "passed": true,
-        "score": 0.64,
-        "signal_scores": {
-          "metadata": {
-            "score": 0.7,
-            "evidence": "hits=['Europa'], bans=[]"
-          },
-          "captions": {
-            "score": 0.8,
-            "evidence": "hits=['Europa'], bans=[]"
-          },
-          "filename": {
-            "score": 0.2,
-            "evidence": "hits=[], bans=[]"
-          },
-          "provider_tags": {
-            "score": 0.75,
-            "evidence": "tags=['Europa life potential'], hits=['Europa'], bans=[]"
-          }
-        },
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
         "matched_required": [
-          "Europa"
+          "Europa",
+          "Jupiter"
         ],
         "violated_prohibited": [],
-        "missing_required": [
-          "Jupiter",
-          "Galileo spacecraft"
-        ],
-        "vision_check": null,
-        "reasons": [
-          "signals confirm (score=0.64)"
-        ]
+        "missing_required": [],
+        "vision_check": null
       },
       "entity_spec": {
         "beat_id": "scene9",
         "scene_id": 9,
         "required_entities": [
           "Europa",
-          "Jupiter",
-          "Galileo spacecraft"
+          "Jupiter"
         ],
         "match_terms": {
           "Europa": [
             "Europa",
-            "jupiter's moon"
+            "europa moon"
           ],
           "Jupiter": [
             "Jupiter"
-          ],
-          "Galileo spacecraft": [
-            "Galileo spacecraft",
-            "galileo"
           ]
         },
         "optional_entities": [
+          "Juno spacecraft",
+          "Galileo spacecraft",
           "ocean",
-          "ice shell",
-          "cracks",
-          "ridges"
+          "water"
         ],
         "prohibited_entities": [
-          "Saturn",
           "Mars",
-          "Earth",
-          "Voyager",
-          "Cassini"
+          "Enceladus",
+          "Titan",
+          "Earth (unless clearly as comparison)"
         ],
         "scene_intent": "exploration",
         "confidence": 1.0,
-        "visual_objective": "Show Europa's icy, cracked surface with Jupiter looming in the background, conveying the mystery of its hidden ocean and the anticipation of discovery."
+        "visual_objective": "Viewer should see Europa and Jupiter to feel the mystery and promise of exploring this alien ocean, evoking curiosity and anticipation."
       },
       "shot_duration_s": 5.5,
-      "narration_duration_s": 8.96,
+      "narration_duration_s": 11.95,
       "camera_motion": "pan_left",
       "motion_params": {
         "zoom_start": 1.12,
@@ -1678,8 +1654,78 @@
         "pan_y": 0
       },
       "transition": "crossfade",
-      "timeline_start_s": 117.22,
-      "timeline_end_s": 122.72,
+      "timeline_start_s": 101.55,
+      "timeline_end_s": 107.05,
+      "render_duration_s": 0.0
+    },
+    {
+      "scene_id": 9,
+      "beat_index": 0,
+      "shot_index": 2,
+      "asset_path": "results/europa__jupiter_s_ocean_moon/shots/scene9_variant_2.mp4",
+      "asset_source": "cached",
+      "asset_title": "cached still",
+      "query_used": "Europa ocean life",
+      "verification": {
+        "passed": true,
+        "score": 1.0,
+        "pre_verified": true,
+        "signal_scores": {},
+        "reasons": [
+          "human-approved (pinned)"
+        ],
+        "matched_required": [
+          "Europa",
+          "Jupiter"
+        ],
+        "violated_prohibited": [],
+        "missing_required": [],
+        "vision_check": null
+      },
+      "entity_spec": {
+        "beat_id": "scene9",
+        "scene_id": 9,
+        "required_entities": [
+          "Europa",
+          "Jupiter"
+        ],
+        "match_terms": {
+          "Europa": [
+            "Europa",
+            "europa moon"
+          ],
+          "Jupiter": [
+            "Jupiter"
+          ]
+        },
+        "optional_entities": [
+          "Juno spacecraft",
+          "Galileo spacecraft",
+          "ocean",
+          "water"
+        ],
+        "prohibited_entities": [
+          "Mars",
+          "Enceladus",
+          "Titan",
+          "Earth (unless clearly as comparison)"
+        ],
+        "scene_intent": "exploration",
+        "confidence": 1.0,
+        "visual_objective": "Viewer should see Europa and Jupiter to feel the mystery and promise of exploring this alien ocean, evoking curiosity and anticipation."
+      },
+      "shot_duration_s": 5.5,
+      "narration_duration_s": 11.95,
+      "camera_motion": "push_in",
+      "motion_params": {
+        "zoom_start": 1.12,
+        "zoom_end": 1.22,
+        "pan_x": -60,
+        "pan_y": 0
+      },
+      "transition": "crossfade",
+      "timeline_start_s": 107.05,
+      "timeline_end_s": 112.55,
       "render_duration_s": 0.0
     }
   ]

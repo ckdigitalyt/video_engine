@@ -7,7 +7,7 @@
       "passed": true,
       "detail": "v=h264 a=aac",
       "metrics": {
-        "duration_s": 108.1,
+        "duration_s": 106.1,
         "resolution": [
           1920,
           1080
@@ -48,27 +48,27 @@
     {
       "name": "silence",
       "passed": true,
-      "detail": "max_volume=-1.0 dB (silence < -50.0 dB)",
+      "detail": "max_volume=-1.2 dB (silence < -50.0 dB)",
       "metrics": {
-        "max_db": -1.0,
-        "mean_db": -17.0
+        "max_db": -1.2,
+        "mean_db": -16.5
       }
     },
     {
       "name": "clipping",
       "passed": true,
-      "detail": "max_volume=-1.0 dB (clip >= -0.5 dB)",
+      "detail": "max_volume=-1.2 dB (clip >= -0.5 dB)",
       "metrics": {
-        "max_db": -1.0
+        "max_db": -1.2
       }
     },
     {
       "name": "hook_strength",
       "passed": true,
-      "detail": "hook window (15s): 4 distinct visuals (need >= 2)",
+      "detail": "hook window (15s): 5 distinct visuals (need >= 5)",
       "metrics": {
-        "distinct_in_hook": 4,
-        "shots_in_hook": 4
+        "distinct_in_hook": 5,
+        "shots_in_hook": 5
       }
     },
     {
@@ -80,13 +80,13 @@
     {
       "name": "style_locked",
       "passed": true,
-      "detail": "0 placed stills, 0 drifted",
+      "detail": "1 placed stills, 0 drifted",
       "metrics": {}
     },
     {
       "name": "manim_registered",
       "passed": true,
-      "detail": "2 Manim clip(s) in final timeline",
+      "detail": "0 Manim clip(s) in final timeline",
       "metrics": {}
     },
     {
@@ -102,10 +102,10 @@
       "passed": true,
       "detail": "mastered audio publication-safe (I/LRA/TP OK)",
       "metrics": {
-        "integrated_lufs": -14.39,
-        "true_peak_dbTP": -1.03,
-        "lra": 2.7,
-        "max_volume_db": -1.0
+        "integrated_lufs": -14.43,
+        "true_peak_dbTP": -1.21,
+        "lra": 3.0,
+        "max_volume_db": -1.2
       }
     },
     {

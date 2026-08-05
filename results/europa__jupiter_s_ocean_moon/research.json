@@ -2,152 +2,175 @@
   "facts": [
     {
       "claim": "Europa is the sixth-largest moon in the solar system and the fourth-largest of Jupiter's moons.",
-      "value": 3121.6,
-      "unit": "km",
+      "value": null,
+      "unit": "",
       "source": "NASA",
-      "year": 2024,
-      "confidence": 1.0,
+      "year": null,
+      "confidence": 0.99,
       "verified": true,
       "verification_notes": "According to NASA, Europa is the sixth-largest moon in the solar system and the fourth-largest of Jupiter's moons."
+    },
+    {
+      "claim": "Europa's diameter is approximately 3,100 kilometers.",
+      "value": 3100,
+      "unit": "km",
+      "source": "NASA",
+      "year": null,
+      "confidence": 0.99,
+      "verified": true,
+      "verification_notes": "NASA lists Europa's diameter as about 3,100 km."
     },
     {
       "claim": "Europa orbits Jupiter at an average distance of about 671,000 kilometers.",
       "value": 671000,
       "unit": "km",
       "source": "NASA",
-      "year": 2024,
-      "confidence": 1.0,
+      "year": null,
+      "confidence": 0.99,
       "verified": true,
-      "verification_notes": "NASA states Europa's average orbital distance from Jupiter is approximately 671,000 km."
+      "verification_notes": "NASA states Europa's average orbital distance is 671,000 km."
     },
     {
-      "claim": "Europa's orbital period around Jupiter is approximately 3.55 Earth days.",
+      "claim": "A day on Europa (its rotation period) is about 3.55 Earth days.",
       "value": 3.55,
       "unit": "days",
       "source": "NASA",
-      "year": 2024,
-      "confidence": 1.0,
+      "year": null,
+      "confidence": 0.99,
       "verified": true,
-      "verification_notes": "NASA lists Europa's orbital period as about 3.55 Earth days."
+      "verification_notes": "NASA confirms Europa's rotation period is 3.55 Earth days."
     },
     {
-      "claim": "Europa's surface temperature averages about 110 Kelvin (approximately -160 degrees Celsius).",
+      "claim": "Europa's surface is one of the most reflective in the solar system, with a visible albedo of about 0.67.",
+      "value": 0.67,
+      "unit": "albedo",
+      "source": "NASA",
+      "year": null,
+      "confidence": 0.95,
+      "verified": true,
+      "verification_notes": "NASA reports Europa's visible albedo as 0.67, making it highly reflective."
+    },
+    {
+      "claim": "The surface temperature of Europa averages about 110 Kelvin (minus 160 degrees Celsius).",
       "value": 110,
       "unit": "K",
       "source": "NASA",
-      "year": 2024,
-      "confidence": 1.0,
+      "year": null,
+      "confidence": 0.98,
       "verified": true,
-      "verification_notes": "NASA reports average surface temperature around 110 K, equivalent to about -160\u00b0C."
+      "verification_notes": "NASA's planetary fact sheet lists the average surface temperature as 110 K."
     },
     {
-      "claim": "Europa's subsurface ocean is estimated to contain more than twice the amount of water as all of Earth's oceans combined.",
-      "value": null,
-      "unit": null,
+      "claim": "Europa's subsurface ocean is estimated to contain about twice the volume of all Earth's oceans.",
+      "value": 2,
+      "unit": "times Earth's ocean volume",
       "source": "NASA",
-      "year": 2024,
+      "year": null,
       "confidence": 0.9,
       "verified": true,
-      "verification_notes": "NASA estimates Europa's ocean has more than twice the water of Earth's oceans."
+      "verification_notes": "NASA notes Europa's ocean may contain twice as much water as Earth's oceans."
     },
     {
-      "claim": "The estimated depth of Europa's subsurface ocean is between 60 and 150 kilometers.",
+      "claim": "Europa is gravitationally locked with Jupiter, meaning the same hemisphere always faces the planet.",
       "value": null,
+      "unit": "",
+      "source": "NASA",
+      "year": null,
+      "confidence": 0.99,
+      "verified": true,
+      "verification_notes": "NASA confirms Europa is tidally locked, with the same side always facing Jupiter."
+    },
+    {
+      "claim": "Europa was discovered by Galileo Galilei in January 1610.",
+      "value": 1610,
+      "unit": "year",
+      "source": "NASA",
+      "year": 1610,
+      "confidence": 0.99,
+      "verified": true,
+      "verification_notes": "Galileo discovered Europa in January 1610, as documented by NASA."
+    },
+    {
+      "claim": "NASA's Europa Clipper mission launched on October 14, 2024, to study Europa in detail.",
+      "value": 2024,
+      "unit": "year",
+      "source": "NASA",
+      "year": 2024,
+      "confidence": 0.99,
+      "verified": true,
+      "verification_notes": "NASA launched Europa Clipper on October 14, 2024, to study Europa."
+    },
+    {
+      "claim": "NASA's Juno spacecraft performed a close flyby of Europa on September 29, 2022, at a distance of about 352 kilometers.",
+      "value": 352,
       "unit": "km",
       "source": "NASA",
-      "year": 2024,
-      "confidence": 0.85,
+      "year": 2022,
+      "confidence": 0.99,
       "verified": true,
-      "verification_notes": "NASA cites ocean depth estimates ranging from 60 to 150 km."
+      "verification_notes": "NASA's Juno flew by Europa on September 29, 2022, at 352 km altitude."
     },
     {
-      "claim": "Data from NASA's Galileo spacecraft (orbiting Jupiter from 1995 to 2003) provided strong evidence for a subsurface ocean on Europa.",
+      "claim": "Europa's surface is composed mostly of water ice, with a thin atmosphere of oxygen.",
       "value": null,
-      "unit": null,
+      "unit": "",
       "source": "NASA",
-      "year": 2003,
-      "confidence": 1.0,
+      "year": null,
+      "confidence": 0.98,
       "verified": true,
-      "verification_notes": "Galileo mission data during 1995-2003 gave strong evidence for a subsurface ocean."
+      "verification_notes": "NASA confirms Europa's icy surface and thin oxygen atmosphere."
     },
     {
-      "claim": "Europa's surface is marked by linear cracks and ridges, with relatively few impact craters, indicating a geologically young and active surface.",
+      "claim": "Europa's ocean is estimated to have a depth of 60 to 150 kilometers beneath the ice shell.",
+      "value": 100,
+      "unit": "km (mean estimate)",
+      "source": "NASA",
+      "year": null,
+      "confidence": 0.9,
+      "verified": true,
+      "verification_notes": "NASA estimates Europa's ocean depth between 60 and 150 km."
+    },
+    {
+      "claim": "Europa is considered one of the most promising places in the solar system for finding habitable environments beyond Earth.",
       "value": null,
-      "unit": null,
+      "unit": "",
+      "source": "NASA",
+      "year": null,
+      "confidence": 0.99,
+      "verified": true,
+      "verification_notes": "NASA highlights Europa as a top candidate for habitable environments."
+    },
+    {
+      "claim": "The Galileo spacecraft's magnetic field measurements in the late 1990s provided strong evidence for a subsurface ocean on Europa.",
+      "value": 1990,
+      "unit": "decade",
       "source": "NASA",
       "year": 1997,
-      "confidence": 0.9,
+      "confidence": 0.98,
       "verified": true,
-      "verification_notes": "NASA notes Europa's surface features and few craters suggest a young, active surface."
-    },
-    {
-      "claim": "NASA's Europa Clipper mission, launched in October 2024, is expected to arrive at Jupiter in April 2030.",
-      "value": null,
-      "unit": null,
-      "source": "NASA",
-      "year": 2024,
-      "confidence": 1.0,
-      "verified": true,
-      "verification_notes": "NASA confirms Europa Clipper launched in Oct 2024 and is set to arrive in April 2030."
-    },
-    {
-      "claim": "Scientists estimate that Europa's surface may be only 20 to 180 million years old, which is very young in geological terms compared to the age of the solar system (4.6 billion years).",
-      "value": null,
-      "unit": "million years",
-      "source": "NASA",
-      "year": 2024,
-      "confidence": 0.8,
-      "verified": true,
-      "verification_notes": "NASA estimates surface age between 20-180 million years, geologically young."
-    },
-    {
-      "claim": "Europa is tidally locked with Jupiter, meaning the same hemisphere always faces the planet.",
-      "value": null,
-      "unit": null,
-      "source": "NASA",
-      "year": 2024,
-      "confidence": 1.0,
-      "verified": true,
-      "verification_notes": "NASA confirms tidal locking, showing one hemisphere always faces Jupiter."
-    },
-    {
-      "claim": "The tidal flexing caused by Europa's eccentric orbit (eccentricity of about 0.009) is considered the primary heat source for its subsurface ocean.",
-      "value": 0.009,
-      "unit": null,
-      "source": "NASA",
-      "year": 2024,
-      "confidence": 0.9,
-      "verified": true,
-      "verification_notes": "NASA identifies tidal heating from eccentric orbit as primary heat source; eccentricity ~0.009."
-    },
-    {
-      "claim": "Europa's surface is composed primarily of water ice, with possible salts and sulfuric acid compounds.",
-      "value": null,
-      "unit": null,
-      "source": "NASA",
-      "year": 2024,
-      "confidence": 0.85,
-      "verified": true,
-      "verification_notes": "NASA states surface is mostly water ice, with possible salts and sulfuric acid."
+      "verification_notes": "Galileo's magnetometer data in the 1990s indicated a subsurface ocean."
     }
   ],
   "hook_ideas": [
-    "What if there is an ocean world in our solar system with more water than Earth? Meet Europa.",
-    "Could Europa hold the key to finding life beyond Earth? Explore the evidence.",
-    "Jupiter's icy moon Europa might be the most promising place to search for alien life."
+    "Start with the question: Could there be life under the ice? Europa is Earth's closest ocean world.",
+    "Show a dramatic zoom from Jupiter's Great Red Spot to Europa's cracked ice surface, emphasizing the hidden ocean.",
+    "Mention that Europa Clipper will fly past 49 times, closer than any previous mission, to search for habitable conditions.",
+    "Play a sound clip of NASA's 2022 Juno flyby audio (actually a data sonification) as a teaser."
   ],
   "misconceptions": [
-    "Europa's ocean is not directly visible; it is hidden beneath a thick ice shell.",
-    "Europa is not the only moon with a subsurface ocean; several moons in the outer solar system are candidates.",
-    "The surface of Europa is not smooth; it is covered with cracks, ridges, and chaotic terrains."
+    "Europa is not a moon with a solid surface; it's an ice shell over a vast liquid ocean.",
+    "Europa is not the same as Enceladus (Saturn's moon), which also has an ocean; they are often confused.",
+    "Europa's surface is not smooth like a billiard ball; it's covered with ridges, cracks, and very few craters.",
+    "Europa does not have a thick atmosphere; it has a very thin oxygen atmosphere, not breathable."
   ],
   "key_sources": [
-    "NASA Solar System Exploration: Europa",
-    "NASA Europa Clipper mission page",
-    "Jet Propulsion Laboratory (JPL) \u2013 Europa Clipper",
-    "ESA \u2013 Exploring Europa (mention if applicable)"
+    "NASA \u2013 Europa: Jupiter's Moon",
+    "NASA \u2013 Europa Clipper Mission",
+    "NASA \u2013 Juno Mission at Jupiter",
+    "ESA \u2013 Europa studies",
+    "Encyclopedia Britannica \u2013 Europa (moon)"
   ],
-  "_elapsed_s": 6.5,
+  "_elapsed_s": 9.6,
   "_verification_failed": false,
-  "_verification_elapsed_s": 4.5
+  "_verification_elapsed_s": 5.8
 }

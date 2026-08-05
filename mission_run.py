@@ -1299,7 +1299,7 @@ def stage_music_mix(video_path: str, music_path: str, out_path: str,
     # NOTE: sidechaincompress in this ffmpeg build refuses a LABELED pad as
     # its sidechain input ("matches no streams") — always feed it the raw
     # [0:a] voice stream; band-split pads are the MAIN input only.
-    SIDECHAIN = "threshold=0.0625:ratio=3.5:attack=20:release=80"
+    SIDECHAIN = "threshold=0.0625:ratio=3.5:attack=20:release=250"
     # Jade spec §4: never allow abrupt music starts/stops — fade the bed
     # in over 1s and out over the final 1.5s (unless the video is shorter).
     fade_in = min(1.0, dur / 4)

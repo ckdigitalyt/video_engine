@@ -1,183 +1,179 @@
 [
   {
     "title": "The Hidden Ocean",
-    "narration": "Beneath a cracked ice shell, an ocean holds twice the water of all Earth's seas. But here, 671,000 kilometers from Jupiter, it stays liquid. How?",
-    "visual_goal": "A dramatic zoom into Europa's cracked ice surface, then a cutaway revealing a dark, vast ocean below.",
+    "narration": "Beneath a cracked shell of ice, there's an ocean with twice the water of all Earth's seas combined. Could something be swimming in it? This moon, just 3,100 kilometers across, might cradle secrets.",
+    "visual_goal": "Close-up of Europa's icy surface cracking, revealing a dark ocean below",
     "search_queries": [
       "Europa surface cracks",
-      "Europa subsurface ocean",
+      "Europa ocean beneath ice",
       "Jupiter moon Europa"
     ],
-    "emotion": "tension",
-    "visual_style": "photorealistic",
-    "sfx_events": [],
-    "para_tags": []
-  },
-  {
-    "title": "Jupiter's Grip",
-    "narration": "Europa is tidally locked, so one side always faces Jupiter. Its orbit is slightly lopsided. Each pass stretches the moon, flexing its interior.",
-    "visual_goal": "Show Europa orbiting Jupiter with an exaggerated eccentric orbit, flexing and straining.",
-    "search_queries": [
-      "Europa orbit Jupiter",
-      "tidal flexing moon",
-      "Jupiter moon orbit animation"
-    ],
     "emotion": "wonder",
-    "visual_style": "clean_vector",
+    "visual_style": "photorealistic",
     "sfx_events": [
       {
-        "trigger": "stretch",
-        "at": "stretches the moon"
+        "trigger": "crack",
+        "at": "after: cracked shell of ice"
       }
-    ],
-    "para_tags": []
+    ]
   },
   {
-    "title": "The Heat Engine",
-    "narration": "That friction generates heat. An eccentricity of 0.009 seems tiny, but it's enough to keep an ocean liquid, 60 to 150 kilometers deep.",
-    "visual_goal": "Diagram showing tidal flexing generating heat, with an arrow indicating heat rising to the ocean.",
+    "title": "Galileo's Discovery",
+    "narration": "In January 1610, Galileo Galilei spotted a tiny dot orbiting Jupiter. He had no idea it held an ocean. That pinprick of light changed our cosmic perspective forever.",
+    "visual_goal": "Old telescope view of Jupiter and its moons, then Galileo's sketch",
     "search_queries": [
-      "tidal heating diagram",
-      "Europa internal heat",
-      "subsurface ocean depth"
+      "Galileo telescope Jupiter moons",
+      "historical astronomy sketches",
+      "Jupiter moons through telescope"
     ],
-    "emotion": "revelation",
-    "visual_style": "clean_vector",
+    "emotion": "nostalgia",
+    "visual_style": "sepia_cel",
     "sfx_events": [
       {
         "trigger": "whoosh",
-        "at": "keeps an ocean liquid"
+        "at": "after: spotted a tiny dot"
       }
-    ],
-    "para_tags": []
+    ]
   },
   {
-    "title": "A Young Surface",
-    "narration": "This world is geologically alive. Few craters. Long, linear cracks. Scientists say the surface is only 20 to 180 million years old.",
-    "visual_goal": "Slow pan across Europa's surface, highlighting cracks and ridges with minimal craters.",
+    "title": "The Icy Shell",
+    "narration": "Europa's surface is mostly water ice, reflecting 67% of sunlight. Temperature: minus 160 degrees Celsius. That brilliant white shell hides a dark, liquid heart beneath.",
+    "visual_goal": "Bright icy surface with cracks, reflecting sunlight",
     "search_queries": [
-      "Europa surface ridges",
-      "Europa young surface",
-      "Europa cracks close up"
+      "Europa surface ice",
+      "Europa albedo",
+      "icy moon surface"
     ],
     "emotion": "awe",
     "visual_style": "photorealistic",
-    "sfx_events": [],
-    "para_tags": []
-  },
-  {
-    "title": "The First Evidence",
-    "narration": "In 1995, Galileo arrived. For eight years, it orbited Jupiter. Its data pointed to a hidden ocean, changing everything.",
-    "visual_goal": "Historic footage of Galileo spacecraft, then a cut to its magnetometer readings showing a induced field.",
-    "search_queries": [
-      "Galileo spacecraft",
-      "Galileo mission Jupiter",
-      "Europa magnetic field evidence"
-    ],
-    "emotion": "nostalgia",
-    "visual_style": "photorealistic",
     "sfx_events": [
       {
-        "trigger": "beep",
-        "at": "orbited Jupiter"
+        "trigger": "sparkle",
+        "at": "after: bounces back 67% of sunlight"
       }
-    ],
-    "para_tags": []
+    ]
   },
   {
-    "title": "The Clues",
-    "narration": "Ice, salts, sulfuric acid. Tidal heating. A magnetic field that flickers. All puzzle pieces pointing to a vast, salty ocean.",
-    "visual_goal": "Montage of Europa's surface composition, tidal flexing, and magnetic field lines, with subtle puzzle-like assembly.",
+    "title": "Tidal Lock",
+    "narration": "Europa is gravitationally locked with Jupiter. One side always faces the giant planet. That constant pull squeezes its insides, generating heat that keeps the hidden ocean liquid.",
+    "visual_goal": "Europa orbiting Jupiter, always showing same face, with tidal bulges",
     "search_queries": [
-      "Europa surface composition",
-      "Europa magnetic field",
-      "Europa ocean evidence"
+      "Europa tidal locking",
+      "Jupiter gravitational pull",
+      "Europa orbit"
+    ],
+    "emotion": "tension",
+    "visual_style": "clean_vector",
+    "sfx_events": [
+      {
+        "trigger": "heartbeat",
+        "at": "after: constant pull"
+      }
+    ]
+  },
+  {
+    "title": "The Magnetic Clue",
+    "narration": "In the late 1990s, the Galileo spacecraft measured Europa's magnetic field. The data hinted at something conductive beneath the ice\u2014a fingerprint of saline water moving with the tides.",
+    "visual_goal": "Spacecraft measuring magnetic field lines around Europa",
+    "search_queries": [
+      "Galileo spacecraft Europa",
+      "magnetic field measurements",
+      "Europa magnetosphere"
     ],
     "emotion": "revelation",
-    "visual_style": "watercolor",
-    "sfx_events": [],
-    "para_tags": []
-  },
-  {
-    "title": "The Deep Ocean",
-    "narration": "More than twice the water of all Earth's oceans. The depth? 60 to 150 kilometers. There, in the dark, could life exist?",
-    "visual_goal": "A cross-section of Europa showing a deep ocean, with faint bioluminescent specks in the dark.",
-    "search_queries": [
-      "Europa ocean cross section",
-      "deep ocean life",
-      "Europa subsurface ocean depth"
-    ],
-    "emotion": "hopeful",
-    "visual_style": "watercolor",
+    "visual_style": "90s_anime",
     "sfx_events": [
       {
-        "trigger": "underwater",
-        "at": "in the dark"
+        "trigger": "riser",
+        "at": "after: measured Europa's magnetic field"
       }
     ],
-    "para_tags": []
+    "para_tags": [
+      "[whisper]"
+    ]
   },
   {
-    "title": "The Clock Ticks",
-    "narration": "In October 2024, Europa Clipper launched. Its journey takes six years. Arrival at Jupiter? April 2030.",
-    "visual_goal": "Launch footage of Europa Clipper, then a fast-forward animation of its trajectory to Jupiter.",
+    "title": "Ocean's Depth",
+    "narration": "That ocean runs 60 to 150 kilometers below the ice\u2014over ten times the depth of Earth's Mariana Trench. An abyss that dwarfs anything on our planet.",
+    "visual_goal": "Cross-section of Europa showing thick ice and deep ocean",
     "search_queries": [
-      "Europa Clipper launch",
-      "Europa Clipper trajectory",
-      "spacecraft launch 2024"
+      "Europa cross-section ocean depth",
+      "subsurface ocean diagram",
+      "Europa ice shell"
+    ],
+    "emotion": "awe",
+    "visual_style": "watercolor"
+  },
+  {
+    "title": "Juno's Flyby",
+    "narration": "In 2022, NASA's Juno spacecraft flew within 352 kilometers of Europa\u2014closer than the ISS is to Earth. The moon's fractured face filled the entire view, revealing chaos and promise.",
+    "visual_goal": "Juno spacecraft flying past Europa, surface details rushing by",
+    "search_queries": [
+      "Juno flyby Europa 2022",
+      "Juno spacecraft close approach",
+      "Europa from spacecraft"
     ],
     "emotion": "tension",
     "visual_style": "photorealistic",
     "sfx_events": [
       {
         "trigger": "boom",
-        "at": "launched"
-      },
-      {
-        "trigger": "riser",
-        "at": "six years"
+        "at": "after: 352 kilometers"
       }
     ],
-    "para_tags": []
+    "para_tags": [
+      "[gasp]"
+    ]
   },
   {
-    "title": "The Arrival",
-    "narration": "In April 2030, the probe will begin its close flybys. Peering through the ice, searching for answers.",
-    "visual_goal": "Europa Clipper flying over Europa's surface, with instruments scanning the ice.",
+    "title": "A Day on Europa",
+    "narration": "A day on Europa lasts 3.55 Earth days. Each slow rotation offers a new angle on the same eternal mystery.",
+    "visual_goal": "Time-lapse of Europa rotating against starfield",
     "search_queries": [
-      "Europa Clipper flyby",
-      "Europa Clipper mission 2030",
-      "spacecraft Europa"
+      "Europa rotation",
+      "moon day length",
+      "Europa surface rotation"
     ],
-    "emotion": "awe",
-    "visual_style": "photorealistic",
+    "emotion": "wonder",
+    "visual_style": "ghibli"
+  },
+  {
+    "title": "The Clipper Arrives",
+    "narration": "The Europa Clipper launched in 2024, arriving in 2030 to study that ocean\u2014looking for signs of habitability. Dozens of flybys will peel back layers of the enigma.",
+    "visual_goal": "Europa Clipper spacecraft flying over Europa's surface with instruments",
+    "search_queries": [
+      "Europa Clipper spacecraft",
+      "Europa mission launch",
+      "spacecraft over Europa"
+    ],
+    "emotion": "hopeful",
+    "visual_style": "hand_drawn",
     "sfx_events": [
       {
         "trigger": "whoosh",
-        "at": "flybys"
+        "at": "after: launched in 2024"
       }
-    ],
-    "para_tags": []
+    ]
   },
   {
-    "title": "The Question",
-    "narration": "If that ocean has the chemistry, the heat, and the time \u2014 4.6 billion years \u2014 could life have found a foothold? [gasp] We are about to find out.",
-    "visual_goal": "A hopeful image of Europa's surface with a subtle glow from beneath, hinting at life.",
+    "title": "The Final Question",
+    "narration": "Could something live in that alien ocean? Scientists think Europa is one of the most promising places. The answer might redefine our place in the universe\u2014if we dare to search.",
+    "visual_goal": "Europa's ocean with hypothetical life forms, then question mark fading in",
     "search_queries": [
-      "Europa life potential",
-      "ocean moon hopeful",
-      "Europa future mission"
+      "Europa ocean life",
+      "habitable worlds",
+      "Europa exploration future"
     ],
     "emotion": "hopeful",
     "visual_style": "watercolor",
     "sfx_events": [
       {
         "trigger": "sparkle",
-        "at": "find out"
+        "at": "after: most promising places"
       }
     ],
     "para_tags": [
-      "[gasp]"
+      "[whisper]"
     ]
   }
 ]

@@ -112,7 +112,7 @@ def three_track_mix(
         f"[mid_in]bandpass=f=2250:w=3500[mid_raw];"
         f"[high_in]highpass=f=4000[high];"
         f"[mid_raw][0:a]sidechaincompress=threshold={duck_threshold}:ratio={duck_ratio}:"
-        f"attack=20:release=80[mid];"
+        f"attack=20:release=250[mid];"
         f"[low][mid][high]amix=inputs=3:normalize=0[duck];"
         f"{sfx_input}"
         f"[0:a][duck][sfx]amix=inputs=3:duration=first:dropout_transition=0:normalize=0,"

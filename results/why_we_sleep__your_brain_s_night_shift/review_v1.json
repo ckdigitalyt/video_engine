@@ -1,0 +1,58 @@
+{
+  "quality_score": 72,
+  "confidence": 0.95,
+  "strengths": [
+    "Professional and clear narration with excellent pacing.",
+    "High-quality scientific diagrams for the glymphatic system and brain waves.",
+    "Clean audio mix where background music complements the voiceover without competition."
+  ],
+  "weaknesses": [
+    "Significant visual-narrative mismatch regarding Randy Gardner; visuals show Apollo astronauts instead of a high school student.",
+    "Over-reliance on NASA/space stock footage that feels disconnected from the 'human health' focus of the script.",
+    "Lack of subtitles reduces accessibility and retention for complex terms like 'suprachiasmatic nucleus'."
+  ],
+  "prioritized_recommendations": [
+    {
+      "priority": "critical",
+      "category": "new_asset",
+      "recommendation": "Replace the footage at 00:45. The script mentions Randy Gardner (a high schooler), but the visual shows Dick Gordon (Apollo astronaut). Use archival photos of Gardner or generic student footage."
+    },
+    {
+      "priority": "high",
+      "category": "visual_relevance",
+      "recommendation": "Replace the lion at 00:04 with a human sleeping to match the 'while you lie still' narration. The current visual breaks the 'human biology' theme immediately."
+    },
+    {
+      "priority": "medium",
+      "category": "subtitles",
+      "recommendation": "Add burned-in subtitles or a CC track, specifically highlighting scientific terms like 'Glymphatic System' and 'Suprachiasmatic Nucleus' when they are first mentioned."
+    },
+    {
+      "priority": "low",
+      "category": "color",
+      "recommendation": "Apply a consistent color grade to the NASA archival footage to better match the modern scientific diagrams at 00:14 and 00:34."
+    }
+  ],
+  "factual_issues": [
+    {
+      "claim": "Randy Gardner, a high schooler in 1964...",
+      "issue": "The visual at 00:45 shows 'Dick Gordon Apollo', which incorrectly implies the record holder was an astronaut.",
+      "suggested_fix": "Use a photo of Randy Gardner from his 1964 experiment."
+    }
+  ],
+  "title_recommendations": [
+    "The Brain's Nightly Cleanup: The Science of Sleep",
+    "Why 7 Hours Isn't Optional",
+    "Inside the Glymphatic System: How Your Brain Flushes Waste"
+  ],
+  "thumbnail_recommendation": {
+    "timestamp": "00:34",
+    "description": "A high-contrast close-up of the Glymphatic Pathway diagram with a bold text overlay saying 'BRAIN CLEANUP'."
+  },
+  "overall_assessment": "The documentary features high-end narration and clear scientific explanations, but suffers from a 'stock-footage-dump' feel where the visuals (mostly NASA-themed) don't always align with the biological subject matter. Correcting the historical visual error regarding Randy Gardner is essential for maintaining credibility.",
+  "_meta": {
+    "video": "results/why_we_sleep__your_brain_s_night_shift/why_we_sleep__your_brain_s_night_shift_mixed.mp4",
+    "model": "gemini-2.5-pro",
+    "elapsed_s": 55.7
+  }
+}

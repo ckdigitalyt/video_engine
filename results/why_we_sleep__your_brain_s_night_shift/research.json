@@ -1,0 +1,177 @@
+{
+  "facts": [
+    {
+      "claim": "Sleep is regulated by the circadian rhythm, a roughly 24-hour internal clock.",
+      "value": 24,
+      "unit": "hours",
+      "source": "National Institute of General Medical Sciences",
+      "year": null,
+      "confidence": 0.99,
+      "verified": true,
+      "verification_notes": "This is a well-established scientific fact. The circadian rhythm is indeed an internal process that regulates the sleep-wake cycle and repeats roughly every 24 hours."
+    },
+    {
+      "claim": "The recommended sleep duration for adults is at least 7 hours per night.",
+      "value": 7,
+      "unit": "hours",
+      "source": "American Academy of Sleep Medicine",
+      "year": 2015,
+      "confidence": 0.98,
+      "verified": true,
+      "verification_notes": "The American Academy of Sleep Medicine (AASM) consensus statement (2015) recommends 7 or more hours of sleep per night for adults aged 18-60 to promote optimal health."
+    },
+    {
+      "claim": "Sleep deprivation can impair attention and working memory.",
+      "value": null,
+      "unit": "",
+      "source": "National Institutes of Health (NIH)",
+      "year": 2021,
+      "confidence": 0.95,
+      "verified": true,
+      "verification_notes": "Extensive research, including NIH-funded studies, consistently shows that sleep deprivation negatively affects cognitive functions including attention, working memory, and executive function."
+    },
+    {
+      "claim": "The glymphatic system, a brain-wide network of perivascular channels, facilitates clearance of metabolic waste from the brain during sleep.",
+      "value": null,
+      "unit": "",
+      "source": "Nedergaard Lab, University of Rochester",
+      "year": 2012,
+      "confidence": 0.97,
+      "verified": true,
+      "verification_notes": "This was discovered and described by the Nedergaard lab at the University of Rochester in a landmark 2012 study published in Science Translational Medicine. The system is indeed more active during sleep."
+    },
+    {
+      "claim": "Slow-wave (deep) sleep is characterized by high amplitude, low frequency brain oscillations.",
+      "value": 0.5,
+      "unit": "Hz",
+      "source": "National Sleep Foundation",
+      "year": 2020,
+      "confidence": 0.9,
+      "verified": true,
+      "verification_notes": "Slow-wave sleep (N3) is defined by high-amplitude, low-frequency (0.5-4 Hz) delta waves as seen on EEG. The specific value of 0.5 Hz is at the lower end of the delta range, but the characterization is correct."
+    },
+    {
+      "claim": "Rapid eye movement (REM) sleep features quick movements of the eyes, low muscle tone, and vivid dreams.",
+      "value": null,
+      "unit": "",
+      "source": "National Institute of Neurological Disorders and Stroke",
+      "year": 2019,
+      "confidence": 0.98,
+      "verified": true,
+      "verification_notes": "REM sleep is characterized by rapid eye movements, skeletal muscle atonia (low muscle tone), and is the stage most associated with vivid dreaming. This is standard physiological knowledge."
+    },
+    {
+      "claim": "The sleep hormone melatonin is released by the pineal gland in response to darkness.",
+      "value": null,
+      "unit": "",
+      "source": "National Institutes of Health (NIH)",
+      "year": 2022,
+      "confidence": 0.96,
+      "verified": true,
+      "verification_notes": "Melatonin is synthesized and secreted by the pineal gland, and its production is inhibited by light and promoted by darkness, regulating the sleep-wake cycle."
+    },
+    {
+      "claim": "The longest recorded period without sleep is approximately 11 days, achieved by Randy Gardner in a science fair project.",
+      "value": 11,
+      "unit": "days",
+      "source": "Wikipedia (citing Guinness World Records and contemporary reports)",
+      "year": 1964,
+      "confidence": 0.85,
+      "verified": true,
+      "verification_notes": "Randy Gardner stayed awake for 264 hours (11 days) in 1964 as part of a high school science fair project. This record is well-documented, although Guinness World Records has since stopped tracking this category due to health risks."
+    },
+    {
+      "claim": "The brain's synaptic down-selection hypothesis suggests sleep trims unnecessary synaptic connections to maintain efficiency.",
+      "value": null,
+      "unit": "",
+      "source": "Cirelli & Tononi, University of Wisconsin",
+      "year": 2015,
+      "confidence": 0.9,
+      "verified": true,
+      "verification_notes": "This hypothesis was proposed by Cirelli and Tononi and is a leading theory explaining the function of sleep. It is supported by multiple studies showing synaptic downscaling during sleep."
+    },
+    {
+      "claim": "A common misconception is that adults need less than 7 hours of sleep; this is not supported by scientific consensus.",
+      "value": null,
+      "unit": "",
+      "source": "American Academy of Sleep Medicine",
+      "year": 2015,
+      "confidence": 0.97,
+      "verified": true,
+      "verification_notes": "The scientific consensus, as stated by the AASM and other bodies, is that adults need 7 or more hours. The idea that less is sufficient is indeed a misconception contradicted by evidence."
+    },
+    {
+      "claim": "Insufficient sleep has been associated with increased risk of obesity, diabetes, and cardiovascular disease.",
+      "value": null,
+      "unit": "",
+      "source": "Centers for Disease Control and Prevention (CDC)",
+      "year": 2021,
+      "confidence": 0.95,
+      "verified": true,
+      "verification_notes": "Numerous epidemiological studies and meta-analyses, including those referenced by the CDC, have consistently found that short or poor sleep is associated with higher risks of these chronic conditions."
+    },
+    {
+      "claim": "The mammalian circadian clock is located in the suprachiasmatic nucleus of the hypothalamus, containing about 20,000 neurons.",
+      "value": 20000,
+      "unit": "neurons",
+      "source": "National Institutes of Health (NIH)",
+      "year": 2018,
+      "confidence": 0.9,
+      "verified": true,
+      "verification_notes": "The suprachiasmatic nucleus (SCN) is indeed the master circadian pacemaker. It contains approximately 20,000 neurons (commonly cited as 20,000 to 25,000). This number is consistent with standard sources."
+    },
+    {
+      "claim": "Sleep is divided into two main types: non-rapid eye movement (NREM) and rapid eye movement (REM). NREM is further divided into light and deep stages.",
+      "value": null,
+      "unit": "",
+      "source": "National Sleep Foundation",
+      "year": 2020,
+      "confidence": 0.99,
+      "verified": true,
+      "verification_notes": "This is a standard classification. NREM sleep includes stages N1 (light), N2 (light), and N3 (deep/slow-wave), while REM is distinct."
+    },
+    {
+      "claim": "Human sleep cycles repeat approximately every 90 minutes, cycling through NREM and REM stages.",
+      "value": 90,
+      "unit": "minutes",
+      "source": "Harvard Medical School",
+      "year": 2019,
+      "confidence": 0.93,
+      "verified": true,
+      "verification_notes": "The average sleep cycle is about 90 minutes, but it can range from 70 to 120 minutes, typically lengthening toward morning. This is a widely accepted figure."
+    },
+    {
+      "claim": "Clocks: The word 'circadian' comes from Latin 'circa diem', meaning 'around a day.'",
+      "value": null,
+      "unit": "",
+      "source": "National Institute of General Medical Sciences",
+      "year": null,
+      "confidence": 0.99,
+      "verified": true,
+      "verification_notes": "The term 'circadian' was coined by Franz Halberg and derives from the Latin 'circa' (about) and 'diem' (day), meaning 'about a day'. This is historically accurate."
+    }
+  ],
+  "hook_ideas": [
+    "How one week of bad sleep can make your brain look and act like it's 'drunk'",
+    "The brain literally cleans itself while you sleep: a nightly self-washing cycle",
+    "Why your brain needs 7 hours could save you from Alzheimer's",
+    "Dispelling the myth: You can't just 'catch up' on sleep"
+  ],
+  "misconceptions": [
+    "Sleep is a passive state where the brain is simply 'off'.",
+    "Adults can thrive on less than 7 hours of sleep if they are 'used to it'.",
+    "Watching TV or using a smartphone before bed does not affect sleep quality.",
+    "You can 'binge sleep' on weekends to make up for lost sleep during the week."
+  ],
+  "key_sources": [
+    "National Sleep Foundation",
+    "American Academy of Sleep Medicine",
+    "National Institutes of Health (NIH)",
+    "Centers for Disease Control and Prevention (CDC)",
+    "Harvard Medical School",
+    "Wired and Recent documentaries"
+  ],
+  "_elapsed_s": 12.1,
+  "_verification_failed": false,
+  "_verification_elapsed_s": 10.9
+}

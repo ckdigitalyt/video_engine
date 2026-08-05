@@ -203,6 +203,13 @@ MANIM_SCENES = {
     "pulsar_density": "cache/manim/pulsar_density.mp4",
     "black_hole_lensing": "cache/manim/black_hole_lensing.mp4",
     "moon_phases": "cache/manim/moon_phases.mp4",
+    # v12: topic-agnostic generic beats — every topic gets motion
+    "generic_clock": "cache/manim/generic_ClockSeven.mp4",
+    "generic_waves": "cache/manim/generic_BrainWaves.mp4",
+    "generic_bars": "cache/manim/generic_GrowingBars.mp4",
+    "generic_pulse": "cache/manim/generic_PulseMotif.mp4",
+    "generic_figure": "cache/manim/generic_FigureBeat.mp4",
+    "generic_cycle": "cache/manim/generic_CycleLoop.mp4",
 }
 
 # Topic -> Manim scenes (intent-mapped).  General registry: adding a new
@@ -220,6 +227,16 @@ TOPIC_MANIM = {
     "moon":    {"explanation": "moon_phases", "journey": "moon_phases",
                  "emotion": "moon_phases", "scale": "moon_phases",
                  "structure": "moon_phases"},
+    # v12: generic fallback — topic-agnostic beats mapped by intent.  A
+    # fresh topic with no bespoke scenes still gets real animation.
+    "__generic__": {
+        "hook": "generic_pulse", "emotion": "generic_waves",
+        "explanation": "generic_bars", "structure": "generic_cycle",
+        "scale": "generic_clock", "journey": "generic_figure",
+        "timeline": "generic_clock", "climax": "generic_pulse",
+        "context": "generic_figure", "conclusion": "generic_cycle",
+        "default": "generic_bars",
+    },
 }
 
 # Which topic a given text belongs to (keyword hints, general-purpose).
@@ -326,20 +343,57 @@ def _detect_topic(scene_text: str) -> str:
 
 
 def _manim_scene_for(scene_text: str, intent: str = "default") -> str:
-    """Pick a Manim scene by topic + intent (general, registry-driven)."""
+    """Pick a Manim scene by topic + intent (general, registry-driven).
+
+    v12: falls back to the topic-agnostic generic beat mapped by intent,
+    so a fresh topic with no bespoke scenes still gets real animation
+    (was: returned "" for any unregistered topic -> manim: 0 in stats).
+    """
     topic = _detect_topic(scene_text)
-    if not topic or topic not in TOPIC_MANIM:
-        return ""
-    mapping = TOPIC_MANIM[topic]
-    # intent-priority: scale/explanation beats are the natural Manim beats
-    for key in ("scale", "explanation", "timeline", "journey", "structure"):
-        if intent == key and key in mapping:
-            return MANIM_SCENES[mapping[key]]
-        # also trigger on scale words even when intent is generic
-        if (key == "scale" and key in mapping and
-                any(k in scene_text.lower() for k in
-                    ("how big", "how far", "million", "billion", "fit inside", "size"))):
-            return MANIM_SCENES[mapping[key]]
+    if topic and topic in TOPIC_MANIM:
+        mapping = TOPIC_MANIM[topic]
+        # intent-priority: scale/explanation beats are the natural Manim beats
+        for key in ("scale", "explanation", "timeline", "journey", "structure"):
+            if intent == key and key in mapping:
+                return MANIM_SCENES[mapping[key]]
+            # also trigger on scale words even when intent is generic
+            if (key == "scale" and key in mapping and
+                    any(k in scene_text.lower() for k in
+                        ("how big", "how far", "million", "billion", "fit inside", "size"))):
+                return MANIM_SCENES[mapping[key]]
+    # v12: generic fallback (any topic, any intent)
+    generic = TOPIC_MANIM.get("__generic__", {})
+    key = intent if intent in generic else "default"
+    clip = generic.get(key, generic.get("default"))
+    return MANIM_SCENES.get(clip, "") if clip else ""
+
+
+# v12: flat-vector ANIMATED beats (Blender, Workbench FLAT) — the
+# Kurzgesagt-style vector motion the channel direction calls for.  These
+# are topic-agnostic; any scene can pull one, so the video never ships
+# as pure Ken-Burns stills (sleep episode shipped manim:0 + zero vector
+# animation — the two biggest v11 failures).
+VECTOR_BEATS = {
+    "hook": "cache/vector/vector_pulse.mp4",
+    "emotion": "cache/vector/vector_waves.mp4",
+    "explanation": "cache/vector/vector_bars.mp4",
+    "structure": "cache/vector/vector_clock.mp4",
+    "scale": "cache/vector/vector_orbit.mp4",
+    "journey": "cache/vector/vector_figure_walk.mp4",
+    "timeline": "cache/vector/vector_clock.mp4",
+    "climax": "cache/vector/vector_pulse.mp4",
+    "context": "cache/vector/vector_figure_walk.mp4",
+    "conclusion": "cache/vector/vector_orbit.mp4",
+    "default": "cache/vector/vector_pulse.mp4",
+}
+
+
+def _vector_beat_for(intent: str = "default") -> str:
+    """Return the cached flat-vector animated beat for an intent, or ""
+    if the clip hasn't been rendered yet (tools/vector_clips.py)."""
+    clip = VECTOR_BEATS.get(intent, VECTOR_BEATS.get("default", ""))
+    if clip and os.path.exists(clip) and os.path.getsize(clip) > 200_000:
+        return clip
     return ""
 
 
@@ -533,6 +587,18 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                 stats["rejected"] += 1
                 print(f"  [manim-gate] rejected {os.path.basename(manim)} "
                       f"({(mv.errors or ['not kinetic'])[:1]})")
+        # 1b) v12: flat-vector ANIMATED beat (Kurzgesagt-style motion) —
+        #     every scene gets real animation, not just Ken-Burns stills.
+        #     Rendered once by tools/vector_clips.py into cache/vector/.
+        if not shots or shots[0].get("kind") != "manim":
+            vbeat = _vector_beat_for(intent)
+            if vbeat and vbeat not in manim_used:
+                manim_used.add(vbeat)
+                shots.insert(0, {"file": vbeat,
+                                 "duration": min(8.0, M._probe_duration(vbeat)),
+                                 "kind": "vector"})
+                stats["manim"] += 1  # counts as animated coverage
+                print(f"  [vector] {os.path.basename(vbeat)} (intent={intent})")
         # 2) Stills with Ken Burns (2 per scene typically)
         still_count = 0
         for kind, query in _still_plan_for(text, spec, scene):
@@ -823,6 +889,8 @@ def _pace_pad_scenes(scenes_data: list[dict], audio_dir: str,
             if not boundaries:
                 boundaries = [0.55]  # single-clause scene: one mid-scene pause
             gap_s = pad_s / len(boundaries)
+            gap_s = min(gap_s, 0.7)  # v12: cap per-gap pause — 1.3s mid-scene
+                                        # silence reads as an abrupt voice stop
             chunks = []
             prev = 0
             n = len(data)
@@ -859,6 +927,64 @@ def _pace_pad_scenes(scenes_data: list[dict], audio_dir: str,
         print("  [pacing] " + ", ".join(
             f"s{r['scene']}:{r['wpm_after']:.0f}wpm({r['role']})"
             for r in updated))
+    return audio_durations
+
+
+def _trim_scene_edges(audio_dir: str, scenes_data: list[dict],
+                      audio_durations: list[float],
+                      keep_tail_s: float = 0.12) -> list[float]:
+    """Trim leading/trailing silence from every scene track (v12).
+
+    Root cause of "voice abruptly stops at points": Chatterbox appends
+    0.4-0.5s of trailing silence per scene; concatenated back-to-back
+    that reads as dead air / cut-off narration.  Deterministic fix:
+    cut silence below -38 dB at both edges, keep a short natural tail
+    so sentences don't sound clipped, then re-probe durations.
+    """
+    import numpy as _np
+    import soundfile as _sf
+    updated = []
+    for i in range(len(scenes_data)):
+        ap = os.path.join(audio_dir, f"scene_{i}.wav")
+        if not os.path.exists(ap):
+            continue
+        try:
+            data, sr = _sf.read(ap, dtype="float32")
+        except Exception as e:  # noqa: BLE001
+            print(f"  [trim] !! read failed scene {i}: {str(e)[:60]}")
+            continue
+        if data.ndim > 1:
+            data = data.mean(axis=1)
+        if len(data) < sr:  # sub-1s: leave alone
+            continue
+        threshold = 10 ** (-38 / 20.0)
+        env = _np.abs(data)
+        nz = _np.nonzero(env > threshold)[0]
+        if len(nz) == 0:
+            continue
+        start, end = int(nz[0]), int(nz[-1])
+        # leading silence: cut to first speech, keep 30 ms
+        lead_cut = max(0, start - int(0.03 * sr))
+        # trailing silence: cut to last speech, keep natural tail
+        tail_keep = int(keep_tail_s * sr)
+        end_cut = min(len(data), end + tail_keep)
+        if lead_cut >= end_cut or (lead_cut == 0 and end_cut == len(data)):
+            continue
+        trimmed = data[lead_cut:end_cut]
+        try:
+            _sf.write(ap, trimmed, sr)
+        except Exception as e:  # noqa: BLE001
+            print(f"  [trim] !! write failed scene {i}: {str(e)[:60]}")
+            continue
+        new_dur = len(trimmed) / sr
+        old_dur = audio_durations[i] if i < len(audio_durations) else None
+        if i < len(audio_durations):
+            audio_durations[i] = new_dur
+        if old_dur is not None and old_dur - new_dur > 0.15:
+            updated.append({"scene": i, "cut_s": round(old_dur - new_dur, 2)})
+    if updated:
+        print("  [trim] " + ", ".join(
+            f"s{u['scene']}:-{u['cut_s']}s" for u in updated))
     return audio_durations
 
 
@@ -964,7 +1090,7 @@ def build_stills_timeline(scenes_data: list[dict], shot_plan: dict,
                 "end_time": round(t + dur, 3),
                 "transition": "crossfade" if si > 0 else "fade",
                 "motion": "none",
-                "camera": "ken_burns" if shot["kind"] != "manim" else "static",
+                "camera": "ken_burns" if shot["kind"] not in ("manim", "vector") else "static",
                 "beat_index": si,
                 "shot_type": "primary",
             }
@@ -1199,6 +1325,11 @@ def main():
     # boundaries so narration lands inside the band (space after key
     # facts).  Deterministic fix for "narration feels too fast".
     audio_durations = _pace_pad_scenes(scenes_data, "cache/audio", audio_durations)
+
+    # ── v12: TRIM EDGE SILENCE — Chatterbox appends 0.4-0.5s trailing
+    # silence per scene; back-to-back that reads as abrupt voice stops.
+    # Cut both edges below -38 dB (keep a 120 ms natural tail).
+    audio_durations = _trim_scene_edges("cache/audio", scenes_data, audio_durations)
 
     # ── Timeline + render ──────────────────────────────────────────────
     build_stills_timeline(scenes_data, shot_plan, audio_durations, timeline_path)

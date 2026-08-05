@@ -1,65 +1,51 @@
 {
-  "quality_score": 68,
-  "confidence": 0.95,
+  "quality_score": 52,
+  "confidence": 0.9,
   "strengths": [
-    "Professional and engaging narration with excellent pacing and clarity.",
-    "Compelling script structure that moves logically from physical mechanics to exploration history and future goals.",
-    "Effective use of atmospheric music that enhances the sense of mystery without overpowering the voiceover.",
-    "High-quality AI-generated landscapes that visualize the alien environment of Europa's surface."
+    "Engaging script structure with a strong hook about alien oceans",
+    "Clear narration delivery and pronunciation throughout"
   ],
   "weaknesses": [
-    "Significant visual-factual mismatches: showing the Earth-Moon system while discussing Jupiter's moons.",
-    "Misleading imagery: including a human astronaut for a robotic mission (Europa Clipper).",
-    "Inaccurate diagrams: the gravity-assist chart shows a trajectory toward Saturn, which is irrelevant to the Jupiter-focused script.",
-    "Inconsistent visual style, mixing realistic NASA footage with stylized AI art and generic sci-fi landscapes."
+    "Severe visual mismatch in multiple scenes, such as showing a diagram of the Sun's core for Europa's temperature",
+    "Inconsistent visual style, mixing AI art, real footage, and unrelated scientific diagrams"
   ],
   "prioritized_recommendations": [
     {
       "priority": "critical",
-      "category": "fact_change",
-      "recommendation": "Replace the 'Earth-Moon system' animation at 0:44 with a diagram showing Europa orbiting Jupiter to match the narration about tidal locking and eccentricity."
-    },
-    {
-      "priority": "high",
       "category": "new_asset",
-      "recommendation": "Remove the shot of the human astronaut at 1:32. Replace it with a 3D render or NASA animation of the Europa Clipper spacecraft to avoid implying a crewed mission."
+      "recommendation": "Replace the 'Inside the Sun' diagram at 00:24 with a graphic showing Europa's icy crust and surface temperatures."
     },
     {
       "priority": "high",
-      "category": "shot_order",
-      "recommendation": "Replace the landscape at 0:20 which features two suns; Europa orbits Jupiter in a single-star system. This breaks immersion for science-literate viewers."
+      "category": "visual_relevance",
+      "recommendation": "Replace the Earth-Moon orbit diagram at 00:56 with a visual comparing Europa's ocean depth to the Mariana Trench."
     },
     {
       "priority": "medium",
-      "category": "new_asset",
-      "recommendation": "Update the gravity-assist diagram at 1:03 to show the actual VEEGA (Venus-Earth-Earth Gravity Assist) path for Galileo or the Mars-Earth assist for Clipper, rather than a path toward Saturn."
+      "category": "visual_relevance",
+      "recommendation": "Swap the exoplanet lineup at 00:35 with an animation of Europa orbiting Jupiter to illustrate tidal locking."
     }
   ],
   "factual_issues": [
     {
-      "claim": "Europa's orbit and tidal flexing",
-      "issue": "The visual at 0:44 explicitly labels and shows the Earth-Moon system.",
-      "suggested_fix": "Use a Manim animation showing Jupiter at the center with Europa's elliptical orbit."
-    },
-    {
-      "claim": "Europa Clipper mission",
-      "issue": "Visual at 1:32 shows a human astronaut, but Clipper is an uncrewed robotic probe.",
-      "suggested_fix": "Use footage of the spacecraft assembly or a space render of the probe."
+      "claim": "Europa's surface is a brilliant white shell... temperatures plunge to minus 160 degrees Celsius",
+      "issue": "The visual displays a diagram of 'Inside the Sun' showing a 15 million degree core, which directly contradicts the narration.",
+      "suggested_fix": "Replace with a visual of Europa's frozen surface or a temperature scale graphic."
     }
   ],
   "title_recommendations": [
-    "The Hidden Ocean of Europa",
-    "Jupiter's Moon: The Search for Alien Life",
-    "Europa Clipper: Peering Beneath the Ice"
+    "Europa: The Ocean Under the Ice",
+    "Jupiter's Frozen Enigma",
+    "Searching for Life on Europa"
   ],
   "thumbnail_recommendation": {
-    "timestamp": "01:12",
-    "description": "A high-contrast shot of the cracked icy surface of Europa with the massive, banded disk of Jupiter looming on the horizon."
+    "timestamp": "00:04",
+    "description": "A cross-section diagram of Europa showing the sub-surface ocean beneath the cracked ice shell."
   },
-  "overall_assessment": "The documentary features a top-tier script and narration that effectively builds curiosity about the search for life. However, it is severely undermined by 'hallucinated' visuals and generic stock footage that contradict the scientific facts being presented. Correcting the orbital diagrams and removing misleading human-spaceflight imagery is essential for maintaining credibility.",
+  "overall_assessment": "The documentary features a compelling script and clear narration, but suffers from highly irrelevant visual assets. Correcting the mismatched diagrams and aligning the imagery with the scientific claims will significantly improve the overall quality.",
   "_meta": {
     "video": "results/europa__jupiter_s_ocean_moon/europa__jupiter_s_ocean_moon_mixed.mp4",
     "model": "gemini-2.5-pro",
-    "elapsed_s": 42.1
+    "elapsed_s": 133.9
   }
 }
