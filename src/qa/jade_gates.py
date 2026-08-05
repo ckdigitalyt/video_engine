@@ -188,13 +188,21 @@ class PreRenderGate:
                                if not problems else f"Manim fact mismatch: {problems[:5]}"))
 
         # ── 5. Shot hold / retention (§5/§9 shot hold too long) ────────
-        holds = [v.get("end_time", 0) - v.get("start_time", 0) for v in vt]
+        # v12: animated clips (manim / vector beats) are MOTION, not static
+        # holds — a 4-8s animated beat keeps novelty high and is standard
+        # Kurzgesagt pacing.  The hold cap exists to prevent frozen-frame
+        # novelty collapse, so only static (ken-burns/still) shots count.
+        holds = [
+            v.get("end_time", 0) - v.get("start_time", 0)
+            for v in vt
+            if v.get("asset_source") not in ("manim", "vector")
+        ]
         longest = max(holds) if holds else 0.0
         # float-epsilon tolerance: a 4.000000000000002s hold is a rounding
         # artifact of start/end both being rounded to 3dp, NOT a real
         # violation of the 4.0s cap — never fail-closed on binary dust.
         report.add(QACheck("shot_hold", longest <= self._max_hold + 1e-6,
-                           f"longest shot {longest:.3f}s (limit {self._max_hold}s)",
+                           f"longest static shot {longest:.3f}s (limit {self._max_hold}s)",
                            metrics={"longest_hold_s": round(longest, 3)}))
 
         # ── 6. Dead-air in narration timeline (§5/§9 dead-air gap) ─────

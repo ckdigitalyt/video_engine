@@ -1201,6 +1201,12 @@ def _edge_gen(i, ap, sents, emo, voice_lock, stats, cache_audio):
     pitch = _EMO_PITCH.get(emo, "+0Hz")
     locked_voice = voice_lock.voice_id if voice_lock is not None \
         else "en-US-ChristopherNeural"
+    # v12: the locked voice is a Chatterbox identity ("kurzgesagt_like"),
+    # NOT a valid edge-tts voice — the fallback chain must never feed it
+    # to edge (would raise "Invalid voice" and cascade to Kokoro, which
+    # then trips the voice_switching gate).  Map to a real edge voice.
+    if not locked_voice.startswith("en-") or locked_voice == "kurzgesagt_like":
+        locked_voice = "en-US-ChristopherNeural"
 
     async def _gen():
         chunks = []

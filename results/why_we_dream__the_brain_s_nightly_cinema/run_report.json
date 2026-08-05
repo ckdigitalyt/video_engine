@@ -1,0 +1,570 @@
+{
+  "topic": "Why We Dream: The Brain's Nightly Cinema",
+  "started_at": "2026-08-05T22:34:32Z",
+  "strategy": "stills_first",
+  "stages": {
+    "visuals": {
+      "manim": 3,
+      "nasa": 0,
+      "wikimedia": 0,
+      "ai": 2,
+      "video_fallback": 0,
+      "rejected": 7,
+      "vision_checked": 2,
+      "deduped": 33,
+      "cached": 13
+    },
+    "pre_render_gate": {
+      "passed": false,
+      "blocking_failures": [
+        "pacing"
+      ],
+      "checks": [
+        {
+          "name": "voice_switching",
+          "passed": true,
+          "detail": "single locked voice",
+          "metrics": {}
+        },
+        {
+          "name": "voice_loudness_consistency",
+          "passed": true,
+          "detail": "per-scene RMS spread 1.7 dB (limit 12.0 dB)",
+          "metrics": {}
+        },
+        {
+          "name": "style_drift",
+          "passed": true,
+          "detail": "3 placed stills, 0 drifted",
+          "metrics": {}
+        },
+        {
+          "name": "off_topic_assets",
+          "passed": true,
+          "detail": "no unverified assets in timeline",
+          "metrics": {}
+        },
+        {
+          "name": "manim_registration",
+          "passed": true,
+          "detail": "no Manim planned for this episode",
+          "metrics": {}
+        },
+        {
+          "name": "manim_kinetic",
+          "passed": true,
+          "detail": "placed Manim scenes are motion-rich",
+          "metrics": {}
+        },
+        {
+          "name": "shot_hold",
+          "passed": true,
+          "detail": "longest static shot 4.000s (limit 4.0s)",
+          "metrics": {
+            "longest_hold_s": 4.0
+          }
+        },
+        {
+          "name": "dead_air",
+          "passed": true,
+          "detail": "no narration gaps > 0.5s",
+          "metrics": {
+            "dead_air_gaps_s": []
+          }
+        },
+        {
+          "name": "generation_complete",
+          "passed": true,
+          "detail": "all planned audio files present",
+          "metrics": {}
+        },
+        {
+          "name": "pacing",
+          "passed": false,
+          "detail": "rushed scenes: ['scene 4: rushed: 161 wpm > 160 (161 wpm)']",
+          "metrics": {
+            "avg_wpm": 146.6,
+            "rushed_scene_count": 1,
+            "comprehension_risk_flags": [
+              "scene 4: high comprehension risk"
+            ],
+            "high_risk": [
+              {
+                "scene": 4,
+                "flags": [
+                  "rushed: 161 wpm > 160",
+                  "high comprehension risk"
+                ],
+                "risk": {
+                  "score": 0.64,
+                  "signals": {
+                    "speech_rate": 0.36,
+                    "technical_density": 0.28,
+                    "sentence_length": 0.0
+                  },
+                  "wpm": 160.6,
+                  "role": "explanation",
+                  "band": [
+                    115,
+                    160
+                  ],
+                  "grade": "high"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "semantic_alignment",
+          "passed": true,
+          "detail": "every visual belongs to its narration beat",
+          "metrics": {}
+        }
+      ]
+    }
+  },
+  "errors": [
+    "pre-render gate blocked: ['pacing']"
+  ],
+  "provider": "deepseek",
+  "voice_lock": {
+    "provider": "chatterbox",
+    "voice_id": "kurzgesagt_like",
+    "speaker_id": "jade-narrator-001",
+    "rate": "+0%",
+    "pitch": "+0Hz",
+    "scene_voices": {
+      "0": "kurzgesagt_like",
+      "1": "kurzgesagt_like",
+      "2": "kurzgesagt_like",
+      "3": "kurzgesagt_like",
+      "4": "kurzgesagt_like",
+      "5": "kurzgesagt_like",
+      "6": "kurzgesagt_like",
+      "7": "kurzgesagt_like",
+      "8": "kurzgesagt_like",
+      "9": "kurzgesagt_like"
+    },
+    "scene_providers": {
+      "0": "chatterbox",
+      "1": "chatterbox",
+      "2": "chatterbox",
+      "3": "chatterbox",
+      "4": "chatterbox",
+      "5": "chatterbox",
+      "6": "chatterbox",
+      "7": "chatterbox",
+      "8": "chatterbox",
+      "9": "chatterbox"
+    },
+    "overrides": []
+  },
+  "style_bible": {
+    "style_name": "jade",
+    "style_modifier": "hand-painted cinematic concept art, painterly brushwork, rich depth, warm amber and deep teal color palette with soft cream highlights, consistent lighting and color grade, no text",
+    "palette": [
+      "#F5F0E1",
+      "#C97B4A",
+      "#2F4858",
+      "#86A8A6",
+      "#1B2631"
+    ],
+    "reference_frame_prompt": "",
+    "subject_sheet": [],
+    "placed_style_tokens": {
+      "scene0_1.jpg": "The viewer should see the brain's intense activity during sleep, highlighting the mystery of dream forgetting, and feel intrigued.. photorealistic, cinematic, high detail, no text",
+      "scene1_0.jpg": "The viewer should see two researchers in a 1950s university basement lab, observing a sleeping volunteer and noticing the rapid eye movements, conveying the moment of discovering REM sleep.. flat-vector documentary illustration, clean geometric shapes, smooth curves, bold flat color fills, deep navy background with high-saturation cyan and orange accents, simple stylized human figures, minimal detail, no text, no gradients, no photorealism",
+      "scene5_0.jpg": "The viewer should see a clear contrast between the dim, fragmented dreams of non-REM sleep and the vivid, story-like dreams of REM sleep, understanding the physiological distinction.. flat-vector documentary illustration, clean geometric shapes, smooth curves, bold flat color fills, deep navy background with high-saturation cyan and orange accents, simple stylized human figures, minimal detail, no text, no gradients, no photorealism"
+    }
+  },
+  "entity_specs": {
+    "0": {
+      "beat_id": "scene0",
+      "scene_id": 0,
+      "required_entities": [
+        "human brain",
+        "Eugene Aserinsky",
+        "Nathaniel Kleitman"
+      ],
+      "match_terms": {
+        "human brain": [
+          "human brain",
+          "brain",
+          "cerebrum",
+          "brain activity"
+        ],
+        "Eugene Aserinsky": [
+          "Eugene Aserinsky",
+          "Aserinsky",
+          "REM discoverer"
+        ],
+        "Nathaniel Kleitman": [
+          "Nathaniel Kleitman",
+          "Kleitman",
+          "sleep researcher"
+        ]
+      },
+      "optional_entities": [
+        "Sigmund Freud",
+        "The Interpretation of Dreams",
+        "Allan Hobson",
+        "Robert McCarley",
+        "EEG recording",
+        "sleep cycle diagram"
+      ],
+      "prohibited_entities": [
+        "fMRI scan",
+        "digital EEG machine",
+        "Carl Jung",
+        "modern polysomnography equipment"
+      ],
+      "scene_intent": "hook",
+      "confidence": 1.0,
+      "visual_objective": "The viewer should see the brain's intense activity during sleep, highlighting the mystery of dream forgetting, and feel intrigued."
+    },
+    "1": {
+      "beat_id": "scene1",
+      "scene_id": 1,
+      "required_entities": [
+        "Eugene Aserinsky",
+        "Nathaniel Kleitman"
+      ],
+      "match_terms": {
+        "Eugene Aserinsky": [
+          "Eugene Aserinsky",
+          "Aserinsky"
+        ],
+        "Nathaniel Kleitman": [
+          "Nathaniel Kleitman",
+          "Kleitman"
+        ]
+      },
+      "optional_entities": [
+        "University of Chicago",
+        "sleeping volunteer",
+        "1950s laboratory equipment",
+        "electroencephalograph"
+      ],
+      "prohibited_entities": [
+        "Sigmund Freud",
+        "Harvard Medical School",
+        "Hobson",
+        "McCarley",
+        "modern sleep lab",
+        "digital displays"
+      ],
+      "scene_intent": "reveal",
+      "confidence": 1.0,
+      "visual_objective": "The viewer should see two researchers in a 1950s university basement lab, observing a sleeping volunteer and noticing the rapid eye movements, conveying the moment of discovering REM sleep."
+    },
+    "2": {
+      "beat_id": "scene2",
+      "scene_id": 2,
+      "required_entities": [
+        "Sigmund Freud",
+        "The Interpretation of Dreams"
+      ],
+      "match_terms": {
+        "Sigmund Freud": [
+          "Sigmund Freud",
+          "Freud"
+        ],
+        "The Interpretation of Dreams": [
+          "The Interpretation of Dreams",
+          "Interpretation of Dreams",
+          "Die Traumdeutung"
+        ]
+      },
+      "optional_entities": [
+        "sleeping person",
+        "dream imagery",
+        "antique book"
+      ],
+      "prohibited_entities": [
+        "Eugene Aserinsky",
+        "Nathaniel Kleitman",
+        "REM sleep lab",
+        "polysomnography",
+        "activation-synthesis model",
+        "Hobson and McCarley"
+      ],
+      "scene_intent": "explanation",
+      "confidence": 1.0,
+      "visual_objective": "Viewer sees a portrait of Sigmund Freud and his book, feeling the historical weight of early dream theory."
+    },
+    "3": {
+      "beat_id": "scene3",
+      "scene_id": 3,
+      "required_entities": [
+        "human brain",
+        "EEG"
+      ],
+      "match_terms": {
+        "human brain": [
+          "human brain",
+          "brain",
+          "cerebrum",
+          "gray matter"
+        ],
+        "EEG": [
+          "EEG",
+          "electroencephalogram",
+          "brain waves",
+          "electroencephalography"
+        ]
+      },
+      "optional_entities": [
+        "sleeping person",
+        "REM cycle diagram",
+        "polysomnogram"
+      ],
+      "prohibited_entities": [
+        "CT scan",
+        "MRI",
+        "fMRI",
+        "non-human brain",
+        "anachronistic sleep tracker",
+        "smartphone"
+      ],
+      "scene_intent": "journey",
+      "confidence": 1.0,
+      "visual_objective": "Viewer should see a journey through the brain's REM sleep cycles, feeling the lengthening phases and the brain's activity."
+    },
+    "4": {
+      "beat_id": "scene4",
+      "scene_id": 4,
+      "required_entities": [
+        "brain"
+      ],
+      "match_terms": {
+        "brain": [
+          "brain",
+          "human brain",
+          "brain activity",
+          "cerebrum"
+        ]
+      },
+      "optional_entities": [
+        "sleeping person",
+        "alarm clock",
+        "bed",
+        "pillow",
+        "EEG cap"
+      ],
+      "prohibited_entities": [
+        "Eugene Aserinsky",
+        "Nathaniel Kleitman",
+        "Sigmund Freud",
+        "Allan Hobson",
+        "Robert McCarley"
+      ],
+      "scene_intent": "reveal",
+      "confidence": 1.0,
+      "visual_objective": "Viewer should see the brain's intricate neural network dissolving memories, evoking a sense of wonder about the mind's self-erasing mechanism."
+    },
+    "5": {
+      "beat_id": "scene5",
+      "scene_id": 5,
+      "required_entities": [
+        "Eugene Aserinsky",
+        "Allan Hobson"
+      ],
+      "match_terms": {
+        "Eugene Aserinsky": [
+          "Eugene Aserinsky",
+          "Aserinsky",
+          "REM discoverer"
+        ],
+        "Allan Hobson": [
+          "Allan Hobson",
+          "J. Allan Hobson",
+          "Hobson",
+          "activation synthesis"
+        ]
+      },
+      "optional_entities": [
+        "Nathaniel Kleitman",
+        "Robert McCarley",
+        "sleeping person",
+        "EEG machine"
+      ],
+      "prohibited_entities": [
+        "Sigmund Freud's The Interpretation of Dreams book"
+      ],
+      "scene_intent": "explanation",
+      "confidence": 1.0,
+      "visual_objective": "The viewer should see a clear contrast between the dim, fragmented dreams of non-REM sleep and the vivid, story-like dreams of REM sleep, understanding the physiological distinction."
+    },
+    "6": {
+      "beat_id": "scene6",
+      "scene_id": 6,
+      "required_entities": [
+        "Allan Hobson",
+        "Robert McCarley"
+      ],
+      "match_terms": {
+        "Allan Hobson": [
+          "Allan Hobson",
+          "J. Allan Hobson",
+          "Hobson"
+        ],
+        "Robert McCarley": [
+          "Robert McCarley",
+          "R.W. McCarley",
+          "McCarley"
+        ]
+      },
+      "optional_entities": [
+        "human brain",
+        "EEG reading",
+        "sleep lab",
+        "synapse"
+      ],
+      "prohibited_entities": [
+        "Sigmund Freud",
+        "Eugene Aserinsky",
+        "Nathaniel Kleitman",
+        "spacecraft",
+        "futuristic city",
+        "alien"
+      ],
+      "scene_intent": "hook",
+      "confidence": 1.0,
+      "visual_objective": "Viewers see Hobson and McCarley or a brain amidst chaotic neural signals, feeling the tension between random static and meaningful solutions."
+    },
+    "7": {
+      "beat_id": "scene7",
+      "scene_id": 7,
+      "required_entities": [
+        "human brain",
+        "sleep EEG"
+      ],
+      "match_terms": {
+        "human brain": [
+          "human brain",
+          "brain",
+          "cerebrum",
+          "brain illustration",
+          "brain scan"
+        ],
+        "sleep EEG": [
+          "sleep EEG",
+          "EEG",
+          "electroencephalogram",
+          "brain waves",
+          "polysomnogram",
+          "sleep recording"
+        ]
+      },
+      "optional_entities": [
+        "Eugene Aserinsky",
+        "Nathaniel Kleitman",
+        "Sigmund Freud",
+        "The Interpretation of Dreams",
+        "REM sleep visualization"
+      ],
+      "prohibited_entities": [
+        "fMRI",
+        "CT scan",
+        "PET scan",
+        "Albert Einstein",
+        "modern digital brain model"
+      ],
+      "scene_intent": "reveal",
+      "confidence": 1.0,
+      "visual_objective": "Viewer should SEE a translucent, illuminated brain with synaptic connections sparking during sleep, overlaid with classic EEG waveforms; FEEL a sense of wonder at the brain\u2019s hidden, problem-solving power during rest."
+    },
+    "8": {
+      "beat_id": "scene8",
+      "scene_id": 8,
+      "required_entities": [
+        "Eugene Aserinsky",
+        "Nathaniel Kleitman"
+      ],
+      "match_terms": {
+        "Eugene Aserinsky": [
+          "Eugene Aserinsky",
+          "aserinsky"
+        ],
+        "Nathaniel Kleitman": [
+          "Nathaniel Kleitman",
+          "kleitman"
+        ]
+      },
+      "optional_entities": [
+        "sleeping infant",
+        "polysomnogram chart",
+        "sunrise over calm landscape",
+        "The Interpretation of Dreams book",
+        "vintage sleep laboratory equipment"
+      ],
+      "prohibited_entities": [
+        "modern digital sleep tracker",
+        "fMRI scanner",
+        "non-REM sleep hypnogram",
+        "representation of lucid dreaming"
+      ],
+      "scene_intent": "explanation",
+      "confidence": 1.0,
+      "visual_objective": "Viewer should see archival photographs of Aserinsky and Kleitman, linking the discovery of REM sleep to its modern understanding as an overnight emotional balm, and feel the historical weight of this therapeutic insight."
+    },
+    "9": {
+      "beat_id": "scene9",
+      "scene_id": 9,
+      "required_entities": [
+        "film projector",
+        "director's chair",
+        "human brain"
+      ],
+      "match_terms": {
+        "film projector": [
+          "film projector",
+          "movie projector",
+          "projector",
+          "cinema projector"
+        ],
+        "director's chair": [
+          "director's chair",
+          "canvas chair",
+          "folding director chair"
+        ],
+        "human brain": [
+          "human brain",
+          "brain",
+          "cerebrum"
+        ]
+      },
+      "optional_entities": [
+        "Eugene Aserinsky",
+        "Nathaniel Kleitman",
+        "Sigmund Freud",
+        "The Interpretation of Dreams (book)",
+        "Allan Hobson",
+        "Robert McCarley"
+      ],
+      "prohibited_entities": [
+        "modern digital projector",
+        "laptop",
+        "smartphone",
+        "Carl Jung",
+        "Ivan Pavlov",
+        "modern sleep laboratory (post-2000 equipment)"
+      ],
+      "scene_intent": "explanation",
+      "confidence": 1.0,
+      "visual_objective": "The viewer should see a human brain visualized as a vintage film projector, with a director's chair nearby, to convey the metaphor that dreaming is an internal cinema where the mind edits emotions and solves problems for the waking world."
+    }
+  },
+  "camera_diversity": {
+    "moves": 0,
+    "entropy": 0.0,
+    "repetitive": false,
+    "distribution": {}
+  },
+  "final": {
+    "output": null,
+    "iterations": 0,
+    "error": "pre-render gate blocked: ['pacing']",
+    "duration_s": 0
+  }
+}

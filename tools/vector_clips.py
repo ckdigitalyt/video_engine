@@ -80,19 +80,25 @@ def render(template: str, out_path: str, palette: dict | None = None,
         raise RuntimeError(f"no frames rendered: {r.stderr[-300:]}")
     # composite transparent frames onto navy bg → h264 mp4
     os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
+    if os.path.exists(out_path):
+        os.remove(out_path)  # never leave a stale/partial clip behind
     concat = os.path.join(tmp, "frames.txt")
     with open(concat, "w") as f:
         for p in pngs:
             f.write(f"file '{os.path.join(tmp, p)}'\n")
-    bg = ",".join(f"{int(c * 255)}" for c in BG)
     cmd = [
         "ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", concat,
-        "-vf", f"color=c=0x{int(BG[0]*255):02x}{int(BG[1]*255):02x}{int(BG[2]*255):02x}"
-               f":s={W}x{H},format=rgb24[bg];[bg][0:v]overlay=0:0:format=auto,format=yuv420p",
+        "-filter_complex",
+        f"color=c=0x{int(BG[0]*255):02x}{int(BG[1]*255):02x}{int(BG[2]*255):02x}"
+        f":s={W}x{H}:r={FPS},format=rgb24[bg];"
+        f"[0:v]format=rgba[fg];[bg][fg]overlay=0:0:shortest=1:format=auto,format=yuv420p[vout]",
+        "-map", "[vout]",
         "-r", str(FPS), "-c:v", "libx264", "-preset", "fast", "-crf", "20",
         out_path,
     ]
-    subprocess.run(cmd, capture_output=True, text=True, timeout=1200, check=True)
+    r2 = subprocess.run(cmd, capture_output=True, text=True, timeout=1200)
+    if r2.returncode != 0 or not os.path.exists(out_path):
+        raise RuntimeError(f"ffmpeg composite failed: {r2.stderr[-400:]}")
     return out_path
 
 

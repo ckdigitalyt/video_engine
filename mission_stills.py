@@ -390,11 +390,30 @@ VECTOR_BEATS = {
 
 def _vector_beat_for(intent: str = "default") -> str:
     """Return the cached flat-vector animated beat for an intent, or ""
-    if the clip hasn't been rendered yet (tools/vector_clips.py)."""
+    if the clip hasn't been rendered yet (tools/vector_clips.py).
+
+    Validates the clip with ffprobe — a partial/corrupt render (e.g.
+    failed ffmpeg composite) must never enter the timeline."""
     clip = VECTOR_BEATS.get(intent, VECTOR_BEATS.get("default", ""))
-    if clip and os.path.exists(clip) and os.path.getsize(clip) > 200_000:
-        return clip
-    return ""
+    if not clip or not os.path.exists(clip):
+        return ""
+    if os.path.getsize(clip) < 200_000:
+        return ""
+    try:
+        r = subprocess.run(
+            ["ffprobe", "-v", "error", "-show_entries", "format=duration",
+             "-of", "csv=p=0", clip],
+            capture_output=True, text=True, timeout=15,
+        )
+        if r.returncode != 0 or not r.stdout.strip():
+            print(f"  [vector] rejecting corrupt clip {os.path.basename(clip)}")
+            return ""
+        dur = float(r.stdout.strip())
+        if dur < 1.0:
+            return ""
+    except Exception:
+        return ""
+    return clip
 
 
 # Visual style modifiers ("Jade" subsystem).
@@ -1320,16 +1339,17 @@ def main():
     print(f"  Voice tracks: {len(scenes_data)} (total {sum(audio_durations):.1f}s) "
           f"[{narration_stats.get('provider')}]")
 
+    # ── v12: TRIM EDGE SILENCE FIRST (root cause of voice stops: 0.4-0.6s
+    # trailing silence per scene) — THEN pace-pad.  Trimming AFTER pacing
+    # shortens the track and re-inflates WPM past the band, which failed
+    # the pacing gate (scene 4: 153 -> 161 wpm after trim).
+    audio_durations = _trim_scene_edges("cache/audio", scenes_data, audio_durations)
+
     # ── v10 (rec 1/11): PACING PADDING — if Chatterbox delivered a scene
     # faster than its role's comprehension band, insert pauses at sentence
     # boundaries so narration lands inside the band (space after key
     # facts).  Deterministic fix for "narration feels too fast".
     audio_durations = _pace_pad_scenes(scenes_data, "cache/audio", audio_durations)
-
-    # ── v12: TRIM EDGE SILENCE — Chatterbox appends 0.4-0.5s trailing
-    # silence per scene; back-to-back that reads as abrupt voice stops.
-    # Cut both edges below -38 dB (keep a 120 ms natural tail).
-    audio_durations = _trim_scene_edges("cache/audio", scenes_data, audio_durations)
 
     # ── Timeline + render ──────────────────────────────────────────────
     build_stills_timeline(scenes_data, shot_plan, audio_durations, timeline_path)
