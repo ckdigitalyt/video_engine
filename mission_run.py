@@ -1087,7 +1087,9 @@ def stage_narration_dynamic(scenes: list[dict], cache_audio: str,
                 stats["para_tags_used"] = stats.get("para_tags_used", 0) + \
                     len(sc.get("para_tags") or [])
                 if voice_lock is not None:
-                    voice_lock.record_scene(i, "chatterbox", "resemble")
+                    voice_lock.record_scene(i, "chatterbox",
+                                            get_config("voices.chatterbox.voice_id",
+                                                       "kurzgesagt_like"))
                 if audio_prompt:
                     stats["cloned_voice"] = os.path.basename(audio_prompt)
             except Exception as e:  # noqa: BLE001

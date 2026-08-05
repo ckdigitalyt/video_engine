@@ -46,22 +46,21 @@ class TTSProvider(ABC):
 # high-energy hook: exaggeration=0.8, cfg_weight=0.3 (lively read);
 # somber/factual:   exaggeration=0.4, cfg_weight=0.7 (steady);
 # wonder/awe/reveal: mid-high exaggeration, moderate CFG.
-# Calm documentary band (channel direction 2026-08-05): warm-authoritative
-# General American narrator for US/global audiences.  Exaggeration stays
-# moderate (0.35-0.45) and cfg_weight low-ish (0.30-0.40) so delivery is
-# measured, trustworthy, easy to follow on a phone speaker — never
-# theatrical or hyper-emotive.  Baseline (0.40, 0.35) per voices.yaml.
+# LOCKED narrator band (2026-08-05): Kurzgesagt-style clone from synthetic
+# en-GB-ThomasNeural reference (audio_prompt).  Approved variant params
+# ex=0.50 / cfg=0.32 — energetic-but-clear, warm and friendly, never
+# theatrical.  Emotion/role modulation stays narrow around the lock.
 CHATTERBOX_EMOTION_PARAMS = {
-    "hook":       (0.45, 0.32),
-    "tension":    (0.42, 0.33),
-    "revelation": (0.44, 0.32),
-    "wonder":     (0.42, 0.34),
-    "awe":        (0.44, 0.33),
-    "hopeful":    (0.41, 0.35),
-    "nostalgia":  (0.38, 0.37),
-    "somber":     (0.36, 0.39),
-    "explanation": (0.38, 0.38),
-    "default":    (0.40, 0.35),
+    "hook":       (0.52, 0.30),
+    "tension":    (0.48, 0.31),
+    "revelation": (0.52, 0.30),
+    "wonder":     (0.50, 0.32),
+    "awe":        (0.52, 0.31),
+    "hopeful":    (0.50, 0.32),
+    "nostalgia":  (0.46, 0.34),
+    "somber":     (0.44, 0.36),
+    "explanation": (0.46, 0.35),
+    "default":    (0.50, 0.32),
 }
 
 # Paralinguistic tags Chatterbox speaks natively (expert doc §1.3).

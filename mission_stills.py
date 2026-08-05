@@ -1091,8 +1091,10 @@ def main():
     # remain exception-only fallbacks inside stage_narration_dynamic.
     from src.qa.voice_lock import lock_voice
     from src.director.style_bible import create_style_bible
+    from src.utils.config import get_config
+    _voice_id = get_config("voices.chatterbox.voice_id", "kurzgesagt_like")
     voice_lock = lock_voice(provider="chatterbox",
-                            voice_id="resemble",
+                            voice_id=_voice_id,
                             speaker_id="jade-narrator-001").reset_episode()
     style_bible = create_style_bible("jade").reset_episode()
     run_report["voice_lock"] = voice_lock.to_dict()

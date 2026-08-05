@@ -2,20 +2,21 @@
 
 voices:
   chatterbox:
-    # PRIMARY NARRATOR — English documentary, US/global audience.
-    # Channel direction 2026-08-05: warm, authoritative, clear, mature;
-    # General American documentary tone; NOT theatrical/gravelly.
-    # No celebrity cloning; audio_prompt stays empty (built-in voice).
-    # If a reference clip is added later: clean speech only, language
-    # must match the target (avoid accent transfer).
-    audio_prompt: ""
-    # Calmer documentary band (docs: defaults 0.5/0.5; reduce cfg for
-    # pacing, keep exaggeration moderate):
-    cfg_weight: 0.35
-    exaggeration: 0.40
+    # PRIMARY NARRATOR — LOCKED 2026-08-05 (ckdigital approved
+    # variant_kurzgesagt_like.wav as the channel narrator).
+    # Warm, friendly, energetic British-style documentary narrator,
+    # cloned from a SYNTHETIC reference (edge-tts en-GB-ThomasNeural,
+    # 26.6s clean speech — NOT a real person, no likeness issues).
+    # Reference language (en-GB) matches target (English) — no accent
+    # transfer (Chatterbox docs).
+    voice_id: "kurzgesagt_like"
+    audio_prompt: "cache/voices/ref_thomas.wav"
+    # Approved variant params (ex=0.50, cfg=0.32): energetic-but-clear.
+    cfg_weight: 0.32
+    exaggeration: 0.50
     style: documentary
     pacing: slightly_slow
-    tone: warm_authoritative
+    tone: warm_energetic
 
   kokoro:
     # Kokoro ONNX model file
