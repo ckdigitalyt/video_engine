@@ -1614,12 +1614,12 @@ def stage_music_mix(video_path: str, music_path: str, out_path: str,
 # ═══════════════════════════════════════════════════════════════════════ #
 
 def stage_video_review(video_path: str, scenes: list[dict], out_path: str) -> dict:
-    print("\n[13/16] VIDEO REVIEW (Gemini Pro, end-to-end)", flush=True)
+    print("\n[13/16] VIDEO REVIEW (Gemini Flash, end-to-end)", flush=True)
     t0 = time.time()
     from review_video import _upload_and_review
     script_text = "\n".join(f"SCENE {i}: {s['narration']}" for i, s in enumerate(scenes))
     review = _upload_and_review(video_path, script_text, model="gemini-3.5-flash")
-    review["_meta"] = {"video": video_path, "model": "gemini-2.5-pro",
+    review["_meta"] = {"video": video_path, "model": "gemini-3.5-flash",
                        "elapsed_s": round(time.time() - t0, 1)}
     os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
     with open(out_path, "w") as f:
@@ -1996,7 +1996,7 @@ def main():
             f"multi-reviewer script review ({len(review_report.get('passes', []))} passes, gate={review_report.get('final_gate_passed')})",
             f"director beat mode: {director_stats.get('shots')} shots, providers={director_stats.get('providers')}",
             f"ffmpeg sidechain music ducking (bed={os.path.basename(args.music)})",
-            f"Gemini Pro end-to-end review score {review.get('quality_score')}/100",
+            f"Gemini Flash end-to-end review score {review.get('quality_score')}/100",
         ],
         techniques_failed=[
             "web search in research agent (no API key — used DeepSeek knowledge base)",
@@ -2012,7 +2012,7 @@ def main():
             for r in review.get("prioritized_recommendations", [])[:5]
         ],
         benchmark_results={"llm": provider_name, "renderer": "moviepy+ffmpeg",
-                            "tts": "kokoro bm_george", "video_review_model": "gemini-2.5-pro",
+                            "tts": "kokoro bm_george", "video_review_model": "gemini-3.5-flash",
                             "music_mix": "ffmpeg sidechaincompress"},
         metrics={"final_score": review.get("quality_score"),
                  "render_iterations": iteration,

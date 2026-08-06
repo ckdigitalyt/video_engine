@@ -123,7 +123,7 @@ def main():
             f"ffmpeg sidechain music ducking (bed={os.path.basename(args.music)})",
         ],
         techniques_failed=[
-            "gemini-2.5-pro quota 429 on free tier — fallback to 3.5-flash",
+            "gemini flash quota 429 on free tier — retrying",
         ],
         prompt_improvements=[
             "review prompt asks for timestamps + prioritized categories",

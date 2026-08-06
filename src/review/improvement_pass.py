@@ -1,7 +1,7 @@
 """
 improvement_pass.py — Automated video improvement passes.
 
-Consumes a Gemini Pro end-to-end video review (structured JSON), selects
+Consumes a Gemini Flash end-to-end video review (structured JSON), selects
 high-value recommendations that are *automatically applicable*, applies
 them to the render inputs (timeline / audio mix / config), and re-renders.
 

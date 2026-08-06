@@ -1,0 +1,85 @@
+{
+  "quality_score": 68,
+  "confidence": 0.95,
+  "strengths": [
+    "Professional and clear narration with good pacing",
+    "Strong script structure with a compelling hook and logical flow",
+    "High-quality cinematic AI-generated visuals in the latter half of the video"
+  ],
+  "weaknesses": [
+    "Significant visual-narrative mismatch at 0:11 (bar chart used for a lab story)",
+    "Extended black screen during the Freud segment (0:26-0:35) kills visual momentum",
+    "Inconsistent visual style, jumping between flat 2D graphics and realistic cinematic shots"
+  ],
+  "prioritized_recommendations": [
+    {
+      "priority": "critical",
+      "category": "visual_relevance",
+      "recommendation": "Replace the bar chart at 0:11 with imagery representing a 1950s laboratory or the researchers Aserinsky and Kleitman."
+    },
+    {
+      "priority": "high",
+      "category": "new_asset",
+      "recommendation": "Add visuals for the Freud section (0:26-0:35); a black screen for 9 seconds is unacceptable for audience retention."
+    },
+    {
+      "priority": "medium",
+      "category": "color",
+      "recommendation": "Apply a consistent color grade or filter to the 2D graphics to better match the teal/moody aesthetic of the cinematic shots."
+    }
+  ],
+  "factual_issues": [],
+  "title_recommendations": [
+    "The Science of Why We Dream",
+    "Inside Your Nightly Cinema: The Mystery of REM",
+    "Why Your Brain Erases 95% of Your Dreams"
+  ],
+  "thumbnail_recommendation": {
+    "timestamp": "01:43",
+    "description": "A silhouette of a person watching a projector screen with a glowing red brain icon overlaid on their head, set against a moody teal background."
+  },
+  "overall_assessment": "The documentary features a top-tier script and narration that effectively explains the complexities of REM sleep and dream theory. However, the visual execution is uneven, with several segments lacking relevant imagery or suffering from stylistic whiplash between abstract graphics and cinematic realism.",
+  "atomic_rubrics": [
+    {
+      "t": "0:03",
+      "check": "a single clear visual subject is visible",
+      "pass": true
+    },
+    {
+      "t": "0:15",
+      "check": "the visual matches the narration playing at that moment",
+      "pass": false
+    },
+    {
+      "t": "0:30",
+      "check": "there is camera motion or an animated element (not a frozen frame)",
+      "pass": false
+    },
+    {
+      "t": "0:45",
+      "check": "no jarring cut or black frame",
+      "pass": true
+    },
+    {
+      "t": "1:00",
+      "check": "narration is audible and not clipped mid-sentence",
+      "pass": true
+    },
+    {
+      "t": "1:30",
+      "check": "visual style is consistent with the rest of the video",
+      "pass": false
+    },
+    {
+      "t": "1:45",
+      "check": "music does not overpower the voice",
+      "pass": true
+    }
+  ],
+  "rubric_pass_rate": 0.57,
+  "_meta": {
+    "video": "results/why_we_dream__the_brain_s_nightly_cinema/why_we_dream__the_brain_s_nightly_cinema_mixed.mp4",
+    "model": "gemini-2.5-pro",
+    "elapsed_s": 31.2
+  }
+}

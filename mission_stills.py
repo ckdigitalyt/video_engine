@@ -1424,7 +1424,18 @@ def main():
     t0 = time.time()
     if gates is not None:
         gates._instrumenter.start_render()
-    mods["MoviePyRenderer"]().render(timeline_path, output_path)
+    # v12.4: coverage gate — heal or block before rendering (no black frames).
+    _cov = M._ensure_timeline_coverage(scenes_data, timeline_path)
+    if _cov.get("blocked"):
+        print(f"  !! COVERAGE GATE BLOCKED: {_cov['blocked']}")
+        run_report["errors"].append(f"coverage gate blocked: {_cov['blocked']}")
+        run_report["final"] = {"output": None, "iterations": 0,
+                               "error": f"coverage gate blocked: {_cov['blocked']}"}
+        M._write_json(os.path.join(out_dir, "run_report.json"), run_report)
+        print("  ABORT: no render — fix missing assets and re-run.")
+        sys.exit(2)
+    _subs = M._build_subtitle_clips(scenes_data, timeline_path)
+    mods["MoviePyRenderer"]().render(timeline_path, output_path, subtitles=_subs)
     render_s = time.time() - t0
     run_report["stages"]["render_v1"] = {
         "duration_s": M._probe_duration(output_path),
@@ -1621,7 +1632,14 @@ def main():
         # pass needs distinct input/output files; rendering into graded.mp4
         # then grading it onto itself makes ffmpeg exit "same as Input #0").
         raw_render = os.path.join(out_dir, f"{slug}.mp4")
-        mods["MoviePyRenderer"]().render(timeline_path, raw_render)
+        # v12.4: coverage gate + burned-in subtitles on every re-render.
+        _cov = M._ensure_timeline_coverage(scenes_data, timeline_path)
+        if _cov.get("blocked"):
+            print(f"  !! COVERAGE GATE BLOCKED on re-render: {_cov['blocked']}")
+            run_report["errors"].append(f"coverage gate blocked: {_cov['blocked']}")
+            break
+        _subs = M._build_subtitle_clips(scenes_data, timeline_path)
+        mods["MoviePyRenderer"]().render(timeline_path, raw_render, subtitles=_subs)
         # re-apply organic texture pass so the improved render keeps the look
         try:
             graded_path = os.path.join(out_dir, f"{slug}_graded.mp4")

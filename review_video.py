@@ -106,17 +106,14 @@ def _upload_and_review(video_path: str, script_text: str, model: str = "gemini-3
     prompt = REVIEW_PROMPT.format(script=script_text[:12000])
     video_part = types.Part.from_uri(file_uri=upload.uri, mime_type=upload.mime_type)
 
-    # Model fallback chain: preferred flash model first, then other flash
-    # variants, then pro models (quota varies per key/plan; flash models are
-    # broadly available and cheap on the free tier).
-    # NOTE: correct API names — "gemini-3.1-pro" alone 404s; use -preview suffix.
-    model_chain = [model, "gemini-3-flash-preview", "gemini-2.5-flash",
-                   "gemini-2.5-pro", "gemini-3-pro-preview", "gemini-3.1-pro-preview"]
+    # Model fallback chain: flash-only. Pro models are intentionally ignored
+    # (free-tier pro quota is blocked; flash is broadly available and cheap).
+    model_chain = [model, "gemini-3-flash-preview", "gemini-2.5-flash"]
     model_chain = list(dict.fromkeys(model_chain))  # dedupe, keep order
     last_err: Exception | None = None
     for m in model_chain:
-        # Retry 429/RESOURCE_EXHAUSTED up to 4x with backoff (pro quota is
-        # per-minute; a short wait usually clears it).
+        # Retry 429/RESOURCE_EXHAUSTED up to 4x with backoff (free-tier quota
+        # is per-minute; a short wait usually clears it).
         for attempt in range(5):
             print(f"→ Reviewing with {m}..." + (f" (attempt {attempt+1}/5)" if attempt else ""))
             try:

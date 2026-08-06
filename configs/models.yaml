@@ -18,5 +18,5 @@ llm:
     temperature: 0.7
 
   gemini:
-    model: "models/gemini-2.5-pro"
-    script_model: "models/gemini-2.5-pro"
+    model: "models/gemini-3.5-flash"
+    script_model: "models/gemini-3.5-flash"

@@ -1,8 +1,6 @@
 {
-  "passed": false,
-  "blocking_failures": [
-    "repeated_assets"
-  ],
+  "passed": true,
+  "blocking_failures": [],
   "checks": [
     {
       "name": "encoding",
@@ -24,12 +22,10 @@
     },
     {
       "name": "repeated_assets",
-      "passed": false,
-      "detail": "repeated files: {'results/why_we_dream__the_brain_s_nightly_cinema/shots/scene1_variant_0.mp4': 3}",
+      "passed": true,
+      "detail": "no repeats",
       "metrics": {
-        "repeats": {
-          "results/why_we_dream__the_brain_s_nightly_cinema/shots/scene1_variant_0.mp4": 3
-        }
+        "repeats": {}
       }
     },
     {
@@ -84,13 +80,13 @@
     {
       "name": "style_locked",
       "passed": true,
-      "detail": "9 placed stills, 0 drifted",
+      "detail": "11 placed stills, 0 drifted",
       "metrics": {}
     },
     {
       "name": "manim_registered",
       "passed": true,
-      "detail": "4 Manim clip(s) in final timeline",
+      "detail": "3 Manim clip(s) in final timeline",
       "metrics": {}
     },
     {
@@ -119,5 +115,5 @@
       "metrics": {}
     }
   ],
-  "publish_ready": false
+  "publish_ready": true
 }
