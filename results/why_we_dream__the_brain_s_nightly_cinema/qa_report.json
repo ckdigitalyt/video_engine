@@ -1,13 +1,15 @@
 {
-  "passed": true,
-  "blocking_failures": [],
+  "passed": false,
+  "blocking_failures": [
+    "repeated_assets"
+  ],
   "checks": [
     {
       "name": "encoding",
       "passed": true,
       "detail": "v=h264 a=aac",
       "metrics": {
-        "duration_s": 121.333333,
+        "duration_s": 122.033333,
         "resolution": [
           1920,
           1080
@@ -22,10 +24,12 @@
     },
     {
       "name": "repeated_assets",
-      "passed": true,
-      "detail": "no repeats",
+      "passed": false,
+      "detail": "repeated files: {'results/why_we_dream__the_brain_s_nightly_cinema/shots/scene1_variant_0.mp4': 3}",
       "metrics": {
-        "repeats": {}
+        "repeats": {
+          "results/why_we_dream__the_brain_s_nightly_cinema/shots/scene1_variant_0.mp4": 3
+        }
       }
     },
     {
@@ -51,7 +55,7 @@
       "detail": "max_volume=-3.2 dB (silence < -50.0 dB)",
       "metrics": {
         "max_db": -3.2,
-        "mean_db": -23.8
+        "mean_db": -23.9
       }
     },
     {

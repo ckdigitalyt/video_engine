@@ -590,6 +590,12 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
     stats = {"manim": 0, "nasa": 0, "wikimedia": 0, "ai": 0, "video_fallback": 0,
              "rejected": 0, "vision_checked": 0, "deduped": 0}
     manim_used = set()
+    # v12.2: stills REJECTED by the asset gate this run must never be
+    # re-admitted via the [CACHE] branch — the gate `continue`s but leaves
+    # the file on disk, and the cache-reuse check only tests existence/size,
+    # so a rejected photo (e.g. a motorcycle or ancient ruins) came right
+    # back into the timeline on the next plan iteration.
+    rejected_this_run: set[str] = set()
     # Content-based dedup: dHash of every placed still (Priority 6 — no
     # consecutive near-identical assets, including same-content files with
     # different names).
@@ -648,7 +654,8 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
             # v9.1: reuse topic-scoped cached stills from an interrupted run
             # (same safety bar as pinned: existing file > 15 KB).  Avoids
             # re-downloading every still after a crash/rerun.
-            if os.path.exists(out) and os.path.getsize(out) > 15000:
+            if (os.path.exists(out) and os.path.getsize(out) > 15000
+                    and fname not in rejected_this_run):
                 got, src, title = out, "cached", "cached still"
                 print(f"  [CACHE] {fname} reused from topic cache")
             elif fname in pinned and os.path.exists(out) and os.path.getsize(out) > 15000:
@@ -695,6 +702,7 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                 stats["vision_checked"] += int(bool(ver.get("vision_check")))
                 if not ver.get("passed"):
                     stats["rejected"] += 1
+                    rejected_this_run.add(fname)
                     print(f"  [gate] rejected {fname} "
                           f"({ver.get('reasons', ['?'])[:1]})")
                     continue
@@ -744,6 +752,7 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
         placed_total = sum(sh.get("duration", 0) for sh in shots)
         # Add variants (opposite camera) until the scene is visually
         # covered or we hit 4 shots — prevents one-shot freeze stretches.
+        var_i = 0
         while shots and est > placed_total + 1.5 and est > 8.0 and len(shots) < 4:
             # estimate narration duration: ~2.6 words/sec spoken
             last = shots[-1]
@@ -758,8 +767,13 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                     capture_output=True, text=True, timeout=30)
                 src = last.get("kind", "manim")
             if os.path.exists(src_img):
+                # v12.2: unique filename PER VARIANT — the old code reused
+                # `still_count` which is frozen at 0 for manim scenes, so
+                # every variant overwrote scene{i}_variant_0.mp4 and the
+                # timeline repeated the same file 3x → repeated_assets gate.
+                var_i += 1
                 variant = os.path.join(
-                    out_dir, "shots", f"scene{i}_variant_{still_count}.mp4")
+                    out_dir, "shots", f"scene{i}_variant_cov{var_i}.mp4")
                 vcam = cam_params if still_count else {}
                 vcam = dict(vcam)
                 # invert the camera move for visual novelty
