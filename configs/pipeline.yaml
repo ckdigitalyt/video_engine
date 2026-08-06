@@ -1,8 +1,21 @@
 # pipeline.yaml — Orchestration and pipeline behaviour settings
 
 pipeline:
-  # Maximum number of planner/review iterations before forced approval
-  max_iterations: 3
+  # Maximum number of planner/review iterations before forced approval.
+  # v12.5 cost guardrail: 1 by default; a 2nd pass runs only when the review
+  # score is below improve_score_threshold (see mission_run/mission_stills).
+  max_iterations: 1
+
+  # v12.5: render improvement passes — hard stop at 1 rerender. A 2nd render
+  # pass is allowed ONLY when the latest review score is below this threshold.
+  improve_score_threshold: 70
+
+  # Script review personas: 2 by default (fact + storytelling). Set to
+  # ["fact_reviewer","documentary_editor","retention_reviewer","storytelling_reviewer"]
+  # or "all" to run the full 4-persona suite (2x the LLM calls per pass).
+  script_review:
+    personas: ["fact_reviewer", "storytelling_reviewer"]
+    max_passes: 2
 
   # Local cache directories for intermediate assets
   cache:

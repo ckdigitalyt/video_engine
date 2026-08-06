@@ -140,6 +140,21 @@ def _upload_and_review(video_path: str, script_text: str, model: str = "gemini-3
                 break  # non-quota error: move to next model
             print(f"    !! {m} failed: {str(e)[:120]}")
             continue
+    # v12.5: DeepSeek flash as backup — all Gemini flash models failed.
+    # DeepSeek has no video input, so this is a script-only review (degraded,
+    # clearly flagged so the improvement pass treats it cautiously).
+    try:
+        from src.providers.llm_provider import DeepSeekProvider
+        print("→ All Gemini flash models failed — falling back to DeepSeek flash "
+              "(script-only review, degraded)")
+        dp = DeepSeekProvider()
+        raw = dp.generate_json(REVIEW_PROMPT.format(script=script_text[:12000]))
+        review = _parse_review_json(raw)
+        review["_meta"]["model_used"] = "deepseek-v4-flash (script-only fallback)"
+        review["_meta"]["degraded"] = True
+        return review
+    except Exception as e:  # noqa: BLE001
+        last_err = e
     raise RuntimeError(f"All review models failed; last error: {last_err}")
 
 

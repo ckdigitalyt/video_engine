@@ -157,19 +157,41 @@ Respond in STRICT JSON with this exact schema (no markdown fences):
 # ═══════════════════════════════════════════════════════════════════════ #
 
 
+def _active_personas() -> list[str]:
+    """Personas to run per pass — configurable, 2 by default (cost guardrail).
+
+    Set ``pipeline.script_review.personas`` to a list of persona keys, or
+    ``["all"]`` to run the full 4-persona suite (~2x the LLM calls).
+    """
+    cfg = get_config("pipeline.script_review.personas",
+                     ["fact_reviewer", "storytelling_reviewer"])
+    if isinstance(cfg, str):
+        cfg = [p.strip() for p in cfg.split(",") if p.strip()]
+    if "all" in cfg:
+        return list(PERSONAS.keys())
+    active = [k for k in cfg if k in PERSONAS]
+    return active or ["fact_reviewer", "storytelling_reviewer"]
+
+
 class ScriptReviewer:
     """Runs the multi-persona script review loop (bounded passes)."""
 
     def __init__(
         self,
         provider_name: Optional[str] = None,
-        max_passes: int = 3,
+        max_passes: Optional[int] = None,
         verbose: bool = True,
     ):
         factory = ProviderFactory()
         self._provider_name = provider_name or get_config("pipeline.roles.default", "gemini")
         self._provider = factory.get_llm_provider(self._provider_name)
-        self._max_passes = max(1, min(max_passes, 3))
+        try:
+            self._fallback = factory.get_fallback_llm_provider()
+        except Exception:
+            self._fallback = None
+        # v12.5: default 2 passes (was 3); a 2nd pass only runs if the gate fails.
+        self._max_passes = max(1, min(
+            max_passes or get_config("pipeline.script_review.max_passes", 2), 3))
         self._verbose = verbose
 
     # ── Public API ─────────────────────────────────────────────────────
@@ -195,7 +217,7 @@ class ScriptReviewer:
             scores: dict[str, PersonaScore] = {}
             consolidated: list[ReviewIssue] = []
 
-            for key in PERSONAS:
+            for key in _active_personas():
                 scores[key], issues = self._run_persona(
                     key, self._format_script(current), facts_text
                 )
@@ -237,7 +259,16 @@ class ScriptReviewer:
 
     def _run_persona(self, persona_key: str, script_text: str, facts_text: str):
         prompt = _persona_prompt(persona_key, script_text, facts_text)
-        raw = self._provider.generate_json(prompt)
+        try:
+            raw = self._provider.generate_json(prompt)
+        except Exception as e:
+            # v12.5: Gemini flash first, DeepSeek flash as runtime backup.
+            if self._fallback is not None:
+                self._log(f"    !! primary provider failed ({str(e)[:80]}) — "
+                          f"retrying via {type(self._fallback).__name__}")
+                raw = self._fallback.generate_json(prompt)
+            else:
+                raise
         try:
             data = json.loads(raw)
         except json.JSONDecodeError:
@@ -350,15 +381,22 @@ one per line, numbered "SCENE N: <narration>".
 
     @staticmethod
     def _gate_met(scores: dict[str, PersonaScore]) -> bool:
-        if "fact_reviewer" not in scores:
-            return False
-        checks = [
-            scores.get("retention_reviewer", PersonaScore("", 0, 0, "")).score >= GATE["retention"],
-            scores["fact_reviewer"].score >= GATE["facts"],
-            scores.get("storytelling_reviewer", PersonaScore("", 0, 0, "")).score >= GATE["story"],
-            scores.get("documentary_editor", PersonaScore("", 0, 0, "")).score >= GATE["edit"],
-        ]
-        return all(checks)
+        """Gate checks only the active personas (configurable, 2 by default)."""
+        active = _active_personas()
+        key_to_gate = {
+            "fact_reviewer": "facts",
+            "retention_reviewer": "retention",
+            "storytelling_reviewer": "story",
+            "documentary_editor": "edit",
+        }
+        checks = []
+        for k in active:
+            if k not in scores:
+                return False
+            gate_key = key_to_gate.get(k)
+            if gate_key and gate_key in GATE:
+                checks.append(scores[k].score >= GATE[gate_key])
+        return bool(checks) and all(checks)
 
     def _log(self, msg: str):
         if self._verbose:

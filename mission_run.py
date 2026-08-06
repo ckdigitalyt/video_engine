@@ -372,9 +372,14 @@ def stage_script(topic: str, research: dict, provider) -> list[dict]:
 
 def stage_script_review(scenes: list[dict], research: dict, provider_name: str) -> tuple[list[dict], dict]:
     set_usage_stage("script_review")
-    print("\n[4/16] SCRIPT REVIEW (4 independent reviewers, ≤3 passes)", flush=True)
+    from src.utils.config import get_config as _gc
+    _personas = _gc("pipeline.script_review.personas",
+                    ["fact_reviewer", "storytelling_reviewer"])
+    _n_p = len(_personas) if isinstance(_personas, list) else 4
+    _mp = _gc("pipeline.script_review.max_passes", 2)
+    print(f"\n[4/16] SCRIPT REVIEW ({_n_p} reviewers, ≤{_mp} passes)", flush=True)
     t0 = time.time()
-    reviewer = ScriptReviewer(provider_name=provider_name, max_passes=3)
+    reviewer = ScriptReviewer(provider_name=provider_name)
     narrations = [s["narration"] for s in scenes]
     final_narrations, results = reviewer.review(
         narrations,
@@ -1758,10 +1763,11 @@ def main():
     ap = argparse.ArgumentParser(description="Jade Studio mission pipeline")
     ap.add_argument("--topic", default="Voyager 1: the farthest human-made object")
     ap.add_argument("--out", default=None, help="Output video path")
-    ap.add_argument("--provider", default=None, help="LLM provider (deepseek|gemini)")
+    ap.add_argument("--provider", default=None, help="LLM provider (deepseek|gemini); default gemini (flash)")
     ap.add_argument("--target-seconds", type=float, default=TARGET_DURATION_S,
                     help="Target narration runtime in seconds (scales scenes+words)")
-    ap.add_argument("--max-render-iterations", type=int, default=3)
+    ap.add_argument("--max-render-iterations", type=int, default=2,
+                    help="Max total renders (1=no improvement pass, 2=one rerender; default 2)")
     ap.add_argument("--music", default="cache/music/cinematic.mp3")
     ap.add_argument("--music-db", type=float, default=-6.0)
     args = ap.parse_args()
@@ -1781,7 +1787,7 @@ def main():
                   "stages": {}, "errors": []}
 
     factory = mods["ProviderFactory"]()
-    provider_name = args.provider or "deepseek"
+    provider_name = args.provider or "gemini"
     llm = factory.get_llm_provider(provider_name)
     run_report["provider"] = provider_name
 
@@ -1909,7 +1915,15 @@ def main():
     }
 
     iteration = 1
-    max_iter = max(1, min(args.max_render_iterations, 3))
+    # v12.5 cost guardrails: 1 improvement pass by default; a 2nd pass runs
+    # ONLY when the review score is below improve_score_threshold. Hard stop
+    # at 3 total renders (max 2 rerenders) regardless of the flag.
+    from src.utils.config import get_config as _gc2
+    _thr = _gc2("pipeline.improve_score_threshold", 70)
+    _score = review.get("quality_score") or 0
+    max_iter = 1 if _score >= _thr else min(max(1, args.max_render_iterations), 3)
+    if max_iter > 1:
+        print(f"  Score {_score} < {_thr} → improvement loop active (max {max_iter} renders)", flush=True)
     while iteration < max_iter:
         plan_dict = stage_improvement_plan(review, iteration + 1, out_dir, max_total=max_iter)
         run_report["stages"][f"improve_pass_{iteration}"] = plan_dict

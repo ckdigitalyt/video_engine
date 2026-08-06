@@ -1213,7 +1213,7 @@ def main():
 
     mods = M._imports()
     factory = mods["ProviderFactory"]()
-    provider_name = args.provider or "deepseek"
+    provider_name = args.provider or "gemini"
     llm = factory.get_llm_provider(provider_name)
     run_report["provider"] = provider_name
 
@@ -1618,7 +1618,14 @@ def main():
         print(f"  !! video review failed (non-fatal, continuing): {str(e)[:120]}")
         run_report["stages"]["review_v1"] = {"error": str(e)[:200]}
     iteration = 1
-    max_iter = 1 if review is None else 3
+    # v12.5 cost guardrails: 1 improvement pass max; only when the review
+    # score is below improve_score_threshold. Hard stop at 2 (1 rerender).
+    from src.utils.config import get_config as _gc2
+    _thr = _gc2("pipeline.improve_score_threshold", 70)
+    _score = (review or {}).get("quality_score") or 0
+    max_iter = 1 if (review is None or _score >= _thr) else 2
+    if max_iter > 1:
+        print(f"  Score {_score} < {_thr} → improvement loop active (max {max_iter} renders)", flush=True)
     while iteration < max_iter:
         plan_dict = M.stage_improvement_plan(review, iteration + 1, out_dir, max_total=max_iter)
         run_report["stages"][f"improve_pass_{iteration}"] = plan_dict
