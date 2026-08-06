@@ -4,8 +4,8 @@
 # Provider selection flows:
 #   1. Explicit argument to constructor (highest priority)
 #   2. pipeline.roles.{role} in pipeline.yaml (e.g. planner, critic)
-#   3. pipeline.roles.default in pipeline.yaml (default: gemini)
-#   4. pipeline.roles.fallback in pipeline.yaml (fallback: deepseek)
+#   3. pipeline.roles.default in pipeline.yaml (default: gemini flash)
+#   4. Runtime fallback chains (v12.6): mistral free -> deepseek v4 flash
 #
 # No module should hardcode DeepSeekProvider() or GeminiProvider().
 # Always use ProviderFactory or pass an LLMProvider instance.
@@ -18,5 +18,11 @@ llm:
     temperature: 0.7
 
   gemini:
-    model: "models/gemini-3.5-flash"
-    script_model: "models/gemini-3.5-flash"
+    model: "models/gemini-2.5-flash"
+    script_model: "models/gemini-2.5-flash"
+
+  mistral:
+    model: "mistral-small-latest"
+    script_model: "mistral-small-latest"
+    max_tokens: 2000
+    temperature: 0.7

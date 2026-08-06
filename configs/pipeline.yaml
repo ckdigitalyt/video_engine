@@ -52,8 +52,9 @@ pipeline:
   roles:
     # Default LLM provider used when no specific role is configured
     default: "gemini"
-    # Fallback provider when the default is unavailable
-    fallback: "deepseek"
+    # Fallback provider when the default is unavailable (v12.6: mistral free,
+    # then deepseek as last resort in the runtime chains)
+    fallback: "mistral"
     # Role-specific provider overrides
     planner: "gemini"
     critic: "gemini"

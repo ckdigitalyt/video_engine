@@ -76,7 +76,7 @@ class AssetVerifier:
     def __init__(
         self,
         vision_enabled: bool = True,
-        vision_model: str = "gemini-3.5-flash",
+        vision_model: str = "gemini-2.5-flash",
         fatal_on_vision_fail: bool = True,
     ):
         self._vision_enabled = vision_enabled

@@ -1623,8 +1623,8 @@ def stage_video_review(video_path: str, scenes: list[dict], out_path: str) -> di
     t0 = time.time()
     from review_video import _upload_and_review
     script_text = "\n".join(f"SCENE {i}: {s['narration']}" for i, s in enumerate(scenes))
-    review = _upload_and_review(video_path, script_text, model="gemini-3.5-flash")
-    review["_meta"] = {"video": video_path, "model": "gemini-3.5-flash",
+    review = _upload_and_review(video_path, script_text, model="gemini-2.5-flash")
+    review["_meta"] = {"video": video_path, "model": "gemini-2.5-flash",
                        "elapsed_s": round(time.time() - t0, 1)}
     os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
     with open(out_path, "w") as f:
@@ -2026,7 +2026,7 @@ def main():
             for r in review.get("prioritized_recommendations", [])[:5]
         ],
         benchmark_results={"llm": provider_name, "renderer": "moviepy+ffmpeg",
-                            "tts": "kokoro bm_george", "video_review_model": "gemini-3.5-flash",
+                            "tts": "kokoro bm_george", "video_review_model": "gemini-2.5-flash",
                             "music_mix": "ffmpeg sidechaincompress"},
         metrics={"final_score": review.get("quality_score"),
                  "render_iterations": iteration,

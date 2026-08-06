@@ -185,10 +185,14 @@ class ScriptReviewer:
         factory = ProviderFactory()
         self._provider_name = provider_name or get_config("pipeline.roles.default", "gemini")
         self._provider = factory.get_llm_provider(self._provider_name)
-        try:
-            self._fallback = factory.get_fallback_llm_provider()
-        except Exception:
-            self._fallback = None
+        # v12.6 fallback chain: Gemini flash -> Mistral free -> DeepSeek v4 flash.
+        # Providers without an API key configured are skipped gracefully.
+        self._fallbacks: list = []
+        for name in ("mistral", "deepseek"):
+            try:
+                self._fallbacks.append(factory.get_llm_provider(name))
+            except Exception:
+                continue
         # v12.5: default 2 passes (was 3); a 2nd pass only runs if the gate fails.
         self._max_passes = max(1, min(
             max_passes or get_config("pipeline.script_review.max_passes", 2), 3))
@@ -262,13 +266,20 @@ class ScriptReviewer:
         try:
             raw = self._provider.generate_json(prompt)
         except Exception as e:
-            # v12.5: Gemini flash first, DeepSeek flash as runtime backup.
-            if self._fallback is not None:
-                self._log(f"    !! primary provider failed ({str(e)[:80]}) — "
-                          f"retrying via {type(self._fallback).__name__}")
-                raw = self._fallback.generate_json(prompt)
-            else:
-                raise
+            # v12.6: Gemini flash first, then Mistral free, then DeepSeek v4 flash.
+            raw = None
+            last_err = e
+            for fb in self._fallbacks:
+                try:
+                    self._log(f"    !! primary provider failed ({str(e)[:80]}) — "
+                              f"retrying via {type(fb).__name__}")
+                    raw = fb.generate_json(prompt)
+                    break
+                except Exception as e2:  # noqa: BLE001
+                    last_err = e2
+                    continue
+            if raw is None:
+                raise last_err
         try:
             data = json.loads(raw)
         except json.JSONDecodeError:

@@ -106,7 +106,7 @@ def _gemini_listen(audio_paths: dict) -> dict:
             data=open(p, "rb").read(), mime_type=mime))
         parts.append(types.Part.from_text(text=f"<audio label={label}>"))
     resp = client.models.generate_content(
-        model="gemini-3.5-flash", contents=parts,
+        model="gemini-2.5-flash", contents=parts,
         config=types.GenerateContentConfig(
             temperature=0.1, response_mime_type="application/json"),
     )

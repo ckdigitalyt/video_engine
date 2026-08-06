@@ -1,14 +1,14 @@
 #!/bin/bash
 # pro_review_autoscan.sh — run a Gemini Flash review (kept name for cron compat).
 # Probes quota first (cheap 1-token call), retries until it clears, then reviews
-# the dream video master with gemini-3.5-flash and prints a summary.
+# the dream video master with gemini-2.5-flash and prints a summary.
 set -u
 cd /home/ubuntu/video_engine || exit 1
 set -a; . ./.env; set +a
 
 VIDEO="results/why_we_dream__the_brain_s_nightly_cinema/why_we_dream__the_brain_s_nightly_cinema_mixed.mp4"
 OUT="results/why_we_dream__the_brain_s_nightly_cinema/review_pro_autoscan.json"
-MODEL="gemini-3.5-flash"
+MODEL="gemini-2.5-flash"
 
 # Phase 1: wait for flash quota (max ~6h, check every 5 min)
 echo "[$(date -u +%H:%M:%S)] probing ${MODEL} quota..."

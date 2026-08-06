@@ -24,6 +24,7 @@ class ProviderFactory:
     _LLM_CLASS_MAP = {
         "deepseek": "DeepSeekProvider",
         "gemini": "GeminiProvider",
+        "mistral": "MistralProvider",
     }
 
     def get_llm_provider(self, name: str) -> LLMProvider:

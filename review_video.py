@@ -81,7 +81,7 @@ holistic quality_score on the rubric outcomes plus your expert judgment.
 Be specific. Reference timestamps where useful. Prioritize fixes by impact."""
 
 
-def _upload_and_review(video_path: str, script_text: str, model: str = "gemini-3.5-flash") -> dict:
+def _upload_and_review(video_path: str, script_text: str, model: str = "gemini-2.5-flash") -> dict:
     from google import genai
     from google.genai import types
 
@@ -106,9 +106,10 @@ def _upload_and_review(video_path: str, script_text: str, model: str = "gemini-3
     prompt = REVIEW_PROMPT.format(script=script_text[:12000])
     video_part = types.Part.from_uri(file_uri=upload.uri, mime_type=upload.mime_type)
 
-    # Model fallback chain: flash-only. Pro models are intentionally ignored
-    # (free-tier pro quota is blocked; flash is broadly available and cheap).
-    model_chain = [model, "gemini-3-flash-preview", "gemini-2.5-flash"]
+    # v12.6 priority chain (free tier): Gemini 2.5 Flash first, then other
+    # Gemini flash variants (all video-capable), then Mistral free (script-only)
+    # and finally DeepSeek v4 flash (script-only). Pro models are ignored.
+    model_chain = [model, "gemini-3.5-flash", "gemini-3-flash-preview"]
     model_chain = list(dict.fromkeys(model_chain))  # dedupe, keep order
     last_err: Exception | None = None
     for m in model_chain:
@@ -140,21 +141,25 @@ def _upload_and_review(video_path: str, script_text: str, model: str = "gemini-3
                 break  # non-quota error: move to next model
             print(f"    !! {m} failed: {str(e)[:120]}")
             continue
-    # v12.5: DeepSeek flash as backup — all Gemini flash models failed.
-    # DeepSeek has no video input, so this is a script-only review (degraded,
-    # clearly flagged so the improvement pass treats it cautiously).
-    try:
-        from src.providers.llm_provider import DeepSeekProvider
-        print("→ All Gemini flash models failed — falling back to DeepSeek flash "
-              "(script-only review, degraded)")
-        dp = DeepSeekProvider()
-        raw = dp.generate_json(REVIEW_PROMPT.format(script=script_text[:12000]))
-        review = _parse_review_json(raw)
-        review["_meta"]["model_used"] = "deepseek-v4-flash (script-only fallback)"
-        review["_meta"]["degraded"] = True
-        return review
-    except Exception as e:  # noqa: BLE001
-        last_err = e
+    # v12.6: Mistral free as backup #2, then DeepSeek v4 flash as backup #3.
+    # Both are text-only, so these are script-only reviews (degraded, clearly
+    # flagged so the improvement pass treats them cautiously). Providers with
+    # no API key configured are skipped gracefully.
+    for fb_name, fb_cls in (("mistral", "MistralProvider"),
+                            ("deepseek", "DeepSeekProvider")):
+        try:
+            from src.providers.factory import ProviderFactory
+            fb = ProviderFactory().get_llm_provider(fb_name)
+            print(f"→ All Gemini flash models failed — falling back to {fb_name} "
+                  f"(script-only review, degraded)")
+            raw = fb.generate_json(REVIEW_PROMPT.format(script=script_text[:12000]))
+            review = _parse_review_json(raw)
+            review["_meta"]["model_used"] = f"{fb_name} (script-only fallback)"
+            review["_meta"]["degraded"] = True
+            return review
+        except Exception as e:  # noqa: BLE001
+            last_err = e
+            print(f"    !! {fb_name} fallback unavailable: {str(e)[:100]}")
     raise RuntimeError(f"All review models failed; last error: {last_err}")
 
 
@@ -182,7 +187,7 @@ def main():
     ap.add_argument("video", help="Path to rendered MP4")
     ap.add_argument("--script", default=None, help="JSON with scenes (for fact check)")
     ap.add_argument("--out", default=None, help="Output review JSON path")
-    ap.add_argument("--model", default="gemini-3.5-flash")
+    ap.add_argument("--model", default="gemini-2.5-flash")
     args = ap.parse_args()
 
     script_text = ""

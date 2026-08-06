@@ -163,6 +163,32 @@ class DeepSeekProvider(LLMProvider):
         return response.content
 
 
+class MistralProvider(LLMProvider):
+    """LLM provider backed by Mistral's OpenAI-compatible API (free tier).
+
+    Backup #2 in the v12.6 priority chain (after Gemini flash, before
+    DeepSeek). Text-only — used for script review/planning fallbacks and
+    script-only video review fallback.
+    """
+
+    def __init__(self, **kwargs):
+        api_key = os.environ.get("MISTRAL_API_KEY")
+        if not api_key:
+            raise RuntimeError("MISTRAL_API_KEY not set — add it to .env for "
+                               "Mistral free-tier fallback")
+        self._llm = ChatOpenAI(
+            api_key=api_key,
+            base_url=get_config("providers.mistral.base_url",
+                                "https://api.mistral.ai/v1"),
+            model=get_config("llm.mistral.model", "mistral-small-latest"),
+            max_tokens=get_config("llm.mistral.max_tokens", 2000),
+        )
+
+    def generate_text(self, prompt: str, image_path: Optional[str] = None, **kwargs) -> str:
+        response = self._llm.invoke([HumanMessage(content=prompt)])
+        return response.content
+
+
 # ── Gemini ─────────────────────────────────────────────────────────────────
 
 class GeminiProvider(LLMProvider):
