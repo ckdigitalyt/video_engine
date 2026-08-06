@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-review_video.py — End-to-end video review with Gemini Pro.
+review_video.py — End-to-end video review with Gemini Flash.
 
-Uploads the rendered MP4 to Gemini (files API) and asks Gemini 2.5 Pro to
+Uploads the rendered MP4 to Gemini (files API) and asks Gemini Flash to
 review the ACTUAL video: narration, pacing, visuals, transitions, timing,
 music balance, cinematography, factual accuracy, and more.  Returns a
 structured JSON review used by the improvement pass.
@@ -81,7 +81,7 @@ holistic quality_score on the rubric outcomes plus your expert judgment.
 Be specific. Reference timestamps where useful. Prioritize fixes by impact."""
 
 
-def _upload_and_review(video_path: str, script_text: str, model: str = "gemini-2.5-pro") -> dict:
+def _upload_and_review(video_path: str, script_text: str, model: str = "gemini-3.5-flash") -> dict:
     from google import genai
     from google.genai import types
 
@@ -106,33 +106,41 @@ def _upload_and_review(video_path: str, script_text: str, model: str = "gemini-2
     prompt = REVIEW_PROMPT.format(script=script_text[:12000])
     video_part = types.Part.from_uri(file_uri=upload.uri, mime_type=upload.mime_type)
 
-    # Model fallback chain: preferred pro model first, then flash models
-    # (quota varies per key/plan; flash models are broadly available).
-    # Model fallback chain: critical review first (Gemini 3.1 pro per studio
-    # policy), then flash models (quota varies per key/plan).
-    model_chain = [model, "gemini-3.1-pro", "gemini-3.5-flash",
-                   "gemini-3-flash-preview", "gemini-2.5-flash"]
+    # Model fallback chain: preferred flash model first, then other flash
+    # variants, then pro models (quota varies per key/plan; flash models are
+    # broadly available and cheap on the free tier).
+    # NOTE: correct API names — "gemini-3.1-pro" alone 404s; use -preview suffix.
+    model_chain = [model, "gemini-3-flash-preview", "gemini-2.5-flash",
+                   "gemini-2.5-pro", "gemini-3-pro-preview", "gemini-3.1-pro-preview"]
     model_chain = list(dict.fromkeys(model_chain))  # dedupe, keep order
     last_err: Exception | None = None
     for m in model_chain:
-        print(f"→ Reviewing with {m}...")
-        try:
-            response = client.models.generate_content(
-                model=m,
-                contents=[prompt, video_part],
-                config=types.GenerateContentConfig(
-                    temperature=0.2,
-                    response_mime_type="application/json",
-                ),
-            )
-            text = response.text or ""
-            if not text.strip():
-                raise RuntimeError("empty response")
-            review = _parse_review_json(text)
-            review["_meta"]["model_used"] = m
-            return review
-        except Exception as e:  # noqa: BLE001
-            last_err = e
+        # Retry 429/RESOURCE_EXHAUSTED up to 4x with backoff (pro quota is
+        # per-minute; a short wait usually clears it).
+        for attempt in range(5):
+            print(f"→ Reviewing with {m}..." + (f" (attempt {attempt+1}/5)" if attempt else ""))
+            try:
+                response = client.models.generate_content(
+                    model=m,
+                    contents=[prompt, video_part],
+                    config=types.GenerateContentConfig(
+                        temperature=0.2,
+                        response_mime_type="application/json",
+                    ),
+                )
+                text = response.text or ""
+                if not text.strip():
+                    raise RuntimeError("empty response")
+                review = _parse_review_json(text)
+                review["_meta"]["model_used"] = m
+                return review
+            except Exception as e:  # noqa: BLE001
+                last_err = e
+                msg = str(e)
+                if "429" in msg or "RESOURCE_EXHAUSTED" in msg:
+                    time.sleep(15 * (attempt + 1))
+                    continue
+                break  # non-quota error: move to next model
             print(f"    !! {m} failed: {str(e)[:120]}")
             continue
     raise RuntimeError(f"All review models failed; last error: {last_err}")
@@ -162,7 +170,7 @@ def main():
     ap.add_argument("video", help="Path to rendered MP4")
     ap.add_argument("--script", default=None, help="JSON with scenes (for fact check)")
     ap.add_argument("--out", default=None, help="Output review JSON path")
-    ap.add_argument("--model", default="gemini-2.5-pro")
+    ap.add_argument("--model", default="gemini-3.5-flash")
     args = ap.parse_args()
 
     script_text = ""

@@ -22,8 +22,11 @@ render:
   preset: "fast"
 
 # Subtitles configuration (word-level, animated)
+# v12.4: enabled by default — the v12 review flagged "add high-quality
+# burned-in subtitles"; the engine + renderer support existed but the
+# config disabled them and stage_render never passed clips to the renderer.
 subtitles:
-  enabled: false
+  enabled: true
   font: "Arial"
   font_size: 28
   color: "#FFFFFF"

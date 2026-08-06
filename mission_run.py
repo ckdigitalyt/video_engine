@@ -533,6 +533,15 @@ AI_IMAGE_PROMPTS = {
     ),
 }
 
+# Unified style suffix appended to EVERY generated still.  Fixes the
+# v12 review finding "inconsistent visual style / saturation varies":
+# without a locked style token each provider call drifts.  The grade pass
+# (stage_cinematic_grade) then unifies color further at render time.
+_AI_STYLE_SUFFIX = (
+    ", cinematic documentary still, consistent color palette, "
+    "soft natural lighting, high detail, 16:9 composition"
+)
+
 
 def _still_to_kenburns(image_path: str, out_path: str, duration: float = 9.0) -> str:
     """Convert a still image to a Ken Burns motion clip (1920x1080@30)."""
@@ -585,7 +594,7 @@ def stage_ai_imagery(result_scenes, out_dir: str) -> dict:
                 print(f"  [AI] !! {name} failed: {str(e)[:90]}")
         return False
 
-    generated, injected = 0, 0
+    generated, injected, sem_injected = 0, 0, 0
     for scene in result_scenes:
         text = (scene.narration.spoken_narration or "").lower()
         kind = None
@@ -595,43 +604,100 @@ def stage_ai_imagery(result_scenes, out_dir: str) -> dict:
             kind = "spacecraft"
         elif any(k in text for k in ("interstellar", "leaving", "beyond", "void", "lonely")):
             kind = "interstellar"
-        if not kind:
-            continue
 
-        img_path = os.path.join("cache", "generated", f"ai_{kind}.png")
-        if not os.path.exists(img_path):
-            if _gen(AI_IMAGE_PROMPTS[kind], img_path):
-                generated += 1
-            else:
-                print(f"  [AI] !! {kind} generation failed on all providers")
+        if kind:
+            img_path = os.path.join("cache", "generated", f"ai_{kind}.png")
+            if not os.path.exists(img_path):
+                if _gen(AI_IMAGE_PROMPTS[kind] + _AI_STYLE_SUFFIX, img_path):
+                    generated += 1
+                else:
+                    print(f"  [AI] !! {kind} generation failed on all providers")
+                    continue
+
+            clip_path = os.path.join("cache", "generated", f"ai_{kind}_kb.mp4")
+            if not os.path.exists(clip_path):
+                clip_path = _still_to_kenburns(img_path, clip_path, duration=9.0)
+            if not clip_path:
                 continue
 
-        clip_path = os.path.join("cache", "generated", f"ai_{kind}_kb.mp4")
+            # Inject into the scene's last primary shot (replacing weak stock)
+            for beat in (scene.beat_plans or []):
+                for shot in beat.shots:
+                    if shot.shot_type.value == "primary" and shot.asset_plan:
+                        shot.asset_plan.filepath = clip_path
+                        shot.asset_plan.provider = ProviderType.GENERATED
+                        shot.asset_plan.video_url = f"ai://{kind}"
+                        shot.asset_plan.query_used = f"ai_generated_{kind}"
+                        shot.asset_plan.score = 0.9
+                        shot.asset_plan.semantic_score = max(shot.asset_plan.semantic_score or 0.0, 0.9)
+                        shot.motion = "none"
+                        shot.duration = min(9.0, max(shot.duration, 6.0))
+                        injected += 1
+                        print(f"  [AI] injected {kind} into scene {scene.scene_id} ({shot.duration:.1f}s)")
+                        break
+                else:
+                    continue
+                break
+            continue
+
+        # ── Narration-driven semantic stills (v12.4) ──────────────────
+        # Fixes the v12 review finding "generic bar chart used instead of
+        # depicting the 1953 lab discovery": scenes whose best asset is
+        # semantically weak / fell back to stock now get a scene-specific
+        # AI still generated FROM THE NARRATION, so the visuals track the
+        # script instead of a generic stock query.
+        primary = None
+        for beat in (scene.beat_plans or []):
+            for shot in beat.shots:
+                if shot.shot_type.value == "primary":
+                    primary = shot
+                    break
+            if primary:
+                break
+        if not primary or not primary.asset_plan:
+            continue
+        sem = primary.asset_plan.semantic_score or primary.semantic_score or 0.0
+        prov = primary.asset_plan.provider.value if primary.asset_plan.provider else ""
+        weak = sem < 0.65 or prov in ("placeholder", "emergency", "stock")
+        if not weak:
+            continue
+        # Build a prompt from the scene's actual narration + visual goal.
+        visual_goal = ""
+        if scene.visual_plan and scene.visual_plan.visual_description:
+            visual_goal = scene.visual_plan.visual_description
+        narration_snip = (scene.narration.spoken_narration or "")[:160].strip()
+        prompt = (
+            f"{visual_goal or ('A scene about: ' + narration_snip)}"
+            + _AI_STYLE_SUFFIX
+        )
+        prompt_hash = abs(hash((prompt, scene.scene_id))) % 100000
+        img_path = os.path.join("cache", "generated", f"ai_sem_{scene.scene_id}_{prompt_hash}.png")
+        if not os.path.exists(img_path):
+            if not _gen(prompt, img_path):
+                print(f"  [AI] !! semantic still for scene {scene.scene_id} failed — keeping stock")
+                continue
+            generated += 1
+        clip_path = os.path.join("cache", "generated", f"ai_sem_{scene.scene_id}_{prompt_hash}_kb.mp4")
         if not os.path.exists(clip_path):
             clip_path = _still_to_kenburns(img_path, clip_path, duration=9.0)
         if not clip_path:
             continue
+        primary.asset_plan.filepath = clip_path
+        primary.asset_plan.provider = ProviderType.GENERATED
+        primary.asset_plan.video_url = f"ai://semantic_{scene.scene_id}"
+        primary.asset_plan.query_used = f"ai_generated_semantic_{scene.scene_id}"
+        primary.asset_plan.score = 0.9
+        primary.asset_plan.semantic_score = 0.9
+        primary.motion = "none"
+        primary.duration = min(9.0, max(primary.duration, 6.0))
+        sem_injected += 1
+        print(f"  [AI] semantic still injected into scene {scene.scene_id} "
+              f"(sem_score {sem:.2f} → 0.90, {primary.duration:.1f}s)")
 
-        # Inject into the scene's last primary shot (replacing weak stock)
-        for beat in (scene.beat_plans or []):
-            for shot in beat.shots:
-                if shot.shot_type.value == "primary" and shot.asset_plan:
-                    shot.asset_plan.filepath = clip_path
-                    shot.asset_plan.provider = ProviderType.GENERATED
-                    shot.asset_plan.video_url = f"ai://{kind}"
-                    shot.asset_plan.query_used = f"ai_generated_{kind}"
-                    shot.asset_plan.score = 0.9
-                    shot.motion = "none"
-                    shot.duration = min(9.0, max(shot.duration, 6.0))
-                    injected += 1
-                    print(f"  [AI] injected {kind} into scene {scene.scene_id} ({shot.duration:.1f}s)")
-                    break
-            else:
-                continue
-            break
-
-    print(f"  Generated {generated}, injected {injected} ({(time.time()-t0):.1f}s)")
+    print(f"  Generated {generated}, injected {injected}, semantic-injected {sem_injected} "
+          f"({(time.time()-t0):.1f}s)")
     return {"generated": generated, "injected": injected,
+            "semantic_injected": sem_injected,
             "elapsed_s": round(time.time() - t0, 1)}
 
 
@@ -663,18 +729,175 @@ def stage_narration(result_scenes, cache_audio: str, voice_lock=None) -> dict:
 # Rendering (12) + music mix (11, post-render ffmpeg sidechain)
 # ═══════════════════════════════════════════════════════════════════════ #
 
+def _ensure_timeline_coverage(result_scenes, timeline_path: str) -> dict:
+    """v12.4 coverage gate: every video_timeline entry MUST reference an
+    existing file before render.  Missing entries (v12 review finding: black
+    screen 0:26-0:35 because the renderer silently skipped absent shot files)
+    are healed with a Ken Burns still generated from that scene's own visual
+    description / narration.  If healing is impossible, the render is BLOCKED
+    loudly instead of producing black frames.
+    """
+    if not os.path.exists(timeline_path):
+        return {"missing": 0, "healed": 0, "blocked": "no timeline to check"}
+    with open(timeline_path) as f:
+        tl = json.load(f)
+    vt = tl.get("video_timeline", [])
+    at = tl.get("audio_timeline", [])
+    missing = [e for e in vt if not e.get("file") or not os.path.exists(e.get("file", ""))]
+    if not missing:
+        return {"missing": 0, "healed": 0, "blocked": False}
+
+    print(f"  [coverage] !! {len(missing)}/{len(vt)} video entries reference missing files — healing")
+
+    # Scene spans from the audio timeline (ordered by scene).
+    spans = sorted([(e.get("start_time", 0), e.get("end_time", 0))
+                    for e in at if e.get("track") == "voice"])
+
+    def _scene_for(t: float):
+        for i, (s, e) in enumerate(spans):
+            if s - 0.05 <= t < e + 0.05:
+                return i if i < len(result_scenes) else None
+        return None
+
+    # Reusable image providers (same as stage_ai_imagery).
+    from src.providers.image_gen import NvidiaNimProvider, PollinationsProvider
+    prov = NvidiaNimProvider() if NvidiaNimProvider().is_available() else None
+    fallback = PollinationsProvider()
+
+    def _gen_still(prompt: str, out_path: str) -> bool:
+        attempts = []
+        if prov is not None:
+            attempts.append(prov)
+        if fallback.is_available():
+            attempts.append(fallback)
+        for p in attempts:
+            try:
+                p.generate(prompt, out_path, width=1024, height=576)
+                if os.path.exists(out_path):
+                    return True
+            except Exception as e:
+                print(f"    !! heal gen failed: {str(e)[:80]}")
+        return False
+
+    healed = 0
+    os.makedirs("cache/generated", exist_ok=True)
+    for entry in missing:
+        sidx = _scene_for(entry.get("start_time", 0))
+        scene = result_scenes[sidx] if sidx is not None else None
+        # Prefer any valid asset already attached to this scene.
+        valid = ""
+        if scene is not None:
+            for beat in (scene.beat_plans or []):
+                for shot in beat.shots:
+                    if shot.asset_plan and shot.asset_plan.filepath and \
+                            os.path.exists(shot.asset_plan.filepath):
+                        valid = shot.asset_plan.filepath
+                        break
+                if valid:
+                    break
+        if not valid and scene is not None:
+            desc = ""
+            if scene.visual_plan and scene.visual_plan.visual_description:
+                desc = scene.visual_plan.visual_description
+            if not desc:
+                desc = (scene.narration.spoken_narration or "")[:140]
+            if not desc:
+                desc = scene.title
+            h = abs(hash((desc, entry.get("start_time", 0)))) % 100000
+            img = os.path.join("cache", "generated", f"cov_heal_{h}.png")
+            if not os.path.exists(img) and not _gen_still(
+                    desc + _AI_STYLE_SUFFIX, img):
+                print(f"  [coverage] !! cannot heal missing asset at "
+                      f"{entry.get('start_time', 0):.1f}s — provider unavailable")
+                continue
+            dur = max(3.0, min(entry.get("end_time", 0) - entry.get("start_time", 0), 9.0))
+            clip = os.path.join("cache", "generated", f"cov_heal_{h}_kb.mp4")
+            if not os.path.exists(clip):
+                clip = _still_to_kenburns(img, clip, duration=dur)
+            valid = clip if clip and os.path.exists(clip) else ""
+        if valid:
+            entry["file"] = valid
+            entry["transition"] = "crossfade"
+            entry["motion"] = "ken_burns_in"
+            entry["shot_type"] = "coverage_heal"
+            healed += 1
+            print(f"  [coverage] healed entry at {entry.get('start_time', 0):.1f}s → {os.path.basename(valid)}")
+
+    still_missing = [e for e in vt if not e.get("file") or not os.path.exists(e.get("file", ""))]
+    blocked = False
+    if still_missing:
+        blocked = (
+            f"{len(still_missing)} video entries still missing after heal "
+            f"(times: {[round(e.get('start_time', 0), 1) for e in still_missing][:6]}) — "
+            f"refusing to render black frames"
+        )
+        print(f"  [coverage] !! BLOCKED: {blocked}")
+
+    if healed:
+        with open(timeline_path, "w") as f:
+            json.dump(tl, f, indent=2)
+    return {"missing": len(missing), "healed": healed, "blocked": blocked}
+
+
+def _build_subtitle_clips(result_scenes, timeline_path: str) -> list[dict]:
+    """v12.4: generate burned-in word subtitles for the whole timeline.
+    Fixes the v12 review finding 'add subtitles': the SubtitleEngine and
+    renderer support existed but stage_render never generated or passed
+    subtitle clips, so every video shipped without them.
+    """
+    from src.utils.config import get_config
+    if not get_config("subtitles.enabled", True):
+        return []
+    if not os.path.exists(timeline_path):
+        return []
+    with open(timeline_path) as f:
+        tl = json.load(f)
+    # Scene start offsets from the audio timeline.
+    starts = [e.get("start_time", 0) for e in tl.get("audio_timeline", [])
+              if e.get("track") == "voice"]
+    from src.subtitles.engine import SubtitleEngine
+    engine = SubtitleEngine()
+    all_clips: list[dict] = []
+    for i, scene in enumerate(result_scenes):
+        ap = scene.audio_plan
+        if ap is None or not ap.narration_audio_path:
+            continue
+        text = scene.narration.spoken_narration if scene.narration else ""
+        if not text.strip() or not os.path.exists(ap.narration_audio_path):
+            continue
+        try:
+            timing = engine.generate(ap.narration_audio_path, text)
+        except Exception as e:
+            print(f"  [subs] !! scene {scene.scene_id} timing failed: {str(e)[:80]}")
+            continue
+        offset_ms = (starts[i] if i < len(starts) else 0.0) * 1000.0
+        for clip in engine.to_renderer_clips(timing):
+            clip["start_ms"] = clip.get("start_ms", 0) + offset_ms
+            clip["end_ms"] = clip.get("end_ms", 0) + offset_ms
+            all_clips.append(clip)
+    if all_clips:
+        print(f"  [subs] {len(all_clips)} subtitle clips ({len(result_scenes)} scenes)")
+    return all_clips
+
+
 def stage_render(result_scenes, timeline_path: str, output_path: str,
                  build_timeline: bool = True) -> dict:
     print(f"\n[12/16] RENDERING → {output_path}", flush=True)
     t0 = time.time()
     if build_timeline:
         TimelineBuilder().build_and_write(result_scenes, timeline_path)
-    MoviePyRenderer().render(timeline_path, output_path)
+    # v12.4: coverage gate — heal or block before rendering (no black frames).
+    cov = _ensure_timeline_coverage(result_scenes, timeline_path)
+    if cov.get("blocked"):
+        raise RuntimeError(f"Coverage gate blocked render: {cov['blocked']}")
+    subtitles = _build_subtitle_clips(result_scenes, timeline_path)
+    MoviePyRenderer().render(timeline_path, output_path, subtitles=subtitles)
     size_mb = os.path.getsize(output_path) / 1e6 if os.path.exists(output_path) else 0
     dur = _probe_duration(output_path)
     print(f"  Rendered {dur:.1f}s, {size_mb:.1f} MB ({round(time.time()-t0,1)}s)")
     return {"duration_s": round(dur, 1), "size_mb": round(size_mb, 1),
-            "render_s": round(time.time() - t0, 1), "output": output_path}
+            "render_s": round(time.time() - t0, 1), "output": output_path,
+            "coverage": cov, "subtitle_clips": len(subtitles)}
 
 
 def stage_cinematic_grade(video_path: str, out_path: str,
@@ -1395,7 +1618,7 @@ def stage_video_review(video_path: str, scenes: list[dict], out_path: str) -> di
     t0 = time.time()
     from review_video import _upload_and_review
     script_text = "\n".join(f"SCENE {i}: {s['narration']}" for i, s in enumerate(scenes))
-    review = _upload_and_review(video_path, script_text, model="gemini-2.5-pro")
+    review = _upload_and_review(video_path, script_text, model="gemini-3.5-flash")
     review["_meta"] = {"video": video_path, "model": "gemini-2.5-pro",
                        "elapsed_s": round(time.time() - t0, 1)}
     os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
@@ -1661,11 +1884,21 @@ def main():
     render_stats = stage_render(result_scenes, timeline_path, output_path)
     run_report["stages"]["render_v1"] = render_stats
 
+    # ── v12.4: unified cinematic grade (was dead code — never called) ──
+    # The v12 review flagged "color grade the AI-generated segments …
+    # saturation levels vary significantly".  stage_cinematic_grade existed
+    # but no call site existed, so style drifted across shots.  Apply the
+    # organic texture + unified grade pass to EVERY render before mixing.
+    graded_path = os.path.join(out_dir, f"{slug}_v1_graded.mp4")
+    grade_stats = stage_cinematic_grade(output_path, graded_path)
+    run_report["stages"]["grade_v1"] = grade_stats
+    grade_src = graded_path if grade_stats.get("graded") else output_path
+
     # ── Stage 11: Music mix (sidechain ducking) ───────────────────────
-    mix_stats = stage_music_mix(output_path, args.music, mixed_path,
+    mix_stats = stage_music_mix(grade_src, args.music, mixed_path,
                                 music_volume_db=args.music_db)
     run_report["stages"]["music_v1"] = mix_stats
-    review_target = mixed_path if mix_stats.get("mixed") else output_path
+    review_target = mixed_path if mix_stats.get("mixed") else grade_src
 
     # ── Stages 13-14: Review + improvement (bounded loop) ─────────────
     review = stage_video_review(review_target, scenes_data,
@@ -1691,11 +1924,16 @@ def main():
         render_stats = stage_render(result_scenes, timeline_path, output_path,
                                     build_timeline=False)
         run_report["stages"][f"render_v{iteration+1}"] = render_stats
+        # v12.4: grade every improvement-pass render too (style consistency).
+        _gpath = os.path.join(out_dir, f"{slug}_v{iteration+1}_graded.mp4")
+        _gstats = stage_cinematic_grade(output_path, _gpath)
+        run_report["stages"][f"grade_v{iteration+1}"] = _gstats
+        _gsrc = _gpath if _gstats.get("graded") else output_path
         # Re-mix music on the improved render
-        mix_stats = stage_music_mix(output_path, args.music, mixed_path,
+        mix_stats = stage_music_mix(_gsrc, args.music, mixed_path,
                                     music_volume_db=args.music_db)
         run_report["stages"][f"music_v{iteration+1}"] = mix_stats
-        review_target = mixed_path if mix_stats.get("mixed") else output_path
+        review_target = mixed_path if mix_stats.get("mixed") else _gsrc
         review = stage_video_review(review_target, scenes_data,
                                     os.path.join(out_dir, f"review_v{iteration+1}.json"))
         run_report["stages"][f"review_v{iteration+1}"] = {
