@@ -613,7 +613,8 @@ class WikimediaCommonsProvider(AssetProvider):
             # Check if response is HTML (rate limiting) rather than JSON
             for attempt in range(3):
                 content_type = raw_resp.headers.get("Content-Type", "")
-                if "text/html" in content_type or raw_resp.status_code == 429:
+                if "text/html" in content_type or raw_resp.status_code == 429 \
+                        or len(raw_resp.content) < 2:
                     import time
                     wait = 3 * (attempt + 1)
                     print(f"-> Wikimedia API rate limited, retry {attempt+1} in {wait}s...")
@@ -621,7 +622,27 @@ class WikimediaCommonsProvider(AssetProvider):
                     raw_resp = requests.get(self._base_url, params=params, headers=headers, timeout=15)
                 else:
                     break
-            res = raw_resp.json()
+            # v14 fix: a 200 with an EMPTY body (transient Wikimedia
+            # throttling, seen on the 52-Hz v18 run) still fails json() —
+            # retry on parse failure too instead of returning [] and
+            # flooding the video with placeholders.
+            try:
+                res = raw_resp.json()
+            except Exception:
+                import time as _t
+                _ok = False
+                for attempt in range(3):
+                    _t.sleep(3 * (attempt + 1))
+                    raw_resp = requests.get(self._base_url, params=params, headers=headers, timeout=15)
+                    try:
+                        res = raw_resp.json()
+                        _ok = True
+                        break
+                    except Exception:
+                        continue
+                if not _ok:
+                    print("-> Wikimedia API request failed (empty body after retries)")
+                    return []
         except Exception as e:
             print(f"-> Wikimedia API request failed: {e}")
             return []

@@ -3,22 +3,17 @@
   "publish_ready": false,
   "blocked_by": {
     "publish": [
-      "frozen_shots",
-      "excessive_static"
+      "hook_strength"
     ],
     "pre_render": [
       "shot_hold",
       "pacing",
       "resolution_headroom"
-    ],
-    "claims": [
-      "claim_contradictions"
     ]
   },
   "categories": [
-    "factual",
     "retention",
     "visual"
   ],
-  "summary": "Gates blocked \u2014 revision required before publication: publish: frozen_shots, excessive_static; pre_render: shot_hold, pacing, resolution_headroom; claims: claim_contradictions"
+  "summary": "Gates blocked \u2014 revision required before publication: publish: hook_strength; pre_render: shot_hold, pacing, resolution_headroom"
 }

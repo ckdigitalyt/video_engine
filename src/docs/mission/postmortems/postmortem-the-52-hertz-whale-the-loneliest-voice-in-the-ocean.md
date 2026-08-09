@@ -1,11 +1,11 @@
 # Postmortem — The 52-Hertz Whale: the loneliest voice in the ocean
-**When:** 2026-08-09T13:55:55+00:00
+**When:** 2026-08-09T14:49:07+00:00
 
 ## Techniques that worked
 - multi-reviewer script review (2 passes, gate=False)
-- director beat mode: 43 shots, providers={'manim': 3, 'placeholder': 35, 'pexels': 4, 'emergency': 1}
+- director beat mode: 35 shots, providers={'manim': 3, 'placeholder': 25, 'pexels': 5, 'emergency': 2}
 - ffmpeg sidechain music ducking (bed=cinematic.mp3)
-- Gemini Flash end-to-end review score 85/100
+- Gemini Flash end-to-end review score 45/100
 
 ## Techniques that failed
 - web search in research agent (no API key — used DeepSeek knowledge base)
@@ -26,10 +26,11 @@ _(none recorded)_
 _(none recorded)_
 
 ## Review feedback
-- Replace irrelevant visuals (e.g., the record player at 0:33, the vintage camera at 1:17) with more thematic or abstract 
-- Enhance visual relevance for generic ocean shots (e.g., 0:21, 0:45). Consider abstract visualizations of sound waves tra
-- Strive for greater visual style consistency across all assets. If using AI art/stock footage, aim for a cohesive aesthet
-- Extend the duration of some impactful visual segments (e.g., the whale breaching at 0:55) slightly to allow the viewer m
+- Replace the bar chart and blurry blue blob (0:11-0:19) with visuals directly related to sonar, ocean acoustics, or the U
+- Remove the alien in the desert visual (0:19-0:24) entirely. This is completely irrelevant and highly distracting. Replac
+- Replace the small, blurry picture-in-picture element at 0:49-0:54 with a clear animated map showing the whale's migrator
+- Develop a consistent visual style. Either commit to abstract motion graphics (Manim-like) throughout, or use high-qualit
+- Minimize solid color screens with text. Instead, use subtle background footage (e.g., deep ocean, abstract water texture
 
 ## Benchmark results
 ```json
@@ -45,10 +46,10 @@ _(none recorded)_
 ## Metrics
 ```json
 {
-  "final_score": 85,
+  "final_score": 45,
   "render_iterations": 1,
-  "shots": 43,
-  "fallbacks": 36,
-  "duration_s": 93.233333
+  "shots": 35,
+  "fallbacks": 27,
+  "duration_s": 81.266667
 }
 ```

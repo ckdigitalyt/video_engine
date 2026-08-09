@@ -1,8 +1,7 @@
 {
   "passed": false,
   "blocking_failures": [
-    "frozen_shots",
-    "excessive_static"
+    "hook_strength"
   ],
   "checks": [
     {
@@ -10,7 +9,7 @@
       "passed": true,
       "detail": "v=h264 a=aac",
       "metrics": {
-        "duration_s": 93.233333,
+        "duration_s": 81.266667,
         "resolution": [
           1920,
           1080
@@ -33,24 +32,19 @@
     },
     {
       "name": "frozen_shots",
-      "passed": false,
-      "detail": "frozen runs (>= 2.5s): [(30.0, 15)]",
+      "passed": true,
+      "detail": "no frozen shots",
       "metrics": {
-        "frozen_runs": [
-          [
-            30.0,
-            15
-          ]
-        ],
-        "frames_sampled": 7
+        "frozen_runs": [],
+        "frames_sampled": 6
       }
     },
     {
       "name": "excessive_static",
-      "passed": false,
-      "detail": "longest static window: 15.0s (limit 8.0s)",
+      "passed": true,
+      "detail": "longest static window: 0.0s (limit 8.0s)",
       "metrics": {
-        "longest_static_s": 15
+        "longest_static_s": 0
       }
     },
     {
@@ -59,7 +53,7 @@
       "detail": "max_volume=-1.5 dB (silence < -50.0 dB)",
       "metrics": {
         "max_db": -1.5,
-        "mean_db": -15.8
+        "mean_db": -15.9
       }
     },
     {
@@ -72,11 +66,11 @@
     },
     {
       "name": "hook_strength",
-      "passed": true,
-      "detail": "hook window (15s): 5 distinct visuals (need >= 5)",
+      "passed": false,
+      "detail": "WEAK HOOK: only 4 distinct visual(s) in first 15s \u2014 opening needs stronger material",
       "metrics": {
-        "distinct_in_hook": 5,
-        "shots_in_hook": 5
+        "distinct_in_hook": 4,
+        "shots_in_hook": 4
       }
     },
     {
@@ -110,9 +104,9 @@
       "passed": true,
       "detail": "mastered audio publication-safe (I/LRA/TP OK)",
       "metrics": {
-        "integrated_lufs": -13.97,
-        "true_peak_dbTP": -1.47,
-        "lra": 3.0,
+        "integrated_lufs": -14.09,
+        "true_peak_dbTP": -1.49,
+        "lra": 3.7,
         "max_volume_db": -1.5
       }
     },

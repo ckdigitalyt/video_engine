@@ -4,7 +4,7 @@
     {
       "name": "claim_contradictions",
       "passed": true,
-      "detail": "11 claim(s); 0 contradicted"
+      "detail": "13 claim(s); 0 contradicted"
     },
     {
       "name": "unsupported_quantitative_claims",
@@ -19,33 +19,53 @@
   ],
   "claims": [
     {
-      "text": "fifty-two Hertz",
+      "text": "fifty-two hertz",
       "kind": "quantitative",
       "value": "52",
       "unit": "hertz",
       "entity": null,
       "status": "verified",
-      "detail": "matched research fact: \u2026the 52-hertz whale is the only known whale with a call at 52 hz 52",
+      "detail": "matched research fact: \u2026the 52-hertz whale is the only known whale with a consistent call frequency of 52 hz 52",
       "source_label": "research_pack"
     },
     {
-      "text": "forty Hertz",
+      "text": "forty hertz",
       "kind": "quantitative",
       "value": "40",
       "unit": "hertz",
       "entity": null,
       "status": "verified",
-      "detail": "matched research fact: \u2026the whale's call frequency is higher than blue whales (10-40 hz) and lower than fin whales (20 hz) ",
+      "detail": "matched research fact: \u2026the whale's call frequency is higher than the typical blue whale (10-40 hz) and lower than the fin w",
       "source_label": "research_pack"
     },
     {
-      "text": "twenty Hertz",
+      "text": "twenty hertz",
       "kind": "quantitative",
       "value": "20",
       "unit": "hertz",
       "entity": null,
       "status": "verified",
-      "detail": "matched research fact: \u2026the whale's call frequency is higher than blue whales (10-40 hz) and lower than fin whales (20 hz) ",
+      "detail": "matched research fact: \u2026the whale's call frequency is higher than the typical blue whale (10-40 hz) and lower than the fin w",
+      "source_label": "research_pack"
+    },
+    {
+      "text": "thirty years",
+      "kind": "quantitative",
+      "value": "30",
+      "unit": "years",
+      "entity": null,
+      "status": "verified",
+      "detail": "matched research fact: \u2026the whale has been tracked annually since 1992, traveling up to 3,000 km per year 3000",
+      "source_label": "research_pack"
+    },
+    {
+      "text": "two hundred times",
+      "kind": "quantitative",
+      "value": "200",
+      "unit": "times",
+      "entity": null,
+      "status": "verified",
+      "detail": "matched research fact: \u2026the whale's calls are detected approximately 200 times per year 200",
       "source_label": "research_pack"
     },
     {
@@ -55,104 +75,110 @@
       "unit": "kilometers",
       "entity": null,
       "status": "verified",
-      "detail": "matched research fact: \u2026the whale's call range extends up to 3,000 kilometers in the pacific ocean 3000",
+      "detail": "matched research fact: \u2026the whale has been tracked annually since 1992, traveling up to 3,000 km per year 3000",
       "source_label": "research_pack"
     },
     {
-      "text": "Detected since nineteen eighty-nine",
+      "text": "ten to forty hertz",
+      "kind": "quantitative",
+      "value": "10",
+      "unit": "hertz",
+      "entity": "blue whales",
+      "status": "verified",
+      "detail": "matched research fact: \u2026the whale's call frequency is higher than the typical blue whale (10-40 hz) and lower than the fin w",
+      "source_label": "research_pack"
+    },
+    {
+      "text": "around twenty hertz",
+      "kind": "quantitative",
+      "value": "20",
+      "unit": "hertz",
+      "entity": "fin whales",
+      "status": "verified",
+      "detail": "matched research fact: \u2026the whale's call frequency is higher than the typical blue whale (10-40 hz) and lower than the fin w",
+      "source_label": "research_pack"
+    },
+    {
+      "text": "in nineteen eighty-nine",
       "kind": "quantitative",
       "value": "1989",
       "unit": "year",
-      "entity": null,
+      "entity": "None",
       "status": "verified",
-      "detail": "matched research fact: \u2026the whale has been tracked annually since its discovery in 1989 1989",
+      "detail": "matched research fact: \u2026the whale's calls were first detected in 1989 by the u.s. navy's sound surveillance system (sosus) 1",
       "source_label": "research_pack"
     },
     {
-      "text": "Blue whales hum at ten to forty Hertz",
+      "text": "two hundred times a year",
       "kind": "quantitative",
-      "value": "40",
-      "unit": "Hertz",
-      "entity": null,
+      "value": "200",
+      "unit": "times per year",
+      "entity": "52-Hz whale",
       "status": "verified",
-      "detail": "matched research fact: \u2026the whale's call frequency is higher than blue whales (10-40 hz) and lower than fin whales (20 hz) ",
+      "detail": "matched research fact: \u2026the whale's calls are detected approximately 200 times per year 200",
       "source_label": "research_pack"
     },
     {
-      "text": "Fin whales at around twenty Hertz",
+      "text": "For thirty years",
       "kind": "quantitative",
-      "value": "20",
-      "unit": "Hertz",
-      "entity": null,
+      "value": "30",
+      "unit": "years",
+      "entity": "52-Hz whale",
       "status": "verified",
-      "detail": "matched research fact: \u2026the whale's call frequency is higher than blue whales (10-40 hz) and lower than fin whales (20 hz) ",
+      "detail": "matched research fact: \u2026the whale has been tracked annually since 1992, traveling up to 3,000 km per year 3000",
       "source_label": "research_pack"
     },
     {
-      "text": "This? Fifty-two Hertz",
+      "text": "From thirty-two degrees north to forty-eight degrees north",
       "kind": "quantitative",
-      "value": "52",
-      "unit": "Hertz",
-      "entity": null,
+      "value": "32",
+      "unit": "degrees",
+      "entity": "52-Hz whale",
       "status": "verified",
-      "detail": "matched research fact: \u2026the 52-hertz whale is the only known whale with a call at 52 hz 52",
+      "detail": "matched research fact: \u2026the whale's calls have been detected in the north pacific ocean, primarily between 32\u00b0n and 48\u00b0n lat",
       "source_label": "research_pack"
     },
     {
-      "text": "Three thousand kilometers of ocean",
+      "text": "Three thousand kilometers a year",
       "kind": "quantitative",
       "value": "3000",
       "unit": "kilometers",
-      "entity": null,
+      "entity": "52-Hz whale",
       "status": "verified",
-      "detail": "matched research fact: \u2026the whale's call range extends up to 3,000 kilometers in the pacific ocean 3000",
+      "detail": "matched research fact: \u2026the whale has been tracked annually since 1992, traveling up to 3,000 km per year 3000",
       "source_label": "research_pack"
-    },
-    {
-      "text": "One hundred fifty decibels",
-      "kind": "quantitative",
-      "value": "150",
-      "unit": "decibels",
-      "entity": null,
-      "status": "verified",
-      "detail": "matched research fact: \u2026the whale's call amplitude is estimated at 150-160 decibels 155",
-      "source_label": "research_pack"
-    },
-    {
-      "text": "louder than a jet engine",
-      "kind": "causal",
-      "value": "None",
-      "unit": "None",
-      "entity": null,
-      "status": "ok",
-      "detail": "",
-      "source_label": ""
     }
   ],
   "entities": [
     "52-Hz whale",
-    "Fifty-two Blue",
-    "U.S. Navy\u2019s SOSUS array",
-    "submarines",
-    "violin",
-    "drumline",
-    "Schools",
-    "Scientists"
+    "SOSUS array",
+    "U.S. Navy",
+    "blue whales",
+    "fin whales",
+    "blue-fin hybrid",
+    "hydrophone streams"
   ],
   "conflation_risks": [
     {
       "type": "conflation_risk",
-      "a": "52-hz whale",
-      "b": "fifty-two blue",
-      "detail": "Both refer to the same phenomenon (the whale singing at 52 Hz). 'Fifty-two blue' is a nickname for the 52-hz whale, so they are not distinct phenomena.",
-      "severity": "minor"
+      "a": "blue whales",
+      "b": "fin whales",
+      "detail": "These are distinct species with different typical call frequencies (blue whales: 10-40 Hz, fin whales: ~20 Hz). The 52-Hz whale's frequency is outside both ranges, so its calls must not be conflated with either species' typical calls.",
+      "severity": "major"
     },
     {
       "type": "conflation_risk",
-      "a": "U.S. Navy\u2019s SOSUS array",
-      "b": "submarines",
-      "detail": "The SOSUS array is a detection system, while submarines are objects being detected. They are distinct, but an attribute like 'tracking capability' could be conflated if misstated (e.g., implying the SOSUS array is a submarine).",
-      "severity": "minor"
+      "a": "U.S. Navy",
+      "b": "SOSUS array",
+      "detail": "The U.S. Navy operates the SOSUS array, but they are distinct entities. The SOSUS array is a tool/technology, while the U.S. Navy is the organization. Attributes (e.g., intent, actions) should not transfer from the array to the Navy or vice versa.",
+      "severity": "major"
+    },
+    {
+      "type": "conflation_risk",
+      "a": "blue-fin hybrid",
+      "b": "52-hz whale",
+      "detail": "The blue-fin hybrid is a hypothesis to explain the 52-Hz whale's calls, but they are not the same phenomenon. The hybrid is a theoretical explanation, while the 52-Hz whale is the observed signal. Attributes (e.g., identity, behavior) must not transfer from the hybrid to the whale or vice versa.",
+      "severity": "major"
     }
   ],
   "blocking_failures": []

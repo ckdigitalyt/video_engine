@@ -264,6 +264,7 @@ class TimelineBuilder:
                         _fp = (shot["filepath"] or "").lower()
                         if _motion in (None, "none", "") and (
                             "placeholder" in _fp or "emergency" in _fp
+                            or "/generated/" in _fp or "ai_sem" in _fp
                         ):
                             _motion = "kenburns"
                         video_timeline.append({
