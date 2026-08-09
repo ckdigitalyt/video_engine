@@ -1,46 +1,48 @@
 {
   "topic": "The 52-Hertz Whale: the loneliest voice in the ocean",
-  "started_at": "2026-08-09T10:40:25Z",
+  "started_at": "2026-08-09T11:57:23Z",
   "stages": {
     "research": {
-      "facts": 15,
-      "elapsed_s": 8.8
+      "facts": 14,
+      "elapsed_s": 6.9
     },
     "claim_gate": {
-      "passed": true,
+      "passed": false,
       "blocking": [],
-      "claims": 13,
+      "claims": 9,
       "conflation_risks": 2
     },
     "director": {
-      "shots": 30,
-      "avg_shot_s": 4.7,
+      "shots": 45,
+      "avg_shot_s": 4.2,
       "providers": {
-        "manim": 4,
-        "pexels": 16,
-        "placeholder": 7,
-        "emergency": 3
+        "manim": 3,
+        "placeholder": 23,
+        "pexels": 17,
+        "emergency": 2
       },
-      "fallbacks": 10,
+      "fallbacks": 25,
       "transitions": {
         "fade": 17,
-        "cut_sync": 9,
-        "cut": 1,
-        "crossfade": 3
+        "cut_sync": 12,
+        "zoom_in": 2,
+        "crossfade": 9,
+        "wipe_left": 2,
+        "cut": 3
       },
       "motions": {
         "none": 13,
         "pan_left": 10,
-        "push_in": 1,
-        "ken_burns_in": 6
+        "push_in": 15,
+        "ken_burns_in": 7
       },
-      "elapsed_s": 723.0
+      "elapsed_s": 767.4
     },
     "ai_imagery": {
-      "generated": 2,
-      "injected": 0,
+      "generated": 3,
+      "injected": 1,
       "semantic_injected": 2,
-      "elapsed_s": 92.6
+      "elapsed_s": 113.9
     },
     "narration": {
       "provider": "fish",
@@ -67,7 +69,7 @@
         {
           "name": "voice_loudness_consistency",
           "passed": true,
-          "detail": "per-scene RMS spread 1.4 dB (limit 12.0 dB)",
+          "detail": "per-scene RMS spread 1.2 dB (limit 12.0 dB)",
           "metrics": {}
         },
         {
@@ -97,9 +99,9 @@
         {
           "name": "shot_hold",
           "passed": false,
-          "detail": "longest static shot 7.000s (limit 4.0s)",
+          "detail": "longest static shot 6.000s (limit 4.0s)",
           "metrics": {
-            "longest_hold_s": 7.0
+            "longest_hold_s": 6.0
           }
         },
         {
@@ -128,18 +130,17 @@
         {
           "name": "pacing",
           "passed": false,
-          "detail": "rushed scenes: ['scene 5: rushed: 200 wpm > 172 (200 wpm)', 'scene 8: rushed: 220 wpm > 175 (220 wpm)']",
+          "detail": "rushed scenes: ['scene 7: rushed: 186 wpm > 172 (186 wpm)']",
           "metrics": {
-            "avg_wpm": 155.1,
-            "rushed_scene_count": 3,
+            "avg_wpm": 147.7,
+            "rushed_scene_count": 2,
             "comprehension_risk_flags": [
-              "scene 4: high comprehension risk",
-              "scene 5: high comprehension risk",
-              "scene 8: high comprehension risk"
+              "scene 3: high comprehension risk",
+              "scene 7: high comprehension risk"
             ],
             "high_risk": [
               {
-                "scene": 4,
+                "scene": 3,
                 "flags": [
                   "high comprehension risk"
                 ],
@@ -150,7 +151,7 @@
                     "technical_density": 0.55,
                     "sentence_length": 0.0
                   },
-                  "wpm": 156.4,
+                  "wpm": 135.4,
                   "role": "explanation",
                   "band": [
                     115,
@@ -160,45 +161,23 @@
                 }
               },
               {
-                "scene": 5,
+                "scene": 7,
                 "flags": [
-                  "rushed: 200 wpm > 172",
+                  "rushed: 186 wpm > 172",
                   "high comprehension risk"
                 ],
                 "risk": {
-                  "score": 1.0,
+                  "score": 0.97,
                   "signals": {
-                    "speech_rate": 1.0,
+                    "speech_rate": 0.69,
                     "technical_density": 0.28,
                     "sentence_length": 0.0
                   },
-                  "wpm": 199.7,
+                  "wpm": 185.7,
                   "role": "exploration",
                   "band": [
                     128,
                     172
-                  ],
-                  "grade": "high"
-                }
-              },
-              {
-                "scene": 8,
-                "flags": [
-                  "rushed: 220 wpm > 175",
-                  "high comprehension risk"
-                ],
-                "risk": {
-                  "score": 1.0,
-                  "signals": {
-                    "speech_rate": 1.0,
-                    "technical_density": 0.0,
-                    "sentence_length": 0.0
-                  },
-                  "wpm": 220.5,
-                  "role": "climax",
-                  "band": [
-                    130,
-                    175
                   ],
                   "grade": "high"
                 }
@@ -215,36 +194,36 @@
         {
           "name": "resolution_headroom",
           "passed": false,
-          "detail": "11 shot(s) exceed source headroom: scene_0_b1_s0.mp4 source 640x360 BELOW output 1920x1080 \u2014 upscaling stock footage causes v; scene_1_b1_s0.mp4 source 426x240 BELOW output 1920x1080 \u2014 upscaling stock footage causes v; scene_2_b0_s0.mp4 source 1280x720 BELOW output 1920x1080 \u2014 upscaling stock footage causes ; scene_2_b0_s1.mp4 source 640x360 BELOW output 1920x1080 \u2014 upscaling stock footage causes v",
+          "detail": "8 shot(s) exceed source headroom: scene_0_b2_s0.mp4 source 1366x720 BELOW output 1920x1080 \u2014 upscaling stock footage causes ; scene_1_b1_s0.mp4 source 426x240 BELOW output 1920x1080 \u2014 upscaling stock footage causes v; scene_2_b0_s0.mp4 source 1280x720 BELOW output 1920x1080 \u2014 upscaling stock footage causes ; scene_3_b0_s0.mp4 source 426x240 BELOW output 1920x1080 \u2014 upscaling stock footage causes v",
           "metrics": {}
         }
       ]
     },
     "render_v1": {
-      "duration_s": 64.6,
-      "size_mb": 7.5,
-      "render_s": 59.4,
+      "duration_s": 119.3,
+      "size_mb": 19.7,
+      "render_s": 123.0,
       "output": "results/the_52_hertz_whale__the_loneliest_voice_in_t/the_52_hertz_whale__the_loneliest_voice_in_t_v1.mp4",
       "coverage": {
         "missing": 0,
         "healed": 0,
         "blocked": false
       },
-      "subtitle_clips": 162
+      "subtitle_clips": 291
     },
     "grade_v1": {
       "graded": true,
       "grain": 8,
-      "elapsed_s": 292.8,
-      "size_mb": 36.2
+      "elapsed_s": 560.9,
+      "size_mb": 75.5
     },
     "sfx_v1": {
-      "placed": 10
+      "placed": 7
     },
     "music_v1": {
       "mixed": true,
-      "elapsed_s": 14.7,
-      "size_mb": 36.8,
+      "elapsed_s": 25.3,
+      "size_mb": 76.5,
       "mean_db": -15.8,
       "sfx": "sfx_timeline_run.wav",
       "audio_qa": {
@@ -258,7 +237,7 @@
           {
             "name": "ducking_depth",
             "passed": true,
-            "detail": "voice mean -26.8 dB vs bed -16.0 dB \u2014 voice above bed \u2713 (ducking viable)"
+            "detail": "voice mean -26.2 dB vs bed -16.0 dB \u2014 voice above bed \u2713 (ducking viable)"
           }
         ]
       }
@@ -266,91 +245,45 @@
     "review_v1": {
       "score": 45,
       "confidence": 0.9,
-      "elapsed_s": 44.8
+      "elapsed_s": 69.5
     },
     "improve_pass_1": {
       "iteration": 2,
       "applied": [
         {
-          "category": "transitions",
-          "detail": "[transitions][medium] Improve transitions between scenes. Avoid abrupt cuts to black or irrelevant content. Use smoother fades, wipes, or animated transitions that align with the narrative flow.",
-          "source_rec": "Improve transitions between scenes. Avoid abrupt cuts to black or irrelevant content. Use smoother fades, wipes, or animated transitions that align with the narrative flow."
+          "category": "pacing",
+          "detail": "[pacing][medium] Re-time cuts and transitions to align seamlessly with the narration, ensuring visuals support the spoken word rather than distracting from it. Eliminate abrupt cuts to black screens or unrelated image",
+          "source_rec": "Re-time cuts and transitions to align seamlessly with the narration, ensuring visuals support the spoken word rather than distracting from it. Eliminate abrupt cuts to black screens or unrelated image"
         }
       ],
       "flagged": [
-        "[unclassified] Replace all irrelevant visuals (e.g., bar chart at 0:07, alien at 0:14, nebula at 0:19, iceberg at 0:45, moon at 0:34). Every visual must directly support or illustrate the narration.",
-        "[new_asset] Eliminate the small, inset video boxes that appear randomly in the corners. If a visual is important, it should be full screen or integrated seamlessly into the main visual narrative.",
-        "[unclassified] Develop a consistent visual style. Either lean into the abstract animation, or use high-quality, relevant stock footage, but avoid jarring mixes of unrelated visual types and qualities.",
-        "[new_scene] Replace black screens with single words (e.g., 'year' at 0:14, 'to' at 0:22, 'books' at 0:46) with relevant, engaging visuals or animations that enhance the narrative.",
-        "[unclassified] Ensure all text overlays are consistent in style, font, and animation, and appear only when necessary to reinforce key information, not as standalone words on black screens."
+        "[unclassified] Replace all irrelevant stock footage (e.g., 0:07-0:12, 0:15-0:26, 0:26-0:30, 0:37-0:45, 0:49-0:56, 1:44-1:47) with visuals directly related to whales, oceanography, sound waves, or scientific tracking. Consider using more consistent and sophisticated abstract animations if real footage is unavailable.",
+        "[unclassified] Establish a consistent visual style throughout the documentary. Decide whether the primary aesthetic is abstract, realistic, or a blend, and ensure all visuals adhere to this chosen style to maintain coherence.",
+        "[new_asset] Integrate more actual footage or high-quality CGI of whales, underwater environments, and scientific equipment (like hydrophones or SOSUS arrays) to enhance visual storytelling and engagement.",
+        "[unclassified] Refine the on-screen text presentation. While effective, ensure its style and background are consistent and visually appealing across all scenes, avoiding sudden shifts to plain text on a solid color after a complex visual."
       ],
       "stopped_early": false,
       "notes": "",
       "elapsed_s": 0.0
-    },
-    "render_v2": {
-      "duration_s": 64.6,
-      "size_mb": 7.5,
-      "render_s": 58.2,
-      "output": "results/the_52_hertz_whale__the_loneliest_voice_in_t/the_52_hertz_whale__the_loneliest_voice_in_t_v1.mp4",
-      "coverage": {
-        "missing": 0,
-        "healed": 0,
-        "blocked": false
-      },
-      "subtitle_clips": 162
-    },
-    "grade_v2": {
-      "graded": true,
-      "grain": 8,
-      "elapsed_s": 290.8,
-      "size_mb": 36.2
-    },
-    "music_v2": {
-      "mixed": true,
-      "elapsed_s": 14.7,
-      "size_mb": 36.8,
-      "mean_db": -15.8,
-      "sfx": "sfx_timeline_run.wav",
-      "audio_qa": {
-        "passed": true,
-        "checks": [
-          {
-            "name": "narration_clipping",
-            "passed": true,
-            "detail": "no narration clipping"
-          },
-          {
-            "name": "ducking_depth",
-            "passed": true,
-            "detail": "voice mean -26.8 dB vs bed -16.0 dB \u2014 voice above bed \u2713 (ducking viable)"
-          }
-        ]
-      }
-    },
-    "review_v2": {
-      "score": 45,
-      "confidence": 0.9,
-      "elapsed_s": 49.9
     }
   },
   "errors": [
     "pre-render gate blocked: ['shot_hold', 'pacing', 'resolution_headroom']",
-    "publish gate: ['repeated_assets']"
+    "publish gate: ['frozen_shots', 'excessive_static', 'hook_strength']"
   ],
   "provider": "mistral",
   "claim_gate": {
-    "passed": true,
+    "passed": false,
     "checks": [
       {
         "name": "claim_contradictions",
         "passed": true,
-        "detail": "13 claim(s); 0 contradicted"
+        "detail": "9 claim(s); 0 contradicted"
       },
       {
         "name": "unsupported_quantitative_claims",
-        "passed": true,
-        "detail": "all quantitative claims source-backed"
+        "passed": false,
+        "detail": "UNSUPPORTED (advisory) numbers: January to December; nineteen ninety-four to two thousand twenty-four"
       },
       {
         "name": "entity_disambiguation",
@@ -360,13 +293,23 @@
     ],
     "claims": [
       {
-        "text": "forty hertz",
+        "text": "fifty-two hertz",
         "kind": "quantitative",
-        "value": "40",
+        "value": "52",
         "unit": "hertz",
         "entity": null,
         "status": "verified",
-        "detail": "matched research fact: \u2026the whale's call is significantly higher than typical blue whale calls (10-40 hz) and fin whale call",
+        "detail": "matched research fact: \u2026the 52-hertz whale is the only known whale with a call frequency of 52 hz 52",
+        "source_label": "research_pack"
+      },
+      {
+        "text": "twenty hertz",
+        "kind": "quantitative",
+        "value": "20",
+        "unit": "hertz",
+        "entity": null,
+        "status": "verified",
+        "detail": "matched research fact: \u2026the whale's call frequency is higher than the typical blue whale (10-40 hz) and lower than the fin w",
         "source_label": "research_pack"
       },
       {
@@ -377,144 +320,93 @@
         "entity": null,
         "status": "verified",
         "detail": "",
-        "source_label": "NOAA Pacific Marine Environmental Laboratory (PMEL), Scripps Institution of Ocea"
+        "source_label": "NOAA Fisheries, Woods Hole Oceanographic Institution (WHOI), and other marine bi"
       },
       {
-        "text": "thirty thousand miles",
+        "text": "three thousand kilometers",
         "kind": "quantitative",
-        "value": "30000",
-        "unit": "miles",
+        "value": "3000",
+        "unit": "kilometers",
         "entity": null,
         "status": "verified",
-        "detail": "matched research fact: \u2026the whale has been tracked annually since 1992, covering over 30,000 miles of ocean 30000",
+        "detail": "matched research fact: \u2026the whale's call range extends up to 3,000 kilometers 3000",
         "source_label": "research_pack"
       },
       {
-        "text": "fifty-two hertz",
+        "text": "ten-forty",
         "kind": "quantitative",
-        "value": "52",
+        "value": "1040",
         "unit": "hertz",
-        "entity": null,
-        "status": "verified",
-        "detail": "matched research fact: \u2026the 52-hertz whale is the only known whale with a consistently high-frequency call of 52 hz 52",
-        "source_label": "research_pack"
-      },
-      {
-        "text": "ten to forty hertz",
-        "kind": "quantitative",
-        "value": "10 to 40",
-        "unit": "hertz",
-        "entity": "blue whales",
+        "entity": "blue whale hum frequency",
         "status": "verified",
         "detail": "",
-        "source_label": "NOAA (National Oceanic and Atmospheric Administration) and Scripps Institution o"
-      },
-      {
-        "text": "twenty to thirty",
-        "kind": "quantitative",
-        "value": "20 to 30",
-        "unit": "hertz",
-        "entity": "fin whales",
-        "status": "ok",
-        "detail": "hypothesis: The 52 Hz frequency is a documented but unexplained acoustic signal; blue whales typically vocalize at 10-40 Hz, making ",
-        "source_label": "NOAA Pacific Marine Environmental Laboratory (PMEL) Acoustics Program"
+        "source_label": "NOAA Pacific Marine Environmental Laboratory (PMEL)"
       },
       {
         "text": "fifty-two",
         "kind": "quantitative",
         "value": "52",
         "unit": "hertz",
-        "entity": "52-Hz whale",
+        "entity": "whale call frequency",
         "status": "verified",
-        "detail": "matched research fact: \u2026the 52-hertz whale is the only known whale with a consistently high-frequency call of 52 hz 52",
+        "detail": "matched research fact: \u2026the 52-hertz whale is the only known whale with a call frequency of 52 hz 52",
         "source_label": "research_pack"
       },
       {
-        "text": "nineteen eighty-nine",
+        "text": "Since nineteen eighty-nine",
         "kind": "quantitative",
         "value": "1989",
         "unit": "year",
-        "entity": "U.S. Navy's SOSUS array",
+        "entity": "year",
         "status": "verified",
-        "detail": "matched research fact: \u2026the whale's call was first detected in 1989 by the u.s. navy's sosus hydrophone array 1989",
+        "detail": "matched research fact: \u2026the whale has been tracked annually since 1989 1989",
         "source_label": "research_pack"
       },
       {
-        "text": "over thirty thousand miles",
+        "text": "January to December",
         "kind": "quantitative",
-        "value": "30000",
-        "unit": "miles",
-        "entity": "52-Hz whale",
-        "status": "verified",
-        "detail": "matched research fact: \u2026the whale has been tracked annually since 1992, covering over 30,000 miles of ocean 30000",
-        "source_label": "research_pack"
-      },
-      {
-        "text": "nineteen ninety-two",
-        "kind": "quantitative",
-        "value": "1992",
-        "unit": "year",
-        "entity": "tracking of 52-Hz whale",
-        "status": "verified",
-        "detail": "matched research fact: \u2026the whale has been tracked annually since 1992, covering over 30,000 miles of ocean 30000",
-        "source_label": "research_pack"
-      },
-      {
-        "text": "December and January",
-        "kind": "quantitative",
-        "value": "December and January",
+        "value": "12",
         "unit": "months",
-        "entity": "peak calls of 52-Hz whale",
-        "status": "ok",
-        "detail": "hypothesis: The 52 Hz call is a documented acoustic phenomenon, but its origin remains unconfirmed despite decades of tracking; it i",
-        "source_label": "NOAA Pacific Marine Environmental Laboratory (PMEL), reports by Dr. William Watk"
+        "entity": "time period",
+        "status": "unsupported",
+        "detail": "The claim 'January to December' (12 months) is not independently verifiable as a scientific fact in this context; the narrative describes the 52-hertz whale's s",
+        "source_label": ""
       },
       {
-        "text": "August",
+        "text": "nineteen ninety-four to two thousand twenty-four",
         "kind": "quantitative",
-        "value": "August",
-        "unit": "month",
-        "entity": "secondary whisper of 52-Hz whale",
-        "status": "ok",
-        "detail": "hypothesis: The 52 Hz frequency is a documented acoustic phenomenon with no confirmed biological source, widely attributed to a blue",
-        "source_label": "NOAA Pacific Marine Environmental Laboratory (PMEL) Acoustic Monitoring Program,"
-      },
-      {
-        "text": "twenty fifteen",
-        "kind": "quantitative",
-        "value": "2015",
+        "value": "1994",
         "unit": "year",
-        "entity": "album 'fifty-two hertz I Love You'",
-        "status": "verified",
-        "detail": "matched research fact: \u2026the whale's call has inspired multiple artworks, books, and musical compositions, including a 2015 a",
-        "source_label": "research_pack"
+        "entity": "start year",
+        "status": "unsupported",
+        "detail": "The existence of a 52 Hz whale and its continuous singing since 1994 is not an established scientific fact with independent verification.",
+        "source_label": ""
       }
     ],
     "entities": [
-      "blue whales",
-      "fin whales",
       "52-Hz whale",
-      "U.S. Navy's SOSUS array",
-      "California",
-      "Aleutians",
-      "ocean's static",
-      "ocean's hum",
-      "lighthouse beam",
-      "album 'fifty-two hertz I Love You'"
+      "blue whale",
+      "fin whale",
+      "SOSUS array",
+      "Pacific Ocean",
+      "autonomous underwater vehicles",
+      "hydrophones",
+      "blue whale with a rare mutation",
+      "hybrid whale"
     ],
     "conflation_risks": [
       {
         "type": "conflation_risk",
-        "a": "ocean's static",
-        "b": "ocean's hum",
-        "detail": "Both refer to background noise in the ocean, but 'ocean's static' is a metaphor for random noise, while 'ocean's hum' is a specific low-frequency phenomenon. Attributes like frequency range or source should not transfer between them.",
+        "a": "blue whale",
+        "b": "blue whale with a rare mutation",
+        "detail": "A 'blue whale with a rare mutation' is a specific instance of a blue whale, not a distinct phenomenon. Attributes of the general blue whale (e.g., typical frequency range) must not transfer to the mutated individual, as the mutation may alter its acoustic behavior.",
         "severity": "minor"
       },
       {
         "type": "conflation_risk",
-        "a": "lighthouse beam",
-        "b": "beacon",
-        "detail": "Both are metaphors for a guiding or prominent signal, but 'lighthouse beam' implies directionality and visibility, while 'beacon' is more abstract. Attributes like physical presence or visibility should not transfer.",
+        "a": "fin whale",
+        "b": "hybrid whale",
+        "detail": "A 'hybrid whale' could theoretically be a hybrid of fin whales or other species, but it is not inherently a distinct phenomenon from fin whales. Attributes of fin whales (e.g., typical frequency range) must not transfer to hybrids without verification.",
         "severity": "minor"
       }
     ],
@@ -569,7 +461,9 @@
   "publish_gate": {
     "passed": false,
     "blocking_failures": [
-      "repeated_assets"
+      "frozen_shots",
+      "excessive_static",
+      "hook_strength"
     ],
     "checks": [
       {
@@ -577,7 +471,7 @@
         "passed": true,
         "detail": "v=h264 a=aac",
         "metrics": {
-          "duration_s": 64.6,
+          "duration_s": 119.266667,
           "resolution": [
             1920,
             1080
@@ -592,55 +486,58 @@
       },
       {
         "name": "repeated_assets",
-        "passed": false,
-        "detail": "repeated files: {'cache/video/scene_4_b0_s0.mp4': 2}",
+        "passed": true,
+        "detail": "no repeats",
         "metrics": {
-          "repeats": {
-            "cache/video/scene_4_b0_s0.mp4": 2
-          }
+          "repeats": {}
         }
       },
       {
         "name": "frozen_shots",
-        "passed": true,
-        "detail": "no frozen shots",
+        "passed": false,
+        "detail": "frozen runs (>= 2.5s): [(60.0, 15)]",
         "metrics": {
-          "frozen_runs": [],
-          "frames_sampled": 5
+          "frozen_runs": [
+            [
+              60.0,
+              15
+            ]
+          ],
+          "frames_sampled": 8
         }
       },
       {
         "name": "excessive_static",
-        "passed": true,
-        "detail": "longest static window: 0.0s (limit 8.0s)",
+        "passed": false,
+        "detail": "longest static window: 15.0s (limit 8.0s)",
         "metrics": {
-          "longest_static_s": 0
+          "longest_static_s": 15
         }
       },
       {
         "name": "silence",
         "passed": true,
-        "detail": "max_volume=-1.3 dB (silence < -50.0 dB)",
+        "detail": "max_volume=-1.4 dB (silence < -50.0 dB)",
         "metrics": {
-          "max_db": -1.3,
+          "max_db": -1.4,
           "mean_db": -15.8
         }
       },
       {
         "name": "clipping",
         "passed": true,
-        "detail": "max_volume=-1.3 dB (clip >= -0.5 dB)",
+        "detail": "max_volume=-1.4 dB (clip >= -0.5 dB)",
         "metrics": {
-          "max_db": -1.3
+          "max_db": -1.4
         }
       },
       {
         "name": "hook_strength",
-        "passed": true,
-        "detail": "hook window (15s): 5 distinct visuals (need >= 5)",
+        "passed": false,
+        "detail": "WEAK HOOK: only 4 distinct visual(s) in first 15s \u2014 opening needs stronger material",
         "metrics": {
-          "distinct_in_hook": 5,
-          "shots_in_hook": 5
+          "distinct_in_hook": 4,
+          "shots_in_hook": 4
         }
       },
       {
@@ -658,7 +555,7 @@
       {
         "name": "manim_registered",
         "passed": true,
-        "detail": "4 Manim clip(s) in final timeline",
+        "detail": "3 Manim clip(s) in final timeline",
         "metrics": {}
       },
       {
@@ -674,10 +571,10 @@
         "passed": true,
         "detail": "mastered audio publication-safe (I/LRA/TP OK)",
         "metrics": {
-          "integrated_lufs": -14.04,
-          "true_peak_dbTP": -1.26,
-          "lra": 3.2,
-          "max_volume_db": -1.3
+          "integrated_lufs": -13.98,
+          "true_peak_dbTP": -1.45,
+          "lra": 3.3,
+          "max_volume_db": -1.4
         }
       },
       {
@@ -724,25 +621,31 @@
     "publish_ready": false,
     "blocked_by": {
       "publish": [
-        "repeated_assets"
+        "frozen_shots",
+        "excessive_static",
+        "hook_strength"
       ],
       "pre_render": [
         "shot_hold",
         "pacing",
         "resolution_headroom"
+      ],
+      "claims": [
+        "unsupported_quantitative_claims"
       ]
     },
     "categories": [
+      "factual",
       "retention",
       "visual"
     ],
-    "summary": "Gates blocked \u2014 revision required before publication: publish: repeated_assets; pre_render: shot_hold, pacing, resolution_headroom"
+    "summary": "Gates blocked \u2014 revision required before publication: publish: frozen_shots, excessive_static, hook_strength; pre_render: shot_hold, pacing, resolution_headroom; claims: unsupported_quantitative_claims"
   },
   "final": {
     "output": "results/the_52_hertz_whale__the_loneliest_voice_in_t/the_52_hertz_whale__the_loneliest_voice_in_t_v1_mixed.mp4",
-    "iterations": 2,
+    "iterations": 1,
     "final_score": 45,
-    "duration_s": 64.6
+    "duration_s": 119.266667
   },
   "llm_usage_deepseek": {
     "stages": {},

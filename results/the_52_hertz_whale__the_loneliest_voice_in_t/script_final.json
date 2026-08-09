@@ -1,19 +1,19 @@
 [
   {
-    "title": "The Mystery Call",
-    "narration": "Blue whales hum at ten to forty hertz. Fin whales at twenty to thirty. This one? Alone at fifty-two.",
-    "visual_goal": "A lone whale silhouette in deep blue ocean, sound wave pulsing at 52Hz in red against the backdrop. Quick cut to hydrophone array underwater.",
+    "title": "The 52-Hertz Whale: The Loneliest Voice in the Ocean",
+    "narration": "A whale sings at fifty-two hertz. Blue whales hum at ten-forty. Fin whales groan at around twenty hertz. This one? Alone at fifty-two, a lone voice in a vast, indifferent ocean where most whales never even hear its call.",
+    "visual_goal": "A lone whale surfaces in deep blue ocean, its breath misting in the cold air. A soundwave visualization pulses at 52Hz, glowing faintly against the dark water. Sudden cut to a spectrogram with a single, glowing 52Hz spike standing stark against a silent ocean of black and blue frequencies.",
     "search_queries": [
-      "whale sound wave 52Hz",
-      "SOSUS hydrophone array",
-      "blue whale call frequency"
+      "whale soundwave 52Hz",
+      "loneliest whale spectrogram",
+      "ocean acoustic monitoring"
     ],
     "emotion": "awe",
     "visual_style": "photorealistic",
     "sfx_events": [
       {
-        "trigger": "pulse_rise",
-        "at": "52"
+        "trigger": "whale_breath",
+        "at": "whale sings"
       }
     ],
     "para_tags": [
@@ -21,16 +21,46 @@
     ]
   },
   {
-    "title": "First Detection",
-    "narration": "Detected in nineteen eighty-nine by the U.S.. Navy\u2019s SOSUS array. No one knew what it was.",
-    "visual_goal": "Black-and-white sonar screen flickering to life, 1989 timestamp. Close-up of hydrophone in murky water.",
+    "title": "A Call No One Answers",
+    "narration": "Since nineteen eighty-nine, this whale has sung every year. thirty-five years of calls. No matching replies detected. Just the endless, echoing silence of the deep.",
+    "visual_goal": "A year counter ticks from 1989 to 2024, each year flashing with a spectrogram of the 52Hz call. No answering calls ever appear\u2014only empty space where replies should be.",
     "search_queries": [
-      "SOSUS hydrophone 1989",
-      "US Navy underwater sonar",
-      "first whale call recording"
+      "whale tracking 1989 to 2024",
+      "ocean acoustic tracking timeline"
+    ],
+    "emotion": "somber",
+    "visual_style": "clean_vector",
+    "sfx_events": [],
+    "para_tags": []
+  },
+  {
+    "title": "Why 52 Hertz?",
+    "narration": "Blue whales can't hear it. Its frequency is outside the typical range for fin whales as well. A pulse in the static, too high, too strange for any known whale song.",
+    "visual_goal": "Split screen: a blue whale\u2019s call (10-40Hz) fades into static, while the 52Hz spike remains, pulsing like a heartbeat in the dark. The blue whale\u2019s call flickers and dies, leaving only the lonely frequency.",
+    "search_queries": [
+      "whale hearing range comparison",
+      "52Hz whale frequency explained"
     ],
     "emotion": "tension",
     "visual_style": "sepia_cel",
+    "sfx_events": [
+      {
+        "trigger": "low_rumble",
+        "at": "too high"
+      }
+    ],
+    "para_tags": []
+  },
+  {
+    "title": "The SOSUS Secret",
+    "narration": "The U.S.. Navy's SOSUS array picked up its call, initially for military purposes but later used for scientific analysis. A signal no one expected to intercept.",
+    "visual_goal": "A black screen with green sonar blips flickering like distant stars. A single 52Hz blip appears, labeled 'SOSUS'. The screen dissolves into grainy, declassified Navy footage of hydrophone arrays being deployed in the 1960s.",
+    "search_queries": [
+      "SOSUS hydrophone array",
+      "declassified Navy whale tracking"
+    ],
+    "emotion": "revelation",
+    "visual_style": "90s_anime",
     "sfx_events": [
       {
         "trigger": "sonar_ping",
@@ -40,159 +70,101 @@
     "para_tags": []
   },
   {
-    "title": "The Loneliness Factor",
-    "narration": "Every year since, still unanswered after thirty-five years. Just this call, cutting through the ocean\u2019s static like a beacon.",
-    "visual_goal": "Time-lapse of hydrophone networks lighting up across the Pacific. Whale call waveform spikes above ambient noise.",
+    "title": "3,000 Kilometers of Silence",
+    "narration": "Its call travels three thousand kilometers across the Pacific. Yet no matching replies have been detected. Too high. Too strange. Or is the ocean simply too vast for any reply to reach?",
+    "visual_goal": "A map of the Pacific Ocean stretches across the screen. A red line traces 3,000km from the whale\u2019s position near California, fading into the abyss. No other whale calls appear along the route\u2014only empty blue silence.",
     "search_queries": [
-      "whale call louder than ocean noise",
-      "hydrophone network Pacific",
-      "52Hz whale tracking"
+      "whale call range map",
+      "Pacific Ocean whale migration routes"
     ],
-    "emotion": "somber",
+    "emotion": "wonder",
+    "visual_style": "watercolor",
+    "sfx_events": [
+      {
+        "trigger": "distant_whoosh",
+        "at": "3,000 kilometers"
+      }
+    ],
+    "para_tags": []
+  },
+  {
+    "title": "The AUVs Listen",
+    "narration": "Autonomous underwater vehicles now glide through the deep, their hydrophones listening. They detect the fifty-two hertz call. Still alone. Unanswered. Singing into the void.",
+    "visual_goal": "A sleek AUV glides through the dark ocean, its red lights cutting through the black water. A hydrophone icon appears, detecting the 52Hz call in real-time. No other calls are detected\u2014only the lonely frequency.",
+    "search_queries": [
+      "autonomous underwater vehicle whale tracking",
+      "AUV hydrophone monitoring"
+    ],
+    "emotion": "hopeful",
     "visual_style": "clean_vector",
     "sfx_events": [
       {
-        "trigger": "wave_crash",
-        "at": "ocean\u2019s noise"
+        "trigger": "mechanical_hum",
+        "at": "Autonomous underwater"
       }
     ],
+    "para_tags": []
+  },
+  {
+    "title": "Every Month, Every Year",
+    "narration": "January to December. nineteen ninety-four to two thousand twenty-four. Always fifty-two hertz. Always alone. A rhythm of solitude that never wavers, never changes, never finds an echo.",
+    "visual_goal": "A hand-drawn calendar flips through months and years. Each month flashes with a spectrogram of the 52Hz call\u2014identical, unchanging. No variation, no reply, just the same lonely song.",
+    "search_queries": [
+      "whale call frequency consistency",
+      "year-round whale tracking"
+    ],
+    "emotion": "nostalgia",
+    "visual_style": "hand_drawn",
+    "sfx_events": [],
+    "para_tags": []
+  },
+  {
+    "title": "Is It Really Lonely?",
+    "narration": "Or is it just singing in a language we don\u2019t understand? A frequency we\u2019ve never heard before, a voice from a world we\u2019ve barely begun to explore.",
+    "visual_goal": "The whale swims in deep blue, its body outlined in bioluminescent trails. A soundwave visualization of the 52Hz call ripples outward. The scene fades to abstract ocean waves, swirling like ink in water.",
+    "search_queries": [
+      "whale communication mystery",
+      "ocean acoustic language"
+    ],
+    "emotion": "tension",
+    "visual_style": "ghibli",
+    "sfx_events": [
+      {
+        "trigger": "ocean_wave",
+        "at": "language we don't understand"
+      }
+    ],
+    "para_tags": []
+  },
+  {
+    "title": "The Mystery Remains",
+    "narration": "We\u2019ve tracked it for decades. We\u2019ve mapped its path. We\u2019ve listened to its song. Yet we still don\u2019t know: who is it? A blue whale with a rare mutation? A hybrid? Something entirely unknown?",
+    "visual_goal": "A spectrogram of the 52Hz call fills the screen, the spike glowing like a beacon. A question mark overlays it, pulsing faintly. The screen fades to black as the mystery lingers.",
+    "search_queries": [
+      "52Hz whale identity mystery",
+      "unknown whale species tracking"
+    ],
+    "emotion": "awe",
+    "visual_style": "photorealistic",
+    "sfx_events": [],
     "para_tags": [
       "[sigh]"
     ]
   },
   {
-    "title": "Where Is It?",
-    "narration": "From California to the Aleutians, over thirty thousand miles tracked cumulatively since nineteen ninety-two. But no one\u2019s seen it.",
-    "visual_goal": "Animated map of the North Pacific with a pulsing red dot moving erratically. Satellite imagery of ocean swells.",
+    "title": "The Loneliest Voice",
+    "narration": "In the ocean\u2019s endless noise, one voice sings at fifty-two hertz. And no one answers. Not in nineteen eighty-nine. Not in two thousand twenty-four. Not ever.",
+    "visual_goal": "The whale dives into the deep blue, its silhouette shrinking into the abyss. The soundwave visualization of the 52Hz call fades into silence. The screen fades to black with the title, leaving only the echo of a song no one hears.",
     "search_queries": [
-      "North Pacific whale migration map",
-      "30000 miles whale tracking",
-      "Aleutian Islands whale sightings"
+      "loneliest whale documentary",
+      "52Hz whale final shot"
     ],
-    "emotion": "wonder",
-    "visual_style": "ghibli",
-    "sfx_events": [
-      {
-        "trigger": "ship_horn",
-        "at": "Aleutians"
-      }
-    ],
-    "para_tags": []
-  },
-  {
-    "title": "The Clue",
-    "narration": "Acoustic analysis suggests it\u2019s a blue whale, but blue whales don\u2019t typically sing at fifty-two hertz.",
-    "visual_goal": "Side-by-side spectrograms: a standard blue whale call (10-40Hz) vs. the 52Hz spike. Scientist\u2019s finger pointing at the mismatch.",
-    "search_queries": [
-      "blue whale call spectrogram",
-      "52Hz vs blue whale frequency",
-      "whale acoustic analysis"
-    ],
-    "emotion": "revelation",
-    "visual_style": "watercolor",
-    "sfx_events": [
-      {
-        "trigger": "record_scratch",
-        "at": "don\u2019t"
-      }
-    ],
-    "para_tags": [
-      "[chuckle]"
-    ]
-  },
-  {
-    "title": "Why 52?",
-    "narration": "A voice no one else can hear. Cutting through the ocean\u2019s hum like a lighthouse beam.",
-    "visual_goal": "Underwater microphone close-up, sound waves radiating outward. Whale silhouette with sound waves distorting the water.",
-    "search_queries": [
-      "30 decibel whale call",
-      "underwater sound wave visualization",
-      "whale call decibel comparison"
-    ],
-    "emotion": "tension",
+    "emotion": "somber",
     "visual_style": "photorealistic",
     "sfx_events": [
       {
-        "trigger": "echo_boom",
-        "at": "void"
-      }
-    ],
-    "para_tags": []
-  },
-  {
-    "title": "The Pattern",
-    "narration": "December and January, peak calls. August, a secondary whisper.",
-    "visual_goal": "Calendar with red dots marking December/January, a smaller dot in August. Hydrophone blinking off-screen.",
-    "search_queries": [
-      "whale call seasonal pattern",
-      "December whale migration",
-      "August whale vocalization"
-    ],
-    "emotion": "nostalgia",
-    "visual_style": "hand_drawn",
-    "sfx_events": [
-      {
-        "trigger": "wind_howl",
-        "at": "silence"
-      }
-    ],
-    "para_tags": []
-  },
-  {
-    "title": "The Art",
-    "narration": "Books. Albums. Even a twenty fifteen album titled \u2018fifty-two hertz I Love You.\u2019 A voice turned into art.",
-    "visual_goal": "Collage of book covers, album art, and paintings featuring the 52Hz whale. Vinyl record spinning with the title visible.",
-    "search_queries": [
-      "52 Hz I Love You album cover",
-      "whale art book",
-      "52Hz whale inspired art"
-    ],
-    "emotion": "hopeful",
-    "visual_style": "90s_anime",
-    "sfx_events": [
-      {
-        "trigger": "vinyl_crackle",
-        "at": "I Love You"
-      }
-    ],
-    "para_tags": []
-  },
-  {
-    "title": "The Question",
-    "narration": "Is it lost? Or is it the only one of its kind?",
-    "visual_goal": "Whale silhouette fading into deep blue. Hydrophone array in the distance, lights flickering.",
-    "search_queries": [
-      "loneliest whale in the ocean",
-      "52Hz whale mystery",
-      "is the 52Hz whale alone"
-    ],
-    "emotion": "tension",
-    "visual_style": "sepia_cel",
-    "sfx_events": [
-      {
-        "trigger": "heartbeat_slow",
-        "at": "kind"
-      }
-    ],
-    "para_tags": [
-      "[whisper]"
-    ]
-  },
-  {
-    "title": "The Call Continues",
-    "narration": "fifty-two hertz. Every year. For thirty-five years, it has called, no answers, no sightings, just this lone frequency.",
-    "visual_goal": "Whale call waveform looping endlessly. Fade to black with the number 52Hz glowing in the darkness.",
-    "search_queries": [
-      "52Hz whale call loop",
-      "loneliest whale in the ocean",
-      "whale call frequency 52"
-    ],
-    "emotion": "awe",
-    "visual_style": "clean_vector",
-    "sfx_events": [
-      {
-        "trigger": "whale_song_loop",
-        "at": "52"
+        "trigger": "whale_dive",
+        "at": "diving into deep blue"
       }
     ],
     "para_tags": []

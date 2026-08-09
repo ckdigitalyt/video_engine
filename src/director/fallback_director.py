@@ -24,6 +24,30 @@ from src.models.schemas import AssetPlan, ProviderType, Scene
 
 logger = logging.getLogger(__name__)
 
+# Beat-planner suffixes that pollute archive searches (NASA/Wikimedia).
+# A query like "blue whale underwater primary shot" makes Commons return
+# stamp catalogues instead of whales — the 52-Hz run's placeholder flood.
+_SHOT_SUFFIX_TOKENS = {
+    "primary shot", "cutaway shot", "overlay shot", "secondary shot",
+    "stock footage", "b-roll", "broll", "close-up shot", "wide shot",
+    "establishing shot", "detail shot", "transition shot", "beauty shot",
+    "aerial shot", "underwater shot", "pov shot", "insert shot",
+    "hero shot", "coverage shot", "insert", "overlay", "cutaway",
+}
+
+
+def _strip_shot_suffix(query: str) -> str:
+    """Strip beat-planner shot-type suffixes from a search query so
+    archive searches (NASA images / Wikimedia Commons) look for the
+    SUBJECT, not the camera instruction."""
+    q = (query or "").strip()
+    lowered = q.lower()
+    for tok in sorted(_SHOT_SUFFIX_TOKENS, key=len, reverse=True):
+        if lowered.endswith(tok):
+            q = q[: len(q) - len(tok)].strip().rstrip(",;:")
+            lowered = q.lower()
+    return q
+
 
 class FallbackDirector:
     """Produces a fallback video clip when all primary providers fail.
@@ -256,8 +280,10 @@ class FallbackDirector:
                 h_lower = h.lower()
                 if any(kw in h_lower for kw in space_keywords):
                     return h
-            # Non-space topic: search the archive for the actual subject.
-            return hints[0]
+            # Non-space topic: search the archive for the actual subject,
+            # stripped of beat-planner suffixes ("primary shot" etc.) that
+            # pollute the archive search and return unrelated junk.
+            return _strip_shot_suffix(hints[0])
         return self.rng.choice(default_queries)
 
     # ------------------------------------------------------------------ #
@@ -355,7 +381,10 @@ class FallbackDirector:
         ]
         # v14 fix: same topic-aware logic as NASA — use the real subject
         # query; Commons has relevant imagery for every topic.  Space
-        # defaults only for space-related hints or empty hints.
+        # defaults only for space-related hints or empty hints.  Also strip
+        # beat-planner suffixes so Commons search finds the SUBJECT, not
+        # junk pages (the 52-Hz run's "blue whale underwater primary shot"
+        # returned stamp catalogues -> 23 placeholder shots).
         if hints:
             space_keywords = {"space", "star", "galaxy", "planet", "nasa", "astronaut",
                               "cosmic", "nebula", "orbit", "telescope", "universe"}
@@ -363,7 +392,7 @@ class FallbackDirector:
                 h_lower = h.lower()
                 if any(kw in h_lower for kw in space_keywords):
                     return h
-            return hints[0]
+            return _strip_shot_suffix(hints[0])
         return self.rng.choice(default_queries)
 
     # ------------------------------------------------------------------ #

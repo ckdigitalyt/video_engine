@@ -1,9 +1,9 @@
 # Postmortem — The 52-Hertz Whale: the loneliest voice in the ocean
-**When:** 2026-08-09T11:10:23+00:00
+**When:** 2026-08-09T12:28:28+00:00
 
 ## Techniques that worked
-- multi-reviewer script review (2 passes, gate=True)
-- director beat mode: 30 shots, providers={'manim': 4, 'pexels': 16, 'placeholder': 7, 'emergency': 3}
+- multi-reviewer script review (2 passes, gate=False)
+- director beat mode: 45 shots, providers={'manim': 3, 'placeholder': 23, 'pexels': 17, 'emergency': 2}
 - ffmpeg sidechain music ducking (bed=cinematic.mp3)
 - Gemini Flash end-to-end review score 45/100
 
@@ -26,11 +26,11 @@ _(none recorded)_
 _(none recorded)_
 
 ## Review feedback
-- Revise the script to correct grammatical errors and word choices. Specifically, change 'no one seen it' to 'no one has s
-- Replace all irrelevant visuals (0:06-0:13 bar chart, 0:14-0:17 alien, 0:34-0:35 moon, 0:45-0:52 iceberg/rope) with high-
-- Establish and maintain a consistent visual style and color palette throughout the video. Avoid jarring shifts between di
-- Improve transitions between scenes. Utilize smoother techniques like dissolves, subtle wipes, or thematic cuts instead o
-- Ensure burned-in subtitles are perfectly synchronized with the narration and reflect the corrected script, including gra
+- Replace all irrelevant stock footage (e.g., 0:07-0:12, 0:15-0:26, 0:26-0:30, 0:37-0:45, 0:49-0:56, 1:44-1:47) with visua
+- Establish a consistent visual style throughout the documentary. Decide whether the primary aesthetic is abstract, realis
+- Integrate more actual footage or high-quality CGI of whales, underwater environments, and scientific equipment (like hyd
+- Re-time cuts and transitions to align seamlessly with the narration, ensuring visuals support the spoken word rather tha
+- Refine the on-screen text presentation. While effective, ensure its style and background are consistent and visually app
 
 ## Benchmark results
 ```json
@@ -47,9 +47,9 @@ _(none recorded)_
 ```json
 {
   "final_score": 45,
-  "render_iterations": 2,
-  "shots": 30,
-  "fallbacks": 10,
-  "duration_s": 64.6
+  "render_iterations": 1,
+  "shots": 45,
+  "fallbacks": 25,
+  "duration_s": 119.266667
 }
 ```

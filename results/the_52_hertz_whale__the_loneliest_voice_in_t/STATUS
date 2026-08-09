@@ -1,4 +1,5 @@
 REVISION_REQUIRED
 blocked by:
-  publish: repeated_assets
+  publish: frozen_shots, excessive_static, hook_strength
   pre_render: shot_hold, pacing, resolution_headroom
+  claims: unsupported_quantitative_claims

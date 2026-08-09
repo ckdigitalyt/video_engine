@@ -51,7 +51,16 @@ RETENTION_GATES = {"shot_hold", "hook_strength", "max_shot_duration",
 
 
 def _blocked_names(gate: dict) -> list[str]:
-    """Names of the checks that actually blocked a gate report."""
+    """Names of the checks that actually blocked a gate report.
+
+    v14 fix: prefer the gate's explicit ``blocking_failures`` list when
+    present.  Advisory checks (e.g. ``unsupported_quantitative_claims``
+    which is report-only by design) must NOT count as blockers — the
+    whale run was wrongly held at REVISION_REQUIRED for an advisory flag.
+    """
+    bf = gate.get("blocking_failures")
+    if isinstance(bf, list):
+        return [str(x) for x in bf if x]
     out = []
     for c in gate.get("checks", []):
         if not c.get("passed", True):

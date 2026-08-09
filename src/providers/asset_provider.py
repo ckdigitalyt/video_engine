@@ -113,7 +113,10 @@ class PexelsProvider(AssetProvider):
 
         # Pre-register the best-scoring result URL so a future lookup
         # (e.g. on a re-run of the same query) finds it, even before download.
-        best_url = sorted_results[0]["video_files"][0]["link"]
+        # v14 fix: register the HIGHEST-QUALITY variant, not video_files[0]
+        # (Pexels often lists the SD rendition first — that URL then gets
+        # served on every cache hit and trips resolution_headroom).
+        best_url = _pick_best_variant_link(sorted_results[0])
         self._cache.register("pexels", query, best_url)
         self._last_query = query
 
@@ -305,7 +308,9 @@ class PixabayProvider(AssetProvider):
             print(label)
 
         # Pre-register best result in cache
-        best_url = sorted_results[0]["video_files"][0]["link"]
+        # v14 fix: register the HIGHEST-QUALITY variant (Pixabay lists
+        # large/medium/small — video_files[0] may be the smallest).
+        best_url = _pick_best_variant_link(results[0])
         self._cache.register("pixabay", query, best_url)
         self._last_query = query
 
