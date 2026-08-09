@@ -22,6 +22,10 @@ pexels:
   base_url: "https://api.pexels.com/videos"
   max_results: 5
   timeout: 15
+  # v13 (expert review rec #3): hard floor — candidates below this are
+  # rejected outright (upscaling stock into 1920x1080 = visible softness).
+  min_width: 1920
+  min_height: 1080
 
 pixabay:
   base_url: "https://pixabay.com/api/videos"

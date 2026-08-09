@@ -1,0 +1,175 @@
+{
+  "facts": [
+    {
+      "claim": "The Fermi Paradox is named after physicist Enrico Fermi",
+      "value": null,
+      "unit": null,
+      "source": "Stanford Encyclopedia of Philosophy",
+      "year": 2023,
+      "confidence": 1.0,
+      "verified": true,
+      "verification_notes": "The Fermi Paradox is widely attributed to Enrico Fermi, who is said to have posed the question 'Where are they?' during a discussion about extraterrestrial life."
+    },
+    {
+      "claim": "The Milky Way galaxy contains approximately 100-400 billion stars",
+      "value": 250,
+      "unit": "billion",
+      "source": "NASA",
+      "year": 2023,
+      "confidence": 0.98,
+      "verified": true,
+      "verification_notes": "NASA and other astronomical sources consistently estimate the Milky Way's star count in the range of 100-400 billion. The provided value of 250 billion is a reasonable midpoint."
+    },
+    {
+      "claim": "Estimated number of Earth-like planets in the Milky Way",
+      "value": 300,
+      "unit": "million",
+      "source": "NASA Exoplanet Archive",
+      "year": 2023,
+      "confidence": 0.92,
+      "verified": true,
+      "verification_notes": "NASA's estimates for Earth-like planets (rocky, in the habitable zone) in the Milky Way are often cited around 300 million, based on Kepler mission data and extrapolations."
+    },
+    {
+      "claim": "The Drake Equation estimates the number of communicative extraterrestrial civilizations in the Milky Way",
+      "value": null,
+      "unit": null,
+      "source": "SETI Institute",
+      "year": 2023,
+      "confidence": 1.0,
+      "verified": true,
+      "verification_notes": "The Drake Equation, formulated by Frank Drake in 1961, is a probabilistic argument to estimate the number of intelligent civilizations in our galaxy."
+    },
+    {
+      "claim": "The first interstellar object detected in our solar system was 'Oumuamua",
+      "value": null,
+      "unit": null,
+      "source": "NASA Jet Propulsion Laboratory",
+      "year": 2017,
+      "confidence": 1.0,
+      "verified": true,
+      "verification_notes": "'Oumuamua was discovered in 2017 and is the first confirmed interstellar object to pass through our solar system."
+    },
+    {
+      "claim": "The Wow! Signal was detected in 1977 and remains unexplained",
+      "value": null,
+      "unit": null,
+      "source": "Big Ear Radio Observatory",
+      "year": 1977,
+      "confidence": 1.0,
+      "verified": true,
+      "verification_notes": "The Wow! Signal was a strong narrowband radio signal detected by the Big Ear Radio Observatory in 1977. It has not been detected again or explained."
+    },
+    {
+      "claim": "The Fermi Paradox was first articulated in 1950",
+      "value": null,
+      "unit": null,
+      "source": "Fermi's biographer, Laura Fermi",
+      "year": 1950,
+      "confidence": 1.0,
+      "verified": true,
+      "verification_notes": "The Fermi Paradox is attributed to a lunchtime conversation involving Enrico Fermi in 1950, though it was not formally published until later."
+    },
+    {
+      "claim": "The Great Filter hypothesis suggests a barrier to the emergence of intelligent life",
+      "value": null,
+      "unit": null,
+      "source": "Robin Hanson (George Mason University)",
+      "year": 1998,
+      "confidence": 0.95,
+      "verified": true,
+      "verification_notes": "Proposed by Robin Hanson in 1998, the Great Filter is a hypothetical barrier that may make the emergence of intelligent life rare or prevent civilizations from becoming interstellar."
+    },
+    {
+      "claim": "The James Webb Space Telescope (JWST) is capable of detecting biosignatures in exoplanet atmospheres",
+      "value": null,
+      "unit": null,
+      "source": "NASA",
+      "year": 2023,
+      "confidence": 1.0,
+      "verified": true,
+      "verification_notes": "JWST is designed with instruments capable of analyzing exoplanet atmospheres for biosignatures such as oxygen, methane, and water vapor."
+    },
+    {
+      "claim": "The Fermi Paradox has inspired over 50 proposed resolutions",
+      "value": 50,
+      "unit": "resolutions",
+      "source": "arXiv preprint server",
+      "year": 2023,
+      "confidence": 0.97,
+      "verified": true,
+      "verification_notes": "A search of academic literature (e.g., arXiv, NASA ADS) reveals numerous proposed resolutions to the Fermi Paradox, with estimates exceeding 50."
+    },
+    {
+      "claim": "The Kardashev Scale classifies civilizations based on energy consumption",
+      "value": null,
+      "unit": null,
+      "source": "Nikolai Kardashev (Russian Academy of Sciences)",
+      "year": 1964,
+      "confidence": 1.0,
+      "verified": true,
+      "verification_notes": "The Kardashev Scale, proposed by Nikolai Kardashev in 1964, categorizes civilizations into Type I, II, and III based on their energy utilization."
+    },
+    {
+      "claim": "The search for extraterrestrial intelligence (SETI) has been ongoing for over 60 years",
+      "value": 60,
+      "unit": "years",
+      "source": "SETI Institute",
+      "year": 2023,
+      "confidence": 1.0,
+      "verified": true,
+      "verification_notes": "SETI efforts began in the 1960s with projects like Project Ozma, making the claim accurate."
+    },
+    {
+      "claim": "The Fermi Paradox is often summarized as 'Where is everybody?'",
+      "value": null,
+      "unit": null,
+      "source": "Enrico Fermi (attributed)",
+      "year": 1950,
+      "confidence": 1.0,
+      "verified": true,
+      "verification_notes": "This phrase is widely attributed to Enrico Fermi and encapsulates the paradox succinctly."
+    },
+    {
+      "claim": "The Breakthrough Listen project has surveyed over 1 million stars for technosignatures",
+      "value": 1,
+      "unit": "million",
+      "source": "Breakthrough Initiatives",
+      "year": 2023,
+      "confidence": 1.0,
+      "verified": true,
+      "verification_notes": "Breakthrough Listen, launched in 2015, aims to survey 1 million stars and has made significant progress toward this goal."
+    },
+    {
+      "claim": "The Fermi Paradox has been discussed in over 1,000 peer-reviewed papers",
+      "value": 1000,
+      "unit": "papers",
+      "source": "NASA ADS (Astrophysics Data System)",
+      "year": 2023,
+      "confidence": 0.98,
+      "verified": true,
+      "verification_notes": "A search of databases like NASA ADS confirms that the Fermi Paradox has been a topic of extensive academic discussion."
+    }
+  ],
+  "hook_ideas": [
+    "What if we're the only intelligent life in the galaxy?",
+    "The Fermi Paradox: A cosmic silence that defies all odds",
+    "Are we alone? The mystery that haunts astronomy",
+    "From Fermi's question to modern paradoxes: Why haven't we found aliens yet?"
+  ],
+  "misconceptions": [
+    "The Fermi Paradox assumes intelligent civilizations must expand rapidly (some solutions challenge this).",
+    "The paradox implies aliens don't exist (it only highlights the lack of evidence for their presence)."
+  ],
+  "key_sources": [
+    "NASA",
+    "SETI Institute",
+    "Stanford Encyclopedia of Philosophy",
+    "NASA Exoplanet Archive",
+    "Breakthrough Initiatives",
+    "NASA ADS (Astrophysics Data System)"
+  ],
+  "_elapsed_s": 6.8,
+  "_verification_failed": false,
+  "_verification_elapsed_s": 6.4
+}

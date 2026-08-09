@@ -341,7 +341,27 @@ one per line, numbered "SCENE N: <narration>".
 
 == REVISED SCENES (SCENE N: ... per line) ==
 """
-        raw = self._provider.generate_text(prompt)
+        raw = None
+        last_err = None
+        try:
+            raw = self._provider.generate_text(prompt)
+        except Exception as e:  # noqa: BLE001
+            last_err = e
+        # v13.1: primary provider may be quota-limited (Gemini free tier is 20
+        # req/day) — fall back to Mistral free, then DeepSeek, for TEXT stages
+        # only (vision review remains Gemini-locked in review_video.py).
+        if not raw:
+            for fb in self._fallbacks:
+                try:
+                    self._log(f"    !! revise primary failed ({str(last_err or 'empty')[:60]}) — "
+                              f"retrying via {type(fb).__name__}")
+                    raw = fb.generate_text(prompt)
+                    break
+                except Exception as e2:  # noqa: BLE001
+                    last_err = e2
+                    continue
+            if raw is None and last_err is not None:
+                raise last_err
         revised = self._parse_scene_lines(raw)
         if len(revised) == len(scenes) and all(revised):
             self._log(f"  Revised {len(revised)} scenes from consolidated feedback.")

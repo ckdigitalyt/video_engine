@@ -21,11 +21,18 @@ import os
 import json
 from typing import Any, Optional
 
+# v13.1: ImageMagick's security policy blocks MoviePy's TextClip (@/tmp/...
+# indirect read) — render subtitle text with PIL instead (no external binary).
+import PIL.Image
+import PIL.ImageDraw
+import PIL.ImageFont
+
 from moviepy.editor import (
     AudioFileClip,
     ColorClip,
     CompositeAudioClip,
     CompositeVideoClip,
+    ImageClip,
     TextClip,
     VideoFileClip,
 )
@@ -44,6 +51,61 @@ from src.models.schemas import (
 )
 from src.renderer import Renderer
 from src.utils.config import get_config
+
+
+# v13.1: ImageMagick-free subtitle text rendering.  MoviePy's TextClip shells
+# out to `convert` with a @/tmp/...txt indirect read, which ImageMagick's
+# security policy blocks — render text to an RGBA PIL image instead.
+_FONT_CANDIDATES = (
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+    "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
+    "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+    "/usr/share/fonts/truetype/noto/NotoSans-Regular.ttf",
+)
+
+
+def _resolve_font(fontsize: int):
+    for fp in _FONT_CANDIDATES:
+        if os.path.exists(fp):
+            try:
+                return PIL.ImageFont.truetype(fp, fontsize)
+            except Exception:
+                continue
+    return PIL.ImageFont.load_default()
+
+
+def _pil_text_clip(
+    text: str,
+    fontsize: int = 28,
+    color: str = "#FFFFFF",
+    stroke_color: str = "#000000",
+    stroke_width: int = 1,
+):
+    """Render subtitle text to a transparent RGBA image, return an ImageClip."""
+    font = _resolve_font(fontsize)
+    stroke = max(1, int(stroke_width))
+    # Measure the text with a scratch image.
+    scratch = PIL.Image.new("RGBA", (10, 10))
+    draw = PIL.ImageDraw.Draw(scratch)
+    bbox = draw.textbbox((0, 0), text, font=font, stroke_width=stroke)
+    w = bbox[2] - bbox[0] + stroke * 2 + 8
+    h = bbox[3] - bbox[1] + stroke * 2 + 8
+    img = PIL.Image.new("RGBA", (max(w, 4), max(h, 4)), (0, 0, 0, 0))
+    draw = PIL.ImageDraw.Draw(img)
+    # Center the text inside the canvas.
+    ox = (img.width - (bbox[2] - bbox[0])) // 2 - bbox[0] + stroke
+    oy = (img.height - (bbox[3] - bbox[1])) // 2 - bbox[1] + stroke
+    draw.text(
+        (ox, oy),
+        text,
+        font=font,
+        fill=color,
+        stroke_width=stroke,
+        stroke_fill=stroke_color,
+    )
+    import numpy as np
+    return ImageClip(np.array(img))
 
 
 # ── Module-level helpers (shared across instances) ───────────────────────
@@ -310,13 +372,12 @@ class MoviePyRenderer(Renderer):
                 if dur <= 0:
                     continue
 
-                txt_clip = TextClip(
-                    txt=sub.get("text", ""),
-                    fontsize=sub.get("font_size", 28),
+                txt_clip = _pil_text_clip(
+                    text=sub.get("text", ""),
+                    fontsize=int(sub.get("font_size", 28)),
                     color=sub.get("color", "#FFFFFF"),
                     stroke_color=sub.get("outline", "#000000"),
-                    stroke_width=1,
-                    method="label",
+                    stroke_width=int(sub.get("stroke_width", 1)),
                 )
                 txt_clip = txt_clip.set_position(
                     ("center", target_res[1] - sub.get("bottom_margin", 80))

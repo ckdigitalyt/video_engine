@@ -50,13 +50,13 @@ class TestInit:
         c.close()
 
     def test_schema_tables_exist(self, cache: AssetCache) -> None:
-        cur = cache._conn.execute(
+        cur = cache._conn().execute(
             "SELECT name FROM sqlite_master WHERE type='table' AND name='assets'"
         )
         assert cur.fetchone() is not None
 
     def test_indexes_exist(self, cache: AssetCache) -> None:
-        cur = cache._conn.execute(
+        cur = cache._conn().execute(
             "SELECT name FROM sqlite_master WHERE type='index'"
         )
         names = {r[0] for r in cur.fetchall()}
@@ -93,7 +93,7 @@ class TestLookup:
 class TestRegister:
     def test_insert(self, cache: AssetCache) -> None:
         cache.register("pexels", "milky_way", "https://pexels.com/mw.mp4")
-        cur = cache._conn.execute(
+        cur = cache._conn().execute(
             "SELECT * FROM assets WHERE provider='pexels' AND search_query='milky_way'"
         )
         row = cur.fetchone()
@@ -103,7 +103,7 @@ class TestRegister:
     def test_upsert_updates_use_count(self, cache: AssetCache) -> None:
         cache.register("p", "q", "https://url/1")
         cache.register("p", "q", "https://url/2")  # same PK
-        cur = cache._conn.execute(
+        cur = cache._conn().execute(
             "SELECT use_count, asset_url FROM assets WHERE provider='p' AND search_query='q'"
         )
         row = cur.fetchone()
@@ -113,7 +113,7 @@ class TestRegister:
     def test_register_without_local_path(self, cache: AssetCache) -> None:
         """Pre-register at search time, local_path can be null."""
         cache.register("p", "q", "https://url")
-        cur = cache._conn.execute(
+        cur = cache._conn().execute(
             "SELECT local_path FROM assets WHERE provider='p' AND search_query='q'"
         )
         row = cur.fetchone()
@@ -125,7 +125,7 @@ class TestRegister:
             f = tmp_path / f"bulk_{i}.mp4"
             f.write_bytes(b"x")
             cache.register(f"p_{i}", f"q_{i}", f"https://url/{i}", local_path=str(f))
-        cur = cache._conn.execute("SELECT COUNT(*) FROM assets")
+        cur = cache._conn().execute("SELECT COUNT(*) FROM assets")
         assert cur.fetchone()[0] == count
 
 
@@ -138,7 +138,7 @@ class TestUpdateLocalPath:
         f = tmp_path / "updated.mp4"
         f.write_bytes(b"data")
         cache.update_local_path("p", "q", "https://url", str(f))
-        cur = cache._conn.execute(
+        cur = cache._conn().execute(
             "SELECT local_path, use_count FROM assets WHERE provider='p' AND search_query='q'"
         )
         row = cur.fetchone()
@@ -184,7 +184,7 @@ class TestTouch:
         f.write_bytes(b"data")
         cache.register("p", "q", "https://url", local_path=str(f))
         cache.touch("p", "q")
-        cur = cache._conn.execute(
+        cur = cache._conn().execute(
             "SELECT use_count FROM assets WHERE provider='p' AND search_query='q'"
         )
         assert cur.fetchone()["use_count"] == 2
@@ -196,7 +196,7 @@ class TestTouch:
         cache.register("pexels", "cat", "https://url/1", local_path=str(f))
         cache.register("pexels", "dog", "https://url/2", local_path=str(f))
         cache.touch("pexels", "cat")
-        cur = cache._conn.execute(
+        cur = cache._conn().execute(
             "SELECT search_query, use_count FROM assets WHERE provider='pexels' ORDER BY search_query"
         )
         rows = cur.fetchall()
@@ -248,7 +248,7 @@ class TestIntegrity:
         """Primary key constraint prevents duplicate (provider, query)."""
         cache.register("p", "q", "https://url/1")
         cache.register("p", "q", "https://url/2")
-        cur = cache._conn.execute(
+        cur = cache._conn().execute(
             "SELECT COUNT(*) FROM assets WHERE provider='p' AND search_query='q'"
         )
         assert cur.fetchone()[0] == 1  # upsert, not insert

@@ -23,6 +23,22 @@ pipeline:
     audio: "cache/audio"
     music: "cache/music"
 
+  # v13 rec #3 (expert review): source images must have headroom for
+  # Ken Burns pan/zoom.  Never generate at final-output resolution and
+  # then zoom — the quality gate derives the SAFE zoom from the actual
+  # source dimensions (see src/qa/resolution_gate.py).
+  image_gen:
+    # Requested generation size (Pollinations honors it; NIM snaps to
+    # its allowed dims, max 2048).  2560x1440 = 1.33x headroom over
+    # 1920x1080 output; enough for the default 1.0-1.22 Ken Burns zoom.
+    stills_width: 2560
+    stills_height: 1440
+    # Internal Ken Burns render scale (2x output) before downscale.
+    kenburns_internal_scale: 2.0
+    # Fail pre-render if a still shot's zoom exceeds headroom by more
+    # than this margin (a 1.05x margin keeps rounding noise away).
+    zoom_headroom_margin: 1.05
+
   # Fallback is handled by FallbackDirector — no static clip
   fallback:
     video: ""  # Empty: FallbackDirector handles all degradation
@@ -50,11 +66,11 @@ pipeline:
     eval_frame: "cache/video/eval_frame.jpg"
 
   roles:
-    # Default LLM provider used when no specific role is configured
-    default: "gemini"
-    # Fallback provider when the default is unavailable (v12.6: mistral free,
-    # then deepseek as last resort in the runtime chains)
-    fallback: "mistral"
+    # v13.1: text stages on Mistral free tier (Gemini 2.5-flash free quota is
+    # only 20 req/day and burns out mid-run); Gemini stays for vision-only.
+    default: "mistral"
+    # Fallback provider when the default is unavailable (deepseek last resort)
+    fallback: "deepseek"
     # Role-specific provider overrides
-    planner: "gemini"
+    planner: "mistral"
     critic: "gemini"

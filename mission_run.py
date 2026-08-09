@@ -75,7 +75,7 @@ def _merge_scene_meta(original: list[dict], replacement: list[dict]) -> list[dic
     for i, s in enumerate(replacement or []):
         s = dict(s)
         if i < len(original):
-            for k in _SCENE_META_FIELDS:
+            for k in _SCENE_META_FIELDS + ("title", "narration", "visual_goal", "search_queries"):
                 if k not in s or s.get(k) in (None, [], ""):
                     v = (original[i] or {}).get(k)
                     if v not in (None, [], ""):
@@ -303,6 +303,16 @@ def stage_script(topic: str, research: dict, provider) -> list[dict]:
         raw = provider.generate_json(prompt + "\nReturn ONLY valid JSON.")
         data = json.loads(raw)
     scenes = data.get("scenes", [])
+    # v13.1: LLM outputs occasionally omit required keys (missing narration
+    # broke stage_script_review with KeyError) — normalize every scene so
+    # downstream stages can rely on title/narration/visual_goal/search_queries.
+    for _s in scenes:
+        if not isinstance(_s, dict):
+            continue
+        _s.setdefault("title", "Scene")
+        _s.setdefault("narration", "")
+        _s.setdefault("visual_goal", "")
+        _s.setdefault("search_queries", [])
     total_words = sum(len(s.get("narration", "").split()) for s in scenes)
     print(f"  {len(scenes)} scenes drafted, {total_words} words "
           f"(~{total_words * 0.4:.0f}s at 150wpm)")
@@ -380,7 +390,7 @@ def stage_script_review(scenes: list[dict], research: dict, provider_name: str) 
     print(f"\n[4/16] SCRIPT REVIEW ({_n_p} reviewers, ≤{_mp} passes)", flush=True)
     t0 = time.time()
     reviewer = ScriptReviewer(provider_name=provider_name)
-    narrations = [s["narration"] for s in scenes]
+    narrations = [s.get("narration", "") for s in scenes]
     final_narrations, results = reviewer.review(
         narrations,
         facts=research.get("facts", []),
@@ -454,39 +464,59 @@ def stage_storyboard_and_direct(
     director = VisualDirector(use_beats=True, topic=topic, llm_provider=llm, scene_data=scenes)
     result_scenes = director.run()
 
-    # ── Manim injection (v2): scale-comparison scenes get a Manim clip ──
-    # Mission: Manim is first-class for scale comparisons / orbital mechanics.
-    # If any scene's narration references distance/light-time, replace its
-    # first primary shot's asset with the pre-rendered Manim clip.
-    manim_clip = os.path.join("cache", "manim", "voyager_scale.mp4")
-    if os.path.exists(manim_clip):
-        for scene in result_scenes:
-            text = (scene.narration.spoken_narration or "").lower()
-            # Broad trigger set: any scene about distance/scale/light-time
-            # (v3: v2's reviewed script didn't contain the v1 keywords)
-            triggers = (
-                "light-hour", "light hour", "22.9", "24 billion", "distance",
-                "light-years away", "billion kilometers", "billion kilometres",
-                "how far", "farthest", "far from earth", "reach earth",
-                "hours to reach", "scale", "journey so far",
-            )
-            if any(k in text for k in triggers):
-                for beat in (scene.beat_plans or []):
-                    for shot in beat.shots:
-                        if shot.shot_type.value == "primary" and shot.asset_plan:
-                            shot.asset_plan.filepath = manim_clip
-                            shot.asset_plan.provider = ProviderType.MANIM
-                            shot.asset_plan.video_url = "manim://voyager_scale"
-                            shot.asset_plan.query_used = "voyager distance light scale"
-                            shot.asset_plan.score = 0.95
-                            shot.motion = "none"  # animation is self-contained
-                            shot.duration = min(9.0, max(shot.duration, 7.0))
-                            print(f"  [Manim] Injected voyager_scale clip into scene {scene.scene_id} "
-                                  f"({shot.duration:.1f}s)")
-                            break
-                    else:
-                        continue
+    # ── Manim + flat-vector beat injection (v13, shared direction) ────
+    # Single source of truth: src/director/visual_direction.py — the SAME
+    # registry mission_stills.py uses, so the two runners can't drift
+    # apart again.  Every scene gets real animation: a topic/intent-matched
+    # Manim clip when one exists, else a Kurzgesagt-style flat-vector beat
+    # rendered ALGORITHMICALLY for THIS video (per-video, labeled).
+    # (Old v2 Voyager-only gate removed in v13.)
+    from src.director.visual_direction import (
+        manim_scene_for, vector_beat_for, render_vector_beats,
+    )
+    _slug = "".join(c if c.isalnum() else "_" for c in topic.lower())[:44].strip("_")
+    _vector_dir = os.path.join("results", _slug, "vector")
+    _intents_needed = []
+    for _si, scene in enumerate(result_scenes):
+        _role = ("hook" if _si == 0 else
+                 "climax" if _si == len(result_scenes) - 2 else
+                 "conclusion" if _si == len(result_scenes) - 1 else "exploration")
+        _intents_needed.append({"hook": "hook", "climax": "climax",
+                                "conclusion": "conclusion",
+                                "exploration": "explanation"}.get(_role, "default"))
+    render_vector_beats(_vector_dir, label=_slug, intents=_intents_needed)
+    _anim_used: set = set()
+    _injected = {"manim": 0, "vector": 0}
+    for _si, scene in enumerate(result_scenes):
+        _intent = _intents_needed[_si]
+        _text = scene.narration.spoken_narration or ""
+        _clip = manim_scene_for(_text, _intent)
+        _kind = "manim"
+        if not _clip or not os.path.exists(_clip) or _clip in _anim_used:
+            _clip = vector_beat_for(_intent, vector_dir=_vector_dir)
+            _kind = "vector"
+        if not _clip or _clip in _anim_used:
+            continue
+        _anim_used.add(_clip)
+        for beat in (scene.beat_plans or []):
+            for shot in beat.shots:
+                if shot.shot_type.value == "primary" and shot.asset_plan:
+                    shot.asset_plan.filepath = _clip
+                    shot.asset_plan.provider = ProviderType.MANIM
+                    shot.asset_plan.video_url = f"manim://{os.path.basename(_clip)}"
+                    shot.asset_plan.query_used = f"{_kind} {_intent}"
+                    shot.asset_plan.score = 0.95
+                    shot.motion = "none"  # animation is self-contained
+                    shot.duration = min(9.0, max(shot.duration, 7.0))
+                    _injected[_kind] += 1
+                    print(f"  [{_kind}] Injected {os.path.basename(_clip)} into scene "
+                          f"{scene.scene_id} ({shot.duration:.1f}s)")
                     break
+            else:
+                continue
+            break
+    if _injected["manim"] or _injected["vector"]:
+        print(f"  [animation] manim x{_injected['manim']}, vector x{_injected['vector']}")
 
     provider_stats, fallback_count, total_shots = {}, 0, 0
     shot_durations, transitions_used, motions_used = [], {}, {}
@@ -572,10 +602,11 @@ def stage_ai_imagery(result_scenes, out_dir: str) -> dict:
     Uses the benchmarked default provider (NVIDIA NIM flux.1-dev).
     Cached in cache/generated — only generates once per prompt.
     """
-    print("\n[8b/16] AI IMAGE GENERATION (NIM primary → Pollinations fallback)", flush=True)
+    print("\n[8b/16] AI IMAGE GENERATION (NIM primary → Pollinations fallback, parallel)", flush=True)
     t0 = time.time()
     os.makedirs("cache/generated", exist_ok=True)
     from src.providers.image_gen import NvidiaNimProvider, PollinationsProvider
+    from concurrent.futures import ThreadPoolExecutor, as_completed
 
     prov = NvidiaNimProvider()
     fallback = PollinationsProvider()
@@ -592,14 +623,16 @@ def stage_ai_imagery(result_scenes, out_dir: str) -> dict:
             attempts.append(("pollinations", fallback))
         for name, p in attempts:
             try:
-                p.generate(prompt, out_path, width=1024, height=576)
+                p.generate(prompt, out_path, width=2560, height=1440)
                 print(f"  [AI] {name}: generated {os.path.basename(out_path)} ({os.path.getsize(out_path)//1024} KB)")
                 return True
             except Exception as e:
                 print(f"  [AI] !! {name} failed: {str(e)[:90]}")
         return False
 
-    generated, injected, sem_injected = 0, 0, 0
+    # ── Collect image tasks first (kind-based + semantic stills) ───────
+    tasks = []  # (kind, prompt, img_path, clip_path, scene, primary, is_semantic)
+
     for scene in result_scenes:
         text = (scene.narration.spoken_narration or "").lower()
         kind = None
@@ -612,20 +645,82 @@ def stage_ai_imagery(result_scenes, out_dir: str) -> dict:
 
         if kind:
             img_path = os.path.join("cache", "generated", f"ai_{kind}.png")
-            if not os.path.exists(img_path):
-                if _gen(AI_IMAGE_PROMPTS[kind] + _AI_STYLE_SUFFIX, img_path):
-                    generated += 1
-                else:
-                    print(f"  [AI] !! {kind} generation failed on all providers")
-                    continue
-
             clip_path = os.path.join("cache", "generated", f"ai_{kind}_kb.mp4")
-            if not os.path.exists(clip_path):
-                clip_path = _still_to_kenburns(img_path, clip_path, duration=9.0)
-            if not clip_path:
-                continue
+            tasks.append({"kind": kind, "prompt": AI_IMAGE_PROMPTS[kind] + _AI_STYLE_SUFFIX,
+                          "img_path": img_path, "clip_path": clip_path,
+                          "scene": scene, "primary": None, "is_semantic": False})
 
-            # Inject into the scene's last primary shot (replacing weak stock)
+    for scene in result_scenes:
+        primary = None
+        for beat in (scene.beat_plans or []):
+            for shot in beat.shots:
+                if shot.shot_type.value == "primary":
+                    primary = shot
+                    break
+            if primary:
+                break
+        if not primary or not primary.asset_plan:
+            continue
+        sem = primary.asset_plan.semantic_score or primary.semantic_score or 0.0
+        prov_name = primary.asset_plan.provider.value if primary.asset_plan.provider else ""
+        weak = sem < 0.65 or prov_name in ("placeholder", "emergency", "stock")
+        if not weak:
+            continue
+        visual_goal = ""
+        if scene.visual_plan and scene.visual_plan.visual_description:
+            visual_goal = scene.visual_plan.visual_description
+        narration_snip = (scene.narration.spoken_narration or "")[:160].strip()
+        prompt = (
+            f"{visual_goal or ('A scene about: ' + narration_snip)}"
+            + _AI_STYLE_SUFFIX
+        )
+        prompt_hash = abs(hash((prompt, scene.scene_id))) % 100000
+        img_path = os.path.join("cache", "generated", f"ai_sem_{scene.scene_id}_{prompt_hash}.png")
+        clip_path = os.path.join("cache", "generated", f"ai_sem_{scene.scene_id}_{prompt_hash}_kb.mp4")
+        tasks.append({"kind": f"semantic_{scene.scene_id}", "prompt": prompt,
+                      "img_path": img_path, "clip_path": clip_path,
+                      "scene": scene, "primary": primary, "is_semantic": True})
+
+    # ── Parallel generation: image → Ken Burns clip ──────────────────
+    def _gen_task(t: dict):
+        if not os.path.exists(t["img_path"]):
+            if not _gen(t["prompt"], t["img_path"]):
+                return t, None, True  # generation failed on all providers
+        clip_path = t["clip_path"]
+        if not os.path.exists(clip_path):
+            clip_path = _still_to_kenburns(t["img_path"], clip_path, duration=9.0)
+        return t, clip_path, False
+
+    generated, injected, sem_injected = 0, 0, 0
+    results = []
+    with ThreadPoolExecutor(max_workers=min(4, max(1, len(tasks)))) as ex:
+        futs = [ex.submit(_gen_task, t) for t in tasks]
+        for fut in as_completed(futs):
+            t, clip_path, failed = fut.result()
+            if failed or not clip_path:
+                print(f"  [AI] !! {t['kind']} generation failed on all providers")
+                continue
+            results.append((t, clip_path))
+            generated += 1
+
+    # ── Inject serially (mutates shared scene/shot objects) ──────────
+    for t, clip_path in results:
+        scene = t["scene"]
+        if t["is_semantic"]:
+            primary = t["primary"]
+            primary.asset_plan.filepath = clip_path
+            primary.asset_plan.provider = ProviderType.GENERATED
+            primary.asset_plan.video_url = f"ai://semantic_{scene.scene_id}"
+            primary.asset_plan.query_used = f"ai_generated_semantic_{scene.scene_id}"
+            primary.asset_plan.score = 0.9
+            primary.asset_plan.semantic_score = 0.9
+            primary.motion = "none"
+            primary.duration = min(9.0, max(primary.duration, 6.0))
+            sem_injected += 1
+            print(f"  [AI] semantic still injected into scene {scene.scene_id} "
+                  f"(→ 0.90, {primary.duration:.1f}s)")
+        else:
+            kind = t["kind"]
             for beat in (scene.beat_plans or []):
                 for shot in beat.shots:
                     if shot.shot_type.value == "primary" and shot.asset_plan:
@@ -643,61 +738,6 @@ def stage_ai_imagery(result_scenes, out_dir: str) -> dict:
                 else:
                     continue
                 break
-            continue
-
-        # ── Narration-driven semantic stills (v12.4) ──────────────────
-        # Fixes the v12 review finding "generic bar chart used instead of
-        # depicting the 1953 lab discovery": scenes whose best asset is
-        # semantically weak / fell back to stock now get a scene-specific
-        # AI still generated FROM THE NARRATION, so the visuals track the
-        # script instead of a generic stock query.
-        primary = None
-        for beat in (scene.beat_plans or []):
-            for shot in beat.shots:
-                if shot.shot_type.value == "primary":
-                    primary = shot
-                    break
-            if primary:
-                break
-        if not primary or not primary.asset_plan:
-            continue
-        sem = primary.asset_plan.semantic_score or primary.semantic_score or 0.0
-        prov = primary.asset_plan.provider.value if primary.asset_plan.provider else ""
-        weak = sem < 0.65 or prov in ("placeholder", "emergency", "stock")
-        if not weak:
-            continue
-        # Build a prompt from the scene's actual narration + visual goal.
-        visual_goal = ""
-        if scene.visual_plan and scene.visual_plan.visual_description:
-            visual_goal = scene.visual_plan.visual_description
-        narration_snip = (scene.narration.spoken_narration or "")[:160].strip()
-        prompt = (
-            f"{visual_goal or ('A scene about: ' + narration_snip)}"
-            + _AI_STYLE_SUFFIX
-        )
-        prompt_hash = abs(hash((prompt, scene.scene_id))) % 100000
-        img_path = os.path.join("cache", "generated", f"ai_sem_{scene.scene_id}_{prompt_hash}.png")
-        if not os.path.exists(img_path):
-            if not _gen(prompt, img_path):
-                print(f"  [AI] !! semantic still for scene {scene.scene_id} failed — keeping stock")
-                continue
-            generated += 1
-        clip_path = os.path.join("cache", "generated", f"ai_sem_{scene.scene_id}_{prompt_hash}_kb.mp4")
-        if not os.path.exists(clip_path):
-            clip_path = _still_to_kenburns(img_path, clip_path, duration=9.0)
-        if not clip_path:
-            continue
-        primary.asset_plan.filepath = clip_path
-        primary.asset_plan.provider = ProviderType.GENERATED
-        primary.asset_plan.video_url = f"ai://semantic_{scene.scene_id}"
-        primary.asset_plan.query_used = f"ai_generated_semantic_{scene.scene_id}"
-        primary.asset_plan.score = 0.9
-        primary.asset_plan.semantic_score = 0.9
-        primary.motion = "none"
-        primary.duration = min(9.0, max(primary.duration, 6.0))
-        sem_injected += 1
-        print(f"  [AI] semantic still injected into scene {scene.scene_id} "
-              f"(sem_score {sem:.2f} → 0.90, {primary.duration:.1f}s)")
 
     print(f"  Generated {generated}, injected {injected}, semantic-injected {sem_injected} "
           f"({(time.time()-t0):.1f}s)")
@@ -706,31 +746,9 @@ def stage_ai_imagery(result_scenes, out_dir: str) -> dict:
             "elapsed_s": round(time.time() - t0, 1)}
 
 
-# ═══════════════════════════════════════════════════════════════════════ #
 # Narration stage (10)
 # ═══════════════════════════════════════════════════════════════════════ #
 
-def stage_narration(result_scenes, cache_audio: str, voice_lock=None) -> dict:
-    print("\n[10/16] NARRATION (Kokoro George)", flush=True)
-    t0 = time.time()
-    for scene in result_scenes:
-        ap = os.path.join(cache_audio, f"scene_{scene.scene_id}.wav")
-        generate_voice(scene.narration.spoken_narration, ap)
-        if voice_lock is not None:
-            voice_lock.record_scene(scene.scene_id, "kokoro", "bm_george")
-        scene.audio_plan = AudioPlan(
-            narration_audio_path=ap,
-            music_style=MusicStyle.CINEMATIC,
-            ducking_enabled=True,
-            ducking_reduction_db=8.0,
-        )
-    if voice_lock is not None:
-        voice_lock.save()
-    print(f"  Voice tracks: {len(result_scenes)} ({round(time.time()-t0,1)}s)")
-    return {"voice_scenes": len(result_scenes), "elapsed_s": round(time.time() - t0, 1)}
-
-
-# ═══════════════════════════════════════════════════════════════════════ #
 # Rendering (12) + music mix (11, post-render ffmpeg sidechain)
 # ═══════════════════════════════════════════════════════════════════════ #
 
@@ -777,7 +795,7 @@ def _ensure_timeline_coverage(result_scenes, timeline_path: str) -> dict:
             attempts.append(fallback)
         for p in attempts:
             try:
-                p.generate(prompt, out_path, width=1024, height=576)
+                p.generate(prompt, out_path, width=2560, height=1440)
                 if os.path.exists(out_path):
                     return True
             except Exception as e:
@@ -861,25 +879,34 @@ def _build_subtitle_clips(result_scenes, timeline_path: str) -> list[dict]:
     starts = [e.get("start_time", 0) for e in tl.get("audio_timeline", [])
               if e.get("track") == "voice"]
     from src.subtitles.engine import SubtitleEngine
-    engine = SubtitleEngine()
-    all_clips: list[dict] = []
-    for i, scene in enumerate(result_scenes):
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    def _subs_one(i: int, scene):
         ap = scene.audio_plan
         if ap is None or not ap.narration_audio_path:
-            continue
+            return []
         text = scene.narration.spoken_narration if scene.narration else ""
         if not text.strip() or not os.path.exists(ap.narration_audio_path):
-            continue
+            return []
         try:
+            engine = SubtitleEngine()  # fresh per worker (config-only state)
             timing = engine.generate(ap.narration_audio_path, text)
         except Exception as e:
             print(f"  [subs] !! scene {scene.scene_id} timing failed: {str(e)[:80]}")
-            continue
+            return []
         offset_ms = (starts[i] if i < len(starts) else 0.0) * 1000.0
+        clips = []
         for clip in engine.to_renderer_clips(timing):
             clip["start_ms"] = clip.get("start_ms", 0) + offset_ms
             clip["end_ms"] = clip.get("end_ms", 0) + offset_ms
-            all_clips.append(clip)
+            clips.append(clip)
+        return clips
+
+    all_clips: list[dict] = []
+    with ThreadPoolExecutor(max_workers=min(4, max(1, len(result_scenes)))) as ex:
+        futs = [ex.submit(_subs_one, i, s) for i, s in enumerate(result_scenes)]
+        for fut in as_completed(futs):
+            all_clips.extend(fut.result())
     if all_clips:
         print(f"  [subs] {len(all_clips)} subtitle clips ({len(result_scenes)} scenes)")
     return all_clips
@@ -1191,6 +1218,16 @@ def build_sfx_timeline(scenes: list[dict], audio_durations: list[float],
         for ev in (sc.get("sfx_events") or [])[:2]:
             trig = (ev.get("trigger") or "tick").strip().lower()
             at = (ev.get("at") or "").lower()
+            # v13 (expert review rec #2): authentic-source events use the
+            # REAL recording (e.g. NOAA Bloop) — never a synth stand-in for
+            # story-central audio.
+            authentic = None
+            if ev.get("type") == "authentic" and ev.get("source"):
+                try:
+                    from src.qa.authentic_audio import fetch_authentic
+                    authentic = fetch_authentic(ev.get("source"))
+                except Exception as _e:
+                    print(f"  [sfx] !! authentic fetch failed: {str(_e)[:80]}")
             # map phrase -> fractional position in narration
             frac = 0.5
             if at and words:
@@ -1206,6 +1243,30 @@ def build_sfx_timeline(scenes: list[dict], audio_durations: list[float],
                 in_scene = [c for c in scene_cuts if cursor - 0.25 <= c <= cursor + dur + 0.25]
                 if in_scene:
                     t_at = min(in_scene, key=lambda c: abs(c - t_at))
+            if authentic is not None:
+                # Place the REAL recording at the event (respect its own
+                # duration; speed metadata preserved for on-screen labels).
+                import subprocess as _sp
+                _stripped = out_path + ".authentic.wav"
+                _sp.run(["ffmpeg", "-y", "-v", "error", "-i", authentic["path"],
+                         "-af", f"adelay={int(t_at*1000)}|{int(t_at*1000)}",
+                         "-t", str(total + 2.0), "-ar", "44100", "-ac", "1",
+                         _stripped], capture_output=True, timeout=60)
+                if os.path.exists(_stripped):
+                    # overlay onto the bed (same sample rate/layout)
+                    import array as _arr2
+                    import wave as _w2
+                    with _w2.open(_stripped) as _w:
+                        _r = _w.readframes(_w.getnframes())
+                    _raw = _arr2.array("h", _r)
+                    for _k, _s in enumerate(_raw):
+                        if 0 <= _k < n:
+                            bed[_k] += _s / 32767.0
+                    os.remove(_stripped)
+                    events_placed.append({"scene": i, "trigger": f"authentic:{ev.get('source')}",
+                                          "at_s": round(t_at, 2)})
+                    print(f"  [sfx] authentic '{ev.get('source')}' placed at {t_at:.1f}s")
+                    continue
             samples, _ = _synth_sfx_event(trig)
             start = int(t_at * sr)
             for j, s in enumerate(samples):
@@ -1610,8 +1671,72 @@ def stage_music_mix(video_path: str, music_path: str, out_path: str,
     ok = mean_db is not None and -30.0 < mean_db < -5.0
     print(f"  Music mixed (ducked under narration): {_probe_duration(out_path):.1f}s, {size_mb:.1f} MB, "
           f"mean={mean_db} dB {'✓' if ok else '⚠ check mix'}")
+    # ── v13 audio QA (expert review rec #7) ─────────────────────────────
+    # 1) Narration-track clipping: every scene's voice wav must have no
+    #    clipped samples (max_volume < -0.5 dB).  2) Ducking depth: the
+    #    music bed must sit well below the voice during narration (else
+    #    the mix is a wall of music).  Deterministic ffmpeg checks.
+    audio_qa = {"passed": True, "checks": []}
+    try:
+        cache_audio = os.path.join("cache", "audio")
+        _clip = []
+        for _sc in (scenes or []):
+            _sid = _sc.get("scene_id", 0) if isinstance(_sc, dict) else 0
+            _ap = os.path.join(cache_audio, f"scene_{_sid}.wav")
+            if not os.path.exists(_ap):
+                continue
+            _vd = subprocess.run(
+                ["ffmpeg", "-i", _ap, "-af", "volumedetect", "-f", "null", "-"],
+                capture_output=True, text=True, timeout=20)
+            _mv = _re.search(r"max_volume: ([-.\d]+) dB", _vd.stderr)
+            _max = float(_mv.group(1)) if _mv else -99.0
+            if _max > -0.5:
+                _clip.append(f"scene{_sid}:{_max:.1f}dB")
+        audio_qa["checks"].append({
+            "name": "narration_clipping",
+            "passed": not _clip,
+            "detail": "no narration clipping"
+                       if not _clip else f"CLIPPED narration: {_clip[:5]}",
+        })
+        # 2) Ducking depth: mean level of the mixed master during a voice
+        #    segment vs the bed-only level.  Simplified deterministic proxy:
+        #    voice tracks' mean vs master mean (voice is the loudest element;
+        #    if master mean is within 3 dB of voice mean, the bed is not
+        #    ducking under narration).
+        _voice_means = []
+        for _sc in (scenes or []):
+            _sid = _sc.get("scene_id", 0) if isinstance(_sc, dict) else 0
+            _ap = os.path.join(cache_audio, f"scene_{_sid}.wav")
+            if not os.path.exists(_ap):
+                continue
+            _vd = subprocess.run(
+                ["ffmpeg", "-i", _ap, "-af", "volumedetect", "-f", "null", "-"],
+                capture_output=True, text=True, timeout=20)
+            _mv2 = _re.search(r"mean_volume: ([-.\d]+) dB", _vd.stderr)
+            if _mv2:
+                _voice_means.append(float(_mv2.group(1)))
+        _duck_ok = True
+        _duck_note = "ducking depth check skipped (no voice tracks)"
+        if _voice_means and mean_db is not None:
+            _v_mean = sum(_voice_means) / len(_voice_means)
+            # Master should be within 2 dB of voice mean (music ducked below
+            # narration, not competing with it); if master is much LOUDER
+            # than voice, the bed overwhelmed the mix.
+            _duck_ok = mean_db <= _v_mean + 2.0
+            _duck_note = (f"master mean {mean_db:.1f} dB vs voice {_v_mean:.1f} dB "
+                          + ("— bed ducked under narration ✓"
+                             if _duck_ok else "— bed too loud vs narration ✗"))
+        audio_qa["checks"].append({
+            "name": "ducking_depth", "passed": _duck_ok, "detail": _duck_note,
+        })
+        audio_qa["passed"] = all(c["passed"] for c in audio_qa["checks"])
+    except Exception as _e:
+        print(f"  !! audio QA failed (non-fatal): {str(_e)[:80]}")
+    print(f"  [audio-qa] passed={audio_qa['passed']} " +
+          "; ".join(f"{c['name']}={c['passed']}" for c in audio_qa["checks"]))
     return {"mixed": True, "elapsed_s": round(time.time() - t0, 1), "size_mb": round(size_mb, 1),
-            "mean_db": mean_db, "sfx": os.path.basename(sfx_used) if sfx_used else None}
+            "mean_db": mean_db, "sfx": os.path.basename(sfx_used) if sfx_used else None,
+            "audio_qa": audio_qa}
 
 
 # ═══════════════════════════════════════════════════════════════════════ #
@@ -1843,6 +1968,82 @@ def main():
     _write_json(os.path.join(out_dir, "script_review_report.json"), review_report)
     _write_json(os.path.join(out_dir, "script_final.json"), scenes_data)
 
+    # ── Stage 4b (v13, expert review rec #1/#9): FACTUAL CLAIM GATE ───
+    # Every quantitative claim + named phenomenon in the final narration
+    # is extracted, disambiguated (Bloop vs 52-Hz whale etc.) and verified
+    # against the research pack BEFORE any visuals are planned.  A blocked
+    # gate forces script revision — never proceed with a conflated or
+    # unsupported claim (the Bloop video's fatal error was exactly this).
+    try:
+        from src.qa.claim_verifier import ClaimVerifier
+        _claim_gate = ClaimVerifier(llm=llm, research_pack=research).run(
+            scenes_data, out_dir=out_dir)
+        run_report["stages"]["claim_gate"] = {
+            "passed": _claim_gate["passed"],
+            "blocking": _claim_gate["blocking_failures"],
+            "claims": len(_claim_gate["claims"]),
+            "conflation_risks": len(_claim_gate["conflation_risks"]),
+        }
+        run_report["claim_gate"] = _claim_gate
+        if _claim_gate["blocking_failures"]:
+            print("  !! CLAIM GATE BLOCKED: " +
+                  str(_claim_gate["blocking_failures"]))
+            run_report["errors"].append(
+                f"claim gate blocked: {_claim_gate['blocking_failures']}")
+            # v13: a blocked factual gate is a HARD STOP for the script.
+            # Attempt ONE targeted rewrite of the offending scenes, then
+            # re-run the gate; if it still fails, the run is REVISION-
+            # REQUIRED (never silently render a factually broken script).
+            _fix = llm.generate_json(
+                "The narration below contains factual errors flagged by a "
+                "fact-check gate.  Rewrite the scenes to fix ONLY the errors "
+                "(remove wrong numbers, separate conflated phenomena, keep "
+                "tone and scene count).  Return STRICT JSON array of scenes "
+                "with title/narration/visual_goal/search_queries.\n\n" +
+                "Issues: " + json.dumps(_claim_gate["blocking_failures"]) + "\n\n" +
+                json.dumps({"scenes": scenes_data})[:6000])
+            try:
+                _fx = json.loads(_fix)
+                _fx_scenes = _fx.get("scenes", []) if isinstance(_fx, dict) else (
+                    _fx if isinstance(_fx, list) else [])
+                if len(_fx_scenes) == len(scenes_data):
+                    scenes_data = _merge_scene_meta(scenes_data, _fx_scenes)
+                    for s in scenes_data:
+                        s["narration"] = normalize_narration(s.get("narration", ""))
+                    _claim_gate2 = ClaimVerifier(
+                        llm=llm, research_pack=research).run(scenes_data, out_dir=out_dir)
+                    run_report["stages"]["claim_gate_fix"] = {
+                        "passed": _claim_gate2["passed"],
+                        "blocking": _claim_gate2["blocking_failures"],
+                    }
+                    if not _claim_gate2["passed"]:
+                        run_report["errors"].append(
+                            "claim gate still blocked after targeted rewrite")
+                    _claim_gate = _claim_gate2
+                    _write_json(os.path.join(out_dir, "script_final.json"), scenes_data)
+            except Exception as _e:
+                print(f"  !! claim-fix rewrite failed: {str(_e)[:80]}")
+            # v13 hard stop: a script that fails the factual gate after the
+            # targeted rewrite must NEVER be rendered.  Write the status and
+            # abort — the artifacts + claim_report.json are the revision
+            # evidence (same policy as the stills runner's pre-render abort).
+            if not _claim_gate.get("passed", False):
+                from src.qa.publish_status import resolve_status, write_status
+                _st = resolve_status(claim_gate=_claim_gate,
+                                     fatal_errors=["claim gate blocked after rewrite"],
+                                     artifacts=[os.path.join(out_dir, "claim_report.json")])
+                write_status(out_dir, _st)
+                run_report["status"] = _st
+                run_report["errors"].append(_st["summary"])
+                _write_json(os.path.join(out_dir, "run_report.json"), run_report)
+                print("\n  ⛔ CLAIM GATE HARD BLOCK — script is factually unsafe.\n"
+                      f"  {_st['summary']}\n"
+                      "  Fix the script (see claim_report.json) and re-run.")
+                sys.exit(3)
+    except Exception as _e:
+        print(f"  !! claim gate error (non-fatal): {str(_e)[:100]}")
+        run_report["stages"]["claim_gate"] = {"error": str(_e)[:120]}
+
     # ── Stages 5-9: Storyboard + director ─────────────────────────────
     result_scenes, director_stats = stage_storyboard_and_direct(topic, scenes_data, lib, ep, llm)
     run_report["stages"]["director"] = director_stats
@@ -1855,15 +2056,34 @@ def main():
     cache_audio = "cache/audio"
     os.makedirs(cache_audio, exist_ok=True)
     # v9 (Jade spec §1): lock the narrator voice once at project start.
+    # v13 consolidation: provider is config-driven (voices.provider,
+    # default chatterbox — the locked kurzgesagt_like narrator).  Both
+    # runners share stage_narration_dynamic so they can't diverge again.
     from src.qa.voice_lock import lock_voice
     from src.director.style_bible import create_style_bible
-    voice_lock = lock_voice(provider="kokoro", voice_id="bm_george",
+    from src.utils.config import get_config as _gc
+    _voice_provider = _gc("voices.provider", "chatterbox")
+    _voice_id = _gc("voices.chatterbox.voice_id", "kurzgesagt_like")
+    voice_lock = lock_voice(provider=_voice_provider, voice_id=_voice_id,
                             speaker_id="jade-narrator-001").reset_episode()
     style_bible = create_style_bible("jade").reset_episode()
     run_report["voice_lock"] = voice_lock.to_dict()
     run_report["style_bible"] = style_bible.to_dict()
-    audio_stats = stage_narration(result_scenes, cache_audio, voice_lock=voice_lock)
-    run_report["stages"]["narration"] = audio_stats
+    _audio_durs, narration_stats = stage_narration_dynamic(
+        scenes_data, cache_audio, provider=_voice_provider,
+        voice_lock=voice_lock)
+    # Map generated audio back onto Scene objects for the renderer
+    # (stage_narration_dynamic returns durations/stats only).
+    for _sc in result_scenes:
+        _ap = os.path.join(cache_audio, f"scene_{_sc.scene_id}.wav")
+        if os.path.exists(_ap):
+            _sc.audio_plan = AudioPlan(
+                narration_audio_path=_ap,
+                music_style=MusicStyle.CINEMATIC,
+                ducking_enabled=True,
+                ducking_reduction_db=8.0,
+            )
+    run_report["stages"]["narration"] = narration_stats
 
     # ── v9 (Jade spec §9): DETERMINISTIC PRE-RENDER GATE ─────────────
     from src.qa.jade_gates import PreRenderGate
@@ -1901,8 +2121,23 @@ def main():
     grade_src = graded_path if grade_stats.get("graded") else output_path
 
     # ── Stage 11: Music mix (sidechain ducking) ───────────────────────
+    # v13: build the scripted SFX timeline first (supports authentic
+    # source recordings, e.g. NOAA Bloop — rec #2), then mix.
+    _sfx_path = ""
+    try:
+        _sfx_path = os.path.join("cache", "music", "sfx_timeline_run.wav")
+        _sfx_path, _sfx_placed = build_sfx_timeline(
+            scenes_data, _audio_durs, _sfx_path)
+        if not _sfx_placed:
+            _sfx_path = ""
+        run_report["stages"]["sfx_v1"] = {"placed": len(_sfx_placed)}
+    except Exception as _e:
+        print(f"  !! SFX timeline failed (non-fatal): {str(_e)[:90]}")
+        _sfx_path = ""
     mix_stats = stage_music_mix(grade_src, args.music, mixed_path,
-                                music_volume_db=args.music_db)
+                                music_volume_db=args.music_db,
+                                sfx_path=_sfx_path, scenes=scenes_data,
+                                audio_durations=_audio_durs)
     run_report["stages"]["music_v1"] = mix_stats
     review_target = mixed_path if mix_stats.get("mixed") else grade_src
 
@@ -1945,7 +2180,9 @@ def main():
         _gsrc = _gpath if _gstats.get("graded") else output_path
         # Re-mix music on the improved render
         mix_stats = stage_music_mix(_gsrc, args.music, mixed_path,
-                                    music_volume_db=args.music_db)
+                                    music_volume_db=args.music_db,
+                                    sfx_path=_sfx_path, scenes=scenes_data,
+                                    audio_durations=_audio_durs)
         run_report["stages"][f"music_v{iteration+1}"] = mix_stats
         review_target = mixed_path if mix_stats.get("mixed") else _gsrc
         review = stage_video_review(review_target, scenes_data,
@@ -1976,6 +2213,31 @@ def main():
     except Exception as e:
         print(f"  !! publish gate failed (non-fatal): {str(e)[:100]}")
         run_report["publish_gate"] = {"error": str(e)[:200]}
+
+    # ── v13 (expert review rec #10): RUN-LEVEL PUBLISH STATUS ─────────
+    # Resolve PUBLISH_READY / REVISION_REQUIRED / BLOCKED from every gate
+    # and write STATUS.json + STATUS so the cron-driven daily pipeline can
+    # make ONE deterministic decision: upload only when PUBLISH_READY.
+    try:
+        from src.qa.publish_status import resolve_status, write_status
+        _status = resolve_status(
+            publish_gate=run_report.get("publish_gate"),
+            pre_render_gate=run_report.get("stages", {}).get("pre_render_gate"),
+            claim_gate=run_report.get("claim_gate"),
+            # Only a missing final artifact is FATAL — gate blocks are
+            # classified as REVISION_REQUIRED via their gate reports.
+            fatal_errors=[] if os.path.exists(final_video)
+                          else ["final video artifact missing"],
+            artifacts=[final_video],
+        )
+        run_report["status"] = _status
+        write_status(out_dir, _status)
+        print(f"\n  [status] {_status['status']}" +
+              (f" — blocked by: {_status['blocked_by']}"
+               if _status.get("blocked_by") else " — all gates passed"))
+    except Exception as e:
+        print(f"  !! status resolution failed (non-fatal): {str(e)[:100]}")
+        run_report["status"] = {"error": str(e)[:160]}
     # ── Stage 15-16: Final output + postmortem ────────────────────────
     print("\n[15-16/16] FINAL OUTPUT + POSTMORTEM", flush=True)
     run_report["final"] = {

@@ -10,6 +10,7 @@ This replaces the old single-clip-per-scene flow with beat-based editing.
 from typing import List, Optional, Dict, Any
 import os
 import concurrent.futures
+import threading
 
 from src.cinematic.beat_planner import TimelineBuilder as BeatTimelineBuilder
 from src.cinematic.duplicate_detector import DuplicateDetector
@@ -95,6 +96,10 @@ class BeatDirector:
         self.total_shots_requested = 0
         self.total_shots_accepted = 0
 
+        # v13: scenes process in parallel — guard shared counters, the
+        # duplicate detector and quality-gate/diversity state with a lock.
+        self._lock = threading.Lock()
+
     def process_scene_beats(
         self,
         scene: Scene,
@@ -155,23 +160,27 @@ class BeatDirector:
 
         for beat in beat_plans:
             for shot_idx, shot in enumerate(beat.shots):
-                self.total_shots_requested += 1
+                with self._lock:
+                    self.total_shots_requested += 1
                 result = self._process_shot(scene, beat, shot, narration, shot_idx, max_retries_per_shot)
                 if result is not None:
                     shot.asset_plan = result
                     shot.semantic_score = result.semantic_score
-                    self.total_shots_accepted += 1
+                    with self._lock:
+                        self.total_shots_accepted += 1
 
         # Fallback for failed shots
         for beat in beat_plans:
             for shot in beat.shots:
                 if shot.asset_plan is None:
-                    self.total_fallbacks += 1
+                    with self._lock:
+                        self.total_fallbacks += 1
                     fallback = self._fallback_for_shot(scene, beat, shot, narration)
                     if fallback:
                         shot.asset_plan = fallback
                         shot.semantic_score = fallback.semantic_score
-                        self.total_shots_accepted += 1
+                        with self._lock:
+                            self.total_shots_accepted += 1
 
         scene.beat_plans = beat_plans
         return scene
@@ -201,7 +210,8 @@ class BeatDirector:
                     queries.extend(all_motifs[:4])
 
         for query in queries[:max_retries + 4]:
-            self.total_queries_tried += 1
+            with self._lock:
+                self.total_queries_tried += 1
 
             # Use standard sequential provider chain (parallel collection unreliable)
             try:
@@ -249,9 +259,11 @@ class BeatDirector:
             sem_score = self._semantic_validator.score(narration=narration, query=query, asset=ap)
             ap.semantic_score = sem_score
 
-            passed, reason, _ = self._quality_gates.check_all(asset=ap, category=self._router.category)
+            with self._lock:
+                passed, reason, _ = self._quality_gates.check_all(asset=ap, category=self._router.category)
             if not passed:
-                self.total_gate_rejections += 1
+                with self._lock:
+                    self.total_gate_rejections += 1
                 continue
 
             if vf_link:
@@ -265,7 +277,8 @@ class BeatDirector:
 
             # Record accepted asset in duplicate detector (only for local files)
             if os.path.exists(vp):
-                self._duplicate_detector.record_use(vp, timestamp=shot.timestamp)
+                with self._lock:
+                    self._duplicate_detector.record_use(vp, timestamp=shot.timestamp)
 
             print(f"    [BeatDirector] Shot accepted: {purpose} (provider={provider_name})")
             return ap

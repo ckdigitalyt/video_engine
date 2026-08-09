@@ -145,12 +145,22 @@ class PexelsProvider(AssetProvider):
         w_res = get_config("providers.pexels.scoring.resolution_weight", 0.40)
         w_dur = get_config("providers.pexels.scoring.duration_match_weight", 0.40)
         w_hd = get_config("providers.pexels.scoring.hd_bonus_weight", 0.20)
+        # v13 (expert review rec #3): hard floor on source resolution — a
+        # 640x360 clip upscaled into 1920x1080 is visible softness.  Any
+        # candidate below the floor is REJECTED outright (score 0) so the
+        # router moves to the next provider instead of shipping soft video.
+        _min_w = get_config("providers.pexels.min_width", 1920)
+        _min_h = get_config("providers.pexels.min_height", 1080)
 
         scored: list[tuple[dict, float]] = []
         for video in results:
-            # ── Resolution score ───────────────────────────────────────
+            # ── Resolution floor (rec #3) ──────────────────────────────
             w = video.get("width", 0) or 0
             h = video.get("height", 0) or 0
+            if (_min_w and w and w < _min_w) or (_min_h and h and h < _min_h):
+                scored.append((video, 0.0))  # below floor: reject
+                continue
+            # ── Resolution score ───────────────────────────────────────
             if w * h <= 0:
                 res_score = 0.0
             else:

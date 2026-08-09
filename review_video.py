@@ -106,9 +106,9 @@ def _upload_and_review(video_path: str, script_text: str, model: str = "gemini-2
     prompt = REVIEW_PROMPT.format(script=script_text[:12000])
     video_part = types.Part.from_uri(file_uri=upload.uri, mime_type=upload.mime_type)
 
-    # v12.6 priority chain (free tier): Gemini 2.5 Flash first, then other
-    # Gemini flash variants (all video-capable), then Mistral free (script-only)
-    # and finally DeepSeek v4 flash (script-only). Pro models are ignored.
+    # v13 vision lock (free tier): Gemini 2.5 Flash first, then other Gemini
+    # flash variants (all video-capable). NO text-only fallback below: video
+    # review REQUIRES a multimodal model that can actually see the video.
     model_chain = [model, "gemini-3.5-flash", "gemini-3-flash-preview"]
     model_chain = list(dict.fromkeys(model_chain))  # dedupe, keep order
     last_err: Exception | None = None
@@ -141,26 +141,17 @@ def _upload_and_review(video_path: str, script_text: str, model: str = "gemini-2
                 break  # non-quota error: move to next model
             print(f"    !! {m} failed: {str(e)[:120]}")
             continue
-    # v12.6: Mistral free as backup #2, then DeepSeek v4 flash as backup #3.
-    # Both are text-only, so these are script-only reviews (degraded, clearly
-    # flagged so the improvement pass treats them cautiously). Providers with
-    # no API key configured are skipped gracefully.
-    for fb_name, fb_cls in (("mistral", "MistralProvider"),
-                            ("deepseek", "DeepSeekProvider")):
-        try:
-            from src.providers.factory import ProviderFactory
-            fb = ProviderFactory().get_llm_provider(fb_name)
-            print(f"→ All Gemini flash models failed — falling back to {fb_name} "
-                  f"(script-only review, degraded)")
-            raw = fb.generate_json(REVIEW_PROMPT.format(script=script_text[:12000]))
-            review = _parse_review_json(raw)
-            review["_meta"]["model_used"] = f"{fb_name} (script-only fallback)"
-            review["_meta"]["degraded"] = True
-            return review
-        except Exception as e:  # noqa: BLE001
-            last_err = e
-            print(f"    !! {fb_name} fallback unavailable: {str(e)[:100]}")
-    raise RuntimeError(f"All review models failed; last error: {last_err}")
+    # v13: VISION LOCK — no text-only degradation. A script-only "review" of
+    # a video the model never saw is worse than no review (it could pass a
+    # broken render or reject a good one on text alone). If every Gemini flash
+    # variant fails, fail loudly so the run stops instead of shipping a fake
+    # review. Retry the run when Gemini quota clears (the 429 backoff above
+    # already handles short free-tier quota windows).
+    raise RuntimeError(
+        "Video review failed: all Gemini flash variants unavailable "
+        f"(last error: {last_err}). Vision-required review will NOT fall back "
+        "to text-only models (Mistral/DeepSeek cannot see video)."
+    )
 
 
 def _parse_review_json(text: str) -> dict:

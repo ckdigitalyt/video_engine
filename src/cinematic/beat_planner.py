@@ -421,7 +421,12 @@ class BeatPlanner:
             if i == len(clauses) - 1:
                 remaining = scene_duration - time_cursor
                 if remaining > 0:
-                    duration = min(remaining, 12.0)
+                    # v13 rec #4: cap the LAST beat too — 12s of one visual
+                    # is a retention killer even at scene close.  Visual
+                    # progression must come from multiple shots, not one
+                    # over-long beat.  (The coverage builder splits any
+                    # remaining overrun into motion chunks.)
+                    duration = min(remaining, 8.0)
 
             beat = Beat(index=i, text=clause, start_time=time_cursor, duration=duration)
             beats.append(beat)
@@ -430,7 +435,9 @@ class BeatPlanner:
         if beats and beats[-1].start_time + beats[-1].duration < scene_duration:
             diff = scene_duration - (beats[-1].start_time + beats[-1].duration)
             new_dur = beats[-1].duration + diff
-            beats[-1].duration = min(new_dur, 12.0)
+            # v13 rec #4: hard ceiling on any single beat — remainder is
+            # handled by the timeline coverage builder as motion chunks.
+            beats[-1].duration = min(new_dur, 8.0)
 
         return beats
 

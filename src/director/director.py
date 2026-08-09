@@ -270,19 +270,31 @@ class VisualDirector:
                 knowledge_library=kl,
             )
 
+        # v13: process scenes in PARALLEL — per-scene beat planning, asset
+        # search and downloads are independent.  Shared BeatDirector state
+        # (counters, duplicate detector, quality gates) is lock-guarded.
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+
+        scenes_in = []
         for scene_data in self._scene_data:
             if isinstance(scene_data, Scene):
                 scene = scene_data
             else:
                 scene = self._dict_to_scene(scene_data)
-
             print(f"\n{'─'*50}")
             print(f"  Scene {scene.scene_id}: {scene.title}")
             print(f"{'─'*50}")
+            scenes_in.append(scene)
 
-            # Process scene with beat-based editing
-            scene = self._beat_director.process_scene_beats(scene)
-            accepted_scenes.append(scene)
+        results: dict[int, Scene] = {}
+        workers = min(3, max(1, len(scenes_in)))
+        with ThreadPoolExecutor(max_workers=workers) as ex:
+            futs = {ex.submit(self._beat_director.process_scene_beats, s): s for s in scenes_in}
+            for fut in as_completed(futs):
+                s = fut.result()
+                results[s.scene_id] = s
+        # Restore original scene order for storyboard validation.
+        accepted_scenes = [results[s.scene_id] for s in scenes_in]
 
         stats = self._beat_director.get_stats()
         # ── Storyboard validation ────────────────────────────────────

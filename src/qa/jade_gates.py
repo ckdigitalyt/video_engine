@@ -48,6 +48,8 @@ from src.cinematic.pacing_engine import audit_pacing, comprehension_risk
 HOOK_WINDOW_S = 15.0
 HOOK_MIN_SHOTS = 5          # distinct visuals in the opening window
 MAX_SHOT_HOLD_S = 4.0      # hard cap on a single shot's on-screen time
+MAX_SHOT_DURATION_S = 12.0  # v13 rec #4: NO single clip may run 12+ s
+                            # (even animated — visual progression required)
 MAX_DEAD_AIR_S = 0.5        # gap between narration blocks allowed
 SILENCE_GAP_S = 0.8         # silence run inside the final audio = dead air
 BLACK_FRAME_LUMA = 12.0     # mean luma below this = black/dead frame
@@ -205,6 +207,21 @@ class PreRenderGate:
                            f"longest static shot {longest:.3f}s (limit {self._max_hold}s)",
                            metrics={"longest_hold_s": round(longest, 3)}))
 
+        # ── 5b. Absolute max shot duration (v13 rec #4) ────────────────
+        # No single clip — animated or not — may exceed the hard ceiling.
+        # 12+ s of essentially unchanged visual kills retention even when
+        # the narration is good.  (Holds are chunked into <=6s motion
+        # segments by the timeline builder; this is the final backstop.)
+        all_durs = [v.get("end_time", 0) - v.get("start_time", 0) for v in vt]
+        over = [d for d in all_durs if d > MAX_SHOT_DURATION_S + 1e-6]
+        report.add(QACheck(
+            "max_shot_duration", not over,
+            f"no shot exceeds {MAX_SHOT_DURATION_S:.0f}s"
+            if not over else f"{len(over)} shot(s) exceed {MAX_SHOT_DURATION_S:.0f}s: "
+            + ", ".join(f"{d:.1f}s" for d in sorted(over, reverse=True)[:5]),
+            metrics={"longest_shot_s": round(max(all_durs), 3) if all_durs else 0.0,
+                     "over_limit": [round(d, 2) for d in sorted(over, reverse=True)[:8]]}))
+
         # ── 6. Dead-air in narration timeline (§5/§9 dead-air gap) ─────
         gaps = []
         for a, b in zip(at, at[1:]):
@@ -308,6 +325,20 @@ class PreRenderGate:
                 "every visual belongs to its narration beat"
                 if not misaligned else f"misaligned shots: {misaligned[:5]}"))
 
+        # ── 10. Resolution headroom (v13 rec #3) — source images must ───
+        #    sustain the planned zoom before render.  Generates at final
+        #    res then zooming = guaranteed softness; catch it on the PLAN.
+        try:
+            from src.qa.resolution_gate import check_timeline_headroom
+            from src.utils.config import get_config
+            _margin = float(get_config(
+                "pipeline.image_gen.zoom_headroom_margin", 1.05))
+            rh = check_timeline_headroom(timeline_path, margin=_margin)
+            report.add(QACheck("resolution_headroom", rh["passed"], rh["detail"]))
+        except Exception as e:
+            report.add(QACheck("resolution_headroom", True,
+                               f"headroom check skipped ({str(e)[:60]})"))
+
         return report.to_dict()
 
 
@@ -385,6 +416,28 @@ class PublishGate:
         # ── Black opening frames (§5 no dead openings) ─────────────────
         opening = self._check_opening_frames(video_path)
         report.add(QACheck("opening_black_frames", opening["passed"], opening["detail"]))
+
+        # ── Absolute max shot duration in final timeline (v13 rec #4) ──
+        tl2 = tl or {}
+        durs = [v.get("end_time", 0) - v.get("start_time", 0)
+                for v in tl2.get("video_timeline", [])]
+        over = [d for d in durs if d > MAX_SHOT_DURATION_S + 1e-6]
+        report.add(QACheck(
+            "max_shot_duration", not over,
+            f"no shot exceeds {MAX_SHOT_DURATION_S:.0f}s in final timeline"
+            if not over else f"{len(over)} shot(s) exceed {MAX_SHOT_DURATION_S:.0f}s: "
+            + ", ".join(f"{d:.1f}s" for d in sorted(over, reverse=True)[:5])))
+
+        # ── Visual artifact scan on the final video (v13 rec #5) ───────
+        # Mirrored edges / smeared borders / seam lines / wrong aspect.
+        try:
+            from src.qa.visual_artifact_check import run_visual_artifact_check
+            art = run_visual_artifact_check(video_path)
+            for c in art.get("checks", []):
+                report.add(QACheck(c["name"], c["passed"], c["detail"]))
+        except Exception as e:
+            report.add(QACheck("visual_artifacts", True,
+                               f"artifact scan skipped ({str(e)[:60]})"))
 
         data = report.to_dict()
         data["publish_ready"] = not data["blocking_failures"]

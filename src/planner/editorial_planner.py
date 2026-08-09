@@ -240,17 +240,23 @@ class EditorialPlanner:
         if total >= 2:
             roles += ["climax", "conclusion"]
 
-        plans = []
-        for i, scene_data in enumerate(scenes_with_narration):
-            role = scene_data.get("narrative_role", roles[i] if i < len(roles) else "exploration")
-            plan = self.plan_scene(
-                scene_id=scene_data.get("scene_id", i),
-                title=scene_data.get("title", ""),
-                narration=scene_data.get("narration", ""),
+        # v13: plan scenes in parallel — per-scene LLM calls are independent.
+        from concurrent.futures import ThreadPoolExecutor
+        plans: list = [None] * len(scenes_with_narration)
+
+        def _plan_one(i: int, sd: dict) -> None:
+            role = sd.get("narrative_role", roles[i] if i < len(roles) else "exploration")
+            plans[i] = self.plan_scene(
+                scene_id=sd.get("scene_id", i),
+                title=sd.get("title", ""),
+                narration=sd.get("narration", ""),
                 topic=topic,
                 narrative_role=role,
             )
-            plans.append(plan)
+
+        with ThreadPoolExecutor(max_workers=min(4, max(1, len(scenes_with_narration)))) as ex:
+            list(ex.map(lambda item: _plan_one(item[0], item[1]),
+                        enumerate(scenes_with_narration)))
 
         return plans
 

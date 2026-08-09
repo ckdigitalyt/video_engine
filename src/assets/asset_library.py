@@ -238,7 +238,7 @@ class AssetLibrary:
         Return every indexed entry from the cache as a list of dicts with
         keys *query*, *asset_url*, *local_path*.
         """
-        cur = self._cache._conn.execute(
+        cur = self._cache._conn().execute(
             "SELECT search_query AS query, asset_url, local_path "
             "FROM assets WHERE provider='asset_library' AND local_path IS NOT NULL"
         )

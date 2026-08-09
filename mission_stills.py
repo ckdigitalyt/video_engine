@@ -28,6 +28,24 @@ load_dotenv()
 
 import mission_run as M
 
+# v13 consolidation: visual direction (Manim registry, flat-vector
+# beats, Jade style lock) lives in ONE module shared with mission_run
+# so the two runners can never drift apart again.
+from src.director.visual_direction import (
+    MANIM_SCENES,
+    TOPIC_MANIM,
+    _TOPIC_HINTS,
+    detect_topic as _detect_topic,
+    manim_scene_for as _manim_scene_for,
+    manim_script_for as _manim_script_for,
+    VECTOR_BEATS,
+    vector_beat_for as _vector_beat_for,
+    render_vector_beats as _render_vector_beats,
+    FIXED_JADE_STYLE,
+    STYLE_MODIFIERS,
+    style_prompt_for as _style_prompt_for,
+)
+
 # v11 recalibration: shot-hold / dead-air / hook constants live in the
 # QA gates module — import them here so build_stills_timeline enforces
 # the SAME caps the gates check (single source of truth).
@@ -181,7 +199,7 @@ def _ai_still(prompt: str, out_path: str) -> str:
     from src.providers.image_gen import NvidiaNimProvider, PollinationsProvider
     for prov in (NvidiaNimProvider(), PollinationsProvider()):
         try:
-            prov.generate(prompt, out_path, width=1024, height=576)
+            prov.generate(prompt, out_path, width=2560, height=1440)
             print(f"  [AI] {prov.name}: {os.path.basename(out_path)} ({os.path.getsize(out_path)//1024} KB)")
             return out_path
         except Exception as e:
@@ -192,73 +210,6 @@ def _ai_still(prompt: str, out_path: str) -> str:
 # ═══════════════════════════════════════════════════════════════════════ #
 # Stills-first visual planner
 # ═══════════════════════════════════════════════════════════════════════ #
-
-MANIM_SCENES = {
-    "voyager_scale": "cache/manim/voyager_scale.mp4",
-    "voyager_timeline": "cache/manim/voyager_timeline.mp4",
-    "voyager_trajectory": "cache/manim/voyager_trajectory.mp4",
-    "sun_scale": "cache/manim/sun_scale.mp4",
-    "sun_layers": "cache/manim/sun_layers.mp4",
-    "pulsar_lighthouse": "cache/manim/pulsar_lighthouse.mp4",
-    "pulsar_density": "cache/manim/pulsar_density.mp4",
-    "black_hole_lensing": "cache/manim/black_hole_lensing.mp4",
-    "moon_phases": "cache/manim/moon_phases.mp4",
-    # v12: topic-agnostic generic beats — every topic gets motion
-    "generic_clock": "cache/manim/generic_ClockSeven.mp4",
-    "generic_waves": "cache/manim/generic_BrainWaves.mp4",
-    "generic_bars": "cache/manim/generic_GrowingBars.mp4",
-    "generic_pulse": "cache/manim/generic_PulseMotif.mp4",
-    "generic_figure": "cache/manim/generic_FigureBeat.mp4",
-    "generic_cycle": "cache/manim/generic_CycleLoop.mp4",
-}
-
-# Topic -> Manim scenes (intent-mapped).  General registry: adding a new
-# topic means adding its scenes here; the planner logic stays topic-free.
-TOPIC_MANIM = {
-    "voyager": {"scale": "voyager_scale", "timeline": "voyager_timeline",
-                 "journey": "voyager_trajectory"},
-    "sun":     {"scale": "sun_scale", "explanation": "sun_layers",
-                 "structure": "sun_layers"},
-    "pulsar":  {"explanation": "pulsar_lighthouse", "journey": "pulsar_lighthouse",
-                 "scale": "pulsar_density", "emotion": "pulsar_lighthouse"},
-    "black_holes": {"explanation": "black_hole_lensing", "structure": "black_hole_lensing",
-                 "emotion": "black_hole_lensing", "journey": "black_hole_lensing",
-                 "scale": "black_hole_lensing"},
-    "moon":    {"explanation": "moon_phases", "journey": "moon_phases",
-                 "emotion": "moon_phases", "scale": "moon_phases",
-                 "structure": "moon_phases"},
-    # v12: generic fallback — topic-agnostic beats mapped by intent.  A
-    # fresh topic with no bespoke scenes still gets real animation.
-    "__generic__": {
-        "hook": "generic_pulse", "emotion": "generic_waves",
-        "explanation": "generic_bars", "structure": "generic_cycle",
-        "scale": "generic_clock", "journey": "generic_figure",
-        "timeline": "generic_clock", "climax": "generic_pulse",
-        "context": "generic_figure", "conclusion": "generic_cycle",
-        "default": "generic_bars",
-    },
-}
-
-# Which topic a given text belongs to (keyword hints, general-purpose).
-# NOTE: hints must be DISJOINT and avoid physics-unit false positives:
-# - "star" is NOT a sun hint (pulsar narration says "this star")
-# - "solar" alone is NOT a sun hint ("solar masses" is a unit used for
-#   neutron stars) — only compound solar terms trigger the sun topic.
-_TOPIC_HINTS = {
-    "voyager": ("voyager", "spacecraft", "golden record", "pale blue dot",
-                 "jupiter", "saturn", "heliopause"),
-    "sun":     ("solar wind", "solar flare", "solar cycle", "solar corona",
-                 "solar surface", "sunlight", "photosphere", "chromosphere",
-                 "the sun fuses", "the sun's", "sun's core", "sun's surface",
-                 "our star"),
-    "pulsar":  ("pulsar", "neutron star", "lighthouse", "spins", "rotating",
-                 "beam", "dense", "teaspoon", "magnetar", "supernova remnant"),
-    "black_holes": ("black hole", "event horizon", "singularity", "accretion",
-                 "spacetime", "lensing", "photon ring", "gravitational"),
-    "moon":    ("the moon", "lunar", "moon's", "apollo", "craters",
-                 "maria", "regolith", "tidal locking", "moon phases",
-                 "earth's companion"),
-}
 
 # Pinned stills: real NASA assets that must NOT be overwritten by the
 # fetch planner (human-approved swaps from refine_stills).  Keyed by
@@ -334,145 +285,6 @@ def _kenburns(image_path: str, out_path: str, duration: float = 6.0,
     return out_path if os.path.exists(out_path) else ""
 
 
-def _detect_topic(scene_text: str) -> str:
-    t = scene_text.lower()
-    for topic, hints in _TOPIC_HINTS.items():
-        if any(h in t for h in hints):
-            return topic
-    return ""
-
-
-def _manim_scene_for(scene_text: str, intent: str = "default") -> str:
-    """Pick a Manim scene by topic + intent (general, registry-driven).
-
-    v12: falls back to the topic-agnostic generic beat mapped by intent,
-    so a fresh topic with no bespoke scenes still gets real animation
-    (was: returned "" for any unregistered topic -> manim: 0 in stats).
-    """
-    topic = _detect_topic(scene_text)
-    if topic and topic in TOPIC_MANIM:
-        mapping = TOPIC_MANIM[topic]
-        # intent-priority: scale/explanation beats are the natural Manim beats
-        for key in ("scale", "explanation", "timeline", "journey", "structure"):
-            if intent == key and key in mapping:
-                return MANIM_SCENES[mapping[key]]
-            # also trigger on scale words even when intent is generic
-            if (key == "scale" and key in mapping and
-                    any(k in scene_text.lower() for k in
-                        ("how big", "how far", "million", "billion", "fit inside", "size"))):
-                return MANIM_SCENES[mapping[key]]
-    # v12: generic fallback (any topic, any intent)
-    generic = TOPIC_MANIM.get("__generic__", {})
-    key = intent if intent in generic else "default"
-    clip = generic.get(key, generic.get("default"))
-    return MANIM_SCENES.get(clip, "") if clip else ""
-
-
-# v12: flat-vector ANIMATED beats (Blender, Workbench FLAT) — the
-# Kurzgesagt-style vector motion the channel direction calls for.  These
-# are topic-agnostic; any scene can pull one, so the video never ships
-# as pure Ken-Burns stills (sleep episode shipped manim:0 + zero vector
-# animation — the two biggest v11 failures).
-VECTOR_BEATS = {
-    "hook": "cache/vector/vector_pulse.mp4",
-    "emotion": "cache/vector/vector_waves.mp4",
-    "explanation": "cache/vector/vector_bars.mp4",
-    "structure": "cache/vector/vector_clock.mp4",
-    "scale": "cache/vector/vector_orbit.mp4",
-    "journey": "cache/vector/vector_figure_walk.mp4",
-    "timeline": "cache/vector/vector_clock.mp4",
-    "climax": "cache/vector/vector_pulse.mp4",
-    "context": "cache/vector/vector_figure_walk.mp4",
-    "conclusion": "cache/vector/vector_orbit.mp4",
-    "default": "cache/vector/vector_pulse.mp4",
-}
-
-
-def _vector_beat_for(intent: str = "default") -> str:
-    """Return the cached flat-vector animated beat for an intent, or ""
-    if the clip hasn't been rendered yet (tools/vector_clips.py).
-
-    Validates the clip with ffprobe — a partial/corrupt render (e.g.
-    failed ffmpeg composite) must never enter the timeline."""
-    clip = VECTOR_BEATS.get(intent, VECTOR_BEATS.get("default", ""))
-    if not clip or not os.path.exists(clip):
-        return ""
-    if os.path.getsize(clip) < 200_000:
-        return ""
-    try:
-        r = subprocess.run(
-            ["ffprobe", "-v", "error", "-show_entries", "format=duration",
-             "-of", "csv=p=0", clip],
-            capture_output=True, text=True, timeout=15,
-        )
-        if r.returncode != 0 or not r.stdout.strip():
-            print(f"  [vector] rejecting corrupt clip {os.path.basename(clip)}")
-            return ""
-        dur = float(r.stdout.strip())
-        if dur < 1.0:
-            return ""
-    except Exception:
-        return ""
-    return clip
-
-
-# Visual style modifiers ("Jade" subsystem).
-#
-# STUDIO DECISION (2026-08-03): consistency over rotation.  ckdigital
-# asked for ONE fixed style + ONE color combination used for every
-# cartoon/stylized shot, so the video reads as a single art direction
-# instead of a mix of unrelated styles.  All non-photoreal AI stills now
-# use FIXED_JADE_STYLE (+ its fixed palette) regardless of scene emotion;
-# the per-emotion rotation below is kept only as a fallback for scenes
-# that carry an explicit visual_style that is NOT in the fixed set.
-# 2026-08-05: channel direction — flat-vector Kurzgesagt-style (matches
-# style_bible DEFAULT_STYLE_MODIFIER + STYLE_TOKEN="flat-vector").
-FIXED_JADE_STYLE = (
-    "flat-vector documentary illustration, clean geometric shapes, smooth "
-    "curves, bold flat color fills, deep navy background with high-saturation "
-    "cyan and orange accents, simple stylized human figures, minimal detail, "
-    "no text, no gradients, no photorealism"
-)
-
-STYLE_MODIFIERS = {
-    "jade": FIXED_JADE_STYLE,
-    "ghibli": (
-        "Studio Ghibli-inspired hand-drawn animation, painterly backgrounds, "
-        "soft warm palette, detailed matte art, no text"),
-    "hand_drawn": (
-        "hand-drawn cel animation, expressive ink outlines, vibrant colors, "
-        "no text"),
-    "90s_anime": (
-        "1990s anime cel style, detailed background art, film grain, "
-        "dramatic lighting, no text"),
-    "sepia_cel": (
-        "sepia-toned hand-drawn cel animation, vintage documentary look, "
-        "aged paper texture, no text"),
-    "watercolor": (
-        "watercolor illustration, soft washes, delicate detail, no text"),
-    "clean_vector": (
-        "clean vector infographic illustration, flat modern design, "
-        "minimalist, no text"),
-    "photorealistic": "photorealistic, cinematic, high detail, no text",
-}
-
-
-def _style_prompt_for(scene: dict, fallback: str = "") -> str:
-    """Resolve a scene's visual_style into a prompt modifier.
-
-    v8.1 (2026-08-03): consistency override — unless the scene explicitly
-    asks for a photorealistic look, return the single fixed Jade style so
-    every stylized shot shares one art direction and color palette.
-    """
-    style = ((scene or {}).get("visual_style") or "").strip().lower()
-    if style == "photorealistic":
-        return STYLE_MODIFIERS["photorealistic"]
-    if style and style in STYLE_MODIFIERS and style in ("jade",):
-        return STYLE_MODIFIERS[style]
-    # Consistency override: all cartoon shots share the fixed Jade style.
-    return FIXED_JADE_STYLE
-
-
 def _still_plan_for(scene_text: str, spec=None, scene=None) -> list:
     """Ordered candidate prompts/queries for still imagery.
 
@@ -541,24 +353,6 @@ def _still_plan_for(scene_text: str, spec=None, scene=None) -> list:
     return out
 
 
-def _manim_script_for(clip_path: str) -> str:
-    """Resolve the .py source for a rendered Manim clip.
-
-    Rendered clips live in cache/manim/<name>.mp4 while their source
-    scripts live in src/manim/scenes/<name>.py (or beside the clip when
-    generated ad-hoc).  Missing source is NOT a hard failure — the clip
-    already exists and is registered; kinetic validation is a bonus."""
-    cands = [
-        clip_path.replace(".mp4", ".py"),
-        os.path.join("src", "manim", "scenes",
-                     os.path.basename(clip_path).replace(".mp4", ".py")),
-    ]
-    for c in cands:
-        if os.path.exists(c):
-            return c
-    return ""
-
-
 def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                          gates=None, specs: Optional[dict] = None,
                          topic_slug: str = "",
@@ -584,6 +378,18 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
     os.makedirs(os.path.join(out_dir, "shots"), exist_ok=True)
     still_root = os.path.join("cache", "stills", topic_slug or "default")
     os.makedirs(still_root, exist_ok=True)
+    # v13 fix: per-video vector beats must render into THIS run's vector
+    # dir before any scene requests one (mission_run does this; the stills
+    # runner referenced ``vector_dir`` without ever defining it → NameError
+    # on the first non-Manim scene).
+    vector_dir = os.path.join(out_dir, "vector")
+    os.makedirs(vector_dir, exist_ok=True)
+    _vi_intents = []
+    for _vi, _scene in enumerate(scenes_data):
+        _vs = (specs or {}).get(_vi)
+        _vi_intents.append(getattr(_vs, "scene_intent", "default") or "default")
+    _render_vector_beats(vector_dir, label=topic_slug or "stills",
+                         intents=_vi_intents)
     pinned = PINNED_STILLS_BY_TOPIC.get(topic_slug, {})
 
     plan = {}
@@ -631,11 +437,12 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                 stats["rejected"] += 1
                 print(f"  [manim-gate] rejected {os.path.basename(manim)} "
                       f"({(mv.errors or ['not kinetic'])[:1]})")
-        # 1b) v12: flat-vector ANIMATED beat (Kurzgesagt-style motion) —
-        #     every scene gets real animation, not just Ken-Burns stills.
-        #     Rendered once by tools/vector_clips.py into cache/vector/.
+        # 1b) v13: flat-vector ANIMATED beat (Kurzgesagt-style motion) —
+        #     rendered ALGORITHMICALLY for THIS video (per-video, labeled,
+        #     into out_dir/vector/) — never reused across episodes.  Every
+        #     scene gets real animation, not just Ken-Burns stills.
         if not shots or shots[0].get("kind") != "manim":
-            vbeat = _vector_beat_for(intent)
+            vbeat = _vector_beat_for(intent, vector_dir=vector_dir)
             if vbeat and vbeat not in manim_used:
                 manim_used.add(vbeat)
                 shots.insert(0, {"file": vbeat,
@@ -1297,6 +1104,70 @@ def main():
         M._write_json(os.path.join(out_dir, "script_review_report.json"), review_report)
         M._write_json(os.path.join(out_dir, "script_final.json"), scenes_data)
 
+    # ── v13 (expert review rec #1/#9): FACTUAL CLAIM GATE ─────────────
+    # Same hard gate as mission_run: extract + disambiguate + verify every
+    # quantitative claim and named phenomenon BEFORE visuals.  A blocked
+    # gate after one targeted rewrite aborts the run (never render a
+    # factually broken script — the Bloop/52Hz conflation is exactly the
+    # failure class this exists to prevent).
+    try:
+        from src.qa.claim_verifier import ClaimVerifier
+        _claim_gate = ClaimVerifier(llm=llm, research_pack=research).run(
+            scenes_data, out_dir=out_dir)
+        run_report["claim_gate"] = _claim_gate
+        run_report["stages"]["claim_gate"] = {
+            "passed": _claim_gate["passed"],
+            "blocking": _claim_gate["blocking_failures"],
+        }
+        if _claim_gate["blocking_failures"]:
+            print("  !! CLAIM GATE BLOCKED: " +
+                  str(_claim_gate["blocking_failures"]))
+            run_report["errors"].append(
+                f"claim gate blocked: {_claim_gate['blocking_failures']}")
+            _fix = llm.generate_json(
+                "The narration below contains factual errors flagged by a "
+                "fact-check gate.  Rewrite the scenes to fix ONLY the errors "
+                "(remove wrong numbers, separate conflated phenomena, keep "
+                "tone and scene count).  Return STRICT JSON array of scenes "
+                "with title/narration/visual_goal/search_queries.\n\n" +
+                "Issues: " + json.dumps(_claim_gate["blocking_failures"]) + "\n\n" +
+                json.dumps({"scenes": scenes_data})[:6000])
+            try:
+                _fx = json.loads(_fix)
+                _fx_scenes = _fx.get("scenes", []) if isinstance(_fx, dict) else (
+                    _fx if isinstance(_fx, list) else [])
+                if len(_fx_scenes) == len(scenes_data):
+                    scenes_data = M._merge_scene_meta(scenes_data, _fx_scenes)
+                    from src.utils.tts_normalize import normalize_narration
+                    for _s in scenes_data:
+                        _s["narration"] = normalize_narration(_s.get("narration", ""))
+                    _claim_gate = ClaimVerifier(
+                        llm=llm, research_pack=research).run(scenes_data, out_dir=out_dir)
+                    run_report["stages"]["claim_gate_fix"] = {
+                        "passed": _claim_gate["passed"],
+                        "blocking": _claim_gate["blocking_failures"],
+                    }
+                    if not _claim_gate["passed"]:
+                        run_report["errors"].append(
+                            "claim gate still blocked after targeted rewrite")
+                    M._write_json(os.path.join(out_dir, "script_final.json"), scenes_data)
+            except Exception as _e:
+                print(f"  !! claim-fix rewrite failed: {str(_e)[:80]}")
+            if not _claim_gate.get("passed", False):
+                from src.qa.publish_status import resolve_status, write_status
+                _st = resolve_status(claim_gate=_claim_gate,
+                                     fatal_errors=["claim gate blocked after rewrite"],
+                                     artifacts=[os.path.join(out_dir, "claim_report.json")])
+                write_status(out_dir, _st)
+                run_report["status"] = _st
+                M._write_json(os.path.join(out_dir, "run_report.json"), run_report)
+                print("\n  ⛔ CLAIM GATE HARD BLOCK — script is factually unsafe.\n"
+                      f"  {_st['summary']}\n"
+                      "  Fix the script (see claim_report.json) and re-run.")
+                sys.exit(3)
+    except Exception as _e:
+        print(f"  !! claim gate error (non-fatal): {str(_e)[:100]}")
+        run_report["stages"]["claim_gate"] = {"error": str(_e)[:120]}
     # Clear v2 motion clips so they regenerate with the fixed Ken Burns
     if os.path.isdir(os.path.join(out_dir, "shots")):
         shutil.rmtree(os.path.join(out_dir, "shots"))
@@ -1310,8 +1181,9 @@ def main():
     from src.qa.voice_lock import lock_voice
     from src.director.style_bible import create_style_bible
     from src.utils.config import get_config
+    _voice_provider = get_config("voices.provider", "chatterbox")
     _voice_id = get_config("voices.chatterbox.voice_id", "kurzgesagt_like")
-    voice_lock = lock_voice(provider="chatterbox",
+    voice_lock = lock_voice(provider=_voice_provider,
                             voice_id=_voice_id,
                             speaker_id="jade-narrator-001").reset_episode()
     style_bible = create_style_bible("jade").reset_episode()
@@ -1367,7 +1239,7 @@ def main():
         narration_stats = {"provider": "cached(chatterbox)"}
     else:
         audio_durations, narration_stats = M.stage_narration_dynamic(
-            scenes_data, "cache/audio", provider="chatterbox",
+            scenes_data, "cache/audio", provider=_voice_provider,
             voice_lock=voice_lock)
     print(f"  Voice tracks: {len(scenes_data)} (total {sum(audio_durations):.1f}s) "
           f"[{narration_stats.get('provider')}]")
@@ -1706,6 +1578,28 @@ def main():
         print(f"  !! publish gate failed (non-fatal): {str(e)[:100]}")
         run_report["publish_gate"] = {"error": str(e)[:200]}
 
+    # ── v13 (expert review rec #10): RUN-LEVEL PUBLISH STATUS ─────────
+    # Same PUBLISH_READY / REVISION_REQUIRED / BLOCKED state machine as
+    # mission_run — the cron-driven daily pipeline uploads ONLY when
+    # PUBLISH_READY (see tools/daily_video.sh).
+    try:
+        from src.qa.publish_status import resolve_status, write_status
+        _status = resolve_status(
+            publish_gate=run_report.get("publish_gate"),
+            pre_render_gate=run_report.get("stages", {}).get("pre_render_gate"),
+            claim_gate=run_report.get("claim_gate"),
+            fatal_errors=[] if os.path.exists(review_target)
+                          else ["final video artifact missing"],
+            artifacts=[review_target],
+        )
+        run_report["status"] = _status
+        write_status(out_dir, _status)
+        print(f"\n  [status] {_status['status']}" +
+              (f" — blocked by: {_status['blocked_by']}"
+               if _status.get("blocked_by") else " — all gates passed"))
+    except Exception as e:
+        print(f"  !! status resolution failed (non-fatal): {str(e)[:100]}")
+        run_report["status"] = {"error": str(e)[:160]}
     # ── Interim-asset cleanup (studio policy: keep only the final video) ──
     # Every run produces several mp4s (raw render, graded master, final mix)
     # plus a shots/ dir of Ken Burns clips.  Only the final _mixed master is

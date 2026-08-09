@@ -1,0 +1,405 @@
+{
+  "topic": "The Tunguska Event: the 1908 explosion that shook Siberia",
+  "started_at": "2026-08-06T15:13:30Z",
+  "stages": {
+    "research": {
+      "facts": 14,
+      "elapsed_s": 6.8
+    },
+    "director": {
+      "shots": 25,
+      "avg_shot_s": 3.8,
+      "providers": {
+        "pexels": 15,
+        "nasa": 10
+      },
+      "fallbacks": 0,
+      "transitions": {
+        "cut_sync": 8,
+        "fade": 7,
+        "crossfade": 6,
+        "wipe_left": 3,
+        "cut": 1
+      },
+      "motions": {
+        "ken_burns_in": 5,
+        "pan_left": 5,
+        "none": 5,
+        "push_in": 10
+      },
+      "elapsed_s": 121.8
+    },
+    "ai_imagery": {
+      "generated": 0,
+      "injected": 0,
+      "semantic_injected": 0,
+      "elapsed_s": 0.0
+    },
+    "narration": {
+      "voice_scenes": 5,
+      "elapsed_s": 66.9
+    },
+    "pre_render_gate": {
+      "passed": false,
+      "blocking_failures": [
+        "pacing"
+      ],
+      "checks": [
+        {
+          "name": "voice_switching",
+          "passed": true,
+          "detail": "single locked voice",
+          "metrics": {}
+        },
+        {
+          "name": "voice_loudness_consistency",
+          "passed": true,
+          "detail": "per-scene RMS spread 1.2 dB (limit 12.0 dB)",
+          "metrics": {}
+        },
+        {
+          "name": "style_drift",
+          "passed": true,
+          "detail": "0 placed stills, 0 drifted",
+          "metrics": {}
+        },
+        {
+          "name": "off_topic_assets",
+          "passed": true,
+          "detail": "no unverified assets in timeline",
+          "metrics": {}
+        },
+        {
+          "name": "manim_registration",
+          "passed": true,
+          "detail": "no Manim planned for this episode",
+          "metrics": {}
+        },
+        {
+          "name": "manim_kinetic",
+          "passed": true,
+          "detail": "placed Manim scenes are motion-rich",
+          "metrics": {}
+        },
+        {
+          "name": "shot_hold",
+          "passed": true,
+          "detail": "longest static shot 0.000s (limit 4.0s)",
+          "metrics": {
+            "longest_hold_s": 0.0
+          }
+        },
+        {
+          "name": "dead_air",
+          "passed": true,
+          "detail": "no narration gaps > 0.5s",
+          "metrics": {
+            "dead_air_gaps_s": []
+          }
+        },
+        {
+          "name": "generation_complete",
+          "passed": true,
+          "detail": "all planned audio files present",
+          "metrics": {}
+        },
+        {
+          "name": "pacing",
+          "passed": false,
+          "detail": "rushed scenes: ['scene 3: rushed: 180 wpm > 175 (180 wpm)']",
+          "metrics": {
+            "avg_wpm": 151.7,
+            "rushed_scene_count": 1,
+            "comprehension_risk_flags": [],
+            "high_risk": [
+              {
+                "scene": 3,
+                "flags": [
+                  "rushed: 180 wpm > 175"
+                ],
+                "risk": {
+                  "score": 0.49,
+                  "signals": {
+                    "speech_rate": 0.49,
+                    "technical_density": 0.0,
+                    "sentence_length": 0.0
+                  },
+                  "wpm": 180.4,
+                  "role": "climax",
+                  "band": [
+                    130,
+                    175
+                  ],
+                  "grade": "medium"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "render_v1": {
+      "duration_s": 64.6,
+      "size_mb": 16.0,
+      "render_s": 95.6,
+      "output": "results/the_tunguska_event__the_1908_explosion_that/the_tunguska_event__the_1908_explosion_that_v1.mp4",
+      "coverage": {
+        "missing": 0,
+        "healed": 0,
+        "blocked": false
+      },
+      "subtitle_clips": 161
+    },
+    "grade_v1": {
+      "graded": true,
+      "grain": 8,
+      "elapsed_s": 447.6,
+      "size_mb": 44.0
+    },
+    "music_v1": {
+      "mixed": true,
+      "elapsed_s": 18.3,
+      "size_mb": 44.6,
+      "mean_db": -15.8,
+      "sfx": null
+    },
+    "review_v1": {
+      "score": 10,
+      "confidence": 0.95,
+      "elapsed_s": 83.6
+    },
+    "improve_pass_1": {
+      "iteration": 2,
+      "applied": [
+        {
+          "category": "transitions",
+          "detail": "[transitions][high] Implement smooth and purposeful transitions (e.g., dissolves, fades) that enhance the narrative flow and connect visual elements logically, rather than abrupt cuts.",
+          "source_rec": "Implement smooth and purposeful transitions (e.g., dissolves, fades) that enhance the narrative flow and connect visual elements logically, rather than abrupt cuts."
+        },
+        {
+          "category": "music",
+          "detail": "[music][medium] Select background music that is thematically appropriate for a documentary about a mysterious cosmic event, building suspense and awe without overpowering the narration.",
+          "source_rec": "Select background music that is thematically appropriate for a documentary about a mysterious cosmic event, building suspense and awe without overpowering the narration."
+        }
+      ],
+      "flagged": [
+        "[new_asset] Replace all visuals with content directly illustrating the Tunguska event. This includes historical photos, maps, animations of the blast, scientific diagrams, footage of the Siberian taiga, and relevant archival material. (e.g., 0:00-0:04 should show a fireball, 0:04-0:07 flattened trees, 0:28-0:32 Vanavara trading post, etc.)",
+        "[script_change] Re-record the narration with a more dynamic and emotive delivery. Infuse gravitas, suspense, and varied pacing to match the dramatic and mysterious nature of the event.",
+        "[new_asset] Incorporate relevant animations and graphics, such as animated maps showing the shockwave's reach, 3D reconstructions of the flattened forest, or scientific visualizations of an airburst."
+      ],
+      "stopped_early": false,
+      "notes": "",
+      "elapsed_s": 0.0
+    },
+    "render_v2": {
+      "duration_s": 64.6,
+      "size_mb": 16.0,
+      "render_s": 98.6,
+      "output": "results/the_tunguska_event__the_1908_explosion_that/the_tunguska_event__the_1908_explosion_that_v1.mp4",
+      "coverage": {
+        "missing": 0,
+        "healed": 0,
+        "blocked": false
+      },
+      "subtitle_clips": 161
+    },
+    "grade_v2": {
+      "graded": true,
+      "grain": 8,
+      "elapsed_s": 449.2,
+      "size_mb": 44.0
+    },
+    "music_v2": {
+      "mixed": true,
+      "elapsed_s": 18.1,
+      "size_mb": 44.6,
+      "mean_db": -15.8,
+      "sfx": null
+    },
+    "review_v2": {
+      "score": 35,
+      "confidence": 0.95,
+      "elapsed_s": 274.9
+    }
+  },
+  "errors": [
+    "pre-render gate blocked: ['pacing']",
+    "publish gate: ['hook_strength']"
+  ],
+  "provider": "mistral",
+  "voice_lock": {
+    "provider": "kokoro",
+    "voice_id": "bm_george",
+    "speaker_id": "jade-narrator-001",
+    "rate": "+0%",
+    "pitch": "+0Hz",
+    "scene_voices": {
+      "0": "bm_george",
+      "1": "bm_george",
+      "2": "bm_george",
+      "3": "bm_george",
+      "4": "bm_george"
+    },
+    "scene_providers": {
+      "0": "kokoro",
+      "1": "kokoro",
+      "2": "kokoro",
+      "3": "kokoro",
+      "4": "kokoro"
+    },
+    "overrides": []
+  },
+  "style_bible": {
+    "style_name": "jade",
+    "style_modifier": "hand-painted cinematic concept art, painterly brushwork, rich depth, warm amber and deep teal color palette with soft cream highlights, consistent lighting and color grade, no text",
+    "palette": [
+      "#F5F0E1",
+      "#C97B4A",
+      "#2F4858",
+      "#86A8A6",
+      "#1B2631"
+    ],
+    "reference_frame_prompt": "",
+    "subject_sheet": [],
+    "placed_style_tokens": {}
+  },
+  "publish_gate": {
+    "passed": false,
+    "blocking_failures": [
+      "hook_strength"
+    ],
+    "checks": [
+      {
+        "name": "encoding",
+        "passed": true,
+        "detail": "v=h264 a=aac",
+        "metrics": {
+          "duration_s": 64.6,
+          "resolution": [
+            1920,
+            1080
+          ]
+        }
+      },
+      {
+        "name": "resolution",
+        "passed": true,
+        "detail": "1920x1080",
+        "metrics": {}
+      },
+      {
+        "name": "repeated_assets",
+        "passed": true,
+        "detail": "no repeats",
+        "metrics": {
+          "repeats": {}
+        }
+      },
+      {
+        "name": "frozen_shots",
+        "passed": true,
+        "detail": "no frozen shots",
+        "metrics": {
+          "frozen_runs": [],
+          "frames_sampled": 5
+        }
+      },
+      {
+        "name": "excessive_static",
+        "passed": true,
+        "detail": "longest static window: 0.0s (limit 8.0s)",
+        "metrics": {
+          "longest_static_s": 0
+        }
+      },
+      {
+        "name": "silence",
+        "passed": true,
+        "detail": "max_volume=-1.5 dB (silence < -50.0 dB)",
+        "metrics": {
+          "max_db": -1.5,
+          "mean_db": -15.8
+        }
+      },
+      {
+        "name": "clipping",
+        "passed": true,
+        "detail": "max_volume=-1.5 dB (clip >= -0.5 dB)",
+        "metrics": {
+          "max_db": -1.5
+        }
+      },
+      {
+        "name": "hook_strength",
+        "passed": false,
+        "detail": "WEAK HOOK: only 4 distinct visual(s) in first 15s \u2014 opening needs stronger material",
+        "metrics": {
+          "distinct_in_hook": 4,
+          "shots_in_hook": 4
+        }
+      },
+      {
+        "name": "voice_consistency",
+        "passed": true,
+        "detail": "single locked voice",
+        "metrics": {}
+      },
+      {
+        "name": "style_locked",
+        "passed": true,
+        "detail": "0 placed stills, 0 drifted",
+        "metrics": {}
+      },
+      {
+        "name": "manim_registered",
+        "passed": true,
+        "detail": "0 Manim clip(s) in final timeline",
+        "metrics": {}
+      },
+      {
+        "name": "dead_air_audio",
+        "passed": true,
+        "detail": "no dead-air runs in mastered audio",
+        "metrics": {
+          "runs": []
+        }
+      },
+      {
+        "name": "loudness_master",
+        "passed": true,
+        "detail": "mastered audio publication-safe (I/LRA/TP OK)",
+        "metrics": {
+          "integrated_lufs": -13.98,
+          "true_peak_dbTP": -1.5,
+          "lra": 2.8,
+          "max_volume_db": -1.5
+        }
+      },
+      {
+        "name": "opening_black_frames",
+        "passed": true,
+        "detail": "opening mean luma 255.0 (black < 12.0)",
+        "metrics": {}
+      }
+    ],
+    "publish_ready": false
+  },
+  "final": {
+    "output": "results/the_tunguska_event__the_1908_explosion_that/the_tunguska_event__the_1908_explosion_that_v1_mixed.mp4",
+    "iterations": 2,
+    "final_score": 35,
+    "duration_s": 64.6
+  },
+  "llm_usage_deepseek": {
+    "stages": {},
+    "total": {
+      "calls": 0,
+      "input": 0,
+      "output": 0,
+      "cached": 0,
+      "cost_usd": 0.0,
+      "hit_rate": 0.0
+    }
+  },
+  "postmortem": "/home/ubuntu/video_engine/src/docs/mission/postmortems/postmortem-the-tunguska-event-the-1908-explosion-that-shook-siberia.md"
+}

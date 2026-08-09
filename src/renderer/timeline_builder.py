@@ -266,25 +266,60 @@ class TimelineBuilder:
                             "shot_type": shot["shot_type"],
                         })
 
-                # If shots don't cover the full audio length,
-                # extend the last shot to fill the gap (hold last frame).
+                # If shots don't cover the full audio length, extend coverage
+                # WITHOUT unbounded static holds (expert review rec #4: no
+                # single clip may run 12+ s of essentially unchanged visual).
+                # Holds are chunked at MAX_HOLD_S and each chunk gets a
+                # slow zoom (visual progression) so long narration overruns
+                # stay visually alive.  An overrun longer than
+                # MAX_TOTAL_HOLD_S fails the build loudly instead of
+                # producing a retention-killing freeze.
                 scene_shots = [v for v in video_timeline
                                if v.get("start_time", 0) >= start and v.get("end_time", 0) <= end]
                 if scene_shots:
                     last_vid_end = max(v.get("end_time", 0) for v in scene_shots)
                     last_shot = max(scene_shots, key=lambda v: v.get("end_time", 0))
                     if last_vid_end < end - 0.1:
-                        video_timeline.append({
-                            "layer": 1,
-                            "file": last_shot.get("file", ""),
-                            "start_time": last_vid_end,
-                            "end_time": end,
-                            "transition": "none",
-                            "motion": "none",
-                            "camera": "static",
-                            "beat_index": last_shot.get("beat_index", 0),
-                            "shot_type": "hold",
-                        })
+                        gap = end - last_vid_end
+                        max_hold = getattr(self, "max_hold_s", 6.0)
+                        max_total = getattr(self, "max_total_hold_s", 9.0)
+                        if gap > max_total + 1e-6:
+                            raise RuntimeError(
+                                f"Timeline coverage gap {gap:.1f}s in scene "
+                                f"{sd.get('scene_id')} exceeds hold limit "
+                                f"{max_total:.0f}s — narration overruns visuals; "
+                                "add more shots or trim narration")
+                        cursor = last_vid_end
+                        chunk_i = 0
+                        src_file = last_shot.get("file", "")
+                        beat = last_shot.get("beat_index", 0)
+                        while cursor < end - 0.05:
+                            chunk = min(max_hold, end - cursor)
+                            if chunk <= 0.05:
+                                break
+                            # Slow progressive zoom per chunk — each hold chunk
+                            # is its own camera move (motion metadata drives
+                            # the renderer's Ken Burns), never a freeze.
+                            zoom = 1.0 + 0.06 * (chunk_i + 1)
+                            video_timeline.append({
+                                "layer": 1,
+                                "file": src_file,
+                                "start_time": round(cursor, 3),
+                                "end_time": round(cursor + chunk, 3),
+                                "transition": "none",
+                                "motion": "kenburns",
+                                "camera": "static",
+                                "beat_index": beat,
+                                "shot_type": "hold",
+                                "motion_params": {
+                                    "zoom_start": max(1.0, zoom - 0.05),
+                                    "zoom_end": zoom,
+                                    "pan_x": 0.0,
+                                    "pan_y": 0.0,
+                                },
+                            })
+                            cursor += chunk
+                            chunk_i += 1
             else:
                 # Single clip per scene (legacy mode)
                 video_timeline.append({

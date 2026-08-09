@@ -1,6 +1,13 @@
-# voices.yaml — TTS (Kokoro) and audio mixing settings
+# voices.yaml — TTS and audio mixing settings
 
 voices:
+  # v13 consolidation: SINGLE source of truth for the narrator engine.
+  # Both runners (mission_run.py / mission_stills.py) read
+  # voices.provider — no hardcoded per-runner engines, so the pipeline
+  # can never diverge again (was: mission_run -> kokoro, stills ->
+  # chatterbox).  LOCKED 2026-08-05: chatterbox kurzgesagt_like.
+  provider: "chatterbox"
+
   chatterbox:
     # PRIMARY NARRATOR — LOCKED 2026-08-05 (ckdigital approved
     # variant_kurzgesagt_like.wav as the channel narrator).

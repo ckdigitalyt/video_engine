@@ -1,0 +1,124 @@
+{
+  "passed": false,
+  "blocking_failures": [
+    "repeated_assets",
+    "voice_consistency"
+  ],
+  "checks": [
+    {
+      "name": "encoding",
+      "passed": true,
+      "detail": "v=h264 a=aac",
+      "metrics": {
+        "duration_s": 56.766667,
+        "resolution": [
+          1920,
+          1080
+        ]
+      }
+    },
+    {
+      "name": "resolution",
+      "passed": true,
+      "detail": "1920x1080",
+      "metrics": {}
+    },
+    {
+      "name": "repeated_assets",
+      "passed": false,
+      "detail": "repeated files: {'cache/video/scene_1_b2_s0.mp4': 2}",
+      "metrics": {
+        "repeats": {
+          "cache/video/scene_1_b2_s0.mp4": 2
+        }
+      }
+    },
+    {
+      "name": "frozen_shots",
+      "passed": true,
+      "detail": "no frozen shots",
+      "metrics": {
+        "frozen_runs": [],
+        "frames_sampled": 4
+      }
+    },
+    {
+      "name": "excessive_static",
+      "passed": true,
+      "detail": "longest static window: 0.0s (limit 8.0s)",
+      "metrics": {
+        "longest_static_s": 0
+      }
+    },
+    {
+      "name": "silence",
+      "passed": true,
+      "detail": "max_volume=-1.2 dB (silence < -50.0 dB)",
+      "metrics": {
+        "max_db": -1.2,
+        "mean_db": -16.3
+      }
+    },
+    {
+      "name": "clipping",
+      "passed": true,
+      "detail": "max_volume=-1.2 dB (clip >= -0.5 dB)",
+      "metrics": {
+        "max_db": -1.2
+      }
+    },
+    {
+      "name": "hook_strength",
+      "passed": true,
+      "detail": "hook window (15s): 5 distinct visuals (need >= 5)",
+      "metrics": {
+        "distinct_in_hook": 5,
+        "shots_in_hook": 5
+      }
+    },
+    {
+      "name": "voice_consistency",
+      "passed": false,
+      "detail": "scene3: provider edge != locked chatterbox; scene3: voice en-US-ChristopherNeural != locked kurzgesagt_like; scene4: provider edge != locked chatterbox; scene4: voice en-US-ChristopherNeural != locked kurzgesagt_like",
+      "metrics": {}
+    },
+    {
+      "name": "style_locked",
+      "passed": true,
+      "detail": "0 placed stills, 0 drifted",
+      "metrics": {}
+    },
+    {
+      "name": "manim_registered",
+      "passed": true,
+      "detail": "3 Manim clip(s) in final timeline",
+      "metrics": {}
+    },
+    {
+      "name": "dead_air_audio",
+      "passed": true,
+      "detail": "no dead-air runs in mastered audio",
+      "metrics": {
+        "runs": []
+      }
+    },
+    {
+      "name": "loudness_master",
+      "passed": true,
+      "detail": "mastered audio publication-safe (I/LRA/TP OK)",
+      "metrics": {
+        "integrated_lufs": -14.14,
+        "true_peak_dbTP": -1.15,
+        "lra": 2.5,
+        "max_volume_db": -1.2
+      }
+    },
+    {
+      "name": "opening_black_frames",
+      "passed": true,
+      "detail": "opening mean luma 255.0 (black < 12.0)",
+      "metrics": {}
+    }
+  ],
+  "publish_ready": false
+}
