@@ -2020,7 +2020,13 @@ def main():
                   "stages": {}, "errors": []}
 
     factory = mods["ProviderFactory"]()
-    provider_name = args.provider or "gemini"
+    # v13.2: default provider comes from pipeline.yaml (roles.default,
+    # mistral free tier) — NOT a hardcoded gemini.  The Bloop + whale runs
+    # died mid-script on Gemini's 20 req/day free quota because this line
+    # forced gemini for every text stage.  Gemini stays for the vision-only
+    # video review (stage 13) where it is genuinely required.
+    from src.utils.config import get_config as _gc_prov
+    provider_name = args.provider or _gc_prov("pipeline.roles.default", "mistral")
     llm = factory.get_llm_provider(provider_name)
     run_report["provider"] = provider_name
 
