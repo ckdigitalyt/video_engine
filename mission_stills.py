@@ -1043,6 +1043,17 @@ def main():
         # ── Research + verify ──────────────────────────────────────────────
         research = M.stage_research(topic, llm)
         research = M.stage_fact_verification(research, llm)
+        # v19 (ckdigital direction): Kaggle datasets as bonus research source
+        _kaggle = M.stage_kaggle_research(topic)
+        if _kaggle:
+            research["kaggle_datasets"] = _kaggle
+            _ks = research.setdefault("key_sources", [])
+            for _d in _kaggle.get("datasets", []):
+                _ks.append(f"Kaggle dataset: {_d.get('title','')} ({_d.get('url','')})")
+            run_report["stages"]["kaggle_research"] = {
+                "datasets": len(_kaggle.get("datasets", [])),
+                "elapsed_s": _kaggle.get("elapsed_s"),
+            }
         M._write_json(os.path.join(out_dir, "research.json"), research)
 
         # ── Script + review ────────────────────────────────────────────────

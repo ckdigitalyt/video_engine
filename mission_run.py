@@ -165,6 +165,54 @@ def stage_research(topic: str, provider) -> dict:
     return data
 
 
+def stage_kaggle_research(topic: str) -> dict:
+    """Enrich the research pack with real Kaggle datasets for *topic*.
+
+    Queries the Kaggle Datasets API (credentials from ~/.kaggle/kaggle.json),
+    takes the top datasets, and returns a dict of dataset metadata:
+    titles, descriptions, URLs.  FAIL-SOFT: any error returns {} and never
+    blocks the run — Kaggle is a bonus data source, not a dependency.
+    (ckdigital direction 2026-08-09: use Kaggle in the video process.)
+    """
+    print("\n[1b/16] KAGGLE DATASET RESEARCH (fail-soft)", flush=True)
+    t0 = time.time()
+    try:
+        kaggle_path = os.path.expanduser("~/.kaggle/kaggle.json")
+        if not os.path.isfile(kaggle_path):
+            print("  !! No ~/.kaggle/kaggle.json — skipping Kaggle research")
+            return {}
+        import base64
+        import urllib.request
+        with open(kaggle_path) as f:
+            cred = json.load(f)
+        auth = base64.b64encode(
+            f"{cred['username']}:{cred['key']}".encode()
+        ).decode()
+        search = urllib.parse.quote(topic.split(":")[0].strip()[:60])
+        url = f"https://www.kaggle.com/api/v1/datasets/list?search={search}&page=1"
+        req = urllib.request.Request(
+            url, headers={"Authorization": f"Basic {auth}"},
+        )
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            items = json.loads(resp.read().decode())
+        out = {"datasets": [], "elapsed_s": round(time.time() - t0, 1)}
+        for d in items[:3]:
+            title = d.get("title", "")
+            desc = (d.get("description", "") or "").strip()[:300]
+            owner = d.get("ownerName", "") or d.get("owner", "")
+            slug = d.get("datasetSlug", "") or d.get("slug", "")
+            url_ds = f"https://www.kaggle.com/datasets/{owner}/{slug}"
+            out["datasets"].append({
+                "title": title, "description": desc,
+                "url": url_ds, "source": "kaggle",
+            })
+            print(f"  [Kaggle] {title} — {url_ds}")
+        return out
+    except Exception as exc:
+        print(f"  !! Kaggle research failed ({str(exc)[:100]}) — continuing without it")
+        return {}
+
+
 def stage_fact_verification(research: dict, provider) -> dict:
     set_usage_stage("fact_verification")
     print("\n[2/16] FACT VERIFICATION", flush=True)
@@ -2084,6 +2132,18 @@ def main():
     # ── Stage 1-2: Research + verification ────────────────────────────
     research = stage_research(topic, llm)
     research = stage_fact_verification(research, llm)
+    # v19 (ckdigital direction): Kaggle datasets as a bonus research source
+    # (fail-soft — never blocks the run).
+    _kaggle = stage_kaggle_research(topic)
+    if _kaggle:
+        research["kaggle_datasets"] = _kaggle
+        _ks = research.setdefault("key_sources", [])
+        for _d in _kaggle.get("datasets", []):
+            _ks.append(f"Kaggle dataset: {_d.get('title','')} ({_d.get('url','')})")
+        run_report["stages"]["kaggle_research"] = {
+            "datasets": len(_kaggle.get("datasets", [])),
+            "elapsed_s": _kaggle.get("elapsed_s"),
+        }
     _write_json(os.path.join(out_dir, "research.json"), research)
     run_report["stages"]["research"] = {"facts": len(research.get("facts", [])),
                                         "elapsed_s": research.get("_elapsed_s")}
