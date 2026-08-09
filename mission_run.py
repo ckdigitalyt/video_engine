@@ -2066,8 +2066,16 @@ def main():
     # video review (stage 13) where it is genuinely required.
     from src.utils.config import get_config as _gc_prov
     provider_name = args.provider or _gc_prov("pipeline.roles.default", "mistral")
-    llm = factory.get_llm_provider(provider_name)
+    # v19 (ckdigital direction): use the COST CHAIN — primary -> gemini/grok/
+    # mistral (keys present) -> deepseek LAST.  Gemini/Grok get leveraged as
+    # much as possible; DeepSeek stays the paid last resort.  ChainLLMProvider
+    # falls through per-call on quota/errors, so a Gemini 429 can no longer
+    # kill a run (the v13 failure mode).
+    llm = factory.get_cost_chain_llm_provider(provider_name)
     run_report["provider"] = provider_name
+    run_report["provider_chain"] = [
+        p.__class__.__name__ for p in getattr(llm, "_providers", [llm])
+    ]
 
     lib = mods["VisualKnowledgeLibrary"]()
     lib.load_all()

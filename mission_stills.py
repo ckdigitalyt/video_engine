@@ -1020,9 +1020,17 @@ def main():
 
     mods = M._imports()
     factory = mods["ProviderFactory"]()
-    provider_name = args.provider or "gemini"
-    llm = factory.get_llm_provider(provider_name)
+    from src.utils.config import get_config
+    provider_name = args.provider or get_config("pipeline.roles.default", "gemini")
+    # v19 (ckdigital direction): cost chain — primary -> gemini/grok/mistral
+    # (keys present) -> deepseek LAST.  Gemini/Grok leveraged first;
+    # DeepSeek stays the paid last resort.  ChainLLMProvider falls through
+    # per-call on quota/errors so a Gemini 429 can't kill the run.
+    llm = factory.get_cost_chain_llm_provider(provider_name)
     run_report["provider"] = provider_name
+    run_report["provider_chain"] = [
+        p.__class__.__name__ for p in getattr(llm, "_providers", [llm])
+    ]
 
     if args.reuse and os.path.exists(os.path.join(out_dir, "script_final.json")):
         print("  [reuse] Loading cached script_final.json + cached stills/audio")

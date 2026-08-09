@@ -24,6 +24,7 @@ class ProviderFactory:
     _LLM_CLASS_MAP = {
         "deepseek": "DeepSeekProvider",
         "gemini": "GeminiProvider",
+        "grok": "GrokProvider",
         "mistral": "MistralProvider",
     }
 
@@ -61,6 +62,35 @@ class ProviderFactory:
         """
         provider_name = get_config("pipeline.roles.default", "gemini")
         return self.get_llm_provider(provider_name)
+
+    def get_cost_chain_llm_provider(self, primary: str) -> LLMProvider:
+        """Build a runtime fallback chain: primary -> gemini/grok/mistral
+        (whichever have keys) -> deepseek last.  Lets the pipeline use
+        Gemini/Grok as much as possible so DeepSeek cost stays minimal.
+        Chain order (configured): primary first, then roles.chain, with
+        deepseek always last.
+        """
+        from src.providers.llm_provider import ChainLLMProvider
+
+        chain_names = [primary]
+        for name in get_config("pipeline.roles.chain", ["gemini", "grok", "mistral"]):
+            if name not in chain_names:
+                chain_names.append(name)
+        if "deepseek" not in chain_names:
+            chain_names.append("deepseek")
+
+        providers = []
+        for name in chain_names:
+            try:
+                providers.append(self.get_llm_provider(name))
+            except Exception:
+                # Missing key / unsupported provider — skip, next in chain
+                continue
+        if not providers:
+            raise RuntimeError("No LLM provider available in cost chain")
+        if len(providers) == 1:
+            return providers[0]
+        return ChainLLMProvider(providers)
 
     def get_fallback_llm_provider(self) -> LLMProvider:
         """

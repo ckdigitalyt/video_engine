@@ -68,9 +68,17 @@ pipeline:
   roles:
     # v13.1: text stages on Mistral free tier (Gemini 2.5-flash free quota is
     # only 20 req/day and burns out mid-run); Gemini stays for vision-only.
-    default: "mistral"
+    # v19 (ckdigital direction): default is GEMINI — the runner wraps every
+    # provider in a cost chain (primary -> gemini/grok/mistral -> deepseek
+    # LAST), falling through per-call on quota/errors.  So Gemini/Grok are
+    # leveraged first and DeepSeek cost stays minimal; the old "Gemini 429
+    # kills the run" failure mode is gone because ChainLLMProvider retries
+    # the next provider in the chain on each call.
+    default: "gemini"
     # Fallback provider when the default is unavailable (deepseek last resort)
     fallback: "deepseek"
+    # Cost-chain preference order (primary is always tried first)
+    chain: ["gemini", "grok", "mistral"]
     # Role-specific provider overrides
     planner: "mistral"
     critic: "gemini"

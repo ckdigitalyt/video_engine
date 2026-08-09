@@ -211,3 +211,64 @@ class GeminiProvider(LLMProvider):
             contents=contents,
         )
         return response.text.strip()
+
+
+# ── Grok (xAI) ─────────────────────────────────────────────────────────────
+
+class GrokProvider(LLMProvider):
+    """LLM provider backed by xAI Grok (OpenAI-compatible endpoint).
+
+    Activated by XAI_API_KEY in .env.  Joins the cost chain ahead of
+    DeepSeek (ckdigital direction: leverage Gemini + Grok as much as
+    possible, DeepSeek as last resort).
+    """
+
+    def __init__(self, **kwargs):
+        api_key = os.environ.get("XAI_API_KEY")
+        if not api_key:
+            raise RuntimeError("XAI_API_KEY not set — add it to .env to enable Grok")
+        self._llm = ChatOpenAI(
+            api_key=api_key,
+            base_url=get_config("providers.grok.base_url", "https://api.x.ai/v1"),
+            model=get_config("llm.grok.model", "grok-3"),
+            max_tokens=get_config("llm.grok.max_tokens", 2000),
+        )
+
+    def generate_text(self, prompt: str, image_path: Optional[str] = None, **kwargs) -> str:
+        response = self._llm.invoke([HumanMessage(content=prompt)])
+        return response.content
+
+
+# ── Runtime fallback chain ─────────────────────────────────────────────────
+
+class ChainLLMProvider(LLMProvider):
+    """Tries providers in order; first success wins.
+
+    Lets the pipeline use free/cheap providers (Gemini, Grok, Mistral)
+    as much as possible and only falls through to paid DeepSeek when
+    everything else fails (or is missing a key / quota-limited).
+    """
+
+    def __init__(self, providers: list[LLMProvider]):
+        self._providers = [p for p in providers if p is not None]
+
+    def generate_text(self, prompt: str, image_path: Optional[str] = None, **kwargs) -> str:
+        last: Optional[Exception] = None
+        for p in self._providers:
+            try:
+                return p.generate_text(prompt, image_path=image_path, **kwargs)
+            except Exception as exc:  # noqa: BLE001 — try next provider
+                last = exc
+                continue
+        raise RuntimeError(f"ChainLLMProvider: all providers failed ({last})")
+
+    def generate_json(self, prompt: str, **kwargs) -> str:
+        last: Optional[Exception] = None
+        for p in self._providers:
+            try:
+                raw = p.generate_text(prompt, **kwargs)
+                return raw.replace("```json", "").replace("```", "").strip()
+            except Exception as exc:  # noqa: BLE001
+                last = exc
+                continue
+        raise RuntimeError(f"ChainLLMProvider: all providers failed ({last})")

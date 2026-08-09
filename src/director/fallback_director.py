@@ -10,6 +10,7 @@ Fallback chain (in order):
 7. Absolute last resort: simple gradient (NEVER a black frame)
 """
 
+import hashlib
 import json
 import logging
 import os
@@ -107,14 +108,18 @@ class FallbackDirector:
         # Store for use by individual fallback methods
         self._fallback_queries = queries_list
         self._fallback_narration = narration
+        self._fallback_duration = target_duration
 
         # v14: fallback chain is TOPIC-AWARE.  NASA/Wikimedia image search
         # now uses the actual topic query (see _pick_nasa_query/
         # _pick_wikimedia_query) so a whale video never gets galaxies.
+        # v19 (ckdigital direction): AI-generated imagery (Pollinations/
+        # FLUX) is the PRIMARY image fallback — ahead of stock archives —
+        # so a failed stock provider never floods a video with placeholders.
         chain = [
+            ("generated_image", self._try_generated_image),
             ("nasa_image", lambda: self._try_nasa_image(queries_list)),
             ("wikimedia_image", lambda: self._try_wikimedia_image(queries_list)),
-            ("generated_image", self._try_generated_image),
             ("reuse_scene", lambda: self._try_reuse_scene(
                 scene_num, narration, target_duration, accepted_scenes,
             )),
@@ -451,13 +456,80 @@ class FallbackDirector:
         return None
 
     # ------------------------------------------------------------------ #
-    # Fallback 4: Generated image (placeholder for future generator)
+    # Fallback 4: AI-generated image (Pollinations/FLUX) + Ken Burns
     # ------------------------------------------------------------------ #
 
-    def _try_generated_image(self) -> Optional[AssetPlan]:
-        """Placeholder for AI-generated image fallback."""
-        # This will be implemented when an image generation model is available
+    # Style suffix locked for EVERY generated still — without it each
+    # provider call drifts and the video looks like a slideshow of
+    # unrelated images (same lesson as mission_run._AI_STYLE_SUFFIX).
+    _GEN_STYLE_SUFFIX = (
+        ", cinematic documentary still, consistent color palette, "
+        "soft natural lighting, high detail, 16:9 composition"
+    )
+
+    def _generate_ai_still(self, prompt: str, out_path: str) -> Optional[str]:
+        """Generate one still via Pollinations (free) -> NIM FLUX ->
+        SiliconFlow -> HF.  Returns out_path on success, None otherwise.
+        Provider order is cost-aware: keyless free first, FLUX-quality
+        second, paid/limited last."""
+        from src.providers.image_gen import (
+            HFServerlessProvider,
+            NvidiaNimProvider,
+            PollinationsProvider,
+            SiliconFlowProvider,
+        )
+
+        chain = [
+            PollinationsProvider(),
+            NvidiaNimProvider(),
+            SiliconFlowProvider(),
+            HFServerlessProvider(),
+        ]
+        for prov in chain:
+            try:
+                if not prov.is_available():
+                    continue
+                prov.generate(prompt, out_path, width=2560, height=1440)
+                if os.path.isfile(out_path) and os.path.getsize(out_path) > 5000:
+                    logger.info("[FallbackDirector] AI still via %s", prov.name)
+                    return out_path
+            except Exception as exc:
+                logger.debug("[FallbackDirector] AI image %s failed: %s", prov.name, exc)
+                continue
         return None
+
+    def _try_generated_image(self) -> Optional[AssetPlan]:
+        """Generate a topic-aware AI still (Pollinations/FLUX) and animate
+        it with Ken Burns.  The prompt uses the stripped subject query so
+        a whale scene gets a whale, never a galaxy or a stamp catalogue."""
+        queries = getattr(self, "_fallback_queries", None) or []
+        narration = getattr(self, "_fallback_narration", "") or ""
+
+        # Subject-first prompt: strip beat-planner shot suffixes, prefer
+        # the most specific query, enrich with the narration's subject.
+        candidates = [_strip_shot_suffix(q) for q in queries if isinstance(q, str)]
+        subject = next((c for c in candidates if c and len(c) > 4), "")
+        if not subject:
+            words = narration.split()
+            subject = " ".join(words[:12]) if words else "ocean documentary"
+
+        prompt = subject[:160] + self._GEN_STYLE_SUFFIX
+        key = hashlib.md5(prompt.encode()).hexdigest()[:12]
+        img_path = os.path.join(self.generated_dir, f"gen_{key}.png")
+
+        if not (os.path.isfile(img_path) and os.path.getsize(img_path) > 5000):
+            img_path = self._generate_ai_still(prompt, img_path)
+        if not img_path:
+            return None
+
+        duration = min(max(getattr(self, "_fallback_duration", 10.0), 4.0), 10.0)
+        video_path = self._ken_burns_animate(img_path, "generated", duration=duration)
+        if not video_path:
+            return None
+
+        return self._make_asset(
+            video_path, "generated", subject, 0.90,
+        )
 
     # ------------------------------------------------------------------ #
     # Fallback 5: Reuse a previous scene with distinct visual treatment
