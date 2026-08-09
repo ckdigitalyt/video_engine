@@ -254,13 +254,25 @@ class TimelineBuilder:
                     shot_end = min(end, shot_end)  # clamp to scene end
 
                     if shot["filepath"] and shot_end > shot_start:
+                        # v14 fix (52-Hz v17 frozen_shots 15s window):
+                        # placeholder/emergency fallback clips often carry
+                        # motion "none" -> a long static window that trips
+                        # the publish gate's frozen/static checks.  Give
+                        # them a slow Ken Burns camera move so fallback
+                        # visuals stay alive.
+                        _motion = shot["motion"]
+                        _fp = (shot["filepath"] or "").lower()
+                        if _motion in (None, "none", "") and (
+                            "placeholder" in _fp or "emergency" in _fp
+                        ):
+                            _motion = "kenburns"
                         video_timeline.append({
                             "layer": 1,
                             "file": shot["filepath"],
                             "start_time": shot_start,
                             "end_time": shot_end,
                             "transition": shot["transition"],
-                            "motion": shot["motion"],
+                            "motion": _motion,
                             "camera": shot["camera"],
                             "beat_index": shot["beat_index"],
                             "shot_type": shot["shot_type"],

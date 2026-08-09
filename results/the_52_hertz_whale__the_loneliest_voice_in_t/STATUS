@@ -1,5 +1,5 @@
 REVISION_REQUIRED
 blocked by:
-  publish: frozen_shots, excessive_static, hook_strength
+  publish: frozen_shots, excessive_static
   pre_render: shot_hold, pacing, resolution_headroom
-  claims: unsupported_quantitative_claims
+  claims: claim_contradictions

@@ -1392,7 +1392,19 @@ def stage_narration_dynamic(scenes: list[dict], cache_audio: str,
                 # Restrained S2.1 style: a SINGLE mild [calm]/[measured]
                 # cue at sentence start (channel direction — emphasis/
                 # suspense/wonder only, never over-dramatized).
-                styled = cb.apply_style(sc.get("narration"), emo, role)
+                # v14 pacing fix (52-Hz v17: scenes 6/8 at 175/205 wpm):
+                # same role-based pause engine the ElevenLabs path uses —
+                # Fish reads natural pauses, slowing rushed scenes into
+                # the role band without changing the locked voice.
+                from src.utils.tts_normalize import apply_pacing_pauses
+                _pause_density = {
+                    "hook": "light", "exploration": "medium",
+                    "explanation": "heavy", "climax": "medium",
+                    "conclusion": "heavy",
+                }.get(role, "medium")
+                _paused = apply_pacing_pauses(
+                    sc.get("narration"), _pause_density)
+                styled = cb.apply_style(_paused, emo, role)
                 cb.generate_voice(styled, ap)
                 if voice_lock is not None:
                     voice_lock.record_scene(i, "fish", cb._voice_id)

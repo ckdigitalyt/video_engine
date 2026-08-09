@@ -81,7 +81,32 @@ _WORD_NUM_PAT = re.compile(
 
 
 def _words_to_number(words: str) -> str:
-    """'fifty-two thousand' -> '52000' (handles the common patterns)."""
+    """'fifty-two thousand' -> '52000' (handles the common patterns).
+
+    v14 fix: hyphenated RANGES ("one hundred fifty-one hundred sixty" =
+    150-160, from research packs like "150-160 decibels") must NOT collapse
+    into one absurd integer (15100).  Only treat a hyphen split as a RANGE
+    when BOTH halves carry their own multiplier (hundred/thousand/million)
+    — i.e. two complete numbers.  A plain compound like "fifty-two" or
+    "fifty-two thousand" (52 x 1000) stays a single number.
+    """
+    raw = words.strip()
+    import re as _re
+    halves = _re.split(r"\s*[-–—]\s*", raw)
+    _MULT = ("hundred", "thousand", "million", "billion")
+    if len(halves) == 2:
+        has_mult_a = any(t in halves[0].lower() for t in _MULT)
+        has_mult_b = any(t in halves[1].lower() for t in _MULT)
+        if has_mult_a and has_mult_b:
+            a = _words_to_number_single(halves[0])
+            b = _words_to_number_single(halves[1])
+            if a and b and int(a) < int(b):
+                return f"{a}-{b}"
+    return _words_to_number_single(raw)
+
+
+def _words_to_number_single(words: str) -> str:
+    """Parse ONE number written out in words (no range)."""
     total, cur = 0, 0
     for tok in re.split(r"[- ]", words.strip()):
         tok = tok.lower()

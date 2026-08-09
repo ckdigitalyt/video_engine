@@ -79,9 +79,17 @@ class PexelsProvider(AssetProvider):
                 if _sz is not None:
                     _ok = not ((_min_w and _sz[0] < _min_w) or
                                (_min_h and _sz[1] < _min_h))
+            else:
+                # v14 fix (52-Hz v17 resolution_headroom leak): a cache row
+                # whose local file is missing/never downloaded (remote-only
+                # pre-registration, e.g. "sd_4" SD URLs) CANNOT be verified
+                # against the floor — fail closed and re-search instead of
+                # serving a possibly-low-res URL that later trips the
+                # pre-render headroom gate.
+                _ok = False
             if not _ok:
-                print(f"-> Cache EVICT (below {_min_w}x{_min_h} floor): "
-                      f"'{query}' → {cached['local_path']}")
+                print(f"-> Cache EVICT (below {_min_w}x{_min_h} floor or "
+                      f"unverifiable): '{query}' → {cached['local_path']}")
                 self._cache.evict("pexels", query)
                 cached = None
         if cached is not None:

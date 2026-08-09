@@ -1,15 +1,15 @@
 {
-  "passed": false,
+  "passed": true,
   "checks": [
     {
       "name": "claim_contradictions",
       "passed": true,
-      "detail": "9 claim(s); 0 contradicted"
+      "detail": "11 claim(s); 0 contradicted"
     },
     {
       "name": "unsupported_quantitative_claims",
-      "passed": false,
-      "detail": "UNSUPPORTED (advisory) numbers: January to December; nineteen ninety-four to two thousand twenty-four"
+      "passed": true,
+      "detail": "all quantitative claims source-backed"
     },
     {
       "name": "entity_disambiguation",
@@ -19,120 +19,139 @@
   ],
   "claims": [
     {
-      "text": "fifty-two hertz",
+      "text": "fifty-two Hertz",
       "kind": "quantitative",
       "value": "52",
       "unit": "hertz",
       "entity": null,
       "status": "verified",
-      "detail": "matched research fact: \u2026the 52-hertz whale is the only known whale with a call frequency of 52 hz 52",
+      "detail": "matched research fact: \u2026the 52-hertz whale is the only known whale with a call at 52 hz 52",
       "source_label": "research_pack"
     },
     {
-      "text": "twenty hertz",
+      "text": "forty Hertz",
+      "kind": "quantitative",
+      "value": "40",
+      "unit": "hertz",
+      "entity": null,
+      "status": "verified",
+      "detail": "matched research fact: \u2026the whale's call frequency is higher than blue whales (10-40 hz) and lower than fin whales (20 hz) ",
+      "source_label": "research_pack"
+    },
+    {
+      "text": "twenty Hertz",
       "kind": "quantitative",
       "value": "20",
       "unit": "hertz",
       "entity": null,
       "status": "verified",
-      "detail": "matched research fact: \u2026the whale's call frequency is higher than the typical blue whale (10-40 hz) and lower than the fin w",
+      "detail": "matched research fact: \u2026the whale's call frequency is higher than blue whales (10-40 hz) and lower than fin whales (20 hz) ",
       "source_label": "research_pack"
     },
     {
-      "text": "thirty-five years",
-      "kind": "quantitative",
-      "value": "35",
-      "unit": "years",
-      "entity": null,
-      "status": "verified",
-      "detail": "",
-      "source_label": "NOAA Fisheries, Woods Hole Oceanographic Institution (WHOI), and other marine bi"
-    },
-    {
-      "text": "three thousand kilometers",
+      "text": "Three thousand kilometers",
       "kind": "quantitative",
       "value": "3000",
       "unit": "kilometers",
       "entity": null,
       "status": "verified",
-      "detail": "matched research fact: \u2026the whale's call range extends up to 3,000 kilometers 3000",
+      "detail": "matched research fact: \u2026the whale's call range extends up to 3,000 kilometers in the pacific ocean 3000",
       "source_label": "research_pack"
     },
     {
-      "text": "ten-forty",
-      "kind": "quantitative",
-      "value": "1040",
-      "unit": "hertz",
-      "entity": "blue whale hum frequency",
-      "status": "verified",
-      "detail": "",
-      "source_label": "NOAA Pacific Marine Environmental Laboratory (PMEL)"
-    },
-    {
-      "text": "fifty-two",
-      "kind": "quantitative",
-      "value": "52",
-      "unit": "hertz",
-      "entity": "whale call frequency",
-      "status": "verified",
-      "detail": "matched research fact: \u2026the 52-hertz whale is the only known whale with a call frequency of 52 hz 52",
-      "source_label": "research_pack"
-    },
-    {
-      "text": "Since nineteen eighty-nine",
+      "text": "Detected since nineteen eighty-nine",
       "kind": "quantitative",
       "value": "1989",
       "unit": "year",
-      "entity": "year",
+      "entity": null,
       "status": "verified",
-      "detail": "matched research fact: \u2026the whale has been tracked annually since 1989 1989",
+      "detail": "matched research fact: \u2026the whale has been tracked annually since its discovery in 1989 1989",
       "source_label": "research_pack"
     },
     {
-      "text": "January to December",
+      "text": "Blue whales hum at ten to forty Hertz",
       "kind": "quantitative",
-      "value": "12",
-      "unit": "months",
-      "entity": "time period",
-      "status": "unsupported",
-      "detail": "The claim 'January to December' (12 months) is not independently verifiable as a scientific fact in this context; the narrative describes the 52-hertz whale's s",
-      "source_label": ""
+      "value": "40",
+      "unit": "Hertz",
+      "entity": null,
+      "status": "verified",
+      "detail": "matched research fact: \u2026the whale's call frequency is higher than blue whales (10-40 hz) and lower than fin whales (20 hz) ",
+      "source_label": "research_pack"
     },
     {
-      "text": "nineteen ninety-four to two thousand twenty-four",
+      "text": "Fin whales at around twenty Hertz",
       "kind": "quantitative",
-      "value": "1994",
-      "unit": "year",
-      "entity": "start year",
-      "status": "unsupported",
-      "detail": "The existence of a 52 Hz whale and its continuous singing since 1994 is not an established scientific fact with independent verification.",
+      "value": "20",
+      "unit": "Hertz",
+      "entity": null,
+      "status": "verified",
+      "detail": "matched research fact: \u2026the whale's call frequency is higher than blue whales (10-40 hz) and lower than fin whales (20 hz) ",
+      "source_label": "research_pack"
+    },
+    {
+      "text": "This? Fifty-two Hertz",
+      "kind": "quantitative",
+      "value": "52",
+      "unit": "Hertz",
+      "entity": null,
+      "status": "verified",
+      "detail": "matched research fact: \u2026the 52-hertz whale is the only known whale with a call at 52 hz 52",
+      "source_label": "research_pack"
+    },
+    {
+      "text": "Three thousand kilometers of ocean",
+      "kind": "quantitative",
+      "value": "3000",
+      "unit": "kilometers",
+      "entity": null,
+      "status": "verified",
+      "detail": "matched research fact: \u2026the whale's call range extends up to 3,000 kilometers in the pacific ocean 3000",
+      "source_label": "research_pack"
+    },
+    {
+      "text": "One hundred fifty decibels",
+      "kind": "quantitative",
+      "value": "150",
+      "unit": "decibels",
+      "entity": null,
+      "status": "verified",
+      "detail": "matched research fact: \u2026the whale's call amplitude is estimated at 150-160 decibels 155",
+      "source_label": "research_pack"
+    },
+    {
+      "text": "louder than a jet engine",
+      "kind": "causal",
+      "value": "None",
+      "unit": "None",
+      "entity": null,
+      "status": "ok",
+      "detail": "",
       "source_label": ""
     }
   ],
   "entities": [
     "52-Hz whale",
-    "blue whale",
-    "fin whale",
-    "SOSUS array",
-    "Pacific Ocean",
-    "autonomous underwater vehicles",
-    "hydrophones",
-    "blue whale with a rare mutation",
-    "hybrid whale"
+    "Fifty-two Blue",
+    "U.S. Navy\u2019s SOSUS array",
+    "submarines",
+    "violin",
+    "drumline",
+    "Schools",
+    "Scientists"
   ],
   "conflation_risks": [
     {
       "type": "conflation_risk",
-      "a": "blue whale",
-      "b": "blue whale with a rare mutation",
-      "detail": "A 'blue whale with a rare mutation' is a specific instance of a blue whale, not a distinct phenomenon. Attributes of the general blue whale (e.g., typical frequency range) must not transfer to the mutated individual, as the mutation may alter its acoustic behavior.",
+      "a": "52-hz whale",
+      "b": "fifty-two blue",
+      "detail": "Both refer to the same phenomenon (the whale singing at 52 Hz). 'Fifty-two blue' is a nickname for the 52-hz whale, so they are not distinct phenomena.",
       "severity": "minor"
     },
     {
       "type": "conflation_risk",
-      "a": "fin whale",
-      "b": "hybrid whale",
-      "detail": "A 'hybrid whale' could theoretically be a hybrid of fin whales or other species, but it is not inherently a distinct phenomenon from fin whales. Attributes of fin whales (e.g., typical frequency range) must not transfer to hybrids without verification.",
+      "a": "U.S. Navy\u2019s SOSUS array",
+      "b": "submarines",
+      "detail": "The SOSUS array is a detection system, while submarines are objects being detected. They are distinct, but an attribute like 'tracking capability' could be conflated if misstated (e.g., implying the SOSUS array is a submarine).",
       "severity": "minor"
     }
   ],
