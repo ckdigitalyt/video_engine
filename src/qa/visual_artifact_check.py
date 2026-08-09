@@ -38,6 +38,11 @@ MIRROR_P90 = 0.15            # 90th percentile of border-row flip deltas must st
 SMEAR_RATIO = 0.12          # border gradient energy / interior below this = smear
 SEAM_PCT = 99.5             # row/col diff must exceed this percentile by SEAM_FACTOR
 SEAM_FACTOR = 6.0
+# A true seam (duplicated/stretched content) is a SHARP discontinuity:
+# the anomalous line must also correlate poorly with its neighbor (a
+# natural high-contrast edge — light ray, object boundary — continues
+# smoothly into adjacent columns/rows, so corr stays high).
+SEAM_MAX_NEIGHBOR_CORR = 0.90
 SAMPLE_FRAMES = 6           # how many frames to probe (evenly spaced)
 
 
@@ -156,8 +161,10 @@ def check_frame_smear(img: np.ndarray, frac: float = BORDER_FRAC) -> dict:
 
 def check_frame_seam(img: np.ndarray) -> dict:
     """Vertical/horizontal seam lines: a row/col whose diff from neighbors
-    spikes far above the frame's own 99.5th percentile (duplicated/warped
-    object boundary).  Percentile-based → robust to flat dark frames."""
+    spikes far above the frame's own 99.5th percentile AND whose content
+    does not continue smoothly into its neighbor (a duplicated or stretched
+    strip shows a hard boundary; a natural high-contrast edge continues
+    into the adjacent line, so neighbor correlation stays high)."""
     h, w = img.shape
     row_diff = np.abs(np.diff(img, axis=0)).mean(axis=1)   # h-1 values
     col_diff = np.abs(np.diff(img, axis=1)).mean(axis=0)   # w-1 values
@@ -165,9 +172,37 @@ def check_frame_seam(img: np.ndarray) -> dict:
     c_p = np.percentile(col_diff, SEAM_PCT) + 1e-9
     r_max = row_diff.max()
     c_max = col_diff.max()
-    seam = (r_max > SEAM_FACTOR * r_p) or (c_max > SEAM_FACTOR * c_p)
+
+    def _neighbor_corr_col(idx):
+        if idx <= 0 or idx >= w - 2:
+            return 1.0
+        a, b = img[:, idx], img[:, idx + 1]
+        if a.std() < 1e-6 or b.std() < 1e-6:
+            return 1.0
+        return float(np.corrcoef(a, b)[0, 1])
+
+    def _neighbor_corr_row(idx):
+        if idx <= 0 or idx >= h - 2:
+            return 1.0
+        a, b = img[idx, :], img[idx + 1, :]
+        if a.std() < 1e-6 or b.std() < 1e-6:
+            return 1.0
+        return float(np.corrcoef(a, b)[0, 1])
+
+    col_seam = False
+    col_idx = None
+    if c_max > SEAM_FACTOR * c_p:
+        idx = int(col_diff.argmax())
+        col_idx = idx
+        col_seam = _neighbor_corr_col(idx) < SEAM_MAX_NEIGHBOR_CORR
+    row_seam = False
+    if r_max > SEAM_FACTOR * r_p:
+        idx = int(row_diff.argmax())
+        row_seam = _neighbor_corr_row(idx) < SEAM_MAX_NEIGHBOR_CORR
+    seam = col_seam or row_seam
     return {"passed": not seam, "row_anomaly": float(r_max / r_p),
-            "col_anomaly": float(c_max / c_p)}
+            "col_anomaly": float(c_max / c_p),
+            "col_index": col_idx if col_seam else None}
 
 
 def check_aspect_stretch(video_path: str) -> dict:
@@ -199,6 +234,7 @@ def run_visual_artifact_check(video_path: str,
 
     mirror_hits, smear_hits, seam_hits = [], [], []
     mirror_deltas: list[float] = []
+    seam_positions: list[int] = []  # column indices of seam candidates
     for i, f in enumerate(frames):
         # Skip essentially-black frames (luma < 5): every artifact metric is
         # meaningless on a blank frame and black is a separate QA concern
@@ -212,6 +248,8 @@ def run_visual_artifact_check(video_path: str,
         se = check_frame_seam(f)
         if not se["passed"]:
             seam_hits.append(f"frame{i}:row={se['row_anomaly']:.0f}x,col={se['col_anomaly']:.0f}x")
+            if se.get("col_index") is not None:
+                seam_positions.append(se["col_index"])
 
     # Mirror verdict from the robust aggregate: the 90th percentile of ALL
     # border-row deltas across frames (single-row chance correlations and
@@ -221,6 +259,16 @@ def run_visual_artifact_check(video_path: str,
         p90 = float(_np.percentile(mirror_deltas, 90))
         if p90 >= MIRROR_P90:
             mirror_hits.append(f"p90 delta {p90:+.2f} >= {MIRROR_P90:.2f}")
+
+    # Seam verdict with PERSISTENCE: a real duplicated/stretched strip is a
+    # static artifact — its seam column reappears at the same position in
+    # multiple frames (camera motion moves natural edges, so they scatter).
+    if seam_hits:
+        from collections import Counter as _Counter
+        pos_counts = _Counter(seam_positions)
+        persistent = [p for p, n in pos_counts.items() if n >= 2]
+        if not persistent:
+            seam_hits = []  # all seams were transient (natural edges)
 
     checks.append({"name": "mirrored_edges", "passed": not mirror_hits,
                    "detail": "no mirrored border artifacts"
