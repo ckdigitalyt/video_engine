@@ -1352,6 +1352,32 @@ def stage_narration_dynamic(scenes: list[dict], cache_audio: str,
         # paralinguistic tags ([chuckle], [sigh]...) pass through natively.
         # v9.1: ONE ChatterboxProvider for the whole run (model stays
         # loaded across scenes — no 17s reload per scene).
+        if provider == "fish":
+            try:
+                from src.providers.tts_provider import FishAudioProvider
+                # ONE provider for the whole run — fixed reference_id,
+                # never changes mid-video (voice lock records every scene).
+                if cb is None:
+                    cb = FishAudioProvider()
+                    stats["provider"] = "fish"
+                    stats["fish_voice"] = cb._voice_id
+                    stats["fish_model"] = cb._model
+                # Restrained S2.1 style: a SINGLE mild [calm]/[measured]
+                # cue at sentence start (channel direction — emphasis/
+                # suspense/wonder only, never over-dramatized).
+                styled = cb.apply_style(sc.get("narration"), emo, role)
+                cb.generate_voice(styled, ap)
+                if voice_lock is not None:
+                    voice_lock.record_scene(i, "fish", cb._voice_id)
+            except Exception as e:  # noqa: BLE001
+                print(f"  !! fish failed for scene {i} ({str(e)[:90]}) — "
+                      f"chatterbox fallback (ckdigital direction)")
+                stats["fallbacks"] += 1
+                provider = "chatterbox"
+                # fall through to the chatterbox branch for this scene
+            if provider == "fish":
+                durations.append(_probe_duration(ap) if os.path.exists(ap) else 5.0)
+                continue
         if provider == "elevenlabs":
             try:
                 from src.providers.tts_provider import ElevenLabsProvider
@@ -2144,24 +2170,26 @@ def main():
     from src.qa.voice_lock import lock_voice
     from src.director.style_bible import create_style_bible
     from src.utils.config import get_config as _gc
-    _voice_provider = _gc("voices.provider", "elevenlabs")
-    # Resolve the narrator ONCE before locking (2026-08-09): ElevenLabs
-    # is primary, but a key can be valid for lookups yet have no TTS
-    # credits (HTTP 402).  Discovering that mid-run would force a voice
-    # switch — QA forbids it.  Probe at startup; on failure lock ONE
-    # consistent fallback voice (edge) for the whole video.
+    _voice_provider = _gc("voices.provider", "fish")
+    # Resolve the narrator ONCE before locking (2026-08-09): Fish Audio
+    # S2.1 Pro Free is primary (fixed reference_id — never a mid-video
+    # switch); Chatterbox is the fallback if the Fish API is unavailable.
     try:
-        if _voice_provider == "elevenlabs":
+        if _voice_provider == "fish":
+            from src.providers.tts_provider import FishAudioProvider
+            _fish = FishAudioProvider()  # verifies key + model + voice
+            _voice_id = _fish._voice_id
+        elif _voice_provider == "elevenlabs":
             from src.providers.tts_provider import ElevenLabsProvider
-            _el = ElevenLabsProvider()  # resolves voice + probes synthesis
+            _el = ElevenLabsProvider()
             _voice_id = _el.voice_id
         else:
             _voice_id = _gc("voices.chatterbox.voice_id", "kurzgesagt_like")
     except Exception as _e:
         print(f"  !! narrator unavailable ({str(_e)[:100]}) — "
-              f"locking edge fallback for the WHOLE video")
-        _voice_provider = "edge"
-        _voice_id = "en-US-ChristopherNeural"
+              f"locking chatterbox fallback for the WHOLE video")
+        _voice_provider = "chatterbox"
+        _voice_id = _gc("voices.chatterbox.voice_id", "kurzgesagt_like")
     voice_lock = lock_voice(provider=_voice_provider, voice_id=_voice_id,
                             speaker_id="jade-narrator-001").reset_episode()
     style_bible = create_style_bible("jade").reset_episode()

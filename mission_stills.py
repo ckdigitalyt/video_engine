@@ -1175,29 +1175,30 @@ def main():
     # ── v9 (Jade spec §1/§2): lock narrator voice + visual identity ──
     # Single voice + single style for the WHOLE episode, decided once
     # here and persisted so re-renders/improvement passes cannot drift.
-    # Primary narrator = ElevenLabs (2026-08-09 direction): Declan Sage
-    # default, David fallback; edge/kokoro remain exception-only
-    # fallbacks inside stage_narration_dynamic.
+    # Primary narrator = Fish Audio S2.1 Pro Free (2026-08-09 direction):
+    # "Narrator" by Max N, one voice per video; Chatterbox fallback if
+    # the Fish API fails; edge/kokoro remain exception-only fallbacks
+    # inside stage_narration_dynamic.
     from src.qa.voice_lock import lock_voice
     from src.director.style_bible import create_style_bible
     from src.utils.config import get_config
-    _voice_provider = get_config("voices.provider", "elevenlabs")
-    # Resolve the narrator ONCE before locking (2026-08-09): ElevenLabs
-    # primary; a valid key may still lack TTS credits (HTTP 402).  Probe
-    # at startup; on failure lock ONE consistent fallback voice (edge)
-    # for the whole video — never a mid-video switch.
+    _voice_provider = get_config("voices.provider", "fish")
     try:
-        if _voice_provider == "elevenlabs":
+        if _voice_provider == "fish":
+            from src.providers.tts_provider import FishAudioProvider
+            _fish = FishAudioProvider()  # verifies key + model + voice
+            _voice_id = _fish._voice_id
+        elif _voice_provider == "elevenlabs":
             from src.providers.tts_provider import ElevenLabsProvider
-            _el = ElevenLabsProvider()  # resolves voice + probes synthesis
+            _el = ElevenLabsProvider()
             _voice_id = _el.voice_id
         else:
             _voice_id = get_config("voices.chatterbox.voice_id", "kurzgesagt_like")
     except Exception as _e:
         print(f"  !! narrator unavailable ({str(_e)[:100]}) — "
-              f"locking edge fallback for the WHOLE video")
-        _voice_provider = "edge"
-        _voice_id = "en-US-ChristopherNeural"
+              f"locking chatterbox fallback for the WHOLE video")
+        _voice_provider = "chatterbox"
+        _voice_id = get_config("voices.chatterbox.voice_id", "kurzgesagt_like")
     voice_lock = lock_voice(provider=_voice_provider,
                             voice_id=_voice_id,
                             speaker_id="jade-narrator-001").reset_episode()

@@ -201,23 +201,34 @@ class ChatterboxProvider(TTSProvider):
 def get_tts_provider(name: str | None = None) -> TTSProvider:
     """Resolve the configured TTS provider (config voices.provider).
 
-    ``elevenlabs`` (primary since 2026-08-09): Declan Sage default voice,
-    David fallback — warm authority, clear pacing, global English/US.
-    ``chatterbox``: expressive flow-matching narrator (legacy primary).
+    ``fish`` (primary since 2026-08-09): Fish Audio S2.1 Pro Free,
+    "Narrator" by Max N — deep, warm, authoritative American English.
+    ``chatterbox``: expressive flow-matching narrator (fallback per
+    ckdigital if the Fish API fails).
     Falls back to edge/kokoro when the configured provider is unavailable.
     """
-    provider_name = name or get_config("voices.provider", "elevenlabs")
-    if provider_name == "elevenlabs":
+    provider_name = name or get_config("voices.provider", "fish")
+    if provider_name == "fish":
         try:
-            return ElevenLabsProvider()
+            return FishAudioProvider()
         except Exception as e:  # noqa: BLE001
-            print(f"  !! elevenlabs unavailable ({e}) — falling back to edge")
-            return EdgeTTSProvider()
+            print(f"  !! fish unavailable ({e}) — falling back to chatterbox")
+            try:
+                return ChatterboxProvider()
+            except Exception as e2:  # noqa: BLE001
+                print(f"  !! chatterbox unavailable ({e2}) — falling back to edge")
+                return EdgeTTSProvider()
     if provider_name == "chatterbox":
         try:
             return ChatterboxProvider()
         except Exception as e:  # noqa: BLE001
             print(f"  !! chatterbox unavailable ({e}) — falling back to edge")
+            return EdgeTTSProvider()
+    if provider_name == "elevenlabs":
+        try:
+            return ElevenLabsProvider()
+        except Exception as e:  # noqa: BLE001
+            print(f"  !! elevenlabs unavailable ({e}) — falling back to edge")
             return EdgeTTSProvider()
     if provider_name == "edge":
         return EdgeTTSProvider()
@@ -629,3 +640,193 @@ class ElevenLabsProvider(TTSProvider):
         """No persistent worker to stop (cloud API)."""
         pass
 
+
+
+# ── Fish Audio S2.1 Pro (cloud, 2026-08-09) — PRIMARY narrator ────────────
+# Channel direction 2026-08-09 (ckdigital): Fish Audio S2.1 Pro Free for
+# narration.
+#   * MODEL: s2.1-pro-free — sent as an HTTP HEADER (model: s2.1-pro-free).
+#     A missing/misspelled header silently falls back to the PAID
+#     s2.1-pro model — this provider always sets it explicitly.
+#   * VOICE: "Narrator" by Max N (reference_id 0327fdb5da9e4fd782899a8058c8ae2b)
+#     — deep, warm, authoritative, calm/measured standard American English.
+#   * STYLE: S2.1 Pro has NO style/emotion JSON field — delivery is driven
+#     by inline natural-language [bracket] tags inside the text ([calm],
+#     [measured], [emphasis], [break]...).  Per channel direction we use
+#     them SPARINGLY (emphasis/suspense/wonder only), never over-dramatized.
+#   * ONE voice per video: reference_id is fixed; the voice lock records
+#     every scene so QA blocks any mid-video switch.
+#   * Fallback: Chatterbox (per ckdigital) if the Fish API fails.
+#
+# Free tier (verified 2026-08-09): $0, fair-use, no hard char cap, 5
+# concurrent requests, no SLA.  Free window currently ends 2026-08-31.
+# COMMERCIAL-USE TERMS: 2026 product pages allow commercial use of
+# s2.1-pro-free for smaller businesses (<$1M ARR), but the Aug-2024 ToS
+# still says free = personal/non-commercial — an unresolved conflict.
+# Confirmed with support before monetizing; see fish_audio_research.md.
+
+FISH_DEFAULT_VOICE_ID = "0327fdb5da9e4fd782899a8058c8ae2b"  # Narrator by Max N
+FISH_BACKUP_VOICES = {
+    "azeez": "398dcc0108d84aad919e7f299fb04117",       # documentary/historical
+    "laim": "eb986eb97d1c45a39d5c1f0453e176a3",        # General American measured
+    "daniel": "0eb3061649da44a98bded9163319567c",      # educational/YouTube
+}
+# Restrained documentary recipe (channel direction): single mild cue per
+# sentence at sentence start, NO intensity modifiers, sampling kept calm.
+FISH_STYLE_TAGS = {
+    "default": "[calm]",          # baseline measured delivery
+    "hook": "[measured]",
+    "tension": "[measured]",
+    "revelation": "[measured]",   # wonder WITHOUT over-dramatization
+    "wonder": "[measured]",
+    "awe": "[measured]",
+    "hopeful": "[calm]",
+    "nostalgia": "[calm]",
+    "somber": "[calm]",
+    "explanation": "[calm]",
+    "climax": "[measured]",
+    "conclusion": "[calm]",
+}
+
+
+class FishAudioProvider(TTSProvider):
+    """Cloud TTS via Fish Audio S2.1 Pro Free (native /v1/tts API)."""
+
+    name = "fish"
+
+    def __init__(self, voice_id: str | None = None,
+                 model: str | None = None,
+                 api_key: str | None = None):
+        from src.utils.config import get_config
+        self._voice_id = voice_id or get_config(
+            "voices.fish.voice_id", FISH_DEFAULT_VOICE_ID)
+        self._model = model or get_config("voices.fish.model", "s2.1-pro-free")
+        self._api_key = api_key or os.environ.get("FISH_API_KEY", "")
+        if not self._api_key:
+            raise RuntimeError("FISH_API_KEY not set — cannot use Fish Audio")
+        # Hard guard: the model is chosen by HTTP HEADER; a missing header
+        # silently falls back to the PAID s2.1-pro.  Refuse to run unless
+        # the configured model is a known free model name.
+        if not self._model or "free" not in self._model.lower():
+            raise RuntimeError(
+                f"Fish model '{self._model}' is not a free model — refusing "
+                f"to risk paid-tier billing. Configure voices.fish.model to "
+                f"'s2.1-pro-free'.")
+        self._temperature = float(get_config("voices.fish.temperature", 0.6))
+        self._speed = float(get_config("voices.fish.prosody.speed", 1.0))
+        self._volume = float(get_config("voices.fish.prosody.volume", 0))
+        self._sample_rate = int(get_config("voices.fish.sample_rate", 44100))
+        self._format = get_config("voices.fish.format", "mp3")
+        self._condition_previous = bool(get_config(
+            "voices.fish.condition_on_previous_chunks", True))
+        self._reference_audio_path = os.path.join(
+            "cache", "audio", "fish_narrator_reference.wav")
+        # Verify the voice is reachable (cheap model-metadata GET; no auth
+        # needed for public models) so a bad voice_id fails at init, not
+        # mid-video.
+        self._verify_voice()
+
+    def is_available(self) -> bool:
+        return bool(self._api_key)
+
+    def _verify_voice(self) -> None:
+        import urllib.request
+        import json as _json
+        try:
+            req = urllib.request.Request(
+                f"https://api.fish.audio/model/{self._voice_id}",
+                headers={"User-Agent": "Mozilla/5.0"})
+            with urllib.request.urlopen(req, timeout=30) as r:
+                data = _json.loads(r.read())
+            title = data.get("title", "") or data.get("name", "")
+            print(f"  [fish] voice verified: '{title}' "
+                  f"(id={self._voice_id})")
+        except Exception as e:
+            print(f"  [fish] !! voice lookup failed ({str(e)[:80]}) — "
+                  f"will rely on synthesis error handling")
+
+    # ── Style/emotion injection (S2.1 natural-language [bracket] tags) ──
+
+    def apply_style(self, text: str, emotion: str = "default",
+                    role: str = "exploration") -> str:
+        """Inject a SINGLE mild S2.1 style cue at the sentence start —
+        restrained documentary delivery, never over-dramatized (channel
+        direction 2026-08-09)."""
+        cue = FISH_STYLE_TAGS.get(emotion, FISH_STYLE_TAGS["default"])
+        # emphasis/wonder cues are used ONLY when the script marks them;
+        # we never add intensity modifiers.
+        return f"{cue} {text}".strip() if cue else text
+
+    # ── Generation ─────────────────────────────────────────────────────
+
+    def generate_voice(self, text: str, output_path: str) -> None:
+        """Synthesize speech via Fish Audio S2.1 Pro Free; save WAV."""
+        import urllib.request
+        import json as _json
+        url = "https://api.fish.audio/v1/tts"
+        payload = {
+            "text": strip_paralinguistic_tags(text)[:5000],
+            "reference_id": self._voice_id,
+            "temperature": self._temperature,
+            "top_p": 0.9,
+            "prosody": {
+                "speed": self._speed,
+                "volume": self._volume,
+                "normalize_loudness": True,
+            },
+            "format": self._format,
+            "sample_rate": self._sample_rate,
+            "mp3_bitrate": 128,
+            "latency": "normal",
+            "normalize": True,
+            "condition_on_previous_chunks": self._condition_previous,
+        }
+        req = urllib.request.Request(
+            url, data=_json.dumps(payload).encode(),
+            headers={
+                "Authorization": f"Bearer {self._api_key}",
+                "Content-Type": "application/json",
+                # CRITICAL: model is a HEADER on Fish's API.  Missing or
+                # misspelled => silently bills the PAID s2.1-pro tier.
+                "model": self._model,
+                "User-Agent": "Mozilla/5.0",
+            })
+        print(f"  [fish] synthesizing (model={self._model}, "
+              f"voice={self._voice_id}): '{text[:40]}...'")
+        try:
+            with urllib.request.urlopen(req, timeout=180) as r:
+                data = r.read()
+        except Exception as e:
+            # Surface the HTTP status (401/402/429/500) for diagnostics.
+            code = getattr(e, "code", None)
+            detail = str(e)
+            if code:
+                try:
+                    detail = e.read().decode(errors="replace")[:200]
+                except Exception:
+                    pass
+            raise RuntimeError(f"Fish Audio API error {code}: {detail}")
+        if not data or len(data) < 1000:
+            raise RuntimeError(
+                f"Fish Audio returned {len(data) if data else 0} bytes "
+                f"(check API key + free-tier availability)")
+        os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
+        tmp = output_path.rsplit(".", 1)[0] + "." + self._format
+        with open(tmp, "wb") as f:
+            f.write(data)
+        # normalize to WAV (pipeline expects 44100 stereo WAV)
+        subprocess.run(
+            ["ffmpeg", "-y", "-v", "error", "-i", tmp, "-ar", "44100",
+             "-ac", "2", "-c:a", "pcm_s16le", output_path],
+            capture_output=True, text=True, timeout=120,
+        )
+        if not os.path.exists(output_path):
+            raise RuntimeError("ffmpeg WAV conversion failed")
+        if os.path.exists(tmp) and tmp != output_path:
+            os.remove(tmp)
+        print(f"  [fish] saved {output_path} "
+              f"({os.path.getsize(output_path)//1024} KB)")
+
+    def shutdown(self) -> None:
+        """No persistent worker to stop (cloud API)."""
+        pass
