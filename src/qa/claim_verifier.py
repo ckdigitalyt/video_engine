@@ -220,7 +220,10 @@ class ClaimVerifier:
         entities = [e.lower() for e in (extraction.get("entities") or [])]
         hits: list[dict] = []
 
-        # 1) Curated pairs present in the same script.
+        # 1) Curated pairs present in the same script — a WARNING-level
+        #    flag (co-mention of two distinct phenomena is not itself an
+        #    error; actual attribute transfer is what blocks).  The LLM
+        #    disambiguation step below decides criticality.
         for a, b, why in KNOWN_DISTINCT_PHENOMENA:
             has_a = a in text or any(a in e for e in entities)
             has_b = b in text or any(b in e for e in entities)
@@ -229,31 +232,68 @@ class ClaimVerifier:
                     "type": "conflation_risk",
                     "a": a, "b": b,
                     "detail": why,
-                    "severity": "critical",
+                    "severity": "major",
                 })
 
         # 1b) Attribute-transfer detection for the known Bloop case: the
         # narration never needs to say "52-Hz whale" verbatim to conflate
-        # the two — "At fifty-two hertz… in the range of a whale" while
-        # talking ABOUT the Bloop IS the conflation (52 Hz is the whale's
-        # frequency, NOT the Bloop's).  Detect by co-occurrence within a
-        # single narration block.
-        if "bloop" in text:
-            freq_claims = [c for c in extraction.get("claims", [])
-                           if c.kind == "quantitative"
-                           and c.unit in ("hertz", "hz", "khz")]
-            if freq_claims and ("whale" in text or "whales" in text):
+        # the two — "At fifty-two hertz… it was in the range of a whale"
+        # while talking ABOUT the Bloop IS the conflation (52 Hz is the
+        # whale's frequency, NOT the Bloop's).
+        sentences = re.split(r"(?<=[.!?])\s+", text)
+        for i, sent in enumerate(sentences):
+            if "whale" not in sent and "whales" not in sent:
+                continue
+            freq_in_sent = any(
+                c.kind == "quantitative"
+                and c.unit in ("hertz", "hz", "khz")
+                and c.text.lower() in sent
+                for c in extraction.get("claims", []))
+            if not freq_in_sent:
+                continue
+            # SAME-sentence bloop+hertz+whale = clear-cut transfer (critical).
+            if "bloop" in sent:
                 hits.append({
                     "type": "conflation_risk",
                     "a": "the bloop",
-                    "b": f"whale vocalization at {freq_claims[0].text}",
-                    "detail": ("The narration attributes a whale-range frequency "
-                                f"({freq_claims[0].text}) to The Bloop.  The Bloop's "
-                                "frequency is NOT 52 Hz — 52 Hz is the separate "
-                                "52-Hz whale's call.  Remove the frequency from "
-                                "the Bloop's description or attribute it explicitly "
-                                "to the OTHER phenomenon."),
+                    "b": "whale vocalization at whale-range frequency",
+                    "detail": ("A sentence about The Bloop also carries a "
+                                "whale-range frequency — the frequency belongs "
+                                "to the separate 52-Hz whale, not the Bloop. "
+                                "Remove it from the Bloop's description."),
                     "severity": "critical",
+                })
+                continue
+            # ADJACENT-sentence attribution ("They called it the Bloop." /
+            # "At fifty-two hertz, it was in the range of a whale…") — the
+            # exact expert-review pattern.  Critical ONLY when the whale is
+            # NOT the sentence's agent: "in the range of a whale" (whale is
+            # a comparison object -> the frequency belongs to the Bloop) is
+            # a conflation; "a whale calls at fifty-two hertz" (whale is
+            # the subject) is the correct 52-Hz-whale framing.
+            _prev = sentences[i - 1].lower() if i > 0 else ""
+            _next = sentences[i + 1].lower() if i + 1 < len(sentences) else ""
+            if "bloop" in _prev or "bloop" in _next:
+                # Whale-as-AGENT means the whale performs the call:
+                # "a whale calls at fifty-two hertz" / "the whale's call at
+                # 52 hertz" — correct 52-Hz framing.  "hertz … in the range
+                # of a whale" has NO vocalization verb, so the frequency is
+                # attributed to the Bloop → conflation.
+                _whale_agent = bool(re.search(
+                    r"whale[^.!?]*(calls|sings|communicates|vocalizes|"
+                    r"produces|uses)[^.!?]*hertz|"
+                    r"whale'?s?[^.!?]*call[^.!?]*hertz",
+                    sent))
+                hits.append({
+                    "type": "conflation_risk",
+                    "a": "the bloop",
+                    "b": "whale vocalization at whale-range frequency",
+                    "detail": ("A whale-range frequency appears adjacent to a "
+                                "sentence naming The Bloop.  If the frequency is "
+                                "attributed to the Bloop (e.g. 'it was in the range "
+                                "of a whale'), that is a conflation — 52 Hz belongs "
+                                "to the separate 52-Hz whale, not the Bloop."),
+                    "severity": "major" if _whale_agent else "critical",
                 })
 
         # 2) LLM script-specific disambiguation.
