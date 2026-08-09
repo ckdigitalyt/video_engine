@@ -159,7 +159,12 @@ def _cover_crop(clip, target_res: tuple[int, int]):
     if cw <= 0 or ch <= 0:
         return clip.resize(newsize=target_res)
     scale = max(tw / cw, th / ch)
-    new_size = (int(round(cw * scale)), int(round(ch * scale)))
+    # v14 fix: CEIL, never round — rounding down (e.g. 1917x1080 from a
+    # 426x240 source) makes the center-crop origin go NEGATIVE and MoviePy
+    # mis-composites the clip into a small corner with black bars
+    # (Gemini flagged 0:18/0:24/0:28/0:57/1:09 on the 52-Hz run).
+    import math
+    new_size = (int(math.ceil(cw * scale)), int(math.ceil(ch * scale)))
     clip = clip.resize(newsize=new_size)
     # Center crop to exact target
     x = (new_size[0] - tw) // 2
