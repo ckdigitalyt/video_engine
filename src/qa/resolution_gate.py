@@ -91,8 +91,14 @@ def check_shot_headroom(shot: dict, margin: float = 1.05,
 
     # Pre-rendered video clip (no still/Ken Burns zoom): must already be
     # at/above output resolution — the pipeline must never upscale stock.
+    # v19 fix: this applies to ALL video files regardless of leftover
+    # motion_params.  Pre-rendered Ken Burns clips (stills-first runner)
+    # carry the camera plan used to RENDER them (zoom 1.22 etc.), but the
+    # renderer never re-applies motion_params to an .mp4 — the zoom is
+    # already baked into the frames.  Applying still-image zoom math here
+    # false-positives every 1920x1080 pre-rendered clip (safe max 1.05).
     is_video = path.lower().endswith((".mp4", ".mov", ".webm", ".mkv"))
-    if is_video and not shot.get("motion_params"):
+    if is_video:
         ok = src[0] >= out_w and src[1] >= out_h
         return {
             "passed": ok,
