@@ -704,14 +704,20 @@ class FishAudioProvider(TTSProvider):
         self._api_key = api_key or os.environ.get("FISH_API_KEY", "")
         if not self._api_key:
             raise RuntimeError("FISH_API_KEY not set — cannot use Fish Audio")
-        # Hard guard: the model is chosen by HTTP HEADER; a missing header
-        # silently falls back to the PAID s2.1-pro.  Refuse to run unless
-        # the configured model is a known free model name.
-        if not self._model or "free" not in self._model.lower():
+        # v19g (ckdigital direction): PAID tier approved (commercial terms
+        # confirmed 2026-08-09).  Guard now only refuses EMPTY/unknown model
+        # names — a misspelled header silently bills the paid tier, so we
+        # still validate against the known S2.1 model family.  The old
+        # free-only refusal is gone.
+        if not self._model:
             raise RuntimeError(
-                f"Fish model '{self._model}' is not a free model — refusing "
-                f"to risk paid-tier billing. Configure voices.fish.model to "
-                f"'s2.1-pro-free'.")
+                "Fish model is empty — configure voices.fish.model "
+                "(e.g. 's2.1-pro').")
+        _known = ("s2.1-pro", "s2.1-pro-free", "s2.1-turbo")
+        if self._model not in _known:
+            raise RuntimeError(
+                f"Fish model '{self._model}' is not a known S2.1 model "
+                f"({_known}) — refusing to risk billing a wrong tier.")
         self._temperature = float(get_config("voices.fish.temperature", 0.6))
         self._speed = float(get_config("voices.fish.prosody.speed", 1.0))
         self._volume = float(get_config("voices.fish.prosody.volume", 0))
@@ -776,7 +782,7 @@ class FishAudioProvider(TTSProvider):
             },
             "format": self._format,
             "sample_rate": self._sample_rate,
-            "mp3_bitrate": 128,
+            "mp3_bitrate": int(get_config("voices.fish.mp3_bitrate", 320)),
             "latency": "normal",
             "normalize": True,
             "condition_on_previous_chunks": self._condition_previous,

@@ -14,12 +14,14 @@ voices:
 
   fish:
     # PRIMARY NARRATOR — 2026-08-09 (ckdigital direction).
-    # Model: s2.1-pro-free (sent as an HTTP HEADER — a missing/misspelled
-    # header silently bills the PAID s2.1-pro tier; the provider refuses
-    # any non-free model name).
+    # Model: s2.1-pro (BEST tier — ckdigital confirmed commercial terms are
+    # fine 2026-08-09; paid tier approved, never downgrade to free).  Sent
+    # as an HTTP HEADER (a missing/misspelled header silently bills the
+    # paid tier — the provider validates the configured model name).
     # Voice: "Narrator" by Max N (reference_id verified via live API;
     # tags: deep/authoritative/calm/measured/documentary).
-    model: "s2.1-pro-free"
+    model: "s2.1-pro"
+    allow_paid: true
     voice_id: "0327fdb5da9e4fd782899a8058c8ae2b"
     # Restrained documentary delivery (channel direction): the voice is
     # naturally calm/measured; style cues ([calm]/[measured]) are injected
@@ -29,6 +31,7 @@ voices:
     top_p: 0.9
     sample_rate: 44100
     format: "mp3"
+    mp3_bitrate: 320
     condition_on_previous_chunks: true
     prosody:
       speed: 0.95    # 0.95-1.05 band — 52-Hz run hit 200/220wpm on short scenes; 0.95 for headroom
@@ -80,6 +83,6 @@ voices:
     # Fade-out duration for background music (ms)
     fade_out_ms: 3000
     # Additional gain applied to music before ducking (dB)
-    music_volume_db: 0.0
+    music_volume_db: -14.0   # v19g: bed 14 dB under voice (old 0.0 = full-volume bed drowning narration)
     # Default background music file
     background_music: "cache/music/cinematic.mp3"

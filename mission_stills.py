@@ -753,10 +753,17 @@ def _pace_pad_scenes(scenes_data: list[dict], audio_dir: str,
             chunks = []
             prev = 0
             n = len(data)
+            # v19g: keep channel count when padding — 1D zeros would
+            # collapse stereo narration back to mono.
+            if data.ndim > 1:
+                _pad = _np.zeros((int(sr * gap_s), data.shape[1]),
+                                 dtype="float32")
+            else:
+                _pad = _np.zeros(int(sr * gap_s), dtype="float32")
             for frac in boundaries:
                 idx = int(n * frac)
                 chunks.append(data[prev:idx])
-                chunks.append(_np.zeros(int(sr * gap_s), dtype="float32"))
+                chunks.append(_pad)
                 prev = idx
             chunks.append(data[prev:])
             out = _np.concatenate(chunks) if chunks else data
@@ -812,12 +819,15 @@ def _trim_scene_edges(audio_dir: str, scenes_data: list[dict],
         except Exception as e:  # noqa: BLE001
             print(f"  [trim] !! read failed scene {i}: {str(e)[:60]}")
             continue
-        if data.ndim > 1:
-            data = data.mean(axis=1)
+        # v19g: PRESERVE channels — the old data.mean(axis=1) downmixed
+        # Fish's stereo narration to mono, making it sound thin/flat.
+        # Envelope uses max across channels; slicing keeps both channels.
+        env = _np.abs(data)
+        if env.ndim > 1:
+            env = env.max(axis=1)
         if len(data) < sr:  # sub-1s: leave alone
             continue
         threshold = 10 ** (-38 / 20.0)
-        env = _np.abs(data)
         nz = _np.nonzero(env > threshold)[0]
         if len(nz) == 0:
             continue
@@ -1031,6 +1041,11 @@ def main():
     run_report["provider_chain"] = [
         p.__class__.__name__ for p in getattr(llm, "_providers", [llm])
     ]
+    # v19g: per-call attribution — which provider actually answered each
+    # stage (ChainLLMProvider records usage as it goes).
+    run_report["stages"]["provider_usage"] = (
+        llm.usage() if hasattr(llm, "usage") else {}
+    )
 
     if args.reuse and os.path.exists(os.path.join(out_dir, "script_final.json")):
         print("  [reuse] Loading cached script_final.json + cached stills/audio")

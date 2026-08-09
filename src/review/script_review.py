@@ -184,15 +184,15 @@ class ScriptReviewer:
     ):
         factory = ProviderFactory()
         self._provider_name = provider_name or get_config("pipeline.roles.default", "gemini")
-        self._provider = factory.get_llm_provider(self._provider_name)
-        # v12.6 fallback chain: Gemini flash -> Mistral free -> DeepSeek v4 flash.
-        # Providers without an API key configured are skipped gracefully.
+        # v19g (ckdigital direction): script review uses the SAME cost chain
+        # as the rest of the pipeline — Gemini -> Groq -> OpenRouter ->
+        # DeepSeek LAST.  Mistral is deliberately EXCLUDED (small model,
+        # not good enough for script work).  ChainLLMProvider falls through
+        # per-call and logs which provider answered.
+        self._provider = factory.get_cost_chain_llm_provider(self._provider_name)
+        # v12.6 legacy fallbacks removed in v19g — the cost chain handles
+        # fallthrough internally.
         self._fallbacks: list = []
-        for name in ("mistral", "deepseek"):
-            try:
-                self._fallbacks.append(factory.get_llm_provider(name))
-            except Exception:
-                continue
         # v12.5: default 2 passes (was 3); a 2nd pass only runs if the gate fails.
         self._max_passes = max(1, min(
             max_passes or get_config("pipeline.script_review.max_passes", 2), 3))

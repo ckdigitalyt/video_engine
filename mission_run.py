@@ -1926,9 +1926,11 @@ def stage_music_mix(video_path: str, music_path: str, out_path: str,
                 _bed_mean = float(_mb.group(1))
             _v_mean = sum(_voice_means) / len(_voice_means)
             if _bed_mean is not None:
-                # Voice must sit at least 4 dB above the raw bed; the
-                # sidechain then ducks the bed further under narration.
-                _duck_ok = _v_mean <= _bed_mean - 4.0
+                # v19g fix: the old check (_v_mean <= _bed_mean - 4.0) was
+                # INVERTED — it PASSED when the bed was 10 dB LOUDER than
+                # the voice (exactly the bad mix ckdigital heard).  Voice
+                # must sit at least 4 dB ABOVE the bed.
+                _duck_ok = _v_mean >= _bed_mean + 4.0
                 _duck_note = (f"voice mean {_v_mean:.1f} dB vs bed {_bed_mean:.1f} dB "
                               + ("— voice above bed ✓ (ducking viable)"
                                  if _duck_ok else "— bed too loud vs narration ✗"))
@@ -2137,6 +2139,12 @@ def main():
     run_report["provider_chain"] = [
         p.__class__.__name__ for p in getattr(llm, "_providers", [llm])
     ]
+    # v19g: per-call attribution — which provider actually answered each
+    # stage (ChainLLMProvider records usage as it goes).
+    run_report.setdefault("stages", {})
+    run_report["stages"]["provider_usage"] = (
+        llm.usage() if hasattr(llm, "usage") else {}
+    )
 
     lib = mods["VisualKnowledgeLibrary"]()
     lib.load_all()

@@ -305,12 +305,38 @@ class ChainLLMProvider(LLMProvider):
 
     def __init__(self, providers: list[LLMProvider]):
         self._providers = [p for p in providers if p is not None]
+        # v19g (ckdigital direction): per-call attribution — record which
+        # provider actually ANSWERED each call so the pipeline logs "who
+        # wrote what" instead of hiding it inside a silent chain.
+        self._usage: dict[str, int] = {}
+        self._last_provider: Optional[str] = None
+
+    def _record(self, provider: LLMProvider) -> None:
+        name = type(provider).__name__.replace("Provider", "")
+        self._usage[name] = self._usage.get(name, 0) + 1
+        self._last_provider = name
+        print(f"    [chain] answered by {name} (cumulative {dict(self._usage)})",
+              flush=True)
+
+    def usage(self) -> dict[str, int]:
+        """Per-provider call counts for run_report attribution.
+
+        Returns the LIVE dict so run_report entries written at startup
+        reflect the full run's attribution when the report is saved at
+        the end.
+        """
+        return self._usage
+
+    def last_provider(self) -> Optional[str]:
+        return self._last_provider
 
     def generate_text(self, prompt: str, image_path: Optional[str] = None, **kwargs) -> str:
         last: Optional[Exception] = None
         for p in self._providers:
             try:
-                return p.generate_text(prompt, image_path=image_path, **kwargs)
+                out = p.generate_text(prompt, image_path=image_path, **kwargs)
+                self._record(p)
+                return out
             except Exception as exc:  # noqa: BLE001 — try next provider
                 last = exc
                 continue
@@ -321,6 +347,7 @@ class ChainLLMProvider(LLMProvider):
         for p in self._providers:
             try:
                 raw = p.generate_text(prompt, **kwargs)
+                self._record(p)
                 return raw.replace("```json", "").replace("```", "").strip()
             except Exception as exc:  # noqa: BLE001
                 last = exc

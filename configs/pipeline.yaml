@@ -77,8 +77,10 @@ pipeline:
     default: "gemini"
     # Fallback provider when the default is unavailable (deepseek last resort)
     fallback: "deepseek"
-    # Cost-chain preference order (primary is always tried first)
-    chain: ["gemini", "groq", "openrouter", "mistral"]
+    # Cost-chain preference order (primary is always tried first).
+    # v19g (ckdigital direction): Mistral EXCLUDED — small model, not for
+    # script work.  DeepSeek is auto-appended LAST by the factory.
+    chain: ["gemini", "groq", "openrouter"]
     # Role-specific provider overrides
     planner: "mistral"
     critic: "gemini"
