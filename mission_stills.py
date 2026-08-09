@@ -1175,14 +1175,17 @@ def main():
     # ── v9 (Jade spec §1/§2): lock narrator voice + visual identity ──
     # Single voice + single style for the WHOLE episode, decided once
     # here and persisted so re-renders/improvement passes cannot drift.
-    # Primary narrator = Chatterbox (expert spec: expressive flow-matching
-    # TTS with emotion exaggeration + paralinguistic tags); edge/kokoro
-    # remain exception-only fallbacks inside stage_narration_dynamic.
+    # Primary narrator = ElevenLabs (2026-08-09 direction): Declan Sage
+    # default, David fallback; edge/kokoro remain exception-only
+    # fallbacks inside stage_narration_dynamic.
     from src.qa.voice_lock import lock_voice
     from src.director.style_bible import create_style_bible
     from src.utils.config import get_config
-    _voice_provider = get_config("voices.provider", "chatterbox")
-    _voice_id = get_config("voices.chatterbox.voice_id", "kurzgesagt_like")
+    _voice_provider = get_config("voices.provider", "elevenlabs")
+    if _voice_provider == "elevenlabs":
+        _voice_id = get_config("voices.elevenlabs.voice", "Declan Sage")
+    else:
+        _voice_id = get_config("voices.chatterbox.voice_id", "kurzgesagt_like")
     voice_lock = lock_voice(provider=_voice_provider,
                             voice_id=_voice_id,
                             speaker_id="jade-narrator-001").reset_episode()

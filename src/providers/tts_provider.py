@@ -201,11 +201,18 @@ class ChatterboxProvider(TTSProvider):
 def get_tts_provider(name: str | None = None) -> TTSProvider:
     """Resolve the configured TTS provider (config voices.provider).
 
-    ``chatterbox`` (primary, per expert spec): expressive flow-matching
-    narrator with emotion exaggeration + paralinguistic tags.  Falls
-    back to edge/kokoro when the worker venv is unavailable.
+    ``elevenlabs`` (primary since 2026-08-09): Declan Sage default voice,
+    David fallback — warm authority, clear pacing, global English/US.
+    ``chatterbox``: expressive flow-matching narrator (legacy primary).
+    Falls back to edge/kokoro when the configured provider is unavailable.
     """
-    provider_name = name or get_config("voices.provider", "chatterbox")
+    provider_name = name or get_config("voices.provider", "elevenlabs")
+    if provider_name == "elevenlabs":
+        try:
+            return ElevenLabsProvider()
+        except Exception as e:  # noqa: BLE001
+            print(f"  !! elevenlabs unavailable ({e}) — falling back to edge")
+            return EdgeTTSProvider()
     if provider_name == "chatterbox":
         try:
             return ChatterboxProvider()
@@ -312,3 +319,165 @@ class EdgeTTSProvider(TTSProvider):
             )
             os.replace(wav, output_path)
         print(f"Voice track saved to {output_path}")
+
+
+# ── ElevenLabs (cloud, 2026-08-09) — PRIMARY narrator ─────────────────────
+# Channel direction 2026-08-09 (ckdigital): ElevenLabs for narration.
+#   * DEFAULT voice: "Declan Sage" — warm authority, clear pacing, natural
+#     pronunciation, tuned for a global English/US audience.
+#   * FALLBACK voice: "David" — only when Declan Sage is unavailable.
+#   * ONE voice per video: the voice is resolved ONCE at provider init
+#     (never per scene), so the narrator can never switch mid-video.
+#   * Pacing: pipeline-side pause injection (apply_pacing_pauses) + the
+#     pacing gate keep delivery un-rushed; ElevenLabs stability is set
+#     high for consistent, measured delivery.
+#
+# Voice IDs are resolved BY NAME from the ElevenLabs API at init (own
+# voices first, then the shared library) and cached in cache/voices, so
+# we never hardcode a stale voice_id.  Requires ELEVENLABS_API_KEY.
+
+class ElevenLabsProvider(TTSProvider):
+    """Cloud TTS via ElevenLabs (eleven_multilingual_v2)."""
+
+    name = "elevenlabs"
+
+    def __init__(self, voice_name: str | None = None,
+                 fallback_voice: str | None = None,
+                 api_key: str | None = None):
+        from src.utils.config import get_config
+        self._voice_name = voice_name or get_config(
+            "voices.elevenlabs.voice", "Declan Sage")
+        self._fallback_voice = fallback_voice or get_config(
+            "voices.elevenlabs.fallback_voice", "David")
+        self._api_key = api_key or os.environ.get("ELEVENLABS_API_KEY", "")
+        if not self._api_key:
+            raise RuntimeError(
+                "ELEVENLABS_API_KEY not set — cannot use ElevenLabs narrator")
+        self._model = get_config(
+            "voices.elevenlabs.model", "eleven_multilingual_v2")
+        self._stability = float(get_config(
+            "voices.elevenlabs.stability", 0.55))
+        self._similarity = float(get_config(
+            "voices.elevenlabs.similarity_boost", 0.85))
+        self._style = float(get_config("voices.elevenlabs.style", 0.30))
+        # Resolve the voice ONCE (own voices → shared library → fallback).
+        self.voice_id = self._resolve_voice(self._voice_name)
+        if not self.voice_id:
+            print(f"  !! ElevenLabs: '{self._voice_name}' not found — "
+                  f"falling back to '{self._fallback_voice}'")
+            self.voice_id = self._resolve_voice(self._fallback_voice)
+        if not self.voice_id:
+            raise RuntimeError(
+                f"ElevenLabs voices '{self._voice_name}' and "
+                f"'{self._fallback_voice}' not found in account/library")
+        print(f"  [elevenlabs] narrator locked: '{self._voice_name}' "
+              f"(id={self.voice_id})")
+
+    def is_available(self) -> bool:
+        return bool(self._api_key)
+
+    # ── Voice resolution ───────────────────────────────────────────────
+
+    def _resolve_voice(self, name: str) -> str:
+        """Find a voice_id by name: own voices, then shared library.
+        Caches the resolution in cache/voices/elevenlabs_voices.json."""
+        import urllib.request
+        import json as _json
+        cache_path = os.path.join("cache", "voices", "elevenlabs_voices.json")
+        cached = {}
+        if os.path.exists(cache_path):
+            try:
+                with open(cache_path) as f:
+                    cached = _json.load(f)
+            except Exception:
+                cached = {}
+        if name in cached:
+            return cached[name]
+        headers = {"xi-api-key": self._api_key,
+                   "Content-Type": "application/json"}
+        found = ""
+        # 1) own voices
+        try:
+            req = urllib.request.Request(
+                "https://api.elevenlabs.io/v1/voices", headers=headers)
+            with urllib.request.urlopen(req, timeout=30) as r:
+                data = _json.loads(r.read())
+            for v in data.get("voices", []):
+                if v.get("name", "").strip().lower() == name.strip().lower():
+                    found = v["voice_id"]
+                    break
+        except Exception as e:
+            print(f"  [elevenlabs] !! own-voices lookup failed: {str(e)[:80]}")
+        # 2) shared library (search by name)
+        if not found:
+            try:
+                import urllib.parse
+                url = ("https://api.elevenlabs.io/v1/shared-voices?page_size=30&"
+                       + urllib.parse.urlencode({"search": name}))
+                req = urllib.request.Request(url, headers=headers)
+                with urllib.request.urlopen(req, timeout=30) as r:
+                    data = _json.loads(r.read())
+                for v in data.get("voices", []):
+                    if v.get("name", "").strip().lower() == name.strip().lower():
+                        found = v["voice_id"]
+                        break
+            except Exception as e:
+                print(f"  [elevenlabs] !! shared-voices lookup failed: {str(e)[:80]}")
+        if found:
+            cached[name] = found
+            os.makedirs(os.path.dirname(cache_path), exist_ok=True)
+            with open(cache_path, "w") as f:
+                _json.dump(cached, f, indent=2)
+        return found
+
+    # ── Generation ─────────────────────────────────────────────────────
+
+    def generate_voice(self, text: str, output_path: str) -> None:
+        """Synthesize speech via ElevenLabs; save WAV to output_path."""
+        import urllib.request
+        import json as _json
+        url = f"https://api.elevenlabs.io/v1/text-to-speech/{self.voice_id}"
+        payload = {
+            "text": strip_paralinguistic_tags(text)[:5000],
+            "model_id": self._model,
+            "voice_settings": {
+                "stability": self._stability,
+                "similarity_boost": self._similarity,
+                "style": self._style,
+                "use_speaker_boost": True,
+            },
+        }
+        req = urllib.request.Request(
+            url, data=_json.dumps(payload).encode(),
+            headers={"xi-api-key": self._api_key,
+                     "Content-Type": "application/json",
+                     "Accept": "audio/mpeg"},
+        )
+        print(f"  [elevenlabs] synthesizing ({self._voice_name}): "
+              f"'{text[:40]}...'")
+        mp3 = output_path.rsplit(".", 1)[0] + ".mp3"
+        with urllib.request.urlopen(req, timeout=120) as r:
+            data = r.read()
+        if not data or len(data) < 1000:
+            raise RuntimeError(
+                f"ElevenLabs returned {len(data) if data else 0} bytes")
+        os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
+        with open(mp3, "wb") as f:
+            f.write(data)
+        # normalize to WAV (pipeline expects 44100 stereo WAV)
+        subprocess.run(
+            ["ffmpeg", "-y", "-v", "error", "-i", mp3, "-ar", "44100",
+             "-ac", "2", "-c:a", "pcm_s16le", output_path],
+            capture_output=True, text=True, timeout=120,
+        )
+        if not os.path.exists(output_path):
+            raise RuntimeError("ffmpeg WAV conversion failed")
+        if os.path.exists(mp3) and mp3 != output_path:
+            os.remove(mp3)
+        print(f"  [elevenlabs] saved {output_path} "
+              f"({os.path.getsize(output_path)//1024} KB)")
+
+    def shutdown(self) -> None:
+        """No persistent worker to stop (cloud API)."""
+        pass
+

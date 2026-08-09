@@ -1352,6 +1352,40 @@ def stage_narration_dynamic(scenes: list[dict], cache_audio: str,
         # paralinguistic tags ([chuckle], [sigh]...) pass through natively.
         # v9.1: ONE ChatterboxProvider for the whole run (model stays
         # loaded across scenes — no 17s reload per scene).
+        if provider == "elevenlabs":
+            try:
+                from src.providers.tts_provider import ElevenLabsProvider
+                from src.utils.config import get_config as _gc2
+                # ONE provider for the whole run — the voice is resolved
+                # once at init (Declan Sage → David fallback) and never
+                # changes mid-video (voice lock records every scene).
+                if cb is None:
+                    cb = ElevenLabsProvider()
+                    stats["provider"] = "elevenlabs"
+                    stats["elevenlabs_voice"] = cb.voice_id
+                # Pacing (2026-08-09 direction): never rushed — inject
+                # role-appropriate pauses at sentence boundaries before
+                # synthesis (same pause engine as chatterbox).
+                from src.utils.tts_normalize import apply_pacing_pauses
+                pause_density = {
+                    "hook": "light", "exploration": "medium",
+                    "explanation": "heavy", "climax": "medium",
+                    "conclusion": "heavy",
+                }.get(role, "medium")
+                tagged = apply_pacing_pauses(
+                    sc.get("narration"), pause_density)
+                cb.generate_voice(tagged, ap)
+                if voice_lock is not None:
+                    voice_lock.record_scene(
+                        i, "elevenlabs",
+                        _gc2("voices.elevenlabs.voice", "Declan Sage"))
+            except Exception as e:  # noqa: BLE001
+                print(f"  !! elevenlabs failed for scene {i} ({str(e)[:80]}) — edge fallback")
+                stats["fallbacks"] += 1
+                provider = "edge"
+                _edge_gen(i, ap, sents_clean, emo, voice_lock, stats, cache_audio)
+            durations.append(_probe_duration(ap) if os.path.exists(ap) else 5.0)
+            continue
         if provider == "chatterbox":
             try:
                 ex, cfg = _voice_params(emo, role)
@@ -2105,8 +2139,11 @@ def main():
     from src.qa.voice_lock import lock_voice
     from src.director.style_bible import create_style_bible
     from src.utils.config import get_config as _gc
-    _voice_provider = _gc("voices.provider", "chatterbox")
-    _voice_id = _gc("voices.chatterbox.voice_id", "kurzgesagt_like")
+    _voice_provider = _gc("voices.provider", "elevenlabs")
+    if _voice_provider == "elevenlabs":
+        _voice_id = _gc("voices.elevenlabs.voice", "Declan Sage")
+    else:
+        _voice_id = _gc("voices.chatterbox.voice_id", "kurzgesagt_like")
     voice_lock = lock_voice(provider=_voice_provider, voice_id=_voice_id,
                             speaker_id="jade-narrator-001").reset_episode()
     style_bible = create_style_bible("jade").reset_episode()
