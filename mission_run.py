@@ -2336,6 +2336,25 @@ def main():
         iteration += 1
 
     final_video = review_target
+    # v14: re-run the deterministic pre-render gate against the FINAL
+    # timeline (post-improvement).  The stage-11 report is stale once the
+    # improvement loop has mutated the timeline; using it in status
+    # resolution could block a video the final pass actually fixed (or
+    # correctly keep blocking when the fixes didn't land).
+    try:
+        from src.qa.jade_gates import PreRenderGate as _PRG2
+        _pre_final = _PRG2().run(
+            timeline_path=timeline_path, audio_dir=cache_audio,
+            voice_lock=voice_lock, style_bible=style_bible,
+            scenes_data=scenes_data, audio_durations=_audio_durs)
+        run_report["stages"]["pre_render_gate"] = _pre_final
+        if _pre_final.get("blocking_failures"):
+            print("  !! FINAL pre-render gate STILL blocked: " +
+                  str(_pre_final["blocking_failures"]))
+        else:
+            print("  [gate] final pre-render deterministic gate PASSED")
+    except Exception as _e:
+        print(f"  !! final pre-render gate re-run failed (non-fatal): {str(_e)[:80]}")
     # ── v9 (Jade spec §10): PUBLISH-READINESS GATE on the final video ──
     try:
         from src.qa.jade_gates import PublishGate
