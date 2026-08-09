@@ -239,7 +239,13 @@ class FallbackDirector:
             "cosmic star field",
             "exoplanet concept",
         ]
-        # Prefer user's search query if it seems space-related
+        # v14 fix: prefer the ORIGINAL topic query, not space defaults.
+        # The old logic fell back to random space imagery for ANY non-space
+        # topic (e.g. a whale video got galaxies/planets/astronauts — the
+        # #1 quality killer on the 52-Hz run, Gemini 35/100).  NASA's
+        # archive also holds Earth/ocean imagery, so searching the actual
+        # hint is strictly better.  Space defaults remain ONLY for
+        # genuinely space-related hints or when no hints exist.
         if hints:
             space_keywords = {"space", "star", "galaxy", "planet", "nasa", "astronaut",
                               "cosmic", "nebula", "orbit", "telescope", "universe"}
@@ -247,6 +253,8 @@ class FallbackDirector:
                 h_lower = h.lower()
                 if any(kw in h_lower for kw in space_keywords):
                     return h
+            # Non-space topic: search the archive for the actual subject.
+            return hints[0]
         return self.rng.choice(default_queries)
 
     # ------------------------------------------------------------------ #
@@ -342,7 +350,9 @@ class FallbackDirector:
             "galaxy space photograph",
             "solar system illustration",
         ]
-        # Prefer user's search query if it seems space-related
+        # v14 fix: same topic-aware logic as NASA — use the real subject
+        # query; Commons has relevant imagery for every topic.  Space
+        # defaults only for space-related hints or empty hints.
         if hints:
             space_keywords = {"space", "star", "galaxy", "planet", "nasa", "astronaut",
                               "cosmic", "nebula", "orbit", "telescope", "universe"}
@@ -350,6 +360,7 @@ class FallbackDirector:
                 h_lower = h.lower()
                 if any(kw in h_lower for kw in space_keywords):
                     return h
+            return hints[0]
         return self.rng.choice(default_queries)
 
     # ------------------------------------------------------------------ #
