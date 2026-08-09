@@ -2136,6 +2136,13 @@ def main():
     for _s in scenes_data:
         _ap = os.path.join(cache_audio, f"scene_{_s.get('scene_id', len(_audio_durs))}.wav")
         _audio_durs.append(_probe_duration(_ap) if os.path.exists(_ap) else 0.0)
+    # v13 fix: build the timeline BEFORE the pre-render gate.  Previously
+    # the gate ran against a nonexistent timeline (stage_render builds it),
+    # so shot_hold / max_shot_duration / resolution_headroom checks were
+    # vacuously passing ("no timeline").  stage_render then reuses it.
+    from src.renderer.timeline_builder import TimelineBuilder as _TLB
+    _tlb = _TLB()
+    _tlb.build_and_write(result_scenes, timeline_path)
     _pre_gate = PreRenderGate().run(
         timeline_path=timeline_path, audio_dir=cache_audio,
         voice_lock=voice_lock, style_bible=style_bible,
@@ -2150,7 +2157,8 @@ def main():
         print("  [gate] pre-render deterministic gate PASSED (render allowed)")
 
     # ── Stage 12: Render (initial, voice only) ────────────────────────
-    render_stats = stage_render(result_scenes, timeline_path, output_path)
+    render_stats = stage_render(result_scenes, timeline_path, output_path,
+                                build_timeline=False)
     run_report["stages"]["render_v1"] = render_stats
 
     # ── v12.4: unified cinematic grade (was dead code — never called) ──

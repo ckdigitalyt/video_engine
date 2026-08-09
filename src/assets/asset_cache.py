@@ -102,6 +102,17 @@ class AssetCache:
             )
             conn.commit()
 
+    def evict(self, provider: str, query: str) -> None:
+        """Remove a cache row (v13: used to purge stale sub-floor assets
+        so a re-search can fetch a higher-resolution replacement)."""
+        with self._write_lock:
+            conn = self._conn()
+            conn.execute(
+                "DELETE FROM assets WHERE provider=? AND search_query=?",
+                (provider, query),
+            )
+            conn.commit()
+
     def update_local_path(self, provider: str, query: str, asset_url: str, local_path: str) -> None:
         """
         Set the local_path for the row identified by the primary key

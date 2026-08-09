@@ -65,6 +65,26 @@ class PexelsProvider(AssetProvider):
         # ── Check cache first ──────────────────────────────────────────
         cached = self._cache.lookup("pexels", query)
         if cached is not None:
+            # v13 (expert review rec #3): a cached asset below the
+            # resolution floor must NOT be served — stale low-res cache
+            # entries (pre-floor downloads) would poison every re-run.
+            # Purge and re-search instead of shipping soft footage.
+            _min_w = get_config("providers.pexels.min_width", 1920)
+            _min_h = get_config("providers.pexels.min_height", 1080)
+            _ok = True
+            _lp = cached.get("local_path", "")
+            if _lp and os.path.exists(_lp):
+                from src.qa.resolution_gate import probe_image_size as _pis
+                _sz = _pis(_lp)
+                if _sz is not None:
+                    _ok = not ((_min_w and _sz[0] < _min_w) or
+                               (_min_h and _sz[1] < _min_h))
+            if not _ok:
+                print(f"-> Cache EVICT (below {_min_w}x{_min_h} floor): "
+                      f"'{query}' → {cached['local_path']}")
+                self._cache.evict("pexels", query)
+                cached = None
+        if cached is not None:
             print(f"-> Cache HIT: '{query}' → {cached['local_path']}")
             return [{"video_files": [{"link": cached["asset_url"]}]}]
 
