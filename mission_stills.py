@@ -1262,16 +1262,20 @@ def main():
         for i, s in enumerate(scenes_data):
             ap = os.path.join("cache", "audio", f"scene_{i}.wav")
             audio_durations.append(M._probe_duration(ap))
-            # v9.1: cached audio was Chatterbox-generated — record it on
-            # the voice lock so the pre-render gate isn't vacuous and the
-            # episode's identity stays truthful.
+            # v19 fix: cached audio belongs to THIS episode's locked
+            # narrator (fish), NOT necessarily chatterbox.  The old
+            # hardcoded "cached(chatterbox)" mislabeled Fish wavs on
+            # reuse and tripped the voice_switching gate.  Record the
+            # lock's own identity so the episode stays truthful.
             if voice_lock is not None:
-                from src.utils.config import get_config as _gc
-                _vid = _gc("voices.chatterbox.voice_id", "kurzgesagt_like")
-                voice_lock.record_scene(i, "chatterbox", _vid)
+                voice_lock.record_scene(
+                    i, voice_lock.provider, voice_lock.voice_id,
+                )
         if voice_lock is not None:
             voice_lock.save()
-        narration_stats = {"provider": "cached(chatterbox)"}
+        narration_stats = {
+            "provider": f"cached({voice_lock.provider if voice_lock else 'unknown'})",
+        }
     else:
         audio_durations, narration_stats = M.stage_narration_dynamic(
             scenes_data, "cache/audio", provider=_voice_provider,
