@@ -291,19 +291,32 @@ class TimelineBuilder:
                                 "add more shots or trim narration")
                         cursor = last_vid_end
                         chunk_i = 0
-                        src_file = last_shot.get("file", "")
                         beat = last_shot.get("beat_index", 0)
+                        # v13 fix (expert review rec #4 + repeated_assets gate):
+                        # hold chunks must NOT reuse the ending shot's file —
+                        # that flags repeated_assets and holds one visual for
+                        # too long.  Rotate through the scene's OTHER shots
+                        # (visual progression) with progressive zooms; only
+                        # fall back to the last file when the scene is
+                        # single-shot.
+                        _pool = [s for s in scene_shots
+                                 if s.get("file") != last_shot.get("file")]
+                        if not _pool:
+                            _pool = [last_shot]
                         while cursor < end - 0.05:
                             chunk = min(max_hold, end - cursor)
                             if chunk <= 0.05:
                                 break
+                            # rotate to the next distinct file in the pool
+                            _src = _pool[chunk_i % len(_pool)]
+                            _src_file = _src.get("file", "")
                             # Slow progressive zoom per chunk — each hold chunk
                             # is its own camera move (motion metadata drives
                             # the renderer's Ken Burns), never a freeze.
                             zoom = 1.0 + 0.06 * (chunk_i + 1)
                             video_timeline.append({
                                 "layer": 1,
-                                "file": src_file,
+                                "file": _src_file,
                                 "start_time": round(cursor, 3),
                                 "end_time": round(cursor + chunk, 3),
                                 "transition": "none",
