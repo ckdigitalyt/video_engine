@@ -1,0 +1,15 @@
+{
+  "status": "REVISION_REQUIRED",
+  "publish_ready": false,
+  "blocked_by": {
+    "pre_render": [
+      "shot_hold",
+      "resolution_headroom"
+    ]
+  },
+  "categories": [
+    "retention",
+    "visual"
+  ],
+  "summary": "Gates blocked \u2014 revision required before publication: pre_render: shot_hold, resolution_headroom"
+}

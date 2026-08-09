@@ -1,0 +1,181 @@
+[
+  {
+    "title": "The Signal That Shouldn\u2019t Exist",
+    "narration": "A single pulse, fifty-two times a second, echoes through the Pacific. No *typical* blue whale sings this high. No fin whale sings this loud. [gasp] What creature makes this sound?",
+    "visual_goal": "Underwater hydrophone feed: a waveform spikes at 52Hz, alien against the ocean\u2019s static. Cut to a lone whale surfacing, its call visualized as a glowing pulse.",
+    "search_queries": [
+      "52Hz whale hydrophone recording",
+      "blue whale vs 52Hz whale call",
+      "ocean soundscape visualization"
+    ],
+    "emotion": "awe",
+    "visual_style": "photorealistic",
+    "sfx_events": [
+      {
+        "trigger": "pulse_whoosh",
+        "at": "52 times a second"
+      }
+    ],
+    "para_tags": [
+      "[gasp]"
+    ]
+  },
+  {
+    "title": "First Heard in the Cold War",
+    "narration": "nineteen eighty-nine. The U.S.. Navy\u2019s SOSUS array, built to track submarines, picks up a call. Not Russian. Not a known whale.",
+    "visual_goal": "Grainy 1980s sonar screen flickers with the 52Hz signal. Cut to a submarine silhouette dissolving into ocean waves.",
+    "search_queries": [
+      "SOSUS hydrophone array 1989",
+      "Cold War underwater surveillance",
+      "whale call sonar detection"
+    ],
+    "emotion": "tension",
+    "visual_style": "sepia_cel",
+    "sfx_events": [
+      {
+        "trigger": "sonar_ping",
+        "at": "SOSUS array"
+      }
+    ],
+    "para_tags": []
+  },
+  {
+    "title": "The Whale That Doesn\u2019t Belong",
+    "narration": "Blue whales hum at ten-forty hertz. Fin whales at twenty hertz. This one? fifty-two hertz. Too high. Too loud for a whale. Like a violin cutting through a brass band.",
+    "visual_goal": "Split-screen: left, a blue whale\u2019s deep rumble; right, the 52Hz whale\u2019s sharp pulse. Overlay decibel meters\u2014160dB vs 140dB.",
+    "search_queries": [
+      "blue whale call frequency range",
+      "fin whale vs 52Hz whale decibels",
+      "whale vocalization comparison"
+    ],
+    "emotion": "wonder",
+    "visual_style": "clean_vector",
+    "sfx_events": [
+      {
+        "trigger": "violin_gliss",
+        "at": "Like a violin in a drumline"
+      }
+    ],
+    "para_tags": []
+  },
+  {
+    "title": "A Decade of Silence",
+    "narration": "For years, it sang alone. No matches in the database. Just\u2026 fifty-two hertz, year after year.",
+    "visual_goal": "Time-lapse of ocean waves with the 52Hz waveform pulsing steadily across the screen. Text: \u201c1990\u2026 1991\u2026 1992\u2026\u201d",
+    "search_queries": [
+      "52Hz whale tracking timeline",
+      "lonely whale acoustic record",
+      "whale call decade progression"
+    ],
+    "emotion": "somber",
+    "visual_style": "watercolor",
+    "sfx_events": [],
+    "para_tags": []
+  },
+  {
+    "title": "The Migration Map",
+    "narration": "one hundred thousand kilometers tracked. From California to Alaska. Never observed breeding or interacting with other whales. Always fifty-two hertz.",
+    "visual_goal": "Animated map: a glowing path traces the whale\u2019s route across the Pacific. Dots mark hydrophone detections.",
+    "search_queries": [
+      "52Hz whale migration map",
+      "whale tracking 100000 km",
+      "North Pacific whale routes"
+    ],
+    "emotion": "hopeful",
+    "visual_style": "clean_vector",
+    "sfx_events": [
+      {
+        "trigger": "map_glow",
+        "at": "Always alone"
+      }
+    ],
+    "para_tags": []
+  },
+  {
+    "title": "Why No Answers?",
+    "narration": "No breaching. No calves. No social calls. Just\u2026 this. Why hasn\u2019t it found its kind?",
+    "visual_goal": "Underwater footage of the whale swimming in empty ocean. Text overlay: \u201cNo observed breeding. No interactions.\u201d",
+    "search_queries": [
+      "52Hz whale social behavior",
+      "whale hybridization mystery",
+      "lonely whale observations"
+    ],
+    "emotion": "tension",
+    "visual_style": "photorealistic",
+    "sfx_events": [],
+    "para_tags": []
+  },
+  {
+    "title": "The Hybrid Theory",
+    "narration": "Genetic tests? Inconclusive. Acoustic clues? Suggest blue-fin mix. A voice from another era.",
+    "visual_goal": "Microscopic view of whale tissue next to blue/fin whale DNA strands. The 52Hz waveform overlays as a shadow.",
+    "search_queries": [
+      "52Hz whale hybrid DNA analysis",
+      "blue fin whale hybridization",
+      "whale genetic mystery"
+    ],
+    "emotion": "revelation",
+    "visual_style": "ghibli",
+    "sfx_events": [
+      {
+        "trigger": "dna_sparkle",
+        "at": "Acoustic clues"
+      }
+    ],
+    "para_tags": []
+  },
+  {
+    "title": "Winter\u2019s Song",
+    "narration": "Peak activity in winter. When the ocean is loudest. When the whale\u2019s call cuts through the noise.",
+    "visual_goal": "Stormy Pacific waves with the 52Hz pulse cutting through static. Text: \u201cWinter 2023: 160dB detected.\u201d",
+    "search_queries": [
+      "52Hz whale winter activity",
+      "ocean noise pollution study",
+      "whale call decibel measurement"
+    ],
+    "emotion": "awe",
+    "visual_style": "photorealistic",
+    "sfx_events": [
+      {
+        "trigger": "storm_riser",
+        "at": "cuts through the noise"
+      }
+    ],
+    "para_tags": []
+  },
+  {
+    "title": "The Longest Record",
+    "narration": "thirty years. Over thirty years of this single note. The longest acoustic record of any marine mammal.",
+    "visual_goal": "Timeline: 1989 to 2024. The 52Hz waveform pulses steadily, growing into a dense graph.",
+    "search_queries": [
+      "52Hz whale 30 year acoustic record",
+      "longest marine mammal recording",
+      "whale call database"
+    ],
+    "emotion": "nostalgia",
+    "visual_style": "hand_drawn",
+    "sfx_events": [],
+    "para_tags": []
+  },
+  {
+    "title": "The Whale That Remains",
+    "narration": "A voice in the dark. A mystery unsolved. The loneliest song in the ocean. [whisper] Listen.",
+    "visual_goal": "Final shot: the whale dives into abyssal blue. The 52Hz pulse fades into static. Text: \u201cStill singing.\u201d",
+    "search_queries": [
+      "52Hz whale final dive",
+      "loneliest whale in the ocean",
+      "whale acoustic mystery unsolved"
+    ],
+    "emotion": "somber",
+    "visual_style": "photorealistic",
+    "sfx_events": [
+      {
+        "trigger": "fade_to_silence",
+        "at": "Listen"
+      }
+    ],
+    "para_tags": [
+      "[whisper]"
+    ]
+  }
+]

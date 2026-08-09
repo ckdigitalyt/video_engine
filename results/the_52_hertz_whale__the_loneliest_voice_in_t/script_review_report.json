@@ -1,0 +1,32 @@
+{
+  "passes": [
+    {
+      "pass": 1,
+      "passed": false,
+      "scores": {
+        "fact_reviewer": 7.5,
+        "storytelling_reviewer": 9.1
+      },
+      "issue_counts": {
+        "critical": 0,
+        "major": 2,
+        "minor": 6
+      }
+    },
+    {
+      "pass": 2,
+      "passed": false,
+      "scores": {
+        "fact_reviewer": 7.5,
+        "storytelling_reviewer": 8.5
+      },
+      "issue_counts": {
+        "critical": 0,
+        "major": 1,
+        "minor": 8
+      }
+    }
+  ],
+  "final_gate_passed": false,
+  "elapsed_s": 19.9
+}
