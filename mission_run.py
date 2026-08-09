@@ -1445,7 +1445,10 @@ def stage_narration_dynamic(scenes: list[dict], cache_audio: str,
                 from src.providers.tts_provider import FishAudioProvider
                 # ONE provider for the whole run — fixed reference_id,
                 # never changes mid-video (voice lock records every scene).
-                if cb is None:
+                # v19h: isinstance guard — if a previous scene's fallback
+                # created a Chatterbox/ElevenLabs cb, re-create the fish
+                # provider instead of calling the wrong engine.
+                if cb is None or not isinstance(cb, FishAudioProvider):
                     cb = FishAudioProvider()
                     stats["provider"] = "fish"
                     stats["fish_voice"] = cb._voice_id
@@ -1485,7 +1488,8 @@ def stage_narration_dynamic(scenes: list[dict], cache_audio: str,
                 # ONE provider for the whole run — the voice is resolved
                 # once at init (Declan Sage → David fallback) and never
                 # changes mid-video (voice lock records every scene).
-                if cb is None:
+                # v19h: isinstance guard (see fish branch).
+                if cb is None or not isinstance(cb, ElevenLabsProvider):
                     cb = ElevenLabsProvider()
                     stats["provider"] = "elevenlabs"
                     stats["elevenlabs_voice"] = cb.voice_id
@@ -1519,6 +1523,14 @@ def stage_narration_dynamic(scenes: list[dict], cache_audio: str,
             continue
         if provider == "chatterbox":
             try:
+                from src.providers.tts_provider import ChatterboxProvider
+                # v19h: fish may have set cb to FishAudioProvider before
+                # failing — the chatterbox branch MUST re-create a real
+                # ChatterboxProvider (the old code called
+                # FishAudioProvider.generate_voice(exaggeration=...) and
+                # crashed with TypeError on every fish failure).
+                if cb is None or not isinstance(cb, ChatterboxProvider):
+                    cb = ChatterboxProvider()
                 ex, cfg = _voice_params(emo, role)
                 # Inject the scriptwriter's organic tags at natural
                 # sentence boundaries (expert doc §1.3).
