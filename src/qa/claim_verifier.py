@@ -178,9 +178,9 @@ class ClaimVerifier:
         entities: list[str] = []
         if self._llm is not None:
             try:
-                res = self._llm.generate_json(
-                    _EXTRACT_PROMPT.format(narration=narration[:6000])
-                )
+                res = _parse_llm_json(self._llm.generate_json(
+                    _fill(_EXTRACT_PROMPT, narration=narration[:6000])
+                ))
                 llm_claims = res.get("claims", []) or []
                 entities = res.get("entities", []) or []
             except Exception as e:
@@ -259,12 +259,11 @@ class ClaimVerifier:
         # 2) LLM script-specific disambiguation.
         if self._llm is not None:
             try:
-                res = self._llm.generate_json(
-                    _DISAMBIGUATE_PROMPT.format(
-                        narration=(extraction.get("narration") or "")[:6000],
-                        entities=", ".join(entities or ["(none listed)"]),
-                    )
-                )
+                res = _parse_llm_json(self._llm.generate_json(
+                    _fill(_DISAMBIGUATE_PROMPT,
+                          narration=(extraction.get("narration") or "")[:6000],
+                          entities=", ".join(entities or ["(none listed)"]))
+                ))
                 for h in (res.get("risks", []) or []):
                     hits.append({
                         "type": "conflation_risk",
@@ -319,14 +318,13 @@ class ClaimVerifier:
                 # explicitly labeling fact vs hypothesis vs conclusion.
                 if self._llm is not None:
                     try:
-                        res = self._llm.generate_json(
-                            _VERIFY_PROMPT.format(
-                                claim=c.text,
-                                value=c.value,
-                                unit=c.unit or "",
-                                context=(extraction.get("narration") or "")[:1500],
-                            )
-                        )
+                        res = _parse_llm_json(self._llm.generate_json(
+                            _fill(_VERIFY_PROMPT,
+                                  claim=c.text,
+                                  value=c.value,
+                                  unit=c.unit or "",
+                                  context=(extraction.get("narration") or "")[:1500])
+                        ))
                         status = str(res.get("status", "unsupported")).lower()
                         if status in ("verified", "established_fact"):
                             c.status = "verified"
@@ -411,6 +409,43 @@ class ClaimVerifier:
 
 
 # ── LLM prompts ──────────────────────────────────────────────────────────
+# These prompts contain literal JSON braces, so NEVER pass them through
+# str.format() (a stray brace breaks the format string).  Use _fill()
+# (plain token substitution) and _parse_llm_json() for responses.
+
+def _fill(template: str, **kw) -> str:
+    """Token substitution for prompt templates containing literal braces."""
+    out = template
+    for k, v in kw.items():
+        out = out.replace("{" + k + "}", str(v))
+    return out
+
+
+def _parse_llm_json(text) -> dict:
+    """Robustly parse an LLM JSON response: may come back as a dict, a
+    JSON string, or prose wrapped around JSON — never trust the LLM to be
+    tidy.  Falls back to {} on any failure (caller treats as no-op)."""
+    import json as _json
+    if isinstance(text, dict):
+        return text
+    if isinstance(text, list):
+        return {"claims": text} if text else {}
+    if not isinstance(text, str):
+        return {}
+    t = text.strip()
+    # strip markdown fences if present
+    if t.startswith("```"):
+        t = re.sub(r"^```(?:json)?\s*", "", t)
+        t = re.sub(r"\s*```$", "", t)
+    # find the outermost JSON object
+    start, end = t.find("{"), t.rfind("}")
+    if start >= 0 and end > start:
+        t = t[start:end + 1]
+    try:
+        return _json.loads(t)
+    except Exception:
+        return {}
+
 
 _EXTRACT_PROMPT = """You are a documentary fact-checker.  Extract EVERY
 quantitative claim and named phenomenon from the narration below.
