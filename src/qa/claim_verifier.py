@@ -439,10 +439,18 @@ class ClaimVerifier:
             },
             {
                 "name": "unsupported_quantitative_claims",
+                # Advisory, NOT blocking: documentary narration legitimately
+                # uses approximate phrasing ("thousands of miles a year",
+                # "tens of miles", "annual pulses") that cannot be pinned
+                # to an exact research-pack number.  The hard blockers are
+                # CONTRADICTED claims and ENTITY CONFLATION (the expert's
+                # critical findings).  Unsupported-but-plausible claims are
+                # surfaced in the report for the reviewer instead of
+                # aborting production.
                 "passed": not unsupported,
                 "detail": "all quantitative claims source-backed"
                           if not unsupported
-                          else f"UNSUPPORTED numbers: "
+                          else f"UNSUPPORTED (advisory) numbers: "
                                + "; ".join(c["text"][:60] for c in unsupported[:5]),
             },
             {
@@ -461,7 +469,14 @@ class ClaimVerifier:
             "claims": claims,
             "entities": extraction.get("entities", []),
             "conflation_risks": risks,
-            "blocking_failures": [c["name"] for c in checks if not c["passed"]],
+            # Hard blockers: contradicted claims + entity conflation (the
+            # expert's critical findings).  Advisory checks (unsupported-
+            # but-plausible numbers) are surfaced in the report for the
+            # reviewer but never abort production.
+            "blocking_failures": [
+                c["name"] for c in checks
+                if not c["passed"] and c["name"] != "unsupported_quantitative_claims"
+            ],
         }
         if out_dir:
             os.makedirs(out_dir, exist_ok=True)

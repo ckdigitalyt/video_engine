@@ -1153,7 +1153,7 @@ def main():
                     M._write_json(os.path.join(out_dir, "script_final.json"), scenes_data)
             except Exception as _e:
                 print(f"  !! claim-fix rewrite failed: {str(_e)[:80]}")
-            if not _claim_gate.get("passed", False):
+            if _claim_gate.get("blocking_failures"):
                 from src.qa.publish_status import resolve_status, write_status
                 _st = resolve_status(claim_gate=_claim_gate,
                                      fatal_errors=["claim gate blocked after rewrite"],

@@ -2137,11 +2137,13 @@ def main():
                     _write_json(os.path.join(out_dir, "script_final.json"), scenes_data)
             except Exception as _e:
                 print(f"  !! claim-fix rewrite failed: {str(_e)[:80]}")
-            # v13 hard stop: a script that fails the factual gate after the
-            # targeted rewrite must NEVER be rendered.  Write the status and
-            # abort — the artifacts + claim_report.json are the revision
-            # evidence (same policy as the stills runner's pre-render abort).
-            if not _claim_gate.get("passed", False):
+            # v13 hard stop: a script that still has BLOCKING claim-gate
+            # failures (contradictions / entity conflation) after the
+            # targeted rewrite must NEVER be rendered.  Advisory flags
+            # (unsupported-but-plausible numbers) do NOT abort.  Write
+            # the status and exit — the artifacts + claim_report.json are
+            # the revision evidence.
+            if _claim_gate.get("blocking_failures"):
                 from src.qa.publish_status import resolve_status, write_status
                 _st = resolve_status(claim_gate=_claim_gate,
                                      fatal_errors=["claim gate blocked after rewrite"],
