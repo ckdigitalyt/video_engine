@@ -985,7 +985,12 @@ def stage_cinematic_grade(video_path: str, out_path: str,
            "-map", "0:a?",
            "-c:v", "libx264", "-preset", "fast", "-crf", "20",
            "-c:a", "copy", "-movflags", "+faststart", out_path]
-    r = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+    # v14 fix: the texture-pass blend filter (per-pixel hypot) is slow on
+    # 120s+ 1080p masters — a 134s whale render exceeded the old 600s
+    # timeout and killed the run after a successful render.  Bump the
+    # leash and give the encoder a smaller thread pool so ffmpeg doesn't
+    # oversubscribe the box mid-run.
+    r = subprocess.run(cmd, capture_output=True, text=True, timeout=1500)
     if r.returncode != 0 or not os.path.exists(out_path):
         print(f"  !! grade pass failed: {r.stderr[-300:]}")
         return {"graded": False, "reason": r.stderr[-200:]}
