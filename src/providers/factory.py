@@ -25,6 +25,8 @@ class ProviderFactory:
         "deepseek": "DeepSeekProvider",
         "gemini": "GeminiProvider",
         "grok": "GrokProvider",
+        "groq": "GroqProvider",
+        "openrouter": "OpenRouterProvider",
         "mistral": "MistralProvider",
     }
 

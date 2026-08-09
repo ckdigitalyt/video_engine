@@ -78,7 +78,7 @@ pipeline:
     # Fallback provider when the default is unavailable (deepseek last resort)
     fallback: "deepseek"
     # Cost-chain preference order (primary is always tried first)
-    chain: ["gemini", "grok", "mistral"]
+    chain: ["gemini", "groq", "openrouter", "mistral"]
     # Role-specific provider overrides
     planner: "mistral"
     critic: "gemini"

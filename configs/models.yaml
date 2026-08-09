@@ -32,3 +32,15 @@ llm:
     script_model: "grok-3"
     max_tokens: 2000
     temperature: 0.7
+
+  groq:
+    model: "llama-3.3-70b-versatile"
+    script_model: "llama-3.3-70b-versatile"
+    max_tokens: 2000
+    temperature: 0.7
+
+  openrouter:
+    model: "google/gemma-4-26b-a4b-it:free"
+    script_model: "google/gemma-4-26b-a4b-it:free"
+    max_tokens: 2000
+    temperature: 0.7

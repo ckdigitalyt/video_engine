@@ -239,6 +239,60 @@ class GrokProvider(LLMProvider):
         return response.content
 
 
+# ── Groq (OpenAI-compatible, free tier) ───────────────────────────────────
+
+class GroqProvider(LLMProvider):
+    """LLM provider backed by Groq (LPU inference, free tier).
+
+    Activated by GROQ_API_KEY in .env.  Joins the cost chain ahead of
+    DeepSeek (ckdigital direction: leverage free/cheap providers first).
+    """
+
+    def __init__(self, **kwargs):
+        _key = os.environ.get("GROQ_API_KEY")
+        if not _key:
+            raise RuntimeError("GROQ_API_KEY not set — add it to .env to enable Groq")
+        self._llm = ChatOpenAI(
+            api_key=_key,
+            base_url=get_config("providers.groq.base_url", "https://api.groq.com/openai/v1"),
+            model=get_config("llm.groq.model", "llama-3.3-70b-versatile"),
+            max_tokens=get_config("llm.groq.max_tokens", 2000),
+        )
+
+    def generate_text(self, prompt: str, image_path: Optional[str] = None, **kwargs) -> str:
+        response = self._llm.invoke([HumanMessage(content=prompt)])
+        return response.content
+
+
+# ── OpenRouter (aggregator, free models available) ──────────────────────────
+
+class OpenRouterProvider(LLMProvider):
+    """LLM provider backed by OpenRouter (model aggregator).
+
+    Activated by OPENROUTER_API_KEY in .env.  Default model is a free
+    tier model; override via llm.openrouter.model in models.yaml.
+    """
+
+    def __init__(self, **kwargs):
+        _key = os.environ.get("OPENROUTER_API_KEY")
+        if not _key:
+            raise RuntimeError("OPENROUTER_API_KEY not set — add it to .env to enable OpenRouter")
+        self._llm = ChatOpenAI(
+            api_key=_key,
+            base_url=get_config("providers.openrouter.base_url", "https://openrouter.ai/api/v1"),
+            model=get_config("llm.openrouter.model", "google/gemma-4-26b-a4b-it:free"),
+            max_tokens=get_config("llm.openrouter.max_tokens", 2000),
+            default_headers={
+                "HTTP-Referer": "https://github.com/ckdigitalyt/video_engine",
+                "X-Title": "video_engine",
+            },
+        )
+
+    def generate_text(self, prompt: str, image_path: Optional[str] = None, **kwargs) -> str:
+        response = self._llm.invoke([HumanMessage(content=prompt)])
+        return response.content
+
+
 # ── Runtime fallback chain ─────────────────────────────────────────────────
 
 class ChainLLMProvider(LLMProvider):
