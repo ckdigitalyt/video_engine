@@ -82,5 +82,9 @@ pipeline:
     # script work.  DeepSeek is auto-appended LAST by the factory.
     chain: ["gemini", "groq", "openrouter"]
     # Role-specific provider overrides
-    planner: "mistral"
+    # v19g.1 (ckdigital directive): planner was still "mistral" — a leftover.
+    # Every get_llm_provider_for_role("planner") call site (storyboard,
+    # manim planner, visual critic, knowledge graph, semantic/intent
+    # planners) was routing to MistralProvider raw. NO Mistral: -> gemini.
+    planner: "gemini"
     critic: "gemini"
