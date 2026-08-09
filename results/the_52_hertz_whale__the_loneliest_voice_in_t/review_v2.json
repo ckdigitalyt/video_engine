@@ -1,96 +1,71 @@
 {
-  "quality_score": 35,
-  "confidence": 0.95,
+  "quality_score": 45,
+  "confidence": 0.9,
   "strengths": [
-    "The script is well-structured, poetic, and tells a compelling story about the 52-hertz whale.",
-    "The background music has a fittingly mysterious and atmospheric tone."
+    "The core story of the 52-hertz whale is inherently compelling and mysterious, providing a strong narrative foundation.",
+    "Narration delivery is excellent: clear, well-paced, and maintains an engaging, dramatic tone.",
+    "The script's hook is effective, immediately drawing the viewer into the mystery.",
+    "Music choice is appropriate and well-balanced, supporting the narration without overpowering it."
   ],
   "weaknesses": [
-    "Severe visual mismatch: The video displays space, exoplanets, telescopes, astronauts, and aliens, while the narration is entirely about a marine mammal (the 52-hertz whale).",
-    "Major layout and rendering bugs: Multiple scenes (e.g., 0:18, 0:24, 0:28, 0:57, 1:09) show the actual video footage shrunk into a small corner of the screen, leaving the rest of the frame black.",
-    "The narration is a highly robotic text-to-speech voice with unnatural pauses, awkward phrasing, and flat delivery.",
-    "Inconsistent visual style, jumping randomly between space nebulae, 2D bar charts, sci-fi illustrations, and occasional ocean clips."
+    "Significant visual relevance issues: many visuals (e.g., bar chart, alien, moon, iceberg, rope) are completely unrelated to the accompanying narration.",
+    "Poor visual continuity: the video jumps jarringly between abstract animations, stock footage, and seemingly AI-generated images, lacking a cohesive aesthetic.",
+    "Grammatical and word choice errors in the script, narration, and burned-in subtitles (e.g., 'no one seen it', 'citations' instead of 'sightings', 'loan frequency' instead of 'lone frequency').",
+    "Transitions are often abrupt, featuring hard cuts to black screens or small, unrelated inset videos, which disrupts the flow.",
+    "The inclusion of highly irrelevant and sometimes low-quality visuals (like the alien in the desert) detracts significantly from the documentary's credibility and professionalism."
   ],
   "prioritized_recommendations": [
     {
       "priority": "critical",
-      "category": "new_asset",
-      "recommendation": "Replace all space, astronomy, and alien-themed visuals with relevant footage of oceans, marine life, sonar screens, and submarine tracking equipment."
+      "category": "script_change",
+      "recommendation": "Revise the script to correct grammatical errors and word choices. Specifically, change 'no one seen it' to 'no one has seen it' and 'no citations, just this loan frequency' to 'no sightings, just this lone frequency'."
     },
     {
       "priority": "critical",
-      "category": "zoom",
-      "recommendation": "Fix the layout scaling bugs at 0:18, 0:24, 0:28, 0:57, and 1:09 so that the video assets fill the entire 16:9 frame instead of being shrunk into the corners."
+      "category": "new_asset",
+      "recommendation": "Replace all irrelevant visuals (0:06-0:13 bar chart, 0:14-0:17 alien, 0:34-0:35 moon, 0:45-0:52 iceberg/rope) with high-quality, relevant footage or animations that directly illustrate the narration. Consider more abstract representations of sound waves, sonar, or deep ocean environments."
     },
     {
       "priority": "high",
-      "category": "pacing",
-      "recommendation": "Re-record the narration with a professional voice actor or a more advanced AI voice model to eliminate the robotic cadence and awkward pauses (e.g., 'blue... fin... mix')."
+      "category": "visual_continuity",
+      "recommendation": "Establish and maintain a consistent visual style and color palette throughout the video. Avoid jarring shifts between different types of visual assets (e.g., abstract graphics, realistic footage, text screens)."
+    },
+    {
+      "priority": "high",
+      "category": "transitions",
+      "recommendation": "Improve transitions between scenes. Utilize smoother techniques like dissolves, subtle wipes, or thematic cuts instead of abrupt black screens or unrelated inset videos."
     },
     {
       "priority": "medium",
-      "category": "new_scene",
-      "recommendation": "Replace the 'Goldilocks Zone' bar chart at 0:14 with an animated spectrogram comparing the 52 Hz frequency to normal blue and fin whale frequencies."
+      "category": "subtitles",
+      "recommendation": "Ensure burned-in subtitles are perfectly synchronized with the narration and reflect the corrected script, including grammar and word choice. Correct the 'U.S.. Navy\u2019s' formatting."
     }
   ],
   "factual_issues": [
     {
-      "claim": "The U.S. Navy's SOSUS array picks up a call.",
-      "issue": "The visual shows a bar chart about 'the goldilocks zone' (astronomy), which is completely unrelated to submarine tracking arrays.",
-      "suggested_fix": "Show historical footage or an animation of underwater hydrophones or naval sonar screens."
+      "claim": "But no one seen it.",
+      "issue": "Grammatical error. 'Seen' is the past participle and requires an auxiliary verb (e.g., 'has seen' or 'had seen').",
+      "suggested_fix": "Change to 'But no one has seen it.'"
+    },
+    {
+      "claim": "no answers, no citations, just this loan frequency.",
+      "issue": "Word choice error. 'Citations' is incorrect in the context of tracking a whale; it should be 'sightings'. 'Loan frequency' is incorrect; it should be 'lone frequency'.",
+      "suggested_fix": "Change to 'no answers, no sightings, just this lone frequency.'"
     }
   ],
   "title_recommendations": [
-    "The Loneliest Whale in the World: The Mystery of 52 Hertz",
-    "52 Hertz: The Ocean's Unsolved Acoustic Mystery",
-    "Alone in the Deep: The Story of the 52-Hz Whale"
+    "The 52-Hertz Whale: The Loneliest Song",
+    "Echoes in the Deep: The 52-Hertz Mystery",
+    "The Unheard Call: Tracking the 52-Hertz Whale"
   ],
   "thumbnail_recommendation": {
-    "timestamp": "0:53",
-    "description": "An atmospheric, high-contrast aerial shot of a single whale swimming in a vast, dark blue ocean, with the text '52 Hz' glowing in a sonar-style font."
+    "timestamp": "00:40",
+    "description": "A majestic whale breaching high out of dark, choppy ocean waters against a dramatic, moody sky, capturing the power and mystery of the ocean."
   },
-  "overall_assessment": "While the script is beautifully written and tells a fascinating story, the video suffers from a catastrophic mismatch between the narration and the visuals, which focus almost entirely on space and astronomy instead of marine biology. Additionally, severe rendering bugs leave large portions of the screen black in multiple scenes, and the robotic narration lacks the emotional depth required for this story. A complete visual overhaul and re-recording of the voiceover are necessary to make this video watchable.",
-  "atomic_rubrics": [
-    {
-      "t": "0:03",
-      "check": "a single clear visual subject is visible",
-      "pass": true
-    },
-    {
-      "t": "0:15",
-      "check": "the visual matches the narration playing at that moment",
-      "pass": false
-    },
-    {
-      "t": "0:30",
-      "check": "there is camera motion or an animated element (not a frozen frame)",
-      "pass": false
-    },
-    {
-      "t": "0:45",
-      "check": "no jarring cut or black frame",
-      "pass": true
-    },
-    {
-      "t": "1:00",
-      "check": "narration is audible and not clipped mid-sentence",
-      "pass": true
-    },
-    {
-      "t": "1:30",
-      "check": "visual style is consistent with the rest of the video",
-      "pass": false
-    },
-    {
-      "t": "1:45",
-      "check": "music does not overpower the voice",
-      "pass": null
-    }
-  ],
-  "rubric_pass_rate": 0.5,
+  "overall_assessment": "The documentary presents a fascinating subject with compelling narration, but its visual storytelling is severely underdeveloped. The lack of visual relevance and continuity, combined with jarring transitions and script errors, significantly detracts from the overall quality. To achieve a world-class standard, a complete overhaul of the visual assets and a meticulous review of the script are essential.",
   "_meta": {
     "video": "results/the_52_hertz_whale__the_loneliest_voice_in_t/the_52_hertz_whale__the_loneliest_voice_in_t_v1_mixed.mp4",
     "model": "gemini-2.5-flash",
-    "elapsed_s": 285.4
+    "elapsed_s": 49.9
   }
 }

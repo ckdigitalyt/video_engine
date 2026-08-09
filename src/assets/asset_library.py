@@ -110,24 +110,46 @@ class AssetLibrary:
         if self._enabled:
             match = self._lookup_similar(query)
             if match is not None:
-                # ── Diversity check ────────────────────────────────────
-                if self._diversity_enabled:
-                    penalty = self._compute_diversity_penalty(
-                        query, match.get("asset_url", "")
-                    )
-                    if penalty > 0:
-                        print(f"-> AssetLibrary diversity: penalty={penalty:.2f} "
-                              f"for '{match['query']}' — skipping reuse")
-                        results = self._provider.search(query, **kwargs)
-                        self._track_used(results, query)
-                        return results
+                # v14 fix (52-Hz run resolution_headroom blocker): the reuse
+                # path served STALE low-res cached scene clips (426x240,
+                # 640x360) without any resolution check — 11 shots then
+                # failed the pre-render headroom gate.  Probe the cached
+                # local file; below-floor entries are evicted and re-searched
+                # instead of silently shipping soft footage.
+                from src.qa.resolution_gate import probe_image_size as _pis
+                _min_w = get_config("providers.pexels.min_width", 1920)
+                _min_h = get_config("providers.pexels.min_height", 1080)
+                _lp = match.get("local_path", "")
+                _reuse_ok = True
+                if _lp and os.path.exists(_lp):
+                    _sz = _pis(_lp)
+                    if _sz is not None and (_sz[0] < _min_w or _sz[1] < _min_h):
+                        print(f"-> AssetLibrary EVICT (below {_min_w}x{_min_h} floor): "
+                              f"'{match.get('query', '')}' -> {_lp}")
+                        try:
+                            self._cache.evict("pexels", match.get("query", query))
+                        except Exception:
+                            pass
+                        _reuse_ok = False
+                if _reuse_ok:
+                    # ── Diversity check ────────────────────────────────
+                    if self._diversity_enabled:
+                        penalty = self._compute_diversity_penalty(
+                            query, match.get("asset_url", "")
+                        )
+                        if penalty > 0:
+                            print(f"-> AssetLibrary diversity: penalty={penalty:.2f} "
+                                  f"for '{match['query']}' — skipping reuse")
+                            results = self._provider.search(query, **kwargs)
+                            self._track_used(results, query)
+                            return results
 
-                print(f"-> AssetLibrary REUSE: '{query}' similar to "
-                      f"'{match['query']}' -> {match['local_path']}")
-                self._recent_asset_urls.append(match["asset_url"])
-                self._recent_queries.append(query)
-                self._trim_window()
-                return [{"video_files": [{"link": match["asset_url"]}]}]
+                    print(f"-> AssetLibrary REUSE: '{query}' similar to "
+                          f"'{match['query']}' -> {match['local_path']}")
+                    self._recent_asset_urls.append(match["asset_url"])
+                    self._recent_queries.append(query)
+                    self._trim_window()
+                    return [{"video_files": [{"link": match["asset_url"]}]}]
 
         # Delegate to provider (cache miss or reuse disabled)
         results = self._provider.search(query, **kwargs)

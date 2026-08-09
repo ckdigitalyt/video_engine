@@ -1,11 +1,11 @@
 # Postmortem — The 52-Hertz Whale: the loneliest voice in the ocean
-**When:** 2026-08-09T09:14:51+00:00
+**When:** 2026-08-09T11:10:23+00:00
 
 ## Techniques that worked
-- multi-reviewer script review (2 passes, gate=False)
-- director beat mode: 43 shots, providers={'manim': 3, 'nasa': 26, 'pexels': 14}
+- multi-reviewer script review (2 passes, gate=True)
+- director beat mode: 30 shots, providers={'manim': 4, 'pexels': 16, 'placeholder': 7, 'emergency': 3}
 - ffmpeg sidechain music ducking (bed=cinematic.mp3)
-- Gemini Flash end-to-end review score 35/100
+- Gemini Flash end-to-end review score 45/100
 
 ## Techniques that failed
 - web search in research agent (no API key — used DeepSeek knowledge base)
@@ -26,10 +26,11 @@ _(none recorded)_
 _(none recorded)_
 
 ## Review feedback
-- Replace all space, astronomy, and alien-themed visuals with relevant footage of oceans, marine life, sonar screens, and 
-- Fix the layout scaling bugs at 0:18, 0:24, 0:28, 0:57, and 1:09 so that the video assets fill the entire 16:9 frame inst
-- Re-record the narration with a professional voice actor or a more advanced AI voice model to eliminate the robotic caden
-- Replace the 'Goldilocks Zone' bar chart at 0:14 with an animated spectrogram comparing the 52 Hz frequency to normal blu
+- Revise the script to correct grammatical errors and word choices. Specifically, change 'no one seen it' to 'no one has s
+- Replace all irrelevant visuals (0:06-0:13 bar chart, 0:14-0:17 alien, 0:34-0:35 moon, 0:45-0:52 iceberg/rope) with high-
+- Establish and maintain a consistent visual style and color palette throughout the video. Avoid jarring shifts between di
+- Improve transitions between scenes. Utilize smoother techniques like dissolves, subtle wipes, or thematic cuts instead o
+- Ensure burned-in subtitles are perfectly synchronized with the narration and reflect the corrected script, including gra
 
 ## Benchmark results
 ```json
@@ -45,10 +46,10 @@ _(none recorded)_
 ## Metrics
 ```json
 {
-  "final_score": 35,
+  "final_score": 45,
   "render_iterations": 2,
-  "shots": 43,
-  "fallbacks": 0,
-  "duration_s": 89.6
+  "shots": 30,
+  "fallbacks": 10,
+  "duration_s": 64.6
 }
 ```

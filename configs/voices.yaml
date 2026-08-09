@@ -31,7 +31,7 @@ voices:
     format: "mp3"
     condition_on_previous_chunks: true
     prosody:
-      speed: 1.0      # 0.95-1.05 band — never rushed
+      speed: 0.95    # 0.95-1.05 band — 52-Hz run hit 200/220wpm on short scenes; 0.95 for headroom
       volume: 0
       normalize_loudness: true
 

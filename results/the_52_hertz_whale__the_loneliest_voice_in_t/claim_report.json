@@ -4,7 +4,7 @@
     {
       "name": "claim_contradictions",
       "passed": true,
-      "detail": "9 claim(s); 0 contradicted"
+      "detail": "13 claim(s); 0 contradicted"
     },
     {
       "name": "unsupported_quantitative_claims",
@@ -19,33 +19,33 @@
   ],
   "claims": [
     {
-      "text": "fifty-two times",
+      "text": "forty hertz",
       "kind": "quantitative",
-      "value": "52",
-      "unit": "times",
+      "value": "40",
+      "unit": "hertz",
       "entity": null,
       "status": "verified",
-      "detail": "matched research fact: \u2026the 52-hertz whale is the only known whale with a consistent call frequency of 52 hz 52",
+      "detail": "matched research fact: \u2026the whale's call is significantly higher than typical blue whale calls (10-40 hz) and fin whale call",
       "source_label": "research_pack"
     },
     {
-      "text": "ten-forty hertz",
+      "text": "thirty-five years",
       "kind": "quantitative",
-      "value": "50",
-      "unit": "hertz",
+      "value": "35",
+      "unit": "years",
       "entity": null,
       "status": "verified",
       "detail": "",
-      "source_label": "NOAA Fisheries (e.g., studies on blue whale vocalizations, such as those by Cumm"
+      "source_label": "NOAA Pacific Marine Environmental Laboratory (PMEL), Scripps Institution of Ocea"
     },
     {
-      "text": "twenty hertz",
+      "text": "thirty thousand miles",
       "kind": "quantitative",
-      "value": "20",
-      "unit": "hertz",
+      "value": "30000",
+      "unit": "miles",
       "entity": null,
       "status": "verified",
-      "detail": "matched research fact: \u2026the whale's call frequency is significantly higher than blue whales (10-40 hz) and fin whales (20 hz",
+      "detail": "matched research fact: \u2026the whale has been tracked annually since 1992, covering over 30,000 miles of ocean 30000",
       "source_label": "research_pack"
     },
     {
@@ -55,105 +55,125 @@
       "unit": "hertz",
       "entity": null,
       "status": "verified",
-      "detail": "matched research fact: \u2026the 52-hertz whale is the only known whale with a consistent call frequency of 52 hz 52",
+      "detail": "matched research fact: \u2026the 52-hertz whale is the only known whale with a consistently high-frequency call of 52 hz 52",
       "source_label": "research_pack"
     },
     {
-      "text": "one hundred thousand kilometers",
+      "text": "ten to forty hertz",
       "kind": "quantitative",
-      "value": "100000",
-      "unit": "kilometers",
-      "entity": null,
+      "value": "10 to 40",
+      "unit": "hertz",
+      "entity": "blue whales",
       "status": "verified",
-      "detail": "matched research fact: \u2026the whale has been tracked annually since 1992, covering over 100,000 km of ocean 100000",
-      "source_label": "research_pack"
+      "detail": "",
+      "source_label": "NOAA (National Oceanic and Atmospheric Administration) and Scripps Institution o"
     },
     {
-      "text": "thirty years",
+      "text": "twenty to thirty",
       "kind": "quantitative",
-      "value": "30",
-      "unit": "years",
-      "entity": null,
-      "status": "verified",
-      "detail": "matched research fact: \u2026the whale's calls have been recorded for over 30 years, making it the longest continuous acoustic re",
-      "source_label": "research_pack"
+      "value": "20 to 30",
+      "unit": "hertz",
+      "entity": "fin whales",
+      "status": "ok",
+      "detail": "hypothesis: The 52 Hz frequency is a documented but unexplained acoustic signal; blue whales typically vocalize at 10-40 Hz, making ",
+      "source_label": "NOAA Pacific Marine Environmental Laboratory (PMEL) Acoustics Program"
     },
     {
-      "text": "fifty-two times a second",
+      "text": "fifty-two",
       "kind": "quantitative",
       "value": "52",
-      "unit": "times per second",
-      "entity": null,
+      "unit": "hertz",
+      "entity": "52-Hz whale",
       "status": "verified",
-      "detail": "matched research fact: \u2026the 52-hertz whale is the only known whale with a consistent call frequency of 52 hz 52",
+      "detail": "matched research fact: \u2026the 52-hertz whale is the only known whale with a consistently high-frequency call of 52 hz 52",
       "source_label": "research_pack"
     },
     {
-      "text": "one hundred thousand kilometers tracked",
+      "text": "nineteen eighty-nine",
       "kind": "quantitative",
-      "value": "100000",
-      "unit": "kilometers",
-      "entity": null,
+      "value": "1989",
+      "unit": "year",
+      "entity": "U.S. Navy's SOSUS array",
       "status": "verified",
-      "detail": "matched research fact: \u2026the whale has been tracked annually since 1992, covering over 100,000 km of ocean 100000",
+      "detail": "matched research fact: \u2026the whale's call was first detected in 1989 by the u.s. navy's sosus hydrophone array 1989",
       "source_label": "research_pack"
     },
     {
-      "text": "Peak activity in winter",
+      "text": "over thirty thousand miles",
       "kind": "quantitative",
-      "value": "1",
-      "unit": "season (winter)",
-      "entity": null,
+      "value": "30000",
+      "unit": "miles",
+      "entity": "52-Hz whale",
       "status": "verified",
-      "detail": "matched research fact: \u2026the whale's calls were first detected in 1989 by the u.s. navy's sosus hydrophone array 1989",
+      "detail": "matched research fact: \u2026the whale has been tracked annually since 1992, covering over 30,000 miles of ocean 30000",
+      "source_label": "research_pack"
+    },
+    {
+      "text": "nineteen ninety-two",
+      "kind": "quantitative",
+      "value": "1992",
+      "unit": "year",
+      "entity": "tracking of 52-Hz whale",
+      "status": "verified",
+      "detail": "matched research fact: \u2026the whale has been tracked annually since 1992, covering over 30,000 miles of ocean 30000",
+      "source_label": "research_pack"
+    },
+    {
+      "text": "December and January",
+      "kind": "quantitative",
+      "value": "December and January",
+      "unit": "months",
+      "entity": "peak calls of 52-Hz whale",
+      "status": "ok",
+      "detail": "hypothesis: The 52 Hz call is a documented acoustic phenomenon, but its origin remains unconfirmed despite decades of tracking; it i",
+      "source_label": "NOAA Pacific Marine Environmental Laboratory (PMEL), reports by Dr. William Watk"
+    },
+    {
+      "text": "August",
+      "kind": "quantitative",
+      "value": "August",
+      "unit": "month",
+      "entity": "secondary whisper of 52-Hz whale",
+      "status": "ok",
+      "detail": "hypothesis: The 52 Hz frequency is a documented acoustic phenomenon with no confirmed biological source, widely attributed to a blue",
+      "source_label": "NOAA Pacific Marine Environmental Laboratory (PMEL) Acoustic Monitoring Program,"
+    },
+    {
+      "text": "twenty fifteen",
+      "kind": "quantitative",
+      "value": "2015",
+      "unit": "year",
+      "entity": "album 'fifty-two hertz I Love You'",
+      "status": "verified",
+      "detail": "matched research fact: \u2026the whale's call has inspired multiple artworks, books, and musical compositions, including a 2015 a",
       "source_label": "research_pack"
     }
   ],
   "entities": [
+    "blue whales",
+    "fin whales",
     "52-Hz whale",
-    "Pacific",
-    "U.S. Navy\u2019s SOSUS array",
-    "Russian",
-    "blue whale",
-    "fin whale",
-    "violin",
-    "brass band",
+    "U.S. Navy's SOSUS array",
     "California",
-    "Alaska",
-    "genetic tests",
-    "acoustic clues",
-    "blue-fin mix",
-    "winter",
-    "ocean",
-    "marine mammal"
+    "Aleutians",
+    "ocean's static",
+    "ocean's hum",
+    "lighthouse beam",
+    "album 'fifty-two hertz I Love You'"
   ],
   "conflation_risks": [
     {
       "type": "conflation_risk",
-      "a": "52-hz whale",
-      "b": "typical blue whale",
-      "detail": "The 52-hz whale is distinct from typical blue whales due to its unique call frequency (52 Hz vs ~10-40 Hz for blue whales). Attributes like call frequency, social behavior, and acoustic profile must not transfer between them.",
-      "severity": "major"
+      "a": "ocean's static",
+      "b": "ocean's hum",
+      "detail": "Both refer to background noise in the ocean, but 'ocean's static' is a metaphor for random noise, while 'ocean's hum' is a specific low-frequency phenomenon. Attributes like frequency range or source should not transfer between them.",
+      "severity": "minor"
     },
     {
       "type": "conflation_risk",
-      "a": "52-hz whale",
-      "b": "fin whale",
-      "detail": "Fin whales typically call at ~20 Hz, while the 52-hz whale calls at 52 Hz. Their acoustic profiles, social behaviors, and genetic markers must not be conflated.",
-      "severity": "major"
-    },
-    {
-      "type": "conflation_risk",
-      "a": "U.S. Navy\u2019s SOSUS array",
-      "b": "Russian submarine tracking",
-      "detail": "The SOSUS array is a passive acoustic system used for submarine detection, while Russian submarine tracking is an active military operation. The array's purpose must not be conflated with the intent of tracking Russian submarines.",
-      "severity": "major"
-    },
-    {
-      "type": "conflation_risk",
-      "a": "genetic tests",
-      "b": "acoustic clues",
-      "detail": "Genetic tests analyze DNA, while acoustic clues analyze sound patterns. These are distinct scientific methods and their results must not be conflated.",
+      "a": "lighthouse beam",
+      "b": "beacon",
+      "detail": "Both are metaphors for a guiding or prominent signal, but 'lighthouse beam' implies directionality and visibility, while 'beacon' is more abstract. Attributes like physical presence or visibility should not transfer.",
       "severity": "minor"
     }
   ],

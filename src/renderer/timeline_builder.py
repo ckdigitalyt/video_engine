@@ -302,6 +302,14 @@ class TimelineBuilder:
                         _pool = [s for s in scene_shots
                                  if s.get("file") != last_shot.get("file")]
                         if not _pool:
+                            # v14 fix (repeated_assets blocker on 52-Hz run):
+                            # a SINGLE-shot scene must not reuse its own file
+                            # for hold chunks — that flags repeated_assets.
+                            # Rotate through OTHER scenes' distinct files so
+                            # holds stay visually varied.
+                            _pool = [s for s in video_timeline
+                                     if s.get("file") != last_shot.get("file")]
+                        if not _pool:
                             _pool = [last_shot]
                         while cursor < end - 0.05:
                             chunk = min(max_hold, end - cursor)

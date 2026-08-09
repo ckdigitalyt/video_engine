@@ -2,8 +2,12 @@
   "status": "REVISION_REQUIRED",
   "publish_ready": false,
   "blocked_by": {
+    "publish": [
+      "repeated_assets"
+    ],
     "pre_render": [
       "shot_hold",
+      "pacing",
       "resolution_headroom"
     ]
   },
@@ -11,5 +15,5 @@
     "retention",
     "visual"
   ],
-  "summary": "Gates blocked \u2014 revision required before publication: pre_render: shot_hold, resolution_headroom"
+  "summary": "Gates blocked \u2014 revision required before publication: publish: repeated_assets; pre_render: shot_hold, pacing, resolution_headroom"
 }

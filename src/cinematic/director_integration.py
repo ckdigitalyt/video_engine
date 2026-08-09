@@ -382,9 +382,38 @@ class BeatDirector:
 
     @staticmethod
     def _get_download_url(asset: dict) -> str:
-        """Extract download URL from provider asset dict."""
-        vf = asset.get("video_files", [{}])
+        """Extract the HIGHEST-QUALITY download URL from provider asset dict.
+
+        v14 fix: Pexels ``video_files`` may list SD variants first; picking
+        ``video_files[0]`` downloaded 640x360/426x240 clips that tripped the
+        resolution_headroom gate (11 shots on the 52-Hz run).  Prefer the
+        largest-footprint variant (or an hd/uhd quality tag), falling back
+        to the first entry.
+        """
+        vf = asset.get("video_files", [])
         if isinstance(vf, list) and vf:
+            best = None
+            best_score = -1
+            for entry in vf:
+                if not entry or not entry.get("link"):
+                    continue
+                q = str(entry.get("quality", "")).lower()
+                try:
+                    w = int(entry.get("width", 0) or 0)
+                    h = int(entry.get("height", 0) or 0)
+                except (TypeError, ValueError):
+                    w = h = 0
+                area = max(w, 0) * max(h, 0)
+                score = area
+                if q in ("uhd", "4k"):
+                    score += 10 ** 10
+                elif q == "hd":
+                    score += 10 ** 8
+                if score > best_score:
+                    best_score = score
+                    best = entry.get("link")
+            if best:
+                return best
             link = vf[0].get("link", "")
             if link:
                 return link

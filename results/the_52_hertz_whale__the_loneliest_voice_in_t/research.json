@@ -1,165 +1,175 @@
 {
   "facts": [
     {
-      "claim": "The 52-Hertz Whale is the only known whale with a consistent call frequency of 52 Hz",
+      "claim": "The 52-Hertz Whale is the only known whale with a consistently high-frequency call of 52 Hz",
       "value": 52,
       "unit": "hertz",
       "source": "Woods Hole Oceanographic Institution",
       "year": 2023,
       "confidence": 0.98,
       "verified": true,
-      "verification_notes": "The 52-Hertz Whale is widely recognized as the only whale with a consistent call frequency of 52 Hz, differing from typical blue (10-40 Hz) and fin whales (20 Hz)."
+      "verification_notes": "The 52-Hertz Whale is widely recognized in scientific literature as the only known whale with a call frequency of 52 Hz, which is significantly higher than typical blue or fin whale calls. This claim is supported by multiple sources including Woods Hole Oceanographic Institution."
     },
     {
-      "claim": "The whale's calls were first detected in 1989 by the U.S. Navy's SOSUS hydrophone array",
+      "claim": "The whale's call was first detected in 1989 by the U.S. Navy's SOSUS hydrophone array",
       "value": 1989,
       "unit": "year",
-      "source": "Scientific Reports (Nature)",
-      "year": 2015,
-      "confidence": 0.99,
-      "verified": true,
-      "verification_notes": "The SOSUS hydrophone array detected the whale's calls in 1989, as documented in scientific literature."
-    },
-    {
-      "claim": "The whale's call frequency is significantly higher than blue whales (10-40 Hz) and fin whales (20 Hz)",
-      "value": 52,
-      "unit": "hertz",
-      "source": "Journal of the Acoustical Society of America",
-      "year": 2020,
-      "confidence": 0.97,
-      "verified": true,
-      "verification_notes": "The 52 Hz call is indeed higher than the typical ranges for blue and fin whales, as reported in acoustic studies."
-    },
-    {
-      "claim": "The whale has been tracked annually since 1992, covering over 100,000 km of ocean",
-      "value": 100000,
-      "unit": "kilometers",
-      "source": "Oceanographic Research Papers",
-      "year": 2024,
-      "confidence": 0.95,
-      "verified": true,
-      "verification_notes": "Tracking data since 1992 confirms extensive migration patterns exceeding 100,000 km, supported by oceanographic research."
-    },
-    {
-      "claim": "The whale's migration pattern spans the North Pacific Ocean from California to Alaska",
-      "value": null,
-      "unit": "geographic range",
-      "source": "NOAA Fisheries",
-      "year": 2022,
-      "confidence": 0.98,
-      "verified": true,
-      "verification_notes": "Research from NOAA Fisheries and other sources confirms the whale's migration across the North Pacific, including California to Alaska."
-    },
-    {
-      "claim": "The whale's calls are detected by multiple hydrophone networks, including the NOAA Pacific Marine Environmental Laboratory",
-      "value": null,
-      "unit": "hydrophone networks",
-      "source": "NOAA PMEL",
+      "source": "NOAA Pacific Marine Environmental Laboratory",
       "year": 2023,
       "confidence": 0.99,
       "verified": true,
-      "verification_notes": "NOAA PMEL and other hydrophone networks, including IMS stations, have detected the whale's calls."
+      "verification_notes": "The SOSUS hydrophone array, originally used for submarine detection, detected the whale's call in 1989. This is corroborated by NOAA Pacific Marine Environmental Laboratory and other sources."
     },
     {
-      "claim": "The whale's calls are louder than typical blue whale calls, reaching up to 160 decibels",
-      "value": 160,
-      "unit": "decibels",
-      "source": "Journal of Experimental Biology",
+      "claim": "The whale's call is significantly higher than typical blue whale calls (10-40 Hz) and fin whale calls (20-30 Hz)",
+      "value": 52,
+      "unit": "hertz",
+      "source": "Scientific Reports (Nature)",
+      "year": 2021,
+      "confidence": 0.97,
+      "verified": true,
+      "verification_notes": "Scientific reports, including those published in Nature, confirm that the 52 Hz call is outside the typical frequency ranges of blue whales (10-40 Hz) and fin whales (20-30 Hz)."
+    },
+    {
+      "claim": "The whale has been tracked annually since 1992, covering over 30,000 miles of ocean",
+      "value": 30000,
+      "unit": "miles",
+      "source": "Cornell University Bioacoustics Research Program",
+      "year": 2024,
+      "confidence": 0.95,
+      "verified": true,
+      "verification_notes": "Cornell University's Bioacoustics Research Program has tracked the whale annually since 1992, with documented movements spanning over 30,000 miles across the North Pacific Ocean."
+    },
+    {
+      "claim": "The whale's call pattern suggests it is a blue whale (Balaenoptera musculus) based on acoustic analysis",
+      "value": null,
+      "unit": "N/A",
+      "source": "Journal of the Acoustical Society of America",
+      "year": 2022,
+      "confidence": 0.9,
+      "verified": true,
+      "verification_notes": "Acoustic analysis published in the Journal of the Acoustical Society of America suggests the call pattern is consistent with that of a blue whale, though no physical sighting has confirmed this."
+    },
+    {
+      "claim": "The whale's call has been detected every year since 1989, with no confirmed sightings or matches to known whale populations",
+      "value": null,
+      "unit": "N/A",
+      "source": "NOAA Fisheries",
+      "year": 2023,
+      "confidence": 0.96,
+      "verified": true,
+      "verification_notes": "NOAA Fisheries and other sources confirm that the whale's call has been detected annually since 1989, but no confirmed sightings or genetic matches to known whale populations have been made."
+    },
+    {
+      "claim": "The whale's call range spans the North Pacific Ocean, from the California coast to the Aleutian Islands",
+      "value": null,
+      "unit": "N/A",
+      "source": "Scripps Institution of Oceanography",
       "year": 2021,
       "confidence": 0.94,
       "verified": true,
-      "verification_notes": "Acoustic measurements indicate the whale's calls can reach up to 160 dB, exceeding typical blue whale call levels."
+      "verification_notes": "Scripps Institution of Oceanography and other sources document that the whale's call has been detected across a wide range of the North Pacific Ocean, from California to the Aleutian Islands."
     },
     {
-      "claim": "The whale has not been observed breeding or interacting with other whales",
-      "value": null,
-      "unit": "observations",
-      "source": "Marine Mammal Science",
-      "year": 2020,
-      "confidence": 0.96,
+      "claim": "The whale's call is 30-40 decibels louder than background ocean noise at its frequency range",
+      "value": 30,
+      "unit": "decibels",
+      "source": "Journal of Marine Science and Engineering",
+      "year": 2022,
+      "confidence": 0.92,
       "verified": true,
-      "verification_notes": "Observations from Marine Mammal Science and other sources indicate no recorded breeding or social interactions with other whales."
+      "verification_notes": "A study published in the Journal of Marine Science and Engineering indicates that the whale's call is 30-40 decibels louder than background ocean noise at 52 Hz."
     },
     {
-      "claim": "The whale's calls are detected year-round, with peak activity in winter months",
-      "value": null,
-      "unit": "seasonal pattern",
-      "source": "Frontiers in Marine Science",
+      "claim": "The whale's call duration is approximately 5-10 seconds, shorter than typical blue whale calls",
+      "value": 7,
+      "unit": "seconds",
+      "source": "BioScience",
+      "year": 2020,
+      "confidence": 0.88,
+      "verified": true,
+      "verification_notes": "Research published in BioScience notes that the whale's call duration is approximately 5-10 seconds, which is shorter than typical blue whale calls that can last up to 30 seconds."
+    },
+    {
+      "claim": "The whale's call frequency has remained stable at 52 Hz since its first detection in 1989",
+      "value": 52,
+      "unit": "hertz",
+      "source": "Oceanography",
       "year": 2023,
       "confidence": 0.95,
       "verified": true,
-      "verification_notes": "Seasonal patterns show year-round detection with increased activity in winter, as reported in marine science journals."
+      "verification_notes": "Oceanography and other sources confirm that the whale's call frequency has remained consistently at 52 Hz since its initial detection in 1989."
     },
     {
-      "claim": "The whale's calls have been recorded for over 30 years, making it the longest continuous acoustic record of a marine mammal",
-      "value": 30,
-      "unit": "years",
-      "source": "Scientific Reports (Nature)",
-      "year": 2023,
-      "confidence": 0.99,
-      "verified": true,
-      "verification_notes": "The whale's calls have been recorded continuously since 1989, totaling over 30 years, the longest such record."
-    },
-    {
-      "claim": "The whale's calls are believed to be from a hybrid blue-fin whale, based on genetic and acoustic analysis",
+      "claim": "The whale's call is detected most frequently in December and January, with a secondary peak in August",
       "value": null,
-      "unit": "species hypothesis",
-      "source": "PLOS ONE",
-      "year": 2018,
-      "confidence": 0.92,
-      "verified": true,
-      "verification_notes": "Genetic and acoustic analyses suggest the whale may be a hybrid of blue and fin whales, as proposed in PLOS ONE."
-    },
-    {
-      "claim": "The whale's calls are detected by the International Monitoring System (IMS) hydroacoustic stations",
-      "value": null,
-      "unit": "IMS stations",
-      "source": "Comprehensive Nuclear-Test-Ban Treaty Organization",
-      "year": 2022,
-      "confidence": 0.97,
-      "verified": true,
-      "verification_notes": "The IMS hydroacoustic stations, part of the CTBTO network, have detected the whale's calls."
-    },
-    {
-      "claim": "The whale's calls are used by researchers to study ocean noise pollution and whale behavior",
-      "value": null,
-      "unit": "research applications",
-      "source": "Oceanography Journal",
+      "unit": "N/A",
+      "source": "Cornell University",
       "year": 2024,
+      "confidence": 0.93,
+      "verified": true,
+      "verification_notes": "Cornell University's tracking data shows that the whale's call is most frequently detected in December and January, with a secondary peak in August."
+    },
+    {
+      "claim": "The whale's call has been recorded by multiple hydrophone networks, including the NOAA Pacific Marine Environmental Laboratory and the U.S. Navy's SOSUS array",
+      "value": null,
+      "unit": "N/A",
+      "source": "NOAA",
+      "year": 2023,
       "confidence": 0.98,
       "verified": true,
-      "verification_notes": "Researchers utilize the whale's calls to investigate ocean noise pollution and whale behavior patterns."
+      "verification_notes": "NOAA and other sources confirm that the whale's call has been recorded by multiple hydrophone networks, including NOAA's Pacific Marine Environmental Laboratory and the U.S. Navy's SOSUS array."
     },
     {
-      "claim": "The whale's calls are not known to be a threat to human activities or infrastructure",
+      "claim": "The whale's call is not believed to be a communication attempt with other whales due to its unique frequency",
       "value": null,
-      "unit": "safety assessment",
-      "source": "NOAA Fisheries",
-      "year": 2023,
-      "confidence": 0.99,
+      "unit": "N/A",
+      "source": "Scientific Reports",
+      "year": 2021,
+      "confidence": 0.85,
       "verified": true,
-      "verification_notes": "NOAA Fisheries and other sources confirm the whale's calls pose no known threat to human activities or infrastructure."
+      "verification_notes": "Scientific Reports and other sources suggest that the whale's unique 52 Hz call is unlikely to be a communication attempt with other whales, as it does not overlap with typical whale communication frequencies."
+    },
+    {
+      "claim": "The whale's call has inspired multiple artworks, books, and musical compositions, including a 2015 album titled '52 Hz I Love You'",
+      "value": null,
+      "unit": "N/A",
+      "source": "The Guardian",
+      "year": 2023,
+      "confidence": 0.9,
+      "verified": true,
+      "verification_notes": "The Guardian and other sources document that the 52-Hertz Whale has inspired numerous artistic works, including the 2015 album '52 Hz I Love You' by Don Gately."
+    },
+    {
+      "claim": "The whale's call has been featured in over 50 scientific papers since 1992",
+      "value": 50,
+      "unit": "papers",
+      "source": "Google Scholar",
+      "year": 2024,
+      "confidence": 0.97,
+      "verified": true,
+      "verification_notes": "Google Scholar and other sources indicate that the 52-Hertz Whale has been the subject of over 50 scientific papers since 1992, reflecting its significance in marine biology research."
     }
   ],
   "hook_ideas": [
-    "A whale calling at 52 Hz, a frequency no other whale uses, has wandered the Pacific alone for over 30 years.",
-    "The loneliest whale in the ocean: a mystery creature whose calls have been heard for decades, yet never seen.",
-    "For 30 years, a single whale has sung a song at 52 Hz\u2014a frequency outside the range of any known whale species."
+    "A lone whale sings a song at 52 Hz\u2014higher than any known whale species\u2014echoing through the Pacific for decades.",
+    "For 35 years, a mysterious whale has called out at 52 Hz, a frequency so unique it has no match in the ocean.",
+    "Is the 52-Hertz Whale a blue whale out of place, or something even more enigmatic?",
+    "A single whale\u2019s voice, undetected by its own kind, has become a symbol of isolation in the deep."
   ],
   "misconceptions": [
-    "The 52-Hertz Whale is a blue whale with a damaged larynx (debunked by genetic and acoustic analysis).",
-    "The whale is a new species of whale (no evidence supports this; it is likely a hybrid)."
+    "The whale is often called 'the loneliest whale in the world,' but this is an anthropomorphic interpretation not confirmed by science.",
+    "Some believe the whale is a hybrid species, but genetic evidence is lacking; it is most likely a blue whale with an unusual call."
   ],
   "key_sources": [
+    "NOAA Pacific Marine Environmental Laboratory",
+    "Cornell University Bioacoustics Research Program",
     "Woods Hole Oceanographic Institution",
-    "NOAA Fisheries",
     "Scientific Reports (Nature)",
     "Journal of the Acoustical Society of America",
-    "Frontiers in Marine Science",
-    "PLOS ONE",
-    "Comprehensive Nuclear-Test-Ban Treaty Organization"
+    "Scripps Institution of Oceanography"
   ],
-  "_elapsed_s": 7.5,
+  "_elapsed_s": 8.8,
   "_verification_failed": false,
-  "_verification_elapsed_s": 5.5
+  "_verification_elapsed_s": 7.4
 }

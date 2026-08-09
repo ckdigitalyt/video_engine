@@ -194,10 +194,20 @@ class PreRenderGate:
         # holds — a 4-8s animated beat keeps novelty high and is standard
         # Kurzgesagt pacing.  The hold cap exists to prevent frozen-frame
         # novelty collapse, so only static (ken-burns/still) shots count.
+        # v14 fix: timeline entries do NOT carry an asset_source field, so
+        # the old check never matched and 7s manim clips were flagged as
+        # static holds (52-Hz run shot_hold blocker).  Detect animated
+        # clips by their file path (cache/manim/, cache/vector/) instead.
+        def _is_animated(file_path: str) -> bool:
+            p = (file_path or "").replace("\\", "/")
+            return ("/manim/" in p or "/vector/" in p
+                    or p.startswith("cache/manim/") or p.startswith("cache/vector/"))
+
         holds = [
             v.get("end_time", 0) - v.get("start_time", 0)
             for v in vt
             if v.get("asset_source") not in ("manim", "vector")
+            and not _is_animated(v.get("file", ""))
         ]
         longest = max(holds) if holds else 0.0
         # float-epsilon tolerance: a 4.000000000000002s hold is a rounding

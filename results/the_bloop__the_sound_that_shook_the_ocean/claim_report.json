@@ -1,0 +1,45 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "name": "claim_contradictions",
+      "passed": true,
+      "detail": "2 claim(s); 0 contradicted"
+    },
+    {
+      "name": "unsupported_quantitative_claims",
+      "passed": true,
+      "detail": "all quantitative claims source-backed"
+    },
+    {
+      "name": "entity_disambiguation",
+      "passed": true,
+      "detail": "no entity-conflation risks"
+    }
+  ],
+  "claims": [
+    {
+      "text": "five thousand kilometers",
+      "kind": "quantitative",
+      "value": "5000",
+      "unit": "kilometers",
+      "entity": null,
+      "status": "verified",
+      "detail": "matched research fact: \u2026the sound was powerful enough to be detected by multiple hydrophones separated by up to 5,000 kilome",
+      "source_label": "research_pack"
+    },
+    {
+      "text": "forty Hertz",
+      "kind": "quantitative",
+      "value": "40",
+      "unit": "hertz",
+      "entity": null,
+      "status": "verified",
+      "detail": "matched research fact: \u2026the bloop was an ultra-low-frequency sound, with its primary energy below 40 hertz, classifying it a",
+      "source_label": "research_pack"
+    }
+  ],
+  "entities": [],
+  "conflation_risks": [],
+  "blocking_failures": []
+}

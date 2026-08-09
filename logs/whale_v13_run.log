@@ -1,0 +1,1221 @@
+[duration] target=120s scenes=10 words 282-330
+[asset_router] Loaded env vars from /home/ubuntu/video_engine/.env
+
+[1/16] RESEARCH
+  14 facts, 7 sources (7.5s)
+
+[2/16] FACT VERIFICATION
+  Verified 14/14 facts
+
+[3/16] SCRIPT DEVELOPMENT
+  10 scenes drafted, 169 words (~68s at 150wpm)
+  !! Under word budget (169 < 282) — expanding once
+  !! Expansion JSON failed — retrying once
+  !! Expansion JSON failed again — keeping draft
+
+[4/16] SCRIPT REVIEW (2 reviewers, ≤2 passes)
+
+── Script Review pass 1/2 ──
+  [             Fact Reviewer] score=7.5/10 conf=0.98 issues=8 (major:2 minor:4 nit:2)
+  [     Storytelling Reviewer] score=9.1/10 conf=0.98 issues=4 (minor:2 nit:2)
+  Gate: FAIL (scores={'fact_reviewer': 7.5, 'storytelling_reviewer': 9.1})
+  Revised 10 scenes from consolidated feedback.
+
+── Script Review pass 2/2 ──
+  [             Fact Reviewer] score=7.5/10 conf=0.98 issues=7 (major:1 minor:2 nit:4)
+  [     Storytelling Reviewer] score=8.5/10 conf=0.98 issues=8 (minor:6 nit:2)
+  Gate: FAIL (scores={'fact_reviewer': 7.5, 'storytelling_reviewer': 8.5})
+  Max passes reached — using best available script.
+  Gate passed: False after 2 pass(es) (scores: {'fact_reviewer': 7.5, 'storytelling_reviewer': 8.5})
+
+[5-9/16] STORYBOARD → VISUAL PLANNING → ASSET ROUTING → GENERATION → ANIMATION
+-> AssetRouter: topic='The 52-Hertz Whale: the loneliest voice in the ocean' → category='Nature'
+
+============================================================
+  Visual Director (BEAT MODE): Aesthetic: photorealistic | Mood: bright | Pace: medium | Sub-aesthetic: nature
+  Topic: The 52-Hertz Whale: the loneliest voice in the ocean
+============================================================
+
+
+──────────────────────────────────────────────────
+  Scene 0: The Signal That Shouldn’t Exist
+──────────────────────────────────────────────────
+
+──────────────────────────────────────────────────
+  Scene 1: First Heard in the Cold War
+──────────────────────────────────────────────────
+
+──────────────────────────────────────────────────
+  Scene 2: The Whale That Doesn’t Belong
+──────────────────────────────────────────────────
+
+──────────────────────────────────────────────────
+  Scene 3: A Decade of Silence
+──────────────────────────────────────────────────
+
+──────────────────────────────────────────────────
+  Scene 4: The Migration Map
+──────────────────────────────────────────────────
+
+──────────────────────────────────────────────────
+  Scene 5: Why No Answers?
+──────────────────────────────────────────────────
+
+──────────────────────────────────────────────────
+  Scene 6: The Hybrid Theory
+──────────────────────────────────────────────────
+
+──────────────────────────────────────────────────
+  Scene 7: Winter’s Song
+──────────────────────────────────────────────────
+
+──────────────────────────────────────────────────
+  Scene 8: The Longest Record
+──────────────────────────────────────────────────
+
+──────────────────────────────────────────────────
+  Scene 9: The Whale That Remains
+──────────────────────────────────────────────────
+
+  [BeatDirector] Planning beats for scene 0...
+
+  [BeatDirector] Planning beats for scene 1...
+
+  [BeatDirector] Planning beats for scene 2...
+  [BeatDirector] Concept terms (10): ['Cold War sonar room', 'whale underwater swimming', 'ocean hydrophone recording', 'navy submarine tracking']...
+  [BeatDirector] 5 beats, 5 shots
+-> Cache MISS: 'Cold War sonar room primary shot' — calling Pexels API
+  [BeatDirector] Concept terms (10): ['blue whale swimming', 'ocean waves time-lapse', 'whale underwater close-up', 'ship sonar equipment']...
+  [BeatDirector] 7 beats, 7 shots
+-> Cache MISS: 'blue whale swimming primary shot' — calling Pexels API
+  [BeatDirector] Concept terms (10): ['blue whale underwater', 'ocean deep waves', 'whale tail splash', 'hydrophone in water']...
+  [BeatDirector] 4 beats, 4 shots
+-> Cache MISS: 'blue whale underwater primary shot' — calling Pexels API
+  Candidate 1: id=4571364 4096x2160 dur=7s score=0.850 ← SELECTED
+  Candidate 2: id=5608046 1920x1080 dur=8s score=0.800
+  Candidate 3: id=15546563 3840x2160 dur=50s score=0.600
+  Candidate 4: id=8906187 1920x1080 dur=25s score=0.600
+  Candidate 5: id=10377082 1920x1080 dur=37s score=0.600
+  Candidate 6: id=10377084 1920x1080 dur=29s score=0.600
+  Candidate 7: id=27941813 3840x2160 dur=31s score=0.400
+  Candidate 8: id=27941815 3840x2160 dur=82s score=0.400
+  Candidate 9: id=28097890 3840x2160 dur=90s score=0.400
+  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
+-> Router selected: 'pexels' for query 'blue whale swimming primary shot'
+  Candidate 1: id=12191466 3840x2160 dur=5s score=0.950 ← SELECTED
+  Candidate 2: id=2247164 1920x1080 dur=8s score=0.800
+  Candidate 3: id=6442793 1920x1080 dur=8s score=0.800
+  Candidate 4: id=12191462 3840x2160 dur=15s score=0.600
+  Candidate 5: id=12522257 1920x1080 dur=21s score=0.600
+  Candidate 6: id=6091138 3840x2160 dur=23s score=0.600
+  Candidate 7: id=15509475 3840x2160 dur=15s score=0.600
+  Candidate 8: id=6090850 3840x2160 dur=17s score=0.600
+  Candidate 9: id=27733522 1920x1080 dur=15s score=0.400
+  Candidate 10: id=38457662 3840x2160 dur=20s score=0.400
+-> Router selected: 'pexels' for query 'Cold War sonar room primary shot'
+  Candidate 1: id=4571364 4096x2160 dur=7s score=0.850 ← SELECTED
+  Candidate 2: id=11279748 1920x1080 dur=7s score=0.850
+  Candidate 3: id=15546563 3840x2160 dur=50s score=0.600
+  Candidate 4: id=10377082 1920x1080 dur=37s score=0.600
+  Candidate 5: id=1669815 1920x1080 dur=24s score=0.600
+  Candidate 6: id=10377084 1920x1080 dur=29s score=0.600
+  Candidate 7: id=7102652 1920x1080 dur=28s score=0.600
+  Candidate 8: id=27941815 3840x2160 dur=82s score=0.400
+  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
+  Candidate 10: id=28097890 3840x2160 dur=90s score=0.400
+-> Router selected: 'pexels' for query 'blue whale underwater primary shot'
+-> Already on disk: cache/video/scene_1_b0_s0.mp4
+    [BeatDirector] Shot accepted: primary shot for beat 0 (provider=pexels)
+-> AssetLibrary diversity: penalty=0.30 for 'blue whale underwater primary shot' — skipping reuse
+-> Cache MISS: 'whale underwater swimming primary shot' — calling Pexels API
+-> Already on disk: cache/video/scene_2_b0_s0.mp4
+    [BeatDirector] Shot accepted: primary shot for beat 0 (provider=pexels)
+-> Cache MISS: 'ocean waves time-lapse primary shot' — calling Pexels API
+-> AssetLibrary diversity: penalty=0.30 for 'blue whale underwater primary shot' — skipping reuse
+-> Cache MISS: 'blue whale underwater' — calling Pexels API
+  Candidate 1: id=36592043 3840x2160 dur=6s score=0.700 ← SELECTED
+  Candidate 2: id=11888087 1920x1080 dur=13s score=0.600
+  Candidate 3: id=5348631 3840x2160 dur=63s score=0.600
+  Candidate 4: id=17875165 3840x2160 dur=23s score=0.600
+  Candidate 5: id=38808914 3840x2160 dur=9s score=0.550
+  Candidate 6: id=28738510 5760x3240 dur=11s score=0.450
+  Candidate 7: id=38808913 3840x2160 dur=13s score=0.400
+  Candidate 8: id=36389606 3840x2160 dur=59s score=0.400
+  Candidate 9: id=38663430 3840x2160 dur=19s score=0.400
+  Candidate 10: id=28870121 5760x3240 dur=17s score=0.400
+-> Router selected: 'pexels' for query 'ocean waves time-lapse primary shot'
+  Candidate 1: id=11279748 1920x1080 dur=7s score=0.850 ← SELECTED
+  Candidate 2: id=15546563 3840x2160 dur=50s score=0.600
+  Candidate 3: id=10377082 1920x1080 dur=37s score=0.600
+  Candidate 4: id=1669815 1920x1080 dur=24s score=0.600
+  Candidate 5: id=10377084 1920x1080 dur=29s score=0.600
+  Candidate 6: id=10377449 1920x1080 dur=29s score=0.600
+  Candidate 7: id=26245637 3840x2160 dur=16s score=0.400
+  Candidate 8: id=28097890 3840x2160 dur=90s score=0.400
+  Candidate 9: id=28097887 3840x2160 dur=57s score=0.400
+  Candidate 10: id=27941815 3840x2160 dur=82s score=0.400
+-> Router selected: 'pexels' for query 'blue whale underwater'
+  Candidate 1: id=4571364 4096x2160 dur=7s score=0.850 ← SELECTED
+  Candidate 2: id=5607993 1920x1080 dur=21s score=0.600
+  Candidate 3: id=15546563 3840x2160 dur=50s score=0.600
+  Candidate 4: id=10377082 1920x1080 dur=37s score=0.600
+  Candidate 5: id=10377084 1920x1080 dur=29s score=0.600
+  Candidate 6: id=6625561 3840x2160 dur=30s score=0.600
+  Candidate 7: id=14146687 3840x2160 dur=129s score=0.600
+  Candidate 8: id=10377449 1920x1080 dur=29s score=0.600
+  Candidate 9: id=28097890 3840x2160 dur=90s score=0.400
+  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
+-> Router selected: 'pexels' for query 'whale underwater swimming primary shot'
+-> Cache MISS: 'blue whale swimming' — calling Pexels API
+-> Already on disk: cache/video/scene_0_b0_s0.mp4
+    [BeatDirector] Shot accepted: primary shot for beat 0 (provider=pexels)
+-> AssetLibrary REUSE: 'ocean deep waves primary shot' similar to 'deep ocean abyss primary shot' -> cache/video/scene_7_b1_s0.mp4
+-> Router selected: 'pexels' for query 'ocean deep waves primary shot'
+-> Cache MISS: 'Cold War sonar room' — calling Pexels API
+-> AssetLibrary diversity: penalty=0.15 for 'blue whale underwater primary shot' — skipping reuse
+-> Cache MISS: 'blue whale underwater' — calling Pexels API
+  Candidate 1: id=4571364 4096x2160 dur=7s score=0.850 ← SELECTED
+  Candidate 2: id=5608046 1920x1080 dur=8s score=0.800
+  Candidate 3: id=15546563 3840x2160 dur=50s score=0.600
+  Candidate 4: id=10377082 1920x1080 dur=37s score=0.600
+  Candidate 5: id=6625561 3840x2160 dur=30s score=0.600
+  Candidate 6: id=28097890 3840x2160 dur=90s score=0.400
+  Candidate 7: id=28097887 3840x2160 dur=57s score=0.400
+  Candidate 8: id=27941813 3840x2160 dur=31s score=0.400
+  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
+  Candidate 10: id=27941815 3840x2160 dur=82s score=0.400
+-> Router selected: 'pexels' for query 'blue whale swimming'
+  Candidate 1: id=19217899 3840x2160 dur=5s score=0.950 ← SELECTED
+  Candidate 2: id=30892892 3840x2160 dur=6s score=0.700
+  Candidate 3: id=12191462 3840x2160 dur=15s score=0.600
+  Candidate 4: id=7894801 1920x1080 dur=15s score=0.600
+  Candidate 5: id=15763477 1920x1080 dur=23s score=0.600
+  Candidate 6: id=33770825 3840x2160 dur=9s score=0.550
+  Candidate 7: id=30892982 3840x2160 dur=9s score=0.550
+  Candidate 8: id=30892745 3840x2160 dur=11s score=0.450
+  Candidate 9: id=29560972 3840x2160 dur=12s score=0.400
+  Candidate 10: id=33828503 3840x2160 dur=31s score=0.400
+  Candidate 1: id=11279748 1920x1080 dur=7s score=0.850 ← SELECTED
+  Candidate 2: id=15546563 3840x2160 dur=50s score=0.600
+  Candidate 3: id=10377082 1920x1080 dur=37s score=0.600
+  Candidate 4: id=1669815 1920x1080 dur=24s score=0.600
+  Candidate 5: id=10377084 1920x1080 dur=29s score=0.600
+  Candidate 6: id=10377449 1920x1080 dur=29s score=0.600
+  Candidate 7: id=26245637 3840x2160 dur=16s score=0.400
+  Candidate 8: id=28097890 3840x2160 dur=90s score=0.400
+  Candidate 9: id=28097887 3840x2160 dur=57s score=0.400
+  Candidate 10: id=27941815 3840x2160 dur=82s score=0.400
+-> Router selected: 'pexels' for query 'Cold War sonar room'
+-> Router selected: 'pexels' for query 'blue whale underwater'
+-> Cache MISS: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' — calling Pexels API
+-> Already on disk: cache/video/scene_1_b1_s0.mp4
+    [BeatDirector] Shot accepted: primary shot for beat 1 (provider=pexels)
+-> AssetLibrary diversity: penalty=0.30 for 'hydrophone deep ocean primary shot' — skipping reuse
+-> Cache MISS: 'ocean hydrophone recording primary shot' — calling Pexels API
+-> AssetLibrary diversity: penalty=0.30 for 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' — skipping reuse
+-> Cache MISS: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' — calling Pexels API
+  Candidate 1: id=4326984 4096x2160 dur=7s score=0.850 ← SELECTED
+  Candidate 2: id=11279748 1920x1080 dur=7s score=0.850
+  Candidate 3: id=4332085 4096x2160 dur=17s score=0.600
+  Candidate 4: id=7102652 1920x1080 dur=28s score=0.600
+  Candidate 5: id=14146687 3840x2160 dur=129s score=0.600
+  Candidate 6: id=10377084 1920x1080 dur=29s score=0.600
+  Candidate 7: id=15546563 3840x2160 dur=50s score=0.600
+  Candidate 8: id=27941815 3840x2160 dur=82s score=0.400
+  Candidate 9: id=36004277 3840x2160 dur=119s score=0.400
+  Candidate 10: id=27941813 3840x2160 dur=31s score=0.400
+  Candidate 1: id=4326984 4096x2160 dur=7s score=0.850 ← SELECTED
+  Candidate 2: id=11279748 1920x1080 dur=7s score=0.850
+  Candidate 3: id=4332085 4096x2160 dur=17s score=0.600
+  Candidate 4: id=7102652 1920x1080 dur=28s score=0.600
+  Candidate 5: id=14146687 3840x2160 dur=129s score=0.600
+  Candidate 6: id=10377084 1920x1080 dur=29s score=0.600
+  Candidate 7: id=15546563 3840x2160 dur=50s score=0.600
+  Candidate 8: id=27941815 3840x2160 dur=82s score=0.400
+  Candidate 9: id=36004277 3840x2160 dur=119s score=0.400
+  Candidate 10: id=27941813 3840x2160 dur=31s score=0.400
+-> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
+-> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
+  Candidate 1: id=8822835 3840x2160 dur=11s score=0.650 ← SELECTED
+  Candidate 2: id=8382683 4096x2160 dur=28s score=0.600
+  Candidate 3: id=8822572 3840x2160 dur=15s score=0.600
+  Candidate 4: id=36006201 3840x2160 dur=8s score=0.600
+  Candidate 5: id=19883929 1920x1080 dur=38s score=0.600
+  Candidate 6: id=8822799 3840x2160 dur=12s score=0.600
+  Candidate 7: id=7732120 2720x1530 dur=24s score=0.600
+  Candidate 8: id=18078999 3840x2160 dur=45s score=0.600
+  Candidate 9: id=8824209 3840x2160 dur=12s score=0.600
+  Candidate 10: id=8822982 3840x2160 dur=14s score=0.600
+-> Router selected: 'pexels' for query 'ocean hydrophone recording primary shot'
+-> Already on disk: cache/video/scene_2_b1_s0.mp4
+    [BeatDirector] Shot accepted: primary shot for beat 1 (provider=pexels)
+-> AssetLibrary REUSE: 'whale underwater close-up primary shot' similar to 'blue whale underwater primary shot' -> cache/video/scene_1_b0_s0.mp4
+-> Router selected: 'pexels' for query 'whale underwater close-up primary shot'
+-> Cache MISS: 'whale tail splash primary shot' — calling Pexels API
+-> Already on disk: cache/video/scene_1_b2_s0.mp4
+    [BeatDirector] Shot accepted: primary shot for beat 2 (provider=pexels)
+-> Cache MISS: 'navy submarine tracking primary shot' — calling Pexels API
+-> Already on disk: cache/video/scene_2_b2_s0.mp4
+    [BeatDirector] Shot accepted: primary shot for beat 2 (provider=pexels)
+-> AssetLibrary REUSE: 'ship sonar equipment primary shot' similar to 'underwater sonar equipment primary shot' -> cache/video/scene_0_b0_s0.mp4
+-> Router selected: 'pexels' for query 'ship sonar equipment primary shot'
+  Candidate 1: id=4332086 4096x2160 dur=4s score=1.000 ← SELECTED
+  Candidate 2: id=5542375 4096x2160 dur=6s score=0.900
+  Candidate 3: id=4326984 4096x2160 dur=7s score=0.850
+  Candidate 4: id=8906187 1920x1080 dur=25s score=0.600
+  Candidate 5: id=18680289 1920x1080 dur=16s score=0.600
+  Candidate 6: id=27941813 3840x2160 dur=31s score=0.400
+  Candidate 7: id=27941815 3840x2160 dur=82s score=0.400
+  Candidate 8: id=28097890 3840x2160 dur=90s score=0.400
+  Candidate 9: id=4520420 1920x1012 dur=3s score=0.000
+  Candidate 10: id=4520422 1920x1012 dur=3s score=0.000
+-> Router selected: 'pexels' for query 'whale tail splash primary shot'
+  Candidate 1: id=17628459 1920x1080 dur=9s score=0.750 ← SELECTED
+  Candidate 2: id=2837541 1920x1080 dur=13s score=0.600
+  Candidate 3: id=20360897 3840x2160 dur=38s score=0.600
+  Candidate 4: id=3482752 1920x1080 dur=44s score=0.600
+  Candidate 5: id=15743072 5120x2880 dur=14s score=0.600
+  Candidate 6: id=4687300 3840x2160 dur=28s score=0.600
+  Candidate 7: id=8822799 3840x2160 dur=12s score=0.600
+  Candidate 8: id=4846372 1920x1080 dur=20s score=0.600
+  Candidate 9: id=11431281 3840x2160 dur=12s score=0.600
+  Candidate 10: id=30670663 1920x1080 dur=14s score=0.400
+-> Router selected: 'pexels' for query 'navy submarine tracking primary shot'
+-> AssetLibrary REUSE: 'blue whale swimming' similar to 'blue whale swimming' -> cache/video/scene_0_b0_s0.mp4
+-> Router selected: 'pexels' for query 'blue whale swimming'
+-> AssetLibrary diversity: penalty=0.30 for 'blue whale underwater primary shot' — skipping reuse
+-> Cache MISS: 'blue whale underwater' — calling Pexels API
+-> Already on disk: cache/video/scene_1_b3_s0.mp4
+    [BeatDirector] Shot accepted: primary shot for beat 3 (provider=pexels)
+-> Cache MISS: 'deep sea microphone primary shot' — calling Pexels API
+-> Already on disk: cache/video/scene_2_b3_s0.mp4
+    [BeatDirector] Shot accepted: primary shot for beat 3 (provider=pexels)
+-> AssetLibrary REUSE: 'deep ocean sonar screen primary shot' similar to 'deep ocean abyss primary shot' -> cache/video/scene_7_b1_s0.mp4
+-> Router selected: 'pexels' for query 'deep ocean sonar screen primary shot'
+  Candidate 1: id=11279748 1920x1080 dur=7s score=0.850 ← SELECTED
+  Candidate 2: id=15546563 3840x2160 dur=50s score=0.600
+  Candidate 3: id=10377082 1920x1080 dur=37s score=0.600
+  Candidate 4: id=1669815 1920x1080 dur=24s score=0.600
+  Candidate 5: id=10377084 1920x1080 dur=29s score=0.600
+  Candidate 6: id=10377449 1920x1080 dur=29s score=0.600
+  Candidate 7: id=26245637 3840x2160 dur=16s score=0.400
+  Candidate 8: id=28097890 3840x2160 dur=90s score=0.400
+  Candidate 9: id=28097887 3840x2160 dur=57s score=0.400
+  Candidate 10: id=27941815 3840x2160 dur=82s score=0.400
+-> Router selected: 'pexels' for query 'blue whale underwater'
+-> AssetLibrary diversity: penalty=0.30 for 'blue whale swimming' — skipping reuse
+-> Cache MISS: 'blue whale swimming' — calling Pexels API
+  Candidate 1: id=34877899 1920x1080 dur=8s score=0.600 ← SELECTED
+  Candidate 2: id=7599978 4096x2160 dur=13s score=0.600
+  Candidate 3: id=6953261 4096x2160 dur=20s score=0.600
+  Candidate 4: id=7586498 1920x1080 dur=12s score=0.600
+  Candidate 5: id=33924272 1920x1080 dur=9s score=0.550
+  Candidate 6: id=31824524 1920x1080 dur=10s score=0.500
+  Candidate 7: id=27263871 3840x2160 dur=19s score=0.400
+  Candidate 8: id=36664946 3840x2160 dur=15s score=0.400
+  Candidate 9: id=33028274 1920x1080 dur=14s score=0.400
+  Candidate 10: id=26708647 3840x2160 dur=22s score=0.400
+-> Router selected: 'pexels' for query 'deep sea microphone primary shot'
+-> AssetLibrary REUSE: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' similar to 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' -> cache/video/scene_2_b1_s0.mp4
+-> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
+  Candidate 1: id=4571364 4096x2160 dur=7s score=0.850 ← SELECTED
+  Candidate 2: id=5608046 1920x1080 dur=8s score=0.800
+  Candidate 3: id=15546563 3840x2160 dur=50s score=0.600
+  Candidate 4: id=10377082 1920x1080 dur=37s score=0.600
+  Candidate 5: id=6625561 3840x2160 dur=30s score=0.600
+  Candidate 6: id=28097890 3840x2160 dur=90s score=0.400
+  Candidate 7: id=28097887 3840x2160 dur=57s score=0.400
+  Candidate 8: id=27941813 3840x2160 dur=31s score=0.400
+  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
+  Candidate 10: id=27941815 3840x2160 dur=82s score=0.400
+-> Router selected: 'pexels' for query 'blue whale swimming'
+-> Cache MISS: 'Cold War sonar room' — calling Pexels API
+-> Cache MISS: 'hydrophone in water primary shot' — calling Pexels API
+-> AssetLibrary diversity: penalty=0.30 for 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' — skipping reuse
+-> Cache MISS: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' — calling Pexels API
+  Candidate 1: id=19217899 3840x2160 dur=5s score=0.950 ← SELECTED
+  Candidate 2: id=30892892 3840x2160 dur=6s score=0.700
+  Candidate 3: id=12191462 3840x2160 dur=15s score=0.600
+  Candidate 4: id=7894801 1920x1080 dur=15s score=0.600
+  Candidate 5: id=15763477 1920x1080 dur=23s score=0.600
+  Candidate 6: id=33770825 3840x2160 dur=9s score=0.550
+  Candidate 7: id=30892982 3840x2160 dur=9s score=0.550
+  Candidate 8: id=30892745 3840x2160 dur=11s score=0.450
+  Candidate 9: id=29560972 3840x2160 dur=12s score=0.400
+  Candidate 10: id=33828503 3840x2160 dur=31s score=0.400
+-> Router selected: 'pexels' for query 'Cold War sonar room'
+  Candidate 1: id=4326984 4096x2160 dur=7s score=0.850 ← SELECTED
+  Candidate 2: id=11279748 1920x1080 dur=7s score=0.850
+  Candidate 3: id=4332085 4096x2160 dur=17s score=0.600
+  Candidate 4: id=7102652 1920x1080 dur=28s score=0.600
+  Candidate 5: id=14146687 3840x2160 dur=129s score=0.600
+  Candidate 6: id=10377084 1920x1080 dur=29s score=0.600
+  Candidate 7: id=15546563 3840x2160 dur=50s score=0.600
+  Candidate 8: id=27941815 3840x2160 dur=82s score=0.400
+  Candidate 9: id=36004277 3840x2160 dur=119s score=0.400
+  Candidate 10: id=27941813 3840x2160 dur=31s score=0.400
+-> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
+  Candidate 1: id=8916728 4096x2160 dur=12s score=0.600 ← SELECTED
+  Candidate 2: id=16478160 3840x2160 dur=21s score=0.600
+  Candidate 3: id=7004322 1920x1080 dur=49s score=0.600
+  Candidate 4: id=8822799 3840x2160 dur=12s score=0.600
+  Candidate 5: id=10183486 3840x2160 dur=22s score=0.600
+  Candidate 6: id=19378831 3840x2160 dur=23s score=0.600
+  Candidate 7: id=36006201 3840x2160 dur=8s score=0.467
+  Candidate 8: id=31432872 3840x2160 dur=9s score=0.400
+  Candidate 9: id=34666821 1920x1080 dur=12s score=0.400
+  Candidate 10: id=35813646 1920x1080 dur=12s score=0.400
+-> Router selected: 'pexels' for query 'hydrophone in water primary shot'
+-> AssetLibrary diversity: penalty=0.30 for 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' — skipping reuse
+-> Cache MISS: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' — calling Pexels API
+-> AssetLibrary REUSE: 'blue whale underwater' similar to 'blue whale underwater' -> cache/video/scene_1_b3_s0.mp4
+-> Router selected: 'pexels' for query 'blue whale underwater'
+-> AssetLibrary REUSE: 'whale tail splash primary shot' similar to 'whale tail splash primary shot' -> cache/video/scene_1_b2_s0.mp4
+-> Router selected: 'pexels' for query 'whale tail splash primary shot'
+  Candidate 1: id=4326984 4096x2160 dur=7s score=0.850 ← SELECTED
+  Candidate 2: id=11279748 1920x1080 dur=7s score=0.850
+  Candidate 3: id=4332085 4096x2160 dur=17s score=0.600
+  Candidate 4: id=7102652 1920x1080 dur=28s score=0.600
+  Candidate 5: id=14146687 3840x2160 dur=129s score=0.600
+  Candidate 6: id=10377084 1920x1080 dur=29s score=0.600
+  Candidate 7: id=15546563 3840x2160 dur=50s score=0.600
+  Candidate 8: id=27941815 3840x2160 dur=82s score=0.400
+  Candidate 9: id=36004277 3840x2160 dur=119s score=0.400
+  Candidate 10: id=27941813 3840x2160 dur=31s score=0.400
+-> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
+-> AssetLibrary REUSE: 'blue whale swimming' similar to 'blue whale swimming' -> cache/video/scene_0_b0_s0.mp4
+-> Router selected: 'pexels' for query 'blue whale swimming'
+-> AssetLibrary diversity: penalty=0.30 for 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' — skipping reuse
+-> Cache MISS: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' — calling Pexels API
+  Candidate 1: id=4326984 4096x2160 dur=7s score=0.733 ← SELECTED
+  Candidate 2: id=11279748 1920x1080 dur=7s score=0.733
+  Candidate 3: id=4332085 4096x2160 dur=17s score=0.600
+  Candidate 4: id=7102652 1920x1080 dur=28s score=0.600
+  Candidate 5: id=14146687 3840x2160 dur=129s score=0.600
+  Candidate 6: id=10377084 1920x1080 dur=29s score=0.600
+  Candidate 7: id=15546563 3840x2160 dur=50s score=0.600
+  Candidate 8: id=27941815 3840x2160 dur=82s score=0.400
+  Candidate 9: id=36004277 3840x2160 dur=119s score=0.400
+  Candidate 10: id=27941813 3840x2160 dur=31s score=0.400
+-> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
+-> AssetLibrary diversity: penalty=0.30 for 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' — skipping reuse
+-> Cache MISS: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' — calling Pexels API
+  Candidate 1: id=4326984 4096x2160 dur=7s score=0.850 ← SELECTED
+  Candidate 2: id=11279748 1920x1080 dur=7s score=0.850
+  Candidate 3: id=4332085 4096x2160 dur=17s score=0.600
+  Candidate 4: id=7102652 1920x1080 dur=28s score=0.600
+  Candidate 5: id=14146687 3840x2160 dur=129s score=0.600
+  Candidate 6: id=10377084 1920x1080 dur=29s score=0.600
+  Candidate 7: id=15546563 3840x2160 dur=50s score=0.600
+  Candidate 8: id=27941815 3840x2160 dur=82s score=0.400
+  Candidate 9: id=36004277 3840x2160 dur=119s score=0.400
+  Candidate 10: id=27941813 3840x2160 dur=31s score=0.400
+-> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
+-> Cache MISS: 'ocean surface ripples primary shot' — calling Pexels API
+  Candidate 1: id=5476219 1920x1080 dur=48s score=0.600 ← SELECTED
+  Candidate 2: id=5997982 8192x4320 dur=58s score=0.600
+  Candidate 3: id=5972702 1920x1080 dur=31s score=0.600
+  Candidate 4: id=5668619 4096x2160 dur=15s score=0.600
+  Candidate 5: id=5668615 4096x2160 dur=14s score=0.600
+  Candidate 6: id=5476220 3840x2160 dur=19s score=0.600
+  Candidate 7: id=5194376 1920x1080 dur=12s score=0.600
+  Candidate 8: id=1181911 4096x2160 dur=25s score=0.600
+  Candidate 9: id=33952309 3840x2160 dur=19s score=0.400
+  Candidate 10: id=28371212 3840x2160 dur=41s score=0.400
+-> Router selected: 'pexels' for query 'ocean surface ripples primary shot'
+-> AssetLibrary diversity: penalty=0.30 for 'blue whale swimming' — skipping reuse
+-> Cache MISS: 'blue whale swimming' — calling Pexels API
+  Candidate 1: id=4571364 4096x2160 dur=7s score=0.850 ← SELECTED
+  Candidate 2: id=5608046 1920x1080 dur=8s score=0.800
+  Candidate 3: id=15546563 3840x2160 dur=50s score=0.600
+  Candidate 4: id=10377082 1920x1080 dur=37s score=0.600
+  Candidate 5: id=6625561 3840x2160 dur=30s score=0.600
+  Candidate 6: id=28097890 3840x2160 dur=90s score=0.400
+  Candidate 7: id=28097887 3840x2160 dur=57s score=0.400
+  Candidate 8: id=27941813 3840x2160 dur=31s score=0.400
+  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
+  Candidate 10: id=27941815 3840x2160 dur=82s score=0.400
+-> Router selected: 'pexels' for query 'blue whale swimming'
+-> AssetLibrary diversity: penalty=0.30 for 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' — skipping reuse
+-> Cache MISS: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' — calling Pexels API
+  Candidate 1: id=4326984 4096x2160 dur=7s score=0.850 ← SELECTED
+  Candidate 2: id=11279748 1920x1080 dur=7s score=0.850
+  Candidate 3: id=4332085 4096x2160 dur=17s score=0.600
+  Candidate 4: id=7102652 1920x1080 dur=28s score=0.600
+  Candidate 5: id=14146687 3840x2160 dur=129s score=0.600
+  Candidate 6: id=10377084 1920x1080 dur=29s score=0.600
+  Candidate 7: id=15546563 3840x2160 dur=50s score=0.600
+  Candidate 8: id=27941815 3840x2160 dur=82s score=0.400
+  Candidate 9: id=36004277 3840x2160 dur=119s score=0.400
+  Candidate 10: id=27941813 3840x2160 dur=31s score=0.400
+-> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
+
+  [BeatDirector] Planning beats for scene 3...
+  [BeatDirector] Concept terms (10): ['whale swimming deep', 'ocean sonar waves', 'lonely whale call', 'underwater sound waves']...
+  [BeatDirector] 3 beats, 3 shots
+-> AssetLibrary diversity: penalty=0.30 for 'whale underwater swimming primary shot' — skipping reuse
+-> Cache MISS: 'whale swimming deep primary shot' — calling Pexels API
+  Candidate 1: id=5608046 1920x1080 dur=8s score=0.831 ← SELECTED
+  Candidate 2: id=10377082 1920x1080 dur=37s score=0.600
+  Candidate 3: id=15546563 3840x2160 dur=50s score=0.600
+  Candidate 4: id=5607993 1920x1080 dur=21s score=0.600
+  Candidate 5: id=10377084 1920x1080 dur=29s score=0.600
+  Candidate 6: id=8906187 1920x1080 dur=25s score=0.600
+  Candidate 7: id=10377449 1920x1080 dur=29s score=0.600
+  Candidate 8: id=20601591 3840x2160 dur=16s score=0.600
+  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
+  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
+-> Router selected: 'pexels' for query 'whale swimming deep primary shot'
+-> AssetLibrary REUSE: 'whale swimming deep' similar to 'blue whale swimming' -> cache/video/scene_0_b0_s0.mp4
+-> Router selected: 'pexels' for query 'whale swimming deep'
+-> AssetLibrary diversity: penalty=0.30 for 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' — skipping reuse
+-> Cache MISS: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' — calling Pexels API
+  Candidate 1: id=4326984 4096x2160 dur=7s score=0.877 ← SELECTED
+  Candidate 2: id=11279748 1920x1080 dur=7s score=0.877
+  Candidate 3: id=4332085 4096x2160 dur=17s score=0.600
+  Candidate 4: id=7102652 1920x1080 dur=28s score=0.600
+  Candidate 5: id=14146687 3840x2160 dur=129s score=0.600
+  Candidate 6: id=10377084 1920x1080 dur=29s score=0.600
+  Candidate 7: id=15546563 3840x2160 dur=50s score=0.600
+  Candidate 8: id=27941815 3840x2160 dur=82s score=0.400
+  Candidate 9: id=36004277 3840x2160 dur=119s score=0.400
+  Candidate 10: id=27941813 3840x2160 dur=31s score=0.400
+-> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
+-> Cache MISS: 'ocean sonar waves primary shot' — calling Pexels API
+  Candidate 1: id=6815625 4481x2160 dur=26s score=0.600 ← SELECTED
+  Candidate 2: id=3859443 3840x2160 dur=30s score=0.600
+  Candidate 3: id=6659065 1920x1080 dur=28s score=0.600
+  Candidate 4: id=5476219 1920x1080 dur=48s score=0.600
+  Candidate 5: id=6815619 4481x2160 dur=22s score=0.600
+  Candidate 6: id=855003 1920x1080 dur=24s score=0.600
+  Candidate 7: id=33312510 3840x2160 dur=12s score=0.446
+  Candidate 8: id=35224011 2720x1530 dur=38s score=0.400
+  Candidate 9: id=33846248 3840x2160 dur=30s score=0.400
+  Candidate 10: id=34228902 3840x2160 dur=41s score=0.400
+-> Router selected: 'pexels' for query 'ocean sonar waves primary shot'
+-> AssetLibrary diversity: penalty=0.30 for 'blue whale swimming' — skipping reuse
+-> Cache MISS: 'whale swimming deep' — calling Pexels API
+  Candidate 1: id=15546563 3840x2160 dur=50s score=0.600 ← SELECTED
+  Candidate 2: id=10377082 1920x1080 dur=37s score=0.600
+  Candidate 3: id=5607993 1920x1080 dur=21s score=0.600
+  Candidate 4: id=10377084 1920x1080 dur=29s score=0.600
+  Candidate 5: id=6510690 1920x1080 dur=15s score=0.600
+  Candidate 6: id=10377449 1920x1080 dur=29s score=0.600
+  Candidate 7: id=8906187 1920x1080 dur=25s score=0.600
+  Candidate 8: id=20601591 3840x2160 dur=16s score=0.600
+  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
+  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
+-> Router selected: 'pexels' for query 'whale swimming deep'
+-> AssetLibrary diversity: penalty=0.30 for 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' — skipping reuse
+-> Cache MISS: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' — calling Pexels API
+  Candidate 1: id=4326984 4096x2160 dur=7s score=0.877 ← SELECTED
+  Candidate 2: id=11279748 1920x1080 dur=7s score=0.877
+  Candidate 3: id=4332085 4096x2160 dur=17s score=0.600
+  Candidate 4: id=7102652 1920x1080 dur=28s score=0.600
+  Candidate 5: id=14146687 3840x2160 dur=129s score=0.600
+  Candidate 6: id=10377084 1920x1080 dur=29s score=0.600
+  Candidate 7: id=15546563 3840x2160 dur=50s score=0.600
+  Candidate 8: id=27941815 3840x2160 dur=82s score=0.400
+  Candidate 9: id=36004277 3840x2160 dur=119s score=0.400
+  Candidate 10: id=27941813 3840x2160 dur=31s score=0.400
+-> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
+-> Cache MISS: 'lonely whale call primary shot' — calling Pexels API
+  Candidate 1: id=11279748 1920x1080 dur=7s score=0.877 ← SELECTED
+  Candidate 2: id=4571364 4096x2160 dur=7s score=0.877
+  Candidate 3: id=4326984 4096x2160 dur=7s score=0.877
+  Candidate 4: id=7102652 1920x1080 dur=28s score=0.600
+  Candidate 5: id=5607993 1920x1080 dur=21s score=0.600
+  Candidate 6: id=8906187 1920x1080 dur=25s score=0.600
+  Candidate 7: id=27941813 3840x2160 dur=31s score=0.400
+  Candidate 8: id=27941815 3840x2160 dur=82s score=0.400
+  Candidate 9: id=28097890 3840x2160 dur=90s score=0.400
+  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
+-> Router selected: 'pexels' for query 'lonely whale call primary shot'
+-> AssetLibrary diversity: penalty=0.30 for 'blue whale swimming' — skipping reuse
+-> Cache MISS: 'whale swimming deep' — calling Pexels API
+  Candidate 1: id=15546563 3840x2160 dur=50s score=0.600 ← SELECTED
+  Candidate 2: id=10377082 1920x1080 dur=37s score=0.600
+  Candidate 3: id=5607993 1920x1080 dur=21s score=0.600
+  Candidate 4: id=10377084 1920x1080 dur=29s score=0.600
+  Candidate 5: id=6510690 1920x1080 dur=15s score=0.600
+  Candidate 6: id=10377449 1920x1080 dur=29s score=0.600
+  Candidate 7: id=8906187 1920x1080 dur=25s score=0.600
+  Candidate 8: id=20601591 3840x2160 dur=16s score=0.600
+  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
+  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
+-> Router selected: 'pexels' for query 'whale swimming deep'
+-> AssetLibrary diversity: penalty=0.30 for 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' — skipping reuse
+-> Cache MISS: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' — calling Pexels API
+  Candidate 1: id=4326984 4096x2160 dur=7s score=0.877 ← SELECTED
+  Candidate 2: id=11279748 1920x1080 dur=7s score=0.877
+  Candidate 3: id=4332085 4096x2160 dur=17s score=0.600
+  Candidate 4: id=7102652 1920x1080 dur=28s score=0.600
+  Candidate 5: id=14146687 3840x2160 dur=129s score=0.600
+  Candidate 6: id=10377084 1920x1080 dur=29s score=0.600
+  Candidate 7: id=15546563 3840x2160 dur=50s score=0.600
+  Candidate 8: id=27941815 3840x2160 dur=82s score=0.400
+  Candidate 9: id=36004277 3840x2160 dur=119s score=0.400
+  Candidate 10: id=27941813 3840x2160 dur=31s score=0.400
+-> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
+
+  [BeatDirector] Planning beats for scene 4...
+  [BeatDirector] Concept terms (10): ['whale migration aerial', 'ocean sonar waves', 'blue whale swimming', 'underwater sound waves']...
+  [BeatDirector] 4 beats, 4 shots
+-> Cache MISS: 'whale migration aerial primary shot' — calling Pexels API
+
+  [BeatDirector] Planning beats for scene 5...
+  Candidate 1: id=11279748 1920x1080 dur=7s score=0.850 ← SELECTED
+  Candidate 2: id=11521069 3840x2160 dur=7s score=0.850
+  Candidate 3: id=5608046 1920x1080 dur=8s score=0.800
+  Candidate 4: id=15546563 3840x2160 dur=50s score=0.600
+  Candidate 5: id=27941813 3840x2160 dur=31s score=0.400
+  Candidate 6: id=36004277 3840x2160 dur=119s score=0.400
+  Candidate 7: id=31873891 3840x2160 dur=14s score=0.400
+  Candidate 8: id=29054057 1920x1080 dur=12s score=0.400
+  Candidate 9: id=27941815 3840x2160 dur=82s score=0.400
+  Candidate 10: id=28097890 3840x2160 dur=90s score=0.400
+-> Router selected: 'pexels' for query 'whale migration aerial primary shot'
+-> Cache MISS: 'whale migration aerial' — calling Pexels API
+  [BeatDirector] Concept terms (10): ['whale swimming alone', 'ocean sonar waves', 'deep sea sound waves', 'whale dorsal fin']...
+  [BeatDirector] 5 beats, 5 shots
+-> AssetLibrary REUSE: 'whale swimming alone primary shot' similar to 'whale underwater swimming primary shot' -> cache/video/scene_2_b0_s0.mp4
+-> Router selected: 'pexels' for query 'whale swimming alone primary shot'
+-> Downloading from Pexels…
+  Candidate 1: id=11279748 1920x1080 dur=7s score=0.850 ← SELECTED
+  Candidate 2: id=11521069 3840x2160 dur=7s score=0.850
+  Candidate 3: id=5608046 1920x1080 dur=8s score=0.800
+  Candidate 4: id=15546563 3840x2160 dur=50s score=0.600
+  Candidate 5: id=36004277 3840x2160 dur=119s score=0.400
+  Candidate 6: id=29054057 1920x1080 dur=12s score=0.400
+  Candidate 7: id=31873891 3840x2160 dur=14s score=0.400
+  Candidate 8: id=28097890 3840x2160 dur=90s score=0.400
+  Candidate 9: id=27941813 3840x2160 dur=31s score=0.400
+  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
+-> Router selected: 'pexels' for query 'whale migration aerial'
+-> AssetLibrary diversity: penalty=0.30 for 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' — skipping reuse
+-> Cache MISS: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' — calling Pexels API
+  Candidate 1: id=4326984 4096x2160 dur=7s score=0.850 ← SELECTED
+  Candidate 2: id=11279748 1920x1080 dur=7s score=0.850
+  Candidate 3: id=4332085 4096x2160 dur=17s score=0.600
+  Candidate 4: id=7102652 1920x1080 dur=28s score=0.600
+  Candidate 5: id=14146687 3840x2160 dur=129s score=0.600
+  Candidate 6: id=10377084 1920x1080 dur=29s score=0.600
+  Candidate 7: id=15546563 3840x2160 dur=50s score=0.600
+  Candidate 8: id=27941815 3840x2160 dur=82s score=0.400
+  Candidate 9: id=36004277 3840x2160 dur=119s score=0.400
+  Candidate 10: id=27941813 3840x2160 dur=31s score=0.400
+-> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
+-> Saved: cache/video/scene_5_b0_s0.mp4
+    [BeatDirector] Shot accepted: primary shot for beat 0 (provider=pexels)
+-> Cache MISS: 'ocean sonar waves primary shot' — calling Pexels API
+-> Cache MISS: 'ocean sonar waves primary shot' — calling Pexels API
+  Candidate 1: id=6815625 4481x2160 dur=26s score=0.600 ← SELECTED
+  Candidate 2: id=3859443 3840x2160 dur=30s score=0.600
+  Candidate 3: id=6659065 1920x1080 dur=28s score=0.600
+  Candidate 4: id=5476219 1920x1080 dur=48s score=0.600
+  Candidate 5: id=6815619 4481x2160 dur=22s score=0.600
+  Candidate 6: id=855003 1920x1080 dur=24s score=0.600
+  Candidate 7: id=33312510 3840x2160 dur=12s score=0.400
+  Candidate 8: id=35224011 2720x1530 dur=38s score=0.400
+  Candidate 9: id=33846248 3840x2160 dur=30s score=0.400
+  Candidate 10: id=34228902 3840x2160 dur=41s score=0.400
+-> Router selected: 'pexels' for query 'ocean sonar waves primary shot'
+  Candidate 1: id=6815625 4481x2160 dur=26s score=0.600 ← SELECTED
+  Candidate 2: id=3859443 3840x2160 dur=30s score=0.600
+  Candidate 3: id=6659065 1920x1080 dur=28s score=0.600
+  Candidate 4: id=5476219 1920x1080 dur=48s score=0.600
+  Candidate 5: id=6815619 4481x2160 dur=22s score=0.600
+  Candidate 6: id=855003 1920x1080 dur=24s score=0.600
+  Candidate 7: id=33312510 3840x2160 dur=12s score=0.400
+  Candidate 8: id=35224011 2720x1530 dur=38s score=0.400
+  Candidate 9: id=33846248 3840x2160 dur=30s score=0.400
+  Candidate 10: id=34228902 3840x2160 dur=41s score=0.400
+-> Router selected: 'pexels' for query 'ocean sonar waves primary shot'
+-> AssetLibrary diversity: penalty=0.30 for 'blue whale swimming' — skipping reuse
+-> Cache MISS: 'whale swimming alone' — calling Pexels API
+-> Cache MISS: 'whale migration aerial' — calling Pexels API
+  Candidate 1: id=11279748 1920x1080 dur=7s score=0.850 ← SELECTED
+  Candidate 2: id=11521069 3840x2160 dur=7s score=0.850
+  Candidate 3: id=5608046 1920x1080 dur=8s score=0.800
+  Candidate 4: id=15546563 3840x2160 dur=50s score=0.600
+  Candidate 5: id=36004277 3840x2160 dur=119s score=0.400
+  Candidate 6: id=29054057 1920x1080 dur=12s score=0.400
+  Candidate 7: id=31873891 3840x2160 dur=14s score=0.400
+  Candidate 8: id=28097890 3840x2160 dur=90s score=0.400
+  Candidate 9: id=27941813 3840x2160 dur=31s score=0.400
+  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
+-> Router selected: 'pexels' for query 'whale migration aerial'
+  Candidate 1: id=5608046 1920x1080 dur=8s score=0.800 ← SELECTED
+  Candidate 2: id=15546563 3840x2160 dur=50s score=0.600
+  Candidate 3: id=4332085 4096x2160 dur=17s score=0.600
+  Candidate 4: id=10377082 1920x1080 dur=37s score=0.600
+  Candidate 5: id=6625561 3840x2160 dur=30s score=0.600
+  Candidate 6: id=5607993 1920x1080 dur=21s score=0.600
+  Candidate 7: id=14146687 3840x2160 dur=129s score=0.600
+  Candidate 8: id=28097890 3840x2160 dur=90s score=0.400
+  Candidate 9: id=27941813 3840x2160 dur=31s score=0.400
+  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
+-> Router selected: 'pexels' for query 'whale swimming alone'
+-> AssetLibrary diversity: penalty=0.15 for 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' — skipping reuse
+-> Downloading from Pexels…
+-> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
+-> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
+-> AssetLibrary REUSE: 'blue whale swimming primary shot' similar to 'blue whale underwater primary shot' -> cache/video/scene_1_b0_s0.mp4
+-> Router selected: 'pexels' for query 'blue whale swimming primary shot'
+-> Saved: cache/video/scene_5_b1_s0.mp4
+    [BeatDirector] Shot accepted: primary shot for beat 1 (provider=pexels)
+-> AssetLibrary diversity: penalty=0.30 for 'deep sea microphone primary shot' — skipping reuse
+-> Cache MISS: 'deep sea sound waves primary shot' — calling Pexels API
+-> Cache MISS: 'whale migration aerial' — calling Pexels API
+  Candidate 1: id=11279748 1920x1080 dur=7s score=0.850 ← SELECTED
+  Candidate 2: id=11521069 3840x2160 dur=7s score=0.850
+  Candidate 3: id=5608046 1920x1080 dur=8s score=0.800
+  Candidate 4: id=15546563 3840x2160 dur=50s score=0.600
+  Candidate 5: id=36004277 3840x2160 dur=119s score=0.400
+  Candidate 6: id=29054057 1920x1080 dur=12s score=0.400
+  Candidate 7: id=31873891 3840x2160 dur=14s score=0.400
+  Candidate 8: id=28097890 3840x2160 dur=90s score=0.400
+  Candidate 9: id=27941813 3840x2160 dur=31s score=0.400
+  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
+-> Router selected: 'pexels' for query 'whale migration aerial'
+-> AssetLibrary diversity: penalty=0.15 for 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' — skipping reuse
+-> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
+-> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
+  Candidate 1: id=7513671 3840x2160 dur=19s score=0.600 ← SELECTED
+  Candidate 2: id=4927329 4096x2160 dur=28s score=0.600
+  Candidate 3: id=6815628 4481x2160 dur=14s score=0.600
+  Candidate 4: id=14413880 3840x2160 dur=28s score=0.600
+  Candidate 5: id=19167202 3840x2160 dur=12s score=0.600
+  Candidate 6: id=32213508 1920x1080 dur=9s score=0.550
+  Candidate 7: id=32844046 1920x1080 dur=10s score=0.500
+  Candidate 8: id=28811335 3840x2160 dur=11s score=0.450
+  Candidate 9: id=27808426 3840x2160 dur=13s score=0.400
+  Candidate 10: id=37259189 1920x1080 dur=59s score=0.400
+-> Router selected: 'pexels' for query 'deep sea sound waves primary shot'
+-> Cache MISS: 'underwater sound waves primary shot' — calling Pexels API
+-> AssetLibrary diversity: penalty=0.30 for 'blue whale swimming' — skipping reuse
+-> Cache EVICT (below 1920x1080 floor): 'whale swimming alone' → cache/video/scene_5_b1_s0.mp4
+-> Cache MISS: 'whale swimming alone' — calling Pexels API
+  Candidate 1: id=5608046 1920x1080 dur=8s score=0.800 ← SELECTED
+  Candidate 2: id=15546563 3840x2160 dur=50s score=0.600
+  Candidate 3: id=4332085 4096x2160 dur=17s score=0.600
+  Candidate 4: id=10377082 1920x1080 dur=37s score=0.600
+  Candidate 5: id=6625561 3840x2160 dur=30s score=0.600
+  Candidate 6: id=5607993 1920x1080 dur=21s score=0.600
+  Candidate 7: id=14146687 3840x2160 dur=129s score=0.600
+  Candidate 8: id=28097890 3840x2160 dur=90s score=0.400
+  Candidate 9: id=27941813 3840x2160 dur=31s score=0.400
+  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
+-> Router selected: 'pexels' for query 'whale swimming alone'
+  Candidate 1: id=854344 1920x1080 dur=7s score=0.733 ← SELECTED
+  Candidate 2: id=5251673 1920x1080 dur=35s score=0.600
+  Candidate 3: id=7293893 1920x1080 dur=11s score=0.600
+  Candidate 4: id=2915051 3840x2160 dur=60s score=0.600
+  Candidate 5: id=7318087 1920x1080 dur=17s score=0.600
+  Candidate 6: id=4863640 3840x2160 dur=14s score=0.600
+  Candidate 7: id=4317415 3840x2160 dur=19s score=0.600
+  Candidate 8: id=5968015 1920x1080 dur=13s score=0.600
+  Candidate 9: id=6824938 3840x2160 dur=13s score=0.600
+  Candidate 10: id=32213508 1920x1080 dur=9s score=0.400
+-> Router selected: 'pexels' for query 'underwater sound waves primary shot'
+-> Cache MISS: 'whale migration aerial' — calling Pexels API
+  Candidate 1: id=11279748 1920x1080 dur=7s score=0.733 ← SELECTED
+  Candidate 2: id=11521069 3840x2160 dur=7s score=0.733
+  Candidate 3: id=5608046 1920x1080 dur=8s score=0.667
+  Candidate 4: id=15546563 3840x2160 dur=50s score=0.600
+  Candidate 5: id=36004277 3840x2160 dur=119s score=0.400
+  Candidate 6: id=29054057 1920x1080 dur=12s score=0.400
+  Candidate 7: id=31873891 3840x2160 dur=14s score=0.400
+  Candidate 8: id=28097890 3840x2160 dur=90s score=0.400
+  Candidate 9: id=27941813 3840x2160 dur=31s score=0.400
+  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
+-> Router selected: 'pexels' for query 'whale migration aerial'
+-> AssetLibrary diversity: penalty=0.15 for 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' — skipping reuse
+-> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
+-> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
+-> AssetLibrary diversity: penalty=0.15 for 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' — skipping reuse
+-> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
+-> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
+-> Cache MISS: 'whale dorsal fin primary shot' — calling Pexels API
+  Candidate 1: id=4332086 4096x2160 dur=4s score=1.000 ← SELECTED
+  Candidate 2: id=4326984 4096x2160 dur=7s score=0.850
+  Candidate 3: id=4571364 4096x2160 dur=7s score=0.850
+  Candidate 4: id=35763061 3840x2160 dur=5s score=0.750
+  Candidate 5: id=4332084 4096x2160 dur=20s score=0.600
+  Candidate 6: id=4332085 4096x2160 dur=17s score=0.600
+  Candidate 7: id=7102652 1920x1080 dur=28s score=0.600
+  Candidate 8: id=31873891 3840x2160 dur=14s score=0.400
+  Candidate 9: id=27941815 3840x2160 dur=82s score=0.400
+  Candidate 10: id=4520422 1920x1012 dur=3s score=0.000
+-> Router selected: 'pexels' for query 'whale dorsal fin primary shot'
+-> AssetLibrary diversity: penalty=0.30 for 'blue whale swimming' — skipping reuse
+-> Cache MISS: 'whale swimming alone' — calling Pexels API
+  Candidate 1: id=5608046 1920x1080 dur=8s score=0.800 ← SELECTED
+  Candidate 2: id=15546563 3840x2160 dur=50s score=0.600
+  Candidate 3: id=4332085 4096x2160 dur=17s score=0.600
+  Candidate 4: id=10377082 1920x1080 dur=37s score=0.600
+  Candidate 5: id=6625561 3840x2160 dur=30s score=0.600
+  Candidate 6: id=5607993 1920x1080 dur=21s score=0.600
+  Candidate 7: id=14146687 3840x2160 dur=129s score=0.600
+  Candidate 8: id=28097890 3840x2160 dur=90s score=0.400
+  Candidate 9: id=27941813 3840x2160 dur=31s score=0.400
+  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
+-> Router selected: 'pexels' for query 'whale swimming alone'
+-> AssetLibrary diversity: penalty=0.15 for 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' — skipping reuse
+-> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
+-> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
+-> Cache MISS: 'underwater hydrophone recording primary shot' — calling Pexels API
+  Candidate 1: id=8823292 3840x2160 dur=8s score=0.800 ← SELECTED
+  Candidate 2: id=8686153 1920x1080 dur=9s score=0.750
+  Candidate 3: id=36006201 3840x2160 dur=8s score=0.600
+  Candidate 4: id=8382683 4096x2160 dur=28s score=0.600
+  Candidate 5: id=8822982 3840x2160 dur=14s score=0.600
+  Candidate 6: id=11194812 1920x1080 dur=21s score=0.600
+  Candidate 7: id=8823131 3840x2160 dur=15s score=0.600
+  Candidate 8: id=8823625 3840x2160 dur=19s score=0.600
+  Candidate 9: id=36309931 3840x2160 dur=9s score=0.550
+  Candidate 10: id=35790681 3840x2160 dur=12s score=0.400
+-> Router selected: 'pexels' for query 'underwater hydrophone recording primary shot'
+-> AssetLibrary diversity: penalty=0.15 for 'blue whale swimming' — skipping reuse
+-> Cache MISS: 'whale swimming alone' — calling Pexels API
+  Candidate 1: id=5608046 1920x1080 dur=8s score=0.800 ← SELECTED
+  Candidate 2: id=15546563 3840x2160 dur=50s score=0.600
+  Candidate 3: id=4332085 4096x2160 dur=17s score=0.600
+  Candidate 4: id=10377082 1920x1080 dur=37s score=0.600
+  Candidate 5: id=6625561 3840x2160 dur=30s score=0.600
+  Candidate 6: id=5607993 1920x1080 dur=21s score=0.600
+  Candidate 7: id=14146687 3840x2160 dur=129s score=0.600
+  Candidate 8: id=28097890 3840x2160 dur=90s score=0.400
+  Candidate 9: id=27941813 3840x2160 dur=31s score=0.400
+  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
+-> Router selected: 'pexels' for query 'whale swimming alone'
+-> AssetLibrary diversity: penalty=0.15 for 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' — skipping reuse
+-> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
+-> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
+
+  [BeatDirector] Planning beats for scene 6...
+  [BeatDirector] Concept terms (10): ['whale swimming deep', 'ocean sonar waves', 'blue whale tail', 'underwater sound waves']...
+  [BeatDirector] 5 beats, 5 shots
+-> AssetLibrary diversity: penalty=0.30 for 'blue whale swimming primary shot' — skipping reuse
+-> Cache MISS: 'whale swimming deep primary shot' — calling Pexels API
+  Candidate 1: id=5608046 1920x1080 dur=8s score=0.800 ← SELECTED
+  Candidate 2: id=10377082 1920x1080 dur=37s score=0.600
+  Candidate 3: id=15546563 3840x2160 dur=50s score=0.600
+  Candidate 4: id=5607993 1920x1080 dur=21s score=0.600
+  Candidate 5: id=10377084 1920x1080 dur=29s score=0.600
+  Candidate 6: id=8906187 1920x1080 dur=25s score=0.600
+  Candidate 7: id=10377449 1920x1080 dur=29s score=0.600
+  Candidate 8: id=20601591 3840x2160 dur=16s score=0.600
+  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
+  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
+-> Router selected: 'pexels' for query 'whale swimming deep primary shot'
+-> AssetLibrary REUSE: 'whale swimming deep' similar to 'blue whale swimming' -> cache/video/scene_0_b0_s0.mp4
+-> Router selected: 'pexels' for query 'whale swimming deep'
+-> AssetLibrary diversity: penalty=0.15 for 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' — skipping reuse
+-> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
+-> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
+-> Cache MISS: 'ocean sonar waves primary shot' — calling Pexels API
+  Candidate 1: id=6815625 4481x2160 dur=26s score=0.600 ← SELECTED
+  Candidate 2: id=3859443 3840x2160 dur=30s score=0.600
+  Candidate 3: id=6659065 1920x1080 dur=28s score=0.600
+  Candidate 4: id=5476219 1920x1080 dur=48s score=0.600
+  Candidate 5: id=6815619 4481x2160 dur=22s score=0.600
+  Candidate 6: id=855003 1920x1080 dur=24s score=0.600
+  Candidate 7: id=33312510 3840x2160 dur=12s score=0.400
+  Candidate 8: id=35224011 2720x1530 dur=38s score=0.400
+  Candidate 9: id=33846248 3840x2160 dur=30s score=0.400
+  Candidate 10: id=34228902 3840x2160 dur=41s score=0.400
+-> Router selected: 'pexels' for query 'ocean sonar waves primary shot'
+-> AssetLibrary diversity: penalty=0.30 for 'blue whale swimming' — skipping reuse
+-> Cache MISS: 'whale swimming deep' — calling Pexels API
+  Candidate 1: id=15546563 3840x2160 dur=50s score=0.600 ← SELECTED
+  Candidate 2: id=10377082 1920x1080 dur=37s score=0.600
+  Candidate 3: id=5607993 1920x1080 dur=21s score=0.600
+  Candidate 4: id=10377084 1920x1080 dur=29s score=0.600
+  Candidate 5: id=6510690 1920x1080 dur=15s score=0.600
+  Candidate 6: id=10377449 1920x1080 dur=29s score=0.600
+  Candidate 7: id=8906187 1920x1080 dur=25s score=0.600
+  Candidate 8: id=20601591 3840x2160 dur=16s score=0.600
+  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
+  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
+-> Router selected: 'pexels' for query 'whale swimming deep'
+-> AssetLibrary diversity: penalty=0.15 for 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' — skipping reuse
+-> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
+-> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
+-> AssetLibrary REUSE: 'blue whale tail primary shot' similar to 'blue whale swimming primary shot' -> cache/video/scene_5_b1_s0.mp4
+-> Router selected: 'pexels' for query 'blue whale tail primary shot'
+-> AssetLibrary diversity: penalty=0.15 for 'blue whale swimming' — skipping reuse
+-> Cache MISS: 'whale swimming deep' — calling Pexels API
+  Candidate 1: id=15546563 3840x2160 dur=50s score=0.600 ← SELECTED
+  Candidate 2: id=10377082 1920x1080 dur=37s score=0.600
+  Candidate 3: id=5607993 1920x1080 dur=21s score=0.600
+  Candidate 4: id=10377084 1920x1080 dur=29s score=0.600
+  Candidate 5: id=6510690 1920x1080 dur=15s score=0.600
+  Candidate 6: id=10377449 1920x1080 dur=29s score=0.600
+  Candidate 7: id=8906187 1920x1080 dur=25s score=0.600
+  Candidate 8: id=20601591 3840x2160 dur=16s score=0.600
+  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
+  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
+-> Router selected: 'pexels' for query 'whale swimming deep'
+-> AssetLibrary diversity: penalty=0.15 for 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' — skipping reuse
+-> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
+-> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
+-> Cache MISS: 'underwater sound waves primary shot' — calling Pexels API
+  Candidate 1: id=854344 1920x1080 dur=7s score=0.850 ← SELECTED
+  Candidate 2: id=7293893 1920x1080 dur=11s score=0.650
+  Candidate 3: id=5251673 1920x1080 dur=35s score=0.600
+  Candidate 4: id=2915051 3840x2160 dur=60s score=0.600
+  Candidate 5: id=7318087 1920x1080 dur=17s score=0.600
+  Candidate 6: id=4863640 3840x2160 dur=14s score=0.600
+  Candidate 7: id=4317415 3840x2160 dur=19s score=0.600
+  Candidate 8: id=5968015 1920x1080 dur=13s score=0.600
+  Candidate 9: id=6824938 3840x2160 dur=13s score=0.600
+  Candidate 10: id=32213508 1920x1080 dur=9s score=0.550
+-> Router selected: 'pexels' for query 'underwater sound waves primary shot'
+-> AssetLibrary diversity: penalty=0.15 for 'blue whale swimming' — skipping reuse
+-> Cache MISS: 'whale swimming deep' — calling Pexels API
+  Candidate 1: id=15546563 3840x2160 dur=50s score=0.600 ← SELECTED
+  Candidate 2: id=10377082 1920x1080 dur=37s score=0.600
+  Candidate 3: id=5607993 1920x1080 dur=21s score=0.600
+  Candidate 4: id=10377084 1920x1080 dur=29s score=0.600
+  Candidate 5: id=6510690 1920x1080 dur=15s score=0.600
+  Candidate 6: id=10377449 1920x1080 dur=29s score=0.600
+  Candidate 7: id=8906187 1920x1080 dur=25s score=0.600
+  Candidate 8: id=20601591 3840x2160 dur=16s score=0.600
+  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
+  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
+-> Router selected: 'pexels' for query 'whale swimming deep'
+-> AssetLibrary diversity: penalty=0.15 for 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' — skipping reuse
+-> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
+-> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
+-> Cache MISS: 'marine research lab primary shot' — calling Pexels API
+  Candidate 1: id=3889037 3840x2160 dur=6s score=0.900 ← SELECTED
+  Candidate 2: id=3889032 3840x2160 dur=3s score=0.800
+  Candidate 3: id=12201155 1920x1080 dur=17s score=0.600
+  Candidate 4: id=8926572 1920x1080 dur=26s score=0.600
+  Candidate 5: id=34347520 3840x2160 dur=9s score=0.550
+  Candidate 6: id=34347511 3840x2160 dur=9s score=0.550
+  Candidate 7: id=34046691 1920x1080 dur=9s score=0.550
+  Candidate 8: id=34537922 1920x1080 dur=9s score=0.550
+  Candidate 9: id=34253986 1920x1080 dur=10s score=0.500
+  Candidate 10: id=33847767 3840x2160 dur=13s score=0.400
+-> Router selected: 'pexels' for query 'marine research lab primary shot'
+-> AssetLibrary diversity: penalty=0.15 for 'blue whale swimming' — skipping reuse
+-> Cache MISS: 'whale swimming deep' — calling Pexels API
+  Candidate 1: id=15546563 3840x2160 dur=50s score=0.600 ← SELECTED
+  Candidate 2: id=10377082 1920x1080 dur=37s score=0.600
+  Candidate 3: id=5607993 1920x1080 dur=21s score=0.600
+  Candidate 4: id=10377084 1920x1080 dur=29s score=0.600
+  Candidate 5: id=6510690 1920x1080 dur=15s score=0.600
+  Candidate 6: id=10377449 1920x1080 dur=29s score=0.600
+  Candidate 7: id=8906187 1920x1080 dur=25s score=0.600
+  Candidate 8: id=20601591 3840x2160 dur=16s score=0.600
+  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
+  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
+-> Router selected: 'pexels' for query 'whale swimming deep'
+-> AssetLibrary diversity: penalty=0.15 for 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' — skipping reuse
+-> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
+-> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
+
+  [BeatDirector] Planning beats for scene 7...
+  [BeatDirector] Concept terms (10): ['winter ocean waves', 'whale tail breaching', 'deep sea sonar', 'stormy ocean surface']...
+  [BeatDirector] 3 beats, 3 shots
+-> Cache MISS: 'winter ocean waves primary shot' — calling Pexels API
+
+  [BeatDirector] Planning beats for scene 8...
+  Candidate 1: id=30884246 3840x2160 dur=5s score=0.769 ← SELECTED
+  Candidate 2: id=30884729 3840x2160 dur=7s score=0.677
+  Candidate 3: id=6878141 3840x2160 dur=18s score=0.600
+  Candidate 4: id=15814518 1920x1080 dur=60s score=0.600
+  Candidate 5: id=19785090 2720x1530 dur=15s score=0.600
+  Candidate 6: id=19722743 3840x2160 dur=42s score=0.600
+  Candidate 7: id=6255498 4096x2160 dur=15s score=0.600
+  Candidate 8: id=6878244 3840x2160 dur=22s score=0.600
+  Candidate 9: id=29477440 3840x2160 dur=30s score=0.400
+  Candidate 10: id=30885365 3840x2160 dur=15s score=0.400
+-> Router selected: 'pexels' for query 'winter ocean waves primary shot'
+  [BeatDirector] Concept terms (10): ['whale swimming deep', 'ocean hydrophone recording', 'whale call underwater', 'ship sonar equipment']...
+  [BeatDirector] 3 beats, 3 shots
+-> AssetLibrary REUSE: 'whale swimming deep primary shot' similar to 'blue whale swimming primary shot' -> cache/video/scene_5_b1_s0.mp4
+-> Router selected: 'pexels' for query 'whale swimming deep primary shot'
+-> Already on disk: cache/video/scene_7_b0_s0.mp4
+    [BeatDirector] Shot accepted: primary shot for beat 0 (provider=pexels)
+-> AssetLibrary REUSE: 'whale tail breaching primary shot' similar to 'whale tail splash primary shot' -> cache/video/scene_1_b2_s0.mp4
+-> Router selected: 'pexels' for query 'whale tail breaching primary shot'
+-> AssetLibrary diversity: penalty=0.30 for 'whale swimming deep primary shot' — skipping reuse
+-> Cache MISS: 'whale swimming deep' — calling Pexels API
+-> Already on disk: cache/video/scene_7_b1_s0.mp4
+    [BeatDirector] Shot accepted: primary shot for beat 1 (provider=pexels)
+-> AssetLibrary REUSE: 'deep sea sonar primary shot' similar to 'deep sea microphone primary shot' -> cache/video/scene_2_b3_s0.mp4
+-> Router selected: 'pexels' for query 'deep sea sonar primary shot'
+  Candidate 1: id=15546563 3840x2160 dur=50s score=0.600 ← SELECTED
+  Candidate 2: id=10377082 1920x1080 dur=37s score=0.600
+  Candidate 3: id=5607993 1920x1080 dur=21s score=0.600
+  Candidate 4: id=10377084 1920x1080 dur=29s score=0.600
+  Candidate 5: id=6510690 1920x1080 dur=15s score=0.600
+  Candidate 6: id=10377449 1920x1080 dur=29s score=0.600
+  Candidate 7: id=8906187 1920x1080 dur=25s score=0.600
+  Candidate 8: id=20601591 3840x2160 dur=16s score=0.600
+  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
+  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
+-> Router selected: 'pexels' for query 'whale swimming deep'
+-> Downloading from Pexels…
+-> Saved: cache/video/scene_8_b0_s0.mp4
+    [BeatDirector] Shot accepted: primary shot for beat 0 (provider=pexels)
+-> AssetLibrary diversity: penalty=0.30 for 'hydrophone deep ocean primary shot' — skipping reuse
+-> Cache MISS: 'ocean hydrophone recording primary shot' — calling Pexels API
+  Candidate 1: id=8822835 3840x2160 dur=11s score=0.692 ← SELECTED
+  Candidate 2: id=8822799 3840x2160 dur=12s score=0.646
+  Candidate 3: id=8824209 3840x2160 dur=12s score=0.646
+  Candidate 4: id=36006201 3840x2160 dur=8s score=0.630
+  Candidate 5: id=8382683 4096x2160 dur=28s score=0.600
+  Candidate 6: id=8822572 3840x2160 dur=15s score=0.600
+  Candidate 7: id=19883929 1920x1080 dur=38s score=0.600
+  Candidate 8: id=7732120 2720x1530 dur=24s score=0.600
+  Candidate 9: id=18078999 3840x2160 dur=45s score=0.600
+  Candidate 10: id=8822982 3840x2160 dur=14s score=0.600
+-> Router selected: 'pexels' for query 'ocean hydrophone recording primary shot'
+-> Cache MISS: 'winter ocean waves' — calling Pexels API
+  Candidate 1: id=30884246 3840x2160 dur=5s score=0.769 ← SELECTED
+  Candidate 2: id=30885562 3840x2160 dur=5s score=0.769
+  Candidate 3: id=30884234 3840x2160 dur=5s score=0.769
+  Candidate 4: id=30884729 3840x2160 dur=7s score=0.677
+  Candidate 5: id=16502834 3840x2160 dur=57s score=0.600
+  Candidate 6: id=19722743 3840x2160 dur=42s score=0.600
+  Candidate 7: id=30885361 3840x2160 dur=3s score=0.554
+  Candidate 8: id=30843212 3840x2160 dur=10s score=0.538
+  Candidate 9: id=30885365 3840x2160 dur=15s score=0.400
+  Candidate 10: id=28043979 1920x1080 dur=19s score=0.400
+-> Router selected: 'pexels' for query 'winter ocean waves'
+-> AssetLibrary diversity: penalty=0.30 for 'whale swimming deep' — skipping reuse
+-> Cache HIT: 'whale swimming deep' → cache/video/scene_8_b0_s0.mp4
+-> Router selected: 'pexels' for query 'whale swimming deep'
+-> AssetLibrary REUSE: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' similar to 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' -> cache/video/scene_5_b0_s0.mp4
+-> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
+-> AssetLibrary diversity: penalty=0.30 for 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' — skipping reuse
+-> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
+-> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
+-> AssetLibrary REUSE: 'whale call underwater primary shot' similar to 'blue whale underwater primary shot' -> cache/video/scene_1_b0_s0.mp4
+-> Router selected: 'pexels' for query 'whale call underwater primary shot'
+-> Downloading from Pexels…
+-> Saved: cache/video/scene_8_b2_s0.mp4
+    [BeatDirector] Shot accepted: primary shot for beat 2 (provider=pexels)
+
+  [BeatDirector] Planning beats for scene 9...
+  [BeatDirector] Concept terms (10): ['whale swimming deep', 'ocean waves dark', 'underwater sound waves', 'lighthouse beam night']...
+  [BeatDirector] 4 beats, 4 shots
+-> AssetLibrary diversity: penalty=0.30 for 'whale swimming deep primary shot' — skipping reuse
+-> Cache MISS: 'whale swimming deep primary shot' — calling Pexels API
+  Candidate 1: id=5608046 1920x1080 dur=8s score=0.800 ← SELECTED
+  Candidate 2: id=10377082 1920x1080 dur=37s score=0.600
+  Candidate 3: id=15546563 3840x2160 dur=50s score=0.600
+  Candidate 4: id=5607993 1920x1080 dur=21s score=0.600
+  Candidate 5: id=10377084 1920x1080 dur=29s score=0.600
+  Candidate 6: id=8906187 1920x1080 dur=25s score=0.600
+  Candidate 7: id=10377449 1920x1080 dur=29s score=0.600
+  Candidate 8: id=20601591 3840x2160 dur=16s score=0.600
+  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
+  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
+-> Router selected: 'pexels' for query 'whale swimming deep primary shot'
+-> AssetLibrary diversity: penalty=0.15 for 'whale swimming deep' — skipping reuse
+-> Cache HIT: 'whale swimming deep' → cache/video/scene_8_b0_s0.mp4
+-> Router selected: 'pexels' for query 'whale swimming deep'
+-> AssetLibrary diversity: penalty=0.30 for 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' — skipping reuse
+-> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
+-> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
+-> Downloading from Pexels…
+-> Saved: cache/video/scene_9_b0_s0.mp4
+    [BeatDirector] Shot accepted: primary shot for beat 0 (provider=pexels)
+-> Cache MISS: 'ocean waves dark primary shot' — calling Pexels API
+  Candidate 1: id=5668613 4096x2160 dur=8s score=0.800 ← SELECTED
+  Candidate 2: id=11028763 1920x1080 dur=20s score=0.600
+  Candidate 3: id=11287848 3840x2160 dur=30s score=0.600
+  Candidate 4: id=10234379 3840x2160 dur=20s score=0.600
+  Candidate 5: id=4787456 2720x1530 dur=24s score=0.600
+  Candidate 6: id=32844046 1920x1080 dur=10s score=0.500
+  Candidate 7: id=31202645 4096x2160 dur=60s score=0.400
+  Candidate 8: id=37259189 1920x1080 dur=59s score=0.400
+  Candidate 9: id=32506501 2048x1080 dur=59s score=0.400
+  Candidate 10: id=32864351 1920x1080 dur=30s score=0.400
+-> Router selected: 'pexels' for query 'ocean waves dark primary shot'
+-> Downloading from Pexels…
+-> Saved: cache/video/scene_9_b1_s0.mp4
+    [BeatDirector] Shot accepted: primary shot for beat 1 (provider=pexels)
+-> Cache MISS: 'underwater sound waves primary shot' — calling Pexels API
+  Candidate 1: id=854344 1920x1080 dur=7s score=0.850 ← SELECTED
+  Candidate 2: id=7293893 1920x1080 dur=11s score=0.650
+  Candidate 3: id=5251673 1920x1080 dur=35s score=0.600
+  Candidate 4: id=2915051 3840x2160 dur=60s score=0.600
+  Candidate 5: id=7318087 1920x1080 dur=17s score=0.600
+  Candidate 6: id=4863640 3840x2160 dur=14s score=0.600
+  Candidate 7: id=4317415 3840x2160 dur=19s score=0.600
+  Candidate 8: id=5968015 1920x1080 dur=13s score=0.600
+  Candidate 9: id=6824938 3840x2160 dur=13s score=0.600
+  Candidate 10: id=32213508 1920x1080 dur=9s score=0.550
+-> Router selected: 'pexels' for query 'underwater sound waves primary shot'
+-> AssetLibrary diversity: penalty=0.15 for 'whale swimming deep' — skipping reuse
+-> Cache HIT: 'whale swimming deep' → cache/video/scene_8_b0_s0.mp4
+-> Router selected: 'pexels' for query 'whale swimming deep'
+-> AssetLibrary diversity: penalty=0.30 for 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' — skipping reuse
+-> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
+-> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
+-> Cache MISS: 'lighthouse beam night primary shot' — calling Pexels API
+  Candidate 1: id=19010572 1920x1080 dur=6s score=0.800 ← SELECTED
+  Candidate 2: id=6256795 4096x2160 dur=20s score=0.600
+  Candidate 3: id=19063801 3840x2160 dur=24s score=0.600
+  Candidate 4: id=13306927 1920x1080 dur=37s score=0.600
+  Candidate 5: id=8515272 3840x2160 dur=25s score=0.600
+  Candidate 6: id=15824279 1920x1080 dur=15s score=0.600
+  Candidate 7: id=2409572 3840x2160 dur=32s score=0.600
+  Candidate 8: id=8321082 1920x1080 dur=40s score=0.600
+  Candidate 9: id=1470714 1920x1080 dur=21s score=0.600
+  Candidate 10: id=34948069 3840x2160 dur=72s score=0.400
+-> Router selected: 'pexels' for query 'lighthouse beam night primary shot'
+-> AssetLibrary diversity: penalty=0.15 for 'whale swimming deep' — skipping reuse
+-> Cache HIT: 'whale swimming deep' → cache/video/scene_8_b0_s0.mp4
+-> Router selected: 'pexels' for query 'whale swimming deep'
+-> AssetLibrary diversity: penalty=0.30 for 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' — skipping reuse
+-> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
+-> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
+
+==================================================
+  Storyboard Validation...
+  ⚠ Storyboard issues found:
+    - Diversity: Scene 1, beat 4: duplicate detected: same asset nasa/deep space telescope was already used in scene 0
+    - Diversity: Scene 2, beat 6: duplicate detected: same asset nasa/solar system planets was already used in scene 2
+    - Diversity: Scene 3, beat 2: duplicate detected: same asset nasa/galaxy nebula stars was already used in scene 0
+    - Diversity: Scene 4, beat 1: duplicate detected: same asset nasa/deep space telescope was already used in scene 0
+    - Diversity: Scene 4, beat 2: duplicate detected: same asset nasa/Milky Way galaxy was already used in scene 2
+  (Continuing with best effort)
+
+==================================================
+  Beat Director Results:
+    Shots requested: 43
+    Shots accepted:  43
+    Queries tried:   104
+    Gate rejections: 87
+    Fallbacks:       26
+    Success rate:    100.0%
+==================================================
+
+  [vector] rendering 3 beats (algo, per-video, label='the_52_hertz_whale__the_loneliest_voice_in_t') ...
+  [vector] 3/3 beats ready (643.4s)
+  [manim] Injected generic_PulseMotif.mp4 into scene 0 (7.0s)
+  [manim] Injected generic_GrowingBars.mp4 into scene 1 (7.0s)
+  [manim] Injected generic_CycleLoop.mp4 into scene 9 (7.0s)
+  [animation] manim x3, vector x0
+  Shots: 43 | Avg 4.1s | Providers: {'manim': 3, 'nasa': 26, 'pexels': 14} | Fallbacks: 0
+
+[8b/16] AI IMAGE GENERATION (NIM primary → Pollinations fallback, parallel)
+  [AI] injected golden_record into scene 8 (6.0s)
+  Generated 1, injected 1, semantic-injected 0 (0.0s)
+  !! narrator unavailable (FISH_API_KEY not set — cannot use Fish Audio) — locking chatterbox fallback for the WHOLE video
+[chatterbox] starting persistent worker (model load ~17s)...
+  [chatterbox] 13.8s audio in 165.2s (ex=0.5, cfg=0.28)
+  [chatterbox] 9.8s audio in 118.0s (ex=0.48, cfg=0.31)
+  [chatterbox] 12.8s audio in 154.9s (ex=0.5, cfg=0.32)
+  [chatterbox] 7.4s audio in 92.4s (ex=0.44, cfg=0.36)
+  [chatterbox] 9.6s audio in 117.1s (ex=0.5, cfg=0.32)
+  [chatterbox] 7.5s audio in 97.0s (ex=0.48, cfg=0.31)
+  [chatterbox] 8.0s audio in 99.0s (ex=0.52, cfg=0.3)
+  [chatterbox] 6.4s audio in 86.4s (ex=0.52, cfg=0.31)
+  [chatterbox] 7.0s audio in 89.5s (ex=0.48, cfg=0.34)
+  [chatterbox] 7.3s audio in 98.0s (ex=0.42, cfg=0.38)
+  [audio-qa] scene 1: peak -0.0 dB -> -3 dB headroom ✓
+  [audio-qa] scene 2: peak -0.7 dB -> -3 dB headroom ✓
+  [audio-qa] scene 3: peak -0.7 dB -> -3 dB headroom ✓
+  [audio-qa] scene 4: peak -1.4 dB -> -3 dB headroom ✓
+  [audio-qa] scene 5: peak -0.5 dB -> -3 dB headroom ✓
+  [audio-qa] scene 7: peak -0.3 dB -> -3 dB headroom ✓
+  [audio-qa] scene 8: peak -1.2 dB -> -3 dB headroom ✓
+[timeline] Wrote results/the_52_hertz_whale__the_loneliest_voice_in_t/timeline.json
+  !! PRE-RENDER GATE BLOCKED: ['shot_hold', 'resolution_headroom']
+
+[12/16] RENDERING → results/the_52_hertz_whale__the_loneliest_voice_in_t/the_52_hertz_whale__the_loneliest_voice_in_t_v1.mp4
+  [subs] 195 subtitle clips (10 scenes)
+-> Adding 195 animated subtitle clips...
+Rendering results/the_52_hertz_whale__the_loneliest_voice_in_t/the_52_hertz_whale__the_loneliest_voice_in_t_v1.mp4 on CPU...
+Moviepy - Building video results/the_52_hertz_whale__the_loneliest_voice_in_t/the_52_hertz_whale__the_loneliest_voice_in_t_v1.mp4.
+MoviePy - Writing audio in the_52_hertz_whale__the_loneliest_voice_in_t_v1TEMP_MPY_wvf_snd.mp4
+chunk:   0%|          | 0/1976 [00:00<?, ?it/s, now=None]chunk:   6%|▌         | 109/1976 [00:00<00:04, 445.30it/s, now=None]chunk:   8%|▊         | 154/1976 [00:00<00:04, 394.98it/s, now=None]chunk:  10%|█         | 207/1976 [00:00<00:04, 432.36it/s, now=None]chunk:  13%|█▎        | 251/1976 [00:00<00:04, 411.96it/s, now=None]chunk:  15%|█▍        | 293/1976 [00:00<00:04, 399.18it/s, now=None]chunk:  17%|█▋        | 335/1976 [00:00<00:04, 402.58it/s, now=None]chunk:  19%|█▉        | 376/1976 [00:00<00:04, 369.84it/s, now=None]chunk:  21%|██▏       | 422/1976 [00:01<00:03, 394.64it/s, now=None]chunk:  23%|██▎       | 463/1976 [00:01<00:03, 384.98it/s, now=None]chunk:  25%|██▌       | 502/1976 [00:01<00:04, 348.75it/s, now=None]chunk:  27%|██▋       | 538/1976 [00:01<00:04, 338.71it/s, now=None]chunk:  29%|██▉       | 573/1976 [00:01<00:04, 329.15it/s, now=None]chunk:  31%|███       | 607/1976 [00:01<00:04, 319.25it/s, now=None]chunk:  32%|███▏      | 640/1976 [00:01<00:04, 317.26it/s, now=None]chunk:  34%|███▍      | 679/1976 [00:01<00:03, 328.81it/s, now=None]chunk:  37%|███▋      | 731/1976 [00:01<00:03, 380.34it/s, now=None]chunk:  39%|███▉      | 770/1976 [00:02<00:03, 378.10it/s, now=None]chunk:  41%|████      | 809/1976 [00:02<00:03, 359.25it/s, now=None]chunk:  43%|████▎     | 846/1976 [00:02<00:03, 354.45it/s, now=None]chunk:  45%|████▍     | 887/1976 [00:02<00:03, 359.39it/s, now=None]chunk:  47%|████▋     | 924/1976 [00:02<00:02, 359.54it/s, now=None]chunk:  49%|████▊     | 961/1976 [00:02<00:02, 341.78it/s, now=None]chunk:  51%|█████     | 999/1976 [00:02<00:02, 344.03it/s, now=None]chunk:  53%|█████▎    | 1043/1976 [00:02<00:02, 355.18it/s, now=None]chunk:  55%|█████▍    | 1083/1976 [00:02<00:02, 356.64it/s, now=None]chunk:  57%|█████▋    | 1127/1976 [00:03<00:02, 377.85it/s, now=None]chunk:  59%|█████▉    | 1165/1976 [00:03<00:02, 369.29it/s, now=None]chunk:  61%|██████    | 1203/1976 [00:03<00:02, 329.10it/s, now=None]chunk:  63%|██████▎   | 1243/1976 [00:03<00:02, 345.14it/s, now=None]chunk:  65%|██████▍   | 1283/1976 [00:03<00:01, 354.83it/s, now=None]chunk:  67%|██████▋   | 1327/1976 [00:03<00:01, 376.20it/s, now=None]chunk:  69%|██████▉   | 1367/1976 [00:03<00:01, 378.05it/s, now=None]chunk:  71%|███████   | 1406/1976 [00:03<00:01, 367.77it/s, now=None]chunk:  73%|███████▎  | 1444/1976 [00:03<00:01, 357.45it/s, now=None]chunk:  76%|███████▌  | 1499/1976 [00:04<00:01, 406.97it/s, now=None]chunk:  78%|███████▊  | 1541/1976 [00:04<00:01, 405.18it/s, now=None]chunk:  80%|████████  | 1582/1976 [00:04<00:01, 385.07it/s, now=None]chunk:  82%|████████▏ | 1621/1976 [00:04<00:00, 357.05it/s, now=None]chunk:  84%|████████▍ | 1658/1976 [00:04<00:00, 348.33it/s, now=None]chunk:  86%|████████▌ | 1694/1976 [00:04<00:00, 338.22it/s, now=None]chunk:  88%|████████▊ | 1729/1976 [00:04<00:00, 337.14it/s, now=None]chunk:  89%|████████▉ | 1767/1976 [00:04<00:00, 332.17it/s, now=None]chunk:  91%|█████████▏| 1807/1976 [00:04<00:00, 337.06it/s, now=None]chunk:  93%|█████████▎| 1843/1976 [00:05<00:00, 334.81it/s, now=None]chunk:  95%|█████████▌| 1887/1976 [00:05<00:00, 352.44it/s, now=None]chunk:  98%|█████████▊| 1932/1976 [00:05<00:00, 379.07it/s, now=None]chunk: 100%|█████████▉| 1971/1976 [00:05<00:00, 365.71it/s, now=None]                                                                     MoviePy - Done.
+Moviepy - Writing video results/the_52_hertz_whale__the_loneliest_voice_in_t/the_52_hertz_whale__the_loneliest_voice_in_t_v1.mp4
+
+t:   0%|          | 0/2688 [00:00<?, ?it/s, now=None]t:   0%|          | 5/2688 [00:00<01:00, 44.63it/s, now=None]t:   0%|          | 10/2688 [00:00<01:06, 40.38it/s, now=None]t:   1%|          | 15/2688 [00:00<01:10, 37.97it/s, now=None]t:   1%|          | 19/2688 [00:00<01:10, 38.00it/s, now=None]t:   1%|          | 23/2688 [00:00<01:11, 37.36it/s, now=None]t:   1%|          | 27/2688 [00:00<01:10, 37.76it/s, now=None]t:   1%|          | 31/2688 [00:00<01:10, 37.87it/s, now=None]t:   1%|▏         | 35/2688 [00:00<01:10, 37.89it/s, now=None]t:   1%|▏         | 39/2688 [00:01<01:11, 36.94it/s, now=None]t:   2%|▏         | 43/2688 [00:01<01:13, 36.16it/s, now=None]t:   2%|▏         | 47/2688 [00:01<01:18, 33.65it/s, now=None]t:   2%|▏         | 51/2688 [00:01<01:18, 33.53it/s, now=None]t:   2%|▏         | 55/2688 [00:01<01:19, 33.13it/s, now=None]t:   2%|▏         | 59/2688 [00:01<01:19, 32.92it/s, now=None]t:   2%|▏         | 63/2688 [00:01<01:18, 33.26it/s, now=None]t:   2%|▏         | 67/2688 [00:01<01:17, 33.82it/s, now=None]t:   3%|▎         | 71/2688 [00:02<01:17, 33.79it/s, now=None]t:   3%|▎         | 75/2688 [00:02<01:16, 34.05it/s, now=None]t:   3%|▎         | 79/2688 [00:02<01:17, 33.86it/s, now=None]t:   3%|▎         | 83/2688 [00:02<01:15, 34.66it/s, now=None]t:   3%|▎         | 87/2688 [00:02<01:12, 35.75it/s, now=None]t:   3%|▎         | 91/2688 [00:02<01:10, 36.75it/s, now=None]t:   4%|▎         | 95/2688 [00:02<01:09, 37.44it/s, now=None]t:   4%|▎         | 99/2688 [00:02<01:09, 37.25it/s, now=None]t:   4%|▍         | 103/2688 [00:02<01:12, 35.43it/s, now=None]t:   4%|▍         | 107/2688 [00:03<01:16, 33.66it/s, now=None]t:   4%|▍         | 111/2688 [00:03<01:15, 34.36it/s, now=None]t:   4%|▍         | 115/2688 [00:03<01:15, 34.18it/s, now=None]t:   4%|▍         | 119/2688 [00:03<01:15, 34.25it/s, now=None]t:   5%|▍         | 123/2688 [00:03<01:13, 35.05it/s, now=None]t:   5%|▍         | 127/2688 [00:03<01:16, 33.53it/s, now=None]t:   5%|▍         | 131/2688 [00:03<01:22, 30.86it/s, now=None]t:   5%|▌         | 135/2688 [00:03<01:22, 31.13it/s, now=None]t:   5%|▌         | 139/2688 [00:04<01:21, 31.23it/s, now=None]t:   5%|▌         | 143/2688 [00:04<01:20, 31.77it/s, now=None]t:   5%|▌         | 147/2688 [00:04<01:21, 30.99it/s, now=None]t:   6%|▌         | 151/2688 [00:04<01:22, 30.92it/s, now=None]t:   6%|▌         | 155/2688 [00:04<01:17, 32.87it/s, now=None]t:   6%|▌         | 159/2688 [00:04<01:14, 33.88it/s, now=None]t:   6%|▌         | 164/2688 [00:04<01:11, 35.25it/s, now=None]t:   6%|▋         | 168/2688 [00:04<01:13, 34.51it/s, now=None]t:   6%|▋         | 172/2688 [00:05<01:17, 32.35it/s, now=None]t:   7%|▋         | 176/2688 [00:05<01:19, 31.56it/s, now=None]t:   7%|▋         | 180/2688 [00:05<01:17, 32.39it/s, now=None]t:   7%|▋         | 184/2688 [00:05<01:20, 31.03it/s, now=None]t:   7%|▋         | 188/2688 [00:05<01:19, 31.57it/s, now=None]t:   7%|▋         | 192/2688 [00:05<01:19, 31.38it/s, now=None]t:   7%|▋         | 196/2688 [00:05<01:20, 30.93it/s, now=None]t:   7%|▋         | 200/2688 [00:05<01:15, 32.98it/s, now=None]t:   8%|▊         | 205/2688 [00:06<01:11, 34.86it/s, now=None]t:   8%|▊         | 209/2688 [00:06<01:10, 35.19it/s, now=None]t:   8%|▊         | 214/2688 [00:06<01:07, 36.47it/s, now=None]t:   8%|▊         | 218/2688 [00:06<01:07, 36.63it/s, now=None]t:   8%|▊         | 222/2688 [00:06<01:06, 36.89it/s, now=None]t:   8%|▊         | 226/2688 [00:06<01:24, 29.00it/s, now=None]t:   9%|▊         | 230/2688 [00:06<01:19, 30.82it/s, now=None]t:   9%|▊         | 234/2688 [00:06<01:22, 29.69it/s, now=None]t:   9%|▉         | 238/2688 [00:07<01:31, 26.77it/s, now=None]t:   9%|▉         | 242/2688 [00:07<01:30, 26.93it/s, now=None]t:   9%|▉         | 245/2688 [00:07<01:28, 27.53it/s, now=None]t:   9%|▉         | 249/2688 [00:07<01:25, 28.56it/s, now=None]t:   9%|▉         | 252/2688 [00:07<01:28, 27.43it/s, now=None]t:  10%|▉         | 256/2688 [00:07<01:22, 29.56it/s, now=None]t:  10%|▉         | 260/2688 [00:07<01:20, 30.26it/s, now=None]t:  10%|▉         | 264/2688 [00:07<01:16, 31.49it/s, now=None]t:  10%|▉         | 268/2688 [00:08<01:15, 31.90it/s, now=None]t:  10%|█         | 272/2688 [00:08<01:13, 32.66it/s, now=None]t:  10%|█         | 276/2688 [00:08<01:13, 32.86it/s, now=None]t:  10%|█         | 280/2688 [00:08<01:27, 27.61it/s, now=None]t:  11%|█         | 283/2688 [00:08<01:39, 24.29it/s, now=None]t:  11%|█         | 286/2688 [00:08<01:35, 25.06it/s, now=None]t:  11%|█         | 290/2688 [00:08<01:26, 27.74it/s, now=None]t:  11%|█         | 294/2688 [00:09<01:21, 29.24it/s, now=None]t:  11%|█         | 298/2688 [00:09<01:18, 30.35it/s, now=None]t:  11%|█         | 302/2688 [00:09<01:17, 30.74it/s, now=None]t:  11%|█▏        | 306/2688 [00:09<01:13, 32.25it/s, now=None]t:  12%|█▏        | 310/2688 [00:09<01:19, 29.81it/s, now=None]t:  12%|█▏        | 314/2688 [00:09<01:17, 30.56it/s, now=None]t:  12%|█▏        | 318/2688 [00:09<01:15, 31.37it/s, now=None]t:  12%|█▏        | 322/2688 [00:09<01:12, 32.69it/s, now=None]t:  12%|█▏        | 326/2688 [00:10<01:14, 31.66it/s, now=None]t:  12%|█▏        | 330/2688 [00:10<01:12, 32.54it/s, now=None]t:  12%|█▏        | 334/2688 [00:10<01:09, 33.82it/s, now=None]t:  13%|█▎        | 338/2688 [00:10<01:10, 33.42it/s, now=None]t:  13%|█▎        | 342/2688 [00:10<01:10, 33.27it/s, now=None]t:  13%|█▎        | 346/2688 [00:10<01:08, 34.35it/s, now=None]t:  13%|█▎        | 351/2688 [00:10<01:02, 37.17it/s, now=None]t:  13%|█▎        | 355/2688 [00:10<01:02, 37.41it/s, now=None]t:  13%|█▎        | 359/2688 [00:10<01:02, 37.31it/s, now=None]t:  14%|█▎        | 363/2688 [00:11<01:02, 36.94it/s, now=None]t:  14%|█▎        | 367/2688 [00:11<01:02, 36.98it/s, now=None]t:  14%|█▍        | 371/2688 [00:11<01:02, 36.89it/s, now=None]t:  14%|█▍        | 375/2688 [00:11<01:03, 36.27it/s, now=None]t:  14%|█▍        | 379/2688 [00:11<01:02, 37.03it/s, now=None]t:  14%|█▍        | 383/2688 [00:11<01:02, 36.66it/s, now=None]t:  14%|█▍        | 387/2688 [00:11<01:02, 36.92it/s, now=None]t:  15%|█▍        | 391/2688 [00:11<01:01, 37.64it/s, now=None]t:  15%|█▍        | 395/2688 [00:11<01:02, 36.79it/s, now=None]t:  15%|█▍        | 399/2688 [00:12<01:07, 34.07it/s, now=None]t:  15%|█▍        | 403/2688 [00:12<01:14, 30.64it/s, now=None]t:  15%|█▌        | 407/2688 [00:12<01:16, 29.92it/s, now=None]t:  15%|█▌        | 411/2688 [00:12<01:17, 29.49it/s, now=None]t:  15%|█▌        | 415/2688 [00:12<01:26, 26.41it/s, now=None]t:  16%|█▌        | 419/2688 [00:12<01:26, 26.35it/s, now=None]t:  16%|█▌        | 422/2688 [00:12<01:30, 25.17it/s, now=None]t:  16%|█▌        | 425/2688 [00:13<01:33, 24.13it/s, now=None]t:  16%|█▌        | 428/2688 [00:13<01:30, 24.88it/s, now=None]t:  16%|█▌        | 431/2688 [00:13<01:29, 25.34it/s, now=None]t:  16%|█▌        | 435/2688 [00:13<01:23, 27.13it/s, now=None]t:  16%|█▋        | 439/2688 [00:13<01:18, 28.55it/s, now=None]t:  16%|█▋        | 443/2688 [00:13<01:16, 29.41it/s, now=None]t:  17%|█▋        | 447/2688 [00:13<01:14, 30.05it/s, now=None]t:  17%|█▋        | 451/2688 [00:13<01:12, 31.07it/s, now=None]t:  17%|█▋        | 455/2688 [00:14<01:11, 31.10it/s, now=None]t:  17%|█▋        | 459/2688 [00:14<01:07, 32.87it/s, now=None]t:  17%|█▋        | 463/2688 [00:14<01:04, 34.46it/s, now=None]t:  17%|█▋        | 467/2688 [00:14<01:01, 35.82it/s, now=None]t:  18%|█▊        | 471/2688 [00:14<01:03, 35.16it/s, now=None]t:  18%|█▊        | 475/2688 [00:14<01:04, 34.39it/s, now=None]t:  18%|█▊        | 479/2688 [00:14<01:04, 34.44it/s, now=None]t:  18%|█▊        | 483/2688 [00:14<01:04, 34.12it/s, now=None]t:  18%|█▊        | 487/2688 [00:14<01:03, 34.50it/s, now=None]t:  18%|█▊        | 491/2688 [00:15<01:02, 34.96it/s, now=None]t:  18%|█▊        | 495/2688 [00:15<01:00, 36.04it/s, now=None]t:  19%|█▊        | 499/2688 [00:15<01:00, 36.36it/s, now=None]t:  19%|█▊        | 503/2688 [00:15<01:00, 36.11it/s, now=None]t:  19%|█▉        | 507/2688 [00:15<01:02, 35.09it/s, now=None]t:  19%|█▉        | 511/2688 [00:15<01:01, 35.19it/s, now=None]t:  19%|█▉        | 515/2688 [00:15<01:01, 35.05it/s, now=None]t:  19%|█▉        | 519/2688 [00:15<01:03, 34.03it/s, now=None]t:  19%|█▉        | 523/2688 [00:16<01:04, 33.37it/s, now=None]t:  20%|█▉        | 527/2688 [00:16<01:01, 34.88it/s, now=None]t:  20%|█▉        | 531/2688 [00:16<00:59, 36.12it/s, now=None]t:  20%|█▉        | 535/2688 [00:16<00:58, 36.63it/s, now=None]t:  20%|██        | 539/2688 [00:16<00:58, 36.99it/s, now=None]t:  20%|██        | 544/2688 [00:16<00:54, 39.52it/s, now=None]t:  20%|██        | 550/2688 [00:16<00:49, 43.22it/s, now=None]t:  21%|██        | 555/2688 [00:16<00:48, 43.81it/s, now=None]t:  21%|██        | 560/2688 [00:16<00:46, 45.53it/s, now=None]t:  21%|██        | 565/2688 [00:16<00:46, 45.39it/s, now=None]t:  21%|██        | 570/2688 [00:17<00:45, 46.23it/s, now=None]t:  21%|██▏       | 575/2688 [00:17<00:45, 46.54it/s, now=None]t:  22%|██▏       | 581/2688 [00:17<00:44, 47.00it/s, now=None]t:  22%|██▏       | 586/2688 [00:17<00:44, 47.54it/s, now=None]t:  22%|██▏       | 591/2688 [00:17<00:45, 46.50it/s, now=None]t:  22%|██▏       | 597/2688 [00:17<00:44, 47.49it/s, now=None]t:  22%|██▏       | 602/2688 [00:17<00:43, 47.49it/s, now=None]t:  23%|██▎       | 607/2688 [00:17<00:44, 46.73it/s, now=None]t:  23%|██▎       | 612/2688 [00:17<00:44, 47.15it/s, now=None]t:  23%|██▎       | 617/2688 [00:18<00:43, 47.13it/s, now=None]t:  23%|██▎       | 622/2688 [00:18<00:44, 46.50it/s, now=None]t:  23%|██▎       | 628/2688 [00:18<00:43, 47.90it/s, now=None]t:  24%|██▎       | 634/2688 [00:18<00:42, 48.28it/s, now=None]t:  24%|██▍       | 639/2688 [00:18<00:42, 47.93it/s, now=None]t:  24%|██▍       | 644/2688 [00:18<00:42, 47.66it/s, now=None]t:  24%|██▍       | 649/2688 [00:18<00:43, 47.07it/s, now=None]t:  24%|██▍       | 654/2688 [00:18<00:44, 46.14it/s, now=None]t:  25%|██▍       | 659/2688 [00:18<00:43, 47.08it/s, now=None]t:  25%|██▍       | 664/2688 [00:19<00:46, 43.79it/s, now=None]t:  25%|██▍       | 669/2688 [00:19<00:48, 41.93it/s, now=None]t:  25%|██▌       | 674/2688 [00:19<00:52, 38.64it/s, now=None]t:  25%|██▌       | 678/2688 [00:19<00:53, 37.71it/s, now=None]t:  25%|██▌       | 682/2688 [00:19<00:52, 38.21it/s, now=None]t:  26%|██▌       | 686/2688 [00:19<00:53, 37.35it/s, now=None]t:  26%|██▌       | 691/2688 [00:19<00:51, 38.70it/s, now=None]t:  26%|██▌       | 695/2688 [00:19<00:51, 38.35it/s, now=None]t:  26%|██▌       | 699/2688 [00:20<00:52, 38.02it/s, now=None]t:  26%|██▌       | 704/2688 [00:20<00:52, 37.72it/s, now=None]t:  26%|██▋       | 708/2688 [00:20<00:52, 37.86it/s, now=None]t:  27%|██▋       | 713/2688 [00:20<00:49, 39.97it/s, now=None]t:  27%|██▋       | 718/2688 [00:20<00:48, 40.40it/s, now=None]t:  27%|██▋       | 723/2688 [00:20<00:50, 38.93it/s, now=None]t:  27%|██▋       | 728/2688 [00:20<00:48, 40.40it/s, now=None]t:  27%|██▋       | 733/2688 [00:20<00:48, 40.11it/s, now=None]t:  27%|██▋       | 738/2688 [00:21<00:47, 40.72it/s, now=None]t:  28%|██▊       | 743/2688 [00:21<00:47, 41.24it/s, now=None]t:  28%|██▊       | 748/2688 [00:21<00:47, 40.91it/s, now=None]t:  28%|██▊       | 753/2688 [00:21<00:45, 42.42it/s, now=None]t:  28%|██▊       | 758/2688 [00:21<00:46, 41.19it/s, now=None]t:  28%|██▊       | 763/2688 [00:21<00:48, 39.48it/s, now=None]t:  29%|██▊       | 767/2688 [00:21<00:50, 38.25it/s, now=None]t:  29%|██▊       | 772/2688 [00:21<00:47, 40.29it/s, now=None]t:  29%|██▉       | 777/2688 [00:22<00:57, 33.47it/s, now=None]t:  29%|██▉       | 781/2688 [00:22<00:55, 34.63it/s, now=None]t:  29%|██▉       | 785/2688 [00:22<00:54, 34.91it/s, now=None]t:  29%|██▉       | 789/2688 [00:22<00:53, 35.68it/s, now=None]t:  30%|██▉       | 793/2688 [00:22<00:54, 34.93it/s, now=None]t:  30%|██▉       | 797/2688 [00:22<00:54, 34.39it/s, now=None]t:  30%|██▉       | 801/2688 [00:22<00:59, 31.75it/s, now=None]t:  30%|██▉       | 805/2688 [00:22<00:59, 31.67it/s, now=None]t:  30%|███       | 809/2688 [00:23<00:57, 32.75it/s, now=None]t:  30%|███       | 813/2688 [00:23<00:57, 32.80it/s, now=None]t:  30%|███       | 817/2688 [00:23<00:56, 33.19it/s, now=None]t:  31%|███       | 821/2688 [00:23<00:55, 33.58it/s, now=None]t:  31%|███       | 825/2688 [00:23<00:53, 35.07it/s, now=None]t:  31%|███       | 830/2688 [00:23<00:49, 37.38it/s, now=None]t:  31%|███       | 835/2688 [00:23<00:46, 39.75it/s, now=None]t:  31%|███▏      | 840/2688 [00:23<00:45, 40.48it/s, now=None]t:  31%|███▏      | 845/2688 [00:23<00:42, 42.92it/s, now=None]t:  32%|███▏      | 850/2688 [00:24<00:42, 43.39it/s, now=None]t:  32%|███▏      | 856/2688 [00:24<00:40, 45.50it/s, now=None]t:  32%|███▏      | 861/2688 [00:24<00:41, 44.30it/s, now=None]t:  32%|███▏      | 866/2688 [00:24<00:39, 45.70it/s, now=None]t:  32%|███▏      | 871/2688 [00:24<00:43, 41.49it/s, now=None]t:  33%|███▎      | 876/2688 [00:24<00:43, 41.69it/s, now=None]t:  33%|███▎      | 881/2688 [00:24<00:42, 42.39it/s, now=None]t:  33%|███▎      | 887/2688 [00:24<00:39, 45.46it/s, now=None]t:  33%|███▎      | 893/2688 [00:24<00:38, 47.11it/s, now=None]t:  33%|███▎      | 899/2688 [00:25<00:36, 49.27it/s, now=None]t:  34%|███▎      | 904/2688 [00:25<00:38, 46.20it/s, now=None]t:  34%|███▍      | 909/2688 [00:25<00:40, 44.19it/s, now=None]t:  34%|███▍      | 914/2688 [00:25<00:42, 41.95it/s, now=None]t:  34%|███▍      | 919/2688 [00:25<00:40, 43.19it/s, now=None]t:  34%|███▍      | 925/2688 [00:25<00:38, 45.40it/s, now=None]t:  35%|███▍      | 931/2688 [00:25<00:37, 47.08it/s, now=None]t:  35%|███▍      | 937/2688 [00:25<00:36, 47.60it/s, now=None]t:  35%|███▌      | 942/2688 [00:26<00:38, 45.79it/s, now=None]t:  35%|███▌      | 948/2688 [00:26<00:36, 47.96it/s, now=None]t:  35%|███▌      | 954/2688 [00:26<00:35, 49.00it/s, now=None]t:  36%|███▌      | 960/2688 [00:26<00:34, 50.02it/s, now=None]t:  36%|███▌      | 966/2688 [00:26<00:34, 50.18it/s, now=None]t:  36%|███▌      | 972/2688 [00:26<00:34, 49.90it/s, now=None]t:  36%|███▋      | 977/2688 [00:26<00:34, 48.96it/s, now=None]t:  37%|███▋      | 983/2688 [00:26<00:33, 50.56it/s, now=None]t:  37%|███▋      | 989/2688 [00:27<00:34, 48.76it/s, now=None]t:  37%|███▋      | 994/2688 [00:27<00:35, 48.27it/s, now=None]t:  37%|███▋      | 1000/2688 [00:27<00:33, 50.38it/s, now=None]t:  37%|███▋      | 1006/2688 [00:27<00:32, 51.80it/s, now=None]t:  38%|███▊      | 1012/2688 [00:27<00:34, 48.95it/s, now=None]t:  38%|███▊      | 1017/2688 [00:27<00:34, 49.00it/s, now=None]t:  38%|███▊      | 1023/2688 [00:27<00:33, 49.86it/s, now=None]t:  38%|███▊      | 1029/2688 [00:27<00:32, 50.71it/s, now=None]t:  39%|███▊      | 1035/2688 [00:27<00:33, 49.54it/s, now=None]t:  39%|███▊      | 1040/2688 [00:28<00:33, 48.67it/s, now=None]t:  39%|███▉      | 1046/2688 [00:28<00:32, 50.62it/s, now=None]t:  39%|███▉      | 1052/2688 [00:28<00:31, 52.67it/s, now=None]t:  39%|███▉      | 1058/2688 [00:28<00:31, 51.56it/s, now=None]t:  40%|███▉      | 1064/2688 [00:28<00:30, 52.41it/s, now=None]t:  40%|███▉      | 1070/2688 [00:28<00:32, 49.63it/s, now=None]t:  40%|████      | 1076/2688 [00:28<00:32, 50.20it/s, now=None]t:  40%|████      | 1082/2688 [00:28<00:33, 47.37it/s, now=None]t:  40%|████      | 1087/2688 [00:28<00:34, 46.86it/s, now=None]t:  41%|████      | 1092/2688 [00:29<00:34, 46.22it/s, now=None]t:  41%|████      | 1097/2688 [00:29<00:34, 46.06it/s, now=None]t:  41%|████      | 1102/2688 [00:29<00:35, 44.51it/s, now=None]t:  41%|████      | 1107/2688 [00:29<00:36, 43.39it/s, now=None]t:  41%|████▏     | 1112/2688 [00:29<00:38, 40.43it/s, now=None]t:  42%|████▏     | 1117/2688 [00:29<00:42, 37.30it/s, now=None]t:  42%|████▏     | 1121/2688 [00:29<00:42, 36.83it/s, now=None]t:  42%|████▏     | 1126/2688 [00:29<00:41, 37.82it/s, now=None]t:  42%|████▏     | 1130/2688 [00:30<00:42, 36.64it/s, now=None]t:  42%|████▏     | 1134/2688 [00:30<00:43, 35.76it/s, now=None]t:  42%|████▏     | 1138/2688 [00:30<00:44, 35.00it/s, now=None]t:  42%|████▏     | 1142/2688 [00:30<00:46, 33.37it/s, now=None]t:  43%|████▎     | 1146/2688 [00:30<00:47, 32.43it/s, now=None]t:  43%|████▎     | 1150/2688 [00:30<00:49, 31.07it/s, now=None]t:  43%|████▎     | 1154/2688 [00:30<00:51, 29.71it/s, now=None]t:  43%|████▎     | 1157/2688 [00:31<00:53, 28.50it/s, now=None]t:  43%|████▎     | 1160/2688 [00:31<00:56, 27.02it/s, now=None]t:  43%|████▎     | 1164/2688 [00:31<00:53, 28.46it/s, now=None]t:  43%|████▎     | 1168/2688 [00:31<00:51, 29.51it/s, now=None]t:  44%|████▎     | 1172/2688 [00:31<00:50, 30.02it/s, now=None]t:  44%|████▍     | 1176/2688 [00:31<00:54, 27.72it/s, now=None]t:  44%|████▍     | 1179/2688 [00:31<00:58, 25.68it/s, now=None]t:  44%|████▍     | 1183/2688 [00:31<00:54, 27.81it/s, now=None]t:  44%|████▍     | 1187/2688 [00:32<00:49, 30.45it/s, now=None]t:  44%|████▍     | 1191/2688 [00:32<00:47, 31.49it/s, now=None]t:  44%|████▍     | 1196/2688 [00:32<00:43, 34.04it/s, now=None]t:  45%|████▍     | 1200/2688 [00:32<00:44, 33.44it/s, now=None]t:  45%|████▍     | 1204/2688 [00:32<00:43, 34.04it/s, now=None]t:  45%|████▍     | 1208/2688 [00:32<00:43, 34.39it/s, now=None]t:  45%|████▌     | 1212/2688 [00:32<00:43, 34.00it/s, now=None]t:  45%|████▌     | 1216/2688 [00:32<00:42, 34.48it/s, now=None]t:  45%|████▌     | 1220/2688 [00:33<00:42, 34.75it/s, now=None]t:  46%|████▌     | 1224/2688 [00:33<00:43, 33.93it/s, now=None]t:  46%|████▌     | 1228/2688 [00:33<00:42, 34.31it/s, now=None]t:  46%|████▌     | 1232/2688 [00:33<00:43, 33.56it/s, now=None]t:  46%|████▌     | 1236/2688 [00:33<00:51, 28.43it/s, now=None]t:  46%|████▌     | 1239/2688 [00:33<00:54, 26.51it/s, now=None]t:  46%|████▌     | 1243/2688 [00:33<00:51, 28.25it/s, now=None]t:  46%|████▋     | 1246/2688 [00:33<00:51, 28.18it/s, now=None]t:  46%|████▋     | 1249/2688 [00:34<00:51, 28.15it/s, now=None]t:  47%|████▋     | 1252/2688 [00:34<00:50, 28.49it/s, now=None]t:  47%|████▋     | 1256/2688 [00:34<00:48, 29.49it/s, now=None]t:  47%|████▋     | 1260/2688 [00:34<00:45, 31.64it/s, now=None]t:  47%|████▋     | 1264/2688 [00:34<00:46, 30.87it/s, now=None]t:  47%|████▋     | 1268/2688 [00:34<00:50, 27.96it/s, now=None]t:  47%|████▋     | 1271/2688 [00:34<00:51, 27.76it/s, now=None]t:  47%|████▋     | 1275/2688 [00:34<00:46, 30.57it/s, now=None]t:  48%|████▊     | 1279/2688 [00:35<00:44, 31.33it/s, now=None]t:  48%|████▊     | 1283/2688 [00:35<00:45, 31.11it/s, now=None]t:  48%|████▊     | 1287/2688 [00:35<00:44, 31.20it/s, now=None]t:  48%|████▊     | 1291/2688 [00:35<00:49, 28.33it/s, now=None]t:  48%|████▊     | 1295/2688 [00:35<00:46, 29.90it/s, now=None]t:  48%|████▊     | 1299/2688 [00:35<00:43, 31.67it/s, now=None]t:  49%|████▊     | 1304/2688 [00:35<00:40, 34.54it/s, now=None]t:  49%|████▊     | 1308/2688 [00:35<00:38, 35.64it/s, now=None]t:  49%|████▉     | 1313/2688 [00:36<00:36, 37.81it/s, now=None]t:  49%|████▉     | 1317/2688 [00:36<00:36, 38.00it/s, now=None]t:  49%|████▉     | 1321/2688 [00:36<00:37, 36.91it/s, now=None]t:  49%|████▉     | 1325/2688 [00:36<00:37, 36.55it/s, now=None]t:  49%|████▉     | 1329/2688 [00:36<00:38, 35.01it/s, now=None]t:  50%|████▉     | 1333/2688 [00:36<00:39, 34.25it/s, now=None]t:  50%|████▉     | 1337/2688 [00:36<00:39, 34.31it/s, now=None]t:  50%|████▉     | 1341/2688 [00:36<00:39, 34.33it/s, now=None]t:  50%|█████     | 1345/2688 [00:36<00:38, 35.05it/s, now=None]t:  50%|█████     | 1350/2688 [00:37<00:40, 33.01it/s, now=None]t:  50%|█████     | 1354/2688 [00:37<00:43, 30.52it/s, now=None]t:  51%|█████     | 1358/2688 [00:37<00:49, 26.68it/s, now=None]t:  51%|█████     | 1361/2688 [00:37<00:49, 26.82it/s, now=None]t:  51%|█████     | 1364/2688 [00:37<00:48, 27.37it/s, now=None]t:  51%|█████     | 1367/2688 [00:37<00:51, 25.82it/s, now=None]t:  51%|█████     | 1371/2688 [00:37<00:46, 28.55it/s, now=None]t:  51%|█████     | 1375/2688 [00:38<00:43, 30.32it/s, now=None]t:  51%|█████▏    | 1379/2688 [00:38<00:42, 30.66it/s, now=None]t:  51%|█████▏    | 1383/2688 [00:38<00:47, 27.71it/s, now=None]t:  52%|█████▏    | 1386/2688 [00:38<00:47, 27.65it/s, now=None]t:  52%|█████▏    | 1389/2688 [00:38<00:51, 25.23it/s, now=None]t:  52%|█████▏    | 1393/2688 [00:38<00:50, 25.89it/s, now=None]t:  52%|█████▏    | 1397/2688 [00:38<00:50, 25.46it/s, now=None]t:  52%|█████▏    | 1400/2688 [00:39<00:55, 23.12it/s, now=None]t:  52%|█████▏    | 1403/2688 [00:39<00:56, 22.81it/s, now=None]t:  52%|█████▏    | 1406/2688 [00:39<00:54, 23.56it/s, now=None]t:  52%|█████▏    | 1409/2688 [00:39<00:51, 25.01it/s, now=None]t:  53%|█████▎    | 1413/2688 [00:39<00:44, 28.68it/s, now=None]t:  53%|█████▎    | 1416/2688 [00:39<00:44, 28.27it/s, now=None]t:  53%|█████▎    | 1419/2688 [00:39<00:50, 24.95it/s, now=None]t:  53%|█████▎    | 1422/2688 [00:39<00:55, 22.87it/s, now=None]t:  53%|█████▎    | 1426/2688 [00:40<00:48, 25.78it/s, now=None]t:  53%|█████▎    | 1429/2688 [00:40<00:51, 24.49it/s, now=None]t:  53%|█████▎    | 1432/2688 [00:40<01:04, 19.35it/s, now=None]t:  53%|█████▎    | 1435/2688 [00:40<01:04, 19.37it/s, now=None]t:  53%|█████▎    | 1438/2688 [00:40<01:02, 19.97it/s, now=None]t:  54%|█████▎    | 1441/2688 [00:40<01:03, 19.59it/s, now=None]t:  54%|█████▎    | 1444/2688 [00:41<01:01, 20.35it/s, now=None]t:  54%|█████▍    | 1447/2688 [00:41<00:57, 21.69it/s, now=None]t:  54%|█████▍    | 1450/2688 [00:41<00:52, 23.39it/s, now=None]t:  54%|█████▍    | 1454/2688 [00:41<00:47, 26.22it/s, now=None]t:  54%|█████▍    | 1457/2688 [00:41<00:47, 25.78it/s, now=None]t:  54%|█████▍    | 1461/2688 [00:41<00:43, 27.97it/s, now=None]t:  55%|█████▍    | 1465/2688 [00:41<00:40, 29.83it/s, now=None]t:  55%|█████▍    | 1469/2688 [00:41<00:41, 29.16it/s, now=None]t:  55%|█████▍    | 1472/2688 [00:41<00:41, 29.30it/s, now=None]t:  55%|█████▍    | 1475/2688 [00:42<00:47, 25.31it/s, now=None]t:  55%|█████▍    | 1478/2688 [00:42<00:49, 24.60it/s, now=None]t:  55%|█████▌    | 1481/2688 [00:42<00:52, 22.98it/s, now=None]t:  55%|█████▌    | 1484/2688 [00:42<00:55, 21.63it/s, now=None]t:  55%|█████▌    | 1488/2688 [00:42<00:52, 22.87it/s, now=None]t:  55%|█████▌    | 1491/2688 [00:42<00:57, 20.64it/s, now=None]t:  56%|█████▌    | 1494/2688 [00:43<00:54, 22.02it/s, now=None]t:  56%|█████▌    | 1497/2688 [00:43<00:57, 20.84it/s, now=None]t:  56%|█████▌    | 1500/2688 [00:43<00:58, 20.37it/s, now=None]t:  56%|█████▌    | 1503/2688 [00:43<00:56, 20.87it/s, now=None]t:  56%|█████▌    | 1507/2688 [00:43<00:49, 23.95it/s, now=None]t:  56%|█████▋    | 1512/2688 [00:43<00:43, 27.30it/s, now=None]t:  56%|█████▋    | 1516/2688 [00:43<00:41, 28.31it/s, now=None]t:  57%|█████▋    | 1520/2688 [00:44<00:40, 28.56it/s, now=None]t:  57%|█████▋    | 1524/2688 [00:44<00:37, 31.19it/s, now=None]t:  57%|█████▋    | 1528/2688 [00:44<00:37, 31.28it/s, now=None]t:  57%|█████▋    | 1532/2688 [00:44<00:34, 33.05it/s, now=None]t:  57%|█████▋    | 1537/2688 [00:44<00:32, 35.56it/s, now=None]t:  57%|█████▋    | 1542/2688 [00:44<00:30, 37.48it/s, now=None]t:  58%|█████▊    | 1547/2688 [00:44<00:29, 39.10it/s, now=None]t:  58%|█████▊    | 1551/2688 [00:44<00:30, 37.54it/s, now=None]t:  58%|█████▊    | 1555/2688 [00:44<00:33, 33.78it/s, now=None]t:  58%|█████▊    | 1559/2688 [00:45<00:35, 32.04it/s, now=None]t:  58%|█████▊    | 1563/2688 [00:45<00:36, 31.08it/s, now=None]t:  58%|█████▊    | 1567/2688 [00:45<00:37, 29.93it/s, now=None]t:  58%|█████▊    | 1571/2688 [00:45<00:35, 31.50it/s, now=None]t:  59%|█████▊    | 1575/2688 [00:45<00:33, 32.74it/s, now=None]t:  59%|█████▊    | 1579/2688 [00:45<00:32, 33.66it/s, now=None]t:  59%|█████▉    | 1583/2688 [00:45<00:31, 34.55it/s, now=None]t:  59%|█████▉    | 1587/2688 [00:45<00:32, 34.32it/s, now=None]t:  59%|█████▉    | 1591/2688 [00:46<00:33, 33.03it/s, now=None]t:  59%|█████▉    | 1595/2688 [00:46<00:32, 33.48it/s, now=None]t:  59%|█████▉    | 1599/2688 [00:46<00:32, 33.27it/s, now=None]t:  60%|█████▉    | 1603/2688 [00:46<00:34, 31.73it/s, now=None]t:  60%|█████▉    | 1607/2688 [00:46<00:33, 32.09it/s, now=None]t:  60%|█████▉    | 1611/2688 [00:46<00:33, 32.32it/s, now=None]t:  60%|██████    | 1615/2688 [00:46<00:33, 32.21it/s, now=None]t:  60%|██████    | 1619/2688 [00:46<00:32, 33.02it/s, now=None]t:  60%|██████    | 1623/2688 [00:47<00:35, 29.92it/s, now=None]t:  61%|██████    | 1627/2688 [00:47<00:36, 29.30it/s, now=None]t:  61%|██████    | 1631/2688 [00:47<00:34, 30.51it/s, now=None]t:  61%|██████    | 1635/2688 [00:47<00:33, 31.21it/s, now=None]t:  61%|██████    | 1639/2688 [00:47<00:31, 33.04it/s, now=None]t:  61%|██████    | 1643/2688 [00:47<00:31, 32.95it/s, now=None]t:  61%|██████▏   | 1647/2688 [00:47<00:31, 32.78it/s, now=None]t:  61%|██████▏   | 1651/2688 [00:47<00:32, 31.54it/s, now=None]t:  62%|██████▏   | 1655/2688 [00:48<00:33, 31.21it/s, now=None]t:  62%|██████▏   | 1659/2688 [00:48<00:31, 32.97it/s, now=None]t:  62%|██████▏   | 1663/2688 [00:48<00:33, 30.74it/s, now=None]t:  62%|██████▏   | 1668/2688 [00:48<00:29, 34.19it/s, now=None]t:  62%|██████▏   | 1672/2688 [00:48<00:28, 35.12it/s, now=None]t:  62%|██████▏   | 1677/2688 [00:48<00:27, 36.18it/s, now=None]t:  63%|██████▎   | 1681/2688 [00:48<00:28, 35.53it/s, now=None]t:  63%|██████▎   | 1685/2688 [00:48<00:29, 34.35it/s, now=None]t:  63%|██████▎   | 1689/2688 [00:49<00:29, 33.68it/s, now=None]t:  63%|██████▎   | 1693/2688 [00:49<00:32, 30.42it/s, now=None]t:  63%|██████▎   | 1697/2688 [00:49<00:40, 24.23it/s, now=None]t:  63%|██████▎   | 1700/2688 [00:49<00:43, 22.71it/s, now=None]t:  63%|██████▎   | 1703/2688 [00:49<00:41, 23.90it/s, now=None]t:  63%|██████▎   | 1706/2688 [00:49<00:47, 20.82it/s, now=None]t:  64%|██████▎   | 1709/2688 [00:50<00:47, 20.57it/s, now=None]t:  64%|██████▎   | 1713/2688 [00:50<00:46, 20.90it/s, now=None]t:  64%|██████▍   | 1716/2688 [00:50<00:46, 21.08it/s, now=None]t:  64%|██████▍   | 1719/2688 [00:50<00:48, 20.12it/s, now=None]t:  64%|██████▍   | 1722/2688 [00:50<00:45, 21.09it/s, now=None]t:  64%|██████▍   | 1725/2688 [00:50<00:46, 20.50it/s, now=None]t:  64%|██████▍   | 1729/2688 [00:51<00:46, 20.42it/s, now=None]t:  64%|██████▍   | 1733/2688 [00:51<00:44, 21.24it/s, now=None]t:  65%|██████▍   | 1736/2688 [00:51<00:45, 21.13it/s, now=None]t:  65%|██████▍   | 1739/2688 [00:51<00:47, 20.02it/s, now=None]t:  65%|██████▍   | 1743/2688 [00:51<00:45, 20.96it/s, now=None]t:  65%|██████▍   | 1746/2688 [00:51<00:42, 22.00it/s, now=None]t:  65%|██████▌   | 1749/2688 [00:52<00:45, 20.53it/s, now=None]t:  65%|██████▌   | 1753/2688 [00:52<00:43, 21.45it/s, now=None]t:  65%|██████▌   | 1756/2688 [00:52<00:42, 22.18it/s, now=None]t:  65%|██████▌   | 1759/2688 [00:52<00:45, 20.50it/s, now=None]t:  66%|██████▌   | 1763/2688 [00:52<00:43, 21.05it/s, now=None]t:  66%|██████▌   | 1767/2688 [00:52<00:37, 24.37it/s, now=None]t:  66%|██████▌   | 1770/2688 [00:52<00:41, 22.27it/s, now=None]t:  66%|██████▌   | 1773/2688 [00:53<00:44, 20.62it/s, now=None]t:  66%|██████▌   | 1777/2688 [00:53<00:45, 19.94it/s, now=None]t:  66%|██████▋   | 1781/2688 [00:53<00:46, 19.44it/s, now=None]t:  66%|██████▋   | 1785/2688 [00:53<00:45, 19.80it/s, now=None]t:  67%|██████▋   | 1789/2688 [00:53<00:40, 22.31it/s, now=None]t:  67%|██████▋   | 1793/2688 [00:53<00:35, 25.22it/s, now=None]t:  67%|██████▋   | 1799/2688 [00:54<00:27, 31.77it/s, now=None]t:  67%|██████▋   | 1805/2688 [00:54<00:23, 37.85it/s, now=None]t:  67%|██████▋   | 1811/2688 [00:54<00:20, 42.86it/s, now=None]t:  68%|██████▊   | 1816/2688 [00:54<00:20, 42.29it/s, now=None]t:  68%|██████▊   | 1821/2688 [00:54<00:21, 40.16it/s, now=None]t:  68%|██████▊   | 1826/2688 [00:54<00:21, 40.64it/s, now=None]t:  68%|██████▊   | 1831/2688 [00:54<00:22, 38.81it/s, now=None]t:  68%|██████▊   | 1835/2688 [00:54<00:22, 38.42it/s, now=None]t:  68%|██████▊   | 1839/2688 [00:55<00:22, 37.77it/s, now=None]t:  69%|██████▊   | 1844/2688 [00:55<00:21, 38.54it/s, now=None]t:  69%|██████▉   | 1848/2688 [00:55<00:21, 38.74it/s, now=None]t:  69%|██████▉   | 1852/2688 [00:55<00:22, 36.74it/s, now=None]t:  69%|██████▉   | 1856/2688 [00:55<00:23, 35.61it/s, now=None]t:  69%|██████▉   | 1860/2688 [00:55<00:23, 35.25it/s, now=None]t:  69%|██████▉   | 1864/2688 [00:55<00:22, 36.48it/s, now=None]t:  70%|██████▉   | 1869/2688 [00:55<00:21, 38.59it/s, now=None]t:  70%|██████▉   | 1874/2688 [00:55<00:20, 39.12it/s, now=None]t:  70%|██████▉   | 1879/2688 [00:56<00:20, 40.40it/s, now=None]t:  70%|███████   | 1884/2688 [00:56<00:20, 38.74it/s, now=None]t:  70%|███████   | 1888/2688 [00:56<00:21, 36.55it/s, now=None]t:  70%|███████   | 1892/2688 [00:56<00:21, 37.33it/s, now=None]t:  71%|███████   | 1896/2688 [00:56<00:21, 37.25it/s, now=None]t:  71%|███████   | 1901/2688 [00:56<00:20, 39.09it/s, now=None]t:  71%|███████   | 1906/2688 [00:56<00:19, 40.40it/s, now=None]t:  71%|███████   | 1911/2688 [00:57<00:23, 33.54it/s, now=None]t:  71%|███████   | 1915/2688 [00:57<00:25, 30.49it/s, now=None]t:  71%|███████▏  | 1919/2688 [00:57<00:26, 29.27it/s, now=None]t:  72%|███████▏  | 1923/2688 [00:57<00:29, 26.16it/s, now=None]t:  72%|███████▏  | 1926/2688 [00:57<00:28, 26.69it/s, now=None]t:  72%|███████▏  | 1929/2688 [00:57<00:29, 25.84it/s, now=None]t:  72%|███████▏  | 1932/2688 [00:57<00:32, 23.48it/s, now=None]t:  72%|███████▏  | 1935/2688 [00:58<00:31, 24.23it/s, now=None]t:  72%|███████▏  | 1939/2688 [00:58<00:29, 25.69it/s, now=None]t:  72%|███████▏  | 1943/2688 [00:58<00:28, 26.36it/s, now=None]t:  72%|███████▏  | 1946/2688 [00:58<00:29, 24.83it/s, now=None]t:  73%|███████▎  | 1950/2688 [00:58<00:27, 27.17it/s, now=None]t:  73%|███████▎  | 1953/2688 [00:58<00:30, 24.25it/s, now=None]t:  73%|███████▎  | 1956/2688 [00:58<00:30, 24.05it/s, now=None]t:  73%|███████▎  | 1960/2688 [00:58<00:27, 26.53it/s, now=None]t:  73%|███████▎  | 1964/2688 [00:59<00:26, 27.50it/s, now=None]t:  73%|███████▎  | 1969/2688 [00:59<00:22, 31.37it/s, now=None]t:  73%|███████▎  | 1973/2688 [00:59<00:21, 33.33it/s, now=None]t:  74%|███████▎  | 1977/2688 [00:59<00:20, 34.62it/s, now=None]t:  74%|███████▎  | 1981/2688 [00:59<00:21, 33.31it/s, now=None]t:  74%|███████▍  | 1985/2688 [00:59<00:20, 33.83it/s, now=None]t:  74%|███████▍  | 1989/2688 [00:59<00:20, 33.97it/s, now=None]t:  74%|███████▍  | 1993/2688 [00:59<00:20, 33.27it/s, now=None]t:  74%|███████▍  | 1997/2688 [01:00<00:21, 31.99it/s, now=None]t:  74%|███████▍  | 2001/2688 [01:00<00:20, 33.91it/s, now=None]t:  75%|███████▍  | 2005/2688 [01:00<00:19, 35.14it/s, now=None]t:  75%|███████▍  | 2010/2688 [01:00<00:18, 36.61it/s, now=None]t:  75%|███████▍  | 2015/2688 [01:00<00:18, 37.38it/s, now=None]t:  75%|███████▌  | 2020/2688 [01:00<00:17, 38.06it/s, now=None]t:  75%|███████▌  | 2025/2688 [01:00<00:17, 37.79it/s, now=None]t:  75%|███████▌  | 2029/2688 [01:00<00:17, 38.35it/s, now=None]t:  76%|███████▌  | 2033/2688 [01:01<00:18, 35.79it/s, now=None]t:  76%|███████▌  | 2037/2688 [01:01<00:17, 36.37it/s, now=None]t:  76%|███████▌  | 2041/2688 [01:01<00:18, 34.38it/s, now=None]t:  76%|███████▌  | 2045/2688 [01:01<00:18, 34.12it/s, now=None]t:  76%|███████▌  | 2049/2688 [01:01<00:20, 31.62it/s, now=None]t:  76%|███████▋  | 2053/2688 [01:01<00:21, 29.85it/s, now=None]t:  77%|███████▋  | 2057/2688 [01:01<00:20, 31.35it/s, now=None]t:  77%|███████▋  | 2061/2688 [01:01<00:19, 32.28it/s, now=None]t:  77%|███████▋  | 2065/2688 [01:02<00:18, 33.13it/s, now=None]t:  77%|███████▋  | 2070/2688 [01:02<00:16, 37.32it/s, now=None]t:  77%|███████▋  | 2076/2688 [01:02<00:14, 41.28it/s, now=None]t:  77%|███████▋  | 2082/2688 [01:02<00:13, 45.80it/s, now=None]t:  78%|███████▊  | 2088/2688 [01:02<00:12, 47.83it/s, now=None]t:  78%|███████▊  | 2094/2688 [01:02<00:11, 50.21it/s, now=None]t:  78%|███████▊  | 2100/2688 [01:02<00:11, 51.51it/s, now=None]t:  78%|███████▊  | 2106/2688 [01:02<00:11, 50.39it/s, now=None]t:  79%|███████▊  | 2112/2688 [01:02<00:11, 51.74it/s, now=None]t:  79%|███████▉  | 2118/2688 [01:03<00:10, 52.65it/s, now=None]t:  79%|███████▉  | 2124/2688 [01:03<00:10, 53.00it/s, now=None]t:  79%|███████▉  | 2130/2688 [01:03<00:10, 52.58it/s, now=None]t:  79%|███████▉  | 2136/2688 [01:03<00:10, 52.66it/s, now=None]t:  80%|███████▉  | 2143/2688 [01:03<00:10, 53.95it/s, now=None]t:  80%|███████▉  | 2149/2688 [01:03<00:10, 50.42it/s, now=None]t:  80%|████████  | 2155/2688 [01:03<00:10, 52.80it/s, now=None]t:  80%|████████  | 2161/2688 [01:03<00:10, 51.70it/s, now=None]t:  81%|████████  | 2167/2688 [01:03<00:10, 51.45it/s, now=None]t:  81%|████████  | 2174/2688 [01:04<00:09, 55.19it/s, now=None]t:  81%|████████  | 2180/2688 [01:04<00:09, 55.31it/s, now=None]t:  81%|████████▏ | 2187/2688 [01:04<00:08, 58.25it/s, now=None]t:  82%|████████▏ | 2193/2688 [01:04<00:08, 55.73it/s, now=None]t:  82%|████████▏ | 2199/2688 [01:04<00:09, 50.14it/s, now=None]t:  82%|████████▏ | 2205/2688 [01:04<00:10, 47.64it/s, now=None]t:  82%|████████▏ | 2210/2688 [01:04<00:10, 46.33it/s, now=None]t:  82%|████████▏ | 2215/2688 [01:04<00:10, 44.80it/s, now=None]t:  83%|████████▎ | 2220/2688 [01:05<00:10, 44.24it/s, now=None]t:  83%|████████▎ | 2225/2688 [01:05<00:10, 43.11it/s, now=None]t:  83%|████████▎ | 2230/2688 [01:05<00:11, 41.63it/s, now=None]t:  83%|████████▎ | 2235/2688 [01:05<00:10, 41.57it/s, now=None]t:  83%|████████▎ | 2240/2688 [01:05<00:11, 39.78it/s, now=None]t:  84%|████████▎ | 2245/2688 [01:05<00:10, 40.86it/s, now=None]t:  84%|████████▎ | 2250/2688 [01:05<00:10, 42.02it/s, now=None]t:  84%|████████▍ | 2255/2688 [01:05<00:10, 41.45it/s, now=None]t:  84%|████████▍ | 2260/2688 [01:06<00:10, 40.50it/s, now=None]t:  84%|████████▍ | 2265/2688 [01:06<00:10, 39.00it/s, now=None]t:  84%|████████▍ | 2269/2688 [01:06<00:10, 38.10it/s, now=None]t:  85%|████████▍ | 2273/2688 [01:06<00:12, 32.22it/s, now=None]t:  85%|████████▍ | 2277/2688 [01:06<00:12, 33.35it/s, now=None]t:  85%|████████▍ | 2281/2688 [01:06<00:11, 34.12it/s, now=None]t:  85%|████████▌ | 2285/2688 [01:06<00:11, 33.74it/s, now=None]t:  85%|████████▌ | 2289/2688 [01:06<00:11, 34.45it/s, now=None]t:  85%|████████▌ | 2293/2688 [01:07<00:11, 35.77it/s, now=None]t:  85%|████████▌ | 2297/2688 [01:07<00:10, 35.78it/s, now=None]t:  86%|████████▌ | 2301/2688 [01:07<00:11, 35.13it/s, now=None]t:  86%|████████▌ | 2305/2688 [01:07<00:10, 35.63it/s, now=None]t:  86%|████████▌ | 2309/2688 [01:07<00:10, 35.47it/s, now=None]t:  86%|████████▌ | 2313/2688 [01:07<00:10, 34.15it/s, now=None]t:  86%|████████▌ | 2317/2688 [01:07<00:10, 35.28it/s, now=None]t:  86%|████████▋ | 2322/2688 [01:07<00:09, 37.72it/s, now=None]t:  87%|████████▋ | 2327/2688 [01:07<00:09, 39.19it/s, now=None]t:  87%|████████▋ | 2331/2688 [01:08<00:11, 31.53it/s, now=None]t:  87%|████████▋ | 2335/2688 [01:08<00:12, 28.85it/s, now=None]t:  87%|████████▋ | 2339/2688 [01:08<00:13, 26.03it/s, now=None]t:  87%|████████▋ | 2342/2688 [01:08<00:13, 24.92it/s, now=None]t:  87%|████████▋ | 2345/2688 [01:08<00:14, 24.10it/s, now=None]t:  87%|████████▋ | 2348/2688 [01:08<00:15, 21.29it/s, now=None]t:  87%|████████▋ | 2351/2688 [01:09<00:15, 21.25it/s, now=None]t:  88%|████████▊ | 2354/2688 [01:09<00:15, 21.24it/s, now=None]t:  88%|████████▊ | 2357/2688 [01:09<00:15, 21.09it/s, now=None]t:  88%|████████▊ | 2361/2688 [01:09<00:13, 24.84it/s, now=None]t:  88%|████████▊ | 2365/2688 [01:09<00:11, 28.02it/s, now=None]t:  88%|████████▊ | 2369/2688 [01:09<00:10, 30.01it/s, now=None]t:  88%|████████▊ | 2373/2688 [01:09<00:11, 28.34it/s, now=None]t:  88%|████████▊ | 2377/2688 [01:09<00:10, 30.75it/s, now=None]t:  89%|████████▊ | 2381/2688 [01:10<00:09, 32.43it/s, now=None]t:  89%|████████▊ | 2385/2688 [01:10<00:08, 34.12it/s, now=None]t:  89%|████████▉ | 2389/2688 [01:10<00:08, 34.92it/s, now=None]t:  89%|████████▉ | 2393/2688 [01:10<00:09, 31.50it/s, now=None]t:  89%|████████▉ | 2397/2688 [01:10<00:11, 24.36it/s, now=None]t:  89%|████████▉ | 2400/2688 [01:10<00:13, 22.10it/s, now=None]t:  89%|████████▉ | 2403/2688 [01:10<00:12, 22.89it/s, now=None]t:  90%|████████▉ | 2406/2688 [01:11<00:11, 24.12it/s, now=None]t:  90%|████████▉ | 2410/2688 [01:11<00:10, 26.43it/s, now=None]t:  90%|████████▉ | 2413/2688 [01:11<00:10, 27.11it/s, now=None]t:  90%|████████▉ | 2417/2688 [01:11<00:09, 28.14it/s, now=None]t:  90%|█████████ | 2421/2688 [01:11<00:09, 29.32it/s, now=None]t:  90%|█████████ | 2425/2688 [01:11<00:08, 29.99it/s, now=None]t:  90%|█████████ | 2429/2688 [01:11<00:08, 29.94it/s, now=None]t:  91%|█████████ | 2433/2688 [01:11<00:08, 29.42it/s, now=None]t:  91%|█████████ | 2436/2688 [01:12<00:09, 26.18it/s, now=None]t:  91%|█████████ | 2439/2688 [01:12<00:09, 26.28it/s, now=None]t:  91%|█████████ | 2443/2688 [01:12<00:08, 27.58it/s, now=None]t:  91%|█████████ | 2446/2688 [01:12<00:08, 27.56it/s, now=None]t:  91%|█████████ | 2449/2688 [01:12<00:08, 26.96it/s, now=None]t:  91%|█████████ | 2452/2688 [01:12<00:08, 27.64it/s, now=None]t:  91%|█████████▏| 2456/2688 [01:12<00:07, 30.46it/s, now=None]t:  92%|█████████▏| 2460/2688 [01:12<00:07, 32.29it/s, now=None]t:  92%|█████████▏| 2464/2688 [01:13<00:06, 33.02it/s, now=None]t:  92%|█████████▏| 2468/2688 [01:13<00:06, 32.94it/s, now=None]t:  92%|█████████▏| 2472/2688 [01:13<00:06, 32.59it/s, now=None]t:  92%|█████████▏| 2476/2688 [01:13<00:06, 31.07it/s, now=None]t:  92%|█████████▏| 2480/2688 [01:13<00:06, 30.01it/s, now=None]t:  92%|█████████▏| 2484/2688 [01:13<00:07, 28.50it/s, now=None]t:  93%|█████████▎| 2488/2688 [01:13<00:06, 29.82it/s, now=None]t:  93%|█████████▎| 2492/2688 [01:13<00:06, 30.86it/s, now=None]t:  93%|█████████▎| 2496/2688 [01:14<00:05, 32.60it/s, now=None]t:  93%|█████████▎| 2500/2688 [01:14<00:05, 34.39it/s, now=None]t:  93%|█████████▎| 2504/2688 [01:14<00:05, 33.27it/s, now=None]t:  93%|█████████▎| 2508/2688 [01:14<00:05, 33.71it/s, now=None]t:  93%|█████████▎| 2512/2688 [01:14<00:05, 33.76it/s, now=None]t:  94%|█████████▎| 2516/2688 [01:14<00:05, 33.69it/s, now=None]t:  94%|█████████▍| 2520/2688 [01:14<00:04, 33.68it/s, now=None]t:  94%|█████████▍| 2524/2688 [01:14<00:04, 33.99it/s, now=None]t:  94%|█████████▍| 2528/2688 [01:14<00:04, 34.64it/s, now=None]t:  94%|█████████▍| 2532/2688 [01:15<00:04, 35.29it/s, now=None]t:  94%|█████████▍| 2536/2688 [01:15<00:04, 36.31it/s, now=None]t:  95%|█████████▍| 2541/2688 [01:15<00:03, 37.77it/s, now=None]t:  95%|█████████▍| 2545/2688 [01:15<00:03, 38.35it/s, now=None]t:  95%|█████████▍| 2550/2688 [01:15<00:03, 38.69it/s, now=None]t:  95%|█████████▌| 2554/2688 [01:15<00:03, 37.01it/s, now=None]t:  95%|█████████▌| 2558/2688 [01:15<00:03, 36.10it/s, now=None]t:  95%|█████████▌| 2562/2688 [01:15<00:03, 36.93it/s, now=None]t:  95%|█████████▌| 2566/2688 [01:15<00:03, 37.40it/s, now=None]t:  96%|█████████▌| 2570/2688 [01:16<00:03, 37.18it/s, now=None]t:  96%|█████████▌| 2574/2688 [01:16<00:03, 36.97it/s, now=None]t:  96%|█████████▌| 2578/2688 [01:16<00:03, 36.13it/s, now=None]t:  96%|█████████▌| 2582/2688 [01:16<00:02, 36.58it/s, now=None]t:  96%|█████████▌| 2586/2688 [01:16<00:02, 36.08it/s, now=None]t:  96%|█████████▋| 2591/2688 [01:16<00:02, 38.40it/s, now=None]t:  97%|█████████▋| 2595/2688 [01:16<00:02, 31.96it/s, now=None]t:  97%|█████████▋| 2599/2688 [01:17<00:03, 28.17it/s, now=None]t:  97%|█████████▋| 2603/2688 [01:17<00:03, 26.78it/s, now=None]t:  97%|█████████▋| 2606/2688 [01:17<00:03, 25.85it/s, now=None]t:  97%|█████████▋| 2609/2688 [01:17<00:03, 24.52it/s, now=None]t:  97%|█████████▋| 2612/2688 [01:17<00:03, 23.74it/s, now=None]t:  97%|█████████▋| 2615/2688 [01:17<00:03, 23.64it/s, now=None]t:  97%|█████████▋| 2618/2688 [01:17<00:02, 24.37it/s, now=None]t:  98%|█████████▊| 2621/2688 [01:18<00:02, 22.51it/s, now=None]t:  98%|█████████▊| 2624/2688 [01:18<00:02, 21.72it/s, now=None]t:  98%|█████████▊| 2627/2688 [01:18<00:02, 20.40it/s, now=None]t:  98%|█████████▊| 2630/2688 [01:18<00:02, 21.75it/s, now=None]t:  98%|█████████▊| 2633/2688 [01:18<00:02, 20.74it/s, now=None]t:  98%|█████████▊| 2636/2688 [01:18<00:02, 20.55it/s, now=None]t:  98%|█████████▊| 2639/2688 [01:18<00:02, 20.87it/s, now=None]t:  98%|█████████▊| 2642/2688 [01:19<00:02, 20.85it/s, now=None]t:  98%|█████████▊| 2645/2688 [01:19<00:02, 20.85it/s, now=None]t:  99%|█████████▊| 2648/2688 [01:19<00:01, 20.52it/s, now=None]t:  99%|█████████▊| 2651/2688 [01:19<00:01, 22.18it/s, now=None]t:  99%|█████████▊| 2654/2688 [01:19<00:01, 20.91it/s, now=None]t:  99%|█████████▉| 2657/2688 [01:19<00:01, 20.29it/s, now=None]t:  99%|█████████▉| 2660/2688 [01:19<00:01, 20.10it/s, now=None]t:  99%|█████████▉| 2663/2688 [01:20<00:01, 18.12it/s, now=None]t:  99%|█████████▉| 2665/2688 [01:20<00:01, 16.90it/s, now=None]t:  99%|█████████▉| 2667/2688 [01:20<00:01, 17.13it/s, now=None]t:  99%|█████████▉| 2670/2688 [01:20<00:00, 18.69it/s, now=None]t:  99%|█████████▉| 2672/2688 [01:20<00:00, 17.68it/s, now=None]t:  99%|█████████▉| 2674/2688 [01:20<00:00, 16.99it/s, now=None]t: 100%|█████████▉| 2676/2688 [01:20<00:00, 15.97it/s, now=None]t: 100%|█████████▉| 2678/2688 [01:21<00:00, 13.58it/s, now=None]t: 100%|█████████▉| 2680/2688 [01:21<00:00, 12.32it/s, now=None]t: 100%|█████████▉| 2682/2688 [01:21<00:00, 13.58it/s, now=None]t: 100%|█████████▉| 2685/2688 [01:21<00:00, 15.68it/s, now=None]t: 100%|██████████| 2688/2688 [01:21<00:00, 17.63it/s, now=None]                                                                Moviepy - Done !
+Moviepy - video ready results/the_52_hertz_whale__the_loneliest_voice_in_t/the_52_hertz_whale__the_loneliest_voice_in_t_v1.mp4
+  Rendered 89.6s, 19.3 MB (96.8s)
+  [grade] organic texture pass (grain=8, strength=1.0)
+  Graded 89.6s (403.5s)
+
+[11/16] MUSIC & SOUND (ffmpeg sidechain ducking, bed=cinematic.mp3)
+  !! cinematic.mp3 is silent (-91 dB) — using synth bed
+  [sfx] event-driven SFX timeline: sfx_timeline_run.wav
+  Music mixed (ducked under narration): 89.6s, 63.6 MB, mean=-16.2 dB ✓
+  [audio-qa] passed=True narration_clipping=True; ducking_depth=True
+
+[13/16] VIDEO REVIEW (Gemini Flash, end-to-end)
+→ Uploading results/the_52_hertz_whale__the_loneliest_voice_in_t/the_52_hertz_whale__the_loneliest_voice_in_t_v1_mixed.mp4 to Gemini...
+→ Uploaded: files/f8ddo9ha5oql (FileState.PROCESSING)
+→ Reviewing with gemini-2.5-flash...
+→ Reviewing with gemini-2.5-flash... (attempt 2/5)
+→ Reviewing with gemini-2.5-flash... (attempt 3/5)
+→ Reviewing with gemini-2.5-flash... (attempt 4/5)
+→ Reviewing with gemini-2.5-flash... (attempt 5/5)
+  Score: 35/100 (conf 0.9) | recs: 5
+  Score 35 < 70 → improvement loop active (max 2 renders)
+
+[14/16] IMPROVEMENT PASS planning (iteration 2/2)
+    APPLY  [transitions] [transitions][high] Implement smoother and more logical transitions between scenes. Avoid abrupt cuts to black
+    FLAG   [new_asset] Replace all irrelevant visuals (space, planets, bar charts, alien, astronaut) with imagery directl
+    FLAG   [unclassified] Establish a consistent visual style throughout the documentary. If using abstract animations, e
+    FLAG   [unclassified] Re-purpose the Manim-style animation for relevant data visualization. For example, use it to co
+    FLAG   [unclassified] Ensure all visual elements fill the screen or are intentionally framed. The small, corner-only 
+  Timeline mutated: ['transitions: 15 cuts → fades']
+
+[12/16] RENDERING → results/the_52_hertz_whale__the_loneliest_voice_in_t/the_52_hertz_whale__the_loneliest_voice_in_t_v1.mp4
+  [subs] 195 subtitle clips (10 scenes)
+-> Adding 195 animated subtitle clips...
+Rendering results/the_52_hertz_whale__the_loneliest_voice_in_t/the_52_hertz_whale__the_loneliest_voice_in_t_v1.mp4 on CPU...
+Moviepy - Building video results/the_52_hertz_whale__the_loneliest_voice_in_t/the_52_hertz_whale__the_loneliest_voice_in_t_v1.mp4.
+MoviePy - Writing audio in the_52_hertz_whale__the_loneliest_voice_in_t_v1TEMP_MPY_wvf_snd.mp4
+chunk:   0%|          | 0/1976 [00:00<?, ?it/s, now=None]chunk:   6%|▌         | 109/1976 [00:00<00:04, 447.60it/s, now=None]chunk:   8%|▊         | 154/1976 [00:00<00:04, 395.09it/s, now=None]chunk:  10%|█         | 207/1976 [00:00<00:04, 432.76it/s, now=None]chunk:  13%|█▎        | 251/1976 [00:00<00:04, 414.71it/s, now=None]chunk:  15%|█▍        | 293/1976 [00:00<00:04, 401.76it/s, now=None]chunk:  17%|█▋        | 335/1976 [00:00<00:04, 405.20it/s, now=None]chunk:  19%|█▉        | 376/1976 [00:00<00:04, 371.56it/s, now=None]chunk:  21%|██▏       | 423/1976 [00:01<00:03, 390.92it/s, now=None]chunk:  23%|██▎       | 463/1976 [00:01<00:03, 388.06it/s, now=None]chunk:  25%|██▌       | 503/1976 [00:01<00:04, 332.00it/s, now=None]chunk:  27%|██▋       | 543/1976 [00:01<00:04, 340.82it/s, now=None]chunk:  29%|██▉       | 579/1976 [00:01<00:04, 335.28it/s, now=None]chunk:  31%|███       | 614/1976 [00:01<00:04, 327.40it/s, now=None]chunk:  33%|███▎      | 648/1976 [00:01<00:04, 309.23it/s, now=None]chunk:  35%|███▌      | 695/1976 [00:01<00:03, 349.03it/s, now=None]chunk:  38%|███▊      | 743/1976 [00:01<00:03, 381.87it/s, now=None]chunk:  40%|███▉      | 782/1976 [00:02<00:03, 363.64it/s, now=None]chunk:  41%|████▏     | 820/1976 [00:02<00:03, 363.35it/s, now=None]chunk:  43%|████▎     | 859/1976 [00:02<00:03, 369.50it/s, now=None]chunk:  45%|████▌     | 897/1976 [00:02<00:03, 355.94it/s, now=None]chunk:  47%|████▋     | 933/1976 [00:02<00:03, 345.69it/s, now=None]chunk:  49%|████▉     | 968/1976 [00:02<00:02, 346.03it/s, now=None]chunk:  51%|█████     | 1006/1976 [00:02<00:02, 355.44it/s, now=None]chunk:  53%|█████▎    | 1043/1976 [00:02<00:02, 356.86it/s, now=None]chunk:  55%|█████▍    | 1083/1976 [00:02<00:02, 358.21it/s, now=None]chunk:  57%|█████▋    | 1127/1976 [00:03<00:02, 380.10it/s, now=None]chunk:  59%|█████▉    | 1166/1976 [00:03<00:02, 373.79it/s, now=None]chunk:  61%|██████    | 1204/1976 [00:03<00:02, 331.27it/s, now=None]chunk:  63%|██████▎   | 1243/1976 [00:03<00:02, 344.97it/s, now=None]chunk:  65%|██████▍   | 1283/1976 [00:03<00:01, 354.83it/s, now=None]chunk:  67%|██████▋   | 1327/1976 [00:03<00:01, 376.71it/s, now=None]chunk:  69%|██████▉   | 1367/1976 [00:03<00:01, 378.80it/s, now=None]chunk:  71%|███████   | 1406/1976 [00:03<00:01, 368.50it/s, now=None]chunk:  73%|███████▎  | 1444/1976 [00:03<00:01, 357.31it/s, now=None]chunk:  76%|███████▌  | 1499/1976 [00:04<00:01, 408.24it/s, now=None]chunk:  78%|███████▊  | 1541/1976 [00:04<00:01, 407.08it/s, now=None]chunk:  80%|████████  | 1583/1976 [00:04<00:01, 371.94it/s, now=None]chunk:  82%|████████▏ | 1621/1976 [00:04<00:00, 361.82it/s, now=None]chunk:  84%|████████▍ | 1658/1976 [00:04<00:00, 351.78it/s, now=None]chunk:  86%|████████▌ | 1694/1976 [00:04<00:00, 340.57it/s, now=None]chunk:  88%|████████▊ | 1729/1976 [00:04<00:00, 338.61it/s, now=None]chunk:  89%|████████▉ | 1767/1976 [00:04<00:00, 332.99it/s, now=None]chunk:  91%|█████████▏| 1807/1976 [00:04<00:00, 337.59it/s, now=None]chunk:  93%|█████████▎| 1843/1976 [00:05<00:00, 335.43it/s, now=None]chunk:  95%|█████████▌| 1887/1976 [00:05<00:00, 352.93it/s, now=None]chunk:  98%|█████████▊| 1932/1976 [00:05<00:00, 379.73it/s, now=None]chunk: 100%|█████████▉| 1971/1976 [00:05<00:00, 365.66it/s, now=None]                                                                     MoviePy - Done.
+Moviepy - Writing video results/the_52_hertz_whale__the_loneliest_voice_in_t/the_52_hertz_whale__the_loneliest_voice_in_t_v1.mp4
+
+t:   0%|          | 0/2688 [00:00<?, ?it/s, now=None]t:   0%|          | 4/2688 [00:00<01:21, 32.99it/s, now=None]t:   0%|          | 8/2688 [00:00<01:20, 33.20it/s, now=None]t:   0%|          | 12/2688 [00:00<01:22, 32.59it/s, now=None]t:   1%|          | 16/2688 [00:00<01:22, 32.51it/s, now=None]t:   1%|          | 20/2688 [00:00<01:19, 33.38it/s, now=None]t:   1%|          | 24/2688 [00:00<01:43, 25.83it/s, now=None]t:   1%|          | 27/2688 [00:00<01:48, 24.43it/s, now=None]t:   1%|          | 31/2688 [00:01<01:37, 27.19it/s, now=None]t:   1%|▏         | 35/2688 [00:01<01:31, 29.12it/s, now=None]t:   1%|▏         | 39/2688 [00:01<01:28, 30.04it/s, now=None]t:   2%|▏         | 43/2688 [00:01<01:24, 31.14it/s, now=None]t:   2%|▏         | 47/2688 [00:01<01:28, 29.99it/s, now=None]t:   2%|▏         | 51/2688 [00:01<01:39, 26.45it/s, now=None]t:   2%|▏         | 54/2688 [00:01<01:39, 26.61it/s, now=None]t:   2%|▏         | 57/2688 [00:01<01:36, 27.32it/s, now=None]t:   2%|▏         | 61/2688 [00:02<01:30, 28.99it/s, now=None]t:   2%|▏         | 64/2688 [00:02<01:30, 29.04it/s, now=None]t:   3%|▎         | 68/2688 [00:02<01:25, 30.66it/s, now=None]t:   3%|▎         | 72/2688 [00:02<01:24, 30.92it/s, now=None]t:   3%|▎         | 76/2688 [00:02<01:21, 32.00it/s, now=None]t:   3%|▎         | 80/2688 [00:02<01:21, 31.83it/s, now=None]t:   3%|▎         | 84/2688 [00:02<01:19, 32.87it/s, now=None]t:   3%|▎         | 88/2688 [00:02<01:18, 33.33it/s, now=None]t:   3%|▎         | 92/2688 [00:03<01:19, 32.73it/s, now=None]t:   4%|▎         | 96/2688 [00:03<01:25, 30.33it/s, now=None]t:   4%|▎         | 100/2688 [00:03<01:41, 25.57it/s, now=None]t:   4%|▍         | 104/2688 [00:03<01:38, 26.16it/s, now=None]t:   4%|▍         | 107/2688 [00:03<01:39, 25.89it/s, now=None]t:   4%|▍         | 111/2688 [00:03<01:35, 26.95it/s, now=None]t:   4%|▍         | 115/2688 [00:03<01:30, 28.42it/s, now=None]t:   4%|▍         | 119/2688 [00:04<01:28, 28.98it/s, now=None]t:   5%|▍         | 122/2688 [00:04<01:29, 28.56it/s, now=None]t:   5%|▍         | 125/2688 [00:04<01:36, 26.63it/s, now=None]t:   5%|▍         | 128/2688 [00:04<01:53, 22.57it/s, now=None]t:   5%|▍         | 131/2688 [00:04<01:54, 22.29it/s, now=None]t:   5%|▍         | 134/2688 [00:04<01:53, 22.47it/s, now=None]t:   5%|▌         | 137/2688 [00:04<01:56, 21.89it/s, now=None]t:   5%|▌         | 140/2688 [00:05<01:57, 21.74it/s, now=None]t:   5%|▌         | 143/2688 [00:05<01:52, 22.55it/s, now=None]t:   5%|▌         | 146/2688 [00:05<01:46, 23.92it/s, now=None]t:   6%|▌         | 149/2688 [00:05<01:52, 22.61it/s, now=None]t:   6%|▌         | 153/2688 [00:05<01:39, 25.40it/s, now=None]t:   6%|▌         | 156/2688 [00:05<01:41, 24.93it/s, now=None]t:   6%|▌         | 160/2688 [00:05<01:36, 26.13it/s, now=None]t:   6%|▌         | 163/2688 [00:05<01:40, 25.14it/s, now=None]t:   6%|▌         | 167/2688 [00:06<01:33, 27.10it/s, now=None]t:   6%|▋         | 171/2688 [00:06<01:30, 27.96it/s, now=None]t:   7%|▋         | 175/2688 [00:06<01:29, 28.08it/s, now=None]t:   7%|▋         | 179/2688 [00:06<01:24, 29.79it/s, now=None]t:   7%|▋         | 183/2688 [00:06<01:23, 30.00it/s, now=None]t:   7%|▋         | 187/2688 [00:06<01:26, 28.92it/s, now=None]t:   7%|▋         | 191/2688 [00:06<01:22, 30.23it/s, now=None]t:   7%|▋         | 195/2688 [00:06<01:20, 31.11it/s, now=None]t:   7%|▋         | 199/2688 [00:07<01:17, 32.31it/s, now=None]t:   8%|▊         | 203/2688 [00:07<01:14, 33.22it/s, now=None]t:   8%|▊         | 207/2688 [00:07<01:13, 33.92it/s, now=None]t:   8%|▊         | 211/2688 [00:07<01:20, 30.72it/s, now=None]t:   8%|▊         | 215/2688 [00:07<01:25, 28.99it/s, now=None]t:   8%|▊         | 218/2688 [00:07<01:39, 24.75it/s, now=None]t:   8%|▊         | 221/2688 [00:07<01:41, 24.20it/s, now=None]t:   8%|▊         | 225/2688 [00:08<01:43, 23.91it/s, now=None]t:   8%|▊         | 228/2688 [00:08<01:41, 24.33it/s, now=None]t:   9%|▊         | 231/2688 [00:08<01:41, 24.18it/s, now=None]t:   9%|▊         | 235/2688 [00:08<01:34, 25.87it/s, now=None]t:   9%|▉         | 238/2688 [00:08<01:33, 26.34it/s, now=None]t:   9%|▉         | 241/2688 [00:08<01:32, 26.33it/s, now=None]t:   9%|▉         | 245/2688 [00:08<01:31, 26.81it/s, now=None]t:   9%|▉         | 248/2688 [00:08<01:29, 27.29it/s, now=None]t:   9%|▉         | 252/2688 [00:09<01:25, 28.49it/s, now=None]t:  10%|▉         | 256/2688 [00:09<01:22, 29.63it/s, now=None]t:  10%|▉         | 259/2688 [00:09<01:23, 29.13it/s, now=None]t:  10%|▉         | 263/2688 [00:09<01:19, 30.40it/s, now=None]t:  10%|▉         | 267/2688 [00:09<01:13, 32.86it/s, now=None]t:  10%|█         | 271/2688 [00:09<01:09, 34.78it/s, now=None]t:  10%|█         | 275/2688 [00:09<01:07, 35.94it/s, now=None]t:  10%|█         | 279/2688 [00:09<01:11, 33.77it/s, now=None]t:  11%|█         | 283/2688 [00:10<01:13, 32.84it/s, now=None]t:  11%|█         | 287/2688 [00:10<01:12, 33.06it/s, now=None]t:  11%|█         | 291/2688 [00:10<01:11, 33.37it/s, now=None]t:  11%|█         | 295/2688 [00:10<01:11, 33.50it/s, now=None]t:  11%|█         | 300/2688 [00:10<01:05, 36.63it/s, now=None]t:  11%|█▏        | 304/2688 [00:10<01:04, 37.16it/s, now=None]t:  11%|█▏        | 308/2688 [00:10<01:04, 36.88it/s, now=None]t:  12%|█▏        | 312/2688 [00:10<01:05, 36.24it/s, now=None]t:  12%|█▏        | 316/2688 [00:10<01:05, 36.42it/s, now=None]t:  12%|█▏        | 320/2688 [00:11<01:04, 36.96it/s, now=None]t:  12%|█▏        | 324/2688 [00:11<01:03, 37.50it/s, now=None]t:  12%|█▏        | 328/2688 [00:11<01:03, 37.44it/s, now=None]t:  12%|█▏        | 332/2688 [00:11<01:02, 37.42it/s, now=None]t:  12%|█▎        | 336/2688 [00:11<01:02, 37.88it/s, now=None]t:  13%|█▎        | 340/2688 [00:11<01:01, 37.89it/s, now=None]t:  13%|█▎        | 344/2688 [00:11<01:01, 37.96it/s, now=None]t:  13%|█▎        | 349/2688 [00:11<00:59, 39.34it/s, now=None]t:  13%|█▎        | 354/2688 [00:11<00:56, 41.19it/s, now=None]t:  13%|█▎        | 359/2688 [00:12<00:59, 39.00it/s, now=None]t:  14%|█▎        | 363/2688 [00:12<00:59, 38.82it/s, now=None]t:  14%|█▎        | 367/2688 [00:12<01:05, 35.67it/s, now=None]t:  14%|█▍        | 371/2688 [00:12<01:10, 32.96it/s, now=None]t:  14%|█▍        | 375/2688 [00:12<01:10, 32.60it/s, now=None]t:  14%|█▍        | 379/2688 [00:12<01:09, 33.45it/s, now=None]t:  14%|█▍        | 383/2688 [00:12<01:07, 34.35it/s, now=None]t:  14%|█▍        | 388/2688 [00:12<01:01, 37.15it/s, now=None]t:  15%|█▍        | 393/2688 [00:13<01:02, 36.73it/s, now=None]t:  15%|█▍        | 397/2688 [00:13<01:07, 33.80it/s, now=None]t:  15%|█▍        | 401/2688 [00:13<01:05, 35.09it/s, now=None]t:  15%|█▌        | 405/2688 [00:13<01:12, 31.40it/s, now=None]t:  15%|█▌        | 409/2688 [00:13<01:15, 30.33it/s, now=None]t:  15%|█▌        | 413/2688 [00:13<01:16, 29.84it/s, now=None]t:  16%|█▌        | 417/2688 [00:13<01:14, 30.49it/s, now=None]t:  16%|█▌        | 421/2688 [00:14<01:20, 28.09it/s, now=None]t:  16%|█▌        | 424/2688 [00:14<01:22, 27.46it/s, now=None]t:  16%|█▌        | 427/2688 [00:14<01:30, 24.87it/s, now=None]t:  16%|█▌        | 430/2688 [00:14<01:28, 25.59it/s, now=None]t:  16%|█▌        | 433/2688 [00:14<01:24, 26.55it/s, now=None]t:  16%|█▌        | 436/2688 [00:14<01:22, 27.20it/s, now=None]t:  16%|█▋        | 440/2688 [00:14<01:18, 28.77it/s, now=None]t:  17%|█▋        | 444/2688 [00:14<01:12, 30.77it/s, now=None]t:  17%|█▋        | 448/2688 [00:14<01:09, 32.20it/s, now=None]t:  17%|█▋        | 452/2688 [00:15<01:09, 32.02it/s, now=None]t:  17%|█▋        | 456/2688 [00:15<01:08, 32.51it/s, now=None]t:  17%|█▋        | 461/2688 [00:15<01:03, 35.21it/s, now=None]t:  17%|█▋        | 465/2688 [00:15<01:03, 34.77it/s, now=None]t:  17%|█▋        | 469/2688 [00:15<01:02, 35.40it/s, now=None]t:  18%|█▊        | 473/2688 [00:15<01:03, 35.13it/s, now=None]t:  18%|█▊        | 477/2688 [00:15<01:01, 36.01it/s, now=None]t:  18%|█▊        | 481/2688 [00:15<00:59, 36.86it/s, now=None]t:  18%|█▊        | 485/2688 [00:15<01:00, 36.21it/s, now=None]t:  18%|█▊        | 489/2688 [00:16<01:00, 36.41it/s, now=None]t:  18%|█▊        | 493/2688 [00:16<01:00, 36.08it/s, now=None]t:  19%|█▊        | 498/2688 [00:16<00:59, 37.10it/s, now=None]t:  19%|█▊        | 502/2688 [00:16<00:59, 36.52it/s, now=None]t:  19%|█▉        | 506/2688 [00:16<00:59, 36.63it/s, now=None]t:  19%|█▉        | 510/2688 [00:16<01:01, 35.47it/s, now=None]t:  19%|█▉        | 514/2688 [00:16<01:00, 35.74it/s, now=None]t:  19%|█▉        | 518/2688 [00:16<00:59, 36.50it/s, now=None]t:  19%|█▉        | 522/2688 [00:16<00:58, 36.96it/s, now=None]t:  20%|█▉        | 526/2688 [00:17<00:58, 37.05it/s, now=None]t:  20%|█▉        | 530/2688 [00:17<00:58, 36.92it/s, now=None]t:  20%|█▉        | 534/2688 [00:17<00:57, 37.58it/s, now=None]t:  20%|██        | 538/2688 [00:17<00:58, 37.04it/s, now=None]t:  20%|██        | 543/2688 [00:17<00:55, 38.66it/s, now=None]t:  20%|██        | 549/2688 [00:17<00:49, 43.09it/s, now=None]t:  21%|██        | 554/2688 [00:17<00:48, 43.91it/s, now=None]t:  21%|██        | 560/2688 [00:17<00:45, 46.60it/s, now=None]t:  21%|██        | 565/2688 [00:17<00:45, 46.83it/s, now=None]t:  21%|██        | 570/2688 [00:18<00:45, 46.50it/s, now=None]t:  21%|██▏       | 576/2688 [00:18<00:44, 47.66it/s, now=None]t:  22%|██▏       | 582/2688 [00:18<00:43, 48.50it/s, now=None]t:  22%|██▏       | 587/2688 [00:18<00:45, 46.07it/s, now=None]t:  22%|██▏       | 592/2688 [00:18<00:45, 45.72it/s, now=None]t:  22%|██▏       | 597/2688 [00:18<00:44, 46.70it/s, now=None]t:  22%|██▏       | 602/2688 [00:18<00:44, 46.38it/s, now=None]t:  23%|██▎       | 607/2688 [00:18<00:44, 46.34it/s, now=None]t:  23%|██▎       | 613/2688 [00:18<00:43, 47.96it/s, now=None]t:  23%|██▎       | 618/2688 [00:19<00:43, 47.84it/s, now=None]t:  23%|██▎       | 623/2688 [00:19<00:43, 47.75it/s, now=None]t:  23%|██▎       | 629/2688 [00:19<00:42, 48.55it/s, now=None]t:  24%|██▎       | 635/2688 [00:19<00:40, 50.62it/s, now=None]t:  24%|██▍       | 641/2688 [00:19<00:40, 50.76it/s, now=None]t:  24%|██▍       | 647/2688 [00:19<00:40, 50.42it/s, now=None]t:  24%|██▍       | 653/2688 [00:19<00:40, 50.33it/s, now=None]t:  25%|██▍       | 659/2688 [00:19<00:42, 48.29it/s, now=None]t:  25%|██▍       | 664/2688 [00:20<00:44, 45.50it/s, now=None]t:  25%|██▍       | 669/2688 [00:20<00:45, 44.27it/s, now=None]t:  25%|██▌       | 674/2688 [00:20<00:48, 41.37it/s, now=None]t:  25%|██▌       | 679/2688 [00:20<00:49, 40.44it/s, now=None]t:  25%|██▌       | 684/2688 [00:20<00:47, 41.81it/s, now=None]t:  26%|██▌       | 689/2688 [00:20<00:46, 42.53it/s, now=None]t:  26%|██▌       | 694/2688 [00:20<00:48, 41.36it/s, now=None]t:  26%|██▌       | 699/2688 [00:20<00:48, 40.93it/s, now=None]t:  26%|██▌       | 704/2688 [00:21<00:48, 41.22it/s, now=None]t:  26%|██▋       | 709/2688 [00:21<00:48, 40.98it/s, now=None]t:  27%|██▋       | 714/2688 [00:21<00:47, 41.30it/s, now=None]t:  27%|██▋       | 720/2688 [00:21<00:45, 43.43it/s, now=None]t:  27%|██▋       | 725/2688 [00:21<00:46, 42.55it/s, now=None]t:  27%|██▋       | 730/2688 [00:21<00:45, 43.13it/s, now=None]t:  27%|██▋       | 735/2688 [00:21<00:44, 43.49it/s, now=None]t:  28%|██▊       | 740/2688 [00:21<00:47, 41.19it/s, now=None]t:  28%|██▊       | 745/2688 [00:22<00:46, 41.80it/s, now=None]t:  28%|██▊       | 750/2688 [00:22<00:45, 43.06it/s, now=None]t:  28%|██▊       | 755/2688 [00:22<00:46, 41.45it/s, now=None]t:  28%|██▊       | 760/2688 [00:22<00:50, 38.18it/s, now=None]t:  28%|██▊       | 765/2688 [00:22<00:50, 38.04it/s, now=None]t:  29%|██▊       | 770/2688 [00:22<00:48, 39.36it/s, now=None]t:  29%|██▉       | 775/2688 [00:22<00:46, 41.07it/s, now=None]t:  29%|██▉       | 780/2688 [00:22<00:44, 42.45it/s, now=None]t:  29%|██▉       | 785/2688 [00:22<00:43, 43.51it/s, now=None]t:  29%|██▉       | 790/2688 [00:23<00:42, 44.49it/s, now=None]t:  30%|██▉       | 795/2688 [00:23<00:43, 43.43it/s, now=None]t:  30%|██▉       | 800/2688 [00:23<00:41, 45.20it/s, now=None]t:  30%|██▉       | 805/2688 [00:23<00:42, 44.43it/s, now=None]t:  30%|███       | 811/2688 [00:23<00:40, 46.58it/s, now=None]t:  30%|███       | 816/2688 [00:23<00:42, 44.40it/s, now=None]t:  31%|███       | 821/2688 [00:23<00:41, 45.15it/s, now=None]t:  31%|███       | 826/2688 [00:23<00:42, 43.91it/s, now=None]t:  31%|███       | 831/2688 [00:24<00:43, 42.28it/s, now=None]t:  31%|███       | 837/2688 [00:24<00:40, 46.14it/s, now=None]t:  31%|███▏      | 843/2688 [00:24<00:40, 45.62it/s, now=None]t:  32%|███▏      | 848/2688 [00:24<00:41, 43.95it/s, now=None]t:  32%|███▏      | 853/2688 [00:24<00:44, 41.30it/s, now=None]t:  32%|███▏      | 858/2688 [00:24<00:44, 41.29it/s, now=None]t:  32%|███▏      | 863/2688 [00:24<00:44, 40.83it/s, now=None]t:  32%|███▏      | 868/2688 [00:24<00:44, 41.34it/s, now=None]t:  32%|███▏      | 873/2688 [00:25<00:47, 37.91it/s, now=None]t:  33%|███▎      | 877/2688 [00:25<00:49, 36.31it/s, now=None]t:  33%|███▎      | 881/2688 [00:25<00:50, 35.91it/s, now=None]t:  33%|███▎      | 885/2688 [00:25<00:57, 31.62it/s, now=None]t:  33%|███▎      | 889/2688 [00:25<00:54, 33.20it/s, now=None]t:  33%|███▎      | 893/2688 [00:25<00:53, 33.36it/s, now=None]t:  33%|███▎      | 897/2688 [00:25<00:52, 33.93it/s, now=None]t:  34%|███▎      | 901/2688 [00:25<00:52, 34.35it/s, now=None]t:  34%|███▎      | 906/2688 [00:26<00:47, 37.74it/s, now=None]t:  34%|███▍      | 910/2688 [00:26<00:46, 38.32it/s, now=None]t:  34%|███▍      | 916/2688 [00:26<00:41, 42.39it/s, now=None]t:  34%|███▍      | 922/2688 [00:26<00:39, 44.40it/s, now=None]t:  35%|███▍      | 928/2688 [00:26<00:37, 46.67it/s, now=None]t:  35%|███▍      | 933/2688 [00:26<00:37, 47.29it/s, now=None]t:  35%|███▍      | 938/2688 [00:26<00:38, 45.22it/s, now=None]t:  35%|███▌      | 943/2688 [00:26<00:38, 45.01it/s, now=None]t:  35%|███▌      | 948/2688 [00:26<00:39, 43.66it/s, now=None]t:  35%|███▌      | 954/2688 [00:27<00:38, 45.14it/s, now=None]t:  36%|███▌      | 959/2688 [00:27<00:37, 45.88it/s, now=None]t:  36%|███▌      | 965/2688 [00:27<00:36, 47.39it/s, now=None]t:  36%|███▌      | 970/2688 [00:27<00:36, 47.02it/s, now=None]t:  36%|███▋      | 976/2688 [00:27<00:35, 48.79it/s, now=None]t:  36%|███▋      | 981/2688 [00:27<00:34, 48.80it/s, now=None]t:  37%|███▋      | 986/2688 [00:27<00:35, 48.56it/s, now=None]t:  37%|███▋      | 992/2688 [00:27<00:34, 49.70it/s, now=None]t:  37%|███▋      | 998/2688 [00:27<00:33, 50.23it/s, now=None]t:  37%|███▋      | 1005/2688 [00:28<00:31, 54.23it/s, now=None]t:  38%|███▊      | 1011/2688 [00:28<00:31, 53.60it/s, now=None]t:  38%|███▊      | 1017/2688 [00:28<00:30, 54.24it/s, now=None]t:  38%|███▊      | 1023/2688 [00:28<00:34, 48.89it/s, now=None]t:  38%|███▊      | 1028/2688 [00:28<00:43, 38.35it/s, now=None]t:  38%|███▊      | 1033/2688 [00:28<00:42, 38.78it/s, now=None]t:  39%|███▊      | 1038/2688 [00:28<00:40, 41.21it/s, now=None]t:  39%|███▉      | 1044/2688 [00:28<00:36, 45.01it/s, now=None]t:  39%|███▉      | 1050/2688 [00:29<00:34, 47.54it/s, now=None]t:  39%|███▉      | 1056/2688 [00:29<00:33, 49.40it/s, now=None]t:  40%|███▉      | 1062/2688 [00:29<00:33, 47.98it/s, now=None]t:  40%|███▉      | 1068/2688 [00:29<00:32, 50.22it/s, now=None]t:  40%|███▉      | 1074/2688 [00:29<00:32, 50.07it/s, now=None]t:  40%|████      | 1080/2688 [00:29<00:32, 50.24it/s, now=None]t:  40%|████      | 1086/2688 [00:29<00:31, 50.39it/s, now=None]t:  41%|████      | 1092/2688 [00:29<00:34, 46.33it/s, now=None]t:  41%|████      | 1097/2688 [00:30<00:34, 45.99it/s, now=None]t:  41%|████      | 1102/2688 [00:30<00:36, 43.28it/s, now=None]t:  41%|████      | 1107/2688 [00:30<00:38, 40.89it/s, now=None]t:  41%|████▏     | 1112/2688 [00:30<00:40, 39.34it/s, now=None]t:  42%|████▏     | 1116/2688 [00:30<00:42, 37.06it/s, now=None]t:  42%|████▏     | 1120/2688 [00:30<00:41, 37.75it/s, now=None]t:  42%|████▏     | 1124/2688 [00:30<00:41, 37.79it/s, now=None]t:  42%|████▏     | 1128/2688 [00:30<00:41, 37.44it/s, now=None]t:  42%|████▏     | 1132/2688 [00:31<00:41, 37.28it/s, now=None]t:  42%|████▏     | 1137/2688 [00:31<00:40, 38.24it/s, now=None]t:  42%|████▏     | 1141/2688 [00:31<00:40, 38.42it/s, now=None]t:  43%|████▎     | 1145/2688 [00:31<00:41, 37.16it/s, now=None]t:  43%|████▎     | 1149/2688 [00:31<00:42, 36.10it/s, now=None]t:  43%|████▎     | 1153/2688 [00:31<00:42, 36.21it/s, now=None]t:  43%|████▎     | 1157/2688 [00:31<00:42, 35.65it/s, now=None]t:  43%|████▎     | 1162/2688 [00:31<00:40, 37.30it/s, now=None]t:  43%|████▎     | 1166/2688 [00:31<00:40, 37.51it/s, now=None]t:  44%|████▎     | 1171/2688 [00:32<00:38, 39.29it/s, now=None]t:  44%|████▎     | 1175/2688 [00:32<00:38, 38.85it/s, now=None]t:  44%|████▍     | 1179/2688 [00:32<00:39, 38.19it/s, now=None]t:  44%|████▍     | 1183/2688 [00:32<00:44, 33.91it/s, now=None]t:  44%|████▍     | 1187/2688 [00:32<00:42, 35.06it/s, now=None]t:  44%|████▍     | 1191/2688 [00:32<00:41, 35.66it/s, now=None]t:  44%|████▍     | 1195/2688 [00:32<00:40, 36.73it/s, now=None]t:  45%|████▍     | 1199/2688 [00:32<00:40, 36.45it/s, now=None]t:  45%|████▍     | 1203/2688 [00:32<00:45, 32.91it/s, now=None]t:  45%|████▍     | 1207/2688 [00:33<00:50, 29.44it/s, now=None]t:  45%|████▌     | 1211/2688 [00:33<00:50, 29.16it/s, now=None]t:  45%|████▌     | 1215/2688 [00:33<00:53, 27.36it/s, now=None]t:  45%|████▌     | 1218/2688 [00:33<00:54, 27.09it/s, now=None]t:  45%|████▌     | 1221/2688 [00:33<00:55, 26.42it/s, now=None]t:  46%|████▌     | 1224/2688 [00:33<00:54, 26.66it/s, now=None]t:  46%|████▌     | 1227/2688 [00:33<00:54, 26.83it/s, now=None]t:  46%|████▌     | 1230/2688 [00:34<00:55, 26.19it/s, now=None]t:  46%|████▌     | 1233/2688 [00:34<00:57, 25.22it/s, now=None]t:  46%|████▌     | 1237/2688 [00:34<00:53, 27.22it/s, now=None]t:  46%|████▌     | 1241/2688 [00:34<00:50, 28.40it/s, now=None]t:  46%|████▋     | 1244/2688 [00:34<00:50, 28.63it/s, now=None]t:  46%|████▋     | 1247/2688 [00:34<00:50, 28.45it/s, now=None]t:  47%|████▋     | 1251/2688 [00:34<00:47, 30.00it/s, now=None]t:  47%|████▋     | 1255/2688 [00:34<00:46, 30.81it/s, now=None]t:  47%|████▋     | 1259/2688 [00:34<00:44, 32.47it/s, now=None]t:  47%|████▋     | 1263/2688 [00:35<00:44, 32.36it/s, now=None]t:  47%|████▋     | 1267/2688 [00:35<00:41, 34.39it/s, now=None]t:  47%|████▋     | 1271/2688 [00:35<00:39, 35.43it/s, now=None]t:  47%|████▋     | 1275/2688 [00:35<00:39, 35.81it/s, now=None]t:  48%|████▊     | 1279/2688 [00:35<00:39, 35.64it/s, now=None]t:  48%|████▊     | 1283/2688 [00:35<00:41, 33.53it/s, now=None]t:  48%|████▊     | 1287/2688 [00:35<00:43, 32.40it/s, now=None]t:  48%|████▊     | 1291/2688 [00:35<00:41, 34.06it/s, now=None]t:  48%|████▊     | 1295/2688 [00:36<00:39, 34.94it/s, now=None]t:  48%|████▊     | 1299/2688 [00:36<00:38, 36.20it/s, now=None]t:  48%|████▊     | 1303/2688 [00:36<00:38, 36.12it/s, now=None]t:  49%|████▊     | 1308/2688 [00:36<00:37, 36.63it/s, now=None]t:  49%|████▉     | 1313/2688 [00:36<00:35, 38.79it/s, now=None]t:  49%|████▉     | 1317/2688 [00:36<00:36, 37.84it/s, now=None]t:  49%|████▉     | 1321/2688 [00:36<00:45, 29.88it/s, now=None]t:  49%|████▉     | 1325/2688 [00:36<00:48, 27.82it/s, now=None]t:  49%|████▉     | 1329/2688 [00:37<00:44, 30.50it/s, now=None]t:  50%|████▉     | 1334/2688 [00:37<00:40, 33.15it/s, now=None]t:  50%|████▉     | 1338/2688 [00:37<00:44, 30.19it/s, now=None]t:  50%|████▉     | 1342/2688 [00:37<00:47, 28.14it/s, now=None]t:  50%|█████     | 1345/2688 [00:37<00:51, 26.10it/s, now=None]t:  50%|█████     | 1348/2688 [00:37<00:52, 25.62it/s, now=None]t:  50%|█████     | 1352/2688 [00:37<00:48, 27.81it/s, now=None]t:  50%|█████     | 1357/2688 [00:38<00:45, 29.43it/s, now=None]t:  51%|█████     | 1360/2688 [00:38<00:48, 27.18it/s, now=None]t:  51%|█████     | 1363/2688 [00:38<00:52, 25.34it/s, now=None]t:  51%|█████     | 1366/2688 [00:38<00:58, 22.74it/s, now=None]t:  51%|█████     | 1369/2688 [00:38<00:57, 22.76it/s, now=None]t:  51%|█████     | 1372/2688 [00:38<00:54, 24.00it/s, now=None]t:  51%|█████     | 1375/2688 [00:38<00:53, 24.60it/s, now=None]t:  51%|█████▏    | 1379/2688 [00:38<00:47, 27.76it/s, now=None]t:  51%|█████▏    | 1383/2688 [00:39<00:45, 28.76it/s, now=None]t:  52%|█████▏    | 1386/2688 [00:39<00:49, 26.17it/s, now=None]t:  52%|█████▏    | 1389/2688 [00:39<00:53, 24.42it/s, now=None]t:  52%|█████▏    | 1392/2688 [00:39<00:53, 24.42it/s, now=None]t:  52%|█████▏    | 1395/2688 [00:39<00:53, 24.02it/s, now=None]t:  52%|█████▏    | 1399/2688 [00:39<00:48, 26.34it/s, now=None]t:  52%|█████▏    | 1402/2688 [00:39<00:50, 25.52it/s, now=None]t:  52%|█████▏    | 1405/2688 [00:39<00:48, 26.59it/s, now=None]t:  52%|█████▏    | 1408/2688 [00:40<00:49, 25.82it/s, now=None]t:  52%|█████▏    | 1411/2688 [00:40<00:51, 24.95it/s, now=None]t:  53%|█████▎    | 1414/2688 [00:40<00:51, 24.89it/s, now=None]t:  53%|█████▎    | 1417/2688 [00:40<00:48, 26.15it/s, now=None]t:  53%|█████▎    | 1420/2688 [00:40<00:54, 23.17it/s, now=None]t:  53%|█████▎    | 1423/2688 [00:40<00:51, 24.70it/s, now=None]t:  53%|█████▎    | 1426/2688 [00:40<00:57, 22.13it/s, now=None]t:  53%|█████▎    | 1429/2688 [00:41<00:58, 21.63it/s, now=None]t:  53%|█████▎    | 1433/2688 [00:41<00:50, 24.99it/s, now=None]t:  53%|█████▎    | 1436/2688 [00:41<00:48, 25.70it/s, now=None]t:  54%|█████▎    | 1440/2688 [00:41<00:44, 28.28it/s, now=None]t:  54%|█████▎    | 1443/2688 [00:41<00:43, 28.59it/s, now=None]t:  54%|█████▍    | 1447/2688 [00:41<00:42, 29.06it/s, now=None]t:  54%|█████▍    | 1451/2688 [00:41<00:40, 30.56it/s, now=None]t:  54%|█████▍    | 1455/2688 [00:41<00:39, 31.01it/s, now=None]t:  54%|█████▍    | 1459/2688 [00:41<00:36, 33.33it/s, now=None]t:  54%|█████▍    | 1464/2688 [00:42<00:33, 36.28it/s, now=None]t:  55%|█████▍    | 1468/2688 [00:42<00:33, 36.49it/s, now=None]t:  55%|█████▍    | 1472/2688 [00:42<00:32, 37.37it/s, now=None]t:  55%|█████▍    | 1476/2688 [00:42<00:31, 38.02it/s, now=None]t:  55%|█████▌    | 1480/2688 [00:42<00:31, 37.98it/s, now=None]t:  55%|█████▌    | 1484/2688 [00:42<00:32, 37.51it/s, now=None]t:  55%|█████▌    | 1488/2688 [00:42<00:35, 33.66it/s, now=None]t:  56%|█████▌    | 1492/2688 [00:42<00:38, 30.91it/s, now=None]t:  56%|█████▌    | 1496/2688 [00:43<00:37, 31.96it/s, now=None]t:  56%|█████▌    | 1500/2688 [00:43<00:37, 31.79it/s, now=None]t:  56%|█████▌    | 1504/2688 [00:43<00:36, 32.26it/s, now=None]t:  56%|█████▌    | 1509/2688 [00:43<00:34, 34.52it/s, now=None]t:  56%|█████▋    | 1514/2688 [00:43<00:31, 36.69it/s, now=None]t:  57%|█████▋    | 1519/2688 [00:43<00:31, 36.98it/s, now=None]t:  57%|█████▋    | 1524/2688 [00:43<00:30, 38.33it/s, now=None]t:  57%|█████▋    | 1529/2688 [00:43<00:29, 39.51it/s, now=None]t:  57%|█████▋    | 1534/2688 [00:43<00:28, 40.52it/s, now=None]t:  57%|█████▋    | 1539/2688 [00:44<00:29, 38.58it/s, now=None]t:  57%|█████▋    | 1544/2688 [00:44<00:28, 39.50it/s, now=None]t:  58%|█████▊    | 1548/2688 [00:44<00:38, 29.59it/s, now=None]t:  58%|█████▊    | 1552/2688 [00:44<00:43, 26.03it/s, now=None]t:  58%|█████▊    | 1555/2688 [00:44<00:44, 25.28it/s, now=None]t:  58%|█████▊    | 1558/2688 [00:44<00:45, 24.67it/s, now=None]t:  58%|█████▊    | 1562/2688 [00:45<00:41, 27.30it/s, now=None]t:  58%|█████▊    | 1566/2688 [00:45<00:37, 29.74it/s, now=None]t:  58%|█████▊    | 1570/2688 [00:45<00:34, 32.07it/s, now=None]t:  59%|█████▊    | 1574/2688 [00:45<00:34, 32.19it/s, now=None]t:  59%|█████▊    | 1578/2688 [00:45<00:33, 33.38it/s, now=None]t:  59%|█████▉    | 1582/2688 [00:45<00:32, 34.41it/s, now=None]t:  59%|█████▉    | 1586/2688 [00:45<00:30, 35.62it/s, now=None]t:  59%|█████▉    | 1590/2688 [00:45<00:30, 35.96it/s, now=None]t:  59%|█████▉    | 1594/2688 [00:45<00:31, 35.09it/s, now=None]t:  59%|█████▉    | 1598/2688 [00:46<00:32, 33.59it/s, now=None]t:  60%|█████▉    | 1602/2688 [00:46<00:30, 35.27it/s, now=None]t:  60%|█████▉    | 1606/2688 [00:46<00:29, 36.45it/s, now=None]t:  60%|█████▉    | 1610/2688 [00:46<00:30, 35.70it/s, now=None]t:  60%|██████    | 1614/2688 [00:46<00:32, 33.45it/s, now=None]t:  60%|██████    | 1618/2688 [00:46<00:33, 31.92it/s, now=None]t:  60%|██████    | 1622/2688 [00:46<00:34, 31.14it/s, now=None]t:  60%|██████    | 1626/2688 [00:46<00:34, 30.77it/s, now=None]t:  61%|██████    | 1630/2688 [00:47<00:33, 31.16it/s, now=None]t:  61%|██████    | 1634/2688 [00:47<00:32, 32.82it/s, now=None]t:  61%|██████    | 1638/2688 [00:47<00:31, 33.40it/s, now=None]t:  61%|██████    | 1642/2688 [00:47<00:32, 32.55it/s, now=None]t:  61%|██████    | 1646/2688 [00:47<00:31, 33.39it/s, now=None]t:  61%|██████▏   | 1650/2688 [00:47<00:30, 34.56it/s, now=None]t:  62%|██████▏   | 1654/2688 [00:47<00:30, 34.08it/s, now=None]t:  62%|██████▏   | 1658/2688 [00:47<00:31, 33.11it/s, now=None]t:  62%|██████▏   | 1662/2688 [00:47<00:29, 34.74it/s, now=None]t:  62%|██████▏   | 1666/2688 [00:48<00:29, 35.04it/s, now=None]t:  62%|██████▏   | 1671/2688 [00:48<00:27, 37.36it/s, now=None]t:  62%|██████▏   | 1676/2688 [00:48<00:26, 38.05it/s, now=None]t:  62%|██████▎   | 1680/2688 [00:48<00:27, 37.23it/s, now=None]t:  63%|██████▎   | 1684/2688 [00:48<00:27, 37.04it/s, now=None]t:  63%|██████▎   | 1688/2688 [00:48<00:27, 36.27it/s, now=None]t:  63%|██████▎   | 1692/2688 [00:48<00:31, 31.26it/s, now=None]t:  63%|██████▎   | 1696/2688 [00:49<00:36, 27.24it/s, now=None]t:  63%|██████▎   | 1699/2688 [00:49<00:41, 23.59it/s, now=None]t:  63%|██████▎   | 1702/2688 [00:49<00:41, 23.93it/s, now=None]t:  63%|██████▎   | 1705/2688 [00:49<00:45, 21.46it/s, now=None]t:  64%|██████▎   | 1709/2688 [00:49<00:48, 20.27it/s, now=None]t:  64%|██████▎   | 1712/2688 [00:49<00:44, 22.16it/s, now=None]t:  64%|██████▍   | 1715/2688 [00:50<00:51, 19.07it/s, now=None]t:  64%|██████▍   | 1718/2688 [00:50<00:46, 20.92it/s, now=None]t:  64%|██████▍   | 1721/2688 [00:50<00:48, 20.10it/s, now=None]t:  64%|██████▍   | 1724/2688 [00:50<00:49, 19.44it/s, now=None]t:  64%|██████▍   | 1727/2688 [00:50<00:44, 21.49it/s, now=None]t:  64%|██████▍   | 1730/2688 [00:50<00:44, 21.65it/s, now=None]t:  64%|██████▍   | 1733/2688 [00:50<00:45, 21.00it/s, now=None]t:  65%|██████▍   | 1736/2688 [00:50<00:41, 22.94it/s, now=None]t:  65%|██████▍   | 1739/2688 [00:51<00:43, 22.01it/s, now=None]t:  65%|██████▍   | 1743/2688 [00:51<00:43, 21.89it/s, now=None]t:  65%|██████▍   | 1746/2688 [00:51<00:41, 22.49it/s, now=None]t:  65%|██████▌   | 1749/2688 [00:51<00:43, 21.51it/s, now=None]t:  65%|██████▌   | 1753/2688 [00:51<00:42, 21.92it/s, now=None]t:  65%|██████▌   | 1756/2688 [00:51<00:42, 22.09it/s, now=None]t:  65%|██████▌   | 1759/2688 [00:52<00:44, 20.81it/s, now=None]t:  66%|██████▌   | 1763/2688 [00:52<00:44, 20.89it/s, now=None]t:  66%|██████▌   | 1766/2688 [00:52<00:41, 22.03it/s, now=None]t:  66%|██████▌   | 1769/2688 [00:52<00:41, 22.35it/s, now=None]t:  66%|██████▌   | 1773/2688 [00:52<00:42, 21.50it/s, now=None]t:  66%|██████▌   | 1777/2688 [00:52<00:44, 20.33it/s, now=None]t:  66%|██████▋   | 1781/2688 [00:53<00:44, 20.18it/s, now=None]t:  66%|██████▋   | 1784/2688 [00:53<00:41, 21.87it/s, now=None]t:  66%|██████▋   | 1787/2688 [00:53<00:41, 21.79it/s, now=None]t:  67%|██████▋   | 1791/2688 [00:53<00:36, 24.38it/s, now=None]t:  67%|██████▋   | 1794/2688 [00:53<00:36, 24.58it/s, now=None]t:  67%|██████▋   | 1797/2688 [00:53<00:35, 25.13it/s, now=None]t:  67%|██████▋   | 1803/2688 [00:53<00:26, 33.03it/s, now=None]t:  67%|██████▋   | 1809/2688 [00:53<00:22, 39.06it/s, now=None]t:  68%|██████▊   | 1816/2688 [00:54<00:19, 45.46it/s, now=None]t:  68%|██████▊   | 1821/2688 [00:54<00:20, 42.96it/s, now=None]t:  68%|██████▊   | 1826/2688 [00:54<00:22, 38.54it/s, now=None]t:  68%|██████▊   | 1831/2688 [00:54<00:24, 35.04it/s, now=None]t:  68%|██████▊   | 1835/2688 [00:54<00:24, 34.67it/s, now=None]t:  68%|██████▊   | 1839/2688 [00:54<00:25, 33.65it/s, now=None]t:  69%|██████▊   | 1843/2688 [00:54<00:27, 31.07it/s, now=None]t:  69%|██████▊   | 1847/2688 [00:55<00:26, 31.70it/s, now=None]t:  69%|██████▉   | 1851/2688 [00:55<00:25, 32.75it/s, now=None]t:  69%|██████▉   | 1855/2688 [00:55<00:24, 33.41it/s, now=None]t:  69%|██████▉   | 1859/2688 [00:55<00:25, 32.62it/s, now=None]t:  69%|██████▉   | 1864/2688 [00:55<00:23, 35.36it/s, now=None]t:  70%|██████▉   | 1869/2688 [00:55<00:21, 37.40it/s, now=None]t:  70%|██████▉   | 1873/2688 [00:55<00:22, 36.30it/s, now=None]t:  70%|██████▉   | 1877/2688 [00:55<00:25, 31.40it/s, now=None]t:  70%|██████▉   | 1881/2688 [00:56<00:26, 30.39it/s, now=None]t:  70%|███████   | 1885/2688 [00:56<00:25, 32.09it/s, now=None]t:  70%|███████   | 1889/2688 [00:56<00:23, 33.58it/s, now=None]t:  70%|███████   | 1893/2688 [00:56<00:23, 33.39it/s, now=None]t:  71%|███████   | 1897/2688 [00:56<00:23, 32.97it/s, now=None]t:  71%|███████   | 1901/2688 [00:56<00:24, 32.55it/s, now=None]t:  71%|███████   | 1905/2688 [00:56<00:23, 32.87it/s, now=None]t:  71%|███████   | 1910/2688 [00:56<00:22, 34.70it/s, now=None]t:  71%|███████   | 1914/2688 [00:57<00:21, 35.61it/s, now=None]t:  71%|███████▏  | 1919/2688 [00:57<00:20, 37.86it/s, now=None]t:  72%|███████▏  | 1923/2688 [00:57<00:20, 36.72it/s, now=None]t:  72%|███████▏  | 1927/2688 [00:57<00:20, 37.54it/s, now=None]t:  72%|███████▏  | 1931/2688 [00:57<00:20, 37.62it/s, now=None]t:  72%|███████▏  | 1935/2688 [00:57<00:20, 37.65it/s, now=None]t:  72%|███████▏  | 1939/2688 [00:57<00:19, 37.70it/s, now=None]t:  72%|███████▏  | 1943/2688 [00:57<00:25, 29.26it/s, now=None]t:  72%|███████▏  | 1947/2688 [00:58<00:27, 26.53it/s, now=None]t:  73%|███████▎  | 1951/2688 [00:58<00:26, 27.48it/s, now=None]t:  73%|███████▎  | 1955/2688 [00:58<00:24, 29.60it/s, now=None]t:  73%|███████▎  | 1959/2688 [00:58<00:23, 31.37it/s, now=None]t:  73%|███████▎  | 1963/2688 [00:58<00:22, 32.93it/s, now=None]t:  73%|███████▎  | 1967/2688 [00:58<00:20, 34.53it/s, now=None]t:  73%|███████▎  | 1971/2688 [00:58<00:20, 35.45it/s, now=None]t:  73%|███████▎  | 1975/2688 [00:58<00:20, 35.15it/s, now=None]t:  74%|███████▎  | 1979/2688 [00:58<00:19, 36.45it/s, now=None]t:  74%|███████▍  | 1983/2688 [00:59<00:18, 37.14it/s, now=None]t:  74%|███████▍  | 1987/2688 [00:59<00:18, 37.85it/s, now=None]t:  74%|███████▍  | 1991/2688 [00:59<00:18, 38.43it/s, now=None]t:  74%|███████▍  | 1995/2688 [00:59<00:18, 36.54it/s, now=None]t:  74%|███████▍  | 1999/2688 [00:59<00:20, 32.83it/s, now=None]t:  75%|███████▍  | 2003/2688 [00:59<00:21, 31.25it/s, now=None]t:  75%|███████▍  | 2007/2688 [00:59<00:21, 32.37it/s, now=None]t:  75%|███████▍  | 2011/2688 [00:59<00:20, 32.50it/s, now=None]t:  75%|███████▍  | 2015/2688 [01:00<00:20, 32.82it/s, now=None]t:  75%|███████▌  | 2020/2688 [01:00<00:19, 34.87it/s, now=None]t:  75%|███████▌  | 2025/2688 [01:00<00:18, 36.63it/s, now=None]t:  76%|███████▌  | 2030/2688 [01:00<00:18, 36.45it/s, now=None]t:  76%|███████▌  | 2035/2688 [01:00<00:17, 37.61it/s, now=None]t:  76%|███████▌  | 2039/2688 [01:00<00:17, 37.08it/s, now=None]t:  76%|███████▌  | 2044/2688 [01:00<00:16, 38.06it/s, now=None]t:  76%|███████▌  | 2048/2688 [01:00<00:17, 36.90it/s, now=None]t:  76%|███████▋  | 2052/2688 [01:01<00:17, 36.90it/s, now=None]t:  76%|███████▋  | 2056/2688 [01:01<00:18, 34.72it/s, now=None]t:  77%|███████▋  | 2060/2688 [01:01<00:17, 34.98it/s, now=None]t:  77%|███████▋  | 2064/2688 [01:01<00:19, 32.41it/s, now=None]t:  77%|███████▋  | 2068/2688 [01:01<00:18, 33.16it/s, now=None]t:  77%|███████▋  | 2073/2688 [01:01<00:16, 37.03it/s, now=None]t:  77%|███████▋  | 2079/2688 [01:01<00:14, 41.34it/s, now=None]t:  78%|███████▊  | 2084/2688 [01:01<00:16, 37.42it/s, now=None]t:  78%|███████▊  | 2090/2688 [01:01<00:14, 42.27it/s, now=None]t:  78%|███████▊  | 2096/2688 [01:02<00:13, 45.09it/s, now=None]t:  78%|███████▊  | 2102/2688 [01:02<00:12, 48.11it/s, now=None]t:  78%|███████▊  | 2108/2688 [01:02<00:11, 51.15it/s, now=None]t:  79%|███████▊  | 2114/2688 [01:02<00:11, 51.82it/s, now=None]t:  79%|███████▉  | 2120/2688 [01:02<00:11, 51.27it/s, now=None]t:  79%|███████▉  | 2126/2688 [01:02<00:10, 52.15it/s, now=None]t:  79%|███████▉  | 2132/2688 [01:02<00:10, 51.78it/s, now=None]t:  80%|███████▉  | 2138/2688 [01:02<00:10, 51.53it/s, now=None]t:  80%|███████▉  | 2144/2688 [01:03<00:10, 51.86it/s, now=None]t:  80%|███████▉  | 2150/2688 [01:03<00:10, 52.23it/s, now=None]t:  80%|████████  | 2156/2688 [01:03<00:10, 51.82it/s, now=None]t:  80%|████████  | 2163/2688 [01:03<00:09, 54.57it/s, now=None]t:  81%|████████  | 2169/2688 [01:03<00:09, 54.50it/s, now=None]t:  81%|████████  | 2177/2688 [01:03<00:08, 58.51it/s, now=None]t:  81%|████████  | 2183/2688 [01:03<00:08, 57.74it/s, now=None]t:  81%|████████▏ | 2189/2688 [01:03<00:09, 54.12it/s, now=None]t:  82%|████████▏ | 2195/2688 [01:03<00:09, 50.32it/s, now=None]t:  82%|████████▏ | 2201/2688 [01:04<00:09, 49.91it/s, now=None]t:  82%|████████▏ | 2207/2688 [01:04<00:10, 48.03it/s, now=None]t:  82%|████████▏ | 2212/2688 [01:04<00:10, 46.90it/s, now=None]t:  82%|████████▏ | 2217/2688 [01:04<00:10, 44.38it/s, now=None]t:  83%|████████▎ | 2222/2688 [01:04<00:10, 43.22it/s, now=None]t:  83%|████████▎ | 2227/2688 [01:04<00:11, 41.77it/s, now=None]t:  83%|████████▎ | 2232/2688 [01:04<00:11, 40.06it/s, now=None]t:  83%|████████▎ | 2237/2688 [01:04<00:10, 41.76it/s, now=None]t:  83%|████████▎ | 2242/2688 [01:05<00:10, 42.07it/s, now=None]t:  84%|████████▎ | 2247/2688 [01:05<00:10, 42.47it/s, now=None]t:  84%|████████▍ | 2252/2688 [01:05<00:10, 42.51it/s, now=None]t:  84%|████████▍ | 2257/2688 [01:05<00:09, 43.34it/s, now=None]t:  84%|████████▍ | 2262/2688 [01:05<00:10, 41.17it/s, now=None]t:  84%|████████▍ | 2267/2688 [01:05<00:10, 39.68it/s, now=None]t:  85%|████████▍ | 2272/2688 [01:05<00:10, 38.03it/s, now=None]t:  85%|████████▍ | 2276/2688 [01:05<00:11, 34.68it/s, now=None]t:  85%|████████▍ | 2281/2688 [01:06<00:11, 36.10it/s, now=None]t:  85%|████████▌ | 2286/2688 [01:06<00:11, 35.99it/s, now=None]t:  85%|████████▌ | 2290/2688 [01:06<00:13, 30.45it/s, now=None]t:  85%|████████▌ | 2294/2688 [01:06<00:12, 31.69it/s, now=None]t:  85%|████████▌ | 2298/2688 [01:06<00:11, 32.61it/s, now=None]t:  86%|████████▌ | 2302/2688 [01:06<00:13, 29.05it/s, now=None]t:  86%|████████▌ | 2306/2688 [01:06<00:13, 29.25it/s, now=None]t:  86%|████████▌ | 2310/2688 [01:07<00:13, 28.01it/s, now=None]t:  86%|████████▌ | 2314/2688 [01:07<00:12, 29.46it/s, now=None]t:  86%|████████▌ | 2318/2688 [01:07<00:14, 25.99it/s, now=None]t:  86%|████████▋ | 2321/2688 [01:07<00:13, 26.57it/s, now=None]t:  86%|████████▋ | 2324/2688 [01:07<00:14, 24.27it/s, now=None]t:  87%|████████▋ | 2327/2688 [01:07<00:14, 24.26it/s, now=None]t:  87%|████████▋ | 2330/2688 [01:08<00:16, 21.21it/s, now=None]t:  87%|████████▋ | 2334/2688 [01:08<00:15, 22.92it/s, now=None]t:  87%|████████▋ | 2337/2688 [01:08<00:14, 23.95it/s, now=None]t:  87%|████████▋ | 2340/2688 [01:08<00:17, 19.41it/s, now=None]t:  87%|████████▋ | 2343/2688 [01:08<00:16, 20.74it/s, now=None]t:  87%|████████▋ | 2346/2688 [01:08<00:17, 19.64it/s, now=None]t:  87%|████████▋ | 2349/2688 [01:08<00:15, 21.50it/s, now=None]t:  88%|████████▊ | 2352/2688 [01:09<00:17, 18.88it/s, now=None]t:  88%|████████▊ | 2355/2688 [01:09<00:18, 18.40it/s, now=None]t:  88%|████████▊ | 2357/2688 [01:09<00:17, 18.60it/s, now=None]t:  88%|████████▊ | 2359/2688 [01:09<00:18, 17.44it/s, now=None]t:  88%|████████▊ | 2362/2688 [01:09<00:17, 18.26it/s, now=None]t:  88%|████████▊ | 2364/2688 [01:09<00:18, 17.56it/s, now=None]t:  88%|████████▊ | 2366/2688 [01:09<00:18, 17.67it/s, now=None]t:  88%|████████▊ | 2369/2688 [01:10<00:15, 20.14it/s, now=None]t:  88%|████████▊ | 2372/2688 [01:10<00:15, 19.82it/s, now=None]t:  88%|████████▊ | 2375/2688 [01:10<00:14, 21.72it/s, now=None]t:  88%|████████▊ | 2378/2688 [01:10<00:15, 20.59it/s, now=None]t:  89%|████████▊ | 2382/2688 [01:10<00:12, 24.23it/s, now=None]t:  89%|████████▉ | 2387/2688 [01:10<00:10, 28.89it/s, now=None]t:  89%|████████▉ | 2390/2688 [01:10<00:12, 24.72it/s, now=None]t:  89%|████████▉ | 2393/2688 [01:11<00:13, 22.32it/s, now=None]t:  89%|████████▉ | 2396/2688 [01:11<00:12, 23.70it/s, now=None]t:  89%|████████▉ | 2399/2688 [01:11<00:12, 23.46it/s, now=None]t:  89%|████████▉ | 2402/2688 [01:11<00:12, 23.14it/s, now=None]t:  89%|████████▉ | 2405/2688 [01:11<00:11, 24.53it/s, now=None]t:  90%|████████▉ | 2408/2688 [01:11<00:11, 25.35it/s, now=None]t:  90%|████████▉ | 2412/2688 [01:11<00:10, 26.86it/s, now=None]t:  90%|████████▉ | 2415/2688 [01:11<00:10, 26.89it/s, now=None]t:  90%|████████▉ | 2418/2688 [01:11<00:09, 27.70it/s, now=None]t:  90%|█████████ | 2422/2688 [01:12<00:09, 29.36it/s, now=None]t:  90%|█████████ | 2426/2688 [01:12<00:08, 31.11it/s, now=None]t:  90%|█████████ | 2430/2688 [01:12<00:08, 31.66it/s, now=None]t:  91%|█████████ | 2434/2688 [01:12<00:08, 31.23it/s, now=None]t:  91%|█████████ | 2438/2688 [01:12<00:08, 29.34it/s, now=None]t:  91%|█████████ | 2441/2688 [01:12<00:08, 27.63it/s, now=None]t:  91%|█████████ | 2445/2688 [01:12<00:08, 28.67it/s, now=None]t:  91%|█████████ | 2449/2688 [01:12<00:08, 29.83it/s, now=None]t:  91%|█████████▏| 2453/2688 [01:13<00:07, 30.46it/s, now=None]t:  91%|█████████▏| 2457/2688 [01:13<00:07, 31.70it/s, now=None]t:  92%|█████████▏| 2461/2688 [01:13<00:06, 32.73it/s, now=None]t:  92%|█████████▏| 2465/2688 [01:13<00:06, 33.85it/s, now=None]t:  92%|█████████▏| 2470/2688 [01:13<00:06, 35.67it/s, now=None]t:  92%|█████████▏| 2474/2688 [01:13<00:06, 33.77it/s, now=None]t:  92%|█████████▏| 2478/2688 [01:13<00:06, 33.59it/s, now=None]t:  92%|█████████▏| 2482/2688 [01:13<00:06, 32.86it/s, now=None]t:  92%|█████████▏| 2486/2688 [01:14<00:06, 31.14it/s, now=None]t:  93%|█████████▎| 2490/2688 [01:14<00:06, 30.51it/s, now=None]t:  93%|█████████▎| 2494/2688 [01:14<00:06, 29.50it/s, now=None]t:  93%|█████████▎| 2498/2688 [01:14<00:06, 29.82it/s, now=None]t:  93%|█████████▎| 2502/2688 [01:14<00:05, 32.07it/s, now=None]t:  93%|█████████▎| 2507/2688 [01:14<00:05, 34.34it/s, now=None]t:  93%|█████████▎| 2511/2688 [01:14<00:05, 34.31it/s, now=None]t:  94%|█████████▎| 2515/2688 [01:14<00:04, 35.29it/s, now=None]t:  94%|█████████▎| 2519/2688 [01:15<00:04, 36.52it/s, now=None]t:  94%|█████████▍| 2524/2688 [01:15<00:04, 38.00it/s, now=None]t:  94%|█████████▍| 2528/2688 [01:15<00:04, 38.12it/s, now=None]t:  94%|█████████▍| 2532/2688 [01:15<00:04, 37.92it/s, now=None]t:  94%|█████████▍| 2536/2688 [01:15<00:03, 38.15it/s, now=None]t:  94%|█████████▍| 2540/2688 [01:15<00:04, 36.33it/s, now=None]t:  95%|█████████▍| 2544/2688 [01:15<00:03, 36.81it/s, now=None]t:  95%|█████████▍| 2548/2688 [01:15<00:03, 37.13it/s, now=None]t:  95%|█████████▍| 2552/2688 [01:15<00:03, 37.09it/s, now=None]t:  95%|█████████▌| 2557/2688 [01:16<00:03, 38.26it/s, now=None]t:  95%|█████████▌| 2562/2688 [01:16<00:03, 38.51it/s, now=None]t:  95%|█████████▌| 2567/2688 [01:16<00:03, 39.18it/s, now=None]t:  96%|█████████▌| 2571/2688 [01:16<00:03, 38.96it/s, now=None]t:  96%|█████████▌| 2576/2688 [01:16<00:02, 39.51it/s, now=None]t:  96%|█████████▌| 2581/2688 [01:16<00:02, 40.51it/s, now=None]t:  96%|█████████▌| 2586/2688 [01:16<00:02, 40.94it/s, now=None]t:  96%|█████████▋| 2591/2688 [01:16<00:02, 41.89it/s, now=None]t:  97%|█████████▋| 2596/2688 [01:17<00:02, 34.64it/s, now=None]t:  97%|█████████▋| 2600/2688 [01:17<00:02, 31.19it/s, now=None]t:  97%|█████████▋| 2604/2688 [01:17<00:02, 28.48it/s, now=None]t:  97%|█████████▋| 2608/2688 [01:17<00:03, 26.28it/s, now=None]t:  97%|█████████▋| 2611/2688 [01:17<00:03, 25.41it/s, now=None]t:  97%|█████████▋| 2614/2688 [01:17<00:02, 25.61it/s, now=None]t:  97%|█████████▋| 2617/2688 [01:17<00:02, 24.90it/s, now=None]t:  97%|█████████▋| 2620/2688 [01:18<00:02, 24.33it/s, now=None]t:  98%|█████████▊| 2623/2688 [01:18<00:02, 24.74it/s, now=None]t:  98%|█████████▊| 2626/2688 [01:18<00:02, 23.54it/s, now=None]t:  98%|█████████▊| 2629/2688 [01:18<00:02, 22.65it/s, now=None]t:  98%|█████████▊| 2632/2688 [01:18<00:02, 20.99it/s, now=None]t:  98%|█████████▊| 2635/2688 [01:18<00:02, 20.59it/s, now=None]t:  98%|█████████▊| 2638/2688 [01:19<00:02, 20.09it/s, now=None]t:  98%|█████████▊| 2641/2688 [01:19<00:02, 20.56it/s, now=None]t:  98%|█████████▊| 2644/2688 [01:19<00:02, 20.43it/s, now=None]t:  98%|█████████▊| 2647/2688 [01:19<00:01, 20.71it/s, now=None]t:  99%|█████████▊| 2650/2688 [01:19<00:01, 21.49it/s, now=None]t:  99%|█████████▊| 2653/2688 [01:19<00:01, 19.98it/s, now=None]t:  99%|█████████▉| 2656/2688 [01:19<00:01, 18.44it/s, now=None]t:  99%|█████████▉| 2658/2688 [01:20<00:01, 17.56it/s, now=None]t:  99%|█████████▉| 2660/2688 [01:20<00:01, 17.24it/s, now=None]t:  99%|█████████▉| 2663/2688 [01:20<00:01, 18.91it/s, now=None]t:  99%|█████████▉| 2666/2688 [01:20<00:01, 19.07it/s, now=None]t:  99%|█████████▉| 2668/2688 [01:20<00:01, 17.43it/s, now=None]t:  99%|█████████▉| 2670/2688 [01:20<00:01, 17.55it/s, now=None]t:  99%|█████████▉| 2672/2688 [01:20<00:00, 17.22it/s, now=None]t:  99%|█████████▉| 2674/2688 [01:20<00:00, 16.80it/s, now=None]t: 100%|█████████▉| 2677/2688 [01:21<00:00, 18.44it/s, now=None]t: 100%|█████████▉| 2680/2688 [01:21<00:00, 18.95it/s, now=None]t: 100%|█████████▉| 2682/2688 [01:21<00:00, 18.83it/s, now=None]t: 100%|█████████▉| 2684/2688 [01:21<00:00, 16.90it/s, now=None]t: 100%|█████████▉| 2686/2688 [01:21<00:00, 16.10it/s, now=None]t: 100%|██████████| 2688/2688 [01:21<00:00, 15.77it/s, now=None]                                                                Moviepy - Done !
+Moviepy - video ready results/the_52_hertz_whale__the_loneliest_voice_in_t/the_52_hertz_whale__the_loneliest_voice_in_t_v1.mp4
+  Rendered 89.6s, 19.3 MB (97.2s)
+  [grade] organic texture pass (grain=8, strength=1.0)
+  Graded 89.6s (405.6s)
+
+[11/16] MUSIC & SOUND (ffmpeg sidechain ducking, bed=cinematic.mp3)
+  !! cinematic.mp3 is silent (-91 dB) — using synth bed
+  [sfx] event-driven SFX timeline: sfx_timeline_run.wav
+  Music mixed (ducked under narration): 89.6s, 63.6 MB, mean=-16.2 dB ✓
+  [audio-qa] passed=True narration_clipping=True; ducking_depth=True
+
+[13/16] VIDEO REVIEW (Gemini Flash, end-to-end)
+→ Uploading results/the_52_hertz_whale__the_loneliest_voice_in_t/the_52_hertz_whale__the_loneliest_voice_in_t_v1_mixed.mp4 to Gemini...
+→ Uploaded: files/pcdluclj9ib8 (FileState.PROCESSING)
+→ Reviewing with gemini-2.5-flash...
+→ Reviewing with gemini-2.5-flash... (attempt 2/5)
+→ Reviewing with gemini-2.5-flash... (attempt 3/5)
+→ Reviewing with gemini-2.5-flash... (attempt 4/5)
+→ Reviewing with gemini-2.5-flash... (attempt 5/5)
+→ Reviewing with gemini-3.5-flash...
+  Score: 35/100 (conf 0.95) | recs: 4
+  [gate] PUBLISH-READY ✓ (all deterministic gates passed)
+
+  [status] REVISION_REQUIRED — blocked by: {'pre_render': ['shot_hold', 'resolution_headroom']}
+
+[15-16/16] FINAL OUTPUT + POSTMORTEM
+
+[DEEPSEEK USAGE — this run]
+  calls: 0 | input: 0 tok (cached 0 → hit 0%) | output: 0 tok
+  estimated cost: $0.0000
+
+================================================================
+MISSION RUN COMPLETE — The 52-Hertz Whale: the loneliest voice in the ocean
+  Video:  results/the_52_hertz_whale__the_loneliest_voice_in_t/the_52_hertz_whale__the_loneliest_voice_in_t_v1_mixed.mp4
+  Report: results/the_52_hertz_whale__the_loneliest_voice_in_t/run_report.json
+  Postmortem: /home/ubuntu/video_engine/src/docs/mission/postmortems/postmortem-the-52-hertz-whale-the-loneliest-voice-in-the-ocean.md
+  Final review score: 35/100
+================================================================

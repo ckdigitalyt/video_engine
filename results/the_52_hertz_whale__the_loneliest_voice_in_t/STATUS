@@ -1,3 +1,4 @@
 REVISION_REQUIRED
 blocked by:
-  pre_render: shot_hold, resolution_headroom
+  publish: repeated_assets
+  pre_render: shot_hold, pacing, resolution_headroom

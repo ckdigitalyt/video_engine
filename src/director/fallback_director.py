@@ -84,6 +84,9 @@ class FallbackDirector:
         self._fallback_queries = queries_list
         self._fallback_narration = narration
 
+        # v14: fallback chain is TOPIC-AWARE.  NASA/Wikimedia image search
+        # now uses the actual topic query (see _pick_nasa_query/
+        # _pick_wikimedia_query) so a whale video never gets galaxies.
         chain = [
             ("nasa_image", lambda: self._try_nasa_image(queries_list)),
             ("wikimedia_image", lambda: self._try_wikimedia_image(queries_list)),

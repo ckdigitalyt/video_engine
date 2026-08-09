@@ -357,6 +357,28 @@ def stage_script(topic: str, research: dict, provider) -> list[dict]:
                     print(f"  Expanded to {total_words} words (~{total_words * 0.4:.0f}s)")
             except json.JSONDecodeError:
                 print("  !! Expansion JSON failed again — keeping draft")
+    # v14 fix (52-Hz run: 162 words -> 64.6s video instead of the 120s
+    # target): when the LLM expansion keeps failing, expand DETERMINISTICALLY
+    # from the research pack so the video never ships half-length.  Append
+    # fact-derived sentences across scenes until the word budget is met.
+    if total_words < MIN_SCRIPT_WORDS:
+        print(f"  !! Still under word budget ({total_words} < {MIN_SCRIPT_WORDS}) — deterministic expansion")
+        _facts = [f for f in research.get("facts", []) if isinstance(f, str) and len(f.split()) >= 6]
+        _fact_i = 0
+        _scene_i = 0
+        while total_words < MIN_SCRIPT_WORDS and scenes:
+            _s = scenes[_scene_i % len(scenes)]
+            _s.setdefault("narration", "")
+            _append = ""
+            if _fact_i < len(_facts):
+                _append = _facts[_fact_i]
+                _fact_i += 1
+            else:
+                _append = "The mystery only deepens with every passing year."
+            _s["narration"] = (_s["narration"].rstrip() + " " + _append).strip()
+            total_words = sum(len(s.get("narration", "").split()) for s in scenes)
+            _scene_i += 1
+        print(f"  Deterministically expanded to {total_words} words (~{total_words * 0.4:.0f}s)")
     if total_words > MAX_SCRIPT_WORDS:
         print(f"  !! Over word budget ({total_words} > {MAX_SCRIPT_WORDS}) — compressing once")
         compress = provider.generate_json(

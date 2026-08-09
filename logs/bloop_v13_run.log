@@ -1,0 +1,738 @@
+[duration] target=90s scenes=8 words 211-247
+[asset_router] Loaded env vars from /home/ubuntu/video_engine/.env
+
+[1/16] RESEARCH
+  13 facts, 3 sources (22.4s)
+
+[2/16] FACT VERIFICATION
+  Verified 13/13 facts
+
+[3/16] SCRIPT DEVELOPMENT
+  8 scenes drafted, 202 words (~81s at 150wpm)
+  !! Under word budget (202 < 211) — expanding once
+  Expanded to 247 words (~99s)
+
+[4/16] SCRIPT REVIEW (2 reviewers, ≤2 passes)
+
+── Script Review pass 1/2 ──
+  [             Fact Reviewer] score=6.5/10 conf=0.95 issues=7 (major:4 minor:3)
+  [     Storytelling Reviewer] score=8.0/10 conf=0.95 issues=8 (major:2 minor:6)
+  Gate: FAIL (scores={'fact_reviewer': 6.5, 'storytelling_reviewer': 8.0})
+  Revised 8 scenes from consolidated feedback.
+
+── Script Review pass 2/2 ──
+  [             Fact Reviewer] score=6.0/10 conf=1.00 issues=12 (critical:3 major:5 minor:3 nit:1)
+  [     Storytelling Reviewer] score=7.0/10 conf=0.90 issues=6 (major:2 minor:4)
+  Gate: FAIL (scores={'fact_reviewer': 6.0, 'storytelling_reviewer': 7.0})
+  Max passes reached — using best available script.
+  Gate passed: False after 2 pass(es) (scores: {'fact_reviewer': 6.0, 'storytelling_reviewer': 7.0})
+  [claims] !! LLM extraction failed: Single '}' encountered in format string — using deterministic extraction only
+  [claims] !! disambiguation LLM failed: 'str' object has no attribute 'get'
+
+[5-9/16] STORYBOARD → VISUAL PLANNING → ASSET ROUTING → GENERATION → ANIMATION
+-> AssetRouter: topic='The Bloop: the sound that shook the ocean' → category='Nature'
+
+============================================================
+  Visual Director (BEAT MODE): Aesthetic: photorealistic | Mood: bright | Pace: medium | Sub-aesthetic: nature
+  Topic: The Bloop: the sound that shook the ocean
+============================================================
+
+
+──────────────────────────────────────────────────
+  Scene 0: The Bloop: Roar from the Deep
+──────────────────────────────────────────────────
+
+──────────────────────────────────────────────────
+  Scene 1: Listening to the Abyss
+──────────────────────────────────────────────────
+
+──────────────────────────────────────────────────
+  Scene 2: What Bloops Sound Like
+──────────────────────────────────────────────────
+
+──────────────────────────────────────────────────
+  Scene 3: Five Years of Mystery
+──────────────────────────────────────────────────
+
+──────────────────────────────────────────────────
+  Scene 4: Science Finds the Answer
+──────────────────────────────────────────────────
+
+──────────────────────────────────────────────────
+  Scene 5: Earth's Icequake Roar
+──────────────────────────────────────────────────
+
+──────────────────────────────────────────────────
+  Scene 6: Echoes from Antarctica
+──────────────────────────────────────────────────
+
+──────────────────────────────────────────────────
+  Scene 7: The Ocean's True Voice
+──────────────────────────────────────────────────
+
+  [BeatDirector] Planning beats for scene 0...
+
+  [BeatDirector] Planning beats for scene 1...
+
+  [BeatDirector] Planning beats for scene 2...
+  [BeatDirector] Concept terms (10): ['NOAA hydrophone array', 'Underwater sonar equipment', 'Deep ocean abyss', 'Ocean research vessel']...
+  [BeatDirector] 4 beats, 4 shots
+-> Cache MISS: 'NOAA hydrophone array primary shot' — calling Pexels API
+  [BeatDirector] Concept terms (10): ['hydrophone deep ocean', 'vast dark ocean', 'ocean research vessel', 'deep sea creature silhouette']...
+  [BeatDirector] 3 beats, 3 shots
+-> Cache MISS: 'hydrophone deep ocean primary shot' — calling Pexels API
+  Candidate 1: id=8822835 3840x2160 dur=11s score=0.650 ← SELECTED
+  Candidate 2: id=35898038 1920x1080 dur=7s score=0.650
+  Candidate 3: id=36006201 3840x2160 dur=8s score=0.600
+  Candidate 4: id=7004322 1920x1080 dur=49s score=0.600
+  Candidate 5: id=12481553 1920x1080 dur=54s score=0.600
+  Candidate 6: id=3286124 3840x2160 dur=31s score=0.600
+  Candidate 7: id=28832349 3840x2160 dur=3s score=0.600
+  Candidate 8: id=8822799 3840x2160 dur=12s score=0.600
+  Candidate 9: id=36005246 1920x1080 dur=22s score=0.400
+  Candidate 10: id=38929517 3840x2160 dur=23s score=0.400
+-> Router selected: 'pexels' for query 'NOAA hydrophone array primary shot'
+  Candidate 1: id=11682768 1920x1080 dur=8s score=0.831 ← SELECTED
+  Candidate 2: id=17186320 1920x1080 dur=10s score=0.738
+  Candidate 3: id=9700927 1920x1080 dur=11s score=0.692
+  Candidate 4: id=36006201 3840x2160 dur=8s score=0.630
+  Candidate 5: id=38865258 1920x1080 dur=8s score=0.630
+  Candidate 6: id=8906187 1920x1080 dur=25s score=0.600
+  Candidate 7: id=31011168 3840x2160 dur=15s score=0.400
+  Candidate 8: id=36664946 3840x2160 dur=15s score=0.400
+  Candidate 9: id=29475225 3840x2160 dur=19s score=0.400
+  Candidate 10: id=36710774 3840x2160 dur=15s score=0.400
+-> Router selected: 'pexels' for query 'hydrophone deep ocean primary shot'
+-> Already on disk: cache/video/scene_1_b0_s0.mp4
+    [BeatDirector] Shot accepted: primary shot for beat 0 (provider=pexels)
+-> Cache MISS: 'Underwater sonar equipment primary shot' — calling Pexels API
+-> Already on disk: cache/video/scene_0_b0_s0.mp4
+    [BeatDirector] Shot accepted: primary shot for beat 0 (provider=pexels)
+-> Cache MISS: 'vast dark ocean primary shot' — calling Pexels API
+  Candidate 1: id=11682768 1920x1080 dur=8s score=0.800 ← SELECTED
+  Candidate 2: id=8822964 3840x2160 dur=9s score=0.750
+  Candidate 3: id=8823624 3840x2160 dur=10s score=0.700
+  Candidate 4: id=34660498 1920x1080 dur=7s score=0.650
+  Candidate 5: id=8822982 3840x2160 dur=14s score=0.600
+  Candidate 6: id=9338831 3840x2160 dur=13s score=0.600
+  Candidate 7: id=8823300 3840x2160 dur=19s score=0.600
+  Candidate 8: id=8824370 1920x1080 dur=14s score=0.600
+  Candidate 9: id=8823131 3840x2160 dur=15s score=0.600
+  Candidate 10: id=33212852 3840x2160 dur=12s score=0.400
+-> Router selected: 'pexels' for query 'Underwater sonar equipment primary shot'
+  Candidate 1: id=20053501 1920x1080 dur=5s score=0.969 ← SELECTED
+  Candidate 2: id=5668613 4096x2160 dur=8s score=0.831
+  Candidate 3: id=11028765 3840x2160 dur=8s score=0.831
+  Candidate 4: id=4916486 1920x1080 dur=8s score=0.831
+  Candidate 5: id=14548015 3840x2160 dur=22s score=0.600
+  Candidate 6: id=11287848 3840x2160 dur=30s score=0.600
+  Candidate 7: id=16764714 3840x2160 dur=24s score=0.600
+  Candidate 8: id=5678004 4096x2160 dur=18s score=0.600
+  Candidate 9: id=6749362 1920x1080 dur=26s score=0.600
+  Candidate 10: id=30248500 3840x2160 dur=18s score=0.400
+-> Router selected: 'pexels' for query 'vast dark ocean primary shot'
+  [BeatDirector] Concept terms (10): ['Vast open ocean', 'Deep ocean dark', 'Ocean currents slow', 'Southern Pacific horizon']...
+  [BeatDirector] 2 beats, 3 shots
+-> Cache MISS: 'Vast open ocean primary shot' — calling Pexels API
+  Candidate 1: id=30973719 3840x2160 dur=7s score=0.722 ← SELECTED
+  Candidate 2: id=30734481 3840x2160 dur=10s score=0.602
+  Candidate 3: id=3659129 1920x1080 dur=25s score=0.600
+  Candidate 4: id=5077814 1920x1080 dur=20s score=0.600
+  Candidate 5: id=1570919 1920x1080 dur=24s score=0.600
+  Candidate 6: id=11168747 3840x2160 dur=37s score=0.600
+  Candidate 7: id=13596230 3840x2160 dur=18s score=0.600
+  Candidate 8: id=31011168 3840x2160 dur=15s score=0.404
+  Candidate 9: id=34494288 3840x2160 dur=21s score=0.400
+  Candidate 10: id=38641589 3840x2160 dur=39s score=0.400
+-> Router selected: 'pexels' for query 'Vast open ocean primary shot'
+-> Already on disk: cache/video/scene_0_b1_s0.mp4
+    [BeatDirector] Shot accepted: primary shot for beat 1 (provider=pexels)
+-> Cache MISS: 'ocean research vessel primary shot' — calling Pexels API
+  Candidate 1: id=10419398 1920x1080 dur=7s score=0.877 ← SELECTED
+  Candidate 2: id=5485130 1920x1080 dur=8s score=0.831
+  Candidate 3: id=27046845 3840x2160 dur=8s score=0.630
+  Candidate 4: id=9357808 2720x1530 dur=25s score=0.600
+  Candidate 5: id=17471486 3840x2160 dur=30s score=0.600
+  Candidate 6: id=20256990 3840x2160 dur=14s score=0.600
+  Candidate 7: id=7770853 1920x1080 dur=26s score=0.600
+  Candidate 8: id=31051211 1920x1080 dur=11s score=0.492
+  Candidate 9: id=31831569 3840x2160 dur=26s score=0.400
+  Candidate 10: id=36664946 3840x2160 dur=15s score=0.400
+-> Router selected: 'pexels' for query 'ocean research vessel primary shot'
+-> Already on disk: cache/video/scene_2_b0_s0.mp4
+    [BeatDirector] Shot accepted: primary shot for beat 0 (provider=pexels)
+-> Cache MISS: 'Deep ocean dark cutaway shot' — calling Pexels API
+-> Cache MISS: 'NOAA hydrophone array' — calling Pexels API
+  Candidate 1: id=3582972 1920x1080 dur=7s score=0.733 ← SELECTED
+  Candidate 2: id=11287848 3840x2160 dur=30s score=0.600
+  Candidate 3: id=5678004 4096x2160 dur=18s score=0.600
+  Candidate 4: id=8950647 1920x1080 dur=9s score=0.600
+  Candidate 5: id=5853030 4096x2160 dur=13s score=0.600
+  Candidate 6: id=16764714 3840x2160 dur=24s score=0.600
+  Candidate 7: id=9338834 3840x2160 dur=17s score=0.600
+  Candidate 8: id=38579846 1920x1080 dur=8s score=0.467
+  Candidate 9: id=32844046 1920x1080 dur=10s score=0.400
+  Candidate 10: id=32515216 3840x2160 dur=13s score=0.400
+-> Router selected: 'pexels' for query 'Deep ocean dark cutaway shot'
+-> SemanticValidator LLM error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash\nPlease retry in 46.68473591s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.5-flash'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '46s'}]}} — using fallback
+-> Already on disk: cache/video/scene_2_b0_s1.mp4
+    [BeatDirector] Shot accepted: cutaway shot for beat 0 (provider=pexels)
+-> Cache MISS: 'Ocean currents slow primary shot' — calling Pexels API
+  Candidate 1: id=8823292 3840x2160 dur=8s score=0.800 ← SELECTED
+  Candidate 2: id=8822835 3840x2160 dur=11s score=0.650
+  Candidate 3: id=36006201 3840x2160 dur=8s score=0.600
+  Candidate 4: id=10181598 3840x2160 dur=15s score=0.600
+  Candidate 5: id=3286124 3840x2160 dur=31s score=0.600
+  Candidate 6: id=8822982 3840x2160 dur=14s score=0.600
+  Candidate 7: id=11194812 1920x1080 dur=21s score=0.600
+  Candidate 8: id=8822572 3840x2160 dur=15s score=0.600
+  Candidate 9: id=8822799 3840x2160 dur=12s score=0.600
+  Candidate 10: id=8823303 3840x2160 dur=13s score=0.600
+-> Router selected: 'pexels' for query 'NOAA hydrophone array'
+-> SemanticValidator LLM error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash\nPlease retry in 46.221581056s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.5-flash'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '46s'}]}} — using fallback
+-> Already on disk: cache/video/scene_1_b1_s0.mp4
+    [BeatDirector] Shot accepted: primary shot for beat 1 (provider=pexels)
+-> AssetLibrary REUSE: 'Deep ocean abyss primary shot' similar to 'hydrophone deep ocean primary shot' -> cache/video/scene_1_b0_s0.mp4
+-> Router selected: 'pexels' for query 'Deep ocean abyss primary shot'
+  Candidate 1: id=11931352 3840x2160 dur=12s score=0.847 ← SELECTED
+  Candidate 2: id=6989127 1920x1080 dur=12s score=0.847
+  Candidate 3: id=4571536 1920x1080 dur=12s score=0.847
+  Candidate 4: id=6815628 4481x2160 dur=14s score=0.788
+  Candidate 5: id=4863640 3840x2160 dur=14s score=0.788
+  Candidate 6: id=9319578 4096x2160 dur=60s score=0.600
+  Candidate 7: id=18680290 1920x1080 dur=60s score=0.600
+  Candidate 8: id=855742 1920x1080 dur=30s score=0.600
+  Candidate 9: id=5230340 3840x2160 dur=22s score=0.600
+  Candidate 10: id=34693119 1920x1080 dur=84s score=0.400
+-> Router selected: 'pexels' for query 'Ocean currents slow primary shot'
+-> SemanticValidator LLM error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash\nPlease retry in 45.947103393s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'model': 'gemini-2.5-flash', 'location': 'global'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '45s'}]}} — using fallback
+-> Already on disk: cache/video/scene_1_b2_s0.mp4
+    [BeatDirector] Shot accepted: primary shot for beat 2 (provider=pexels)
+-> AssetLibrary diversity: penalty=0.15 for 'ocean research vessel primary shot' — skipping reuse
+-> Cache MISS: 'Ocean research vessel primary shot' — calling Pexels API
+-> SemanticValidator LLM error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash\nPlease retry in 45.865245433s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'model': 'gemini-2.5-flash', 'location': 'global'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '45s'}]}} — using fallback
+-> Already on disk: cache/video/scene_2_b1_s0.mp4
+    [BeatDirector] Shot accepted: primary shot for beat 1 (provider=pexels)
+
+  [BeatDirector] Planning beats for scene 3...
+  [BeatDirector] Concept terms (4): ['The Bloop: the sound that shook the ocean', 'stock footage', 'documentary', 'general']...
+  [BeatDirector] 2 beats, 3 shots
+-> Cache MISS: 'The Bloop: the sound that shook the ocean primary shot' — calling Pexels API
+  Candidate 1: id=10419398 1920x1080 dur=7s score=0.733 ← SELECTED
+  Candidate 2: id=5485130 1920x1080 dur=8s score=0.667
+  Candidate 3: id=9357808 2720x1530 dur=25s score=0.600
+  Candidate 4: id=17471486 3840x2160 dur=30s score=0.600
+  Candidate 5: id=20256990 3840x2160 dur=14s score=0.600
+  Candidate 6: id=7770853 1920x1080 dur=26s score=0.600
+  Candidate 7: id=27046845 3840x2160 dur=8s score=0.467
+  Candidate 8: id=31831569 3840x2160 dur=26s score=0.400
+  Candidate 9: id=31051211 1920x1080 dur=11s score=0.400
+  Candidate 10: id=36664946 3840x2160 dur=15s score=0.400
+-> Router selected: 'pexels' for query 'Ocean research vessel primary shot'
+-> SemanticValidator LLM error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash\nPlease retry in 45.152346014s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.5-flash'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '45s'}]}} — using fallback
+-> Already on disk: cache/video/scene_1_b3_s0.mp4
+    [BeatDirector] Shot accepted: primary shot for beat 3 (provider=pexels)
+
+  [BeatDirector] Planning beats for scene 4...
+  [BeatDirector] Concept terms (4): ['The Bloop: the sound that shook the ocean', 'stock footage', 'documentary', 'general']...
+  [BeatDirector] 4 beats, 4 shots
+-> AssetLibrary diversity: penalty=0.30 for 'the bloop: the sound that shook the ocean primary shot' — skipping reuse
+-> Cache MISS: 'The Bloop: the sound that shook the ocean primary shot' — calling Pexels API
+  Candidate 1: id=7318077 1920x1080 dur=10s score=0.802 ← SELECTED
+  Candidate 2: id=36123916 3840x2160 dur=5s score=0.795
+  Candidate 3: id=38075487 3840x2160 dur=6s score=0.761
+  Candidate 4: id=855742 1920x1080 dur=30s score=0.600
+  Candidate 5: id=4927329 4096x2160 dur=28s score=0.600
+  Candidate 6: id=11448941 1920x1080 dur=67s score=0.600
+  Candidate 7: id=28811335 3840x2160 dur=11s score=0.563
+  Candidate 8: id=33300037 3840x1920 dur=13s score=0.483
+  Candidate 9: id=27593050 1920x1080 dur=15s score=0.404
+  Candidate 10: id=37029740 3840x2160 dur=41s score=0.400
+-> Router selected: 'pexels' for query 'The Bloop: the sound that shook the ocean primary shot'
+  Candidate 1: id=36123916 3840x2160 dur=5s score=0.750 ← SELECTED
+  Candidate 2: id=7318077 1920x1080 dur=10s score=0.700
+  Candidate 3: id=38075487 3840x2160 dur=6s score=0.700
+  Candidate 4: id=855742 1920x1080 dur=30s score=0.600
+  Candidate 5: id=4927329 4096x2160 dur=28s score=0.600
+  Candidate 6: id=11448941 1920x1080 dur=67s score=0.600
+  Candidate 7: id=28811335 3840x2160 dur=11s score=0.450
+  Candidate 8: id=33300037 3840x1920 dur=13s score=0.400
+  Candidate 9: id=37029740 3840x2160 dur=41s score=0.400
+  Candidate 10: id=27593050 1920x1080 dur=15s score=0.400
+-> Router selected: 'pexels' for query 'The Bloop: the sound that shook the ocean primary shot'
+-> SemanticValidator LLM error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash\nPlease retry in 44.405689324s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.5-flash'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '44s'}]}} — using fallback
+-> Already on disk: cache/video/scene_3_b0_s0.mp4
+    [BeatDirector] Shot accepted: primary shot for beat 0 (provider=pexels)
+-> SemanticValidator LLM error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash\nPlease retry in 44.395927835s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.5-flash'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '44s'}]}} — using fallback
+-> AssetLibrary REUSE: 'stock footage cutaway shot' similar to 'stock footage cutaway shot' -> cache/video/scene_2_b0_s1.mp4
+-> Router selected: 'pexels' for query 'stock footage cutaway shot'
+-> AssetLibrary diversity: penalty=0.30 for 'the bloop: the sound that shook the ocean primary shot' — skipping reuse
+-> Cache MISS: 'The Bloop: the sound that shook the ocean' — calling Pexels API
+-> AssetLibrary REUSE: 'hydrophone deep ocean' similar to 'hydrophone deep ocean primary shot' -> cache/video/scene_1_b0_s0.mp4
+-> Router selected: 'pexels' for query 'hydrophone deep ocean'
+-> SemanticValidator LLM error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash\nPlease retry in 44.142620225s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.5-flash'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '44s'}]}} — using fallback
+-> Already on disk: cache/video/scene_3_b0_s1.mp4
+-> SemanticValidator LLM error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash\nPlease retry in 44.142863099s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.5-flash'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '44s'}]}} — using fallback
+    [BeatDirector] Shot accepted: cutaway shot for beat 0 (provider=pexels)
+-> AssetLibrary REUSE: 'documentary primary shot' similar to 'documentary primary shot' -> cache/video/scene_0_b2_s0.mp4
+-> Router selected: 'pexels' for query 'documentary primary shot'
+-> AssetLibrary diversity: penalty=0.30 for 'the bloop: the sound that shook the ocean documentary stock footage' — skipping reuse
+-> Cache MISS: 'The Bloop: the sound that shook the ocean documentary stock footage' — calling Pexels API
+-> SemanticValidator LLM error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash\nPlease retry in 43.918173003s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.5-flash'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '43s'}]}} — using fallback
+-> Already on disk: cache/video/scene_3_b1_s0.mp4
+    [BeatDirector] Shot accepted: primary shot for beat 1 (provider=pexels)
+
+  [BeatDirector] Planning beats for scene 5...
+  Candidate 1: id=7318077 1920x1080 dur=10s score=0.700 ← SELECTED
+  Candidate 2: id=28903708 1920x1080 dur=6s score=0.700
+  Candidate 3: id=5251673 1920x1080 dur=35s score=0.600
+  Candidate 4: id=11448941 1920x1080 dur=67s score=0.600
+  Candidate 5: id=855742 1920x1080 dur=30s score=0.600
+  Candidate 6: id=4927329 4096x2160 dur=28s score=0.600
+  Candidate 7: id=28811335 3840x2160 dur=11s score=0.450
+  Candidate 8: id=33300037 3840x1920 dur=13s score=0.400
+  Candidate 9: id=37029740 3840x2160 dur=41s score=0.400
+  Candidate 10: id=27593050 1920x1080 dur=15s score=0.400
+-> Router selected: 'pexels' for query 'The Bloop: the sound that shook the ocean'
+  [BeatDirector] Concept terms (4): ['The Bloop: the sound that shook the ocean', 'stock footage', 'documentary', 'general']...
+  [BeatDirector] 2 beats, 3 shots
+-> AssetLibrary diversity: penalty=0.30 for 'the bloop: the sound that shook the ocean primary shot' — skipping reuse
+-> Cache MISS: 'The Bloop: the sound that shook the ocean primary shot' — calling Pexels API
+-> SemanticValidator LLM error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash\nPlease retry in 43.601656526s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'model': 'gemini-2.5-flash', 'location': 'global'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '43s'}]}} — using fallback
+-> AssetLibrary diversity: penalty=0.30 for 'the bloop: the sound that shook the ocean documentary stock footage' — skipping reuse
+-> Cache MISS: 'The Bloop: the sound that shook the ocean documentary stock footage' — calling Pexels API
+  Candidate 1: id=4326984 4096x2160 dur=7s score=0.877 ← SELECTED
+  Candidate 2: id=15453594 3840x2160 dur=11s score=0.692
+  Candidate 3: id=4927329 4096x2160 dur=28s score=0.600
+  Candidate 4: id=12659674 2688x1512 dur=64s score=0.600
+  Candidate 5: id=4332085 4096x2160 dur=17s score=0.600
+  Candidate 6: id=9700926 1920x1080 dur=17s score=0.600
+  Candidate 7: id=4592360 1920x1080 dur=22s score=0.600
+  Candidate 8: id=11156245 3840x2160 dur=30s score=0.600
+  Candidate 9: id=30488499 3840x2160 dur=9s score=0.584
+  Candidate 10: id=30143574 3840x2160 dur=19s score=0.400
+-> Router selected: 'pexels' for query 'The Bloop: the sound that shook the ocean documentary stock footage'
+  Candidate 1: id=7318077 1920x1080 dur=10s score=0.802 ← SELECTED
+  Candidate 2: id=36123916 3840x2160 dur=5s score=0.795
+  Candidate 3: id=38075487 3840x2160 dur=6s score=0.761
+  Candidate 4: id=855742 1920x1080 dur=30s score=0.600
+  Candidate 5: id=4927329 4096x2160 dur=28s score=0.600
+  Candidate 6: id=11448941 1920x1080 dur=67s score=0.600
+  Candidate 7: id=28811335 3840x2160 dur=11s score=0.563
+  Candidate 8: id=33300037 3840x1920 dur=13s score=0.483
+  Candidate 9: id=27593050 1920x1080 dur=15s score=0.404
+  Candidate 10: id=37029740 3840x2160 dur=41s score=0.400
+-> Router selected: 'pexels' for query 'The Bloop: the sound that shook the ocean primary shot'
+  Candidate 1: id=4326984 4096x2160 dur=7s score=0.850 ← SELECTED
+  Candidate 2: id=15453594 3840x2160 dur=11s score=0.650
+  Candidate 3: id=4927329 4096x2160 dur=28s score=0.600
+  Candidate 4: id=12659674 2688x1512 dur=64s score=0.600
+  Candidate 5: id=4332085 4096x2160 dur=17s score=0.600
+  Candidate 6: id=9700926 1920x1080 dur=17s score=0.600
+  Candidate 7: id=4592360 1920x1080 dur=22s score=0.600
+  Candidate 8: id=11156245 3840x2160 dur=30s score=0.600
+  Candidate 9: id=30488499 3840x2160 dur=9s score=0.550
+  Candidate 10: id=30143574 3840x2160 dur=19s score=0.400
+-> Router selected: 'pexels' for query 'The Bloop: the sound that shook the ocean documentary stock footage'
+-> SemanticValidator LLM error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash\nPlease retry in 43.247274783s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'model': 'gemini-2.5-flash', 'location': 'global'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '43s'}]}} — using fallback
+-> Already on disk: cache/video/scene_0_b2_s0.mp4
+    [BeatDirector] Shot accepted: primary shot for beat 2 (provider=pexels)
+
+  [BeatDirector] Planning beats for scene 6...
+-> SemanticValidator LLM error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash\nPlease retry in 43.191862858s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.5-flash'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '43s'}]}} — using fallback
+-> AssetLibrary diversity: penalty=0.30 for 'the bloop: the sound that shook the ocean primary shot' — skipping reuse
+-> Cache MISS: 'The Bloop: the sound that shook the ocean' — calling Pexels API
+-> SemanticValidator LLM error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash\nPlease retry in 43.143870228s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.5-flash'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '43s'}]}} — using fallback
+-> AssetLibrary REUSE: 'stock footage primary shot' similar to 'stock footage primary shot' -> cache/video/scene_0_b1_s0.mp4
+-> Router selected: 'pexels' for query 'stock footage primary shot'
+  [BeatDirector] Concept terms (4): ['The Bloop: the sound that shook the ocean', 'stock footage', 'documentary', 'general']...
+  [BeatDirector] 2 beats, 3 shots
+-> AssetLibrary diversity: penalty=0.30 for 'the bloop: the sound that shook the ocean primary shot' — skipping reuse
+-> Cache MISS: 'The Bloop: the sound that shook the ocean primary shot' — calling Pexels API
+  Candidate 1: id=7318077 1920x1080 dur=10s score=0.802 ← SELECTED
+  Candidate 2: id=28903708 1920x1080 dur=6s score=0.761
+  Candidate 3: id=5251673 1920x1080 dur=35s score=0.600
+  Candidate 4: id=11448941 1920x1080 dur=67s score=0.600
+  Candidate 5: id=855742 1920x1080 dur=30s score=0.600
+  Candidate 6: id=4927329 4096x2160 dur=28s score=0.600
+  Candidate 7: id=28811335 3840x2160 dur=11s score=0.563
+  Candidate 8: id=33300037 3840x1920 dur=13s score=0.483
+  Candidate 9: id=27593050 1920x1080 dur=15s score=0.404
+  Candidate 10: id=37029740 3840x2160 dur=41s score=0.400
+-> Router selected: 'pexels' for query 'The Bloop: the sound that shook the ocean'
+-> SemanticValidator LLM error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash\nPlease retry in 42.884474426s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.5-flash'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '42s'}]}} — using fallback
+-> AssetLibrary diversity: penalty=0.30 for 'the bloop: the sound that shook the ocean primary shot' — skipping reuse
+-> Cache MISS: 'The Bloop: the sound that shook the ocean' — calling Pexels API
+-> SemanticValidator LLM error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash\nPlease retry in 42.724934648s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.5-flash'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '42s'}]}} — using fallback
+-> AssetLibrary diversity: penalty=0.30 for 'the bloop: the sound that shook the ocean documentary stock footage' — skipping reuse
+-> Cache MISS: 'The Bloop: the sound that shook the ocean documentary stock footage' — calling Pexels API
+  Candidate 1: id=7318077 1920x1080 dur=10s score=0.802 ← SELECTED
+  Candidate 2: id=36123916 3840x2160 dur=5s score=0.795
+  Candidate 3: id=38075487 3840x2160 dur=6s score=0.761
+  Candidate 4: id=855742 1920x1080 dur=30s score=0.600
+  Candidate 5: id=4927329 4096x2160 dur=28s score=0.600
+  Candidate 6: id=11448941 1920x1080 dur=67s score=0.600
+  Candidate 7: id=28811335 3840x2160 dur=11s score=0.563
+  Candidate 8: id=33300037 3840x1920 dur=13s score=0.483
+  Candidate 9: id=27593050 1920x1080 dur=15s score=0.404
+  Candidate 10: id=37029740 3840x2160 dur=41s score=0.400
+-> Router selected: 'pexels' for query 'The Bloop: the sound that shook the ocean primary shot'
+  Candidate 1: id=4326984 4096x2160 dur=7s score=0.922 ← SELECTED
+  Candidate 2: id=15453594 3840x2160 dur=11s score=0.763
+  Candidate 3: id=30488499 3840x2160 dur=9s score=0.642
+  Candidate 4: id=4927329 4096x2160 dur=28s score=0.600
+  Candidate 5: id=12659674 2688x1512 dur=64s score=0.600
+  Candidate 6: id=4332085 4096x2160 dur=17s score=0.600
+  Candidate 7: id=9700926 1920x1080 dur=17s score=0.600
+  Candidate 8: id=4592360 1920x1080 dur=22s score=0.600
+  Candidate 9: id=11156245 3840x2160 dur=30s score=0.600
+  Candidate 10: id=30143574 3840x2160 dur=19s score=0.400
+-> Router selected: 'pexels' for query 'The Bloop: the sound that shook the ocean documentary stock footage'
+  Candidate 1: id=7318077 1920x1080 dur=10s score=0.700 ← SELECTED
+  Candidate 2: id=28903708 1920x1080 dur=6s score=0.700
+  Candidate 3: id=5251673 1920x1080 dur=35s score=0.600
+  Candidate 4: id=11448941 1920x1080 dur=67s score=0.600
+  Candidate 5: id=855742 1920x1080 dur=30s score=0.600
+  Candidate 6: id=4927329 4096x2160 dur=28s score=0.600
+  Candidate 7: id=28811335 3840x2160 dur=11s score=0.450
+  Candidate 8: id=33300037 3840x1920 dur=13s score=0.400
+  Candidate 9: id=37029740 3840x2160 dur=41s score=0.400
+  Candidate 10: id=27593050 1920x1080 dur=15s score=0.400
+-> Router selected: 'pexels' for query 'The Bloop: the sound that shook the ocean'
+-> SemanticValidator LLM error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash\nPlease retry in 42.505196648s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.5-flash'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '42s'}]}} — using fallback
+-> AssetLibrary diversity: penalty=0.30 for 'stock footage cutaway shot' — skipping reuse
+-> Cache MISS: 'stock footage cutaway shot' — calling Pexels API
+-> SemanticValidator LLM error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash\nPlease retry in 42.436813287s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'model': 'gemini-2.5-flash', 'location': 'global'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '42s'}]}} — using fallback
+-> AssetLibrary diversity: penalty=0.30 for 'the bloop: the sound that shook the ocean documentary stock footage' — skipping reuse
+-> Cache MISS: 'The Bloop: the sound that shook the ocean documentary stock footage' — calling Pexels API
+-> SemanticValidator LLM error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash\nPlease retry in 42.434423949s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.5-flash'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '42s'}]}} — using fallback
+-> AssetLibrary diversity: penalty=0.30 for 'the bloop: the sound that shook the ocean primary shot' — skipping reuse
+-> Cache MISS: 'The Bloop: the sound that shook the ocean' — calling Pexels API
+  Candidate 1: id=4326984 4096x2160 dur=7s score=0.850 ← SELECTED
+  Candidate 2: id=15453594 3840x2160 dur=11s score=0.650
+  Candidate 3: id=4927329 4096x2160 dur=28s score=0.600
+  Candidate 4: id=12659674 2688x1512 dur=64s score=0.600
+  Candidate 5: id=4332085 4096x2160 dur=17s score=0.600
+  Candidate 6: id=9700926 1920x1080 dur=17s score=0.600
+  Candidate 7: id=4592360 1920x1080 dur=22s score=0.600
+  Candidate 8: id=11156245 3840x2160 dur=30s score=0.600
+  Candidate 9: id=30488499 3840x2160 dur=9s score=0.550
+  Candidate 10: id=30143574 3840x2160 dur=19s score=0.400
+-> Router selected: 'pexels' for query 'The Bloop: the sound that shook the ocean documentary stock footage'
+  Candidate 1: id=7318077 1920x1080 dur=10s score=0.802 ← SELECTED
+  Candidate 2: id=28903708 1920x1080 dur=6s score=0.761
+  Candidate 3: id=5251673 1920x1080 dur=35s score=0.600
+  Candidate 4: id=11448941 1920x1080 dur=67s score=0.600
+  Candidate 5: id=855742 1920x1080 dur=30s score=0.600
+  Candidate 6: id=4927329 4096x2160 dur=28s score=0.600
+  Candidate 7: id=28811335 3840x2160 dur=11s score=0.563
+  Candidate 8: id=33300037 3840x1920 dur=13s score=0.483
+  Candidate 9: id=27593050 1920x1080 dur=15s score=0.404
+  Candidate 10: id=37029740 3840x2160 dur=41s score=0.400
+-> Router selected: 'pexels' for query 'The Bloop: the sound that shook the ocean'
+-> SemanticValidator LLM error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash\nPlease retry in 41.955077298s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.5-flash'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '41s'}]}} — using fallback
+-> AssetLibrary REUSE: 'documentary primary shot' similar to 'documentary primary shot' -> cache/video/scene_3_b1_s0.mp4
+-> Router selected: 'pexels' for query 'documentary primary shot'
+-> SemanticValidator LLM error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash\nPlease retry in 41.929721131s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.5-flash'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '41s'}]}} — using fallback
+-> AssetLibrary diversity: penalty=0.30 for 'the bloop: the sound that shook the ocean documentary stock footage' — skipping reuse
+-> Cache MISS: 'The Bloop: the sound that shook the ocean documentary stock footage' — calling Pexels API
+  Candidate 1: id=7450213 1920x1080 dur=42s score=0.600 ← SELECTED
+  Candidate 2: id=17704528 3840x2160 dur=39s score=0.600
+  Candidate 3: id=4061885 1920x1080 dur=24s score=0.600
+  Candidate 4: id=6594156 3840x2160 dur=60s score=0.600
+  Candidate 5: id=4061799 1920x1080 dur=14s score=0.600
+  Candidate 6: id=854256 1920x1080 dur=27s score=0.600
+  Candidate 7: id=5434505 1920x1080 dur=15s score=0.600
+  Candidate 8: id=6754830 3840x2160 dur=16s score=0.600
+  Candidate 9: id=6492467 3840x2160 dur=59s score=0.600
+  Candidate 10: id=9082092 1280x720 dur=30s score=0.000
+-> Router selected: 'pexels' for query 'stock footage cutaway shot'
+  Candidate 1: id=4326984 4096x2160 dur=7s score=0.922 ← SELECTED
+  Candidate 2: id=15453594 3840x2160 dur=11s score=0.763
+  Candidate 3: id=30488499 3840x2160 dur=9s score=0.642
+  Candidate 4: id=4927329 4096x2160 dur=28s score=0.600
+  Candidate 5: id=12659674 2688x1512 dur=64s score=0.600
+  Candidate 6: id=4332085 4096x2160 dur=17s score=0.600
+  Candidate 7: id=9700926 1920x1080 dur=17s score=0.600
+  Candidate 8: id=4592360 1920x1080 dur=22s score=0.600
+  Candidate 9: id=11156245 3840x2160 dur=30s score=0.600
+  Candidate 10: id=30143574 3840x2160 dur=19s score=0.400
+-> Router selected: 'pexels' for query 'The Bloop: the sound that shook the ocean documentary stock footage'
+-> SemanticValidator LLM error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash\nPlease retry in 41.72029766s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.5-flash'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '41s'}]}} — using fallback
+-> AssetLibrary diversity: penalty=0.15 for 'stock footage cutaway shot' — skipping reuse
+-> Cache MISS: 'stock footage cutaway shot' — calling Pexels API
+-> SemanticValidator LLM error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash\nPlease retry in 41.660676041s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'model': 'gemini-2.5-flash', 'location': 'global'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '41s'}]}} — using fallback
+-> AssetLibrary diversity: penalty=0.30 for 'the bloop: the sound that shook the ocean primary shot' — skipping reuse
+-> Cache MISS: 'The Bloop: the sound that shook the ocean' — calling Pexels API
+-> SemanticValidator LLM error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash\nPlease retry in 41.654380159s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.5-flash'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '41s'}]}} — using fallback
+-> AssetLibrary diversity: penalty=0.30 for 'the bloop: the sound that shook the ocean primary shot' — skipping reuse
+-> Cache MISS: 'The Bloop: the sound that shook the ocean' — calling Pexels API
+  Candidate 1: id=7318077 1920x1080 dur=10s score=0.700 ← SELECTED
+  Candidate 2: id=28903708 1920x1080 dur=6s score=0.700
+  Candidate 3: id=5251673 1920x1080 dur=35s score=0.600
+  Candidate 4: id=11448941 1920x1080 dur=67s score=0.600
+  Candidate 5: id=855742 1920x1080 dur=30s score=0.600
+  Candidate 6: id=4927329 4096x2160 dur=28s score=0.600
+  Candidate 7: id=28811335 3840x2160 dur=11s score=0.450
+  Candidate 8: id=33300037 3840x1920 dur=13s score=0.400
+  Candidate 9: id=37029740 3840x2160 dur=41s score=0.400
+  Candidate 10: id=27593050 1920x1080 dur=15s score=0.400
+-> Router selected: 'pexels' for query 'The Bloop: the sound that shook the ocean'
+  Candidate 1: id=5251673 1920x1080 dur=35s score=0.600 ← SELECTED
+  Candidate 2: id=11448941 1920x1080 dur=67s score=0.600
+  Candidate 3: id=855742 1920x1080 dur=30s score=0.600
+  Candidate 4: id=7318077 1920x1080 dur=10s score=0.600
+  Candidate 5: id=4927329 4096x2160 dur=28s score=0.600
+  Candidate 6: id=28903708 1920x1080 dur=6s score=0.600
+  Candidate 7: id=33300037 3840x1920 dur=13s score=0.400
+  Candidate 8: id=37029740 3840x2160 dur=41s score=0.400
+  Candidate 9: id=27593050 1920x1080 dur=15s score=0.400
+  Candidate 10: id=28811335 3840x2160 dur=11s score=0.400
+-> Router selected: 'pexels' for query 'The Bloop: the sound that shook the ocean'
+-> SemanticValidator LLM error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash\nPlease retry in 41.457081911s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.5-flash'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '41s'}]}} — using fallback
+-> AssetLibrary diversity: penalty=0.30 for 'the bloop: the sound that shook the ocean documentary stock footage' — skipping reuse
+-> Cache MISS: 'The Bloop: the sound that shook the ocean documentary stock footage' — calling Pexels API
+  Candidate 1: id=7450213 1920x1080 dur=42s score=0.600 ← SELECTED
+  Candidate 2: id=17704528 3840x2160 dur=39s score=0.600
+  Candidate 3: id=4061885 1920x1080 dur=24s score=0.600
+  Candidate 4: id=6594156 3840x2160 dur=60s score=0.600
+  Candidate 5: id=4061799 1920x1080 dur=14s score=0.600
+  Candidate 6: id=854256 1920x1080 dur=27s score=0.600
+  Candidate 7: id=5434505 1920x1080 dur=15s score=0.600
+  Candidate 8: id=6754830 3840x2160 dur=16s score=0.600
+  Candidate 9: id=6492467 3840x2160 dur=59s score=0.600
+  Candidate 10: id=9082092 1280x720 dur=30s score=0.000
+-> Router selected: 'pexels' for query 'stock footage cutaway shot'
+-> SemanticValidator LLM error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash\nPlease retry in 41.414665319s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.5-flash'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '41s'}]}} — using fallback
+-> Downloading from Pexels…
+  Candidate 1: id=4326984 4096x2160 dur=7s score=0.850 ← SELECTED
+  Candidate 2: id=15453594 3840x2160 dur=11s score=0.650
+  Candidate 3: id=4927329 4096x2160 dur=28s score=0.600
+  Candidate 4: id=12659674 2688x1512 dur=64s score=0.600
+  Candidate 5: id=4332085 4096x2160 dur=17s score=0.600
+  Candidate 6: id=9700926 1920x1080 dur=17s score=0.600
+  Candidate 7: id=4592360 1920x1080 dur=22s score=0.600
+  Candidate 8: id=11156245 3840x2160 dur=30s score=0.600
+  Candidate 9: id=30488499 3840x2160 dur=9s score=0.550
+  Candidate 10: id=30143574 3840x2160 dur=19s score=0.400
+-> Router selected: 'pexels' for query 'The Bloop: the sound that shook the ocean documentary stock footage'
+-> SemanticValidator LLM error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash\nPlease retry in 41.129638663s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'model': 'gemini-2.5-flash', 'location': 'global'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '41s'}]}} — using fallback
+-> AssetLibrary diversity: penalty=0.30 for 'the bloop: the sound that shook the ocean primary shot' — skipping reuse
+-> Cache MISS: 'The Bloop: the sound that shook the ocean' — calling Pexels API
+  Candidate 1: id=5251673 1920x1080 dur=35s score=0.600 ← SELECTED
+  Candidate 2: id=11448941 1920x1080 dur=67s score=0.600
+  Candidate 3: id=855742 1920x1080 dur=30s score=0.600
+  Candidate 4: id=7318077 1920x1080 dur=10s score=0.600
+  Candidate 5: id=4927329 4096x2160 dur=28s score=0.600
+  Candidate 6: id=28903708 1920x1080 dur=6s score=0.600
+  Candidate 7: id=33300037 3840x1920 dur=13s score=0.400
+  Candidate 8: id=37029740 3840x2160 dur=41s score=0.400
+  Candidate 9: id=27593050 1920x1080 dur=15s score=0.400
+  Candidate 10: id=28811335 3840x2160 dur=11s score=0.400
+-> Router selected: 'pexels' for query 'The Bloop: the sound that shook the ocean'
+-> SemanticValidator LLM error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash\nPlease retry in 41.002496786s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.5-flash'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '41s'}]}} — using fallback
+-> AssetLibrary REUSE: 'general primary shot' similar to 'general primary shot' -> cache/video/scene_3_b3_s0.mp4
+-> Router selected: 'pexels' for query 'general primary shot'
+-> SemanticValidator LLM error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash\nPlease retry in 40.902382784s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.5-flash'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '40s'}]}} — using fallback
+-> AssetLibrary diversity: penalty=0.30 for 'the bloop: the sound that shook the ocean documentary stock footage' — skipping reuse
+-> Cache MISS: 'The Bloop: the sound that shook the ocean documentary stock footage' — calling Pexels API
+-> SemanticValidator LLM error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash\nPlease retry in 40.692349702s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'model': 'gemini-2.5-flash', 'location': 'global'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '40s'}]}} — using fallback
+-> Already on disk: cache/video/scene_4_b3_s0.mp4
+    [BeatDirector] Shot accepted: primary shot for beat 3 (provider=pexels)
+  Candidate 1: id=4326984 4096x2160 dur=7s score=0.733 ← SELECTED
+  Candidate 2: id=4927329 4096x2160 dur=28s score=0.600
+  Candidate 3: id=12659674 2688x1512 dur=64s score=0.600
+  Candidate 4: id=4332085 4096x2160 dur=17s score=0.600
+  Candidate 5: id=9700926 1920x1080 dur=17s score=0.600
+  Candidate 6: id=15453594 3840x2160 dur=11s score=0.600
+  Candidate 7: id=4592360 1920x1080 dur=22s score=0.600
+  Candidate 8: id=11156245 3840x2160 dur=30s score=0.600
+  Candidate 9: id=30143574 3840x2160 dur=19s score=0.400
+  Candidate 10: id=30488499 3840x2160 dur=9s score=0.400
+-> Router selected: 'pexels' for query 'The Bloop: the sound that shook the ocean documentary stock footage'
+-> SemanticValidator LLM error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash\nPlease retry in 40.444466867s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.5-flash'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '40s'}]}} — using fallback
+-> AssetLibrary REUSE: 'documentary primary shot' similar to 'documentary primary shot' -> cache/video/scene_3_b1_s0.mp4
+-> Router selected: 'pexels' for query 'documentary primary shot'
+-> SemanticValidator LLM error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash\nPlease retry in 40.169607553s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.5-flash'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '40s'}]}} — using fallback
+-> AssetLibrary diversity: penalty=0.15 for 'the bloop: the sound that shook the ocean primary shot' — skipping reuse
+-> Cache MISS: 'The Bloop: the sound that shook the ocean' — calling Pexels API
+-> Saved: cache/video/scene_5_b0_s1.mp4
+    [BeatDirector] Shot accepted: cutaway shot for beat 0 (provider=pexels)
+-> AssetLibrary diversity: penalty=0.30 for 'documentary primary shot' — skipping reuse
+-> Cache HIT: 'documentary primary shot' → cache/video/scene_0_b2_s0.mp4
+-> Router selected: 'pexels' for query 'documentary primary shot'
+-> SemanticValidator LLM error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash\nPlease retry in 39.90368017s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.5-flash'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '39s'}]}} — using fallback
+-> AssetLibrary diversity: penalty=0.30 for 'the bloop: the sound that shook the ocean' — skipping reuse
+-> Cache MISS: 'The Bloop: the sound that shook the ocean' — calling Pexels API
+  Candidate 1: id=7318077 1920x1080 dur=10s score=0.906 ← SELECTED
+  Candidate 2: id=28903708 1920x1080 dur=6s score=0.706
+  Candidate 3: id=28811335 3840x2160 dur=11s score=0.676
+  Candidate 4: id=33300037 3840x1920 dur=13s score=0.618
+  Candidate 5: id=5251673 1920x1080 dur=35s score=0.600
+  Candidate 6: id=11448941 1920x1080 dur=67s score=0.600
+  Candidate 7: id=855742 1920x1080 dur=30s score=0.600
+  Candidate 8: id=4927329 4096x2160 dur=28s score=0.600
+  Candidate 9: id=27593050 1920x1080 dur=15s score=0.559
+  Candidate 10: id=37029740 3840x2160 dur=41s score=0.400
+-> Router selected: 'pexels' for query 'The Bloop: the sound that shook the ocean'
+  Candidate 1: id=7318077 1920x1080 dur=10s score=0.906 ← SELECTED
+  Candidate 2: id=28903708 1920x1080 dur=6s score=0.706
+  Candidate 3: id=28811335 3840x2160 dur=11s score=0.676
+  Candidate 4: id=33300037 3840x1920 dur=13s score=0.618
+  Candidate 5: id=5251673 1920x1080 dur=35s score=0.600
+  Candidate 6: id=11448941 1920x1080 dur=67s score=0.600
+  Candidate 7: id=855742 1920x1080 dur=30s score=0.600
+  Candidate 8: id=4927329 4096x2160 dur=28s score=0.600
+  Candidate 9: id=27593050 1920x1080 dur=15s score=0.559
+  Candidate 10: id=37029740 3840x2160 dur=41s score=0.400
+-> Router selected: 'pexels' for query 'The Bloop: the sound that shook the ocean'
+-> SemanticValidator LLM error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash\nPlease retry in 39.672288658s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'model': 'gemini-2.5-flash', 'location': 'global'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '39s'}]}} — using fallback
+-> AssetLibrary diversity: penalty=0.15 for 'the bloop: the sound that shook the ocean documentary stock footage' — skipping reuse
+-> Cache HIT: 'The Bloop: the sound that shook the ocean documentary stock footage' → cache/video/scene_5_b0_s1.mp4
+-> Router selected: 'pexels' for query 'The Bloop: the sound that shook the ocean documentary stock footage'
+-> SemanticValidator LLM error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash\nPlease retry in 39.608950916s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.5-flash'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '39s'}]}} — using fallback
+-> AssetLibrary diversity: penalty=0.15 for 'the bloop: the sound that shook the ocean documentary stock footage' — skipping reuse
+-> Cache HIT: 'The Bloop: the sound that shook the ocean documentary stock footage' → cache/video/scene_5_b0_s1.mp4
+-> Router selected: 'pexels' for query 'The Bloop: the sound that shook the ocean documentary stock footage'
+-> SemanticValidator LLM error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash\nPlease retry in 39.402394898s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.5-flash'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '39s'}]}} — using fallback
+-> SemanticValidator LLM error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 5, model: gemini-2.5-flash\nPlease retry in 39.400208864s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.5-flash'}, 'quotaValue': '5'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '39s'}]}} — using fallback
+
+  [BeatDirector] Planning beats for scene 7...
+  [BeatDirector] Concept terms (10): ['Glacier calving ocean', 'Arctic ice sheet cracks', 'Deep ocean abyss', 'Powerful ocean waves']...
+  [BeatDirector] 2 beats, 3 shots
+-> Cache MISS: 'Glacier calving ocean primary shot' — calling Pexels API
+  Candidate 1: id=8318613 2688x1512 dur=5s score=0.995 ← SELECTED
+  Candidate 2: id=8318615 2688x1512 dur=11s score=0.763
+  Candidate 3: id=9722207 4096x1742 dur=12s score=0.723
+  Candidate 4: id=8318650 2688x1512 dur=13s score=0.683
+  Candidate 5: id=8318614 2688x1512 dur=15s score=0.604
+  Candidate 6: id=8318409 2688x1512 dur=16s score=0.600
+  Candidate 7: id=8318699 2688x1512 dur=22s score=0.600
+  Candidate 8: id=28988888 3840x2160 dur=24s score=0.400
+  Candidate 9: id=29477419 3840x2160 dur=16s score=0.400
+  Candidate 10: id=32987075 3840x2160 dur=16s score=0.400
+-> Router selected: 'pexels' for query 'Glacier calving ocean primary shot'
+-> Downloading from Pexels…
+-> Saved: cache/video/scene_7_b0_s0.mp4
+    [BeatDirector] Shot accepted: primary shot for beat 0 (provider=pexels)
+-> Cache MISS: 'Arctic ice sheet cracks cutaway shot' — calling Pexels API
+  Candidate 1: id=7242211 1920x1080 dur=17s score=0.600 ← SELECTED
+  Candidate 2: id=7441255 1920x1080 dur=16s score=0.600
+  Candidate 3: id=6744924 1920x1080 dur=37s score=0.600
+  Candidate 4: id=36560908 3840x2160 dur=15s score=0.400
+  Candidate 5: id=29504949 3840x2160 dur=20s score=0.400
+  Candidate 6: id=29504939 3840x2160 dur=14s score=0.400
+  Candidate 7: id=29504945 3840x2160 dur=12s score=0.400
+  Candidate 8: id=29541102 3840x2160 dur=27s score=0.400
+  Candidate 9: id=36426729 3840x2160 dur=16s score=0.400
+  Candidate 10: id=29504954 3840x2160 dur=20s score=0.400
+-> Router selected: 'pexels' for query 'Arctic ice sheet cracks cutaway shot'
+-> SemanticValidator LLM error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-2.5-flash\nPlease retry in 51.503025368s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.5-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '51s'}]}} — using fallback
+-> Downloading from Pexels…
+-> Saved: cache/video/scene_7_b0_s1.mp4
+    [BeatDirector] Shot accepted: cutaway shot for beat 0 (provider=pexels)
+-> AssetLibrary REUSE: 'Deep ocean abyss primary shot' similar to 'deep ocean abyss primary shot' -> cache/video/scene_1_b2_s0.mp4
+-> Router selected: 'pexels' for query 'Deep ocean abyss primary shot'
+-> SemanticValidator LLM error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-2.5-flash\nPlease retry in 49.800225666s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.5-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '49s'}]}} — using fallback
+-> Downloading from Pexels…
+-> Saved: cache/video/scene_7_b1_s0.mp4
+    [BeatDirector] Shot accepted: primary shot for beat 1 (provider=pexels)
+
+==================================================
+  Storyboard Validation...
+  ⚠ Storyboard issues found:
+    - Diversity: Scene 2, beat 0: content fingerprint match with scene 0
+    - Diversity: Scene 5, beat 1: duplicate detected: same asset nasa/deep space telescope was already used in scene 4
+    - Diversity: Scene 6, beat 0: duplicate detected: same asset nasa/Milky Way galaxy was already used in scene 4
+    - Diversity: Scene 6, beat 0: duplicate detected: same asset nasa/deep space telescope was already used in scene 4
+    - Diversity: Scene 7, beat 1: duplicate detected: same asset pexels/Deep ocean abyss primary shot was already used in scene 1
+  (Continuing with best effort)
+
+==================================================
+  Beat Director Results:
+    Shots requested: 26
+    Shots accepted:  26
+    Queries tried:   46
+    Gate rejections: 28
+    Fallbacks:       8
+    Success rate:    100.0%
+==================================================
+
+  [vector] rendering 3 beats (algo, per-video, label='the_bloop__the_sound_that_shook_the_ocean') ...
+  [vector] 3/3 beats ready (644.1s)
+  [manim] Injected generic_PulseMotif.mp4 into scene 0 (7.0s)
+  [manim] Injected generic_GrowingBars.mp4 into scene 1 (7.0s)
+  [manim] Injected generic_CycleLoop.mp4 into scene 7 (7.0s)
+  [animation] manim x3, vector x0
+  Shots: 26 | Avg 4.3s | Providers: {'manim': 3, 'pexels': 15, 'nasa': 8} | Fallbacks: 0
+
+[8b/16] AI IMAGE GENERATION (NIM primary → Pollinations fallback, parallel)
+  [AI] injected golden_record into scene 7 (7.0s)
+  Generated 1, injected 1, semantic-injected 0 (0.0s)
+[chatterbox] starting persistent worker (model load ~17s)...
+  [chatterbox] 17.7s audio in 208.6s (ex=0.5, cfg=0.28)
+  [chatterbox] 18.2s audio in 221.4s (ex=0.5, cfg=0.32)
+  [chatterbox] 10.4s audio in 119.8s (ex=0.52, cfg=0.3)
+  [chatterbox] 10.4s audio in 136.3s (ex=0.48, cfg=0.31)
+  [chatterbox] 14.4s audio in 169.3s (ex=0.5, cfg=0.32)
+  [chatterbox] 10.9s audio in 129.8s (ex=0.52, cfg=0.31)
+  [chatterbox] 12.0s audio in 141.4s (ex=0.48, cfg=0.32)
+  [chatterbox] 10.2s audio in 118.7s (ex=0.5, cfg=0.33)
+  [gate] pre-render deterministic gate PASSED (render allowed)
+
+[12/16] RENDERING → results/the_bloop__the_sound_that_shook_the_ocean/the_bloop__the_sound_that_shook_the_ocean_v1.mp4
+[timeline] Wrote results/the_bloop__the_sound_that_shook_the_ocean/timeline.json
+  [subs] 230 subtitle clips (8 scenes)
+-> Adding 230 animated subtitle clips...
+Rendering results/the_bloop__the_sound_that_shook_the_ocean/the_bloop__the_sound_that_shook_the_ocean_v1.mp4 on CPU...
+Moviepy - Building video results/the_bloop__the_sound_that_shook_the_ocean/the_bloop__the_sound_that_shook_the_ocean_v1.mp4.
+MoviePy - Writing audio in the_bloop__the_sound_that_shook_the_ocean_v1TEMP_MPY_wvf_snd.mp4
+chunk:   0%|          | 0/2298 [00:00<?, ?it/s, now=None]chunk:   5%|▍         | 109/2298 [00:00<00:05, 402.16it/s, now=None]chunk:   7%|▋         | 150/2298 [00:00<00:05, 371.14it/s, now=None]chunk:   8%|▊         | 186/2298 [00:00<00:06, 347.16it/s, now=None]chunk:  10%|▉         | 225/2298 [00:00<00:05, 353.32it/s, now=None]chunk:  11%|█▏        | 260/2298 [00:00<00:05, 346.54it/s, now=None]chunk:  13%|█▎        | 295/2298 [00:00<00:06, 330.47it/s, now=None]chunk:  14%|█▍        | 329/2298 [00:00<00:06, 325.28it/s, now=None]chunk:  16%|█▌        | 369/2298 [00:01<00:05, 333.99it/s, now=None]chunk:  18%|█▊        | 413/2298 [00:01<00:05, 359.77it/s, now=None]chunk:  20%|█▉        | 450/2298 [00:01<00:05, 361.95it/s, now=None]chunk:  21%|██        | 487/2298 [00:01<00:05, 347.01it/s, now=None]chunk:  23%|██▎       | 522/2298 [00:01<00:05, 338.90it/s, now=None]chunk:  24%|██▍       | 556/2298 [00:01<00:05, 322.57it/s, now=None]chunk:  26%|██▌       | 597/2298 [00:01<00:04, 342.95it/s, now=None]chunk:  28%|██▊       | 632/2298 [00:01<00:05, 323.80it/s, now=None]chunk:  30%|██▉       | 680/2298 [00:01<00:04, 364.15it/s, now=None]chunk:  31%|███       | 717/2298 [00:02<00:04, 357.45it/s, now=None]chunk:  33%|███▎      | 756/2298 [00:02<00:04, 364.78it/s, now=None]chunk:  35%|███▍      | 793/2298 [00:02<00:04, 361.16it/s, now=None]chunk:  36%|███▌      | 830/2298 [00:02<00:04, 361.60it/s, now=None]chunk:  38%|███▊      | 876/2298 [00:02<00:03, 380.37it/s, now=None]chunk:  40%|███▉      | 915/2298 [00:02<00:03, 360.48it/s, now=None]chunk:  42%|████▏     | 956/2298 [00:02<00:03, 360.72it/s, now=None]chunk:  43%|████▎     | 993/2298 [00:02<00:03, 359.40it/s, now=None]chunk:  45%|████▍     | 1032/2298 [00:02<00:03, 365.34it/s, now=None]chunk:  47%|████▋     | 1069/2298 [00:03<00:03, 334.88it/s, now=None]chunk:  48%|████▊     | 1110/2298 [00:03<00:03, 355.19it/s, now=None]chunk:  50%|████▉     | 1147/2298 [00:03<00:03, 349.92it/s, now=None]chunk:  52%|█████▏    | 1184/2298 [00:03<00:03, 339.41it/s, now=None]chunk:  53%|█████▎    | 1228/2298 [00:03<00:02, 357.19it/s, now=None]chunk:  55%|█████▌    | 1264/2298 [00:03<00:03, 324.94it/s, now=None]chunk:  57%|█████▋    | 1305/2298 [00:03<00:02, 347.34it/s, now=None]chunk:  58%|█████▊    | 1344/2298 [00:03<00:02, 358.23it/s, now=None]chunk:  60%|██████    | 1382/2298 [00:03<00:02, 364.34it/s, now=None]chunk:  62%|██████▏   | 1419/2298 [00:04<00:02, 330.63it/s, now=None]chunk:  63%|██████▎   | 1456/2298 [00:04<00:02, 335.91it/s, now=None]chunk:  65%|██████▍   | 1492/2298 [00:04<00:02, 335.69it/s, now=None]chunk:  66%|██████▋   | 1527/2298 [00:04<00:02, 327.28it/s, now=None]chunk:  68%|██████▊   | 1564/2298 [00:04<00:02, 329.37it/s, now=None]chunk:  70%|██████▉   | 1598/2298 [00:04<00:02, 319.95it/s, now=None]chunk:  71%|███████▏  | 1642/2298 [00:04<00:01, 352.99it/s, now=None]chunk:  73%|███████▎  | 1680/2298 [00:04<00:01, 342.66it/s, now=None]chunk:  75%|███████▍  | 1716/2298 [00:04<00:01, 331.84it/s, now=None]chunk:  76%|███████▌  | 1750/2298 [00:05<00:01, 328.96it/s, now=None]chunk:  78%|███████▊  | 1784/2298 [00:05<00:01, 329.94it/s, now=None]chunk:  79%|███████▉  | 1818/2298 [00:05<00:01, 317.63it/s, now=None]chunk:  81%|████████  | 1852/2298 [00:05<00:01, 322.78it/s, now=None]chunk:  83%|████████▎ | 1896/2298 [00:05<00:01, 347.75it/s, now=None]chunk:  84%|████████▍ | 1931/2298 [00:05<00:01, 332.64it/s, now=None]chunk:  86%|████████▌ | 1965/2298 [00:05<00:01, 318.08it/s, now=None]chunk:  87%|████████▋ | 1997/2298 [00:05<00:00, 309.58it/s, now=None]chunk:  89%|████████▊ | 2037/2298 [00:05<00:00, 334.34it/s, now=None]chunk:  90%|█████████ | 2076/2298 [00:06<00:00, 349.71it/s, now=None]chunk:  92%|█████████▏| 2112/2298 [00:06<00:00, 318.53it/s, now=None]chunk:  94%|█████████▍| 2157/2298 [00:06<00:00, 353.86it/s, now=None]chunk:  95%|█████████▌| 2194/2298 [00:06<00:00, 346.29it/s, now=None]chunk:  97%|█████████▋| 2232/2298 [00:06<00:00, 341.11it/s, now=None]chunk:  99%|█████████▊| 2267/2298 [00:06<00:00, 335.67it/s, now=None]                                                                     MoviePy - Done.
+Moviepy - Writing video results/the_bloop__the_sound_that_shook_the_ocean/the_bloop__the_sound_that_shook_the_ocean_v1.mp4
+
+t:   0%|          | 0/3126 [00:00<?, ?it/s, now=None]t:   0%|          | 5/3126 [00:00<01:06, 47.09it/s, now=None]t:   0%|          | 10/3126 [00:00<01:18, 39.72it/s, now=None]t:   0%|          | 15/3126 [00:00<01:18, 39.60it/s, now=None]t:   1%|          | 19/3126 [00:00<01:18, 39.56it/s, now=None]t:   1%|          | 23/3126 [00:00<01:19, 39.11it/s, now=None]t:   1%|          | 27/3126 [00:00<01:20, 38.44it/s, now=None]t:   1%|          | 31/3126 [00:00<01:20, 38.65it/s, now=None]t:   1%|          | 35/3126 [00:00<01:20, 38.36it/s, now=None]t:   1%|          | 39/3126 [00:01<01:20, 38.18it/s, now=None]t:   1%|▏         | 43/3126 [00:01<01:25, 36.06it/s, now=None]t:   2%|▏         | 47/3126 [00:01<01:32, 33.35it/s, now=None]t:   2%|▏         | 51/3126 [00:01<01:39, 31.00it/s, now=None]t:   2%|▏         | 55/3126 [00:01<01:43, 29.66it/s, now=None]t:   2%|▏         | 59/3126 [00:01<01:45, 29.14it/s, now=None]t:   2%|▏         | 63/3126 [00:01<01:42, 29.98it/s, now=None]t:   2%|▏         | 67/3126 [00:01<01:42, 29.88it/s, now=None]t:   2%|▏         | 71/3126 [00:02<01:36, 31.59it/s, now=None]t:   2%|▏         | 75/3126 [00:02<01:38, 31.04it/s, now=None]t:   3%|▎         | 79/3126 [00:02<01:37, 31.35it/s, now=None]t:   3%|▎         | 83/3126 [00:02<01:34, 32.35it/s, now=None]t:   3%|▎         | 87/3126 [00:02<01:40, 30.36it/s, now=None]t:   3%|▎         | 91/3126 [00:02<01:34, 32.19it/s, now=None]t:   3%|▎         | 95/3126 [00:02<01:29, 33.68it/s, now=None]t:   3%|▎         | 99/3126 [00:02<01:26, 35.06it/s, now=None]t:   3%|▎         | 103/3126 [00:03<01:27, 34.61it/s, now=None]t:   3%|▎         | 107/3126 [00:03<01:29, 33.66it/s, now=None]t:   4%|▎         | 111/3126 [00:03<01:28, 33.88it/s, now=None]t:   4%|▎         | 115/3126 [00:03<01:29, 33.66it/s, now=None]t:   4%|▍         | 119/3126 [00:03<01:29, 33.75it/s, now=None]t:   4%|▍         | 123/3126 [00:03<01:26, 34.79it/s, now=None]t:   4%|▍         | 127/3126 [00:03<01:27, 34.23it/s, now=None]t:   4%|▍         | 131/3126 [00:03<01:25, 34.88it/s, now=None]t:   4%|▍         | 135/3126 [00:03<01:25, 35.07it/s, now=None]t:   4%|▍         | 139/3126 [00:04<01:23, 35.80it/s, now=None]t:   5%|▍         | 143/3126 [00:04<01:23, 35.52it/s, now=None]t:   5%|▍         | 147/3126 [00:04<01:24, 35.17it/s, now=None]t:   5%|▍         | 151/3126 [00:04<01:24, 35.20it/s, now=None]t:   5%|▌         | 157/3126 [00:04<01:13, 40.14it/s, now=None]t:   5%|▌         | 163/3126 [00:04<01:08, 43.45it/s, now=None]t:   5%|▌         | 168/3126 [00:04<01:14, 39.68it/s, now=None]t:   6%|▌         | 173/3126 [00:04<01:12, 40.59it/s, now=None]t:   6%|▌         | 179/3126 [00:05<01:08, 43.31it/s, now=None]t:   6%|▌         | 184/3126 [00:05<01:07, 43.70it/s, now=None]t:   6%|▌         | 189/3126 [00:05<01:06, 44.26it/s, now=None]t:   6%|▌         | 194/3126 [00:05<01:05, 44.99it/s, now=None]t:   6%|▋         | 199/3126 [00:05<01:05, 44.55it/s, now=None]t:   7%|▋         | 204/3126 [00:05<01:06, 44.06it/s, now=None]t:   7%|▋         | 209/3126 [00:05<01:06, 43.56it/s, now=None]t:   7%|▋         | 214/3126 [00:05<01:06, 43.50it/s, now=None]t:   7%|▋         | 219/3126 [00:05<01:04, 44.92it/s, now=None]t:   7%|▋         | 224/3126 [00:06<01:04, 45.10it/s, now=None]t:   7%|▋         | 229/3126 [00:06<01:03, 45.76it/s, now=None]t:   7%|▋         | 234/3126 [00:06<01:04, 45.18it/s, now=None]t:   8%|▊         | 239/3126 [00:06<01:02, 46.42it/s, now=None]t:   8%|▊         | 244/3126 [00:06<01:01, 46.51it/s, now=None]t:   8%|▊         | 249/3126 [00:06<01:01, 46.61it/s, now=None]t:   8%|▊         | 254/3126 [00:06<01:01, 46.46it/s, now=None]t:   8%|▊         | 259/3126 [00:06<01:05, 43.66it/s, now=None]t:   8%|▊         | 264/3126 [00:06<01:06, 43.04it/s, now=None]t:   9%|▊         | 269/3126 [00:07<01:05, 43.31it/s, now=None]t:   9%|▉         | 274/3126 [00:07<01:07, 42.48it/s, now=None]t:   9%|▉         | 279/3126 [00:07<01:06, 42.60it/s, now=None]t:   9%|▉         | 284/3126 [00:07<01:07, 41.91it/s, now=None]t:   9%|▉         | 289/3126 [00:07<01:07, 41.84it/s, now=None]t:   9%|▉         | 294/3126 [00:07<01:09, 40.79it/s, now=None]t:  10%|▉         | 299/3126 [00:07<01:09, 40.40it/s, now=None]t:  10%|▉         | 304/3126 [00:07<01:09, 40.79it/s, now=None]t:  10%|▉         | 309/3126 [00:08<01:10, 39.71it/s, now=None]t:  10%|█         | 313/3126 [00:08<01:11, 39.10it/s, now=None]t:  10%|█         | 317/3126 [00:08<01:17, 36.30it/s, now=None]t:  10%|█         | 321/3126 [00:08<01:19, 35.09it/s, now=None]t:  10%|█         | 326/3126 [00:08<01:12, 38.85it/s, now=None]t:  11%|█         | 331/3126 [00:08<01:09, 40.29it/s, now=None]t:  11%|█         | 336/3126 [00:08<01:12, 38.57it/s, now=None]t:  11%|█         | 341/3126 [00:08<01:10, 39.69it/s, now=None]t:  11%|█         | 346/3126 [00:08<01:08, 40.73it/s, now=None]t:  11%|█         | 351/3126 [00:09<01:09, 40.20it/s, now=None]t:  11%|█▏        | 356/3126 [00:09<01:09, 40.13it/s, now=None]t:  12%|█▏        | 361/3126 [00:09<01:09, 39.89it/s, now=None]t:  12%|█▏        | 366/3126 [00:09<01:12, 37.86it/s, now=None]t:  12%|█▏        | 370/3126 [00:09<01:12, 37.95it/s, now=None]t:  12%|█▏        | 374/3126 [00:09<01:15, 36.38it/s, now=None]t:  12%|█▏        | 379/3126 [00:09<01:10, 38.71it/s, now=None]t:  12%|█▏        | 383/3126 [00:09<01:13, 37.44it/s, now=None]t:  12%|█▏        | 388/3126 [00:10<01:10, 39.01it/s, now=None]t:  13%|█▎        | 393/3126 [00:10<01:09, 39.20it/s, now=None]t:  13%|█▎        | 397/3126 [00:10<01:13, 37.36it/s, now=None]t:  13%|█▎        | 401/3126 [00:10<01:15, 36.09it/s, now=None]t:  13%|█▎        | 405/3126 [00:10<01:16, 35.69it/s, now=None]t:  13%|█▎        | 409/3126 [00:10<01:17, 35.02it/s, now=None]t:  13%|█▎        | 414/3126 [00:10<01:15, 35.99it/s, now=None]t:  13%|█▎        | 418/3126 [00:10<01:14, 36.30it/s, now=None]t:  13%|█▎        | 422/3126 [00:11<01:12, 37.11it/s, now=None]t:  14%|█▎        | 427/3126 [00:11<01:07, 39.82it/s, now=None]t:  14%|█▍        | 432/3126 [00:11<01:07, 39.88it/s, now=None]t:  14%|█▍        | 437/3126 [00:11<01:05, 41.11it/s, now=None]t:  14%|█▍        | 442/3126 [00:11<01:03, 42.32it/s, now=None]t:  14%|█▍        | 447/3126 [00:11<01:02, 43.03it/s, now=None]t:  14%|█▍        | 452/3126 [00:11<01:04, 41.44it/s, now=None]t:  15%|█▍        | 457/3126 [00:11<01:03, 41.88it/s, now=None]t:  15%|█▍        | 462/3126 [00:11<01:03, 42.08it/s, now=None]t:  15%|█▍        | 467/3126 [00:12<01:04, 41.31it/s, now=None]t:  15%|█▌        | 472/3126 [00:12<01:05, 40.55it/s, now=None]t:  15%|█▌        | 477/3126 [00:12<01:05, 40.44it/s, now=None]t:  15%|█▌        | 482/3126 [00:12<01:07, 39.23it/s, now=None]t:  16%|█▌        | 487/3126 [00:12<01:06, 39.48it/s, now=None]t:  16%|█▌        | 491/3126 [00:12<01:09, 38.05it/s, now=None]t:  16%|█▌        | 495/3126 [00:12<01:10, 37.21it/s, now=None]t:  16%|█▌        | 499/3126 [00:12<01:10, 37.10it/s, now=None]t:  16%|█▌        | 504/3126 [00:13<01:08, 38.38it/s, now=None]t:  16%|█▋        | 508/3126 [00:13<01:07, 38.80it/s, now=None]t:  16%|█▋        | 513/3126 [00:13<01:04, 40.45it/s, now=None]t:  17%|█▋        | 518/3126 [00:13<01:03, 40.80it/s, now=None]t:  17%|█▋        | 523/3126 [00:13<01:01, 42.48it/s, now=None]t:  17%|█▋        | 529/3126 [00:13<00:58, 44.58it/s, now=None]t:  17%|█▋        | 534/3126 [00:13<01:02, 41.59it/s, now=None]t:  17%|█▋        | 539/3126 [00:13<01:09, 37.15it/s, now=None]t:  17%|█▋        | 543/3126 [00:14<01:13, 34.96it/s, now=None]t:  17%|█▋        | 547/3126 [00:14<01:27, 29.57it/s, now=None]t:  18%|█▊        | 551/3126 [00:14<01:23, 30.91it/s, now=None]t:  18%|█▊        | 555/3126 [00:14<01:21, 31.61it/s, now=None]t:  18%|█▊        | 559/3126 [00:14<01:20, 31.96it/s, now=None]t:  18%|█▊        | 563/3126 [00:14<01:20, 31.84it/s, now=None]t:  18%|█▊        | 567/3126 [00:14<01:22, 31.08it/s, now=None]t:  18%|█▊        | 571/3126 [00:15<01:28, 28.94it/s, now=None]t:  18%|█▊        | 574/3126 [00:15<01:28, 28.73it/s, now=None]t:  18%|█▊        | 578/3126 [00:15<01:25, 29.83it/s, now=None]t:  19%|█▊        | 582/3126 [00:15<01:22, 30.80it/s, now=None]t:  19%|█▊        | 586/3126 [00:15<01:16, 33.12it/s, now=None]t:  19%|█▉        | 590/3126 [00:15<01:14, 34.19it/s, now=None]t:  19%|█▉        | 594/3126 [00:15<01:12, 34.73it/s, now=None]t:  19%|█▉        | 598/3126 [00:15<01:09, 36.14it/s, now=None]t:  19%|█▉        | 602/3126 [00:15<01:09, 36.36it/s, now=None]t:  19%|█▉        | 606/3126 [00:16<01:08, 37.01it/s, now=None]t:  20%|█▉        | 610/3126 [00:16<01:08, 36.97it/s, now=None]t:  20%|█▉        | 614/3126 [00:16<01:06, 37.82it/s, now=None]t:  20%|█▉        | 619/3126 [00:16<01:06, 37.90it/s, now=None]t:  20%|█▉        | 623/3126 [00:16<01:05, 38.17it/s, now=None]t:  20%|██        | 627/3126 [00:16<01:05, 38.25it/s, now=None]t:  20%|██        | 631/3126 [00:16<01:05, 38.06it/s, now=None]t:  20%|██        | 635/3126 [00:16<01:05, 37.94it/s, now=None]t:  20%|██        | 639/3126 [00:16<01:04, 38.52it/s, now=None]t:  21%|██        | 643/3126 [00:16<01:04, 38.79it/s, now=None]t:  21%|██        | 647/3126 [00:17<01:04, 38.61it/s, now=None]t:  21%|██        | 651/3126 [00:17<01:03, 38.84it/s, now=None]t:  21%|██        | 655/3126 [00:17<01:04, 38.38it/s, now=None]t:  21%|██        | 661/3126 [00:17<00:57, 42.88it/s, now=None]t:  21%|██▏       | 667/3126 [00:17<00:52, 47.05it/s, now=None]t:  22%|██▏       | 673/3126 [00:17<00:50, 48.86it/s, now=None]t:  22%|██▏       | 679/3126 [00:17<00:49, 49.74it/s, now=None]t:  22%|██▏       | 685/3126 [00:17<00:48, 50.45it/s, now=None]t:  22%|██▏       | 691/3126 [00:17<00:47, 50.83it/s, now=None]t:  22%|██▏       | 697/3126 [00:18<00:48, 49.69it/s, now=None]t:  22%|██▏       | 703/3126 [00:18<00:48, 50.00it/s, now=None]t:  23%|██▎       | 709/3126 [00:18<00:49, 48.93it/s, now=None]t:  23%|██▎       | 715/3126 [00:18<00:48, 50.02it/s, now=None]t:  23%|██▎       | 721/3126 [00:18<00:47, 51.17it/s, now=None]t:  23%|██▎       | 727/3126 [00:18<00:49, 48.71it/s, now=None]t:  23%|██▎       | 732/3126 [00:18<00:50, 47.02it/s, now=None]t:  24%|██▎       | 738/3126 [00:18<00:49, 48.36it/s, now=None]t:  24%|██▍       | 743/3126 [00:19<00:48, 48.71it/s, now=None]t:  24%|██▍       | 749/3126 [00:19<00:48, 48.69it/s, now=None]t:  24%|██▍       | 755/3126 [00:19<00:48, 48.89it/s, now=None]t:  24%|██▍       | 761/3126 [00:19<00:47, 49.42it/s, now=None]t:  25%|██▍       | 766/3126 [00:19<00:48, 49.15it/s, now=None]t:  25%|██▍       | 771/3126 [00:19<00:48, 48.60it/s, now=None]t:  25%|██▍       | 776/3126 [00:19<00:51, 45.77it/s, now=None]t:  25%|██▍       | 781/3126 [00:19<00:53, 43.74it/s, now=None]t:  25%|██▌       | 786/3126 [00:20<00:56, 41.66it/s, now=None]t:  25%|██▌       | 791/3126 [00:20<00:57, 40.54it/s, now=None]t:  25%|██▌       | 796/3126 [00:20<00:57, 40.25it/s, now=None]t:  26%|██▌       | 801/3126 [00:20<00:57, 40.11it/s, now=None]t:  26%|██▌       | 806/3126 [00:20<00:57, 40.49it/s, now=None]t:  26%|██▌       | 811/3126 [00:20<00:57, 40.23it/s, now=None]t:  26%|██▌       | 816/3126 [00:20<00:58, 39.58it/s, now=None]t:  26%|██▌       | 820/3126 [00:20<00:58, 39.54it/s, now=None]t:  26%|██▋       | 825/3126 [00:20<00:57, 40.33it/s, now=None]t:  27%|██▋       | 830/3126 [00:21<00:56, 40.83it/s, now=None]t:  27%|██▋       | 835/3126 [00:21<00:55, 41.06it/s, now=None]t:  27%|██▋       | 840/3126 [00:21<00:55, 41.08it/s, now=None]t:  27%|██▋       | 845/3126 [00:21<00:56, 40.12it/s, now=None]t:  27%|██▋       | 850/3126 [00:21<00:58, 38.90it/s, now=None]t:  27%|██▋       | 854/3126 [00:21<00:58, 38.92it/s, now=None]t:  27%|██▋       | 858/3126 [00:21<00:58, 38.84it/s, now=None]t:  28%|██▊       | 863/3126 [00:21<00:56, 40.08it/s, now=None]t:  28%|██▊       | 868/3126 [00:22<00:56, 40.17it/s, now=None]t:  28%|██▊       | 873/3126 [00:22<00:56, 39.99it/s, now=None]t:  28%|██▊       | 878/3126 [00:22<00:55, 40.68it/s, now=None]t:  28%|██▊       | 883/3126 [00:22<00:55, 40.15it/s, now=None]t:  28%|██▊       | 888/3126 [00:22<00:56, 39.92it/s, now=None]t:  29%|██▊       | 893/3126 [00:22<00:53, 41.65it/s, now=None]t:  29%|██▊       | 898/3126 [00:22<00:54, 40.55it/s, now=None]t:  29%|██▉       | 903/3126 [00:22<00:55, 39.83it/s, now=None]t:  29%|██▉       | 908/3126 [00:23<00:53, 41.35it/s, now=None]t:  29%|██▉       | 913/3126 [00:23<00:54, 40.49it/s, now=None]t:  29%|██▉       | 918/3126 [00:23<00:53, 41.60it/s, now=None]t:  30%|██▉       | 923/3126 [00:23<00:53, 41.07it/s, now=None]t:  30%|██▉       | 928/3126 [00:23<00:54, 40.70it/s, now=None]t:  30%|██▉       | 933/3126 [00:23<00:51, 42.29it/s, now=None]t:  30%|███       | 938/3126 [00:23<00:50, 42.97it/s, now=None]t:  30%|███       | 943/3126 [00:23<00:52, 41.43it/s, now=None]t:  30%|███       | 948/3126 [00:24<00:53, 40.76it/s, now=None]t:  30%|███       | 953/3126 [00:24<00:53, 40.26it/s, now=None]t:  31%|███       | 958/3126 [00:24<00:50, 42.67it/s, now=None]t:  31%|███       | 964/3126 [00:24<00:49, 43.52it/s, now=None]t:  31%|███       | 969/3126 [00:24<00:48, 44.69it/s, now=None]t:  31%|███       | 974/3126 [00:24<00:49, 43.87it/s, now=None]t:  31%|███▏      | 979/3126 [00:24<00:57, 37.26it/s, now=None]t:  31%|███▏      | 983/3126 [00:24<01:09, 30.67it/s, now=None]t:  32%|███▏      | 987/3126 [00:25<01:18, 27.24it/s, now=None]t:  32%|███▏      | 990/3126 [00:25<01:23, 25.57it/s, now=None]t:  32%|███▏      | 994/3126 [00:25<01:28, 24.18it/s, now=None]t:  32%|███▏      | 998/3126 [00:25<01:33, 22.75it/s, now=None]t:  32%|███▏      | 1002/3126 [00:25<01:34, 22.58it/s, now=None]t:  32%|███▏      | 1006/3126 [00:26<01:36, 21.91it/s, now=None]t:  32%|███▏      | 1009/3126 [00:26<01:36, 22.04it/s, now=None]t:  32%|███▏      | 1012/3126 [00:26<01:37, 21.66it/s, now=None]t:  32%|███▏      | 1015/3126 [00:26<01:42, 20.64it/s, now=None]t:  33%|███▎      | 1018/3126 [00:26<01:46, 19.73it/s, now=None]t:  33%|███▎      | 1022/3126 [00:26<01:35, 22.03it/s, now=None]t:  33%|███▎      | 1025/3126 [00:26<01:34, 22.22it/s, now=None]t:  33%|███▎      | 1029/3126 [00:27<01:34, 22.12it/s, now=None]t:  33%|███▎      | 1033/3126 [00:27<01:34, 22.17it/s, now=None]t:  33%|███▎      | 1036/3126 [00:27<01:28, 23.73it/s, now=None]t:  33%|███▎      | 1039/3126 [00:27<01:28, 23.49it/s, now=None]t:  33%|███▎      | 1042/3126 [00:27<01:27, 23.88it/s, now=None]t:  33%|███▎      | 1045/3126 [00:27<01:30, 23.11it/s, now=None]t:  34%|███▎      | 1048/3126 [00:27<01:29, 23.32it/s, now=None]t:  34%|███▎      | 1051/3126 [00:28<01:23, 24.71it/s, now=None]t:  34%|███▎      | 1054/3126 [00:28<01:42, 20.31it/s, now=None]t:  34%|███▍      | 1057/3126 [00:28<01:34, 21.89it/s, now=None]t:  34%|███▍      | 1060/3126 [00:28<01:40, 20.66it/s, now=None]t:  34%|███▍      | 1063/3126 [00:28<01:39, 20.81it/s, now=None]t:  34%|███▍      | 1066/3126 [00:28<02:00, 17.15it/s, now=None]t:  34%|███▍      | 1070/3126 [00:29<01:51, 18.52it/s, now=None]t:  34%|███▍      | 1074/3126 [00:29<01:40, 20.37it/s, now=None]t:  34%|███▍      | 1078/3126 [00:29<01:38, 20.74it/s, now=None]t:  35%|███▍      | 1082/3126 [00:29<01:40, 20.38it/s, now=None]t:  35%|███▍      | 1086/3126 [00:29<01:33, 21.84it/s, now=None]t:  35%|███▍      | 1090/3126 [00:30<01:36, 21.21it/s, now=None]t:  35%|███▍      | 1093/3126 [00:30<01:30, 22.52it/s, now=None]t:  35%|███▌      | 1096/3126 [00:30<01:35, 21.20it/s, now=None]t:  35%|███▌      | 1099/3126 [00:30<01:30, 22.50it/s, now=None]t:  35%|███▌      | 1102/3126 [00:30<01:31, 22.13it/s, now=None]t:  35%|███▌      | 1105/3126 [00:30<01:27, 23.20it/s, now=None]t:  35%|███▌      | 1108/3126 [00:30<01:22, 24.44it/s, now=None]t:  36%|███▌      | 1111/3126 [00:30<01:28, 22.67it/s, now=None]t:  36%|███▌      | 1114/3126 [00:31<01:30, 22.12it/s, now=None]t:  36%|███▌      | 1118/3126 [00:31<01:31, 21.91it/s, now=None]t:  36%|███▌      | 1122/3126 [00:31<01:27, 23.00it/s, now=None]t:  36%|███▌      | 1126/3126 [00:31<01:28, 22.64it/s, now=None]t:  36%|███▌      | 1129/3126 [00:31<01:27, 22.76it/s, now=None]t:  36%|███▌      | 1132/3126 [00:31<01:27, 22.90it/s, now=None]t:  36%|███▋      | 1135/3126 [00:31<01:23, 23.92it/s, now=None]t:  36%|███▋      | 1138/3126 [00:32<01:24, 23.64it/s, now=None]t:  37%|███▋      | 1141/3126 [00:32<01:21, 24.44it/s, now=None]t:  37%|███▋      | 1144/3126 [00:32<01:23, 23.83it/s, now=None]t:  37%|███▋      | 1147/3126 [00:32<01:26, 22.92it/s, now=None]t:  37%|███▋      | 1150/3126 [00:32<01:28, 22.39it/s, now=None]t:  37%|███▋      | 1153/3126 [00:32<01:25, 22.98it/s, now=None]t:  37%|███▋      | 1157/3126 [00:32<01:17, 25.48it/s, now=None]t:  37%|███▋      | 1162/3126 [00:32<01:02, 31.25it/s, now=None]t:  37%|███▋      | 1166/3126 [00:33<01:02, 31.50it/s, now=None]t:  37%|███▋      | 1170/3126 [00:33<01:08, 28.57it/s, now=None]t:  38%|███▊      | 1175/3126 [00:33<01:00, 32.17it/s, now=None]t:  38%|███▊      | 1179/3126 [00:33<01:02, 31.37it/s, now=None]t:  38%|███▊      | 1183/3126 [00:33<01:02, 31.24it/s, now=None]t:  38%|███▊      | 1187/3126 [00:33<01:01, 31.54it/s, now=None]t:  38%|███▊      | 1191/3126 [00:33<01:00, 31.98it/s, now=None]t:  38%|███▊      | 1195/3126 [00:34<01:02, 30.84it/s, now=None]t:  38%|███▊      | 1199/3126 [00:34<01:05, 29.44it/s, now=None]t:  38%|███▊      | 1203/3126 [00:34<01:02, 30.93it/s, now=None]t:  39%|███▊      | 1207/3126 [00:34<01:02, 30.87it/s, now=None]t:  39%|███▉      | 1213/3126 [00:34<00:51, 37.42it/s, now=None]t:  39%|███▉      | 1218/3126 [00:34<00:47, 39.79it/s, now=None]t:  39%|███▉      | 1223/3126 [00:34<00:48, 39.04it/s, now=None]t:  39%|███▉      | 1227/3126 [00:34<00:53, 35.73it/s, now=None]t:  39%|███▉      | 1231/3126 [00:35<01:01, 31.03it/s, now=None]t:  40%|███▉      | 1235/3126 [00:35<00:59, 31.89it/s, now=None]t:  40%|███▉      | 1240/3126 [00:35<00:52, 35.78it/s, now=None]t:  40%|███▉      | 1245/3126 [00:35<00:47, 39.39it/s, now=None]t:  40%|███▉      | 1250/3126 [00:35<00:44, 41.95it/s, now=None]t:  40%|████      | 1256/3126 [00:35<00:41, 45.19it/s, now=None]t:  40%|████      | 1262/3126 [00:35<00:38, 48.40it/s, now=None]t:  41%|████      | 1267/3126 [00:35<00:42, 43.96it/s, now=None]t:  41%|████      | 1272/3126 [00:36<00:46, 40.14it/s, now=None]t:  41%|████      | 1277/3126 [00:36<00:51, 35.58it/s, now=None]t:  41%|████      | 1282/3126 [00:36<00:47, 38.61it/s, now=None]t:  41%|████      | 1287/3126 [00:36<00:46, 39.43it/s, now=None]t:  41%|████▏     | 1292/3126 [00:36<00:49, 37.06it/s, now=None]t:  41%|████▏     | 1296/3126 [00:36<00:48, 37.59it/s, now=None]t:  42%|████▏     | 1300/3126 [00:36<00:48, 37.46it/s, now=None]t:  42%|████▏     | 1305/3126 [00:36<00:45, 39.88it/s, now=None]t:  42%|████▏     | 1312/3126 [00:37<00:39, 46.04it/s, now=None]t:  42%|████▏     | 1317/3126 [00:37<00:38, 46.63it/s, now=None]t:  42%|████▏     | 1322/3126 [00:37<00:39, 46.01it/s, now=None]t:  42%|████▏     | 1327/3126 [00:37<00:38, 46.21it/s, now=None]t:  43%|████▎     | 1334/3126 [00:37<00:35, 51.17it/s, now=None]t:  43%|████▎     | 1341/3126 [00:37<00:32, 55.01it/s, now=None]t:  43%|████▎     | 1347/3126 [00:37<00:36, 49.31it/s, now=None]t:  43%|████▎     | 1353/3126 [00:37<00:38, 46.11it/s, now=None]t:  43%|████▎     | 1358/3126 [00:38<00:44, 39.82it/s, now=None]t:  44%|████▎     | 1363/3126 [00:38<00:42, 41.01it/s, now=None]t:  44%|████▍     | 1368/3126 [00:38<00:45, 38.25it/s, now=None]t:  44%|████▍     | 1373/3126 [00:38<00:43, 40.54it/s, now=None]t:  44%|████▍     | 1379/3126 [00:38<00:39, 44.14it/s, now=None]t:  44%|████▍     | 1385/3126 [00:38<00:37, 47.03it/s, now=None]t:  44%|████▍     | 1391/3126 [00:38<00:35, 48.86it/s, now=None]t:  45%|████▍     | 1397/3126 [00:38<00:34, 50.19it/s, now=None]t:  45%|████▍     | 1403/3126 [00:38<00:33, 50.89it/s, now=None]t:  45%|████▌     | 1409/3126 [00:39<00:33, 51.08it/s, now=None]t:  45%|████▌     | 1415/3126 [00:39<00:32, 52.50it/s, now=None]t:  45%|████▌     | 1421/3126 [00:39<00:32, 51.72it/s, now=None]t:  46%|████▌     | 1427/3126 [00:39<00:32, 52.20it/s, now=None]t:  46%|████▌     | 1433/3126 [00:39<00:32, 51.99it/s, now=None]t:  46%|████▌     | 1439/3126 [00:39<00:32, 52.45it/s, now=None]t:  46%|████▋     | 1446/3126 [00:39<00:30, 55.26it/s, now=None]t:  46%|████▋     | 1452/3126 [00:39<00:30, 54.44it/s, now=None]t:  47%|████▋     | 1458/3126 [00:39<00:30, 54.38it/s, now=None]t:  47%|████▋     | 1464/3126 [00:40<00:29, 55.43it/s, now=None]t:  47%|████▋     | 1470/3126 [00:40<00:30, 54.05it/s, now=None]t:  47%|████▋     | 1476/3126 [00:40<00:30, 54.44it/s, now=None]t:  47%|████▋     | 1482/3126 [00:40<00:30, 53.93it/s, now=None]t:  48%|████▊     | 1488/3126 [00:40<00:30, 53.29it/s, now=None]t:  48%|████▊     | 1495/3126 [00:40<00:29, 54.77it/s, now=None]t:  48%|████▊     | 1501/3126 [00:40<00:29, 54.46it/s, now=None]t:  48%|████▊     | 1507/3126 [00:40<00:29, 54.04it/s, now=None]t:  48%|████▊     | 1513/3126 [00:41<00:30, 53.25it/s, now=None]t:  49%|████▊     | 1519/3126 [00:41<00:30, 52.46it/s, now=None]t:  49%|████▉     | 1525/3126 [00:41<00:30, 51.69it/s, now=None]t:  49%|████▉     | 1532/3126 [00:41<00:29, 54.46it/s, now=None]t:  49%|████▉     | 1538/3126 [00:41<00:29, 54.06it/s, now=None]t:  49%|████▉     | 1544/3126 [00:41<00:28, 54.68it/s, now=None]t:  50%|████▉     | 1550/3126 [00:41<00:28, 55.98it/s, now=None]t:  50%|████▉     | 1556/3126 [00:41<00:28, 54.95it/s, now=None]t:  50%|█████     | 1563/3126 [00:41<00:27, 57.43it/s, now=None]t:  50%|█████     | 1574/3126 [00:42<00:21, 70.72it/s, now=None]t:  51%|█████     | 1582/3126 [00:42<00:28, 54.59it/s, now=None]t:  51%|█████     | 1589/3126 [00:42<00:35, 43.40it/s, now=None]t:  51%|█████     | 1595/3126 [00:42<00:38, 39.73it/s, now=None]t:  51%|█████     | 1600/3126 [00:42<00:39, 38.37it/s, now=None]t:  51%|█████▏    | 1605/3126 [00:42<00:41, 37.06it/s, now=None]t:  51%|█████▏    | 1609/3126 [00:43<00:41, 36.71it/s, now=None]t:  52%|█████▏    | 1613/3126 [00:43<00:41, 36.27it/s, now=None]t:  52%|█████▏    | 1617/3126 [00:43<00:42, 35.71it/s, now=None]t:  52%|█████▏    | 1621/3126 [00:43<00:42, 35.75it/s, now=None]t:  52%|█████▏    | 1625/3126 [00:43<00:43, 34.23it/s, now=None]t:  52%|█████▏    | 1629/3126 [00:43<00:47, 31.80it/s, now=None]t:  52%|█████▏    | 1633/3126 [00:43<00:47, 31.31it/s, now=None]t:  52%|█████▏    | 1637/3126 [00:43<00:48, 30.96it/s, now=None]t:  52%|█████▏    | 1641/3126 [00:44<00:48, 30.38it/s, now=None]t:  53%|█████▎    | 1645/3126 [00:44<00:48, 30.67it/s, now=None]t:  53%|█████▎    | 1649/3126 [00:44<00:47, 30.81it/s, now=None]t:  53%|█████▎    | 1653/3126 [00:44<00:46, 31.77it/s, now=None]t:  53%|█████▎    | 1657/3126 [00:44<00:45, 32.25it/s, now=None]t:  53%|█████▎    | 1661/3126 [00:44<00:50, 29.06it/s, now=None]t:  53%|█████▎    | 1665/3126 [00:44<00:48, 30.31it/s, now=None]t:  53%|█████▎    | 1669/3126 [00:45<00:48, 30.12it/s, now=None]t:  54%|█████▎    | 1673/3126 [00:45<00:51, 28.05it/s, now=None]t:  54%|█████▎    | 1676/3126 [00:45<00:59, 24.50it/s, now=None]t:  54%|█████▎    | 1679/3126 [00:45<00:57, 25.12it/s, now=None]t:  54%|█████▍    | 1682/3126 [00:45<00:58, 24.84it/s, now=None]t:  54%|█████▍    | 1685/3126 [00:45<00:57, 25.03it/s, now=None]t:  54%|█████▍    | 1688/3126 [00:45<00:55, 25.68it/s, now=None]t:  54%|█████▍    | 1691/3126 [00:45<00:54, 26.50it/s, now=None]t:  54%|█████▍    | 1694/3126 [00:46<00:55, 26.03it/s, now=None]t:  54%|█████▍    | 1697/3126 [00:46<00:55, 25.97it/s, now=None]t:  54%|█████▍    | 1701/3126 [00:46<00:52, 27.10it/s, now=None]t:  55%|█████▍    | 1704/3126 [00:46<00:51, 27.59it/s, now=None]t:  55%|█████▍    | 1708/3126 [00:46<00:49, 28.61it/s, now=None]t:  55%|█████▍    | 1711/3126 [00:46<00:53, 26.48it/s, now=None]t:  55%|█████▍    | 1714/3126 [00:46<00:53, 26.63it/s, now=None]t:  55%|█████▍    | 1717/3126 [00:46<00:55, 25.39it/s, now=None]t:  55%|█████▌    | 1720/3126 [00:47<00:53, 26.17it/s, now=None]t:  55%|█████▌    | 1724/3126 [00:47<00:49, 28.25it/s, now=None]t:  55%|█████▌    | 1728/3126 [00:47<00:46, 30.06it/s, now=None]t:  55%|█████▌    | 1732/3126 [00:47<00:43, 31.84it/s, now=None]t:  56%|█████▌    | 1736/3126 [00:47<00:41, 33.26it/s, now=None]t:  56%|█████▌    | 1740/3126 [00:47<00:44, 31.39it/s, now=None]t:  56%|█████▌    | 1744/3126 [00:47<00:43, 31.86it/s, now=None]t:  56%|█████▌    | 1749/3126 [00:47<00:39, 35.14it/s, now=None]t:  56%|█████▌    | 1753/3126 [00:47<00:38, 35.44it/s, now=None]t:  56%|█████▌    | 1757/3126 [00:48<00:37, 36.35it/s, now=None]t:  56%|█████▋    | 1761/3126 [00:48<00:37, 36.10it/s, now=None]t:  56%|█████▋    | 1765/3126 [00:48<00:36, 36.87it/s, now=None]t:  57%|█████▋    | 1769/3126 [00:48<00:36, 36.98it/s, now=None]t:  57%|█████▋    | 1773/3126 [00:48<00:36, 37.00it/s, now=None]t:  57%|█████▋    | 1777/3126 [00:48<00:39, 33.98it/s, now=None]t:  57%|█████▋    | 1781/3126 [00:48<00:44, 30.13it/s, now=None]t:  57%|█████▋    | 1785/3126 [00:48<00:45, 29.26it/s, now=None]t:  57%|█████▋    | 1789/3126 [00:49<00:47, 28.32it/s, now=None]t:  57%|█████▋    | 1792/3126 [00:49<00:50, 26.42it/s, now=None]t:  57%|█████▋    | 1795/3126 [00:49<00:48, 27.23it/s, now=None]t:  58%|█████▊    | 1798/3126 [00:49<00:51, 25.98it/s, now=None]t:  58%|█████▊    | 1801/3126 [00:49<00:51, 25.54it/s, now=None]t:  58%|█████▊    | 1805/3126 [00:49<00:49, 26.95it/s, now=None]t:  58%|█████▊    | 1808/3126 [00:49<00:47, 27.68it/s, now=None]t:  58%|█████▊    | 1811/3126 [00:49<00:50, 26.27it/s, now=None]t:  58%|█████▊    | 1814/3126 [00:50<00:54, 24.29it/s, now=None]t:  58%|█████▊    | 1817/3126 [00:50<00:59, 22.01it/s, now=None]t:  58%|█████▊    | 1820/3126 [00:50<00:54, 23.85it/s, now=None]t:  58%|█████▊    | 1824/3126 [00:50<00:47, 27.54it/s, now=None]t:  58%|█████▊    | 1827/3126 [00:50<00:50, 25.91it/s, now=None]t:  59%|█████▊    | 1830/3126 [00:50<00:53, 24.02it/s, now=None]t:  59%|█████▊    | 1834/3126 [00:50<00:46, 27.69it/s, now=None]t:  59%|█████▉    | 1839/3126 [00:50<00:40, 31.93it/s, now=None]t:  59%|█████▉    | 1844/3126 [00:51<00:36, 34.74it/s, now=None]t:  59%|█████▉    | 1849/3126 [00:51<00:34, 36.49it/s, now=None]t:  59%|█████▉    | 1854/3126 [00:51<00:33, 37.54it/s, now=None]t:  59%|█████▉    | 1858/3126 [00:51<00:33, 37.85it/s, now=None]t:  60%|█████▉    | 1863/3126 [00:51<00:31, 40.17it/s, now=None]t:  60%|█████▉    | 1868/3126 [00:51<00:31, 39.72it/s, now=None]t:  60%|█████▉    | 1872/3126 [00:51<00:32, 38.90it/s, now=None]t:  60%|██████    | 1876/3126 [00:51<00:33, 37.16it/s, now=None]t:  60%|██████    | 1880/3126 [00:52<00:36, 34.61it/s, now=None]t:  60%|██████    | 1884/3126 [00:52<00:35, 34.92it/s, now=None]t:  60%|██████    | 1888/3126 [00:52<00:36, 34.16it/s, now=None]t:  61%|██████    | 1892/3126 [00:52<00:35, 34.96it/s, now=None]t:  61%|██████    | 1896/3126 [00:52<00:34, 35.69it/s, now=None]t:  61%|██████    | 1900/3126 [00:52<00:34, 35.22it/s, now=None]t:  61%|██████    | 1904/3126 [00:52<00:34, 35.40it/s, now=None]t:  61%|██████    | 1908/3126 [00:52<00:33, 36.23it/s, now=None]t:  61%|██████    | 1912/3126 [00:52<00:34, 35.46it/s, now=None]t:  61%|██████▏   | 1916/3126 [00:53<00:36, 32.94it/s, now=None]t:  61%|██████▏   | 1920/3126 [00:53<00:36, 33.00it/s, now=None]t:  62%|██████▏   | 1924/3126 [00:53<00:36, 32.80it/s, now=None]t:  62%|██████▏   | 1928/3126 [00:53<00:35, 33.83it/s, now=None]t:  62%|██████▏   | 1932/3126 [00:53<00:34, 34.21it/s, now=None]t:  62%|██████▏   | 1936/3126 [00:53<00:34, 34.51it/s, now=None]t:  62%|██████▏   | 1940/3126 [00:53<00:33, 35.24it/s, now=None]t:  62%|██████▏   | 1944/3126 [00:53<00:32, 35.94it/s, now=None]t:  62%|██████▏   | 1948/3126 [00:54<00:35, 33.43it/s, now=None]t:  62%|██████▏   | 1952/3126 [00:54<00:42, 27.48it/s, now=None]t:  63%|██████▎   | 1955/3126 [00:54<00:42, 27.29it/s, now=None]t:  63%|██████▎   | 1958/3126 [00:54<00:45, 25.92it/s, now=None]t:  63%|██████▎   | 1961/3126 [00:54<00:54, 21.43it/s, now=None]t:  63%|██████▎   | 1964/3126 [00:54<01:01, 18.89it/s, now=None]t:  63%|██████▎   | 1967/3126 [00:55<00:58, 19.84it/s, now=None]t:  63%|██████▎   | 1970/3126 [00:55<00:53, 21.61it/s, now=None]t:  63%|██████▎   | 1973/3126 [00:55<00:49, 23.49it/s, now=None]t:  63%|██████▎   | 1977/3126 [00:55<00:44, 25.91it/s, now=None]t:  63%|██████▎   | 1981/3126 [00:55<00:40, 28.18it/s, now=None]t:  63%|██████▎   | 1984/3126 [00:55<00:40, 27.90it/s, now=None]t:  64%|██████▎   | 1987/3126 [00:55<00:45, 25.02it/s, now=None]t:  64%|██████▎   | 1991/3126 [00:55<00:41, 27.53it/s, now=None]t:  64%|██████▍   | 1994/3126 [00:55<00:41, 27.07it/s, now=None]t:  64%|██████▍   | 1998/3126 [00:56<00:39, 28.85it/s, now=None]t:  64%|██████▍   | 2001/3126 [00:56<00:40, 27.87it/s, now=None]t:  64%|██████▍   | 2005/3126 [00:56<00:39, 28.70it/s, now=None]t:  64%|██████▍   | 2009/3126 [00:56<00:37, 29.99it/s, now=None]t:  64%|██████▍   | 2013/3126 [00:56<00:35, 31.12it/s, now=None]t:  65%|██████▍   | 2017/3126 [00:56<00:34, 32.59it/s, now=None]t:  65%|██████▍   | 2021/3126 [00:56<00:32, 34.18it/s, now=None]t:  65%|██████▍   | 2025/3126 [00:56<00:37, 29.13it/s, now=None]t:  65%|██████▍   | 2029/3126 [00:57<00:40, 27.18it/s, now=None]t:  65%|██████▌   | 2032/3126 [00:57<00:40, 27.01it/s, now=None]t:  65%|██████▌   | 2035/3126 [00:57<00:42, 25.78it/s, now=None]t:  65%|██████▌   | 2038/3126 [00:57<00:43, 25.20it/s, now=None]t:  65%|██████▌   | 2042/3126 [00:57<00:38, 28.24it/s, now=None]t:  65%|██████▌   | 2046/3126 [00:57<00:35, 30.07it/s, now=None]t:  66%|██████▌   | 2050/3126 [00:57<00:34, 31.51it/s, now=None]t:  66%|██████▌   | 2054/3126 [00:57<00:34, 31.50it/s, now=None]t:  66%|██████▌   | 2058/3126 [00:58<00:34, 31.29it/s, now=None]t:  66%|██████▌   | 2062/3126 [00:58<00:33, 31.60it/s, now=None]t:  66%|██████▌   | 2066/3126 [00:58<00:31, 33.34it/s, now=None]t:  66%|██████▌   | 2070/3126 [00:58<00:30, 34.98it/s, now=None]t:  66%|██████▋   | 2074/3126 [00:58<00:29, 35.78it/s, now=None]t:  67%|██████▋   | 2079/3126 [00:58<00:27, 37.48it/s, now=None]t:  67%|██████▋   | 2083/3126 [00:58<00:28, 36.88it/s, now=None]t:  67%|██████▋   | 2088/3126 [00:58<00:27, 38.05it/s, now=None]t:  67%|██████▋   | 2093/3126 [00:59<00:25, 40.03it/s, now=None]t:  67%|██████▋   | 2098/3126 [00:59<00:26, 38.97it/s, now=None]t:  67%|██████▋   | 2103/3126 [00:59<00:25, 39.65it/s, now=None]t:  67%|██████▋   | 2107/3126 [00:59<00:26, 39.18it/s, now=None]t:  68%|██████▊   | 2111/3126 [00:59<00:27, 36.70it/s, now=None]t:  68%|██████▊   | 2115/3126 [00:59<00:28, 36.02it/s, now=None]t:  68%|██████▊   | 2119/3126 [00:59<00:30, 32.69it/s, now=None]t:  68%|██████▊   | 2123/3126 [00:59<00:30, 32.46it/s, now=None]t:  68%|██████▊   | 2127/3126 [01:00<00:31, 32.22it/s, now=None]t:  68%|██████▊   | 2131/3126 [01:00<00:29, 33.56it/s, now=None]t:  68%|██████▊   | 2136/3126 [01:00<00:27, 36.00it/s, now=None]t:  68%|██████▊   | 2140/3126 [01:00<00:27, 35.70it/s, now=None]t:  69%|██████▊   | 2144/3126 [01:00<00:29, 33.78it/s, now=None]t:  69%|██████▊   | 2148/3126 [01:00<00:30, 31.99it/s, now=None]t:  69%|██████▉   | 2152/3126 [01:00<00:30, 31.81it/s, now=None]t:  69%|██████▉   | 2156/3126 [01:00<00:31, 30.83it/s, now=None]t:  69%|██████▉   | 2160/3126 [01:01<00:31, 30.31it/s, now=None]t:  69%|██████▉   | 2164/3126 [01:01<00:31, 30.68it/s, now=None]t:  69%|██████▉   | 2168/3126 [01:01<00:29, 32.14it/s, now=None]t:  69%|██████▉   | 2172/3126 [01:01<00:30, 31.49it/s, now=None]t:  70%|██████▉   | 2176/3126 [01:01<00:32, 29.20it/s, now=None]t:  70%|██████▉   | 2180/3126 [01:01<00:30, 31.40it/s, now=None]t:  70%|██████▉   | 2184/3126 [01:01<00:28, 32.89it/s, now=None]t:  70%|██████▉   | 2188/3126 [01:01<00:27, 34.33it/s, now=None]t:  70%|███████   | 2193/3126 [01:02<00:25, 36.28it/s, now=None]t:  70%|███████   | 2197/3126 [01:02<00:26, 34.86it/s, now=None]t:  70%|███████   | 2201/3126 [01:02<00:26, 35.04it/s, now=None]t:  71%|███████   | 2206/3126 [01:02<00:24, 37.60it/s, now=None]t:  71%|███████   | 2210/3126 [01:02<00:24, 37.98it/s, now=None]t:  71%|███████   | 2214/3126 [01:02<00:28, 32.00it/s, now=None]t:  71%|███████   | 2218/3126 [01:02<00:29, 30.50it/s, now=None]t:  71%|███████   | 2222/3126 [01:03<00:34, 26.23it/s, now=None]t:  71%|███████   | 2226/3126 [01:03<00:35, 25.16it/s, now=None]t:  71%|███████▏  | 2229/3126 [01:03<00:36, 24.42it/s, now=None]t:  71%|███████▏  | 2232/3126 [01:03<00:35, 25.01it/s, now=None]t:  71%|███████▏  | 2235/3126 [01:03<00:38, 23.21it/s, now=None]t:  72%|███████▏  | 2238/3126 [01:03<00:39, 22.66it/s, now=None]t:  72%|███████▏  | 2242/3126 [01:03<00:35, 24.82it/s, now=None]t:  72%|███████▏  | 2245/3126 [01:04<00:43, 20.37it/s, now=None]t:  72%|███████▏  | 2248/3126 [01:04<00:41, 21.25it/s, now=None]t:  72%|███████▏  | 2251/3126 [01:04<00:39, 22.07it/s, now=None]t:  72%|███████▏  | 2254/3126 [01:04<00:41, 20.80it/s, now=None]t:  72%|███████▏  | 2257/3126 [01:04<00:39, 21.73it/s, now=None]t:  72%|███████▏  | 2260/3126 [01:04<00:39, 21.72it/s, now=None]t:  72%|███████▏  | 2263/3126 [01:04<00:40, 21.34it/s, now=None]t:  72%|███████▏  | 2266/3126 [01:05<00:38, 22.30it/s, now=None]t:  73%|███████▎  | 2269/3126 [01:05<00:37, 22.77it/s, now=None]t:  73%|███████▎  | 2272/3126 [01:05<00:35, 24.17it/s, now=None]t:  73%|███████▎  | 2275/3126 [01:05<00:33, 25.26it/s, now=None]t:  73%|███████▎  | 2278/3126 [01:05<00:35, 24.04it/s, now=None]t:  73%|███████▎  | 2281/3126 [01:05<00:36, 23.14it/s, now=None]t:  73%|███████▎  | 2284/3126 [01:05<00:39, 21.40it/s, now=None]t:  73%|███████▎  | 2287/3126 [01:05<00:37, 22.62it/s, now=None]t:  73%|███████▎  | 2291/3126 [01:06<00:31, 26.19it/s, now=None]t:  73%|███████▎  | 2296/3126 [01:06<00:26, 31.12it/s, now=None]t:  74%|███████▎  | 2301/3126 [01:06<00:23, 35.27it/s, now=None]t:  74%|███████▍  | 2306/3126 [01:06<00:21, 37.53it/s, now=None]t:  74%|███████▍  | 2311/3126 [01:06<00:20, 39.38it/s, now=None]t:  74%|███████▍  | 2318/3126 [01:06<00:17, 46.17it/s, now=None]t:  74%|███████▍  | 2323/3126 [01:06<00:18, 43.27it/s, now=None]t:  74%|███████▍  | 2328/3126 [01:06<00:19, 40.12it/s, now=None]t:  75%|███████▍  | 2333/3126 [01:07<00:20, 37.89it/s, now=None]t:  75%|███████▍  | 2338/3126 [01:07<00:20, 39.05it/s, now=None]t:  75%|███████▍  | 2342/3126 [01:07<00:20, 37.49it/s, now=None]t:  75%|███████▌  | 2346/3126 [01:07<00:21, 36.02it/s, now=None]t:  75%|███████▌  | 2350/3126 [01:07<00:21, 35.87it/s, now=None]t:  75%|███████▌  | 2355/3126 [01:07<00:20, 36.94it/s, now=None]t:  75%|███████▌  | 2359/3126 [01:07<00:21, 36.52it/s, now=None]t:  76%|███████▌  | 2363/3126 [01:07<00:21, 35.66it/s, now=None]t:  76%|███████▌  | 2367/3126 [01:07<00:22, 34.35it/s, now=None]t:  76%|███████▌  | 2372/3126 [01:08<00:20, 37.41it/s, now=None]t:  76%|███████▌  | 2377/3126 [01:08<00:19, 39.08it/s, now=None]t:  76%|███████▌  | 2382/3126 [01:08<00:18, 39.90it/s, now=None]t:  76%|███████▋  | 2387/3126 [01:08<00:18, 39.90it/s, now=None]t:  76%|███████▋  | 2391/3126 [01:08<00:20, 35.82it/s, now=None]t:  77%|███████▋  | 2395/3126 [01:08<00:23, 30.81it/s, now=None]t:  77%|███████▋  | 2399/3126 [01:08<00:27, 26.39it/s, now=None]t:  77%|███████▋  | 2402/3126 [01:09<00:28, 25.44it/s, now=None]t:  77%|███████▋  | 2405/3126 [01:09<00:28, 24.87it/s, now=None]t:  77%|███████▋  | 2408/3126 [01:09<00:31, 22.56it/s, now=None]t:  77%|███████▋  | 2411/3126 [01:09<00:32, 22.07it/s, now=None]t:  77%|███████▋  | 2414/3126 [01:09<00:32, 21.73it/s, now=None]t:  77%|███████▋  | 2417/3126 [01:09<00:31, 22.67it/s, now=None]t:  77%|███████▋  | 2420/3126 [01:09<00:30, 22.92it/s, now=None]t:  78%|███████▊  | 2423/3126 [01:10<00:32, 21.88it/s, now=None]t:  78%|███████▊  | 2426/3126 [01:10<00:29, 23.66it/s, now=None]t:  78%|███████▊  | 2429/3126 [01:10<00:28, 24.06it/s, now=None]t:  78%|███████▊  | 2433/3126 [01:10<00:27, 25.03it/s, now=None]t:  78%|███████▊  | 2436/3126 [01:10<00:26, 25.93it/s, now=None]t:  78%|███████▊  | 2440/3126 [01:10<00:25, 26.71it/s, now=None]t:  78%|███████▊  | 2444/3126 [01:10<00:23, 28.83it/s, now=None]t:  78%|███████▊  | 2447/3126 [01:10<00:23, 28.73it/s, now=None]t:  78%|███████▊  | 2450/3126 [01:11<00:24, 27.70it/s, now=None]t:  79%|███████▊  | 2454/3126 [01:11<00:25, 25.90it/s, now=None]t:  79%|███████▊  | 2458/3126 [01:11<00:28, 23.11it/s, now=None]t:  79%|███████▊  | 2461/3126 [01:11<00:27, 24.43it/s, now=None]t:  79%|███████▉  | 2464/3126 [01:11<00:26, 24.93it/s, now=None]t:  79%|███████▉  | 2467/3126 [01:11<00:25, 25.63it/s, now=None]t:  79%|███████▉  | 2470/3126 [01:11<00:26, 25.15it/s, now=None]t:  79%|███████▉  | 2473/3126 [01:12<00:26, 24.26it/s, now=None]t:  79%|███████▉  | 2476/3126 [01:12<00:25, 25.29it/s, now=None]t:  79%|███████▉  | 2480/3126 [01:12<00:23, 27.95it/s, now=None]t:  79%|███████▉  | 2484/3126 [01:12<00:20, 30.91it/s, now=None]t:  80%|███████▉  | 2488/3126 [01:12<00:20, 31.87it/s, now=None]t:  80%|███████▉  | 2492/3126 [01:12<00:19, 33.26it/s, now=None]t:  80%|███████▉  | 2496/3126 [01:12<00:18, 34.68it/s, now=None]t:  80%|███████▉  | 2500/3126 [01:12<00:17, 35.34it/s, now=None]t:  80%|████████  | 2504/3126 [01:12<00:17, 35.23it/s, now=None]t:  80%|████████  | 2508/3126 [01:13<00:18, 33.33it/s, now=None]t:  80%|████████  | 2512/3126 [01:13<00:18, 33.86it/s, now=None]t:  80%|████████  | 2516/3126 [01:13<00:17, 34.47it/s, now=None]t:  81%|████████  | 2520/3126 [01:13<00:17, 34.52it/s, now=None]t:  81%|████████  | 2524/3126 [01:13<00:19, 31.19it/s, now=None]t:  81%|████████  | 2528/3126 [01:13<00:18, 32.89it/s, now=None]t:  81%|████████  | 2532/3126 [01:13<00:17, 33.21it/s, now=None]t:  81%|████████  | 2536/3126 [01:13<00:18, 32.56it/s, now=None]t:  81%|████████▏ | 2541/3126 [01:14<00:16, 34.72it/s, now=None]t:  81%|████████▏ | 2545/3126 [01:14<00:16, 35.46it/s, now=None]t:  82%|████████▏ | 2549/3126 [01:14<00:16, 36.05it/s, now=None]t:  82%|████████▏ | 2553/3126 [01:14<00:16, 33.86it/s, now=None]t:  82%|████████▏ | 2557/3126 [01:14<00:16, 35.44it/s, now=None]t:  82%|████████▏ | 2562/3126 [01:14<00:15, 37.24it/s, now=None]t:  82%|████████▏ | 2566/3126 [01:14<00:15, 37.12it/s, now=None]t:  82%|████████▏ | 2570/3126 [01:14<00:14, 37.24it/s, now=None]t:  82%|████████▏ | 2574/3126 [01:14<00:14, 37.82it/s, now=None]t:  83%|████████▎ | 2579/3126 [01:15<00:13, 39.73it/s, now=None]t:  83%|████████▎ | 2583/3126 [01:15<00:13, 39.40it/s, now=None]t:  83%|████████▎ | 2588/3126 [01:15<00:13, 41.24it/s, now=None]t:  83%|████████▎ | 2593/3126 [01:15<00:13, 40.65it/s, now=None]t:  83%|████████▎ | 2598/3126 [01:15<00:13, 39.93it/s, now=None]t:  83%|████████▎ | 2603/3126 [01:15<00:12, 40.62it/s, now=None]t:  83%|████████▎ | 2608/3126 [01:15<00:13, 37.56it/s, now=None]t:  84%|████████▎ | 2612/3126 [01:15<00:14, 36.22it/s, now=None]t:  84%|████████▎ | 2616/3126 [01:15<00:13, 36.87it/s, now=None]t:  84%|████████▍ | 2621/3126 [01:16<00:13, 38.33it/s, now=None]t:  84%|████████▍ | 2625/3126 [01:16<00:13, 38.35it/s, now=None]t:  84%|████████▍ | 2629/3126 [01:16<00:13, 37.85it/s, now=None]t:  84%|████████▍ | 2633/3126 [01:16<00:12, 38.15it/s, now=None]t:  84%|████████▍ | 2638/3126 [01:16<00:11, 40.96it/s, now=None]t:  85%|████████▍ | 2649/3126 [01:16<00:08, 55.16it/s, now=None]t:  85%|████████▍ | 2655/3126 [01:16<00:09, 48.07it/s, now=None]t:  85%|████████▌ | 2660/3126 [01:16<00:10, 43.82it/s, now=None]t:  85%|████████▌ | 2665/3126 [01:17<00:11, 40.30it/s, now=None]t:  85%|████████▌ | 2670/3126 [01:17<00:11, 38.79it/s, now=None]t:  86%|████████▌ | 2674/3126 [01:17<00:11, 38.92it/s, now=None]t:  86%|████████▌ | 2678/3126 [01:17<00:12, 34.98it/s, now=None]t:  86%|████████▌ | 2682/3126 [01:17<00:15, 28.22it/s, now=None]t:  86%|████████▌ | 2686/3126 [01:17<00:15, 27.75it/s, now=None]t:  86%|████████▌ | 2690/3126 [01:17<00:15, 28.91it/s, now=None]t:  86%|████████▌ | 2694/3126 [01:18<00:13, 31.01it/s, now=None]t:  86%|████████▋ | 2698/3126 [01:18<00:12, 32.93it/s, now=None]t:  86%|████████▋ | 2702/3126 [01:18<00:12, 34.54it/s, now=None]t:  87%|████████▋ | 2706/3126 [01:18<00:11, 35.62it/s, now=None]t:  87%|████████▋ | 2710/3126 [01:18<00:11, 36.80it/s, now=None]t:  87%|████████▋ | 2714/3126 [01:18<00:11, 35.70it/s, now=None]t:  87%|████████▋ | 2718/3126 [01:18<00:14, 28.93it/s, now=None]t:  87%|████████▋ | 2722/3126 [01:18<00:14, 28.30it/s, now=None]t:  87%|████████▋ | 2727/3126 [01:19<00:12, 31.24it/s, now=None]t:  87%|████████▋ | 2731/3126 [01:19<00:14, 27.06it/s, now=None]t:  87%|████████▋ | 2734/3126 [01:19<00:15, 25.78it/s, now=None]t:  88%|████████▊ | 2737/3126 [01:19<00:14, 26.41it/s, now=None]t:  88%|████████▊ | 2742/3126 [01:19<00:12, 30.32it/s, now=None]t:  88%|████████▊ | 2746/3126 [01:19<00:14, 26.71it/s, now=None]t:  88%|████████▊ | 2749/3126 [01:19<00:14, 25.95it/s, now=None]t:  88%|████████▊ | 2754/3126 [01:20<00:12, 28.64it/s, now=None]t:  88%|████████▊ | 2757/3126 [01:20<00:12, 28.94it/s, now=None]t:  88%|████████▊ | 2760/3126 [01:20<00:13, 27.77it/s, now=None]t:  88%|████████▊ | 2763/3126 [01:20<00:14, 25.92it/s, now=None]t:  88%|████████▊ | 2766/3126 [01:20<00:14, 25.49it/s, now=None]t:  89%|████████▊ | 2769/3126 [01:20<00:14, 25.07it/s, now=None]t:  89%|████████▊ | 2772/3126 [01:20<00:14, 24.79it/s, now=None]t:  89%|████████▉ | 2775/3126 [01:20<00:14, 25.05it/s, now=None]t:  89%|████████▉ | 2778/3126 [01:21<00:13, 25.75it/s, now=None]t:  89%|████████▉ | 2782/3126 [01:21<00:12, 27.47it/s, now=None]t:  89%|████████▉ | 2785/3126 [01:21<00:12, 27.38it/s, now=None]t:  89%|████████▉ | 2789/3126 [01:21<00:11, 29.55it/s, now=None]t:  89%|████████▉ | 2793/3126 [01:21<00:10, 31.99it/s, now=None]t:  89%|████████▉ | 2797/3126 [01:21<00:09, 34.02it/s, now=None]t:  90%|████████▉ | 2801/3126 [01:21<00:09, 35.46it/s, now=None]t:  90%|████████▉ | 2806/3126 [01:21<00:08, 38.65it/s, now=None]t:  90%|████████▉ | 2811/3126 [01:21<00:07, 39.62it/s, now=None]t:  90%|█████████ | 2816/3126 [01:22<00:07, 41.61it/s, now=None]t:  90%|█████████ | 2821/3126 [01:22<00:07, 43.26it/s, now=None]t:  90%|█████████ | 2826/3126 [01:22<00:07, 42.75it/s, now=None]t:  91%|█████████ | 2831/3126 [01:22<00:07, 41.57it/s, now=None]t:  91%|█████████ | 2836/3126 [01:22<00:07, 39.55it/s, now=None]t:  91%|█████████ | 2840/3126 [01:22<00:07, 37.95it/s, now=None]t:  91%|█████████ | 2844/3126 [01:22<00:07, 38.36it/s, now=None]t:  91%|█████████ | 2848/3126 [01:22<00:07, 38.54it/s, now=None]t:  91%|█████████▏| 2853/3126 [01:23<00:06, 39.33it/s, now=None]t:  91%|█████████▏| 2858/3126 [01:23<00:06, 41.22it/s, now=None]t:  92%|█████████▏| 2863/3126 [01:23<00:06, 42.05it/s, now=None]t:  92%|█████████▏| 2868/3126 [01:23<00:06, 42.85it/s, now=None]t:  92%|█████████▏| 2873/3126 [01:23<00:07, 33.66it/s, now=None]t:  92%|█████████▏| 2877/3126 [01:23<00:08, 30.02it/s, now=None]t:  92%|█████████▏| 2881/3126 [01:23<00:07, 31.07it/s, now=None]t:  92%|█████████▏| 2885/3126 [01:23<00:07, 32.35it/s, now=None]t:  92%|█████████▏| 2890/3126 [01:24<00:06, 35.54it/s, now=None]t:  93%|█████████▎| 2894/3126 [01:24<00:06, 36.00it/s, now=None]t:  93%|█████████▎| 2898/3126 [01:24<00:06, 33.84it/s, now=None]t:  93%|█████████▎| 2902/3126 [01:24<00:06, 34.37it/s, now=None]t:  93%|█████████▎| 2907/3126 [01:24<00:05, 37.17it/s, now=None]t:  93%|█████████▎| 2912/3126 [01:24<00:05, 38.42it/s, now=None]t:  93%|█████████▎| 2917/3126 [01:24<00:05, 39.62it/s, now=None]t:  93%|█████████▎| 2921/3126 [01:24<00:05, 37.23it/s, now=None]t:  94%|█████████▎| 2926/3126 [01:25<00:05, 39.00it/s, now=None]t:  94%|█████████▍| 2931/3126 [01:25<00:04, 40.18it/s, now=None]t:  94%|█████████▍| 2936/3126 [01:25<00:05, 35.68it/s, now=None]t:  94%|█████████▍| 2940/3126 [01:25<00:05, 34.96it/s, now=None]t:  94%|█████████▍| 2944/3126 [01:25<00:06, 29.70it/s, now=None]t:  94%|█████████▍| 2948/3126 [01:25<00:05, 29.96it/s, now=None]t:  94%|█████████▍| 2952/3126 [01:25<00:05, 29.73it/s, now=None]t:  95%|█████████▍| 2956/3126 [01:26<00:05, 31.73it/s, now=None]t:  95%|█████████▍| 2961/3126 [01:26<00:04, 35.16it/s, now=None]t:  95%|█████████▍| 2965/3126 [01:26<00:04, 32.55it/s, now=None]t:  95%|█████████▍| 2969/3126 [01:26<00:05, 27.69it/s, now=None]t:  95%|█████████▌| 2972/3126 [01:26<00:05, 26.34it/s, now=None]t:  95%|█████████▌| 2975/3126 [01:26<00:06, 23.65it/s, now=None]t:  95%|█████████▌| 2979/3126 [01:26<00:05, 25.93it/s, now=None]t:  95%|█████████▌| 2983/3126 [01:26<00:04, 28.95it/s, now=None]t:  96%|█████████▌| 2987/3126 [01:27<00:04, 30.22it/s, now=None]t:  96%|█████████▌| 2991/3126 [01:27<00:04, 31.98it/s, now=None]t:  96%|█████████▌| 2995/3126 [01:27<00:03, 33.80it/s, now=None]t:  96%|█████████▌| 3000/3126 [01:27<00:03, 36.89it/s, now=None]t:  96%|█████████▌| 3004/3126 [01:27<00:03, 37.53it/s, now=None]t:  96%|█████████▌| 3008/3126 [01:27<00:03, 36.21it/s, now=None]t:  96%|█████████▋| 3012/3126 [01:27<00:03, 31.02it/s, now=None]t:  96%|█████████▋| 3016/3126 [01:27<00:03, 30.09it/s, now=None]t:  97%|█████████▋| 3020/3126 [01:28<00:03, 31.33it/s, now=None]t:  97%|█████████▋| 3024/3126 [01:28<00:03, 30.71it/s, now=None]t:  97%|█████████▋| 3028/3126 [01:28<00:03, 31.00it/s, now=None]t:  97%|█████████▋| 3032/3126 [01:28<00:02, 31.52it/s, now=None]t:  97%|█████████▋| 3037/3126 [01:28<00:02, 34.84it/s, now=None]t:  97%|█████████▋| 3042/3126 [01:28<00:02, 37.48it/s, now=None]t:  97%|█████████▋| 3047/3126 [01:28<00:02, 38.35it/s, now=None]t:  98%|█████████▊| 3052/3126 [01:28<00:01, 39.03it/s, now=None]t:  98%|█████████▊| 3057/3126 [01:29<00:01, 41.40it/s, now=None]t:  98%|█████████▊| 3062/3126 [01:29<00:01, 42.23it/s, now=None]t:  98%|█████████▊| 3067/3126 [01:29<00:01, 36.66it/s, now=None]t:  98%|█████████▊| 3071/3126 [01:29<00:01, 34.76it/s, now=None]t:  98%|█████████▊| 3076/3126 [01:29<00:01, 37.93it/s, now=None]t:  99%|█████████▊| 3081/3126 [01:29<00:01, 39.99it/s, now=None]t:  99%|█████████▊| 3086/3126 [01:29<00:00, 40.72it/s, now=None]t:  99%|█████████▉| 3091/3126 [01:29<00:00, 39.30it/s, now=None]t:  99%|█████████▉| 3095/3126 [01:30<00:00, 38.17it/s, now=None]t:  99%|█████████▉| 3099/3126 [01:30<00:00, 38.11it/s, now=None]t:  99%|█████████▉| 3103/3126 [01:30<00:00, 38.31it/s, now=None]t:  99%|█████████▉| 3107/3126 [01:30<00:00, 38.74it/s, now=None]t: 100%|█████████▉| 3112/3126 [01:30<00:00, 41.62it/s, now=None]t: 100%|█████████▉| 3117/3126 [01:30<00:00, 40.17it/s, now=None]t: 100%|█████████▉| 3122/3126 [01:30<00:00, 36.84it/s, now=None]t: 100%|██████████| 3126/3126 [01:30<00:00, 34.36it/s, now=None]                                                                Moviepy - Done !
+Moviepy - video ready results/the_bloop__the_sound_that_shook_the_ocean/the_bloop__the_sound_that_shook_the_ocean_v1.mp4
+  Rendered 104.2s, 27.6 MB (105.0s)
+  [grade] organic texture pass (grain=8, strength=1.0)
+  Graded 104.2s (463.4s)
+
+[11/16] MUSIC & SOUND (ffmpeg sidechain ducking, bed=cinematic.mp3)
+  !! cinematic.mp3 is silent (-91 dB) — using synth bed
+  [sfx] event-driven SFX timeline: sfx_timeline_run.wav
+  Music mixed (ducked under narration): 104.2s, 79.1 MB, mean=-16.5 dB ✓
+  [audio-qa] passed=False narration_clipping=False; ducking_depth=False
+
+[13/16] VIDEO REVIEW (Gemini Flash, end-to-end)
+→ Uploading results/the_bloop__the_sound_that_shook_the_ocean/the_bloop__the_sound_that_shook_the_ocean_v1_mixed.mp4 to Gemini...
+→ Uploaded: files/6bko7nvcjbz1 (FileState.PROCESSING)
+→ Reviewing with gemini-2.5-flash...
+→ Reviewing with gemini-2.5-flash... (attempt 2/5)
+→ Reviewing with gemini-2.5-flash... (attempt 3/5)
+→ Reviewing with gemini-2.5-flash... (attempt 4/5)
+→ Reviewing with gemini-2.5-flash... (attempt 5/5)
+→ Reviewing with gemini-3.5-flash...
+  Score: 45/100 (conf 0.9) | recs: 3
+  Score 45 < 70 → improvement loop active (max 2 renders)
+
+[14/16] IMPROVEMENT PASS planning (iteration 2/2)
+    APPLY  [shot_order] [shot_order][medium] Remove the picture-in-picture layout style; scale all primary visuals to fill the entire 
+    FLAG   [new_asset] Replace space, galaxy, and astronaut footage with underwater ocean, sonar, and glacier/iceberg cal
+    FLAG   [script_change] Fix the TTS voiceover to correctly pronounce coordinates: 'fifty degrees South, one hundred de
+  → No timeline mutations possible; stopping improvement loop.
+  !! PUBLISH GATE: not publish-ready → ['repeated_assets', 'hook_strength']
+
+  [status] REVISION_REQUIRED — blocked by: {'publish': ['repeated_assets', 'hook_strength']}
+
+[15-16/16] FINAL OUTPUT + POSTMORTEM
+
+[DEEPSEEK USAGE — this run]
+  calls: 0 | input: 0 tok (cached 0 → hit 0%) | output: 0 tok
+  estimated cost: $0.0000
+
+================================================================
+MISSION RUN COMPLETE — The Bloop: the sound that shook the ocean
+  Video:  results/the_bloop__the_sound_that_shook_the_ocean/the_bloop__the_sound_that_shook_the_ocean_v1_mixed.mp4
+  Report: results/the_bloop__the_sound_that_shook_the_ocean/run_report.json
+  Postmortem: /home/ubuntu/video_engine/src/docs/mission/postmortems/postmortem-the-bloop-the-sound-that-shook-the-ocean.md
+  Final review score: 45/100
+================================================================
