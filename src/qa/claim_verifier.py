@@ -304,13 +304,35 @@ class ClaimVerifier:
                           narration=(extraction.get("narration") or "")[:6000],
                           entities=", ".join(entities or ["(none listed)"]))
                 ))
+                # Corroboration: an LLM risk is BLOCKING (critical) only
+                # when both entities actually co-occur within a single
+                # sentence of the narration — that is where attribute
+                # transfer happens.  Legitimate comparisons ("blue whales
+                # call at 10-30 Hz; the 52-Hz whale is different") mention
+                # both across sentences; flagging them as critical would
+                # block every correct documentary.  Non-co-occurring risks
+                # are downgraded to advisory (major) for the reviewer.
+                sentences_l = re.split(r"(?<=[.!?])\s+", text)
                 for h in (res.get("risks", []) or []):
+                    a = str(h.get("a", "")).strip().lower()
+                    b = str(h.get("b", "")).strip().lower()
+                    sev = str(h.get("severity", "major"))
+                    # Nickname/metaphor filter: "the loneliest voice" is
+                    # the SAME entity as "the 52-hertz whale", not a
+                    # separate phenomenon.  If one side's wording is a
+                    # known nickname of the other, drop the risk entirely.
+                    if _is_nickname_pair(a, b):
+                        continue
+                    if sev == "critical":
+                        _co = any(a in s and b in s for s in sentences_l)
+                        if not _co:
+                            sev = "major"  # no transfer evidence
                     hits.append({
                         "type": "conflation_risk",
                         "a": str(h.get("a", "")),
                         "b": str(h.get("b", "")),
                         "detail": str(h.get("why", "")),
-                        "severity": str(h.get("severity", "major")),
+                        "severity": sev,
                     })
             except Exception as e:
                 print(f"  [claims] !! disambiguation LLM failed: {str(e)[:100]}")
@@ -453,6 +475,42 @@ class ClaimVerifier:
 # str.format() (a stray brace breaks the format string).  Use _fill()
 # (plain token substitution) and _parse_llm_json() for responses.
 
+# Nickname/metaphor aliases: the KEY is a figure-of-speech for the VALUE
+# entity — never a separate phenomenon (e.g. "the loneliest voice" IS the
+# 52-Hertz whale).  Used to filter LLM-disambiguation false positives.
+_NICKNAME_ALIASES = {
+    "loneliest voice": "52",
+    "loneliest whale": "52",
+    "lonely whale": "52",
+    "the whale that sings at fifty two hertz": "52",
+    "the whale that sings at 52 hertz": "52",
+}
+
+
+def _is_nickname_pair(a: str, b: str) -> bool:
+    """True when one side is a known nickname/metaphor of the other
+    (same entity — NOT a conflation risk)."""
+    if not a or not b:
+        return False
+    low_a, low_b = a.lower(), b.lower()
+    # direct alias table
+    for nick, target in _NICKNAME_ALIASES.items():
+        if nick in low_a or nick in low_b:
+            other = low_b if nick in low_a else low_a
+            if target in other or "whale" in other:
+                return True
+    # heuristic: shared core token (both mention the same animal/phenomenon
+    # and one side is purely descriptive)
+    for tok in ("whale", "hertz", "bloop"):
+        if tok in low_a and tok in low_b:
+            # both reference the same phenomenon; drop the risk only when
+            # one side is clearly a metaphor/description, not a distinct name
+            if ("loneliest" in low_a or "loneliest" in low_b
+                    or "voice" in low_a or "voice" in low_b):
+                return True
+    return False
+
+
 def _fill(template: str, **kw) -> str:
     """Token substitution for prompt templates containing literal braces."""
     out = template
@@ -511,6 +569,12 @@ transfer (e.g. "The Bloop" vs "the 52-Hz whale": different signals, different
 frequencies, different years; "icequake" is the Bloop's explanation, not a
 separate mystery).
 
+CRITICAL RULE: a NICKNAME or metaphor of a phenomenon is the SAME entity,
+not a separate phenomenon.  "the loneliest voice", "the loneliest whale",
+"the 52-hertz whale" all refer to ONE whale — never report them as a
+conflation pair.  Only report pairs where TWO genuinely distinct phenomena
+appear and an attribute could transfer between them.
+
 Entities mentioned: {entities}
 
 Return STRICT JSON:
@@ -536,6 +600,11 @@ Return STRICT JSON:
 
 Rules:
 - "verified" ONLY if this is an established, independently-checked fact.
+- RANGE TOLERANCE: if the claim is a RANGE (e.g. "between 10 and 30 hertz")
+  that OVERLAPS the commonly accepted range for that entity (blue whales
+  ~10-40 Hz), mark "verified" — a narrower-but-overlapping range is NOT a
+  contradiction.  Only "contradicted" when clearly outside any accepted
+  range (order-of-magnitude off, or a different phenomenon's value).
 - "hypothesis"/"conclusion" if it is a scientific interpretation (e.g.
   NOAA concluded the Bloop was consistent with icequakes — that is a
   conclusion, not an established frequency).
