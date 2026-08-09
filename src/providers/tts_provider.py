@@ -370,8 +370,45 @@ class ElevenLabsProvider(TTSProvider):
             raise RuntimeError(
                 f"ElevenLabs voices '{self._voice_name}' and "
                 f"'{self._fallback_voice}' not found in account/library")
+        # v13: probe synthesis availability ONCE at init.  A key can be
+        # valid for lookups but have no TTS credits (HTTP 402) or a
+        # restricted role (HTTP 401) — discovering that on scene 1 would
+        # force a mid-video voice switch, which QA forbids.  Probe with a
+        # one-word utterance now; on failure raise so the caller picks a
+        # single consistent fallback voice for the whole video.
+        import urllib.request as _ur
+        import json as _j
+        _probe_url = f"https://api.elevenlabs.io/v1/text-to-speech/{self.voice_id}"
+        _probe = _j.dumps({
+            "text": "Test.",
+            "model_id": self._model,
+            "voice_settings": {"stability": 0.5, "similarity_boost": 0.8,
+                                "style": 0.0, "use_speaker_boost": False},
+        }).encode()
+        _req = _ur.Request(
+            _probe_url, data=_probe,
+            headers={"xi-api-key": self._api_key,
+                     "Content-Type": "application/json",
+                     "Accept": "audio/mpeg"})
+        try:
+            with _ur.urlopen(_req, timeout=60) as _r:
+                _data = _r.read()
+            if not _data or len(_data) < 1000:
+                raise RuntimeError(
+                    f"ElevenLabs probe returned {len(_data) if _data else 0} bytes")
+        except Exception as _e:
+            _msg = str(_e)
+            if "402" in _msg:
+                raise RuntimeError(
+                    "ElevenLabs account has no TTS credits (HTTP 402) — "
+                    "add credits or the pipeline will use the fallback voice")
+            if "401" in _msg:
+                raise RuntimeError(
+                    "ElevenLabs key rejected for synthesis (HTTP 401) — "
+                    "check the API key role/permissions")
+            raise RuntimeError(f"ElevenLabs synthesis probe failed: {_msg[:100]}")
         print(f"  [elevenlabs] narrator locked: '{self._voice_name}' "
-              f"(id={self.voice_id})")
+              f"(id={self.voice_id}, synthesis verified)")
 
     def is_available(self) -> bool:
         return bool(self._api_key)
@@ -396,6 +433,16 @@ class ElevenLabsProvider(TTSProvider):
         headers = {"xi-api-key": self._api_key,
                    "Content-Type": "application/json"}
         found = ""
+
+        def _match(candidate: str) -> bool:
+            """Match the requested voice name against a library candidate.
+            Shared-library names carry suffixes ('Declan Sage - Wise and
+            Captivating'), so require a PREFIX match on either side, not
+            exact equality."""
+            c = (candidate or "").strip().lower()
+            n = name.strip().lower()
+            return c == n or c.startswith(n) or n.startswith(c)
+
         # 1) own voices
         try:
             req = urllib.request.Request(
@@ -403,7 +450,7 @@ class ElevenLabsProvider(TTSProvider):
             with urllib.request.urlopen(req, timeout=30) as r:
                 data = _json.loads(r.read())
             for v in data.get("voices", []):
-                if v.get("name", "").strip().lower() == name.strip().lower():
+                if _match(v.get("name", "")):
                     found = v["voice_id"]
                     break
         except Exception as e:
@@ -418,7 +465,7 @@ class ElevenLabsProvider(TTSProvider):
                 with urllib.request.urlopen(req, timeout=30) as r:
                     data = _json.loads(r.read())
                 for v in data.get("voices", []):
-                    if v.get("name", "").strip().lower() == name.strip().lower():
+                    if _match(v.get("name", "")):
                         found = v["voice_id"]
                         break
             except Exception as e:

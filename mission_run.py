@@ -2140,10 +2140,23 @@ def main():
     from src.director.style_bible import create_style_bible
     from src.utils.config import get_config as _gc
     _voice_provider = _gc("voices.provider", "elevenlabs")
-    if _voice_provider == "elevenlabs":
-        _voice_id = _gc("voices.elevenlabs.voice", "Declan Sage")
-    else:
-        _voice_id = _gc("voices.chatterbox.voice_id", "kurzgesagt_like")
+    # Resolve the narrator ONCE before locking (2026-08-09): ElevenLabs
+    # is primary, but a key can be valid for lookups yet have no TTS
+    # credits (HTTP 402).  Discovering that mid-run would force a voice
+    # switch — QA forbids it.  Probe at startup; on failure lock ONE
+    # consistent fallback voice (edge) for the whole video.
+    try:
+        if _voice_provider == "elevenlabs":
+            from src.providers.tts_provider import ElevenLabsProvider
+            _el = ElevenLabsProvider()  # resolves voice + probes synthesis
+            _voice_id = _el.voice_id
+        else:
+            _voice_id = _gc("voices.chatterbox.voice_id", "kurzgesagt_like")
+    except Exception as _e:
+        print(f"  !! narrator unavailable ({str(_e)[:100]}) — "
+              f"locking edge fallback for the WHOLE video")
+        _voice_provider = "edge"
+        _voice_id = "en-US-ChristopherNeural"
     voice_lock = lock_voice(provider=_voice_provider, voice_id=_voice_id,
                             speaker_id="jade-narrator-001").reset_episode()
     style_bible = create_style_bible("jade").reset_episode()
