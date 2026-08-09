@@ -360,58 +360,159 @@ class ElevenLabsProvider(TTSProvider):
         self._similarity = float(get_config(
             "voices.elevenlabs.similarity_boost", 0.85))
         self._style = float(get_config("voices.elevenlabs.style", 0.30))
-        # Resolve the voice ONCE (own voices → shared library → fallback).
-        self.voice_id = self._resolve_voice(self._voice_name)
-        if not self.voice_id:
-            print(f"  !! ElevenLabs: '{self._voice_name}' not found — "
-                  f"falling back to '{self._fallback_voice}'")
-            self.voice_id = self._resolve_voice(self._fallback_voice)
-        if not self.voice_id:
-            raise RuntimeError(
-                f"ElevenLabs voices '{self._voice_name}' and "
-                f"'{self._fallback_voice}' not found in account/library")
-        # v13: probe synthesis availability ONCE at init.  A key can be
-        # valid for lookups but have no TTS credits (HTTP 402) or a
-        # restricted role (HTTP 401) — discovering that on scene 1 would
-        # force a mid-video voice switch, which QA forbids.  Probe with a
-        # one-word utterance now; on failure raise so the caller picks a
-        # single consistent fallback voice for the whole video.
+        # Optional explicit own-voice fallback (free plans cannot use
+        # library voices like Declan Sage/David via the API).  When set,
+        # this voice is used if the primary + fallback can't synthesize;
+        # when empty, the best-scoring synthesizing own voice is picked.
+        self._own_voice_fallback = get_config(
+            "voices.elevenlabs.own_voice_fallback", "")
+        # Resolve + PROBE the narrator ONCE.  Free plans cannot use
+        # shared-library voices via the API (HTTP 402 paid_plan_required)
+        # even though lookups succeed — so the probe decides the real
+        # voice: configured voice if it synthesizes, else the best
+        # matching OWN voice (George/Daniel/etc.), else raise so the
+        # runner locks ONE consistent fallback for the whole video.
         import urllib.request as _ur
         import json as _j
-        _probe_url = f"https://api.elevenlabs.io/v1/text-to-speech/{self.voice_id}"
-        _probe = _j.dumps({
-            "text": "Test.",
-            "model_id": self._model,
-            "voice_settings": {"stability": 0.5, "similarity_boost": 0.8,
-                                "style": 0.0, "use_speaker_boost": False},
-        }).encode()
-        _req = _ur.Request(
-            _probe_url, data=_probe,
-            headers={"xi-api-key": self._api_key,
-                     "Content-Type": "application/json",
-                     "Accept": "audio/mpeg"})
-        try:
-            with _ur.urlopen(_req, timeout=60) as _r:
-                _data = _r.read()
-            if not _data or len(_data) < 1000:
-                raise RuntimeError(
-                    f"ElevenLabs probe returned {len(_data) if _data else 0} bytes")
-        except Exception as _e:
-            _msg = str(_e)
-            if "402" in _msg:
-                raise RuntimeError(
-                    "ElevenLabs account has no TTS credits (HTTP 402) — "
-                    "add credits or the pipeline will use the fallback voice")
-            if "401" in _msg:
-                raise RuntimeError(
-                    "ElevenLabs key rejected for synthesis (HTTP 401) — "
-                    "check the API key role/permissions")
-            raise RuntimeError(f"ElevenLabs synthesis probe failed: {_msg[:100]}")
-        print(f"  [elevenlabs] narrator locked: '{self._voice_name}' "
-              f"(id={self.voice_id}, synthesis verified)")
+
+        def _probe(vid: str) -> bool:
+            """Return True if this voice actually synthesizes."""
+            _probe_url = (f"https://api.elevenlabs.io/v1/text-to-speech/{vid}")
+            _probe = _j.dumps({
+                "text": "Test.",
+                "model_id": self._model,
+                "voice_settings": {"stability": 0.5, "similarity_boost": 0.8,
+                                    "style": 0.0, "use_speaker_boost": False},
+            }).encode()
+            _req = _ur.Request(
+                _probe_url, data=_probe,
+                headers={"xi-api-key": self._api_key,
+                         "Content-Type": "application/json",
+                         "Accept": "audio/mpeg"})
+            try:
+                with _ur.urlopen(_req, timeout=60) as _r:
+                    _d = _r.read()
+                return bool(_d) and len(_d) >= 1000
+            except Exception:
+                return False
+
+        # 1) configured voice (Declan Sage) — may be a library voice
+        self.voice_name = self._voice_name
+        self.voice_id = self._resolve_voice(self._voice_name)
+        if self.voice_id and _probe(self.voice_id):
+            self._synthesis_note = f"{self._voice_name} (verified)"
+        else:
+            if self.voice_id:
+                print(f"  !! ElevenLabs '{self._voice_name}' does not "
+                      f"synthesize on this plan (library voices need paid "
+                      f"subscription) — selecting best OWN voice")
+            else:
+                print(f"  !! ElevenLabs '{self._voice_name}' not found — "
+                      f"selecting best OWN voice")
+            # 2) fallback voice (David) if it is an own voice that works
+            self.voice_id = self._resolve_voice(self._fallback_voice)
+            if self.voice_id and _probe(self.voice_id):
+                self.voice_name = self._fallback_voice
+                self._synthesis_note = f"{self._fallback_voice} (fallback)"
+            else:
+                # 3) explicit own-voice fallback (free-plan usable), e.g.
+                #    "George - Warm, Captivating Storyteller" — closest to
+                #    Declan's male warm-authority direction.
+                if self._own_voice_fallback:
+                    self.voice_id = self._resolve_voice(self._own_voice_fallback)
+                    if self.voice_id and _probe(self.voice_id):
+                        self.voice_name = self._own_voice_fallback
+                        self._synthesis_note = (
+                            f"{self._own_voice_fallback} (own-voice fallback)")
+                # 4) auto-pick the best own voice that actually synthesizes
+                if not getattr(self, "_synthesis_note", ""):
+                    self.voice_id, self.voice_name = self._best_own_voice()
+                    if self.voice_id:
+                        self._synthesis_note = (
+                            f"{self.voice_name} (auto own-voice fallback)")
+                    else:
+                        raise RuntimeError(
+                            "ElevenLabs: no usable voice (configured '"
+                            f"{self._voice_name}', fallback '{self._fallback_voice}', "
+                            "and own voices all failed synthesis probe) — "
+                            "add credits or check the API key")
+        print(f"  [elevenlabs] narrator locked: {self._synthesis_note} "
+              f"(id={self.voice_id})")
 
     def is_available(self) -> bool:
         return bool(self._api_key)
+
+    # ── Voice resolution ───────────────────────────────────────────────
+
+    def _best_own_voice(self) -> tuple[str, str]:
+        """Pick the account's own voice closest to the narrator direction
+        (warm authority, documentary storyteller).  Returns (voice_id,
+        display_name) or ('', '') when the account has no own voices.
+
+        Free plans cannot use shared-library voices via the API, but own
+        voices work — so when the configured narrator (e.g. Declan Sage)
+        is a library voice, this keeps the video on ElevenLabs instead of
+        dropping to the edge fallback."""
+        import urllib.request
+        import json as _json
+        headers = {"xi-api-key": self._api_key,
+                   "Content-Type": "application/json"}
+        try:
+            req = urllib.request.Request(
+                "https://api.elevenlabs.io/v1/voices", headers=headers)
+            with urllib.request.urlopen(req, timeout=30) as r:
+                data = _json.loads(r.read())
+            voices = data.get("voices", [])
+        except Exception as e:
+            print(f"  [elevenlabs] !! own-voices list failed: {str(e)[:80]}")
+            return "", ""
+        if not voices:
+            return "", ""
+        # Score by narrator-direction keywords (name + description).
+        _WANT = ("warm", "captivat", "storyteller", "documentary",
+                 "narrator", "authoritative", "confident", "trustworthy",
+                 "wise", "broadcaster", "informative", "engaging",
+                 "resonant", "smooth", "steady", "mature", "deep")
+        _AVOID = ("warrior", "horror", "trickster", "playful", "quirky",
+                  "energetic social", "villain", "aggressive", "whisper")
+
+        def _score(v: dict) -> int:
+            blob = f"{v.get('name', '')} {v.get('description', '')}".lower()
+            s = sum(2 for w in _WANT if w in blob)
+            s -= sum(3 for w in _AVOID if w in blob)
+            return s
+
+        # Probe in score order and return the FIRST voice that actually
+        # synthesizes.  Some 'own' voices are library-derived clones that
+        # still 402 on free plans (observed: Harrison Gale); the account's
+        # starter voices (George/Daniel/Eric/Bill) synthesize fine — the
+        # probe is the only reliable filter.
+        import urllib.request as _ur2
+        import json as _j2
+        for v in sorted(voices, key=_score, reverse=True):
+            _vid = v.get("voice_id", "")
+            if not _vid:
+                continue
+            _probe_url = f"https://api.elevenlabs.io/v1/text-to-speech/{_vid}"
+            _probe = _j2.dumps({
+                "text": "Test.",
+                "model_id": self._model,
+                "voice_settings": {"stability": 0.5, "similarity_boost": 0.8,
+                                    "style": 0.0, "use_speaker_boost": False},
+            }).encode()
+            _req = _ur2.Request(
+                _probe_url, data=_probe,
+                headers={"xi-api-key": self._api_key,
+                         "Content-Type": "application/json",
+                         "Accept": "audio/mpeg"})
+            try:
+                with _ur2.urlopen(_req, timeout=60) as _r:
+                    _d = _r.read()
+                if _d and len(_d) >= 1000:
+                    return _vid, v.get("name", "")
+            except Exception:
+                continue
+        return "", ""
 
     # ── Voice resolution ───────────────────────────────────────────────
 

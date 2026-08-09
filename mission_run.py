@@ -1376,9 +1376,14 @@ def stage_narration_dynamic(scenes: list[dict], cache_audio: str,
                     sc.get("narration"), pause_density)
                 cb.generate_voice(tagged, ap)
                 if voice_lock is not None:
-                    voice_lock.record_scene(
-                        i, "elevenlabs",
-                        _gc2("voices.elevenlabs.voice", "Declan Sage"))
+                    # Record the ACTUAL resolved voice (Declan Sage may
+                    # have fallen back to an own voice on free plan) —
+                    # the lock must match what really narrated, else QA
+                    # flags a phantom voice switch.
+                    voice_lock.record_scene(i, "elevenlabs",
+                                            getattr(cb, "voice_name",
+                                                    _gc2("voices.elevenlabs.voice",
+                                                         "Declan Sage")))
             except Exception as e:  # noqa: BLE001
                 print(f"  !! elevenlabs failed for scene {i} ({str(e)[:80]}) — edge fallback")
                 stats["fallbacks"] += 1

@@ -21,6 +21,13 @@ voices:
     # cache/voices/elevenlabs_voices.json.
     voice: "Declan Sage"
     fallback_voice: "David"
+    # Free plans cannot use shared-LIBRARY voices (Declan Sage, David)
+    # via the API — lookups work but synthesis returns 402
+    # paid_plan_required.  When the primary+fallback can't synthesize,
+    # use this OWN voice (free-plan usable) — George is the closest
+    # match to Declan's male warm-authority direction.  Empty = auto-pick
+    # the best-scoring own voice that actually synthesizes.
+    own_voice_fallback: "George - Warm, Captivating Storyteller"
     model: "eleven_multilingual_v2"
     # High stability = consistent, measured delivery (un-rushed);
     # similarity_boost keeps the narrator's timbre tight across scenes;
