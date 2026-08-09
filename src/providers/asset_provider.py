@@ -38,6 +38,44 @@ class AssetProvider(ABC):
 
 # ── Pexels ─────────────────────────────────────────────────────────────────
 
+def _pick_best_variant_link(asset: dict) -> str:
+    """Return the HIGHEST-QUALITY video variant link for an asset dict.
+
+    v14 fix: providers list multiple renditions (Pexels: sd/hd/uhd,
+    Pixabay: small/medium/large); ``video_files[0]`` is often the SMALLEST.
+    Caching or downloading that URL ships soft footage that trips the
+    resolution_headroom gate.  Prefer the largest-footprint variant (or an
+    explicit hd/uhd quality tag), falling back to the first entry.
+    """
+    vf = asset.get("video_files", [])
+    if isinstance(vf, list) and vf:
+        best = None
+        best_score = -1
+        for entry in vf:
+            if not entry or not entry.get("link"):
+                continue
+            q = str(entry.get("quality", "")).lower()
+            try:
+                w = int(entry.get("width", 0) or 0)
+                h = int(entry.get("height", 0) or 0)
+            except (TypeError, ValueError):
+                w = h = 0
+            score = max(w, 0) * max(h, 0)
+            if q in ("uhd", "4k"):
+                score += 10 ** 10
+            elif q == "hd":
+                score += 10 ** 8
+            if score > best_score:
+                best_score = score
+                best = entry.get("link")
+        if best:
+            return best
+        link = vf[0].get("link", "")
+        if link:
+            return link
+    return asset.get("url", asset.get("link", ""))
+
+
 class PexelsProvider(AssetProvider):
     """Asset provider backed by the Pexels video API, with SQLite cache
     and deterministic asset quality scoring."""
