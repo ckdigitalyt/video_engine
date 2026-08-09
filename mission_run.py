@@ -952,17 +952,30 @@ def _build_subtitle_clips(result_scenes, timeline_path: str) -> list[dict]:
     from concurrent.futures import ThreadPoolExecutor, as_completed
 
     def _subs_one(i: int, scene):
-        ap = scene.audio_plan
-        if ap is None or not ap.narration_audio_path:
-            return []
-        text = scene.narration.spoken_narration if scene.narration else ""
-        if not text.strip() or not os.path.exists(ap.narration_audio_path):
+        # v19f: accept BOTH Scene objects (mission_run) and raw script
+        # dicts (mission_stills passes scenes_data).  For dicts there is
+        # no audio_plan — fall back to the canonical cache/audio path.
+        if isinstance(scene, dict):
+            _text = scene.get("narration", "") or ""
+            _ap = scene.get("audio_plan")
+            _ap_path = _ap.get("narration_audio_path") if isinstance(_ap, dict) else None
+            _sid = scene.get("scene_id", i)
+        else:
+            _ap = scene.audio_plan
+            _ap_path = _ap.narration_audio_path if (
+                _ap is not None and _ap.narration_audio_path
+            ) else None
+            _text = scene.narration.spoken_narration if scene.narration else ""
+            _sid = scene.scene_id
+        if not _ap_path or not os.path.exists(_ap_path):
+            _ap_path = os.path.join("cache", "audio", f"scene_{i}.wav")
+        if not _text.strip() or not os.path.exists(_ap_path):
             return []
         try:
             engine = SubtitleEngine()  # fresh per worker (config-only state)
-            timing = engine.generate(ap.narration_audio_path, text)
+            timing = engine.generate(_ap_path, _text)
         except Exception as e:
-            print(f"  [subs] !! scene {scene.scene_id} timing failed: {str(e)[:80]}")
+            print(f"  [subs] !! scene {_sid} timing failed: {str(e)[:80]}")
             return []
         offset_ms = (starts[i] if i < len(starts) else 0.0) * 1000.0
         clips = []
