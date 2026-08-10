@@ -246,6 +246,65 @@ AI_PROMPTS = {
 }
 
 
+def _auto_crop_borders(image_path: str, out_path: str) -> str:
+    """Auto-crop empty/jagged black border bands from extreme-aspect mosaics.
+
+    DeepSeek pro 88 review (CRITICAL): the Andromeda Hubble M31 mosaic
+    (wikimedia 42208x9870) showed jagged black edges when the Ken Burns pan
+    moved into empty border territory.  Wide mosaics/panoramas often carry
+    large near-black border bands; crop to the content bounding box so the
+    pan never reveals them.
+
+    Returns the (possibly new) cropped file path, or "" when the asset is
+    mostly empty border (reject), or the ORIGINAL path unchanged when no
+    meaningful border exists (fail-open on any error).
+    """
+    try:
+        from PIL import Image
+        import numpy as np
+        with Image.open(image_path) as im:
+            im = im.convert("RGB")
+            w, h = im.size
+            if w <= 0 or h <= 0:
+                return ""
+            aspect = w / h
+            # Only extreme-aspect assets (mosaics/panoramas) need this;
+            # normal near-16:9 stills are fine.
+            if 0.4 <= aspect <= 2.5:
+                return image_path
+            # Downscale for speed on huge mosaics (42208x9870).
+            scale = min(1.0, 2000.0 / max(w, h))
+            small = im.resize(
+                (max(1, int(w * scale)), max(1, int(h * scale))), Image.LANCZOS
+            )
+            arr = np.asarray(small.convert("L"), dtype=np.float32)
+            mask = arr > 10  # content = brighter than ~4% of full scale
+            rows = mask.any(axis=1)
+            cols = mask.any(axis=0)
+            if not rows.any() or not cols.any():
+                return ""  # fully black — reject
+            r0, r1 = int(np.argmax(rows)), len(rows) - int(np.argmax(rows[::-1]))
+            c0, c1 = int(np.argmax(cols)), len(cols) - int(np.argmax(cols[::-1]))
+            y0, y1 = int(r0 / scale), int(r1 / scale)
+            x0, x1 = int(c0 / scale), int(c1 / scale)
+            content_area = (x1 - x0) * (y1 - y0)
+            if content_area < 0.35 * w * h:
+                return ""  # content is a tiny sliver — reject
+            margin_w = 0.015 * w
+            margin_h = 0.015 * h
+            if (x0 <= margin_w and x1 >= w - margin_w
+                    and y0 <= margin_h and y1 >= h - margin_h):
+                return image_path  # no real border — keep as-is
+            box = (x0, y0, x1, y1)
+            im.crop(box).save(out_path, quality=95)
+            print(f"  [border] auto-cropped {os.path.basename(image_path)} "
+                  f"{w}x{h} -> {x1 - x0}x{y1 - y0}")
+            return out_path
+    except Exception as e:
+        print(f"  [border] !! {os.path.basename(image_path)}: {str(e)[:80]}")
+        return image_path  # fail open — keep original
+
+
 def _kenburns(image_path: str, out_path: str, duration: float = 6.0,
               zoom_in: bool = True, camera: Optional[dict] = None) -> str:
     """Ken Burns motion with LINEAR zoom across the full shot duration.
@@ -487,6 +546,25 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                     style_bible.placed_style_tokens[os.path.basename(got)] = query
             if not got:
                 continue
+            # ── BORDER GATE (v19n, DeepSeek 88 CRITICAL) ─────────────
+            # Wide mosaics/panoramas (e.g. the 42208x9870 Andromeda Hubble
+            # M31 mosaic) carry jagged empty borders that the Ken Burns pan
+            # exposes as black edges.  Auto-crop to the content bbox before
+            # dedup/gate/Ken Burns; reject freshly-fetched assets that are
+            # mostly empty border.  Generated/cached/pinned assets fail open
+            # (keep original) — they were already accepted upstream.
+            if os.path.exists(got):
+                crop_out = os.path.join(
+                    still_root, fname.replace(".jpg", "_crop.jpg"))
+                cropped = _auto_crop_borders(got, crop_out)
+                if not cropped and src not in ("ai", "cached") and fname not in pinned:
+                    stats["rejected"] += 1
+                    rejected_this_run.add(fname)
+                    print(f"  [border] rejected {fname} (mostly empty border)")
+                    continue
+                elif cropped and cropped != got:
+                    got = cropped
+                    print(f"  [border] using cropped {os.path.basename(got)}")
             # Content-based dedup: skip near-identical stills already placed
             if os.path.exists(got) and _is_dup(got):
                 stats["deduped"] += 1

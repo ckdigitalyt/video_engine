@@ -213,7 +213,18 @@ class TestRendererClips:
     def test_clip_count_matches_words(self, engine: SubtitleEngine, short_wav: Path) -> None:
         timing = engine.generate(str(short_wav), "a b c")
         clips = engine.to_renderer_clips(timing)
-        assert len(clips) == 3
+        # v19n: words are grouped into PHRASE clips (max_words_per_line=4),
+        # so 3 words → 1 phrase clip containing all three.
+        assert len(clips) == 1
+        assert clips[0]["text"] == "a b c"
+
+    def test_long_line_splits_into_phrase_clips(self, engine: SubtitleEngine, short_wav: Path) -> None:
+        # 6 words with max_words_per_line=4 → 2 phrase clips.
+        timing = engine.generate(str(short_wav), "one two three four five six")
+        clips = engine.to_renderer_clips(timing)
+        assert len(clips) == 2
+        assert clips[0]["text"] == "one two three four"
+        assert clips[1]["text"] == "five six"
 
 
 # ── Animation ─────────────────────────────────────────────────────────────

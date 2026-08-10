@@ -124,6 +124,24 @@ GATE = {
     "edit": 7.0,          # documentary_editor score
 }
 
+# ── Deterministic factual-hedging check (v19n) ──────────────────────────
+# DeepSeek pro 88 review (MEDIUM): Scene 3 stated the Sun's fate as an
+# absolute certainty ("will simply be flung into a new, more distant
+# region").  Astronomical futures are probabilistic — a future outcome
+# that depends on chaotic N-body dynamics must be hedged ("likely",
+# "may", "could").  This cheap regex net catches absolute predictions
+# about UNCERTAIN outcomes and feeds them into the revision pass as
+# minor issues.  It deliberately does NOT flag the merger itself (that
+# IS established science) — only outcome verbs for individual objects.
+_HEDGE_PATTERNS = (
+    (re.compile(r"\bwill (?:simply |just )?be (flung|ejected|torn|ripped|shattered|vaporized|annihilated|consumed|swallowed|destroyed)\b", re.I),
+     "absolute prediction of an uncertain future outcome"),
+    (re.compile(r"\b(?:sun|earth|planet|star|galaxy)s? (?:will|is going to) (?:be )?(?:flung|ejected|torn|ripped|destroyed|vaporized)\b", re.I),
+     "object-fate stated as certain"),
+    (re.compile(r"\bdefinitely|certainly|guaranteed|without (?:a )?doubt\b", re.I),
+     "false certainty marker"),
+)
+
 
 def _persona_prompt(persona_key: str, script_text: str, facts_text: str) -> str:
     p = PERSONAS[persona_key]
@@ -232,6 +250,14 @@ class ScriptReviewer:
                     f"issues={len(issues)} ({self._sev_counts(issues)})"
                 )
 
+            # v19n (DeepSeek 88 MEDIUM): deterministic factual-hedging net —
+            # flag absolute predictions of uncertain future outcomes and feed
+            # them into the revision prompt (no LLM cost, runs every pass).
+            hedge = self._hedge_issues(current)
+            if hedge:
+                consolidated.extend(hedge)
+                self._log(f"  [hedge] {len(hedge)} absolute-future overstatement(s) flagged")
+
             passed = self._gate_met(scores)
             self._log(f"  Gate: {'PASS' if passed else 'FAIL'} "
                       f"(scores={ {k: round(v.score,1) for k,v in scores.items()} })")
@@ -260,6 +286,31 @@ class ScriptReviewer:
         return current, results
 
     # ── Internals ──────────────────────────────────────────────────────
+
+    # ── Deterministic factual-hedging check (v19n) ────────────────────
+
+    def _hedge_issues(self, scenes: list[str]) -> list[ReviewIssue]:
+        """Flag absolute predictions of uncertain future outcomes.
+
+        DeepSeek pro 88 review (MEDIUM): Scene 3 asserted the Sun's fate
+        as certain ("will simply be flung...").  Probabilistic astronomical
+        outcomes must be hedged.  Pure regex — no LLM call — so it runs on
+        every pass for free and feeds the revision prompt.
+        """
+        issues: list[ReviewIssue] = []
+        for i, scene in enumerate(scenes):
+            for pat, label in _HEDGE_PATTERNS:
+                for m in pat.finditer(scene or ""):
+                    issues.append(ReviewIssue(
+                        persona="deterministic_hedge",
+                        severity="minor",
+                        location=f"scene {i}",
+                        issue=f"{label}: {m.group(0)!r}",
+                        suggestion=("Hedge the prediction with an uncertainty "
+                                    "qualifier ('likely', 'may', 'could') — "
+                                    "e.g. 'will be flung' → 'may be flung'."),
+                    ))
+        return issues
 
     def _run_persona(self, persona_key: str, script_text: str, facts_text: str):
         prompt = _persona_prompt(persona_key, script_text, facts_text)

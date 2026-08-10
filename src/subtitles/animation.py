@@ -140,22 +140,50 @@ def get_animation_clips(
 
     The renderer is responsible for converting these into actual visual
     clips using its own framework (e.g. MoviePy ``TextClip``).
+
+    v19n (DeepSeek 88 review, MEDIUM): words are grouped into PHRASE clips
+    (up to ``max_words_per_line`` per clip, respecting line boundaries) so
+    the burned-in captions read as coherent phrases instead of fragmented
+    single words ("stone's" / "the" / "stars" flashing one word at a
+    time).  The phrase clip spans the first word's start to the last
+    word's end; per-word timing is preserved for the animation styles.
     """
     fn = get_animation_style(style)
     words = fn(words)
 
+    phrases = _group_phrases(words, max_words_per_line)
+
     clips: list[dict] = []
-    for w in words:
+    for ph in phrases:
         clips.append({
-            "text": w.get("word", ""),
-            "start_ms": w["start_ms"],
-            "end_ms": w["end_ms"],
+            "text": " ".join(w.get("word", "") for w in ph),
+            "start_ms": ph[0]["start_ms"],
+            "end_ms": ph[-1]["end_ms"],
             "font_size": font_size,
             "bottom_margin": bottom_margin,
             "max_words_per_line": max_words_per_line,
             "animation": style,
-            "opacity": w.get("anim_opacity", 1.0),
-            "fade_in_ms": w.get("fade_in_ms", 0),
-            "fade_out_ms": w.get("fade_out_ms", 0),
+            "opacity": max((w.get("anim_opacity", 1.0) for w in ph), default=1.0),
+            "fade_in_ms": ph[0].get("fade_in_ms", 0),
+            "fade_out_ms": ph[-1].get("fade_out_ms", 0),
         })
     return clips
+
+
+def _group_phrases(words: list[WordTiming], max_words_per_line: int) -> list[list[WordTiming]]:
+    """Group word timings into phrase chunks (v19n).
+
+    Line boundaries (``is_last_in_line``) always split; additionally split
+    every ``max_words_per_line`` words so a malformed timing stream without
+    line flags still yields bounded phrase sizes.
+    """
+    phrases: list[list[WordTiming]] = []
+    cur: list[WordTiming] = []
+    for w in words:
+        cur.append(w)
+        if w.get("is_last_in_line") or len(cur) >= max_words_per_line:
+            phrases.append(cur)
+            cur = []
+    if cur:
+        phrases.append(cur)
+    return phrases
