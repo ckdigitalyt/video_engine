@@ -320,6 +320,16 @@ class PreRenderGate:
                 # are trusted even when the free-text query differs.
                 if v.get("pre_verified"):
                     continue
+                # v19n.2: trust the vision asset gate.  Shots that PASSED
+                # multi-signal verification against the scene EntitySpec
+                # (verification_passed=True) are spec-approved even when
+                # their fetch query doesn't token-overlap narration — e.g.
+                # EntitySpec-driven queries like "Earth" / "GPS Satellite"
+                # for abstract topics ("Is time real?").  The token
+                # heuristic is a cheap proxy; the vision check is the
+                # stronger signal, so don't double-reject what it accepted.
+                if v.get("verification_passed"):
+                    continue
                 # skip structural/intent queries (visual_goal fallbacks)
                 if _STRUCTURAL.match(query.strip()):
                     continue
