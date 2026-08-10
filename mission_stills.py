@@ -268,9 +268,15 @@ def _kenburns(image_path: str, out_path: str, duration: float = 6.0,
     pan_y = float(cam.get("pan_y", 0))
     # linear zoom: z = z_start + (z_end - z_start) * on/frames
     z_expr = f"{z_start}+({z_end}-{z_start})*on/{frames}"
-    # pan: drift by pan_x/pan_y pixels (in 2x space) across the shot
-    px = f"(iw-iw/zoom)/2+({pan_x}*2)*on/{frames}"
-    py = f"(ih-ih/zoom)/2+({pan_y}*2)*on/{frames}"
+    # pan: drift by pan_x/pan_y pixels (in 2x space) across the shot.
+    # CLAMP to the zoompan-valid window [0, iw-iw/zoom] — without the
+    # clamp, pan+zoom can push the crop window past the source edge and
+    # ffmpeg pads with mirrored edge pixels -> mirrored_edges/smear
+    # artifacts on the final master (Andromeda v4 blocker).
+    px = (f"min(max((iw-iw/zoom)/2+({pan_x}*2)*on/{frames},0),"
+          f"max(iw-iw/zoom,0))")
+    py = (f"min(max((ih-ih/zoom)/2+({pan_y}*2)*on/{frames},0),"
+          f"max(ih-ih/zoom,0))")
     vf = (
         f"scale=3840:2160:force_original_aspect_ratio=increase,crop=3840:2160,"
         f"zoompan=z='{z_expr}':x='{px}':y='{py}':"
@@ -1534,9 +1540,9 @@ def main():
         review = M.stage_video_review(review_target, scenes_data,
                                       os.path.join(out_dir, "review_v1.json"))
         run_report["stages"]["review_v1"] = {
-            "score": review.get("quality_score"),
-            "confidence": review.get("confidence"),
-            "model_used": review.get("_meta", {}).get("model_used"),
+            "score": (review or {}).get("quality_score"),
+            "confidence": (review or {}).get("confidence"),
+            "model_used": (review or {}).get("_meta", {}).get("model_used"),
         }
     except Exception as e:
         print(f"  !! video review failed (non-fatal, continuing): {str(e)[:120]}")
@@ -1595,9 +1601,9 @@ def main():
             review = M.stage_video_review(review_target, scenes_data,
                                           os.path.join(out_dir, f"review_v{iteration+1}.json"))
             run_report["stages"][f"review_v{iteration+1}"] = {
-                "score": review.get("quality_score"),
-                "confidence": review.get("confidence"),
-                "model_used": review.get("_meta", {}).get("model_used"),
+                "score": (review or {}).get("quality_score"),
+                "confidence": (review or {}).get("confidence"),
+                "model_used": (review or {}).get("_meta", {}).get("model_used"),
             }
         except Exception as e:
             print(f"  !! re-review failed (non-fatal): {str(e)[:120]}")
@@ -1728,7 +1734,7 @@ def main():
 
     run_report["final"] = {
         "output": review_target, "iterations": iteration,
-        "final_score": review.get("quality_score"),
+        "final_score": (review or {}).get("quality_score"),
         "duration_s": M._probe_duration(review_target),
         "visual_stats": stills_stats,
     }
@@ -1749,6 +1755,7 @@ def main():
         print(f"  !! usage report failed (non-fatal): {str(e)[:80]}")
     M._write_json(os.path.join(out_dir, "run_report.json"), run_report)
 
+    _score = (review or {}).get("quality_score")
     recorder = mods["PostmortemRecorder"]()
     pm_path = recorder.record(
         topic + " (stills-first)",
@@ -1756,12 +1763,12 @@ def main():
             "stills-first visual strategy: NASA/Wikimedia/AI Ken Burns + Manim beats",
             f"manim scenes: {stills_stats.get('manim', 0)}, nasa: {stills_stats.get('nasa', 0)}, "
             f"wikimedia: {stills_stats.get('wikimedia', 0)}, ai: {stills_stats.get('ai', 0)}",
-            f"Gemini review score {review.get('quality_score')}/100",
+            f"Gemini review score {_score}/100",
         ],
         techniques_failed=[
             "stock-video director (pexels) deprioritized by design in stills mode",
         ],
-        metrics={"final_score": review.get("quality_score"),
+        metrics={"final_score": _score,
                  "duration_s": M._probe_duration(review_target),
                  "avg_wpm": pacing_audit.get("avg_wpm"),
                  "rushed_scene_count": pacing_audit.get("rushed_scene_count"),
@@ -1771,10 +1778,10 @@ def main():
     run_report["postmortem"] = pm_path
     M._write_json(os.path.join(out_dir, "run_report.json"), run_report)
 
-    print("\n" + "=" * 64)
+    print(f"\n{'=' * 64}")
     print(f"STILLS-FIRST RUN COMPLETE — {topic}")
     print(f"  Video:  {review_target}")
-    print(f"  Score:  {review.get('quality_score')}/100 | Dur: {M._probe_duration(review_target):.1f}s")
+    print(f"  Score:  {_score}/100 | Dur: {M._probe_duration(review_target):.1f}s")
     print(f"  Sources: {stills_stats}")
     print("=" * 64)
 

@@ -111,12 +111,18 @@ def _gradient_energy(img: np.ndarray) -> float:
     return float(np.mean(np.abs(gx) + np.abs(gy)))
 
 
-def border_row_deltas(img: np.ndarray, frac: float = BORDER_FRAC) -> list[float]:
+def border_row_deltas(img: np.ndarray, frac: float = BORDER_FRAC,
+                      min_std: float = 2.0) -> list[float]:
     """Per-row mirror deltas for top + bottom border strips of one frame.
 
     Positive delta = the row correlates better with the FLIPPED interior
     row than with the same-side interior row (a mirror artifact).  Returns
     raw per-row values so the caller can aggregate across frames robustly.
+
+    ``min_std``: rows whose border strip OR paired interior strip is
+    near-flat are skipped — correlation on flat/dark rows is numeric
+    noise, and deep-space photography legitimately has black-sky bands
+    (Andromeda v4 false positive: p90 0.22 unfiltered -> -0.03 filtered).
     """
     h, w = img.shape
     bh = max(2, int(h * frac))
@@ -127,9 +133,17 @@ def border_row_deltas(img: np.ndarray, frac: float = BORDER_FRAC) -> list[float]
         return float((a * b).sum() / denom)
 
     def deltas(top_rows, inner_rows):
-        return [corr(top_rows[i], inner_rows[::-1][i]) -
-                corr(top_rows[i], inner_rows[i])
-                for i in range(len(top_rows))]
+        out = []
+        n = min(len(top_rows), len(inner_rows))
+        for i in range(n):
+            t, inn = top_rows[i], inner_rows[i]
+            if t.std() < min_std or inn.std() < min_std:
+                continue
+            # inner_rows[n-1-i] = the vertically-flipped counterpart row
+            # (original code: inner_rows[::-1][i]); a mirror artifact makes
+            # the border row correlate with it better than with same-side.
+            out.append(corr(t, inner_rows[n - 1 - i]) - corr(t, inn))
+        return out
 
     out = deltas(img[:bh, :], img[bh:2 * bh, :])
     out += deltas(img[-bh:, :], img[-2 * bh:-bh, :])
@@ -240,6 +254,15 @@ def run_visual_artifact_check(video_path: str,
         # meaningless on a blank frame and black is a separate QA concern
         # (frozen/opening checks already own it).
         if f.mean() < 5.0:
+            continue
+        # Skip frames whose BORDER BAND is uniform (std < 3.0): a flat band
+        # is either black sky in a space photo or a solid-color frame — it
+        # carries no content, so mirror/smear/seam metrics on it are noise.
+        # (Andromeda v4: frame3 flagged "smear ratio 0.08" purely because
+        # the border was black sky — border mean 0.05 vs interior 17.9.)
+        _bh = max(2, int(f.shape[0] * BORDER_FRAC))
+        _band = np.vstack([f[:_bh, :], f[-_bh:, :]])
+        if float(_band.std()) < 3.0:
             continue
         mirror_deltas += border_row_deltas(f)
         s = check_frame_smear(f)

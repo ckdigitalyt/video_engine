@@ -157,9 +157,16 @@ def test_authentic_audio_qa_speed_mismatch():
 # ═══════════════════════════════════════════════════════════════════════ #
 
 def _frame_with_mirror_top():
-    """Gradient interior + top border that is a vertical mirror of it."""
+    """Noisy interior + top border that is an exact vertical mirror of it.
+
+    Textured (random) interior so same-side row correlation is low and the
+    mirrored copy is a strong flip signature — the mirror detector skips
+    near-flat rows by design (Andromeda v4 false positive: black-sky
+    borders have std ~ 0 and correlation there is numeric noise).
+    """
     h, w = 270, 480
-    base = np.tile(np.linspace(40, 200, h), (w, 1)).T  # vertical gradient
+    rng = np.random.default_rng(11)
+    base = rng.normal(100, 25, (h, w)).astype(np.float32)  # texture per row
     top_h = int(h * 0.04)
     frame = base.copy()
     frame[:top_h] = base[top_h:2 * top_h][::-1]        # mirrored top border
