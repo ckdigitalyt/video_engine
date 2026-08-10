@@ -27,6 +27,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
+from typing import Optional
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -1408,7 +1409,8 @@ def build_sfx_timeline(scenes: list[dict], audio_durations: list[float],
 
 def stage_narration_dynamic(scenes: list[dict], cache_audio: str,
                             provider: str = "edge",
-                            voice_lock=None) -> tuple[list[float], dict]:
+                            voice_lock=None,
+                            scene_ids: Optional[set] = None) -> tuple[list[float], dict]:
     """Dynamic narration: sentence-level rate/pitch modulation by scene
     emotion (edge-tts supports per-sentence rate/pitch), falling back to
     flat Kokoro when edge is unavailable.  Returns (durations, stats).
@@ -1456,6 +1458,15 @@ def stage_narration_dynamic(scenes: list[dict], cache_audio: str,
 
     for i, sc in enumerate(scenes):
         ap = os.path.join(cache_audio, f"scene_{i}.wav")
+        # v20: selective regeneration — scenes NOT in scene_ids reuse their
+        # cached wav (hash-verified by the caller's manifest) and only need
+        # a duration probe + voice-lock record; nothing is re-synthesized.
+        if scene_ids is not None and i not in scene_ids:
+            durations.append(_probe_duration(ap) if os.path.exists(ap) else 5.0)
+            if voice_lock is not None:
+                voice_lock.record_scene(
+                    i, voice_lock.provider, voice_lock.voice_id)
+            continue
         emo = (sc.get("emotion") or "wonder").strip().lower()
         role = _role_for_scene(i, len(scenes), sc.get("narration"))
         sents = _sentences(sc.get("narration"))

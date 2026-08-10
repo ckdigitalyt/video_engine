@@ -28,6 +28,8 @@ load_dotenv()
 
 import mission_run as M
 
+from src.pipeline.manifest import Manifest, parse_shot_id, hash_text
+
 # v13 consolidation: visual direction (Manim registry, beats, Jade style
 # lock) lives in ONE module shared with mission_run
 # so the two runners can never drift apart again.
@@ -618,7 +620,8 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                               "camera": cam.get("move", "push_in"),
                               "motion_params": cam_params,
                               "verification": ver if (gates is not None and spec is not None) else None,
-                              "title": title, "query": query})
+                              "title": title, "query": query,
+                              "asset": got})
                 stats[src] = stats.get(src, 0) + 1
                 still_count += 1
                 # record hash for dedup (content-based, not path-based)
@@ -678,7 +681,8 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                                   "camera": vmove, "motion_params": vcam,
                                   "verification": last.get("verification"),
                                   "title": last.get("title", ""),
-                                  "query": last.get("query", "")})
+                                  "query": last.get("query", ""),
+                                  "asset": src_img})
                     placed_total += 4.0
                     print(f"  [coverage] scene{i}: narration ~{est:.0f}s, "
                           f"added {vmove} variant (total {placed_total:.1f}s)")
@@ -732,7 +736,7 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                 fill_shots = [{"file": clip, "duration": 4.0, "kind": src,
                                "camera": cam.get("move", "push_in"),
                                "motion_params": cam_params, "title": title,
-                               "query": fill_q}]
+                               "query": fill_q, "asset": got}]
                 # v10.4 + 2026 recalibration: fill scenes must also satisfy the
                 # coverage guard AND the 4s micro-beat hold cap.
                 fest = max(4.0, len(text.split()) / 2.6)
@@ -750,7 +754,8 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                     if _kenburns(got, variant, duration=4.0, zoom_in=vmove == "push_in", camera=vcam):
                         fill_shots.append({"file": variant, "duration": 4.0, "kind": src,
                                            "camera": vmove, "motion_params": vcam,
-                                           "title": title, "query": fill_q})
+                                           "title": title, "query": fill_q,
+                                           "asset": got})
                         fplaced += 4.0
                         fcount += 1
                     else:
@@ -1095,6 +1100,10 @@ def main():
                     help="Target narration runtime in seconds (scales scenes+words; default 60)")
     ap.add_argument("--reuse", action="store_true",
                     help="Reuse cached script/stills/audio from a previous run (A/B motion re-render)")
+    ap.add_argument("--scenes", default="",
+                    help="Comma list of scene indices to force-regenerate (e.g. 3,7) — operates through the manifest dependency graph")
+    ap.add_argument("--assets", default="",
+                    help="Comma list of shot ids to force-regenerate (e.g. s03_sh01,s06_sh02) — asset-level repair")
     args = ap.parse_args()
 
     if args.target_seconds:
@@ -1104,6 +1113,13 @@ def main():
     slug = "".join(c if c.isalnum() else "_" for c in topic.lower())[:40].strip("_")
     out_dir = os.path.join("results", slug)
     os.makedirs(out_dir, exist_ok=True)
+    manifest = Manifest(out_dir).load()
+    forced_scenes = {int(x) for x in args.scenes.split(",") if x.strip().isdigit()}
+    forced_assets = set()
+    for _a in (args.assets or "").split(","):
+        _pid = parse_shot_id(_a.strip())
+        if _pid:
+            forced_assets.add(_pid)
     output_path = args.out or os.path.join(out_dir, f"{slug}.mp4")
     mixed_path = os.path.join(out_dir, f"{slug}_mixed.mp4")
     timeline_path = os.path.join(out_dir, "timeline.json")
@@ -1129,7 +1145,7 @@ def main():
         llm.usage() if hasattr(llm, "usage") else {}
     )
 
-    if args.reuse and os.path.exists(os.path.join(out_dir, "script_final.json")):
+    if (args.reuse or args.scenes or args.assets) and os.path.exists(os.path.join(out_dir, "script_final.json")):
         print("  [reuse] Loading cached script_final.json + cached stills/audio")
         with open(os.path.join(out_dir, "script_final.json")) as f:
             scenes_data = json.load(f)
@@ -1284,6 +1300,12 @@ def main():
     except Exception as _e:
         print(f"  !! claim gate error (non-fatal): {str(_e)[:100]}")
         run_report["stages"]["claim_gate"] = {"error": str(_e)[:120]}
+    # v20: record per-scene script hashes (dependency graph root) so the
+    # manifest can decide per-scene voice/visual invalidation on reruns.
+    # Recorded AFTER the claim gate (which may rewrite scenes_data).
+    for _i, _s in enumerate(scenes_data):
+        manifest.set_script(_i, _s.get("narration", ""))
+
     # Clear v2 motion clips so they regenerate with the fixed Ken Burns
     if os.path.isdir(os.path.join(out_dir, "shots")):
         shutil.rmtree(os.path.join(out_dir, "shots"))
@@ -1344,26 +1366,78 @@ def main():
                 _s["intent"] = _spec.scene_intent
     except Exception as e:
         print(f"  !! gates init failed (continuing un-gated): {str(e)[:100]}")
+    # v20: --assets forces asset-level regeneration — delete the cached
+    # still file(s) for the targeted shot ids so the fetch/cache-reuse
+    # branch re-downloads and re-gates them (asset-level repair, not
+    # scene-level: one bad image never forces the whole scene to rebuild).
+    if forced_assets:
+        _still_root = os.path.join("cache", "stills", slug)
+        for _sc, _ix in sorted(forced_assets):
+            _sid = f"s{_sc:02d}_sh{_ix:02d}"
+            _asset = ""
+            _prev_shots = (manifest._prev.get("scenes", {})
+                           .get(str(_sc), {}).get("shots", []))
+            for _sh in _prev_shots:
+                if _sh.get("id") == _sid:
+                    _asset = _sh.get("asset", "")
+                    break
+            _cands = []
+            if _asset:
+                _cands.append(_asset)
+                _cands.append(_asset.replace(".jpg", "_crop.jpg"))
+            _cands.append(os.path.join(_still_root, f"scene{_sc}_{_ix}.jpg"))
+            for _c in _cands:
+                if os.path.exists(_c):
+                    os.remove(_c)
+                    print(f"  [assets] removed {os.path.basename(_c)} for {_sid}")
+
     shot_plan, stills_stats = stage_stills_visuals(scenes_data, out_dir, gates, specs,
                                                   topic_slug=slug,
                                                   style_bible=style_bible)
+    # v20: record per-shot asset hashes (asset-level dependency graph).
+    # Each shot carries its durable still asset path; Ken Burns clips are
+    # derived and cheap to regenerate, so only the still drives visual
+    # change detection (clip files are cleaned up at run end anyway).
+    for _i, _shots in (shot_plan or {}).items():
+        for _si, _sh in enumerate(_shots):
+            manifest.add_shot(
+                _i, _si,
+                file=_sh.get("file", ""),
+                asset=_sh.get("asset", ""),
+                kind=_sh.get("kind", ""),
+                verification_passed=bool(
+                    (_sh.get("verification") or {}).get("passed", True)),
+                camera=_sh.get("camera", ""),
+                query=_sh.get("query", ""),
+            )
     style_bible.save()
     run_report["stages"]["visuals"] = stills_stats
 
-    # ── Narration (dynamic, emotion-modulated; reuse cached audio) ──────
+    # ── Narration (dynamic, emotion-modulated; per-scene hash reuse) ────
+    # v20: the manifest decides per-scene voice reuse.  A scene's cached
+    # wav is reused ONLY when its script hash AND wav hash match the
+    # manifest (replaces the old all-or-nothing --reuse, which could
+    # silently reuse ANOTHER topic's narration from the global cache/audio
+    # dir when scene counts matched).  --scenes forces specific scenes.
     os.makedirs("cache/audio", exist_ok=True)
     audio_durations = []
     narration_stats = {}
-    if args.reuse and all(os.path.exists(os.path.join("cache", "audio", f"scene_{i}.wav"))
-                          for i in range(len(scenes_data))):
+    regen_scenes = set()
+    for i, s in enumerate(scenes_data):
+        ap = os.path.join("cache", "audio", f"scene_{i}.wav")
+        if not manifest.voice_reusable(i, ap, s.get("narration", "")):
+            regen_scenes.add(i)
+    regen_scenes |= forced_scenes
+    if regen_scenes:
+        print(f"  [voice] regenerating scenes: {sorted(regen_scenes)}", flush=True)
+        audio_durations, narration_stats = M.stage_narration_dynamic(
+            scenes_data, "cache/audio", provider=_voice_provider,
+            voice_lock=voice_lock, scene_ids=regen_scenes)
+    else:
+        # every scene hash-verified → probe durations + record lock identity
         for i, s in enumerate(scenes_data):
             ap = os.path.join("cache", "audio", f"scene_{i}.wav")
             audio_durations.append(M._probe_duration(ap))
-            # v19 fix: cached audio belongs to THIS episode's locked
-            # narrator (fish), NOT necessarily chatterbox.  The old
-            # hardcoded "cached(chatterbox)" mislabeled Fish wavs on
-            # reuse and tripped the voice_switching gate.  Record the
-            # lock's own identity so the episode stays truthful.
             if voice_lock is not None:
                 voice_lock.record_scene(
                     i, voice_lock.provider, voice_lock.voice_id,
@@ -1373,10 +1447,6 @@ def main():
         narration_stats = {
             "provider": f"cached({voice_lock.provider if voice_lock else 'unknown'})",
         }
-    else:
-        audio_durations, narration_stats = M.stage_narration_dynamic(
-            scenes_data, "cache/audio", provider=_voice_provider,
-            voice_lock=voice_lock)
     print(f"  Voice tracks: {len(scenes_data)} (total {sum(audio_durations):.1f}s) "
           f"[{narration_stats.get('provider')}]")
 
@@ -1391,6 +1461,14 @@ def main():
     # boundaries so narration lands inside the band (space after key
     # facts).  Deterministic fix for "narration feels too fast".
     audio_durations = _pace_pad_scenes(scenes_data, "cache/audio", audio_durations)
+
+    # v20: record FINAL voice hashes (after trim + pace-pad rewrote the
+    # wavs) so the manifest's voice hash matches the bytes on disk — a
+    # reused track must hash-verify against exactly what the timeline uses.
+    for _i in range(len(scenes_data)):
+        _ap = os.path.join("cache", "audio", f"scene_{_i}.wav")
+        manifest.set_voice(_i, _ap,
+                           audio_durations[_i] if _i < len(audio_durations) else 0)
 
     # ── Timeline + render ──────────────────────────────────────────────
     build_stills_timeline(scenes_data, shot_plan, audio_durations, timeline_path)
@@ -1822,6 +1900,29 @@ def main():
         "duration_s": M._probe_duration(review_target),
         "visual_stats": stills_stats,
     }
+    # ── v20: persist the content-addressed manifest ─────────────────────
+    # Dependency-graph record of every artifact (script/voice/visual
+    # hashes per scene).  Next run diffs against it to regenerate ONLY
+    # what changed; --scenes/--assets operate through this graph.
+    for _i, _s in enumerate(scenes_data):
+        manifest.set_subtitles_hash(_i, hash_text(_s.get("narration", "")))
+    manifest.set_global("topic", topic)
+    manifest.set_global("target_seconds", args.target_seconds)
+    manifest.set_final(
+        output=os.path.basename(review_target) if os.path.exists(review_target) else None,
+        status=run_report.get("status", {}).get("status"),
+        quality_score=(review or {}).get("quality_score"),
+        duration_s=M._probe_duration(review_target) if os.path.exists(review_target) else 0,
+    )
+    manifest.save()
+    _mdiff = manifest.diff()
+    if _mdiff:
+        print(f"  [manifest] {len(_mdiff)} change(s) vs previous run:")
+        for _c in _mdiff:
+            _who = f"scene {_c['scene']}" if _c["scene"] is not None else "global"
+            print(f"    {_who}: {', '.join(_c['changed'])} → {', '.join(_c['actions'])}")
+    else:
+        print("  [manifest] no changes vs previous run (full reuse)")
     # ── DeepSeek usage + cost report (per-stage, whole run) ────────────
     try:
         from src.providers.llm_provider import DeepSeekUsage

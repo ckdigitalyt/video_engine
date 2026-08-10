@@ -55,6 +55,7 @@ Respond in STRICT JSON (no markdown fences) with this schema:
       "recommendation": "<specific, actionable, parameter-level where possible>"}}
   ],
   "factual_issues": [{{"claim": "...", "issue": "...", "suggested_fix": "..."}}],
+  "defects": [{{"scene": <int 0-based>, "shot": "<s06_sh01 or null>", "problem": "irrelevant_asset|unsupported_claim|narration_too_long|narration_too_fast|subtitle_issue|transition_issue|audio_balance|mirrored_edges|color_issue|other", "severity": "fatal|high|medium|low", "action": "regenerate_visual|rewrite_script|regenerate_audio|regenerate_subtitles|fix_transition|reassemble|none"}}],
   "title_recommendations": ["t1", "t2", "t3"],
   "thumbnail_recommendation": "{{"timestamp": "<mm:ss>", "description": "..."}}",
   "overall_assessment": "<2-3 sentences>"
