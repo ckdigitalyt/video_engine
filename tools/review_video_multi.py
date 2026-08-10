@@ -172,7 +172,7 @@ def _openrouter_chat(messages, model, json_mode=True, max_tokens=3000,
             msg = str(e)
             print(f"  !! {model} attempt {attempt+1} failed: {msg[:150]}")
             retry_after = e.headers.get("Retry-After") if e.headers else None
-            if e.code in (429, 500, 502, 503, 529):
+            if e.code in (429, 500, 502, 503, 504, 529):
                 if retry_after and retry_after.isdigit():
                     wait = int(retry_after) + 5
                 else:
@@ -217,7 +217,7 @@ def _nvidia_chat(messages, model, json_mode=True, max_tokens=3000, attempts=5):
             msg = str(e)
             print(f"  !! {model} attempt {attempt+1} failed: {msg[:150]}")
             retry_after = e.headers.get("Retry-After") if e.headers else None
-            if e.code in (429, 500, 502, 503):
+            if e.code in (429, 500, 502, 503, 504):
                 if retry_after and retry_after.isdigit():
                     wait = int(retry_after) + 5
                 else:
@@ -370,6 +370,76 @@ def main():
             results["llama"] = review
             print(f"  score {review.get('quality_score')}/100 (conf {review.get('confidence')})")
 
+    if "gemini" in args.providers:
+        print("=== GEMINI REVIEW (gemini flash vision) ===")
+        t0 = time.time()
+        try:
+            from google import genai
+            client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+            from google.genai import types
+            content = [REVIEW_PROMPT.format(script=script_text[:12000])]
+            for f in frame_files:
+                t = f.split("_")[1].split(".")[0]
+                b64 = _b64(os.path.join(args.frames, f))
+                content.append(f"FRAME t={t}s (filename {f}):")
+                content.append(types.Part.from_bytes(
+                    data=base64.b64decode(b64), mime_type="image/jpeg"))
+            out = None
+            used_model = None
+            for model in ["gemini-2.5-flash", "gemini-3.5-flash", "gemini-3-flash-preview"]:
+                try:
+                    resp = client.models.generate_content(model=model, contents=content)
+                    out = resp.text
+                    used_model = model
+                    break
+                except Exception as e:
+                    print(f"  !! {model} failed: {str(e)[:120]}")
+                    continue
+            if out is None:
+                print("  !! GEMINI: all models failed — skipping")
+            else:
+                review = _parse_json(out)
+                review["_meta"] = {"provider": "gemini", "model": used_model, "elapsed_s": round(time.time() - t0, 1)}
+                with open(os.path.join(args.outdir, "review_gemini.json"), "w") as f:
+                    json.dump(review, f, indent=2)
+                results["gemini"] = review
+                print(f"  score {review.get('quality_score')}/100 (conf {review.get('confidence')})")
+        except Exception as e:
+            print(f"  !! GEMINI provider error: {str(e)[:150]} — skipping")
+
+    if "openrouter" in args.providers:
+        print("=== OPENROUTER REVIEW (free vision model) ===")
+        # Generic OpenRouter reviewer: try the strongest free vision model first.
+        or_models = [
+            "google/gemma-4-31b-it:free",
+            "google/gemma-4-26b-a4b-it:free",
+            "nvidia/nemotron-nano-12b-v2-vl:free",
+        ]
+        t0 = time.time()
+        out = None
+        used_model = None
+        for om in or_models:
+            try:
+                print(f"  trying {om}")
+                out = _openrouter_chat(
+                    [{"role": "user", "content": _frames_content(REVIEW_PROMPT.format(script=script_text[:12000]))}],
+                    om,
+                    attempts=4,
+                )
+                used_model = om
+                break
+            except Exception as e:
+                print(f"  !! {om} gave up: {str(e)[:120]}")
+        if out is None:
+            print("  !! OPENROUTER: all free models exhausted — skipping")
+        else:
+            review = _parse_json(out)
+            review["_meta"] = {"provider": "openrouter", "model": used_model, "elapsed_s": round(time.time() - t0, 1)}
+            with open(os.path.join(args.outdir, "review_openrouter.json"), "w") as f:
+                json.dump(review, f, indent=2)
+            results["openrouter"] = review
+            print(f"  score {review.get('quality_score')}/100 (conf {review.get('confidence')})")
+
     if "grok" in args.providers:
         print("=== GROK REVIEW (x-ai/grok-4.5 via OpenRouter) ===")
         content = [{"type": "text", "text": REVIEW_PROMPT.format(script=script_text[:12000])}]
@@ -380,13 +450,18 @@ def main():
                 "image_url": {"url": f"data:image/jpeg;base64,{_b64(os.path.join(args.frames, f))}"},
             })
         t0 = time.time()
-        out = _openrouter_grok([{"role": "user", "content": content}])
-        review = _parse_json(out)
-        review["_meta"] = {"provider": "grok", "model": "x-ai/grok-4.5", "elapsed_s": round(time.time() - t0, 1)}
-        with open(os.path.join(args.outdir, "review_grok.json"), "w") as f:
-            json.dump(review, f, indent=2)
-        results["grok"] = review
-        print(f"  score {review.get('quality_score')}/100 (conf {review.get('confidence')})")
+        try:
+            out = _openrouter_grok([{"role": "user", "content": content}])
+        except Exception as e:
+            print(f"  !! GROK failed: {str(e)[:150]} — skipping (leaving any prior review_grok.json)")
+            out = None
+        if out is not None:
+            review = _parse_json(out)
+            review["_meta"] = {"provider": "grok", "model": "x-ai/grok-4.5", "elapsed_s": round(time.time() - t0, 1)}
+            with open(os.path.join(args.outdir, "review_grok.json"), "w") as f:
+                json.dump(review, f, indent=2)
+            results["grok"] = review
+            print(f"  score {review.get('quality_score')}/100 (conf {review.get('confidence')})")
 
         # Frame descriptions for DeepSeek (visual transcript)
         desc_content = [{"type": "text", "text": FRAME_DESC_PROMPT}]
@@ -395,11 +470,17 @@ def main():
                 "type": "image_url",
                 "image_url": {"url": f"data:image/jpeg;base64,{_b64(os.path.join(args.frames, f))}"},
             })
-        desc_out = _openrouter_grok([{"role": "user", "content": desc_content}], json_mode=True, max_tokens=2500)
-        descs = _parse_json(desc_out).get("frames", [])
-        with open(os.path.join(args.outdir, "frame_descriptions.json"), "w") as f:
-            json.dump(descs, f, indent=2)
-        print(f"  frame descriptions: {len(descs)}")
+        try:
+            desc_out = _openrouter_grok([{"role": "user", "content": desc_content}], json_mode=True, max_tokens=2500)
+            descs = _parse_json(desc_out).get("frames", [])
+            with open(os.path.join(args.outdir, "frame_descriptions.json"), "w") as f:
+                json.dump(descs, f, indent=2)
+            print(f"  frame descriptions: {len(descs)}")
+        except Exception as e:
+            # v19n.3: grok desc failure must not kill the batch — DeepSeek
+            # can still run with a pre-existing frame_descriptions.json
+            # (describe_frames.py) or an empty transcript.
+            print(f"  !! frame descriptions failed ({str(e)[:100]}) — DeepSeek may fall back to existing transcript")
 
     if "deepseek" in args.providers:
         print("=== DEEPSEEK PRO REVIEW (deepseek-v4-pro) ===")
