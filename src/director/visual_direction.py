@@ -88,10 +88,26 @@ _TOPIC_HINTS = {
     "pulsar":  ("pulsar", "neutron star", "lighthouse", "spins", "rotating",
                  "beam", "dense", "teaspoon", "magnetar", "supernova remnant"),
     "black_holes": ("black hole", "event horizon", "singularity", "accretion",
-                 "spacetime", "lensing", "photon ring", "gravitational"),
+                 "photon ring"),
     "moon":    ("the moon", "lunar", "moon's", "apollo", "craters",
                  "maria", "regolith", "tidal locking", "moon phases",
                  "earth's companion"),
+}
+
+# Distinctive CORE subject terms per topic.  A scene must contain at least
+# one of these (not merely any loose hint) to qualify for that topic's
+# Manim clip.  Prevents generic physics wording in an unrelated scene from
+# pulling a topic's diagram — Andromeda v5 review finding: scene 7's
+# "orchestrated by immense gravitational forces" (a galaxy-MERGER scale
+# beat) triggered the black_holes topic and placed the black-hole lensing
+# diagram there; scene 8 (actual black-hole merger) is where it belongs.
+_TOPIC_CORE = {
+    "voyager": ("voyager", "spacecraft", "golden record"),
+    "sun":     ("sun", "solar", "photosphere"),
+    "pulsar":  ("pulsar", "neutron star", "magnetar"),
+    "black_holes": ("black hole", "event horizon", "singularity",
+                     "accretion", "photon ring"),
+    "moon":    ("moon", "lunar", "apollo", "craters"),
 }
 
 
@@ -110,8 +126,18 @@ def manim_scene_for(scene_text: str, intent: str = "default") -> str:
     v12: falls back to the topic-agnostic generic beat mapped by intent,
     so a fresh topic with no bespoke scenes still gets real animation
     (was: returned "" for any unregistered topic -> manim: 0 in stats).
+    v19l (2026-08-10): a scene must contain a CORE subject term for the
+    topic (not just any loose hint) — Andromeda v5 review finding: a
+    galaxy-merger-scale beat mentioning "gravitational forces" pulled the
+    black-hole lensing diagram into the wrong scene.
     """
-    topic = detect_topic(scene_text)
+    t = (scene_text or "").lower()
+    topic = detect_topic(t)
+    if topic and topic in TOPIC_MANIM:
+        core = _TOPIC_CORE.get(topic, ())
+        if core and not any(k in t for k in core):
+            topic = ""  # loose hint only ("gravitational", "spacetime") —
+            # not actually about this topic's subject; skip its Manim.
     if topic and topic in TOPIC_MANIM:
         mapping = TOPIC_MANIM[topic]
         # intent-priority: scale/explanation beats are the natural Manim beats

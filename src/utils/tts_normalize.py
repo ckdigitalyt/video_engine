@@ -225,6 +225,18 @@ def normalize_narration(text: str) -> str:
         return text
     out = apply_language_layer(text)
 
+    # Markdown emphasis first: "*our*" / "**bold**" -> "our" / "bold".
+    # LLM-written narration often keeps emphasis markers, which TTS reads
+    # aloud as "asterisk" and subtitles render literally (Andromeda v5
+    # review finding: subtitle at 1:14 showed '*our*').  Only PAIRED
+    # asterisks/underscores are stripped — the single "*" used as a
+    # multiplication sign in scientific notation below survives.
+    out = re.sub(r"\*\*([^*\n]+)\*\*", r"\1", out)
+    out = re.sub(r"\*([^*\n]+)\*", r"\1", out)
+    out = re.sub(r"`([^`\n]+)`", r"\1", out)
+    out = re.sub(r"__([^_\n]+)__", r"\1", out)
+    out = re.sub(r"_([^_\n]+)_", r"\1", out)
+
     # Temperature units BEFORE generic numbers: "127°C" -> "one hundred
     # twenty-seven degrees Celsius" (Chatterbox read raw °C as "jerry C").
     out = re.sub(

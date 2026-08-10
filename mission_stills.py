@@ -1509,6 +1509,7 @@ def main():
         # instead of narration phrase positions — SFX must mark on-screen
         # state changes, not commas in the script.
         _cut_times = {}
+        _manim_times: list[float] = []
         if os.path.exists(timeline_path):
             try:
                 with open(timeline_path) as _f:
@@ -1518,10 +1519,15 @@ def main():
                     if _sid is not None:
                         _cut_times.setdefault(_sid, []).append(
                             float(_e.get("start_time", 0)))
+                    # v19l: auto-whoosh when a Manim/vector clip enters
+                    _fp = (_e.get("file") or "").replace("\\", "/")
+                    if "/manim/" in _fp or "/vector/" in _fp:
+                        _manim_times.append(float(_e.get("start_time", 0)))
             except Exception:
                 _cut_times = {}
         sfx_path, sfx_events_placed = M.build_sfx_timeline(
-            scenes_data, audio_durations, sfx_path, cut_times=_cut_times)
+            scenes_data, audio_durations, sfx_path, cut_times=_cut_times,
+            manim_times=_manim_times)
         if not sfx_events_placed:
             sfx_path = ""
     except Exception as e:

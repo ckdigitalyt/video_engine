@@ -954,11 +954,20 @@ def _build_subtitle_clips(result_scenes, timeline_path: str) -> list[dict]:
     from concurrent.futures import ThreadPoolExecutor, as_completed
 
     def _subs_one(i: int, scene):
+        # v19l: strip LLM markdown emphasis from subtitle text — cached
+        # scripts (--reuse) may still carry raw "*our*" (Andromeda v5
+        # review: subtitle at 1:14 rendered the asterisks literally).
+        import re as _re
+        def _clean(t: str) -> str:
+            t = _re.sub(r"\*\*([^*\n]+)\*\*", r"\1", t)
+            t = _re.sub(r"\*([^*\n]+)\*", r"\1", t)
+            t = _re.sub(r"`([^`\n]+)`", r"\1", t)
+            return t
         # v19f: accept BOTH Scene objects (mission_run) and raw script
         # dicts (mission_stills passes scenes_data).  For dicts there is
         # no audio_plan — fall back to the canonical cache/audio path.
         if isinstance(scene, dict):
-            _text = scene.get("narration", "") or ""
+            _text = _clean(scene.get("narration", "") or "")
             _ap = scene.get("audio_plan")
             _ap_path = _ap.get("narration_audio_path") if isinstance(_ap, dict) else None
             _sid = scene.get("scene_id", i)
@@ -967,7 +976,7 @@ def _build_subtitle_clips(result_scenes, timeline_path: str) -> list[dict]:
             _ap_path = _ap.narration_audio_path if (
                 _ap is not None and _ap.narration_audio_path
             ) else None
-            _text = scene.narration.spoken_narration if scene.narration else ""
+            _text = _clean(scene.narration.spoken_narration) if scene.narration else ""
             _sid = scene.scene_id
         if not _ap_path or not os.path.exists(_ap_path):
             _ap_path = os.path.join("cache", "audio", f"scene_{i}.wav")
@@ -1281,7 +1290,8 @@ def _synth_sfx_event(trigger: str, duration: float = None, sr: int = 44100) -> t
 
 def build_sfx_timeline(scenes: list[dict], audio_durations: list[float],
                        out_path: str,
-                       cut_times: dict | None = None) -> tuple[str, list[dict]]:
+                       cut_times: dict | None = None,
+                       manim_times: list[float] | None = None) -> tuple[str, list[dict]]:
     """Place scripted SFX events onto a timeline by matching each event's
     `at` phrase to its word position within the scene narration.
 
@@ -1290,6 +1300,11 @@ def build_sfx_timeline(scenes: list[dict], audio_durations: list[float],
     snapped to the nearest visual cut — SFX become spatial/temporal anchors
     for visual state changes, never punctuation for text.  Falls back to
     phrase-fraction placement when no cut times exist.
+
+    v19l: ``manim_times`` (absolute seconds where a Manim/vector clip
+    starts) gets an automatic low-gain whoosh — eases the cut from organic
+    footage into a stylized diagram (Andromeda v5 review: transition into
+    the lensing diagram at 1:17 felt abrupt).
 
     Returns (wav_path, events_placed) where events_placed is a list of
     {scene, trigger, at_s} for the run report."""
@@ -1366,6 +1381,19 @@ def build_sfx_timeline(scenes: list[dict], audio_durations: list[float],
             events_placed.append({"scene": i, "trigger": trig,
                                   "at_s": round(t_at, 2)})
         cursor += dur
+    # v19l: automatic transition whoosh at each Manim/vector clip start
+    # (eases the cut from organic footage into a stylized diagram).
+    for _mt in (manim_times or []):
+        if not (0.0 <= _mt <= total):
+            continue
+        samples, _ = _synth_sfx_event("whoosh")
+        start = int(_mt * sr)
+        for j, s in enumerate(samples):
+            k = start + j
+            if 0 <= k < n:
+                bed[k] += s * 0.7  # quieter than scripted hits
+        events_placed.append({"scene": -1, "trigger": "whoosh:manim",
+                              "at_s": round(_mt, 2)})
     # normalize to avoid clipping
     peak = max(1e-9, max(abs(s) for s in bed))
     scale = min(1.0, 0.85 / peak) if peak > 0.85 else 1.0
@@ -2410,8 +2438,19 @@ def main():
     _sfx_path = ""
     try:
         _sfx_path = os.path.join("cache", "music", "sfx_timeline_run.wav")
+        # v19l: auto-whoosh at Manim/vector clip starts (transition polish)
+        _manim_times: list[float] = []
+        try:
+            with open(timeline_path) as _f:
+                _tl = json.load(_f)
+            for _e in _tl.get("video_timeline", []):
+                _fp = (_e.get("file") or "").replace("\\", "/")
+                if "/manim/" in _fp or "/vector/" in _fp:
+                    _manim_times.append(float(_e.get("start_time", 0)))
+        except Exception:
+            _manim_times = []
         _sfx_path, _sfx_placed = build_sfx_timeline(
-            scenes_data, _audio_durs, _sfx_path)
+            scenes_data, _audio_durs, _sfx_path, manim_times=_manim_times)
         if not _sfx_placed:
             _sfx_path = ""
         run_report["stages"]["sfx_v1"] = {"placed": len(_sfx_placed)}
