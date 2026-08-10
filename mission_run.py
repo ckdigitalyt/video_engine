@@ -534,12 +534,12 @@ def stage_storyboard_and_direct(
     director = VisualDirector(use_beats=True, topic=topic, llm_provider=llm, scene_data=scenes)
     result_scenes = director.run()
 
-    # ── Manim + flat-vector beat injection (v13, shared direction) ────
+    # ── Manim + beat injection (v13, shared direction) ────────────────
     # Single source of truth: src/director/visual_direction.py — the SAME
     # registry mission_stills.py uses, so the two runners can't drift
     # apart again.  Every scene gets real animation: a topic/intent-matched
-    # Manim clip when one exists, else a Kurzgesagt-style flat-vector beat
-    # rendered ALGORITHMICALLY for THIS video (per-video, labeled).
+    # Manim clip when one exists, else a (disabled under 2026-08-10
+    # realistic direction) Kurzgesagt-style flat-vector beat.
     # (Old v2 Voyager-only gate removed in v13.)
     from src.director.visual_direction import (
         manim_scene_for, vector_beat_for, render_vector_beats,
@@ -642,9 +642,11 @@ AI_IMAGE_PROMPTS = {
 # v12 review finding "inconsistent visual style / saturation varies":
 # without a locked style token each provider call drifts.  The grade pass
 # (stage_cinematic_grade) then unifies color further at render time.
+# 2026-08-10: realistic direction — "photorealistic" keyword required for
+# style-drift QA (STYLE_TOKEN="photorealistic").
 _AI_STYLE_SUFFIX = (
-    ", cinematic documentary still, consistent color palette, "
-    "soft natural lighting, high detail, 16:9 composition"
+    ", photorealistic cinematic documentary still, consistent color "
+    "palette, soft natural lighting, high detail, 16:9 composition"
 )
 
 

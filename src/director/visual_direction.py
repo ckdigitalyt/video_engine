@@ -1,6 +1,6 @@
 """
 visual_direction.py — Single source of truth for the channel's VISUAL
-DIRECTION (Manim registry, flat-vector beats, Jade style lock).
+DIRECTION (Manim registry, beats, Jade style lock).
 
 v13 consolidation (2026-08-06): the video pipeline (mission_run.py) and the
 stills-first pipeline (mission_stills.py) had diverged — mission_run still
@@ -10,15 +10,15 @@ the algorithm can never drift again:
 
   * MANIM_SCENES / TOPIC_MANIM / _TOPIC_HINTS / _manim_scene_for()
       — which animated explanation clips exist and which scenes may use them
-        (topic registry + topic-agnostic generic beats).
+        (topic registry; generic beats DISABLED under realistic direction).
   * VECTOR_BEATS / _vector_beat_for()
       — Kurzgesagt-style flat-vector animated beats (cache/vector/*.mp4),
-        intent-mapped so every scene gets real motion, never pure Ken Burns.
+        DISABLED under the 2026-08-10 realistic direction.
   * FIXED_JADE_STYLE / STYLE_MODIFIERS / _style_prompt_for()
       — ONE locked art direction + palette for all stylized shots.
 
-Channel direction (2026-08-05, ckdigital): flat-vector Kurzgesagt-style,
-locked narrator = Chatterbox kurzgesagt_like.  See configs/voices.yaml.
+Channel direction (2026-08-10, ckdigital): REALISTIC images only —
+photorealistic stills, no flat-vector illustrations or vector beats.
 """
 
 import os
@@ -123,7 +123,12 @@ def manim_scene_for(scene_text: str, intent: str = "default") -> str:
                     any(k in scene_text.lower() for k in
                         ("how big", "how far", "million", "billion", "fit inside", "size"))):
                 return MANIM_SCENES[mapping[key]]
-    # v12: generic fallback (any topic, any intent)
+    # v12: generic fallback (any topic, any intent) — DISABLED under the
+    # 2026-08-10 realistic direction (generic beats = flat diagrams the
+    # review flagged).  Unregistered topics now use Ken Burns on
+    # photorealistic stills instead of generic Manim/vector beats.
+    if not GENERIC_MANIM_BEATS_ENABLED:
+        return ""
     generic = TOPIC_MANIM.get("__generic__", {})
     key = intent if intent in generic else "default"
     clip = generic.get(key, generic.get("default"))
@@ -150,11 +155,22 @@ def manim_script_for(clip_path: str) -> str:
 
 # ── Flat-vector animated beats (Kurzgesagt-style) ───────────────────────
 
+# 2026-08-10: channel direction REVERSED by ckdigital — realistic images
+# only, NO flat-vector illustrations or Kurzgesagt-style vector motion.
+# The flat-vector beats are therefore DISABLED (flag below); scenes get
+# motion from Ken Burns on photorealistic stills + topic manim instead.
+# The generic (topic-agnostic) Manim beats are also disabled — they render
+# the same flat diagram look the review flagged (clock at 0:01, bar
+# charts); only topic-registered Manim scenes (black_hole_lensing, ...)
+# remain available.
+FLAT_VECTOR_BEATS_ENABLED = False
+GENERIC_MANIM_BEATS_ENABLED = False
+
 # v12: flat-vector ANIMATED beats (Blender, Workbench FLAT) — the
-# Kurzgesagt-style vector motion the channel direction calls for.  These
-# are topic-agnostic; any scene can pull one, so the video never ships
-# as pure Ken-Burns stills (sleep episode shipped manim:0 + zero vector
-# animation — the two biggest v11 failures).
+# Kurzgesagt-style vector motion the OLD channel direction called for.
+# These are topic-agnostic; any scene can pull one, so the video never
+# ships as pure Ken-Burns stills (sleep episode shipped manim:0 + zero
+# vector animation — the two biggest v11 failures).
 VECTOR_BEATS = {
     "hook": "cache/vector/vector_pulse.mp4",
     "emotion": "cache/vector/vector_waves.mp4",
@@ -190,8 +206,13 @@ def render_vector_beats(vector_dir: str, label: str = "",
     carries the episode label.  Renders are parallel (one Blender worker
     per template) and validated with ffprobe before use.
 
+    2026-08-10: DISABLED by default (realistic direction, no flat-vector
+    beats) — returns {} immediately unless FLAT_VECTOR_BEATS_ENABLED.
+
     Returns {template: clip_path} for the templates that rendered OK.
     """
+    if not FLAT_VECTOR_BEATS_ENABLED:
+        return {}
     from tools.vector_clips import render as _render, DURATION as _DUR
     os.makedirs(vector_dir, exist_ok=True)
     needed = set()
@@ -233,7 +254,12 @@ def vector_beat_for(intent: str = "default", vector_dir: str = "") -> str:
     v13: ``vector_dir`` (per-video render output) wins when given;
     falls back to the shared cache/vector path for older flows.
     Validates the clip with ffprobe — a partial/corrupt render (e.g.
-    failed ffmpeg composite) must never enter the timeline."""
+    failed ffmpeg composite) must never enter the timeline.
+
+    2026-08-10: DISABLED by default (realistic direction) — returns ""
+    unless FLAT_VECTOR_BEATS_ENABLED."""
+    if not FLAT_VECTOR_BEATS_ENABLED:
+        return ""
     tpl = VECTOR_TEMPLATES.get(intent, VECTOR_TEMPLATES["default"])
     cands = []
     if vector_dir:
@@ -268,13 +294,13 @@ def vector_beat_for(intent: str = "default", vector_dir: str = "") -> str:
 # use FIXED_JADE_STYLE (+ its fixed palette) regardless of scene emotion;
 # the per-emotion rotation below is kept only as a fallback for scenes
 # that carry an explicit visual_style that is NOT in the fixed set.
-# 2026-08-05: channel direction — flat-vector Kurzgesagt-style (matches
-# style_bible DEFAULT_STYLE_MODIFIER + STYLE_TOKEN="flat-vector").
+# 2026-08-05: channel direction — flat-vector Kurzgesagt-style.
+# 2026-08-10: ckdigital reversed it — realistic images only.
+# Matches style_bible DEFAULT_STYLE_MODIFIER + STYLE_TOKEN="photorealistic".
 FIXED_JADE_STYLE = (
-    "flat-vector documentary illustration, clean geometric shapes, smooth "
-    "curves, bold flat color fills, deep navy background with high-saturation "
-    "cyan and orange accents, simple stylized human figures, minimal detail, "
-    "no text, no gradients, no photorealism"
+    "photorealistic cinematic documentary still, realistic textures and "
+    "lighting, natural color palette, sharp focus, high detail, "
+    "16:9 composition, no text"
 )
 
 STYLE_MODIFIERS = {

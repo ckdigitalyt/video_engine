@@ -462,9 +462,11 @@ class FallbackDirector:
     # Style suffix locked for EVERY generated still — without it each
     # provider call drifts and the video looks like a slideshow of
     # unrelated images (same lesson as mission_run._AI_STYLE_SUFFIX).
+    # 2026-08-10: realistic direction — "photorealistic" keyword required
+    # for style-drift QA (STYLE_TOKEN="photorealistic").
     _GEN_STYLE_SUFFIX = (
-        ", cinematic documentary still, consistent color palette, "
-        "soft natural lighting, high detail, 16:9 composition"
+        ", photorealistic cinematic documentary still, consistent color "
+        "palette, soft natural lighting, high detail, 16:9 composition"
     )
 
     def _generate_ai_still(self, prompt: str, out_path: str) -> Optional[str]:

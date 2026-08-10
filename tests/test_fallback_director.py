@@ -145,7 +145,8 @@ class TestFallbackDirector:
         """When all provider-based fallbacks fail, animated placeholder works."""
         from unittest.mock import patch
 
-        with patch.object(self.fd, "_try_nasa_image", return_value=None):
+        with patch.object(self.fd, "_try_nasa_image", return_value=None), \
+             patch.object(self.fd, "_try_generated_image", return_value=None):
             result = self.fd.produce(
                 scene_num=1,
                 narration="Test narration for the cosmos",

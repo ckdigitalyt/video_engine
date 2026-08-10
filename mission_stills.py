@@ -28,8 +28,8 @@ load_dotenv()
 
 import mission_run as M
 
-# v13 consolidation: visual direction (Manim registry, flat-vector
-# beats, Jade style lock) lives in ONE module shared with mission_run
+# v13 consolidation: visual direction (Manim registry, beats, Jade style
+# lock) lives in ONE module shared with mission_run
 # so the two runners can never drift apart again.
 from src.director.visual_direction import (
     MANIM_SCENES,
@@ -295,12 +295,11 @@ def _still_plan_for(scene_text: str, spec=None, scene=None) -> list:
     search for "pulsar" returns a roller coaster at Walibi Belgium).
     AI fallback stills use the scene's Jade visual style.
 
-    v12.2: the channel direction is FLAT-VECTOR (Kurzgesagt-style).
-    Real photos (NASA/Wikimedia) are categorically wrong for that art
-    direction — two reviews in a row flagged "bronze axes", "a
-    motorcycle", "ancient ruins" leaking in.  When the locked style is
-    non-photoreal, every still slot is an AI-generated vector
-    illustration; stock photo sources are dropped entirely.
+    v12.2 (SUPERSEDED): the old flat-vector direction dropped stock photo
+    sources.  2026-08-10: ckdigital reversed the channel direction —
+    REALISTIC images only.  Real photos (NASA/Wikimedia) are correct for
+    the locked photorealistic style and stay in the plan; AI fallback
+    stills carry the photorealistic Jade modifier.
     """
     t = scene_text.lower()
     topic = _detect_topic(scene_text)
@@ -313,8 +312,8 @@ def _still_plan_for(scene_text: str, spec=None, scene=None) -> list:
     for q in (scene or {}).get("search_queries", []) or []:
         q = (q or "").strip()
         if q:
-            # v12.2: flat-vector direction → the query becomes the SUBJECT
-            # of an AI vector illustration, not a stock-photo search.
+            # (2026-08-10 realistic direction: the query is the SUBJECT of
+            # a photorealistic AI still, not a stock-photo search.)
             if vector_direction:
                 plan += [("ai", f"{q}. {style_mod}")]
             else:
@@ -339,10 +338,10 @@ def _still_plan_for(scene_text: str, spec=None, scene=None) -> list:
     else:
         # topic-aware keyword fallback (still general, not per-topic lists)
         if vector_direction:
-            plan += [("ai", f"Illustration of {topic}. {style_mod}")]
+            plan += [("ai", f"Scene of {topic}. {style_mod}")]
         else:
             plan += [("nasa", topic), ("wiki", topic),
-                     ("ai", f"Illustration of {topic}. {style_mod}")]
+                     ("ai", f"Scene of {topic}. {style_mod}")]
 
     # dedupe keeping order
     seen, out = set(), []
@@ -437,10 +436,9 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                 stats["rejected"] += 1
                 print(f"  [manim-gate] rejected {os.path.basename(manim)} "
                       f"({(mv.errors or ['not kinetic'])[:1]})")
-        # 1b) v13: flat-vector ANIMATED beat (Kurzgesagt-style motion) —
-        #     rendered ALGORITHMICALLY for THIS video (per-video, labeled,
-        #     into out_dir/vector/) — never reused across episodes.  Every
-        #     scene gets real animation, not just Ken-Burns stills.
+        # 1b) v13: ANIMATED beat (Kurzgesagt-style motion) — DISABLED under
+        #     the 2026-08-10 realistic direction (flat-vector beats off);
+        #     scenes use Ken Burns on photorealistic stills + topic manim.
         if not shots or shots[0].get("kind") != "manim":
             vbeat = _vector_beat_for(intent, vector_dir=vector_dir)
             if vbeat and vbeat not in manim_used:

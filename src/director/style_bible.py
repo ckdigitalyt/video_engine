@@ -34,19 +34,18 @@ DEFAULT_BIBLE_PATH = "cache/style_bible.json"
 # 2026-08-03 + v8.1).  The bible's style_modifier is this exact token, so
 # every AI still in the episode carries the same look.
 # 2026-08-05: channel direction switched to flat-vector documentary
-# illustration (Kurzgesagt-style): clean geometric shapes, flat fills,
-# deep navy background, high-saturation accents, no photorealism.
+# illustration (Kurzgesagt-style).  2026-08-10: ckdigital reversed it —
+# NO flat-vector illustrations; AI stills must be REALISTIC / photoreal.
 DEFAULT_STYLE_MODIFIER = (
-    "flat-vector documentary illustration, clean geometric shapes, smooth "
-    "curves, bold flat color fills, deep navy background with high-saturation "
-    "cyan and orange accents, simple stylized human figures, minimal detail, "
-    "no text, no gradients, no photorealism"
+    "photorealistic cinematic documentary still, realistic textures and "
+    "lighting, natural color palette, sharp focus, high detail, "
+    "16:9 composition, no text"
 )
 
-DEFAULT_PALETTE = ["#0B1220", "#22D3EE", "#F47F3F", "#A3E635", "#F0C4A8"]
+DEFAULT_PALETTE = ["#14213D", "#5C7A99", "#C9A66B", "#2A9D8F", "#EDE6D6"]
 
 # Token that must appear in every styled prompt (used by drift QA).
-STYLE_TOKEN = "flat-vector"
+STYLE_TOKEN = "photorealistic"
 
 
 @dataclass
