@@ -58,6 +58,16 @@ _NUMBER_PAT = re.compile(
     re.IGNORECASE,
 )
 
+# Decades: "2020s", "late 2020s", "early 2030s", "mid-2020s".  These
+# MUST be captured BEFORE _NUMBER_PAT, which would otherwise parse
+# "2020s" as value=2020 unit=s (SECONDS) — a garbage claim that then
+# pollutes verification (v24 failsafe, from the Venus run where
+# "late 2020s and early 2030s" produced fake "2020 seconds").
+_DECADE_PAT = re.compile(
+    r"\b((?:late|early|mid-?)\s+)?(\d{4})s\b",
+    re.IGNORECASE,
+)
+
 # Written-out numbers the narration may use ("fifty-two hertz",
 # "five thousand kilometers") — the regex above only sees digits.
 _WORD_NUM = {
@@ -172,12 +182,26 @@ class ClaimVerifier:
 
     def _deterministic_claims(self, text: str) -> list[Claim]:
         claims: list[Claim] = []
-        for m in _NUMBER_PAT.finditer(text):
+        # Decades first ("2020s" → value 2020s, unit decade — NOT seconds).
+        for m in _DECADE_PAT.finditer(text):
             claims.append(Claim(
                 text=m.group(0).strip(),
                 kind="quantitative",
+                value=m.group(2) + "s",
+                unit="decade",
+            ))
+        for m in _NUMBER_PAT.finditer(text):
+            raw = m.group(0).strip()
+            unit = m.group(2).lower()
+            # Skip "2020s"-style matches the decade pattern already
+            # captured (otherwise parsed as 2020 SECONDS).
+            if unit == "s" and re.fullmatch(r"\d{4}s", raw):
+                continue
+            claims.append(Claim(
+                text=raw,
+                kind="quantitative",
                 value=m.group(1).replace(",", ""),
-                unit=m.group(2).lower(),
+                unit=unit,
             ))
         # Written-out numbers ("fifty-two hertz", "five thousand km").
         for m in _WORD_NUM_PAT.finditer(text):
@@ -384,14 +408,63 @@ class ClaimVerifier:
                     facts.append(f)
         return facts
 
+    def _fact_texts(self) -> list[str]:
+        out = []
+        for f in self._research_facts():
+            out.append(f"{f.get('claim', '') or ''} {f.get('value', '') or ''}".lower())
+        return out
+
+    def span_supported(self, value, unit, narration: str = "") -> bool:
+        """v24 failsafe: is this claim an extraction ARTIFACT of a
+        distributed span that the research pack supports?
+
+        The Venus blocker: narration said "DAVINCI+ and VERITAS launch
+        late 2020s and early 2030s" — ONE correct sentence, two decades,
+        both supported by the pack.  The extractor split it into two
+        claims ("both launch late 2020s" / "both launch early 2030s"),
+        and the LLM flagged each as contradicted because neither window
+        fits BOTH missions.  That is a false positive: the sentence as
+        written is accurate.
+
+        A claim is a span artifact when:
+          1. its value is a decade ("2020s") or bare 4-digit year;
+          2. the narration SENTENCE carrying it also carries ANOTHER
+             decade (distributed span, not a single window);
+          3. the research pack supports BOTH decades in one fact.
+
+        A genuinely wrong claim ("both missions launch in the 2030s")
+        fails condition 2 — its sentence has no other decade — and stays
+        a hard blocker.  This is deliberately stricter than plain
+        value-token matching ("2030s" in the pack) which would wrongly
+        accept that sentence.
+        """
+        if not value:
+            return False
+        v = str(value).lower().replace(",", "")
+        if len(v) not in (4, 5):
+            return False
+        m = re.search(r"(\d{4})s?\b", v)
+        if not m:
+            return False
+        if not (unit and str(unit).lower() in ("decade", "years", "year", "s")):
+            return False
+        dec = m.group(1) + "s"
+        text = (narration or "").lower()
+        for sent in re.split(r"(?<=[.!?])\s+", text):
+            if dec not in sent:
+                continue
+            others = [d + "s" for d in re.findall(r"\b(\d{4})s\b", sent)
+                      if d + "s" != dec]
+            if not others:
+                continue
+            for ft in self._fact_texts():
+                if dec in ft and all(o in ft for o in others):
+                    return True
+        return False
+
     def verify(self, extraction: dict) -> dict:
         """Tag every claim verified / unsupported / contradicted."""
-        facts = self._research_facts()
-        fact_texts = []
-        for f in facts:
-            claim_txt = str(f.get("claim", "") or "")
-            value_txt = str(f.get("value", "") or "")
-            fact_texts.append(f"{claim_txt} {value_txt}".lower())
+        fact_texts = self._fact_texts()
 
         for c in extraction["claims"]:
             if c.kind != "quantitative" or not c.value:
@@ -424,6 +497,17 @@ class ClaimVerifier:
                 c.source_label = "research_pack"
                 c.detail = f"matched research fact: …{hit[:100]}"
             else:
+                # v24 failsafe: before asking the LLM, check whether this
+                # claim is an extraction artifact of a distributed span the
+                # pack supports (e.g. "late 2020s and early 2030s" split
+                # into two self-contradicting window claims).  Prevents
+                # false "contradicted" verdicts on correct phrasing.
+                if self.span_supported(c.value, c.unit,
+                                       extraction.get("narration", "")):
+                    c.status = "verified"
+                    c.source_label = "research_pack_span"
+                    c.detail = "supported by research-pack distributed span"
+                    continue
                 # No pack support — ask the LLM to verify from knowledge,
                 # explicitly labeling fact vs hypothesis vs conclusion.
                 if self._llm is not None:
@@ -517,6 +601,9 @@ class ClaimVerifier:
             "claims": claims,
             "entities": extraction.get("entities", []),
             "conflation_risks": risks,
+            # Used by adjudicate_artifacts() (the gate failsafe) to decide
+            # whether a surviving contradiction is an extraction artifact.
+            "narration": extraction.get("narration", ""),
             # Hard blockers: contradicted claims + entity conflation (the
             # expert's critical findings).  Advisory checks (unsupported-
             # but-plausible numbers) are surfaced in the report for the
@@ -531,6 +618,29 @@ class ClaimVerifier:
             with open(os.path.join(out_dir, "claim_report.json"), "w") as f:
                 json.dump(result, f, indent=2)
         return result
+
+    def adjudicate_artifacts(self, gate: dict) -> dict:
+        """v24 failsafe: split surviving contradicted claims into genuine
+        blockers vs extraction artifacts (distributed research-pack spans).
+
+        Returns {"artifacts": [...], "genuine": [...], "all_artifacts": bool}.
+        The caller (mission_stills claim gate) may AUTO-OVERRIDE the gate
+        — downgrade claim_contradictions to advisory and continue the run
+        — ONLY when all_artifacts is true AND no other blocking check is
+        failing.  Genuine contradictions (no pack-span support) always
+        hard-block: the Bloop/52-Hz conflation class must never render.
+        """
+        contradicted = [c for c in (gate.get("claims") or [])
+                        if c.get("status") == "contradicted"]
+        narration = gate.get("narration", "")
+        artifacts, genuine = [], []
+        for c in contradicted:
+            if self.span_supported(c.get("value"), c.get("unit"), narration):
+                artifacts.append(c)
+            else:
+                genuine.append(c)
+        return {"artifacts": artifacts, "genuine": genuine,
+                "all_artifacts": bool(artifacts) and not genuine}
 
 
 # ── LLM prompts ──────────────────────────────────────────────────────────

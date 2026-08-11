@@ -1377,27 +1377,53 @@ def main():
     # gate after one targeted rewrite aborts the run (never render a
     # factually broken script — the Bloop/52Hz conflation is exactly the
     # failure class this exists to prevent).
+    #
+    # v24 FAILSAFE (user directive): the gate must never die on its own
+    # extraction artifact.  When claims fail we now: (1) iterate TARGETED
+    # rewrites of the offending passages (up to MAX_CLAIM_FIX_ATTEMPTS),
+    # (2) re-run the verifier after each rewrite, (3) if the SAME claims
+    # survive every attempt, adjudicate whether they are extraction
+    # artifacts of a distributed research-pack span (e.g. "DAVINCI+ and
+    # VERITAS launch late 2020s and early 2030s" split into two
+    # self-contradicting window claims).  All-artifact failures are
+    # auto-overridden to advisory and the run CONTINUES with a loud
+    # run_report entry.  Genuine, pack-unsupported contradictions still
+    # hard-block — the expert's Bloop/52-Hz class must never render.
     try:
         from src.qa.claim_verifier import ClaimVerifier
-        _claim_gate = ClaimVerifier(llm=llm, research_pack=research).run(
-            scenes_data, out_dir=out_dir)
+        _verifier = ClaimVerifier(llm=llm, research_pack=research)
+        _claim_gate = _verifier.run(scenes_data, out_dir=out_dir)
         run_report["claim_gate"] = _claim_gate
         run_report["stages"]["claim_gate"] = {
             "passed": _claim_gate["passed"],
             "blocking": _claim_gate["blocking_failures"],
         }
-        if _claim_gate["blocking_failures"]:
-            print("  !! CLAIM GATE BLOCKED: " +
-                  str(_claim_gate["blocking_failures"]))
+        MAX_CLAIM_FIX_ATTEMPTS = 3
+        _attempt = 0
+        while _claim_gate.get("blocking_failures") and _attempt < MAX_CLAIM_FIX_ATTEMPTS:
+            _attempt += 1
+            _blocking = list(_claim_gate.get("blocking_failures") or [])
+            _failing = [c for c in (_claim_gate.get("claims") or [])
+                        if c.get("status") == "contradicted"]
+            _crit = [r for r in (_claim_gate.get("conflation_risks") or [])
+                     if r.get("severity") == "critical"]
+            print(f"  !! CLAIM GATE BLOCKED (attempt {_attempt}/{MAX_CLAIM_FIX_ATTEMPTS}): "
+                  + str(_blocking))
             run_report["errors"].append(
-                f"claim gate blocked: {_claim_gate['blocking_failures']}")
+                f"claim gate blocked (attempt {_attempt}): {_blocking}")
             _fix = llm.generate_json(
-                "The narration below contains factual errors flagged by a "
-                "fact-check gate.  Rewrite the scenes to fix ONLY the errors "
-                "(remove wrong numbers, separate conflated phenomena, keep "
-                "tone and scene count).  Return STRICT JSON array of scenes "
-                "with title/narration/visual_goal/search_queries.\n\n" +
-                "Issues: " + json.dumps(_claim_gate["blocking_failures"]) + "\n\n" +
+                "The narration below contains factual issues flagged by a "
+                "fact-check gate.  Rewrite ONLY the sentences that carry the "
+                "flagged claims — minimal edit, fix the factual problem in "
+                "place (attribute the correct value/window to each entity, "
+                "separate conjoined phenomena, remove wrong numbers).  Keep "
+                "every OTHER sentence verbatim.  Keep tone, scene count and "
+                "narration length.  Return STRICT JSON array of scenes with "
+                "title/narration/visual_goal/search_queries.\n\n" +
+                "Flagged claims (text | value | unit | reason):\n" +
+                json.dumps(_failing, indent=1)[:4000] + "\n\n" +
+                "Critical conflation risks:\n" +
+                json.dumps(_crit, indent=1)[:2000] + "\n\n" +
                 json.dumps({"scenes": scenes_data})[:6000])
             try:
                 _fx = json.loads(_fix)
@@ -1408,25 +1434,58 @@ def main():
                     from src.utils.tts_normalize import normalize_narration
                     for _s in scenes_data:
                         _s["narration"] = normalize_narration(_s.get("narration", ""))
-                    _claim_gate = ClaimVerifier(
-                        llm=llm, research_pack=research).run(scenes_data, out_dir=out_dir)
-                    run_report["stages"]["claim_gate_fix"] = {
-                        "passed": _claim_gate["passed"],
-                        "blocking": _claim_gate["blocking_failures"],
-                    }
+                    _claim_gate = _verifier.run(scenes_data, out_dir=out_dir)
                     # v22 (Gemini root-cause review): overwrite the stale FAILED
                     # claim_gate report with the FIXED result.  Previously only
                     # stages.claim_gate_fix was updated; resolve_status() reads
                     # run_report["claim_gate"] at the end, so every run stayed
                     # REVISION_REQUIRED on claims even after a successful rewrite.
                     run_report["claim_gate"] = _claim_gate
+                    run_report["stages"][f"claim_gate_fix_{_attempt}"] = {
+                        "passed": _claim_gate["passed"],
+                        "blocking": _claim_gate["blocking_failures"],
+                    }
                     if not _claim_gate["passed"]:
                         run_report["errors"].append(
-                            "claim gate still blocked after targeted rewrite")
+                            f"claim gate still blocked after rewrite {_attempt}")
                     M._write_json(os.path.join(out_dir, "script_final.json"), scenes_data)
+                else:
+                    print(f"  !! claim-fix rewrite shape mismatch "
+                          f"({len(_fx_scenes)} != {len(scenes_data)}) — retrying")
             except Exception as _e:
-                print(f"  !! claim-fix rewrite failed: {str(_e)[:80]}")
-            if _claim_gate.get("blocking_failures"):
+                print(f"  !! claim-fix rewrite failed: {str(_e)[:80]} — retrying")
+        # v24 failsafe adjudication: claims that survived every targeted
+        # rewrite AND are extraction artifacts of a pack-supported span are
+        # auto-overridden (advisory, run continues).  Genuine contradictions
+        # (no pack support) still hard-block below.
+        if _claim_gate.get("blocking_failures"):
+            _adj = _verifier.adjudicate_artifacts(_claim_gate)
+            _blocking = list(_claim_gate.get("blocking_failures") or [])
+            if _adj.get("all_artifacts") and set(_blocking) <= {"claim_contradictions"}:
+                run_report["claim_gate_auto_overridden"] = {
+                    "reason": ("all surviving contradicted claims are extraction "
+                               "artifacts of a distributed research-pack span "
+                               "(value+window supported by the pack; the claim "
+                               "was split into self-contradicting pieces)"),
+                    "attempts": _attempt,
+                    "claims": _adj["artifacts"],
+                }
+                # Downgrade the check to advisory so the run continues, but
+                # keep the report loud for the reviewer.
+                _claim_gate["blocking_failures"] = [
+                    b for b in _blocking if b != "claim_contradictions"]
+                _claim_gate["passed"] = not _claim_gate["blocking_failures"]
+                for _ck in (_claim_gate.get("checks") or []):
+                    if _ck.get("name") == "claim_contradictions":
+                        _ck["passed"] = True
+                        _ck["detail"] = ("AUTO-OVERRIDDEN (span artifact): " +
+                                         "; ".join(
+                                             c.get("text", "")[:60]
+                                             for c in _adj["artifacts"][:5]))
+                print("  ⚠ CLAIM GATE AUTO-OVERRIDE — surviving failures are "
+                      "extraction artifacts of a pack-supported span; "
+                      "continuing (see run_report.claim_gate_auto_overridden).")
+            else:
                 from src.qa.publish_status import resolve_status, write_status
                 _st = resolve_status(claim_gate=_claim_gate,
                                      fatal_errors=["claim gate blocked after rewrite"],
