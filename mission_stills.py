@@ -15,6 +15,7 @@ Usage:
 import argparse
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -234,8 +235,42 @@ def _wikimedia_still_title(query: str, out_path: str) -> tuple[str, str]:
     return "", ""
 
 
+# v25 (Gemini/DeepSeek review CRITICAL — 'AI-generated female faces',
+# 'man with a microchip'): subject guards for AI still prompts.  Generic
+# prompts let the generator invent people/faces for spacecraft scenes;
+# append a hard no-people/no-text guard unless the scene is explicitly
+# about humans (astronaut, people, woman, man, crew, human).
+_PEOPLE_RE = re.compile(
+    r"\b(astronaut|people|person|woman|man|crew|human|face|portrait)\b",
+    re.IGNORECASE)
+
+
+def _guarded_ai_prompt(base: str, scene_text: str, style_mod: str = "") -> str:
+    """v25: append a subject guard to an AI still prompt.
+
+    Planetary/spacecraft documentary stills must not contain people or
+    text (both reviewers flagged AI-generated faces in the DAVINCI+/EnVision
+    scene and a man-with-microchip stock photo in the Venera scene).  The
+    guard is skipped only when the narration itself is about humans.
+    """
+    base = (base or "").strip()
+    if not base:
+        return base
+    if _PEOPLE_RE.search(scene_text or ""):
+        return base + ((". " + style_mod) if style_mod else "")
+    guard = (", photorealistic documentary still, no people, no human faces, "
+             "no text, no watermarks, no logos")
+    return base + guard + ((". " + style_mod) if style_mod else "")
+
+
 def _ai_still(prompt: str, out_path: str) -> str:
     from src.providers.image_gen import NvidiaNimProvider, PollinationsProvider
+    # v25 (Gemini/DeepSeek review CRITICAL — 'AI-generated female faces',
+    # 'man with a microchip'): subject guards for documentary stills.
+    # Generic prompts let the generator invent people; keep people OUT of
+    # planetary/spacecraft scenes unless the narration is explicitly about
+    # humans.
+    prompt = _guarded_ai_prompt(prompt, prompt, "").strip() or prompt
     for prov in (NvidiaNimProvider(), PollinationsProvider()):
         try:
             prov.generate(prompt, out_path, width=2560, height=1440)
@@ -428,8 +463,9 @@ def _still_plan_for(scene_text: str, spec=None, scene=None) -> list:
         if q:
             # (2026-08-10 realistic direction: the query is the SUBJECT of
             # a photorealistic AI still, not a stock-photo search.)
+            # v25: subject guard keeps people/faces out of AI stills.
             if vector_direction:
-                plan += [("ai", f"{q}. {style_mod}")]
+                plan += [("ai", _guarded_ai_prompt(q, scene_text, style_mod))]
             else:
                 plan += [("nasa", q), ("wiki", q)]
 
@@ -437,7 +473,7 @@ def _still_plan_for(scene_text: str, spec=None, scene=None) -> list:
     if spec is not None and spec.required_entities:
         for ent in spec.required_entities[:2]:
             if vector_direction:
-                plan += [("ai", f"{ent}. {style_mod}")]
+                plan += [("ai", _guarded_ai_prompt(ent, scene_text, style_mod))]
             else:
                 plan += [("nasa", ent), ("wiki", ent)]
         obj = spec.visual_objective or f"{topic} documentary scene"
@@ -446,16 +482,16 @@ def _still_plan_for(scene_text: str, spec=None, scene=None) -> list:
         # slot and the stylization never renders (reviewer: "no cartoon /
         # animation / hand-drawn images in the video").
         if vector_direction:
-            plan.insert(0, ("ai", f"{obj}. {style_mod}"))
+            plan.insert(0, ("ai", _guarded_ai_prompt(obj, scene_text, style_mod)))
         else:
-            plan.append(("ai", f"{obj}. {style_mod}"))
+            plan.append(("ai", _guarded_ai_prompt(obj, scene_text, style_mod)))
     else:
         # topic-aware keyword fallback (still general, not per-topic lists)
         if vector_direction:
-            plan += [("ai", f"Scene of {topic}. {style_mod}")]
+            plan += [("ai", _guarded_ai_prompt(f"Scene of {topic}", scene_text, style_mod))]
         else:
             plan += [("nasa", topic), ("wiki", topic),
-                     ("ai", f"Scene of {topic}. {style_mod}")]
+                     ("ai", _guarded_ai_prompt(f"Scene of {topic}", scene_text, style_mod))]
 
     # dedupe keeping order
     seen, out = set(), []
@@ -917,8 +953,39 @@ def _pace_pad_scenes(scenes_data: list[dict], audio_dir: str,
         words = len(text.split())
         if words == 0:
             continue
+        # v25 (Gemini/DeepSeek review CRITICAL — 'voice jitter / abrupt
+        # stutter'): anchor pauses to the ORIGINAL file.  The old code
+        # re-read the already-padded file every pass and recomputed
+        # ``idx = n * frac`` on the GROWN length, so pass 2+ drifted past
+        # the real sentence ends and dropped 1.3-1.4s of dead air
+        # MID-sentence (Venus v3 scene_2: gaps at 4.13s near 'seven' and
+        # 12.77s near 'the' — neither is a sentence boundary).
+        sents = [s.strip() for s in _re.split(r"(?<=[.!?])\s+", text) if s.strip()]
+        if len(sents) < 2:
+            sents = [s.strip() for s in _re.split(r"(?<=[,;:])\s+", text) if s.strip()]
+        try:
+            data0, sr = _sf.read(ap, dtype="float32")
+        except Exception as e:  # noqa: BLE001
+            print(f"  [pacing] !! read failed scene {i}: {str(e)[:60]}")
+            continue
+        n0 = len(data0)
+        total_words = words or 1
+        boundaries = []
+        cum = 0
+        for s in sents[:-1]:
+            cum += len(s.split())
+            boundaries.append(min(0.98, cum / total_words))
+        if not boundaries:
+            boundaries = [0.55]  # single-clause scene: one mid-scene pause
+        # Unique, in-bounds anchor positions on the ORIGINAL audio.
+        anchor_idx = sorted({int(n0 * f) for f in boundaries})
+        anchor_idx = [a for a in anchor_idx if 0 < a < n0]
+        if not anchor_idx:
+            continue
+        inserted = [0] * len(anchor_idx)   # cumulative samples per anchor
+        max_gap_n = int(0.7 * sr)          # v12 cap: TOTAL per boundary
+        dur = n0 / sr
         for _pass in range(3):  # iterate until in band or no progress
-            dur = audio_durations[i] if i < len(audio_durations) else M._probe_duration(ap)
             wpm = measure_speech_rate(text, dur)
             if wpm <= band["max_wpm"] or dur <= 0:
                 break
@@ -927,50 +994,38 @@ def _pace_pad_scenes(scenes_data: list[dict], audio_dir: str,
             pad_s = min(pad_s, dur * 0.45)  # cap per pass: +45% length
             if pad_s < 0.3:
                 break
-            sents = [s.strip() for s in _re.split(r"(?<=[.!?])\s+", text) if s.strip()]
-            if len(sents) < 2:
-                sents = [s.strip() for s in _re.split(r"(?<=[,;:])\s+", text) if s.strip()]
-            try:
-                data, sr = _sf.read(ap, dtype="float32")
-            except Exception as e:  # noqa: BLE001
-                print(f"  [pacing] !! read failed scene {i}: {str(e)[:60]}")
+            gap_s = min(pad_s / len(anchor_idx), 0.7)
+            gap_n = int(sr * gap_s)
+            for b in range(len(anchor_idx)):
+                inserted[b] = min(inserted[b] + gap_n, max_gap_n)
+            if all(v == 0 for v in inserted):
                 break
-            total_words = words or 1
-            boundaries = []
-            cum = 0
-            for s in sents[:-1]:
-                cum += len(s.split())
-                boundaries.append(min(0.98, cum / total_words))
-            if not boundaries:
-                boundaries = [0.55]  # single-clause scene: one mid-scene pause
-            gap_s = pad_s / len(boundaries)
-            gap_s = min(gap_s, 0.7)  # v12: cap per-gap pause — 1.3s mid-scene
-                                        # silence reads as an abrupt voice stop
+            # Rebuild from ORIGINAL audio: pads sit at anchored sentence
+            # ends, so positions never drift across passes.
             chunks = []
             prev = 0
-            n = len(data)
-            # v19g: keep channel count when padding — 1D zeros would
-            # collapse stereo narration back to mono.
-            if data.ndim > 1:
-                _pad = _np.zeros((int(sr * gap_s), data.shape[1]),
-                                 dtype="float32")
-            else:
-                _pad = _np.zeros(int(sr * gap_s), dtype="float32")
-            for frac in boundaries:
-                idx = int(n * frac)
-                chunks.append(data[prev:idx])
-                chunks.append(_pad)
+            for b, idx in enumerate(anchor_idx):
+                chunks.append(data0[prev:idx])
+                if inserted[b] > 0:
+                    # v19g: keep channel count when padding — 1D zeros
+                    # would collapse stereo narration back to mono.
+                    if data0.ndim > 1:
+                        chunks.append(_np.zeros(
+                            (inserted[b], data0.shape[1]), dtype="float32"))
+                    else:
+                        chunks.append(_np.zeros(inserted[b], dtype="float32"))
                 prev = idx
-            chunks.append(data[prev:])
-            out = _np.concatenate(chunks) if chunks else data
+            chunks.append(data0[prev:])
+            out = _np.concatenate(chunks) if chunks else data0
+            dur = len(out) / sr
+        if any(inserted):
             try:
                 _sf.write(ap, out, sr)
             except Exception as e:  # noqa: BLE001
                 print(f"  [pacing] !! write failed scene {i}: {str(e)[:60]}")
-                break
-            new_dur = len(out) / sr
+                continue
             if i < len(audio_durations):
-                audio_durations[i] = new_dur
+                audio_durations[i] = dur
         if i < len(audio_durations):
             dur = audio_durations[i]
             wpm = measure_speech_rate(text, dur)
@@ -989,6 +1044,47 @@ def _pace_pad_scenes(scenes_data: list[dict], audio_dir: str,
         print("  [pacing] " + ", ".join(
             f"s{r['scene']}:{r['wpm_after']:.0f}wpm({r['role']})"
             for r in updated))
+    return audio_durations
+
+
+def _smooth_stem_audio(audio_dir: str, scenes_data: list[dict],
+                       audio_durations: list[float]) -> list[float]:
+    """v25: gentle amplitude smoothing on narration stems.
+
+    Gemini/DeepSeek review (Venus v3): \"voice is jittery and abruptly
+    stuttering\" — amplitude jitter (sharp RMS transitions) inside Fish
+    TTS stems, flagged at 38.8-54.3s in the mix.  Deterministic fix:
+    light 2:1 compressor with fast attack / slow release evens the
+    loudness spikes without re-synthesis.  Duration-preserving and
+    channel-preserving (runs per-stem via ffmpeg, in place).
+    """
+    updated = []
+    for i in range(len(scenes_data)):
+        ap = os.path.join(audio_dir, f"scene_{i}.wav")
+        if not os.path.exists(ap):
+            continue
+        tmp = ap + ".smooth.wav"
+        # threshold -30 dBFS (0.0316), 2:1, attack 10ms, release 150ms —
+        # evens loudness spikes that read as stutter; limiter as safety.
+        filt = ("acompressor=threshold=0.0316:ratio=2:attack=10:release=150:"
+                "makeup=1,alimiter=limit=0.95")
+        r = subprocess.run(
+            ["ffmpeg", "-y", "-v", "error", "-i", ap,
+             "-af", filt, "-c:a", "pcm_s16le", tmp],
+            capture_output=True, text=True, timeout=120)
+        if (r.returncode == 0 and os.path.exists(tmp)
+                and os.path.getsize(tmp) > 0):
+            os.replace(tmp, ap)
+            new_dur = M._probe_duration(ap)
+            if i < len(audio_durations):
+                audio_durations[i] = new_dur
+            updated.append(i)
+        else:
+            print(f"  [smooth] !! ffmpeg failed scene {i}: {r.stderr[:120]}")
+            if os.path.exists(tmp):
+                os.remove(tmp)
+    if updated:
+        print(f"  [smooth] amplitude-smoothed scenes: {updated}")
     return audio_durations
 
 
@@ -1680,6 +1776,13 @@ def main():
     # boundaries so narration lands inside the band (space after key
     # facts).  Deterministic fix for "narration feels too fast".
     audio_durations = _pace_pad_scenes(scenes_data, "cache/audio", audio_durations)
+
+    # v25 (Gemini/DeepSeek review: "voice jittery / abruptly stuttering"):
+    # gentle amplitude smoothing on the narration stems AFTER pacing (so
+    # the compressor evens the TTS loudness spikes without fighting the
+    # inserted pauses), then record final voice hashes on the bytes that
+    # actually ship.
+    audio_durations = _smooth_stem_audio("cache/audio", scenes_data, audio_durations)
 
     # v20: record FINAL voice hashes (after trim + pace-pad rewrote the
     # wavs) so the manifest's voice hash matches the bytes on disk — a

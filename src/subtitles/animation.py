@@ -175,13 +175,17 @@ def _group_phrases(words: list[WordTiming], max_words_per_line: int) -> list[lis
 
     Line boundaries (``is_last_in_line``) always split; additionally split
     every ``max_words_per_line`` words so a malformed timing stream without
-    line flags still yields bounded phrase sizes.
+    line flags still yields bounded phrase sizes.  v25: the length fallback
+    only fires when the stream has NO line flags at all — otherwise a line
+    that legitimately exceeds the cap to keep a number expression together
+    ("two hundred forty-three") would be re-split mid-number.
     """
+    has_flags = any(w.get("is_last_in_line") for w in words)
     phrases: list[list[WordTiming]] = []
     cur: list[WordTiming] = []
     for w in words:
         cur.append(w)
-        if w.get("is_last_in_line") or len(cur) >= max_words_per_line:
+        if w.get("is_last_in_line") or (not has_flags and len(cur) >= max_words_per_line):
             phrases.append(cur)
             cur = []
     if cur:

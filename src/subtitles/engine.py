@@ -25,6 +25,34 @@ from .animation import get_animation_clips
 # ── Public API ────────────────────────────────────────────────────────────
 
 
+# v25 (Gemini review factual catch): number expressions like
+# "two hundred forty-three" or "ninety-six point five percent" must
+# NEVER be split across subtitle lines — the max-words-per-line boundary
+# used to fall inside the run, rendering only "forty-three".
+_NUMBER_WORDS = frozenset("""
+zero one two three four five six seven eight nine ten eleven twelve
+thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty
+thirty forty fifty sixty seventy eighty ninety hundred thousand million
+billion trillion point percent degrees times
+""".split())
+
+
+def _is_number_token(word: str) -> bool:
+    """True when a word is (part of) a number expression."""
+    w = (word or "").strip().lower().rstrip(".,;:!?")
+    if not w:
+        return False
+    if any(ch.isdigit() for ch in w):
+        return True
+    if w in _NUMBER_WORDS:
+        return True
+    if "-" in w:  # forty-three, ninety-six
+        parts = w.split("-")
+        return bool(parts) and all(
+            p in _NUMBER_WORDS or p.isdigit() for p in parts)
+    return False
+
+
 class SubtitleEngine:
     """Generates word-level subtitle timing from a narration audio file.
 
@@ -253,20 +281,35 @@ class SubtitleEngine:
         self,
         timings: list[dict[str, Any]],
     ) -> list[dict[str, Any]]:
-        """Group consecutive words into lines."""
-        result: list[dict[str, Any]] = []
-        line_idx = 0
+        """Group consecutive words into lines.
+
+        v25: number expressions are atomic — the line boundary is pushed
+        forward when it would fall between two number tokens ("two
+        hundred | forty-three" → "two hundred forty-three").
+        """
+        groups: list[list[dict[str, Any]]] = []
+        cur: list[dict[str, Any]] = []
         for i, entry in enumerate(timings):
-            pos_in_line = i % self._max_words_per_line
-            if pos_in_line == 0 and i > 0:
-                line_idx += 1
-            entry["line"] = line_idx
-            entry["is_first_in_line"] = pos_in_line == 0
-            entry["is_last_in_line"] = (
-                pos_in_line == self._max_words_per_line - 1
-                or i == len(timings) - 1
-            )
-            result.append(entry)
+            cur.append(entry)
+            nxt = timings[i + 1]["word"] if i + 1 < len(timings) else None
+            if nxt is None:
+                groups.append(cur)
+                cur = []
+            elif len(cur) >= self._max_words_per_line:
+                # split here UNLESS the boundary falls inside a number run
+                if _is_number_token(entry["word"]) and _is_number_token(nxt):
+                    continue  # keep the number expression together
+                groups.append(cur)
+                cur = []
+        if cur:
+            groups.append(cur)
+        result: list[dict[str, Any]] = []
+        for line_idx, grp in enumerate(groups):
+            for j, entry in enumerate(grp):
+                entry["line"] = line_idx
+                entry["is_first_in_line"] = j == 0
+                entry["is_last_in_line"] = j == len(grp) - 1
+                result.append(entry)
         return result
 
     # ── Line merging for SRT/VTT ───────────────────────────────────────
