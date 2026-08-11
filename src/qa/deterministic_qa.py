@@ -177,7 +177,7 @@ class DeterministicQA:
             # these — the Andromeda v5 run passed "no repeats" while reusing
             # 16 cached stills.  Sample one mid-frame per clip and compare dHashes.
             per_dups: list[dict] = []
-            seen: list[tuple[float, str, str]] = []  # (ts, file, dhash)
+            seen: list[tuple[float, str, str, object, str]] = []  # (ts, file, dhash, scene_id, shot_type)
             import tempfile
             with tempfile.TemporaryDirectory() as td:
                 for i, v in enumerate(entries):
@@ -187,6 +187,18 @@ class DeterministicQA:
                     st = v.get("start_time", 0.0)
                     et = v.get("end_time", st + 1.0)
                     mid = st + (et - st) / 2.0
+                    scene_id = v.get("scene_id")
+                    shot_type = v.get("shot_type", "primary")
+                    # v22 (Gemini root-cause review): coverage variants are
+                    # INTENTIONAL contiguous padding — the same source still
+                    # rendered with a different camera move to cover narration
+                    # past MAX_SHOT_HOLD_S.  Never flag a perceptual repeat
+                    # when both clips are in the SAME scene and contiguous;
+                    # cross-scene repeats of the same visual stay fatal.
+                    def _is_variant_padding(prev: tuple) -> bool:
+                        _, _, _, p_scene, p_type = prev
+                        return (scene_id is not None and p_scene == scene_id
+                                and (shot_type == "variant" or p_type == "variant"))
                     # v21: prefer the SOURCE still (asset) when present — clip
                     # mid-frames are motion-shifted (Ken Burns) and dodge the
                     # hash; the source still is stable and catches coverage
@@ -208,14 +220,16 @@ class DeterministicQA:
                             h = dhash(im)
                     except Exception:
                         continue
-                    for ts0, f0, h0 in seen:
-                        if hamming(h, h0) < self._dup_th + 4:
+                    for prev in seen:
+                        if hamming(h, prev[2]) < self._dup_th + 4:
+                            if _is_variant_padding(prev):
+                                continue  # intentional same-scene coverage padding
                             per_dups.append({
-                                "at": [round(ts0, 1), round(mid, 1)],
-                                "files": [f0, f],
-                                "hamming": hamming(h, h0),
+                                "at": [round(prev[0], 1), round(mid, 1)],
+                                "files": [prev[1], f],
+                                "hamming": hamming(h, prev[2]),
                             })
-                    seen.append((mid, f, h))
+                    seen.append((mid, f, h, scene_id, shot_type))
             detail = "no repeats"
             if repeats:
                 detail = f"repeated files: {repeats}"

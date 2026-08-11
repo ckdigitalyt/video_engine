@@ -352,12 +352,22 @@ def _kenburns(image_path: str, out_path: str, duration: float = 6.0,
     """
     frames = int(duration * 30)
     cam = camera or {}
+    # v22 (Gemini root-cause review): keep zoom strictly inside [1.03, 1.25].
+    # A zoom-out ending at exactly 1.0 makes the crop window touch the source
+    # boundary; with pan or sub-pixel float error ffmpeg pads with mirrored/
+    # smeared edge pixels (the mirrored_edges blocker).  The 3% safety margin
+    # guarantees the crop window never reaches the physical edge.
+    _ZMIN, _ZMAX = 1.03, 1.25
     if zoom_in:
-        z_start = float(cam.get("zoom_start", 1.0))
-        z_end = float(cam.get("zoom_end", 1.22))
+        z_start = min(_ZMAX, max(_ZMIN, float(cam.get("zoom_start", _ZMIN))))
+        z_end = min(_ZMAX, max(_ZMIN, float(cam.get("zoom_end", 1.22))))
+        if z_end <= z_start:
+            z_end = min(_ZMAX, z_start + 0.10)
     else:
-        z_start = float(cam.get("zoom_start", 1.22))
-        z_end = float(cam.get("zoom_end", 1.0))
+        z_start = min(_ZMAX, max(_ZMIN, float(cam.get("zoom_start", 1.22))))
+        z_end = min(_ZMAX, max(_ZMIN, float(cam.get("zoom_end", _ZMIN))))
+        if z_end >= z_start:
+            z_end = max(_ZMIN, z_start - 0.10)
     pan_x = float(cam.get("pan_x", 0))
     pan_y = float(cam.get("pan_y", 0))
     # linear zoom: z = z_start + (z_end - z_start) * on/frames
@@ -455,7 +465,8 @@ def _still_plan_for(scene_text: str, spec=None, scene=None) -> list:
 def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                          gates=None, specs: Optional[dict] = None,
                          topic_slug: str = "",
-                         style_bible=None) -> dict:
+                         style_bible=None,
+                         fresh_scenes: Optional[set] = None) -> dict:
     """Build per-scene shot lists: Manim clips + Ken Burns stills.
 
     When *gates* is provided, every candidate still is verified against
@@ -563,7 +574,8 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
             # (same safety bar as pinned: existing file > 15 KB).  Avoids
             # re-downloading every still after a crash/rerun.
             if (os.path.exists(out) and os.path.getsize(out) > 15000
-                    and fname not in rejected_this_run):
+                    and fname not in rejected_this_run
+                    and (fresh_scenes is None or i not in fresh_scenes)):
                 got, src, title = out, "cached", "cached still"
                 print(f"  [CACHE] {fname} reused from topic cache")
             elif fname in pinned and os.path.exists(out) and os.path.getsize(out) > 15000:
@@ -723,16 +735,20 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                 else:
                     vcam["zoom_start"], vcam["zoom_end"] = vcam.get("zoom_start", 1.0) or 1.0, 1.22
                     vmove = "push_in"
+                # v22 (DeepSeek root-cause review): resolve a compatible move
+                # BEFORE rendering — the clip must be rendered with the
+                # corrected camera params.  v21 computed safe_v AFTER
+                # _kenburns(), so the rendered clip kept the jarring move and
+                # only the timeline label changed (motion_continuity failed).
+                safe_v = _compatible_camera_move(last_camera_move, vmove)
+                if safe_v != vmove:
+                    from src.cinematic.camera_language import CAMERA_MOVES
+                    _m = CAMERA_MOVES.get(safe_v)
+                    vcam = dict(_m) if _m else {"zoom_start": 1.03, "zoom_end": 1.03,
+                                                "pan_x": 0, "pan_y": 0}
+                    vmove = safe_v
                 if _kenburns(src_img, variant, duration=4.0,
                              zoom_in=vmove == "push_in", camera=vcam):
-                    # v21: variant must not jar against the previous shot either
-                    safe_v = _compatible_camera_move(last_camera_move, vmove)
-                    if safe_v != vmove:
-                        from src.cinematic.camera_language import CAMERA_MOVES
-                        _m = CAMERA_MOVES.get(safe_v)
-                        vcam = dict(_m) if _m else {"zoom_start": 1.0, "zoom_end": 1.0,
-                                                    "pan_x": 0, "pan_y": 0}
-                        vmove = safe_v
                     shots.append({"file": variant, "duration": 4.0, "kind": src,
                                   "camera": vmove, "motion_params": vcam,
                                   "verification": last.get("verification"),
@@ -1040,6 +1056,20 @@ def _append_coverage_variant(tl: dict, last: dict, scene_end: float,
         _sp.run(["ffmpeg", "-y", "-v", "error", "-ss", "1.0",
                  "-i", last.get("file", ""), "-frames:v", "1", src_img],
                 capture_output=True, text=True, timeout=30)
+    # v22: prefer a DIFFERENT still already placed in this scene for the
+    # coverage variant, so the viewer never sees the exact same image twice
+    # in a row (the "same image again and again" complaint).  Fall back to
+    # the previous shot's source only when no other asset exists in the scene.
+    alt_src = ""
+    for _e in tl.get("video_timeline", []):
+        if (_e.get("scene_id") == scene_id and _e.get("asset")
+                and os.path.exists(_e["asset"]) and _e.get("asset") != last.get("asset")):
+            alt_src = _e["asset"]
+            break
+    if alt_src:
+        src_img = alt_src
+        print(f"  [variant] scene{scene_id} coverage uses different still "
+              f"({os.path.basename(alt_src)})")
     if not os.path.exists(src_img):
         return  # cannot build a variant; keep capped shot (gate reports it)
     variant = os.path.join(out_dir, "shots", f"scene{scene_id}_covvar.mp4")
@@ -1081,7 +1111,7 @@ def _append_coverage_variant(tl: dict, last: dict, scene_end: float,
             "end_time": round(cursor + dur, 3),
             "transition": "crossfade", "motion": "none",
             "camera": "ken_burns", "beat_index": 1, "shot_type": "variant",
-            "camera_move": "pull_out" if mp["zoom_end"] < mp["zoom_start"] else "push_in",
+            "camera_move": vmove,
             "motion_params": mp,
             "asset_source": last.get("asset_source", ""),
             "asset_title": last.get("asset_title", ""),
@@ -1365,6 +1395,12 @@ def main():
                         "passed": _claim_gate["passed"],
                         "blocking": _claim_gate["blocking_failures"],
                     }
+                    # v22 (Gemini root-cause review): overwrite the stale FAILED
+                    # claim_gate report with the FIXED result.  Previously only
+                    # stages.claim_gate_fix was updated; resolve_status() reads
+                    # run_report["claim_gate"] at the end, so every run stayed
+                    # REVISION_REQUIRED on claims even after a successful rewrite.
+                    run_report["claim_gate"] = _claim_gate
                     if not _claim_gate["passed"]:
                         run_report["errors"].append(
                             "claim gate still blocked after targeted rewrite")
@@ -1477,9 +1513,28 @@ def main():
                     os.remove(_c)
                     print(f"  [assets] removed {os.path.basename(_c)} for {_sid}")
 
+    # v22 (Gemini root-cause review): narration-change cache invalidation.
+    # The topic cache-reuse branch used to accept ANY still file > 15 KB on
+    # disk, so after the claim gate rewrote a scene's narration the OLD stills
+    # were silently reused (v6 run: cached=20, fresh=0 — the "same issue again
+    # and again" pattern).  Scenes whose script hash changed vs the previous
+    # manifest now bypass the cache-reuse branch entirely and re-fetch + re-gate.
+    fresh_scenes: set[int] = set()
+    try:
+        _mdiff = manifest.diff()
+        for _c in _mdiff:
+            if _c.get("scene") is not None and "script" in _c.get("changed", []):
+                fresh_scenes.add(int(_c["scene"]))
+        if fresh_scenes:
+            print(f"  [cache-invalidate] narration changed for scenes "
+                  f"{sorted(fresh_scenes)} — bypassing still cache")
+    except Exception as _e:
+        print(f"  !! manifest diff for cache invalidation failed: {str(_e)[:80]}")
+
     shot_plan, stills_stats = stage_stills_visuals(scenes_data, out_dir, gates, specs,
                                                   topic_slug=slug,
-                                                  style_bible=style_bible)
+                                                  style_bible=style_bible,
+                                                  fresh_scenes=fresh_scenes)
     # v20: record per-shot asset hashes (asset-level dependency graph).
     # Each shot carries its durable still asset path; Ken Burns clips are
     # derived and cheap to regenerate, so only the still drives visual

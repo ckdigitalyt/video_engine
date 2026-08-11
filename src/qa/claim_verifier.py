@@ -349,7 +349,16 @@ class ClaimVerifier:
                     if _is_nickname_pair(a, b):
                         continue
                     if sev == "critical":
-                        _co = any(a in s and b in s for s in sentences_l)
+                        # v22 (DeepSeek root-cause review): corroboration is
+                        # now within TWO sentences, not one.  The expert's
+                        # documented failure mode (Bloop vs 52-Hz whale)
+                        # transfers attributes across ADJACENT sentences;
+                        # same-sentence-only corroboration downgraded real
+                        # risks to advisory and let conflations through.
+                        _co = any(
+                            a in s and b in s for s in sentences_l) or any(
+                            a in sentences_l[i] and b in sentences_l[i + 1]
+                            for i in range(len(sentences_l) - 1))
                         if not _co:
                             sev = "major"  # no transfer evidence
                     hits.append({
@@ -392,10 +401,24 @@ class ClaimVerifier:
             v = c.value
             u = (c.unit or "").strip()
             hit = None
+            # v22 (DeepSeek root-cause review): the old matcher accepted a
+            # number appearing ANYWHERE in a fact text ("52" matched
+            # "52-Hz whale"), which produced false "verified" status for
+            # claims that merely shared a digit.  Now the unit must appear
+            # in the SAME fact text as the number (e.g. "52 Hz" vs
+            # "52 kilometers"), so a number alone no longer passes.
             for ft in fact_texts:
-                if v in ft or (u and u in ft and v in ft):
-                    hit = ft
-                    break
+                if u:
+                    # unit-anchored: number AND unit must co-occur
+                    if v in ft and u.lower() in ft:
+                        hit = ft
+                        break
+                else:
+                    # unitless claim: number alone (fall back to old rule
+                    # only when the claim carries no unit at all)
+                    if v in ft:
+                        hit = ft
+                        break
             if hit:
                 c.status = "verified"
                 c.source_label = "research_pack"
