@@ -24,7 +24,11 @@ from typing import Optional
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from dotenv import load_dotenv
-load_dotenv()
+# v23.1: override=True — the OpenClaw runtime injects a placeholder
+# DEEPSEEK_API_KEY into the process env; without override the real
+# .env key never replaces it and DeepSeek (the cost-chain last resort)
+# 401s, killing runs when Gemini/Groq are quota-limited (Venus v2 crash).
+load_dotenv(override=True)
 
 import mission_run as M
 
