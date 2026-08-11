@@ -2,6 +2,7 @@
 factory.py — A factory for creating provider instances.
 """
 import importlib
+import os
 from typing import Type
 from src.utils.config import get_config
 from .llm_provider import LLMProvider
@@ -28,6 +29,7 @@ class ProviderFactory:
         "groq": "GroqProvider",
         "openrouter": "OpenRouterProvider",
         "mistral": "MistralProvider",
+        "nemotron": "NemotronProvider",
     }
 
     def get_llm_provider(self, name: str) -> LLMProvider:
@@ -74,12 +76,22 @@ class ProviderFactory:
         """
         from src.providers.llm_provider import ChainLLMProvider
 
-        chain_names = [primary]
-        for name in get_config("pipeline.roles.chain", ["gemini", "grok", "mistral"]):
-            if name not in chain_names:
-                chain_names.append(name)
-        if "deepseek" not in chain_names:
-            chain_names.append("deepseek")
+        # v26 experiment (ckdigital directive, controlled): when
+        # LLM_ROUTING_EXPERIMENT=groq|nemotron is set, swap the chain head
+        # to the experiment provider with DeepSeek as the LAST safety net.
+        # Unset (production / daily cron) → today's exact chain behavior.
+        _exp = os.environ.get("LLM_ROUTING_EXPERIMENT", "").strip().lower()
+        if _exp in ("groq", "nemotron"):
+            chain_names = [_exp, "deepseek"]
+            print(f"    [routing-experiment] head={_exp} chain={chain_names} "
+                  f"(DeepSeek stays final safety gate)", flush=True)
+        else:
+            chain_names = [primary]
+            for name in get_config("pipeline.roles.chain", ["gemini", "grok", "mistral"]):
+                if name not in chain_names:
+                    chain_names.append(name)
+            if "deepseek" not in chain_names:
+                chain_names.append("deepseek")
 
         providers = []
         for name in chain_names:
@@ -93,6 +105,19 @@ class ProviderFactory:
         if len(providers) == 1:
             return providers[0]
         return ChainLLMProvider(providers)
+
+    def get_final_gate_llm(self) -> LLMProvider:
+        """DeepSeek-only final gate (claim verification, final review pass).
+
+        ckdigital directive: DeepSeek stays the high-confidence final
+        claim-verification / final-quality gate regardless of the
+        experiment routing — free/cheap heads false-negative on claims
+        (gemini-3.5-flash 4/10, gpt-oss-120b 4/10 in the audit bench).
+        Wrapped in telemetry so gate calls appear in the experiment report.
+        """
+        from src.providers.llm_telemetry import TelemetryWrappedProvider
+        ds = self.get_llm_provider("deepseek")
+        return TelemetryWrappedProvider(ds, label="deepseek_gate", stage="final_gate")
 
     def get_fallback_llm_provider(self) -> LLMProvider:
         """

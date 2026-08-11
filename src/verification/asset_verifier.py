@@ -76,7 +76,9 @@ class AssetVerifier:
     def __init__(
         self,
         vision_enabled: bool = True,
-        vision_model: str = "gemini-2.5-flash",
+        # v26: gemini-2.5-flash is 429 quota-exhausted (production risk);
+        # default to 3.5-flash which the audit verified working for vision.
+        vision_model: str = "gemini-3.5-flash",
         fatal_on_vision_fail: bool = True,
     ):
         self._vision_enabled = vision_enabled

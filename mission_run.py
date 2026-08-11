@@ -2271,7 +2271,8 @@ def main():
     # unsupported claim (the Bloop video's fatal error was exactly this).
     try:
         from src.qa.claim_verifier import ClaimVerifier
-        _claim_gate = ClaimVerifier(llm=llm, research_pack=research).run(
+        _claim_gate = ClaimVerifier(llm=factory.get_final_gate_llm(),
+                                   research_pack=research).run(
             scenes_data, out_dir=out_dir)
         run_report["stages"]["claim_gate"] = {
             "passed": _claim_gate["passed"],
@@ -2306,7 +2307,8 @@ def main():
                     for s in scenes_data:
                         s["narration"] = normalize_narration(s.get("narration", ""))
                     _claim_gate2 = ClaimVerifier(
-                        llm=llm, research_pack=research).run(scenes_data, out_dir=out_dir)
+                        llm=factory.get_final_gate_llm(),
+                        research_pack=research).run(scenes_data, out_dir=out_dir)
                     run_report["stages"]["claim_gate_fix"] = {
                         "passed": _claim_gate2["passed"],
                         "blocking": _claim_gate2["blocking_failures"],
@@ -2604,6 +2606,10 @@ def main():
         from src.providers.llm_provider import DeepSeekUsage
         usage = DeepSeekUsage.summary()
         run_report["llm_usage_deepseek"] = usage
+        # v26 experiment telemetry: per-provider metrics + JSONL evidence.
+        from src.providers import llm_telemetry
+        run_report["llm_experiment"] = llm_telemetry.summary()
+        run_report["llm_telemetry_file"] = llm_telemetry.save()
         tot = usage["total"]
         print("\n[DEEPSEEK USAGE — this run]")
         print(f"  calls: {tot['calls']} | input: {tot['input']:,} tok "

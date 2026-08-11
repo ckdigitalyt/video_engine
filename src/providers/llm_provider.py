@@ -7,6 +7,8 @@ Defines the LLMProvider interface, then implements:
 """
 
 import os
+import time
+import json
 from abc import ABC, abstractmethod
 from contextvars import ContextVar
 from typing import Optional
@@ -264,6 +266,36 @@ class GroqProvider(LLMProvider):
         return response.content
 
 
+
+# ── NVIDIA NIM (Nemotron) — OpenAI-compatible, build credits ────────────────
+
+class NemotronProvider(LLMProvider):
+    """LLM provider backed by NVIDIA NIM (integrate.api.nvidia.com).
+
+    Activated by NVIDIA_API_KEY in .env.  Model default
+    nvidia/nemotron-3-super-120b-a12b (verified working on the audit;
+    ~14-20s/call — slow but stable).  Joins the cost chain as an
+    experiment head via LLM_ROUTING_EXPERIMENT=nemotron.
+    """
+
+    def __init__(self, **kwargs):
+        _key = os.environ.get("NVIDIA_API_KEY")
+        if not _key:
+            raise RuntimeError("NVIDIA_API_KEY not set — add it to .env to enable Nemotron")
+        self._llm = ChatOpenAI(
+            api_key=_key,
+            base_url=get_config("providers.nemotron.base_url",
+                                "https://integrate.api.nvidia.com/v1"),
+            model=get_config("llm.nemotron.model", "nvidia/nemotron-3-super-120b-a12b"),
+            max_tokens=get_config("llm.nemotron.max_tokens", 4000),
+            timeout=get_config("llm.nemotron.timeout", 180),
+        )
+
+    def generate_text(self, prompt: str, image_path: Optional[str] = None, **kwargs) -> str:
+        response = self._llm.invoke([HumanMessage(content=prompt)])
+        return response.content
+
+
 # ── OpenRouter (aggregator, free models available) ──────────────────────────
 
 class OpenRouterProvider(LLMProvider):
@@ -330,26 +362,53 @@ class ChainLLMProvider(LLMProvider):
     def last_provider(self) -> Optional[str]:
         return self._last_provider
 
+    def _attempt(self, p: LLMProvider, fn, json_mode: bool):
+        """Run one provider attempt with telemetry. Returns (out, None) or
+        (None, exc).  Never raises for telemetry itself."""
+        from src.providers.llm_telemetry import record, classify_error
+        name = type(p).__name__.replace("Provider", "")
+        t0 = time.time()
+        try:
+            out = fn(p)
+            lat = time.time() - t0
+            json_ok = None
+            if json_mode:
+                try:
+                    json.loads(out.replace("```json", "").replace("```", "").strip())
+                    json_ok = True
+                except Exception:
+                    json_ok = False
+            record(provider=name, ok=True, latency_s=lat, json_ok=json_ok,
+                   chain_pos=self._providers.index(p) + 1,
+                   model=getattr(getattr(p, "_llm", None), "model_name", None))
+            return out, None
+        except Exception as exc:  # noqa: BLE001 — try next provider
+            record(provider=name, ok=False, latency_s=time.time() - t0,
+                   error_class=classify_error(exc),
+                   chain_pos=self._providers.index(p) + 1,
+                   model=getattr(getattr(p, "_llm", None), "model_name", None))
+            return None, exc
+
     def generate_text(self, prompt: str, image_path: Optional[str] = None, **kwargs) -> str:
         last: Optional[Exception] = None
         for p in self._providers:
-            try:
-                out = p.generate_text(prompt, image_path=image_path, **kwargs)
+            out, exc = self._attempt(p,
+                                     lambda pp: pp.generate_text(prompt, image_path=image_path, **kwargs),
+                                     json_mode=False)
+            if exc is None:
                 self._record(p)
                 return out
-            except Exception as exc:  # noqa: BLE001 — try next provider
-                last = exc
-                continue
+            last = exc
         raise RuntimeError(f"ChainLLMProvider: all providers failed ({last})")
 
     def generate_json(self, prompt: str, **kwargs) -> str:
         last: Optional[Exception] = None
         for p in self._providers:
-            try:
-                raw = p.generate_text(prompt, **kwargs)
+            out, exc = self._attempt(p,
+                                     lambda pp: pp.generate_text(prompt, **kwargs),
+                                     json_mode=True)
+            if exc is None:
                 self._record(p)
-                return raw.replace("```json", "").replace("```", "").strip()
-            except Exception as exc:  # noqa: BLE001
-                last = exc
-                continue
+                return out.replace("```json", "").replace("```", "").strip()
+            last = exc
         raise RuntimeError(f"ChainLLMProvider: all providers failed ({last})")

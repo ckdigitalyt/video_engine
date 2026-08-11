@@ -1357,6 +1357,13 @@ def main():
     run_report = {"topic": topic, "started_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
                   "strategy": "stills_first", "stages": {}, "errors": []}
 
+    # v26 experiment telemetry: tag this run, record routing mode.
+    import os as _os
+    from src.providers import llm_telemetry
+    llm_telemetry.reset()
+    llm_telemetry.set_run(f"{slug}_{time.strftime('%Y%m%d_%H%M%S')}")
+    run_report["experiment_routing"] = _os.environ.get("LLM_ROUTING_EXPERIMENT", "") or "production"
+
     mods = M._imports()
     factory = mods["ProviderFactory"]()
     from src.utils.config import get_config
@@ -1487,7 +1494,10 @@ def main():
     # hard-block — the expert's Bloop/52-Hz class must never render.
     try:
         from src.qa.claim_verifier import ClaimVerifier
-        _verifier = ClaimVerifier(llm=llm, research_pack=research)
+        # v26 (ckdigital directive): claim verification is the high-confidence
+        # final gate — ALWAYS DeepSeek, never the experiment head (free/cheap
+        # models false-negative on claims; audit bench 4/10).
+        _verifier = ClaimVerifier(llm=factory.get_final_gate_llm(), research_pack=research)
         _claim_gate = _verifier.run(scenes_data, out_dir=out_dir)
         run_report["claim_gate"] = _claim_gate
         run_report["stages"]["claim_gate"] = {
@@ -2250,6 +2260,10 @@ def main():
         from src.providers.llm_provider import DeepSeekUsage
         usage = DeepSeekUsage.summary()
         run_report["llm_usage_deepseek"] = usage
+        # v26 experiment telemetry: per-provider metrics + JSONL evidence.
+        from src.providers import llm_telemetry
+        run_report["llm_experiment"] = llm_telemetry.summary()
+        run_report["llm_telemetry_file"] = llm_telemetry.save()
         tot = usage["total"]
         print("\n[DEEPSEEK USAGE — this run]")
         print(f"  calls: {tot['calls']} | input: {tot['input']:,} tok "

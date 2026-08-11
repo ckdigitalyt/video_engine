@@ -209,6 +209,15 @@ class ScriptReviewer:
         # not good enough for script work).  ChainLLMProvider falls through
         # per-call and logs which provider answered.
         self._provider = factory.get_cost_chain_llm_provider(self._provider_name)
+        # v26 experiment (ckdigital directive): ladder the script review —
+        # early passes run on the experiment head (Groq/Nemotron when
+        # LLM_ROUTING_EXPERIMENT is set), the FINAL pass always runs on
+        # the DeepSeek final-quality gate.
+        import os as _os
+        self._experiment_routing = _os.environ.get("LLM_ROUTING_EXPERIMENT", "").strip().lower()
+        self._final_provider = None
+        if self._experiment_routing in ("groq", "nemotron"):
+            self._final_provider = factory.get_final_gate_llm()
         # v12.6 legacy fallbacks removed in v19g — the cost chain handles
         # fallthrough internally.
         self._fallbacks: list = []
@@ -236,6 +245,12 @@ class ScriptReviewer:
         current = scenes[:]
 
         for pass_no in range(1, self._max_passes + 1):
+            # v26 ladder: final pass on DeepSeek final gate (no revise runs
+            # after it, so swapping self._provider here is safe).
+            if self._final_provider is not None and pass_no == self._max_passes:
+                self._provider = self._final_provider
+                self._log("  Final pass on DeepSeek final-quality gate "
+                          f"(experiment routing={self._experiment_routing})")
             self._log(f"\n── Script Review pass {pass_no}/{self._max_passes} ──")
             scores: dict[str, PersonaScore] = {}
             consolidated: list[ReviewIssue] = []
