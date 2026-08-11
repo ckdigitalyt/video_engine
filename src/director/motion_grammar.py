@@ -36,6 +36,8 @@ _MOTION_DIRECTION: dict[str, MotionDirection] = {
     "parallax": MotionDirection.COMPLEX,
     "push_in": MotionDirection.INWARD,
     "push_out": MotionDirection.OUTWARD,
+    "pull_out": MotionDirection.OUTWARD,
+    "reveal": MotionDirection.OUTWARD,
     "pan_left": MotionDirection.LATERAL,
     "pan_right": MotionDirection.LATERAL,
     "tilt_up": MotionDirection.VERTICAL,
@@ -44,6 +46,9 @@ _MOTION_DIRECTION: dict[str, MotionDirection] = {
     "zoom_out": MotionDirection.OUTWARD,
     "follow": MotionDirection.LATERAL,
     "drift": MotionDirection.LATERAL,
+    "tracking": MotionDirection.LATERAL,
+    "orbit": MotionDirection.COMPLEX,
+    "crane_up": MotionDirection.COMPLEX,
     "stabilized": MotionDirection.STATIC,
     "static": MotionDirection.STATIC,
 }

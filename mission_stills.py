@@ -30,6 +30,39 @@ import mission_run as M
 
 from src.pipeline.manifest import Manifest, parse_shot_id, hash_text
 
+# v21: motion continuity — every camera move is validated against the
+# previous shot so cuts never flip direction jarringly (push_in→pull_out,
+# zoom_in→zoom_out).  The grammar existed but was never wired into the
+# stills planner (Andromeda v5 review: "transition feels slightly abrupt",
+# "breaks visual continuity").
+from src.director.motion_grammar import (
+    validate_motion_sequence,
+    get_safe_motion_fallback,
+)
+
+# Moves to try when the proposed move would jar against the previous shot.
+# Lateral/static moves are always safe; inward/outward alternation is the
+# failure mode we're avoiding.
+_SAFE_MOVE_FALLBACKS = ("pan_right", "pan_left", "static", "tilt_up")
+
+
+def _compatible_camera_move(prev_move: Optional[str], proposed: str) -> str:
+    """Return a camera move compatible with the previous shot's move.
+
+    Uses the motion grammar: INWARD→OUTWARD / OUTWARD→INWARD reversals
+    are forbidden (they read as a visible jar between clips).  If the
+    proposed move is incompatible, tries safe alternatives; never returns
+    a move that flips direction against *prev_move*.
+    """
+    if prev_move is None or prev_move == proposed:
+        return proposed
+    if validate_motion_sequence(prev_move, proposed):
+        return proposed
+    for alt in _SAFE_MOVE_FALLBACKS:
+        if validate_motion_sequence(prev_move, alt):
+            return alt
+    return "static"
+
 # v13 consolidation: visual direction (Manim registry, beats, Jade style
 # lock) lives in ONE module shared with mission_run
 # so the two runners can never drift apart again.
@@ -462,6 +495,9 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
     stats = {"manim": 0, "nasa": 0, "wikimedia": 0, "ai": 0, "video_fallback": 0,
              "rejected": 0, "vision_checked": 0, "deduped": 0}
     manim_used = set()
+    # v21: global camera-move continuity — jarring flips (push_in→pull_out)
+    # are forbidden across ALL shots, not just within a scene.
+    last_camera_move: Optional[str] = None
     # v12.2: stills REJECTED by the asset gate this run must never be
     # re-admitted via the [CACHE] branch — the gate `continue`s but leaves
     # the file on disk, and the cache-reuse check only tests existence/size,
@@ -611,6 +647,17 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                 "move": "push_in" if still_count % 2 == 0 else "pull_out",
                 "params": {},
             }
+            # v21: never cut INTO a direction flip (jarred effect).  If the
+            # intent-driven move would reverse the previous shot's direction,
+            # substitute a safe compatible move instead.
+            move = cam.get("move", "push_in")
+            safe_move = _compatible_camera_move(last_camera_move, move)
+            if safe_move != move:
+                from src.cinematic.camera_language import CAMERA_MOVES
+                _m = CAMERA_MOVES.get(safe_move)
+                cam = {"move": safe_move, "intent": intent,
+                       "params": dict(_m) if _m else {"zoom_start": 1.0, "zoom_end": 1.0,
+                                                      "pan_x": 0, "pan_y": 0}}
             cam_params = cam.get("params", {}) or {}
             zoom_in = cam_params.get("zoom_end", 1.2) > cam_params.get("zoom_start", 1.0)
             kb = _kenburns(got, clip, duration=dur, zoom_in=zoom_in,
@@ -622,6 +669,7 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                               "verification": ver if (gates is not None and spec is not None) else None,
                               "title": title, "query": query,
                               "asset": got})
+                last_camera_move = cam.get("move", "push_in")
                 stats[src] = stats.get(src, 0) + 1
                 still_count += 1
                 # record hash for dedup (content-based, not path-based)
@@ -677,12 +725,21 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                     vmove = "push_in"
                 if _kenburns(src_img, variant, duration=4.0,
                              zoom_in=vmove == "push_in", camera=vcam):
+                    # v21: variant must not jar against the previous shot either
+                    safe_v = _compatible_camera_move(last_camera_move, vmove)
+                    if safe_v != vmove:
+                        from src.cinematic.camera_language import CAMERA_MOVES
+                        _m = CAMERA_MOVES.get(safe_v)
+                        vcam = dict(_m) if _m else {"zoom_start": 1.0, "zoom_end": 1.0,
+                                                    "pan_x": 0, "pan_y": 0}
+                        vmove = safe_v
                     shots.append({"file": variant, "duration": 4.0, "kind": src,
                                   "camera": vmove, "motion_params": vcam,
                                   "verification": last.get("verification"),
                                   "title": last.get("title", ""),
                                   "query": last.get("query", ""),
                                   "asset": src_img})
+                    last_camera_move = vmove
                     placed_total += 4.0
                     print(f"  [coverage] scene{i}: narration ~{est:.0f}s, "
                           f"added {vmove} variant (total {placed_total:.1f}s)")
@@ -730,6 +787,14 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
         if got and os.path.exists(got):
             clip = os.path.join(out_dir, "shots", fname.replace(".jpg", ".mp4"))
             cam = gates.camera_decision(intent) if gates is not None else {"move": "push_in", "params": {}}
+            move = cam.get("move", "push_in")
+            safe_move = _compatible_camera_move(last_camera_move, move)
+            if safe_move != move:
+                from src.cinematic.camera_language import CAMERA_MOVES
+                _m = CAMERA_MOVES.get(safe_move)
+                cam = {"move": safe_move, "intent": intent,
+                       "params": dict(_m) if _m else {"zoom_start": 1.0, "zoom_end": 1.0,
+                                                      "pan_x": 0, "pan_y": 0}}
             cam_params = cam.get("params", {}) or {}
             zoom_in = cam_params.get("zoom_end", 1.2) > cam_params.get("zoom_start", 1.0)
             if _kenburns(got, clip, duration=4.0, zoom_in=zoom_in, camera=cam_params):
@@ -737,6 +802,7 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                                "camera": cam.get("move", "push_in"),
                                "motion_params": cam_params, "title": title,
                                "query": fill_q, "asset": got}]
+                last_camera_move = cam.get("move", "push_in")
                 # v10.4 + 2026 recalibration: fill scenes must also satisfy the
                 # coverage guard AND the 4s micro-beat hold cap.
                 fest = max(4.0, len(text.split()) / 2.6)
@@ -751,11 +817,19 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                         vcam["zoom_start"], vcam["zoom_end"] = vcam.get("zoom_start", 1.0) or 1.0, 1.22
                         vmove = "push_in"
                     variant = os.path.join(out_dir, "shots", f"scene{i}_variant_{fcount}.mp4")
+                    safe_v = _compatible_camera_move(last_camera_move, vmove)
+                    if safe_v != vmove:
+                        from src.cinematic.camera_language import CAMERA_MOVES
+                        _m = CAMERA_MOVES.get(safe_v)
+                        vcam = dict(_m) if _m else {"zoom_start": 1.0, "zoom_end": 1.0,
+                                                    "pan_x": 0, "pan_y": 0}
+                        vmove = safe_v
                     if _kenburns(got, variant, duration=4.0, zoom_in=vmove == "push_in", camera=vcam):
                         fill_shots.append({"file": variant, "duration": 4.0, "kind": src,
                                            "camera": vmove, "motion_params": vcam,
                                            "title": title, "query": fill_q,
                                            "asset": got})
+                        last_camera_move = vmove
                         fplaced += 4.0
                         fcount += 1
                     else:
@@ -972,8 +1046,18 @@ def _append_coverage_variant(tl: dict, last: dict, scene_end: float,
     mp = dict(last.get("motion_params") or {})
     if mp.get("zoom_end", 1.2) > mp.get("zoom_start", 1.0):
         mp["zoom_start"], mp["zoom_end"] = mp.get("zoom_end", 1.22), mp.get("zoom_start", 1.0)
+        vmove = "pull_out"
     else:
         mp["zoom_start"], mp["zoom_end"] = mp.get("zoom_start", 1.0) or 1.0, 1.22
+        vmove = "push_in"
+    # v21: coverage variants must not jar against the previous shot's move.
+    prev_move = last.get("camera_move") or last.get("camera") or None
+    safe_v = _compatible_camera_move(prev_move, vmove)
+    if safe_v != vmove:
+        from src.cinematic.camera_language import CAMERA_MOVES
+        _m = CAMERA_MOVES.get(safe_v)
+        mp = dict(_m) if _m else {"zoom_start": 1.0, "zoom_end": 1.0, "pan_x": 0, "pan_y": 0}
+        vmove = safe_v
     # Cap EVERY variant chunk at MAX_SHOT_HOLD_S: the narration remainder
     # can exceed the hold limit (e.g. 11s scene → 4s primary + 4.48s
     # remainder), and an uncapped single variant fails the shot_hold gate.
@@ -1002,6 +1086,7 @@ def _append_coverage_variant(tl: dict, last: dict, scene_end: float,
             "asset_source": last.get("asset_source", ""),
             "asset_title": last.get("asset_title", ""),
             "query_used": last.get("query_used", ""),
+            "asset": last.get("asset", ""),  # v21: source still path
             "scene_id": scene_id,
             "verification_passed": last.get("verification_passed", True),
             "verification_reasons": last.get("verification_reasons", []),
@@ -1057,6 +1142,7 @@ def build_stills_timeline(scenes_data: list[dict], shot_plan: dict,
             entry["asset_source"] = shot.get("kind", "")
             entry["asset_title"] = shot.get("title", "")
             entry["query_used"] = shot.get("query", "")
+            entry["asset"] = shot.get("asset", "")  # v21: source still path
             entry["scene_id"] = i
             ver = shot.get("verification") or {}
             entry["verification_passed"] = bool(ver.get("passed", True))

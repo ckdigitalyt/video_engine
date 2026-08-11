@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import subprocess
 from dataclasses import dataclass, field
 from typing import Optional
@@ -125,6 +126,7 @@ class DeterministicQA:
         # Repeated assets (from timeline if available)
         if timeline_path and os.path.exists(timeline_path):
             self._check_repeated_assets(timeline_path, report)
+            self._check_motion_continuity(timeline_path, report)
 
         # Perceptual duplicate / frozen / static frames
         self._check_motion(video_path, report)
@@ -164,17 +166,112 @@ class DeterministicQA:
         try:
             with open(timeline_path) as f:
                 tl = json.load(f)
-            files = [v.get("file", "") for v in tl.get("video_timeline", [])]
+            entries = tl.get("video_timeline", [])
+            files = [v.get("file", "") for v in entries]
             from collections import Counter
             counts = Counter(files)
             repeats = {f: c for f, c in counts.items() if c > 1 and "manim" not in f}
+            # Perceptual repeats: same visual content under DIFFERENT filenames
+            # (cached stills reused across scenes, coverage variants re-rendering
+            # the same source still).  Exact-filename comparison alone misses
+            # these — the Andromeda v5 run passed "no repeats" while reusing
+            # 16 cached stills.  Sample one mid-frame per clip and compare dHashes.
+            per_dups: list[dict] = []
+            seen: list[tuple[float, str, str]] = []  # (ts, file, dhash)
+            import tempfile
+            with tempfile.TemporaryDirectory() as td:
+                for i, v in enumerate(entries):
+                    f = v.get("file", "")
+                    if not f or "manim" in f or not os.path.exists(f):
+                        continue
+                    st = v.get("start_time", 0.0)
+                    et = v.get("end_time", st + 1.0)
+                    mid = st + (et - st) / 2.0
+                    # v21: prefer the SOURCE still (asset) when present — clip
+                    # mid-frames are motion-shifted (Ken Burns) and dodge the
+                    # hash; the source still is stable and catches coverage
+                    # variants re-rendering the same image.
+                    src = v.get("asset") or ""
+                    hashed_path = src if (src and os.path.exists(src)) else f
+                    frame = os.path.join(td, f"f{i}.jpg")
+                    if hashed_path != src:
+                        r = subprocess.run(
+                            ["ffmpeg", "-y", "-v", "error", "-ss", f"{mid:.2f}",
+                             "-i", f, "-frames:v", "1", "-q:v", "5", frame],
+                            capture_output=True, text=True, timeout=15)
+                    else:
+                        shutil.copy(src, frame)
+                    if not os.path.exists(frame):
+                        continue
+                    try:
+                        with Image.open(frame) as im:
+                            h = dhash(im)
+                    except Exception:
+                        continue
+                    for ts0, f0, h0 in seen:
+                        if hamming(h, h0) < self._dup_th + 4:
+                            per_dups.append({
+                                "at": [round(ts0, 1), round(mid, 1)],
+                                "files": [f0, f],
+                                "hamming": hamming(h, h0),
+                            })
+                    seen.append((mid, f, h))
+            detail = "no repeats"
+            if repeats:
+                detail = f"repeated files: {repeats}"
+            if per_dups:
+                detail += f"; perceptual repeats: {len(per_dups)} (same visual, different file)"
             report.add(QACheck(
-                "repeated_assets", not repeats,
-                detail=f"repeated files: {repeats}" if repeats else "no repeats",
-                metrics={"repeats": repeats},
+                "repeated_assets", not repeats and not per_dups,
+                detail=detail,
+                metrics={"repeats": repeats, "perceptual_repeats": per_dups[:20]},
             ))
         except Exception as e:
             report.add(QACheck("repeated_assets", False, f"timeline parse error: {e}"))
+
+    def _check_motion_continuity(self, timeline_path: str, report: QAReport):
+        """Flag jarring camera-move flips at cut points.
+
+        Uses the motion grammar (validate_motion_sequence): zoom_in→zoom_out,
+        push_in→pull_out and similar directional reversals are forbidden
+        because they read as a visible "jar" between clips.  Also flags
+        lateral reversals (pan_left→pan_right).  The Andromeda v5 run had
+        coverage variants that deliberately inverted the camera move, which is
+        exactly this failure mode.
+        """
+        try:
+            from src.director.motion_grammar import (
+                validate_motion_sequence, get_motion_direction, MotionDirection,
+            )
+        except ImportError:
+            return  # grammar unavailable — skip (planner enforces continuity too)
+        try:
+            with open(timeline_path) as f:
+                tl = json.load(f)
+            entries = tl.get("video_timeline", [])
+            flips: list[dict] = []
+            prev_move = None
+            for v in entries:
+                move = v.get("camera_move") or v.get("camera") or "static"
+                if prev_move is not None and move != prev_move:
+                    ok = validate_motion_sequence(prev_move, move)
+                    if ok and prev_move in ("pan_left", "pan_right") and move in ("pan_left", "pan_right"):
+                        ok = prev_move == move  # lateral reversal is a jar too
+                    if not ok:
+                        flips.append({
+                            "at": v.get("start_time", 0.0),
+                            "from": prev_move, "to": move,
+                        })
+                prev_move = move
+            report.add(QACheck(
+                "motion_continuity", not flips,
+                detail=f"jarring camera flips at cuts: {flips}" if flips
+                       else "camera moves continuous across cuts",
+                metrics={"flips": flips},
+            ))
+        except Exception as e:
+            report.add(QACheck("motion_continuity", False,
+                               f"motion continuity check error: {str(e)[:120]}"))
 
     def _check_motion(self, video_path: str, report: QAReport):
         """Sample frames; detect perceptual dup runs (frozen) and static windows."""
