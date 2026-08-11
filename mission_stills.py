@@ -708,8 +708,22 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
         while shots and est > placed_total + 1.5 and est > 8.0 and len(shots) < 4:
             # estimate narration duration: ~2.6 words/sec spoken
             last = shots[-1]
-            src_img = os.path.join(still_root, os.path.basename(
-                last.get("file", "").replace(".mp4", ".jpg")))
+            # v23: coverage variants must NOT re-render the same still as the
+            # previous shot when the scene already has another distinct still
+            # (the "same image again and again" defect — Andromeda v5, Venus
+            # v1 both flagged these as perceptual repeats).  Prefer a shot
+            # whose asset differs from the last shot's.
+            src_img = ""
+            _alt = next((sh for sh in shots
+                         if sh.get("asset") and sh.get("asset") != last.get("asset")
+                         and os.path.exists(sh["asset"])), None)
+            if _alt:
+                src_img = _alt["asset"]
+                print(f"  [coverage] scene{i}: variant uses DIFFERENT still "
+                      f"({os.path.basename(src_img)})")
+            if not src_img:
+                src_img = os.path.join(still_root, os.path.basename(
+                    last.get("file", "").replace(".mp4", ".jpg")))
             if last.get("kind") == "manim" and not os.path.exists(src_img):
                 # manim-only scene: pull a frame out of the clip
                 src_img = os.path.join(out_dir, "shots", f"scene{i}_frame.jpg")
@@ -754,7 +768,8 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                                   "verification": last.get("verification"),
                                   "title": last.get("title", ""),
                                   "query": last.get("query", ""),
-                                  "asset": src_img})
+                                  "asset": src_img,
+                                  "shot_type": "variant"})
                     last_camera_move = vmove
                     placed_total += 4.0
                     print(f"  [coverage] scene{i}: narration ~{est:.0f}s, "
@@ -1163,7 +1178,7 @@ def build_stills_timeline(scenes_data: list[dict], shot_plan: dict,
                 "motion": "none",
                 "camera": "ken_burns" if shot["kind"] not in ("manim", "vector") else "static",
                 "beat_index": si,
-                "shot_type": "primary",
+                "shot_type": shot.get("shot_type", "primary"),
             }
             # ── Semantic identity (iteration guidance: any frame traceable
             #    from the timeline alone, not just diagnostics) ──
