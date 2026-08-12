@@ -2022,6 +2022,107 @@ def stage_video_review(video_path: str, scenes: list[dict], out_path: str) -> di
     return review
 
 
+def stage_video_review_dual(video_path: str, scenes: list[dict], out_dir: str,
+                            timeline_path: str = "",
+                            script_path: str = "",
+                            interval_s: float | None = None) -> dict:
+    """Dual-model detailed review of the FINAL video (Oumuamua feedback
+    req 4: the video must be reviewed by BOTH Gemini and DeepSeek Pro).
+
+    Gemini (vision) reviews sampled frames + script + timeline and writes
+    per-frame descriptions; DeepSeek Pro (text-only) reviews the same rubric
+    with script + timeline + the Gemini visual transcript.  Saves
+    review_gemini.json / review_deepseek.json / frame_descriptions.json into
+    out_dir.  Non-fatal: provider failures return a partial dict with an
+    "error" key instead of raising (the pipeline continues).
+    """
+    print("\n[14b/16] DUAL-MODEL VIDEO REVIEW (Gemini vision + DeepSeek Pro)", flush=True)
+    t0 = time.time()
+    from src.utils.config import get_config as _gc
+    if not _gc("pipeline.dual_review_enabled", True):
+        print("  [dual-review] disabled via pipeline.dual_review_enabled")
+        return {"skipped": True, "elapsed_s": round(time.time() - t0, 1)}
+    _tools = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tools")
+    if _tools not in sys.path:
+        sys.path.insert(0, _tools)
+    import detailed_video_review as _dvr
+
+    script_text = "\n".join(f"SCENE {i}: {s['narration']}" for i, s in enumerate(scenes))
+    timeline_text = _dvr._load_timeline(timeline_path) if timeline_path else ""
+    if not interval_s:
+        interval_s = float(_gc("pipeline.dual_review_interval_s", 5.0))
+    frames_dir = os.path.join(out_dir, "review_frames")
+    meta = {"video": video_path,
+            "ts": time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime())}
+    out = {"_meta": meta}
+    try:
+        print(f"  extracting frames (every {interval_s:g}s)...")
+        frames = _dvr.extract_frames(video_path, frames_dir, interval=interval_s)
+        out["frames"] = len(frames)
+    except Exception as e:  # noqa: BLE001
+        print(f"  !! frame extraction failed: {str(e)[:100]}")
+        out["error"] = f"frame extraction: {e}"
+        return out
+
+    try:
+        print("  Gemini vision review...")
+        prompt = _dvr.DETAILED_PROMPT.format(
+            script=script_text[:14000], timeline=timeline_text[:8000], audio_diag="")
+        content = [prompt]
+        for t, fp in frames:
+            content.append(f"FRAME t={t}s:")
+            content.append(_dvr.types_part(fp))
+        model, text = _dvr.gemini_call(
+            content, ["gemini-2.5-flash", "gemini-3.5-flash", "gemini-3-flash-preview"])
+        gem = _dvr._parse_json(text)
+        gem["_meta"] = {"provider": "gemini", "model": model, **meta}
+        with open(os.path.join(out_dir, "review_gemini.json"), "w") as f:
+            json.dump(gem, f, indent=2)
+        out["gemini"] = {"score": gem.get("quality_score"),
+                         "confidence": gem.get("confidence"), "model": model}
+        print(f"    Gemini: {gem.get('quality_score')}/100 ({model})")
+    except Exception as e:  # noqa: BLE001
+        print(f"  !! Gemini detailed review failed: {str(e)[:120]}")
+        out["error"] = (out.get("error", "") + f"; gemini: {e}").strip("; ")
+
+    descs = []
+    try:
+        print("  Gemini frame descriptions (visual transcript for DeepSeek)...")
+        dcontent = [_dvr.FRAME_DESC_PROMPT]
+        for t, fp in frames:
+            dcontent.append(f"FRAME t={t}s:")
+            dcontent.append(_dvr.types_part(fp))
+        _, dtext = _dvr.gemini_call(
+            dcontent, ["gemini-2.5-flash", "gemini-3.5-flash", "gemini-3-flash-preview"])
+        descs = _dvr._parse_json(dtext).get("frames", [])
+        with open(os.path.join(out_dir, "frame_descriptions.json"), "w") as f:
+            json.dump(descs, f, indent=2)
+    except Exception as e:  # noqa: BLE001
+        print(f"  !! frame descriptions failed (DeepSeek review lacks visuals): {str(e)[:100]}")
+
+    try:
+        print("  DeepSeek Pro review...")
+        vt = "\n".join(f"[{d.get('t')}s] {d.get('desc')}" for d in descs)
+        prompt = _dvr.DETAILED_PROMPT.format(
+            script=script_text[:14000], timeline=timeline_text[:8000], audio_diag="")
+        prompt += "\n\nVISUAL TRANSCRIPT (frame descriptions):\n" + (vt or "(none)")
+        dtext = _dvr.deepseek_call(prompt)
+        ds = _dvr._parse_json(dtext)
+        ds["_meta"] = {"provider": "deepseek", "model": "deepseek-chat", **meta}
+        with open(os.path.join(out_dir, "review_deepseek.json"), "w") as f:
+            json.dump(ds, f, indent=2)
+        out["deepseek"] = {"score": ds.get("quality_score"),
+                           "confidence": ds.get("confidence"), "model": "deepseek-chat"}
+        out["quality_score"] = ds.get("quality_score")
+        print(f"    DeepSeek Pro: {ds.get('quality_score')}/100")
+    except Exception as e:  # noqa: BLE001
+        print(f"  !! DeepSeek review failed: {str(e)[:120]}")
+        out["error"] = (out.get("error", "") + f"; deepseek: {e}").strip("; ")
+
+    out["elapsed_s"] = round(time.time() - t0, 1)
+    return out
+
+
 # ═══════════════════════════════════════════════════════════════════════ #
 # Improvement pass (14) — applies timeline mutations, then re-render
 # ═══════════════════════════════════════════════════════════════════════ #

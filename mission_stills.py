@@ -2105,6 +2105,32 @@ def main():
             break
         iteration += 1
 
+    # ── v27 (Oumuamua feedback req 4): DUAL-MODEL REVIEW ─────────────
+    # The per-iteration review above is Gemini Flash only.  Oumuamua
+    # feedback: "get the video reviewed by Gemini AND DeepSeek Pro".
+    # Run the detailed dual review (Gemini vision on sampled frames +
+    # DeepSeek Pro on script + visual transcript) once on the FINAL
+    # video, save review_gemini.json / review_deepseek.json into out_dir,
+    # and surface DeepSeek's critical defects as degradations.
+    dual_review = {}
+    try:
+        dual_review = M.stage_video_review_dual(
+            review_target, scenes_data, out_dir,
+            timeline_path=timeline_path,
+            script_path=os.path.join(out_dir, "script_final.json"),
+        )
+        run_report["stages"]["review_dual"] = {
+            "gemini_score": (dual_review.get("gemini") or {}).get("score"),
+            "deepseek_score": (dual_review.get("deepseek") or {}).get("score"),
+            "gemini_model": (dual_review.get("gemini") or {}).get("model"),
+            "deepseek_model": (dual_review.get("deepseek") or {}).get("model"),
+            "frames": dual_review.get("frames"),
+            "error": dual_review.get("error"),
+        }
+    except Exception as e:
+        print(f"  !! dual review failed (non-fatal): {str(e)[:120]}")
+        run_report["stages"]["review_dual"] = {"error": str(e)[:200]}
+
     # ── v9 (Jade spec §10): PUBLISH-READINESS GATE on the final video ──
     # Deterministic: hook strength in the opening seconds, voice
     # consistency, style lock, dead-air/clipping on the mastered audio,
@@ -2208,6 +2234,22 @@ def main():
         degradations.append({
             "stage": "music", "severity": "warning",
             "detail": "music mix failed or no bed available",
+        })
+    # v27 (Oumuamua feedback req 4): surface the dual-model review outcome —
+    # DeepSeek Pro critical defects and low scores must not ship silently.
+    _dual = run_report.get("stages", {}).get("review_dual", {}) or {}
+    if _dual.get("error"):
+        degradations.append({
+            "stage": "dual_review", "severity": "warning",
+            "detail": f"dual-model review incomplete: {_dual['error'][:120]}",
+        })
+    _ds_score = _dual.get("deepseek_score")
+    if _ds_score is not None and _ds_score < int(_thr or 70):
+        degradations.append({
+            "stage": "dual_review", "severity": "warning",
+            "detail": f"DeepSeek Pro score {_ds_score}/100 below "
+                      f"improve threshold {_thr} (Gemini "
+                      f"{_dual.get('gemini_score')}/100)",
         })
     # ── v10 (rec 10/11): pacing failures are exposed, never silent ────
     from src.cinematic.pacing_engine import audit_pacing
