@@ -602,10 +602,28 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                                  "kind": "vector"})
                 stats["manim"] += 1  # counts as animated coverage
                 print(f"  [vector] {os.path.basename(vbeat)} (intent={intent})")
-        # 2) Stills with Ken Burns (2 per scene typically)
+        # 2) Stills with Ken Burns.  v28 root fix (hook_strength): the
+        # HOOK scene (i==0) must plan >= HOOK_MIN_SHOTS DISTINCT stills —
+        # the old fixed cap of 2 stills + variants of the same images
+        # could only ever place 4 distinct visuals in the 15s hook window
+        # (Wow! Signal run: hook_strength 4 < 5).  Other scenes keep the
+        # 2-still budget.
+        still_budget = HOOK_MIN_SHOTS if i == 0 else 2
         still_count = 0
-        for kind, query in _still_plan_for(text, spec, scene):
-            if still_count >= 2:
+        plan_cands = _still_plan_for(text, spec, scene)
+        if i == 0:
+            # Pad the hook scene with photorealistic AI candidates so
+            # NASA/Wikimedia rejections + perceptual dedup can never starve
+            # the opening window below HOOK_MIN_SHOTS distinct stills.
+            _style_mod = _style_prompt_for(scene)
+            _pad = 0
+            while len(plan_cands) < HOOK_MIN_SHOTS + 2 and _pad < 8:
+                _pad += 1
+                plan_cands.append(("ai", _guarded_ai_prompt(
+                    f"{_detect_topic(text)} documentary scene, alternate angle {_pad}",
+                    text, _style_mod)))
+        for kind, query in plan_cands:
+            if still_count >= still_budget:
                 break
             fname = f"scene{i}_{still_count}.jpg"
             out = os.path.join(still_root, fname)
@@ -743,21 +761,29 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
         est = max(4.0, len(text.split()) / 2.6)
         placed_total = sum(sh.get("duration", 0) for sh in shots)
         # Add variants (opposite camera) until the scene is visually
-        # covered or we hit 4 shots — prevents one-shot freeze stretches.
+        # covered or we hit the per-scene shot cap — prevents one-shot
+        # freeze stretches.  v28: the hook scene may grow to
+        # HOOK_MIN_SHOTS+1 shots so its window is dense.
         var_i = 0
-        while shots and est > placed_total + 1.5 and est > 8.0 and len(shots) < 4:
+        _scene_cap = HOOK_MIN_SHOTS + 1 if i == 0 else 4
+        while shots and est > placed_total + 1.5 and est > 8.0 and len(shots) < _scene_cap:
             # estimate narration duration: ~2.6 words/sec spoken
             last = shots[-1]
-            # v23: coverage variants must NOT re-render the same still as the
-            # previous shot when the scene already has another distinct still
-            # (the "same image again and again" defect — Andromeda v5, Venus
-            # v1 both flagged these as perceptual repeats).  Prefer a shot
-            # whose asset differs from the last shot's.
+            # v23+v28: coverage variants must NOT re-render the same still
+            # as the previous shot, and should rotate through the LEAST-used
+            # distinct still in the scene ("same image again and again"
+            # defect — Andromeda v5, Venus v1, Wow! Signal v1).
             src_img = ""
-            _alt = next((sh for sh in shots
-                         if sh.get("asset") and sh.get("asset") != last.get("asset")
-                         and os.path.exists(sh["asset"])), None)
-            if _alt:
+            _used = {}
+            for _sh in shots:
+                _a = _sh.get("asset")
+                if _a:
+                    _used[_a] = _used.get(_a, 0) + 1
+            _cands = [sh for sh in shots
+                      if sh.get("asset") and os.path.exists(sh["asset"])]
+            if _cands:
+                _alt = min(_cands, key=lambda sh: (_used.get(sh["asset"], 0),
+                                                    sh["asset"] == last.get("asset")))
                 src_img = _alt["asset"]
                 print(f"  [coverage] scene{i}: variant uses DIFFERENT still "
                       f"({os.path.basename(src_img)})")
@@ -876,10 +902,14 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                 last_camera_move = cam.get("move", "push_in")
                 # v10.4 + 2026 recalibration: fill scenes must also satisfy the
                 # coverage guard AND the 4s micro-beat hold cap.
+                # v28 root fix: if the HOOK scene falls back to fill, it must
+                # still supply HOOK_MIN_SHOTS DISTINCT visuals — a single
+                # image + camera variants fails hook_strength (Wow! Signal).
                 fest = max(4.0, len(text.split()) / 2.6)
                 fplaced = 4.0
                 fcount = 1
-                while fest > fplaced + 1.5 and fest > 8.0 and fcount < 4:
+                _fill_cap = HOOK_MIN_SHOTS if i == 0 else 4
+                while fest > fplaced + 1.5 and fest > 8.0 and fcount < _fill_cap:
                     vcam = dict(cam_params) if cam_params else {}
                     if vcam.get("zoom_end", 1.2) > vcam.get("zoom_start", 1.0):
                         vcam["zoom_start"], vcam["zoom_end"] = vcam.get("zoom_end", 1.22), vcam.get("zoom_start", 1.0)
@@ -895,11 +925,25 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                         vcam = dict(_m) if _m else {"zoom_start": 1.0, "zoom_end": 1.0,
                                                     "pan_x": 0, "pan_y": 0}
                         vmove = safe_v
-                    if _kenburns(got, variant, duration=4.0, zoom_in=vmove == "push_in", camera=vcam):
+                    # v28: hook-scene fill must use a DIFFERENT still per
+                    # shot, not re-render the same image — try a fresh AI
+                    # still (varied prompt) so the opening stays dense.
+                    _fill_src = got
+                    if i == 0 and fcount > 1:
+                        _fq = _guarded_ai_prompt(
+                            f"{fill_q}, alternate angle {fcount}",
+                            text, _style_prompt_for(scene))
+                        _fo = os.path.join(still_root, f"scene{i}_fillvar{fcount}.jpg")
+                        _fg = _ai_still(_fq, _fo)
+                        if _fg and os.path.exists(_fg) and not _is_dup(_fg):
+                            _fill_src = _fg
+                            print(f"  [fill] scene{i} variant uses NEW still "
+                                  f"({os.path.basename(_fg)})")
+                    if _kenburns(_fill_src, variant, duration=4.0, zoom_in=vmove == "push_in", camera=vcam):
                         fill_shots.append({"file": variant, "duration": 4.0, "kind": src,
                                            "camera": vmove, "motion_params": vcam,
                                            "title": title, "query": fill_q,
-                                           "asset": got})
+                                           "asset": _fill_src})
                         last_camera_move = vmove
                         fplaced += 4.0
                         fcount += 1
@@ -1171,20 +1215,19 @@ def _append_coverage_variant(tl: dict, last: dict, scene_end: float,
         _sp.run(["ffmpeg", "-y", "-v", "error", "-ss", "1.0",
                  "-i", last.get("file", ""), "-frames:v", "1", src_img],
                 capture_output=True, text=True, timeout=30)
-    # v22: prefer a DIFFERENT still already placed in this scene for the
-    # coverage variant, so the viewer never sees the exact same image twice
-    # in a row (the "same image again and again" complaint).  Fall back to
-    # the previous shot's source only when no other asset exists in the scene.
-    alt_src = ""
+    # v22+v28: coverage variants must NOT re-render the same still as the
+    # previous shot, and long remainders must ROTATE through ALL distinct
+    # stills already placed in this scene ("same image again and again"
+    # defect — Andromeda v5, Venus v1, Wow! Signal v1).  Fall back to the
+    # previous shot's source only when no other asset exists in the scene.
+    scene_stills = []
     for _e in tl.get("video_timeline", []):
         if (_e.get("scene_id") == scene_id and _e.get("asset")
-                and os.path.exists(_e["asset"]) and _e.get("asset") != last.get("asset")):
-            alt_src = _e["asset"]
-            break
-    if alt_src:
-        src_img = alt_src
-        print(f"  [variant] scene{scene_id} coverage uses different still "
-              f"({os.path.basename(alt_src)})")
+                and os.path.exists(_e["asset"]) and _e["asset"] not in scene_stills):
+            scene_stills.append(_e["asset"])
+    if scene_stills:
+        print(f"  [variant] scene{scene_id} coverage rotates "
+              f"{len(scene_stills)} distinct still(s)")
     if not os.path.exists(src_img):
         return  # cannot build a variant; keep capped shot (gate reports it)
     variant = os.path.join(out_dir, "shots", f"scene{scene_id}_covvar.mp4")
@@ -1215,6 +1258,12 @@ def _append_coverage_variant(tl: dict, last: dict, scene_end: float,
     while remain > 0.3:
         dur = min(MAX_SHOT_HOLD_S, remain)
         chunk_i += 1
+        # v28: rotate the chunk source through the scene's distinct stills
+        # (never the same image twice in a row when another exists).
+        if scene_stills:
+            _prev = src_img
+            _pool = [s for s in scene_stills if s != _prev] or scene_stills
+            src_img = _pool[(chunk_i - 1) % len(_pool)]
         vfile = os.path.join(out_dir, "shots",
                              f"scene{scene_id}_covvar{chunk_i}.mp4")
         if not _kenburns(src_img, vfile, duration=dur,
@@ -1231,7 +1280,7 @@ def _append_coverage_variant(tl: dict, last: dict, scene_end: float,
             "asset_source": last.get("asset_source", ""),
             "asset_title": last.get("asset_title", ""),
             "query_used": last.get("query_used", ""),
-            "asset": last.get("asset", ""),  # v21: source still path
+            "asset": src_img,  # v28: actual source still used for this chunk
             "scene_id": scene_id,
             "verification_passed": last.get("verification_passed", True),
             "verification_reasons": last.get("verification_reasons", []),

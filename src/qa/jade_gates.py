@@ -473,7 +473,15 @@ class PublishGate:
         except Exception:
             vt = []
         shots_in_window = [v for v in vt if v.get("start_time", 0) < self._hook_window]
-        distinct = len({os.path.basename(v.get("file", "")) for v in shots_in_window})
+        # v28 root fix: count DISTINCT SOURCE STILLS, not render files.
+        # Coverage variants are separate files but show the SAME image, so a
+        # file-based count inflated novelty (Wow! Signal: 4 files, 2 unique
+        # images).  Manim/vector clips have no asset field → fall back to
+        # the clip filename so animated beats still count as visuals.
+        def _visual_key(v: dict) -> str:
+            a = (v.get("asset") or "").strip()
+            return os.path.basename(a) if a else os.path.basename(v.get("file", "") or "")
+        distinct = len({_visual_key(v) for v in shots_in_window})
         passed = distinct >= self._hook_min_shots
         return {
             "passed": passed,
