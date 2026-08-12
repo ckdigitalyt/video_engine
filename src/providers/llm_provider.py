@@ -287,8 +287,8 @@ class NemotronProvider(LLMProvider):
             base_url=get_config("providers.nemotron.base_url",
                                 "https://integrate.api.nvidia.com/v1"),
             model=get_config("llm.nemotron.model", "nvidia/nemotron-3-super-120b-a12b"),
-            max_tokens=get_config("llm.nemotron.max_tokens", 4000),
-            timeout=get_config("llm.nemotron.timeout", 180),
+            max_tokens=get_config("llm.nemotron.max_tokens", 16000),
+            timeout=get_config("llm.nemotron.timeout", 600),
         )
 
     def generate_text(self, prompt: str, image_path: Optional[str] = None, **kwargs) -> str:
