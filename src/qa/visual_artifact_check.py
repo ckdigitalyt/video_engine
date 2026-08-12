@@ -45,6 +45,22 @@ SEAM_FACTOR = 6.0
 SEAM_MAX_NEIGHBOR_CORR = 0.90
 SAMPLE_FRAMES = 6           # how many frames to probe (evenly spaced)
 
+# ── v32 corrected mirror-band detector (DeepSeek-validated 2026-08-12) ──
+# The v13 metric (border_row_deltas p90) false-positived on smooth/structured
+# content: for the innermost border rows, inner[n-1-i] collapses to the row
+# ADJACENT to the border, so the "flip delta" became an adjacency correlation
+# (Wow! Signal v31 re-run: 12/24 clean AI stills flagged, p90 +0.20).
+# The corrected detector requires a CONTIGUOUS RUN of rows that are a
+# pixel-faithful vertical flip of the adjacent interior band, at ANY seam
+# depth 4..32px, per edge independently.
+MIRROR_MIN_CORR = 0.90        # flip-correlation floor for a mirror row
+MIRROR_MIN_MARGIN = 0.15      # flip corr must beat same-side corr by this
+MIRROR_MAX_REL_MAD = 0.30     # MAD/std ceiling (pixel fidelity, relative)
+MIRROR_ABS_MAD = 24.0         # absolute MAD floor (gray levels): near-identical pixels
+MIRROR_MIN_RUN = 4            # contiguous run must be at least this many rows
+MIRROR_RUN_FRAC = 0.60        # ...and cover >= this fraction of the band
+MIRROR_DEPTH_MAX = 32         # scan seam depths 4..32px (classic outpainting bands)
+
 
 def _probe_size(video_path: str) -> Optional[tuple[int, int]]:
     try:
@@ -153,6 +169,84 @@ def border_row_deltas(img: np.ndarray, frac: float = BORDER_FRAC,
     return out
 
 
+def _corr(a: np.ndarray, b: np.ndarray) -> float:
+    """Pearson correlation of two flattened arrays (guarded for flat rows)."""
+    a = a - a.mean(); b = b - b.mean()
+    denom = (np.sqrt((a * a).sum() * (b * b).sum()) + 1e-9)
+    return float((a * b).sum() / denom)
+
+
+def _row_mirror_score(t: np.ndarray, mir: np.ndarray, same: np.ndarray) -> bool:
+    """True when row *t* is a pixel-faithful flipped copy of its mirror
+    counterpart *mir*: high flip correlation, a clear margin over the
+    same-side row *same*, and tight pixel fidelity (relative AND absolute).
+    Smooth/structured content fails the margin test (same-side corr is
+    equally high); scattered adjacency correlations never form a run."""
+    if t.std() < 2.0 or mir.std() < 2.0:
+        return False
+    c_mir = _corr(t, mir)
+    if c_mir < MIRROR_MIN_CORR:
+        return False
+    c_same = _corr(t, same)
+    if (c_mir - c_same) < MIRROR_MIN_MARGIN:
+        return False
+    mad = float(np.mean(np.abs(t - mir)))
+    if mad / max(t.std(), 1e-6) > MIRROR_MAX_REL_MAD:
+        return False
+    if mad > MIRROR_ABS_MAD:
+        return False
+    return True
+
+
+def mirror_band_scan(img: np.ndarray,
+                     depths: Optional[tuple[int, int]] = None) -> list[dict]:
+    """Detect genuine mirrored border bands (outpainting/inpaint seams).
+
+    For each edge (top/bottom/left/right) and each candidate seam depth
+    ``d`` in the scan window, the border band rows 0..d-1 must be a
+    pixel-faithful vertical flip of the adjacent interior band rows
+    d..2d-1: border row i mirrors interior row (2d-1-i).  A band is flagged
+    only when a CONTIGUOUS RUN of rows (>= MIRROR_MIN_RUN and
+    >= MIRROR_RUN_FRAC of the band) satisfies the strict corr/margin/
+    fidelity criteria — the old metric's scattered adjacency correlations
+    never form a run, so smooth content passes.
+
+    ``depths``: optional (min_depth, max_depth) inclusive scan window in
+    px.  Defaults to (4, MIRROR_DEPTH_MAX), calibrated for ~270px-tall
+    gate frames; pass a height-scaled window for full-res stills.
+
+    Returns a list of ``{edge, depth, run, share}`` dicts (empty = clean).
+    """
+    h, w = img.shape
+    d_min, d_max = depths if depths is not None else (4, MIRROR_DEPTH_MAX)
+    hits: list[dict] = []
+    for d in range(max(2, d_min), d_max + 1):
+        # Need BOTH the border band (0..d-1) and its interior counterpart
+        # (d..2d-1) to fit inside the image along the scanned axis.
+        if 2 * d > min(h, w):
+            continue
+        for edge, B, I in (
+            ("top", img[:d], img[d:2 * d]),
+            ("bottom", img[-d:], img[-2 * d:-d]),
+            ("left", img[:, :d].T, img[:, d:2 * d].T),
+            ("right", img[:, -d:].T, img[:, -2 * d:-d].T),
+        ):
+            n = min(len(B), len(I))
+            if n < MIRROR_MIN_RUN:
+                continue
+            run = best = 0
+            for i in range(n):
+                if _row_mirror_score(B[i], I[n - 1 - i], I[i]):
+                    run += 1
+                    best = max(best, run)
+                else:
+                    run = 0
+            if best >= MIRROR_MIN_RUN and best / n >= MIRROR_RUN_FRAC:
+                hits.append({"edge": edge, "depth": d, "run": best,
+                             "share": round(best / n, 2)})
+    return hits
+
+
 def check_frame_mirror(img: np.ndarray, frac: float = BORDER_FRAC) -> dict:
     """Per-frame mirror detection (aggregated deltas).  Kept for tests;
     the video-level gate uses :func:`border_row_deltas` across frames."""
@@ -247,7 +341,6 @@ def run_visual_artifact_check(video_path: str,
         return {"passed": False, "checks": checks, "frames_checked": 0}
 
     mirror_hits, smear_hits, seam_hits = [], [], []
-    mirror_deltas: list[float] = []
     seam_positions: list[int] = []  # column indices of seam candidates
     for i, f in enumerate(frames):
         # Skip essentially-black frames (luma < 5): every artifact metric is
@@ -264,7 +357,13 @@ def run_visual_artifact_check(video_path: str,
         _band = np.vstack([f[:_bh, :], f[-_bh:, :]])
         if float(_band.std()) < 3.0:
             continue
-        mirror_deltas += border_row_deltas(f)
+        # v32: corrected mirror-band detector (contiguous pixel-faithful
+        # flip runs at any depth 4..32px).  Replaces the v13 p90-of-delta
+        # metric that false-positived on smooth content (adjacency corr).
+        for hit in mirror_band_scan(f):
+            mirror_hits.append(
+                f"frame{i}:{hit['edge']}@d={hit['depth']} "
+                f"run={hit['run']}/{hit['share']}")
         s = check_frame_smear(f)
         if not s["passed"]:
             smear_hits.append(f"frame{i}:ratio={s['ratio']:.2f}")
@@ -273,15 +372,6 @@ def run_visual_artifact_check(video_path: str,
             seam_hits.append(f"frame{i}:row={se['row_anomaly']:.0f}x,col={se['col_anomaly']:.0f}x")
             if se.get("col_index") is not None:
                 seam_positions.append(se["col_index"])
-
-    # Mirror verdict from the robust aggregate: the 90th percentile of ALL
-    # border-row deltas across frames (single-row chance correlations and
-    # flat-frame noise wash out; sustained border mirroring does not).
-    if mirror_deltas:
-        import numpy as _np
-        p90 = float(_np.percentile(mirror_deltas, 90))
-        if p90 >= MIRROR_P90:
-            mirror_hits.append(f"p90 delta {p90:+.2f} >= {MIRROR_P90:.2f}")
 
     # Seam verdict with PERSISTENCE: a real duplicated/stretched strip is a
     # static artifact — its seam column reappears at the same position in

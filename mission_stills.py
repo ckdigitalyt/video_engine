@@ -397,6 +397,67 @@ def _auto_crop_borders(image_path: str, out_path: str) -> str:
         return image_path  # fail open — keep original
 
 
+def _crop_mirror_bands(image_path: str, out_path: str) -> str:
+    """Crop baked-in mirrored border bands from a still at INGEST time.
+
+    v32 (DeepSeek-validated): AI image providers occasionally emit a
+    mirrored/outpainted border band (the classic "inpaint seam").  The
+    corrected detector (:func:`src.qa.visual_artifact_check.mirror_band_scan`)
+    finds contiguous pixel-faithful flip runs at any depth 4..32px; any
+    flagged band is cropped off BEFORE the still enters the timeline, so
+    the artifact can never reach the final video.
+
+    Returns the (possibly new) cropped file path, or the ORIGINAL path
+    unchanged when no genuine mirror band exists (fail-open on error).
+    """
+    try:
+        from src.qa.visual_artifact_check import mirror_band_scan
+        from PIL import Image
+        import numpy as np
+        with Image.open(image_path) as im:
+            im = im.convert("RGB")
+            w, h = im.size
+            # Downscale for speed; scan depths scale with frame height so
+            # full-res stills and 480px-wide gate frames behave alike.
+            scale = min(1.0, 800.0 / max(w, h))
+            small = im.resize(
+                (max(1, int(w * scale)), max(1, int(h * scale))),
+                Image.LANCZOS)
+            arr = np.asarray(small.convert("L"), dtype=np.float32)
+            sh = arr.shape[0]
+            d_max = max(8, int(round(0.12 * sh)))  # ~12% of height, like gate frames
+            hits = mirror_band_scan(arr, depths=(4, d_max))
+            if not hits:
+                return image_path  # no genuine mirror band — keep original
+            # Crop the union of flagged bands (margin = 1 scaled row).
+            crop_top = crop_bottom = crop_left = crop_right = 0
+            for hit in hits:
+                d = hit["depth"] + 1
+                if hit["edge"] == "top":
+                    crop_top = max(crop_top, d)
+                elif hit["edge"] == "bottom":
+                    crop_bottom = max(crop_bottom, d)
+                elif hit["edge"] == "left":
+                    crop_left = max(crop_left, d)
+                elif hit["edge"] == "right":
+                    crop_right = max(crop_right, d)
+            # Map scaled pixels back to full-res.
+            inv = 1.0 / scale
+            box = (int(crop_left * inv), int(crop_top * inv),
+                   w - int(crop_right * inv), h - int(crop_bottom * inv))
+            if box[2] - box[0] < 0.5 * w or box[3] - box[1] < 0.5 * h:
+                return image_path  # would destroy composition — keep original
+            im.crop(box).save(out_path, quality=95)
+            print(f"  [mirror] cropped mirrored band(s) "
+                  f"{os.path.basename(image_path)} "
+                  f"{w}x{h} -> {box[2]-box[0]}x{box[3]-box[1]} "
+                  f"({[h['edge'] for h in hits]})")
+            return out_path
+    except Exception as e:
+        print(f"  [mirror] !! {os.path.basename(image_path)}: {str(e)[:80]}")
+        return image_path  # fail open — keep original
+
+
 def _kenburns(image_path: str, out_path: str, duration: float = 6.0,
               zoom_in: bool = True, camera: Optional[dict] = None) -> str:
     """Ken Burns motion with LINEAR zoom across the full shot duration.
@@ -694,6 +755,23 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                 elif cropped and cropped != got:
                     got = cropped
                     print(f"  [border] using cropped {os.path.basename(got)}")
+            # ── MIRROR GATE (v32, DeepSeek-validated) ────────────────
+            # AI stills occasionally carry a baked-in mirrored border band
+            # (outpainting/inpaint seam).  The v13 video-level metric
+            # false-positived on smooth content (Wow! Signal v31 rerun:
+            # 12/24 clean stills flagged); the corrected detector (v32,
+            # contiguous pixel-faithful flip runs at any depth 4..32px)
+            # now also runs HERE at ingest so a genuinely mirrored band is
+            # cropped before it ever reaches the timeline.  Fail-open on
+            # any error (keep original) — the video-level gate still owns
+            # the final verdict.
+            if os.path.exists(got):
+                mir_out = os.path.join(
+                    still_root, fname.replace(".jpg", "_mirror.jpg"))
+                mir_cropped = _crop_mirror_bands(got, mir_out)
+                if mir_cropped and mir_cropped != got:
+                    got = mir_cropped
+                    print(f"  [mirror] using cropped {os.path.basename(got)}")
             # Content-based dedup: skip near-identical stills already placed
             if os.path.exists(got) and _is_dup(got):
                 stats["deduped"] += 1
