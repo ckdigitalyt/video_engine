@@ -1334,15 +1334,28 @@ def build_sfx_timeline(scenes: list[dict], audio_durations: list[float],
                     authentic = fetch_authentic(ev.get("source"))
                 except Exception as _e:
                     print(f"  [sfx] !! authentic fetch failed: {str(_e)[:80]}")
-            # map phrase -> fractional position in narration
+            # map phrase -> WORD-BOUNDARY position in narration
+            # v31 (DeepSeek-validated): the old code used a CHARACTER-
+            # fraction (idx / len(joined)), which lands mid-phrase — the
+            # Wow! Signal 'whoosh' at 28.04s sat 0.7s into the phrase and
+            # sounded random.  Count words BEFORE the matched phrase so the
+            # SFX lands on the trigger word.  If the phrase is NOT found,
+            # DROP the event (defer) instead of guessing at 0.5.
             frac = 0.5
             if at and words:
                 atw = [w for w in at.replace("after", "").replace(":", "").split() if w]
                 if atw:
                     joined = " ".join(words).lower()
-                    idx = joined.find(" ".join(atw[:3]).lower())
+                    needle = " ".join(atw[:3]).lower()
+                    idx = joined.find(needle)
                     if idx >= 0:
-                        frac = min(0.92, max(0.05, idx / max(1, len(joined))))
+                        prefix = joined[:idx]
+                        w_start = len(prefix.split()) if prefix.strip() else 0
+                        frac = min(0.92, max(0.05, w_start / max(1, len(words))))
+                    else:
+                        print(f"  [sfx] !! phrase '{needle}' not found in scene {i} "
+                              f"narration — dropping event '{trig}' (no guess placement)")
+                        continue
             t_at = cursor + frac * dur
             # §4.1: snap to nearest visual cut when the timeline is known
             if scene_cuts:
@@ -1507,8 +1520,16 @@ def stage_narration_dynamic(scenes: list[dict], cache_audio: str,
                     "explanation": "heavy", "climax": "medium",
                     "conclusion": "heavy",
                 }.get(role, "medium")
-                _paused = apply_pacing_pauses(
-                    sc.get("narration"), _pause_density)
+                # v31 (DeepSeek-validated): Fish renders scripted
+                # paralinguistic tags like [chuckle] as LONG dead-air
+                # silence (Wow! Signal scene_2: 0.70s gap at ~20.5-21.2s).
+                # Convert them to a bounded pause marker ("...") so the
+                # beat is kept but never becomes dead air.
+                import re as _retag
+                _tagged = _retag.sub(
+                    r"\[(?:chuckle|laugh|sigh|cough|gasp|whisper)\]",
+                    "...", sc.get("narration") or "")
+                _paused = apply_pacing_pauses(_tagged, _pause_density)
                 styled = cb.apply_style(_paused, emo, role)
                 cb.generate_voice(styled, ap)
                 if voice_lock is not None:
@@ -1839,10 +1860,24 @@ def stage_music_mix(video_path: str, music_path: str, out_path: str,
     # the mid-range of the bed (500 Hz - 4 kHz, the voice's frequency home)
     # with a fast attack (10-30 ms) and medium release (50-100 ms) so the
     # bed "breathes" around speech instead of broadband pumping.  Ratio 3-4:1.
-    # NOTE: sidechaincompress in this ffmpeg build refuses a LABELED pad as
-    # its sidechain input ("matches no streams") — always feed it the raw
-    # [0:a] voice stream; band-split pads are the MAIN input only.
-    SIDECHAIN = "threshold=0.0625:ratio=3.5:attack=20:release=250"
+    # v31 (DeepSeek-validated): the old HARD-CODED threshold=0.0625 (-24 dB)
+    # sat ABOVE the narration mean (~-31 dB in the Wow! Signal run), so the
+    # compressor almost never engaged (audio-qa ducking_depth=False, bed ~15 dB
+    # louder than voice).  Measure the ACTUAL narration level and place the
+    # threshold ~8 dB BELOW the mean so speech reliably triggers ducking.
+    try:
+        _vp = subprocess.run(
+            ["ffmpeg", "-i", video_path, "-af", "volumedetect", "-f", "null", "-"],
+            capture_output=True, text=True, timeout=30)
+        _vm = _re.search(r"mean_volume: ([-.\d]+) dB", _vp.stderr)
+        _narr_mean_db = float(_vm.group(1)) if _vm else -31.0
+    except Exception:
+        _narr_mean_db = -31.0
+    _thr_db = max(-45.0, min(-12.0, _narr_mean_db - 8.0))  # 8 dB below mean
+    _thr_lin = 10 ** (_thr_db / 20.0)
+    SIDECHAIN = f"threshold={_thr_lin:.5f}:ratio=3.5:attack=20:release=250"
+    print(f"  [mix] duck threshold {_thr_lin:.5f} ({_thr_db:.1f} dB) — "
+          f"relative to narration mean {_narr_mean_db:.1f} dB (v31)")
     # Jade spec §4: never allow abrupt music starts/stops — fade the bed
     # in over 1s and out over the final 1.5s (unless the video is shorter).
     fade_in = min(1.0, dur / 4)

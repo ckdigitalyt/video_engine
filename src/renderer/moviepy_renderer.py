@@ -279,11 +279,21 @@ class MoviePyRenderer(Renderer):
 
         # ── Audio clips ────────────────────────────────────────────────
         audio_clips = []
-        for track in timeline.audio_timeline:
+        for idx, track in enumerate(timeline.audio_timeline):
             if not track.file or not os.path.exists(track.file):
                 print(f"  -> Skipping missing audio file: {track.file!r}")
                 continue
             clip = AudioFileClip(track.file).set_start(track.start_time)
+            # v31 (DeepSeek-validated): hard voice seams read as "voice
+            # abruptly broke" (Wow! Signal 15s break at the scene_1→scene_2
+            # boundary).  Overlap contiguous narration tracks with a short
+            # crossfade so the envelope never dips at the seam.
+            if idx > 0 and audio_clips:
+                prev = timeline.audio_timeline[idx - 1]
+                if abs(track.start_time - prev.end_time) < 0.02:
+                    cf = min(0.06, max(0.02, (track.start_time - prev.start_time) * 0.08))
+                    clip = clip.set_start(track.start_time - cf).audio_fadein(cf)
+                    audio_clips[-1] = audio_clips[-1].audio_fadeout(cf)
             audio_clips.append(clip)
 
         # ── Video clips with motion + transitions ──────────────────────

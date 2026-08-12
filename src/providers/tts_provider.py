@@ -718,6 +718,16 @@ class FishAudioProvider(TTSProvider):
             raise RuntimeError(
                 f"Fish model '{self._model}' is not a known S2.1 model "
                 f"({_known}) — refusing to risk billing a wrong tier.")
+        # v31 (DeepSeek-validated): log the ACTIVE narrator identity + the
+        # free-tier quality cap ONCE so run logs never imply "chatterbox"
+        # is the narrator (it is only the FALLBACK when Fish fails).
+        if self._model == "s2.1-pro-free":
+            print("  [fish] ACTIVE NARRATOR: Fish Audio s2.1-pro-free "
+                  "(FREE tier — 128 kbps mp3 cap; 320 kbps + s2.1-pro need "
+                  "loaded Fish credit + allow_paid=true)")
+        else:
+            print(f"  [fish] ACTIVE NARRATOR: Fish Audio {self._model} "
+                  "(paid tier — 320 kbps available)")
         self._temperature = float(get_config("voices.fish.temperature", 0.6))
         self._speed = float(get_config("voices.fish.prosody.speed", 1.0))
         self._volume = float(get_config("voices.fish.prosody.volume", 0))
