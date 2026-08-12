@@ -67,15 +67,20 @@ class NvidiaNimProvider(ImageGenProvider):
 
     name = "nvidia_nim"
 
-    # flux.1-dev valid dimensions (multiples of 64, min 768)
+    # flux.1-dev valid dimensions (multiples of 64, min 768).  VERIFIED
+    # against the live API 2026-08-12: BOTH axes are capped at 1344 — the
+    # old list went to 2048, so 2560x1440 snapped to 2048x1408, the API
+    # 422'd ("Input should be 768, ..., 1280 or 1344"), every fallback
+    # endpoint failed, and the surfaced error was the dead 3rd endpoint's
+    # 404.  v30: dims match what the API actually accepts.
     _ALLOWED_DIMS = [768, 832, 896, 960, 1024, 1088, 1152, 1216, 1280,
-                     1344, 1408, 1472, 1536, 1600, 1664, 1728, 1792,
-                     1856, 1920, 1984, 2048]
+                     1344]
 
+    # v30: dropped the dead `nvidia/flux.1-dev` route (404 page not
+    # found) — it masked the real 422 dims error on every still.
     ENDPOINTS = [
         "https://ai.api.nvidia.com/v1/genai/black-forest-labs/flux.1-dev",
         "https://ai.api.nvidia.com/v1/genai/black-forest-labs/flux.1-schnell",
-        "https://ai.api.nvidia.com/v1/genai/nvidia/flux.1-dev",
     ]
 
     def __init__(self, api_key: Optional[str] = None):
@@ -93,7 +98,13 @@ class NvidiaNimProvider(ImageGenProvider):
                  seed: Optional[int] = None) -> str:
         if not self._api_key:
             raise RuntimeError("NVIDIA_API_KEY not set")
-        width, height = self._snap(width), self._snap(height)
+        # v30: preserve the requested aspect ratio — snap width first,
+        # then derive the height from the snapped width (2560x1440 ->
+        # 1344x768, not 1344x1344).  Independent per-axis snapping of the
+        # old oversized list produced 422s.
+        _w0 = width
+        width = self._snap(width)
+        height = self._snap(int(round(height * width / max(1, _w0))))
         payload = {
             "prompt": prompt,
             "width": width,

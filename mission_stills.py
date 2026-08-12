@@ -263,6 +263,15 @@ def _guarded_ai_prompt(base: str, scene_text: str, style_mod: str = "") -> str:
     return base + guard + ((". " + style_mod) if style_mod else "")
 
 
+# v30: provider circuit breaker — a provider that fails N consecutive
+# times is skipped for the rest of the process.  Prevents per-still HTTP
+# spam when an endpoint is down (the Wow v29 run burned 3 failed calls
+# per still on the misconfigured nvidia_nim route).
+_AI_PROVIDER_FAILS: dict[str, int] = {}
+_AI_PROVIDER_DISABLED: set[str] = set()
+_AI_MAX_CONSECUTIVE_FAILS = 2
+
+
 def _ai_still(prompt: str, out_path: str) -> str:
     from src.providers.image_gen import NvidiaNimProvider, PollinationsProvider
     # v25 (Gemini/DeepSeek review CRITICAL — 'AI-generated female faces',
@@ -272,12 +281,21 @@ def _ai_still(prompt: str, out_path: str) -> str:
     # humans.
     prompt = _guarded_ai_prompt(prompt, prompt, "").strip() or prompt
     for prov in (NvidiaNimProvider(), PollinationsProvider()):
+        name = prov.name
+        if name in _AI_PROVIDER_DISABLED:
+            continue
         try:
             prov.generate(prompt, out_path, width=2560, height=1440)
-            print(f"  [AI] {prov.name}: {os.path.basename(out_path)} ({os.path.getsize(out_path)//1024} KB)")
+            _AI_PROVIDER_FAILS[name] = 0
+            print(f"  [AI] {name}: {os.path.basename(out_path)} ({os.path.getsize(out_path)//1024} KB)")
             return out_path
         except Exception as e:
-            print(f"  [AI] !! {prov.name} failed: {str(e)[:80]}")
+            _AI_PROVIDER_FAILS[name] = _AI_PROVIDER_FAILS.get(name, 0) + 1
+            print(f"  [AI] !! {name} failed: {str(e)[:80]}")
+            if _AI_PROVIDER_FAILS[name] >= _AI_MAX_CONSECUTIVE_FAILS:
+                _AI_PROVIDER_DISABLED.add(name)
+                print(f"  [AI] !! {name} disabled for this run "
+                      f"({_AI_MAX_CONSECUTIVE_FAILS} consecutive failures)")
     return ""
 
 
@@ -1045,9 +1063,27 @@ def _pace_pad_scenes(scenes_data: list[dict], audio_dir: str,
         if not anchor_idx:
             continue
         inserted = [0] * len(anchor_idx)   # cumulative samples per anchor
-        max_gap_n = int(0.7 * sr)          # v12 cap: TOTAL per boundary
+        max_gap_n = int(1.5 * sr)          # v30: 0.7 -> 1.5s TOTAL/boundary
         dur = n0 / sr
-        for _pass in range(3):  # iterate until in band or no progress
+        # v30 (Wow scene 2: 47 words / 14.2s = 199 wpm vs 160 band):
+        # dense scenes were mathematically unfixable — needed +3.4s of
+        # pause but 2 boundaries × 0.7s cap allowed only 1.4s, so the
+        # padder never converged and the pre-render gate hard-aborted the
+        # WHOLE run.  Guarantee enough pause points exist to carry the
+        # needed pad (insert midpoints in the largest gaps, capped at a
+        # sane total so we never create >90% dead air).
+        target_dur = words / (band["target_wpm"] / 60.0)
+        need_s = max(0.0, min(target_dur - dur, dur * 0.9))
+        max_anchors = 10
+        while (len(anchor_idx) * max_gap_n / sr) < need_s \
+                and len(anchor_idx) < max_anchors:
+            _pts = [0] + anchor_idx + [n0]
+            _big = max(range(len(_pts) - 1),
+                       key=lambda k: _pts[k + 1] - _pts[k])
+            anchor_idx = sorted(
+                anchor_idx + [(_pts[_big] + _pts[_big + 1]) // 2])
+        inserted = [0] * len(anchor_idx)
+        for _pass in range(6):  # v30: 3 -> 6 passes
             wpm = measure_speech_rate(text, dur)
             if wpm <= band["max_wpm"] or dur <= 0:
                 break
