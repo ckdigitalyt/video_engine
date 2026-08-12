@@ -189,16 +189,15 @@ class DeterministicQA:
                     mid = st + (et - st) / 2.0
                     scene_id = v.get("scene_id")
                     shot_type = v.get("shot_type", "primary")
-                    # v22 (Gemini root-cause review): coverage variants are
-                    # INTENTIONAL contiguous padding — the same source still
-                    # rendered with a different camera move to cover narration
-                    # past MAX_SHOT_HOLD_S.  Never flag a perceptual repeat
-                    # when both clips are in the SAME scene and contiguous;
-                    # cross-scene repeats of the same visual stay fatal.
-                    def _is_variant_padding(prev: tuple) -> bool:
-                        _, _, _, p_scene, p_type = prev
-                        return (scene_id is not None and p_scene == scene_id
-                                and (shot_type == "variant" or p_type == "variant"))
+                    # v22+v29: coverage variants used to be INTENTIONAL
+                    # contiguous padding (same source still, different camera
+                    # move) — v29 REMOVES that design: the planner now
+                    # guarantees every shot shows a NEW still (unused pool
+                    # first, then freshly generated AI stills).  Any
+                    # remaining perceptual repeat of the same source still is
+                    # therefore a genuine defect (Wow! Signal 33-44s:
+                    # scene2_0.jpg re-rendered 4x) and MUST be flagged —
+                    # contiguous, same-scene or not.
                     # v21: prefer the SOURCE still (asset) when present — clip
                     # mid-frames are motion-shifted (Ken Burns) and dodge the
                     # hash; the source still is stable and catches coverage
@@ -222,8 +221,8 @@ class DeterministicQA:
                         continue
                     for prev in seen:
                         if hamming(h, prev[2]) < self._dup_th + 4:
-                            if _is_variant_padding(prev):
-                                continue  # intentional same-scene coverage padding
+                            # v29: no padding exemption — any repeated visual
+                            # is a defect (planner guarantees distinct stills)
                             per_dups.append({
                                 "at": [round(prev[0], 1), round(mid, 1)],
                                 "files": [prev[1], f],

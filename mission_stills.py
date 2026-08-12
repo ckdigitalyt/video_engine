@@ -602,26 +602,29 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                                  "kind": "vector"})
                 stats["manim"] += 1  # counts as animated coverage
                 print(f"  [vector] {os.path.basename(vbeat)} (intent={intent})")
-        # 2) Stills with Ken Burns.  v28 root fix (hook_strength): the
-        # HOOK scene (i==0) must plan >= HOOK_MIN_SHOTS DISTINCT stills —
-        # the old fixed cap of 2 stills + variants of the same images
-        # could only ever place 4 distinct visuals in the 15s hook window
-        # (Wow! Signal run: hook_strength 4 < 5).  Other scenes keep the
-        # 2-still budget.
-        still_budget = HOOK_MIN_SHOTS if i == 0 else 2
+        # 2) Stills with Ken Burns.  v28: HOOK scene (i==0) plans
+        # >= HOOK_MIN_SHOTS distinct stills (hook_strength gate).
+        # v29 root fix ("same image zoomed/panned more than once" — Wow!
+        # Signal 33-44s): EVERY scene's still budget scales with narration
+        # length, so a scene can never collapse to a single image that all
+        # coverage variants then re-render (scene2_0.jpg was re-rendered
+        # 4x in the Wow run).
+        est = max(4.0, len(text.split()) / 2.6)
+        still_budget = max(2, min(6, int(est / 3.5) + (1 if est % 3.5 > 0 else 0)))
+        if i == 0:
+            still_budget = max(still_budget, HOOK_MIN_SHOTS)
         still_count = 0
         plan_cands = _still_plan_for(text, spec, scene)
-        if i == 0:
-            # Pad the hook scene with photorealistic AI candidates so
-            # NASA/Wikimedia rejections + perceptual dedup can never starve
-            # the opening window below HOOK_MIN_SHOTS distinct stills.
-            _style_mod = _style_prompt_for(scene)
-            _pad = 0
-            while len(plan_cands) < HOOK_MIN_SHOTS + 2 and _pad < 8:
-                _pad += 1
-                plan_cands.append(("ai", _guarded_ai_prompt(
-                    f"{_detect_topic(text)} documentary scene, alternate angle {_pad}",
-                    text, _style_mod)))
+        # v29: pad EVERY scene's candidate pool (not just the hook) so
+        # NASA/Wikimedia rejections + perceptual dedup can never starve a
+        # scene below its still budget.
+        _style_mod = _style_prompt_for(scene)
+        _pad = 0
+        while len(plan_cands) < still_budget + 2 and _pad < 8:
+            _pad += 1
+            plan_cands.append(("ai", _guarded_ai_prompt(
+                f"{_detect_topic(text)} documentary scene, alternate angle {_pad}",
+                text, _style_mod)))
         for kind, query in plan_cands:
             if still_count >= still_budget:
                 break
@@ -769,10 +772,11 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
         while shots and est > placed_total + 1.5 and est > 8.0 and len(shots) < _scene_cap:
             # estimate narration duration: ~2.6 words/sec spoken
             last = shots[-1]
-            # v23+v28: coverage variants must NOT re-render the same still
-            # as the previous shot, and should rotate through the LEAST-used
-            # distinct still in the scene ("same image again and again"
-            # defect — Andromeda v5, Venus v1, Wow! Signal v1).
+            # v23+v28+v29: coverage variants must show a NEW distinct still —
+            # never re-render an image that already appeared in this scene
+            # ("same image zoomed/panned more than once" — Wow! Signal
+            # 33-44s: scene2_0.jpg re-rendered 4x).  Prefer an unused still;
+            # when the scene's pool is exhausted, GENERATE a fresh AI still.
             src_img = ""
             _used = {}
             for _sh in shots:
@@ -781,11 +785,24 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                     _used[_a] = _used.get(_a, 0) + 1
             _cands = [sh for sh in shots
                       if sh.get("asset") and os.path.exists(sh["asset"])]
-            if _cands:
+            # v29: fresh AI still first — the pool of placed stills is
+            # already fully on screen, so re-rendering ANY of them repeats
+            # an image (the exact defect reported).  Only fall back to a
+            # least-used placed still if generation fails (gate flags it).
+            _gen_q = _guarded_ai_prompt(
+                f"{_detect_topic(text)} documentary scene, alternate angle {var_i + 2}",
+                text, _style_prompt_for(scene))
+            _gen_out = os.path.join(still_root, f"scene{i}_covgen{var_i}.jpg")
+            _gen_got = _ai_still(_gen_q, _gen_out)
+            if _gen_got and os.path.exists(_gen_got) and not _is_dup(_gen_got):
+                src_img = _gen_got
+                print(f"  [coverage] scene{i}: variant uses NEW AI still "
+                      f"({os.path.basename(src_img)})")
+            elif _cands:
                 _alt = min(_cands, key=lambda sh: (_used.get(sh["asset"], 0),
                                                     sh["asset"] == last.get("asset")))
                 src_img = _alt["asset"]
-                print(f"  [coverage] scene{i}: variant uses DIFFERENT still "
+                print(f"  [coverage] scene{i}: variant reuses still (fallback) "
                       f"({os.path.basename(src_img)})")
             if not src_img:
                 src_img = os.path.join(still_root, os.path.basename(
@@ -925,11 +942,12 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                         vcam = dict(_m) if _m else {"zoom_start": 1.0, "zoom_end": 1.0,
                                                     "pan_x": 0, "pan_y": 0}
                         vmove = safe_v
-                    # v28: hook-scene fill must use a DIFFERENT still per
+                    # v29: EVERY scene's fill must use a DIFFERENT still per
                     # shot, not re-render the same image — try a fresh AI
-                    # still (varied prompt) so the opening stays dense.
+                    # still (varied prompt) so no image repeats (Wow! Signal
+                    # 33-44s defect).  Previously only the hook scene did this.
                     _fill_src = got
-                    if i == 0 and fcount > 1:
+                    if fcount > 1:
                         _fq = _guarded_ai_prompt(
                             f"{fill_q}, alternate angle {fcount}",
                             text, _style_prompt_for(scene))
@@ -1215,19 +1233,44 @@ def _append_coverage_variant(tl: dict, last: dict, scene_end: float,
         _sp.run(["ffmpeg", "-y", "-v", "error", "-ss", "1.0",
                  "-i", last.get("file", ""), "-frames:v", "1", src_img],
                 capture_output=True, text=True, timeout=30)
-    # v22+v28: coverage variants must NOT re-render the same still as the
-    # previous shot, and long remainders must ROTATE through ALL distinct
-    # stills already placed in this scene ("same image again and again"
-    # defect — Andromeda v5, Venus v1, Wow! Signal v1).  Fall back to the
-    # previous shot's source only when no other asset exists in the scene.
+    # v22+v28+v29: coverage variants must show NEW visuals — never re-render
+    # an image that already appeared in this scene (Wow! Signal 33-44s:
+    # scene2_0.jpg zoomed/panned 4x).  Rotate through UNUSED scene stills
+    # first; when the pool is exhausted, generate a fresh photorealistic AI
+    # still.  Fall back to re-rendering only if generation fails (the
+    # repeated_assets gate then flags the run for revision).
     scene_stills = []
     for _e in tl.get("video_timeline", []):
         if (_e.get("scene_id") == scene_id and _e.get("asset")
                 and os.path.exists(_e["asset"]) and _e["asset"] not in scene_stills):
             scene_stills.append(_e["asset"])
+    used_stills = set(scene_stills)  # every placed still has been shown
     if scene_stills:
-        print(f"  [variant] scene{scene_id} coverage rotates "
+        print(f"  [variant] scene{scene_id} coverage pool: "
               f"{len(scene_stills)} distinct still(s)")
+
+    def _next_coverage_src(_idx: int, _prev_src: str) -> str:
+        """v29: never show the same image twice in a scene."""
+        _unused = [s for s in scene_stills if s not in used_stills]
+        if _unused:
+            return _unused[0]
+        try:
+            _q = (last.get("query_used") or last.get("asset_title")
+                  or f"scene {scene_id} alternate view")
+            _out = os.path.join(out_dir, "shots",
+                                f"scene{scene_id}_covgen{_idx}.jpg")
+            _got = _ai_still(
+                f"Photorealistic documentary image of {_q}, "
+                f"alternate camera angle {_idx}", _out)
+            if _got and os.path.exists(_got):
+                scene_stills.append(_got)
+                return _got
+        except Exception:
+            pass
+        _pool = [s for s in scene_stills if s != _prev_src] or scene_stills
+        if not _pool:
+            return _prev_src  # no stills at all — reuse prev (gate flags it)
+        return _pool[(_idx - 1) % len(_pool)]
     if not os.path.exists(src_img):
         return  # cannot build a variant; keep capped shot (gate reports it)
     variant = os.path.join(out_dir, "shots", f"scene{scene_id}_covvar.mp4")
@@ -1258,12 +1301,10 @@ def _append_coverage_variant(tl: dict, last: dict, scene_end: float,
     while remain > 0.3:
         dur = min(MAX_SHOT_HOLD_S, remain)
         chunk_i += 1
-        # v28: rotate the chunk source through the scene's distinct stills
-        # (never the same image twice in a row when another exists).
-        if scene_stills:
-            _prev = src_img
-            _pool = [s for s in scene_stills if s != _prev] or scene_stills
-            src_img = _pool[(chunk_i - 1) % len(_pool)]
+        # v29: each chunk shows a NEW visual (unused scene still, else a
+        # freshly generated AI still) — never the same image twice.
+        src_img = _next_coverage_src(chunk_i, src_img)
+        used_stills.add(src_img)
         vfile = os.path.join(out_dir, "shots",
                              f"scene{scene_id}_covvar{chunk_i}.mp4")
         if not _kenburns(src_img, vfile, duration=dur,
