@@ -64,6 +64,10 @@ class EngineGates:
                 facts=facts,
                 provider=self._llm,
                 confidence=confidence,
+                # v33 (review M-4): feed the script's curated visual goal
+                # into the spec so it seeds visual_objective instead of
+                # being dropped and re-derived at extra LLM cost.
+                visual_goal=s.get("visual_goal", ""),
             )
             specs[i] = spec
             if self._verbose:
@@ -92,6 +96,19 @@ class EngineGates:
                 "violated_prohibited": [], "missing_required": [],
                 "vision_check": None,
             }
+        # v33 (review C-1): AI stills are generated, not fetched — they have
+        # no authoritative metadata, so the vision check is the ONLY
+        # meaningful signal.  Route them through the vision-only path
+        # (neutral metadata score, fail-open when vision is down).  This
+        # closes the hole where wrong-subject AI stills (Venus faces,
+        # man-with-microchip) sailed through pre-verified.
+        if provider == "ai":
+            res = self._verifier.verify_ai_still(
+                spec, asset_path=asset_path, query_used=query_used)
+            if self._verbose and not res.passed:
+                print(f"  [gate] !! REJECT AI still {os.path.basename(asset_path) or filename}: "
+                      f"{res.reasons}")
+            return res.to_dict()
         res = self._verifier.verify(
             spec, asset_path=asset_path, title=title, description=description,
             filename=filename, provider=provider, tags=tags, query_used=query_used,

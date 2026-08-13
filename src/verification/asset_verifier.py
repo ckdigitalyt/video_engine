@@ -237,6 +237,53 @@ class AssetVerifier:
         res.reasons.append(f"unverified: score={res.score:.2f}, missing={res.missing_required}")
         return res
 
+    # ── Vision-only AI still verification ──────────────────────────────
+
+    def verify_ai_still(self, spec: EntitySpec, *, asset_path: str = "",
+                        query_used: str = "") -> VerificationResult:
+        """Verify an AI-generated still with the VISION check only.
+
+        v33 (review 2026-08-13 C-1): AI stills have no authoritative
+        metadata (empty title/provider, prompt is the only evidence), so
+        metadata scoring is meaningless — it would reject every AI still
+        at ~0.33 when vision is down.  Give metadata a NEUTRAL score and
+        let the vision check alone decide.  Fail-open when vision is
+        unavailable (quota/network): an infra blip must never stall the
+        scene; the post-render video-level gates own the final verdict.
+        """
+        res = VerificationResult(asset_path=asset_path, beat_id=spec.beat_id)
+        res.signal_scores = {
+            "metadata": {"score": 0.5, "evidence": "AI still (neutral)"},
+            "provider_tags": {"score": 0.5, "evidence": query_used},
+        }
+        res.score = 0.5
+        vision_ok = self._vision_enabled and not self._vision_broken
+        if not (vision_ok and asset_path and os.path.exists(asset_path)):
+            res.passed = True  # fail-open: no vision signal available
+            res.reasons.append("AI still: vision unavailable — fail-open")
+            return res
+        vision = self._vision_check(spec, asset_path)
+        res.vision_check = vision
+        if vision.get("error"):
+            self._vision_error_streak += 1
+            if self._vision_error_streak >= self._vision_max_streak:
+                self._vision_broken = True
+                print(f"  [vision] circuit breaker tripped after "
+                      f"{self._vision_error_streak} errors")
+            res.passed = True  # fail-open on infra error
+            res.reasons.append(
+                f"AI still: vision error — fail-open ({vision.get('error','')[:40]})")
+            return res
+        self._vision_error_streak = 0
+        if vision.get("passed"):
+            res.passed = True
+            res.reasons.append("vision check confirmed")
+        else:
+            res.passed = False
+            res.reasons.append(
+                f"AI still: vision check failed (subject={vision.get('subject','?')[:60]})")
+        return res
+
     # ── Signal scorers ─────────────────────────────────────────────────
 
     def _score_metadata(self, spec, title, description, provider) -> dict:

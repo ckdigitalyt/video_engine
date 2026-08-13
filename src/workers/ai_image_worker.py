@@ -2,8 +2,10 @@
 """
 ai_image_worker.py — Worker script for parallel AI image generation.
 
-This script is spawned by mission_run.py via sessions_spawn to generate
-an AI still image for a specific prompt and save it to a specified path.
+Spawns one AI still generation (NVIDIA NIM primary, Pollinations
+fallback) and writes the image to a path.  v33: fixed the broken
+``generate_image()`` call (no such method) — the provider interface is
+``generate(prompt, output_path, width, height, seed)``.
 
 Usage:
     python ai_image_worker.py --prompt "Photorealistic documentary image of the Voyager 1 spacecraft..." --output /path/to/output.png
@@ -37,25 +39,27 @@ def main():
     img_path = args.output
     os.makedirs(os.path.dirname(img_path), exist_ok=True)
 
-    # Try primary provider first
+    # Try primary provider first (v33: ``generate`` writes the file itself
+    # and returns the path — the old code called a nonexistent
+    # ``generate_image()`` and would AttributeError on first spawn).
     if primary.is_available():
         try:
-            img_data = primary.generate_image(args.prompt)
-            with open(img_path, "wb") as f:
-                f.write(img_data)
-            print("Image generated successfully via NVIDIA NIM")
-            return 0
+            got = primary.generate(args.prompt, img_path, width=2560, height=1440)
+            if got and os.path.exists(got):
+                print("Image generated successfully via NVIDIA NIM")
+                return 0
+            raise RuntimeError("primary returned no file")
         except Exception as e:
             print(f"Primary provider failed: {e}")
 
     # Fallback to Pollinations
     if fallback.is_available():
         try:
-            img_data = fallback.generate_image(args.prompt)
-            with open(img_path, "wb") as f:
-                f.write(img_data)
-            print("Image generated successfully via Pollinations")
-            return 0
+            got = fallback.generate(args.prompt, img_path, width=2560, height=1440)
+            if got and os.path.exists(got):
+                print("Image generated successfully via Pollinations")
+                return 0
+            raise RuntimeError("fallback returned no file")
         except Exception as e:
             print(f"Fallback provider failed: {e}")
 

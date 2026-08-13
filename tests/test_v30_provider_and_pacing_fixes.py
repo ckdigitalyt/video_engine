@@ -65,7 +65,10 @@ def test_nvidia_snap_preserves_aspect_ratio():
 
 def test_nvidia_endpoints_contain_no_dead_route():
     p = _provider()
-    assert len(p.ENDPOINTS) == 2
+    # v33: flux.2-klein-4b (verified 2026-08-13, faster + sharper) is
+    # primary, flux.1-dev/schnell fall back.  No dead ``nvidia/`` route.
+    assert len(p.ENDPOINTS) == 3
+    assert p.ENDPOINTS[0].endswith("flux.2-klein-4b")
     assert not any("nvidia/flux.1-dev" in e for e in p.ENDPOINTS)
 
 
@@ -158,3 +161,71 @@ def test_padder_handles_single_sentence_scene():
     from src.cinematic.pacing_engine import role_for, ROLE_PACING
     band = ROLE_PACING[role_for("explanation")]
     assert wpm <= band["max_wpm"] or final_dur >= 8.0
+
+
+# ── v33: review C-2 / M-2 / M-3 regression tests ────────────────────────
+# The 2026-08-13 deepseek pro review found (Critical) that unregistered
+# topics produced subject-less AI prompts (" documentary scene, alternate
+# angle 2") and (Major) that the people-guard lost scene context.  These
+# tests lock the fixes in.
+
+
+def _plan_candidates(text, scene=None):
+    import mission_stills as ms
+    return ms._still_plan_for(text, spec=None, scene=scene)
+
+
+def test_unregistered_topic_pad_prompts_have_subject():
+    """C-2: a Bloop-style (unregistered) topic must never yield an
+    empty-subject AI prompt like ' documentary scene, alternate angle 2'."""
+    import mission_stills as ms
+    text = ("The Bloop was a mysterious ultra-low-frequency sound detected "
+            "in the Pacific Ocean in 1997.")
+    plan = _plan_candidates(text, {"title": "The Bloop",
+                                   "search_queries": ["Bloop sound 1997"]})
+    ai_prompts = [q for k, q in plan if k == "ai"]
+    assert ai_prompts, "expected at least one AI candidate"
+    for q in ai_prompts:
+        assert "documentary scene, alternate angle" not in q.lstrip(), \
+            f"subject-less prompt: {q!r}"
+        assert q.strip() and q.strip()[0].isalpha(), f"prompt starts empty: {q!r}"
+
+
+def test_subject_for_falls_back_to_narration_head():
+    """C-2: with no scene dict, the narration head supplies the subject."""
+    import mission_stills as ms
+    subj = ms._subject_for(
+        "In 1997 the Bloop was detected by the United States Navy.")
+    assert "Bloop" in subj, f"narration head lost the subject: {subj!r}"
+
+
+def test_guarded_ai_prompt_biographical_scene_keeps_people():
+    """M-3: a scene narrating an astronomer/scientist must NOT get the
+    no-people guard appended (the model would omit the person)."""
+    import mission_stills as ms
+    text = ("The astronomer Jocelyn Bell Burnell discovered pulsars "
+            "in 1967.")
+    out = ms._guarded_ai_prompt("Jocelyn Bell Burnell at the telescope",
+                                text, "")
+    assert "no people" not in out, f"biographical scene got people-guard: {out!r}"
+
+
+def test_guarded_ai_prompt_spacecraft_scene_keeps_guard():
+    """M-3: a non-human spacecraft scene keeps the no-people guard."""
+    import mission_stills as ms
+    text = ("Voyager 1 crossed the heliopause in 2012 carrying the "
+            "Golden Record.")
+    out = ms._guarded_ai_prompt("Voyager 1 in deep space", text, "")
+    assert "no people, no human faces" in out
+
+
+def test_nvidia_flux2_pair_snap_keeps_aspect():
+    """v33: flux.2-klein-4b takes a fixed aspect-preserving pair set;
+    snapping must preserve orientation (landscape stays landscape)."""
+    p = _provider()
+    for w, h in ((2560, 1440), (1920, 1080), (1024, 576)):
+        sw, sh = p._snap_pair(w, h)
+        assert sw in {x for pr in p._FLUX2_PAIRS for x in pr}
+        assert sh in {x for pr in p._FLUX2_PAIRS for x in pr}
+        assert (sw >= sh) == (w >= h), f"orientation flipped: {w}x{h} -> {sw}x{sh}"
+    assert p._snap_pair(1024, 1024) == (1024, 1024)

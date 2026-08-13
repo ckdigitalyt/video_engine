@@ -241,8 +241,37 @@ def _wikimedia_still_title(query: str, out_path: str) -> tuple[str, str]:
 # append a hard no-people/no-text guard unless the scene is explicitly
 # about humans (astronaut, people, woman, man, crew, human).
 _PEOPLE_RE = re.compile(
-    r"\b(astronaut|people|person|woman|man|crew|human|face|portrait)\b",
+    r"\b(astronaut|astronauts|people|person|persons|woman|women|man|men|crew|crews|"
+    r"human|humans|face|faces|portrait|portraits|astronomer|astronomers|scientist|"
+    r"scientists|engineer|engineers|researcher|researchers|physicist|physicists|"
+    r"discoverer|discoverers|biologist|biologists|geologist|geologists|"
+    r"mathematician|mathematicians)\b",
     re.IGNORECASE)
+
+
+def _subject_for(scene_text: str, scene=None) -> str:
+    """Best available subject phrase for AI still prompts.
+
+    v33 (review 2026-08-13 C-2): ``_detect_topic()`` returns "" for every
+    unregistered topic (Bloop, Wow! Signal, Venus, Upsweep, 52-Hz...), so
+    pad/coverage prompts became ``" documentary scene, alternate angle 2"``
+    — subject-less.  Fall back to the script's search query, then title,
+    then the narration head.
+    """
+    if scene:
+        for q in (scene.get("search_queries") or []):
+            q = (q or "").strip()
+            if q:
+                return q
+        title = (scene.get("title") or "").strip()
+        if title:
+            return title
+    words = re.findall(r"[A-Za-z][A-Za-z'-]+", scene_text or "")
+    stop = {"the", "a", "an", "of", "in", "on", "at", "to", "for", "and",
+            "or", "is", "are", "was", "were", "this", "that", "it",
+            "its", "with", "by", "from", "as", "be", "been"}
+    head = [w for w in words if w.lower() not in stop][:6]
+    return " ".join(head) if head else (scene_text or "").strip()[:80]
 
 
 def _guarded_ai_prompt(base: str, scene_text: str, style_mod: str = "") -> str:
@@ -279,7 +308,11 @@ def _ai_still(prompt: str, out_path: str) -> str:
     # Generic prompts let the generator invent people; keep people OUT of
     # planetary/spacecraft scenes unless the narration is explicitly about
     # humans.
-    prompt = _guarded_ai_prompt(prompt, prompt, "").strip() or prompt
+    # v33 (review M-2): prompts arriving here are ALREADY guarded at plan
+    # level with the real scene narration (see _still_plan_for / call
+    # sites below).  Re-guarding against the prompt string itself lost
+    # scene context (biographical scenes got "no people" appended).  Do
+    # not re-guard.
     for prov in (NvidiaNimProvider(), PollinationsProvider()):
         name = prov.name
         if name in _AI_PROVIDER_DISABLED:
@@ -565,12 +598,25 @@ def _still_plan_for(scene_text: str, spec=None, scene=None) -> list:
         else:
             plan.append(("ai", _guarded_ai_prompt(obj, scene_text, style_mod)))
     else:
-        # topic-aware keyword fallback (still general, not per-topic lists)
+        # topic-aware keyword fallback (still general, not per-topic lists).
+        # v33: use the subject fallback so unregistered topics never produce
+        # an empty ``"Scene of "`` prompt (review C-2).
+        _subj = _subject_for(scene_text, scene) or topic
         if vector_direction:
-            plan += [("ai", _guarded_ai_prompt(f"Scene of {topic}", scene_text, style_mod))]
+            plan += [("ai", _guarded_ai_prompt(f"Scene of {_subj}", scene_text, style_mod))]
         else:
-            plan += [("nasa", topic), ("wiki", topic),
-                     ("ai", _guarded_ai_prompt(f"Scene of {topic}", scene_text, style_mod))]
+            plan += [("nasa", _subj), ("wiki", _subj),
+                     ("ai", _guarded_ai_prompt(f"Scene of {_subj}", scene_text, style_mod))]
+
+    # v33 (review M-4): the script's curated visual_goal is the writer's
+    # explicit "what the viewer should SEE" — use it as an AI candidate
+    # (after the objective entry, so the spec's refined objective wins
+    # when both exist).  Only when it differs from what's already planned.
+    vg = ((scene or {}).get("visual_goal") or "").strip()
+    if vg:
+        _vg_prompt = _guarded_ai_prompt(vg, scene_text, style_mod)
+        if not any(k == "ai" and q == _vg_prompt for k, q in plan):
+            plan.append(("ai", _vg_prompt))
 
     # dedupe keeping order
     seen, out = set(), []
@@ -702,7 +748,7 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
         while len(plan_cands) < still_budget + 2 and _pad < 8:
             _pad += 1
             plan_cands.append(("ai", _guarded_ai_prompt(
-                f"{_detect_topic(text)} documentary scene, alternate angle {_pad}",
+                f"{_subject_for(text, scene)} documentary scene, alternate angle {_pad}",
                 text, _style_mod)))
         for kind, query in plan_cands:
             if still_count >= still_budget:
@@ -790,7 +836,16 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                 # title and the scene stalls).  NOTE: check ``src`` not
                 # ``kind`` — the cache-reuse branch sets src="cached" while
                 # kind still reflects the plan tuple ("nasa"/"wiki"/"ai").
-                pre_verified = fname in pinned or src in ("ai", "cached")
+                # v33 (review C-1): AI stills are NO LONGER pre-verified —
+                # the old assumption ("generated from the visual objective,
+                # safest by construction") only holds for the objective
+                # entry; padding/coverage/fill prompts are generic strings
+                # and produced exactly the wrong-subject failures reviewers
+                # flagged (Venus faces, man-with-microchip).  They now go
+                # through the vision-only verify path (fail-open when
+                # vision is down).  Cached stills stay pre-verified: they
+                # were already gated on their first fetch this run.
+                pre_verified = fname in pinned or src == "cached"
                 ver = gates.verify_asset(
                     spec, asset_path=got, title=title, filename=fname,
                     provider=src, query_used=query, pre_verified=pre_verified,
@@ -886,7 +941,7 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
             # an image (the exact defect reported).  Only fall back to a
             # least-used placed still if generation fails (gate flags it).
             _gen_q = _guarded_ai_prompt(
-                f"{_detect_topic(text)} documentary scene, alternate angle {var_i + 2}",
+                f"{_subject_for(text, scene)} documentary scene, alternate angle {var_i + 2}",
                 text, _style_prompt_for(scene))
             _gen_out = os.path.join(still_root, f"scene{i}_covgen{var_i}.jpg")
             _gen_got = _ai_still(_gen_q, _gen_out)
@@ -991,8 +1046,12 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
         got, title = _nasa_still_title(fill_q, out)
         src = "nasa"
         if not got:
-            got = _ai_still(
-                f"Photorealistic documentary image of {fill_q}, cinematic", out)
+            # v33: guard the fill prompt with the real scene narration so
+            # biographical scenes keep people and generic fills stay
+            # people-free (review M-2).
+            got = _ai_still(_guarded_ai_prompt(
+                f"Photorealistic documentary image of {fill_q}, cinematic",
+                text, _style_prompt_for(scene)), out)
             src, title = "ai", ""
         if got and os.path.exists(got):
             clip = os.path.join(out_dir, "shots", fname.replace(".jpg", ".mp4"))
@@ -1373,9 +1432,9 @@ def _append_coverage_variant(tl: dict, last: dict, scene_end: float,
                   or f"scene {scene_id} alternate view")
             _out = os.path.join(out_dir, "shots",
                                 f"scene{scene_id}_covgen{_idx}.jpg")
-            _got = _ai_still(
+            _got = _ai_still(_guarded_ai_prompt(
                 f"Photorealistic documentary image of {_q}, "
-                f"alternate camera angle {_idx}", _out)
+                f"alternate camera angle {_idx}", _q, ""), _out)
             if _got and os.path.exists(_got):
                 scene_stills.append(_got)
                 return _got

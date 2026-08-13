@@ -52,6 +52,10 @@ NASA titles the photo "Pale Blue Dot". Entity "Voyager 1" -> ["voyager 1",
 NARRATION: {narration}
 FACTS: {facts}
 
+SCRIPT'S CURATED VISUAL GOAL (what the viewer should SEE and FEEL —
+use this as the PRIMARY seed for visual_objective; refine, don't
+replace): {visual_goal}
+
 Return STRICT JSON:
 {{
   "required_entities": ["concrete subjects that must be shown or strongly implied"],
@@ -70,21 +74,30 @@ def build_spec(
     facts: Optional[list] = None,
     provider=None,
     confidence: float = 1.0,
+    visual_goal: str = "",
 ) -> EntitySpec:
-    """Build an EntitySpec from narration (+facts). LLM-first, fallback-safe."""
-    spec = _from_llm(beat_id, scene_id, narration, facts, provider, confidence)
+    """Build an EntitySpec from narration (+facts). LLM-first, fallback-safe.
+
+    v33 (review M-4): the script's curated ``visual_goal`` ("what the
+    viewer should SEE") is passed through and used to seed the LLM's
+    ``visual_objective`` instead of being dropped and re-derived.
+    """
+    spec = _from_llm(beat_id, scene_id, narration, facts, provider,
+                     confidence, visual_goal=visual_goal)
     if spec is None:
         spec = _from_keywords(beat_id, scene_id, narration, confidence)
     return spec
 
 
-def _from_llm(beat_id, scene_id, narration, facts, provider, confidence) -> Optional[EntitySpec]:
+def _from_llm(beat_id, scene_id, narration, facts, provider, confidence,
+              visual_goal: str = "") -> Optional[EntitySpec]:
     if provider is None:
         return None
     facts_text = json.dumps(facts or [], indent=1)[:2500]
     try:
         raw = provider.generate_json(_SPEC_PROMPT.format(
-            narration=narration[:800], facts=facts_text))
+            narration=narration[:800], facts=facts_text,
+            visual_goal=(visual_goal or "(none provided)")[:300]))
         data = json.loads(raw)
         required = [str(e) for e in data.get("required_entities", [])]
         # Strip abstract, unverifiable descriptors (root-cause fix from
