@@ -353,23 +353,6 @@ PINNED_STILLS_BY_TOPIC = {
     },
 }
 
-AI_PROMPTS = {
-    "spacecraft": ("Photorealistic documentary image of the Voyager 1 spacecraft, "
-                   "large dish antenna, golden record attached, deep interstellar "
-                   "space, cinematic NASA style"),
-    "golden_record": ("Close-up of the Voyager Golden Record, gold-plated copper "
-                      "phonograph record with cover, floating in space, cinematic"),
-    "interstellar": ("Voyager spacecraft tiny against a vast starfield, pale blue "
-                     "dot Earth in the distance, cinematic, photorealistic"),
-    "launch": ("Voyager spacecraft atop a Titan IIIE-Centaur rocket on the "
-               "launch pad at night, floodlights, 1970s archival documentary "
-               "style, historical NASA photograph"),
-    "jupiter": ("The planet Jupiter with the Great Red Spot as seen from deep "
-                "space, photorealistic, documentary style"),
-    "saturn": ("The planet Saturn with rings as seen from deep space, "
-               "photorealistic, documentary style"),
-}
-
 
 def _auto_crop_borders(image_path: str, out_path: str) -> str:
     """Auto-crop empty/jagged black border bands from extreme-aspect mosaics.
