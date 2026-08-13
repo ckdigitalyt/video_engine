@@ -13,7 +13,9 @@
 #
 # Flags:
 #   --topic   "..."   topic (default: rotates through DAILY_TOPICS)
-#   --runner  run|stills   which runner (default: run)
+#   --runner  run|stills   which runner (default: stills — the fixed,
+#             vision-verified stills-first pipeline; `run` is the LEGACY
+#             mission_run path kept only for back-compat)
 #   --upload  actually upload when PUBLISH_READY (default: dry-run report)
 #   --keep    keep REVISION_REQUIRED artifacts (default: keep, they are
 #             the revision evidence; only interim files are cleaned)
@@ -26,7 +28,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
-RUNNER="run"
+RUNNER="stills"
 UPLOAD="no"
 TOPIC=""
 

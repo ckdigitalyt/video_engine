@@ -293,15 +293,20 @@ def _guarded_ai_prompt(base: str, scene_text: str, style_mod: str = "") -> str:
 
 
 # v30: provider circuit breaker — a provider that fails N consecutive
-# times is skipped for the rest of the process.  Prevents per-still HTTP
-# spam when an endpoint is down (the Wow v29 run burned 3 failed calls
-# per still on the misconfigured nvidia_nim route).
+# times is skipped.  Prevents per-still HTTP spam when an endpoint is
+# down (the Wow v29 run burned 3 failed calls per still on the
+# misconfigured nvidia_nim route).
+# v35 (review 2026-08-13): TIME-DECAYED — a disabled provider is retried
+# after _AI_BREAKER_COOLDOWN_S instead of staying dead for the whole run
+# (a 5-minute endpoint blip must not silently kill every AI still after
+# it recovers).
 _AI_PROVIDER_FAILS: dict[str, int] = {}
-_AI_PROVIDER_DISABLED: set[str] = set()
+_AI_PROVIDER_DISABLED_UNTIL: dict[str, float] = {}  # name -> retry-allowed epoch
 _AI_MAX_CONSECUTIVE_FAILS = 2
+_AI_BREAKER_COOLDOWN_S = 300.0
 
 
-def _ai_still(prompt: str, out_path: str) -> str:
+def _ai_still(prompt: str, out_path: str, seed: Optional[int] = None) -> str:
     from src.providers.image_gen import NvidiaNimProvider, PollinationsProvider
     # v25 (Gemini/DeepSeek review CRITICAL — 'AI-generated female faces',
     # 'man with a microchip'): subject guards for documentary stills.
@@ -313,21 +318,25 @@ def _ai_still(prompt: str, out_path: str) -> str:
     # sites below).  Re-guarding against the prompt string itself lost
     # scene context (biographical scenes got "no people" appended).  Do
     # not re-guard.
+    # v35 (review): *seed* threads through to the providers so A/B prompt
+    # tests can pin a fixed seed (see image_gen.deterministic_seed);
+    # production keeps the providers' default (time-based) for variety.
     for prov in (NvidiaNimProvider(), PollinationsProvider()):
         name = prov.name
-        if name in _AI_PROVIDER_DISABLED:
+        if time.time() < _AI_PROVIDER_DISABLED_UNTIL.get(name, 0.0):
             continue
         try:
-            prov.generate(prompt, out_path, width=2560, height=1440)
+            prov.generate(prompt, out_path, width=2560, height=1440, seed=seed)
             _AI_PROVIDER_FAILS[name] = 0
+            _AI_PROVIDER_DISABLED_UNTIL.pop(name, None)
             print(f"  [AI] {name}: {os.path.basename(out_path)} ({os.path.getsize(out_path)//1024} KB)")
             return out_path
         except Exception as e:
             _AI_PROVIDER_FAILS[name] = _AI_PROVIDER_FAILS.get(name, 0) + 1
             print(f"  [AI] !! {name} failed: {str(e)[:80]}")
             if _AI_PROVIDER_FAILS[name] >= _AI_MAX_CONSECUTIVE_FAILS:
-                _AI_PROVIDER_DISABLED.add(name)
-                print(f"  [AI] !! {name} disabled for this run "
+                _AI_PROVIDER_DISABLED_UNTIL[name] = time.time() + _AI_BREAKER_COOLDOWN_S
+                print(f"  [AI] !! {name} disabled for {_AI_BREAKER_COOLDOWN_S:.0f}s "
                       f"({_AI_MAX_CONSECUTIVE_FAILS} consecutive failures)")
     return ""
 
@@ -610,6 +619,39 @@ def _still_plan_for(scene_text: str, spec=None, scene=None) -> list:
     return out
 
 
+def _rejection_ledger_path(still_root: str) -> str:
+    return os.path.join(still_root, "rejected.json")
+
+
+def _load_rejection_ledger(still_root: str) -> dict:
+    """Load the cross-run rejection ledger (v35, review M-5).
+
+    Maps still fname -> rejection reason.  A rejected still must never be
+    re-admitted by a later run's [CACHE] branch (cache-reuse only checks
+    existence/size).  Fail-open: any read error -> empty ledger.
+    """
+    path = _rejection_ledger_path(still_root)
+    try:
+        if os.path.exists(path):
+            with open(path) as f:
+                data = json.load(f)
+            return data if isinstance(data, dict) else {}
+    except Exception:
+        pass
+    return {}
+
+
+def _persist_rejection_ledger(still_root: str, ledger: dict) -> None:
+    """Persist the rejection ledger next to the topic still cache."""
+    try:
+        path = _rejection_ledger_path(still_root)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w") as f:
+            json.dump(ledger, f, indent=1)
+    except Exception:
+        pass
+
+
 def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                          gates=None, specs: Optional[dict] = None,
                          topic_slug: str = "",
@@ -650,6 +692,23 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                          intents=_vi_intents)
     pinned = PINNED_STILLS_BY_TOPIC.get(topic_slug, {})
 
+    # v35 (review M-5): CROSS-RUN rejection ledger.  A still rejected by
+    # the asset gate (wrong subject, mostly-empty border, ...) stays on
+    # disk in the topic cache; without a persistent ledger a LATER run's
+    # [CACHE] branch (which only checks existence/size) would re-admit
+    # the same rejected asset.  Persist rejections to
+    # cache/stills/<topic>/rejected.json (fname -> reason) and seed this
+    # run's rejection set from it.
+    rejection_ledger = _load_rejection_ledger(still_root)
+    if rejection_ledger:
+        print(f"  [ledger] {len(rejection_ledger)} previously-rejected still(s) "
+              f"blocked from cache re-admission")
+
+    def _reject(fname: str, reason: str) -> None:
+        rejected_this_run.add(fname)
+        rejection_ledger[fname] = reason
+        _persist_rejection_ledger(still_root, rejection_ledger)
+
     plan = {}
     stats = {"manim": 0, "nasa": 0, "wikimedia": 0, "ai": 0, "video_fallback": 0,
              "rejected": 0, "vision_checked": 0, "deduped": 0}
@@ -662,7 +721,9 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
     # the file on disk, and the cache-reuse check only tests existence/size,
     # so a rejected photo (e.g. a motorcycle or ancient ruins) came right
     # back into the timeline on the next plan iteration.
-    rejected_this_run: set[str] = set()
+    # v35 (M-5): seeded from the persistent ledger so rejections survive
+    # across runs too (same hole, one run later).
+    rejected_this_run: set[str] = set(rejection_ledger)
     # Content-based dedup: dHash of every placed still (Priority 6 — no
     # consecutive near-identical assets, including same-content files with
     # different names).
@@ -778,7 +839,7 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                 cropped = _auto_crop_borders(got, crop_out)
                 if not cropped and src not in ("ai", "cached") and fname not in pinned:
                     stats["rejected"] += 1
-                    rejected_this_run.add(fname)
+                    _reject(fname, "mostly empty border")
                     print(f"  [border] rejected {fname} (mostly empty border)")
                     continue
                 elif cropped and cropped != got:
@@ -836,7 +897,7 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                 stats["vision_checked"] += int(bool(ver.get("vision_check")))
                 if not ver.get("passed"):
                     stats["rejected"] += 1
-                    rejected_this_run.add(fname)
+                    _reject(fname, str(ver.get("reasons", ["?"])[:1]))
                     print(f"  [gate] rejected {fname} "
                           f"({ver.get('reasons', ['?'])[:1]})")
                     continue

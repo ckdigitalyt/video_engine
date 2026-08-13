@@ -73,7 +73,7 @@ def test_nvidia_endpoints_contain_no_dead_route():
 
 
 def test_ai_still_circuit_breaker_disables_failing_provider(monkeypatch):
-    """After 2 consecutive failures a provider is skipped for the run."""
+    """After 2 consecutive failures a provider is skipped (time-decayed)."""
     import mission_stills as ms
     from src.providers import image_gen
 
@@ -94,7 +94,7 @@ def test_ai_still_circuit_breaker_disables_failing_provider(monkeypatch):
     monkeypatch.setattr(image_gen, "NvidiaNimProvider", lambda: Failing())
     monkeypatch.setattr(image_gen, "PollinationsProvider", lambda: Ok())
     ms._AI_PROVIDER_FAILS.clear()
-    ms._AI_PROVIDER_DISABLED.clear()
+    ms._AI_PROVIDER_DISABLED_UNTIL.clear()
 
     with tempfile.TemporaryDirectory() as d:
         out = os.path.join(d, "a.png")
@@ -103,10 +103,109 @@ def test_ai_still_circuit_breaker_disables_failing_provider(monkeypatch):
         assert ms._AI_PROVIDER_FAILS["nvidia_nim"] == 1
         # 2nd call: nvidia fails again -> disabled, pollinations succeeds
         assert ms._ai_still("test prompt", out)
-        assert "nvidia_nim" in ms._AI_PROVIDER_DISABLED
+        assert "nvidia_nim" in ms._AI_PROVIDER_DISABLED_UNTIL
         # 3rd call: nvidia skipped entirely (fails count frozen at 2)
         assert ms._ai_still("test prompt", out)
         assert ms._AI_PROVIDER_FAILS["nvidia_nim"] == 2
+
+
+def test_ai_still_breaker_decays_after_cooldown(monkeypatch):
+    """v35: after _AI_BREAKER_COOLDOWN_S the provider is retried."""
+    import time as _time
+    import mission_stills as ms
+    from src.providers import image_gen
+
+    class Failing:
+        name = "nvidia_nim"
+
+        def generate(self, *a, **k):
+            raise RuntimeError("boom")
+
+    class Ok:
+        name = "pollinations"
+
+        def generate(self, prompt, out_path, **k):
+            with open(out_path, "w") as f:
+                f.write("x")
+            return out_path
+
+    monkeypatch.setattr(image_gen, "NvidiaNimProvider", lambda: Failing())
+    monkeypatch.setattr(image_gen, "PollinationsProvider", lambda: Ok())
+    ms._AI_PROVIDER_FAILS.clear()
+    ms._AI_PROVIDER_DISABLED_UNTIL.clear()
+    old_cooldown = ms._AI_BREAKER_COOLDOWN_S
+    ms._AI_BREAKER_COOLDOWN_S = 0.05
+    try:
+        with tempfile.TemporaryDirectory() as d:
+            out = os.path.join(d, "a.png")
+            assert ms._ai_still("p", out)
+            assert ms._ai_still("p", out)
+            assert "nvidia_nim" in ms._AI_PROVIDER_DISABLED_UNTIL
+            # during cooldown: skipped, fails frozen at 2
+            assert ms._ai_still("p", out)
+            assert ms._AI_PROVIDER_FAILS["nvidia_nim"] == 2
+            # after cooldown: retried -> fails again, re-disabled
+            _time.sleep(0.1)
+            assert ms._ai_still("p", out)
+            assert ms._AI_PROVIDER_FAILS["nvidia_nim"] == 3
+            assert "nvidia_nim" in ms._AI_PROVIDER_DISABLED_UNTIL
+    finally:
+        ms._AI_BREAKER_COOLDOWN_S = old_cooldown
+
+
+def test_deterministic_seed_stable_and_distinct():
+    """v35: deterministic_seed() is process-stable and prompt-sensitive."""
+    from src.providers.image_gen import deterministic_seed
+    s1 = deterministic_seed("a red cube on a blue table", salt=0)
+    s2 = deterministic_seed("a red cube on a blue table", salt=0)
+    s3 = deterministic_seed("a red cube on a blue table", salt=1)
+    s4 = deterministic_seed("a BLUE cube on a red table", salt=0)
+    assert s1 == s2
+    assert 0 <= s1 < 100000
+    assert s1 != s3  # salt changes the seed
+    assert s1 != s4  # prompt changes the seed
+
+
+def test_rejection_ledger_roundtrip():
+    """v35 (M-5): rejected stills persist across runs via rejected.json."""
+    import mission_stills as ms
+    with tempfile.TemporaryDirectory() as d:
+        assert ms._load_rejection_ledger(d) == {}
+        ms._persist_rejection_ledger(d, {"scene1_0.jpg": "wrong subject"})
+        assert ms._load_rejection_ledger(d) == {"scene1_0.jpg": "wrong subject"}
+        # corrupt ledger fails open
+        with open(ms._rejection_ledger_path(d), "w") as f:
+            f.write("{not json")
+        assert ms._load_rejection_ledger(d) == {}
+
+
+def test_pollinations_pins_model_param(monkeypatch):
+    """v35: Pollinations request explicitly carries the pinned model."""
+    from src.providers import image_gen
+    captured = {}
+
+    class FakeResp:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return False
+
+        def read(self):
+            return b"\xff\xd8fakejpeg"
+
+    def fake_urlopen(req, timeout=180):
+        captured["url"] = req.full_url
+        return FakeResp()
+
+    monkeypatch.setattr(image_gen.urllib.request, "urlopen", fake_urlopen)
+    p = image_gen.PollinationsProvider()
+    with tempfile.TemporaryDirectory() as d:
+        out = os.path.join(d, "x.jpg")
+        p.generate("a cube", out, width=256, height=144, seed=7)
+    assert "model=flux" in captured["url"]
+    assert "seed=7" in captured["url"]
+    assert p._model == "flux"
 
 
 # ───────────────────────────────────────────────────────────────────── #

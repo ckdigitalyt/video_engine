@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import os
 import re
+import time
 from typing import Optional
 
 from .entity_spec import EntitySpec, VerificationResult
@@ -85,11 +86,15 @@ class AssetVerifier:
         self._vision_model = vision_model
         self._fatal_on_vision_fail = fatal_on_vision_fail
         # Circuit breaker: after consecutive vision infra errors, disable
-        # vision for the rest of the process (one 429 must not hammer the
+        # vision for a cooldown window (one 429 must not hammer the
         # provider for every asset in the run).
+        # v35 (review 2026-08-13): TIME-DECAYED — a tripped breaker
+        # re-arms after _vision_breaker_cooldown_s instead of disabling
+        # vision for the whole process.
         self._vision_error_streak = 0
         self._vision_max_streak = 2
-        self._vision_broken = False
+        self._vision_broken_until = 0.0
+        self._vision_breaker_cooldown_s = 300.0
 
     # ── Public API ─────────────────────────────────────────────────────
 
@@ -188,16 +193,17 @@ class AssetVerifier:
         # mismatch: degrade gracefully (metadata decides, low-confidence
         # flag) and trip the circuit breaker.  Only a vision check that
         # SUCCESSFULLY runs and confirms a mismatch is fatal.
-        vision_ok = self._vision_enabled and not self._vision_broken
+        vision_ok = self._vision_enabled and time.time() >= self._vision_broken_until
         if vision_ok and asset_path and os.path.exists(asset_path):
             vision = self._vision_check(spec, asset_path)
             res.vision_check = vision
             if vision.get("error"):
                 self._vision_error_streak += 1
                 if self._vision_error_streak >= self._vision_max_streak:
-                    self._vision_broken = True
+                    self._vision_broken_until = time.time() + self._vision_breaker_cooldown_s
                     print(f"  [vision] circuit breaker tripped after "
-                          f"{self._vision_error_streak} errors")
+                          f"{self._vision_error_streak} errors "
+                          f"(re-arm in {self._vision_breaker_cooldown_s:.0f}s)")
                 # Vision down: metadata decides, but ONLY with a strong
                 # score AND at least one required entity matched.  Off-topic
                 # violations (set above) remain fatal.  This closes the hole
@@ -231,7 +237,7 @@ class AssetVerifier:
         if not res.violated_prohibited and strong:
             res.passed = True
             res.reasons.append(f"metadata-only accept (score={res.score:.2f}); "
-                               f"vision {'broken' if self._vision_broken else 'disabled'}")
+                               f"vision {'breaker' if time.time() < self._vision_broken_until else 'disabled'}")
             return res
         res.passed = False
         res.reasons.append(f"unverified: score={res.score:.2f}, missing={res.missing_required}")
@@ -257,7 +263,7 @@ class AssetVerifier:
             "provider_tags": {"score": 0.5, "evidence": query_used},
         }
         res.score = 0.5
-        vision_ok = self._vision_enabled and not self._vision_broken
+        vision_ok = self._vision_enabled and time.time() >= self._vision_broken_until
         if not (vision_ok and asset_path and os.path.exists(asset_path)):
             res.passed = True  # fail-open: no vision signal available
             res.reasons.append("AI still: vision unavailable — fail-open")
@@ -267,9 +273,10 @@ class AssetVerifier:
         if vision.get("error"):
             self._vision_error_streak += 1
             if self._vision_error_streak >= self._vision_max_streak:
-                self._vision_broken = True
+                self._vision_broken_until = time.time() + self._vision_breaker_cooldown_s
                 print(f"  [vision] circuit breaker tripped after "
-                      f"{self._vision_error_streak} errors")
+                      f"{self._vision_error_streak} errors "
+                      f"(re-arm in {self._vision_breaker_cooldown_s:.0f}s)")
             res.passed = True  # fail-open on infra error
             res.reasons.append(
                 f"AI still: vision error — fail-open ({vision.get('error','')[:40]})")

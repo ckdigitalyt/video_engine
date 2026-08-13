@@ -31,6 +31,24 @@ from src.utils.config import get_config
 
 
 # ═══════════════════════════════════════════════════════════════════════ #
+# Deterministic seeds (v35, review 2026-08-13)
+# ═══════════════════════════════════════════════════════════════════════ #
+
+
+def deterministic_seed(prompt: str, salt: int = 0) -> int:
+    """Stable seed derived from *prompt* for reproducible A/B prompt tests.
+
+    Same prompt + salt -> same seed on every run/process (crc32 is
+    process-independent, unlike ``hash()`` which is salted per process).
+    Pass the result as ``seed=`` to any provider so prompt variants can
+    be compared on equal footing (identical seed, only the prompt
+    differs).
+    """
+    import zlib
+    return zlib.crc32(f"{salt}:{prompt}".encode("utf-8")) % 100000
+
+
+# ═══════════════════════════════════════════════════════════════════════ #
 # Interface
 # ═══════════════════════════════════════════════════════════════════════ #
 
@@ -141,7 +159,10 @@ class NvidiaNimProvider(ImageGenProvider):
                     "prompt": prompt,
                     "width": width,
                     "height": height,
-                    "seed": seed or int(time.time()) % 100000,
+                    # v35: honor seed=0; old ``seed or time`` turned an
+                    # explicit 0 into a time-based seed (A/B tests pass
+                    # deterministic_seed() which can legitimately be 0).
+                    "seed": seed if seed is not None else int(time.time()) % 100000,
                 }
                 data = json.dumps(payload).encode()
                 req = urllib.request.Request(
@@ -296,14 +317,25 @@ class PollinationsProvider(ImageGenProvider):
     Endpoint: https://image.pollinations.ai/prompt/<prompt>?width=&height=&seed=
     No API key required.  Supports model selection via ``model`` query param
     (default FLUX-based).  Verified working 2026-08 (1.7s / 1024x576 JPEG).
+
+    v35 (review 2026-08-13): the model is now PINNED explicitly instead of
+    relying on the endpoint default, which silently shifted to "sana" in
+    Aug 2026.  LIVE VERIFIED 2026-08-13: the endpoint currently IGNORES
+    the ``model`` param (flux/turbo/sana/'' all returned byte-identical
+    JPEGs, Exif manufacturer=sana) — the pin documents intent and takes
+    effect if/when the endpoint honors it.
     """
 
     name = "pollinations"
 
-    def __init__(self, base_url: Optional[str] = None):
+    def __init__(self, base_url: Optional[str] = None,
+                 model: Optional[str] = None):
         self._base_url = base_url or get_config(
             "image_gen.pollinations.base_url",
             "https://image.pollinations.ai/prompt",
+        )
+        self._model = model or get_config(
+            "image_gen.pollinations.model", "flux"
         )
 
     def is_available(self) -> bool:
@@ -313,7 +345,8 @@ class PollinationsProvider(ImageGenProvider):
                  width: int = 1024, height: int = 576,
                  seed: Optional[int] = None) -> str:
         import urllib.parse
-        params = {"width": width, "height": height, "nologo": "true"}
+        params = {"width": width, "height": height, "nologo": "true",
+                  "model": self._model}
         if seed is not None:
             params["seed"] = seed
         url = f"{self._base_url}/{urllib.parse.quote(prompt)}?" + urllib.parse.urlencode(params)
