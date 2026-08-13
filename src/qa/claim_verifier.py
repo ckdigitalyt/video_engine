@@ -84,10 +84,23 @@ _WORD_NUM_PAT = re.compile(
     r"((?:(?:zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|"
     r"twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|"
     r"twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|"
-    r"million|billion)[- ]?){1,4})\s*(hertz|hz|khz|mhz|kilomet(?:er|re)s?|km|"
+    r"million|billion|point)[- ]?){1,6})\s*(hertz|hz|khz|mhz|kilomet(?:er|re)s?|km|"
     r"miles?|mi|seconds?|minutes?|min|hours?|years?|percent|%|times?)",
     re.IGNORECASE,
 )
+
+
+def _norm_units(text: str) -> str:
+    """Normalize British/US unit spellings for match purposes
+    ("kilometres" -> "kilometers", "metres" -> "meters").  The research
+    pack uses British spelling while narration may use US; a raw substring
+    check then misses the pack hit and wrongly falls through to LLM
+    contradiction (Oumuamua run, 2026-08-13).
+    """
+    return (text.replace("kilometres", "kilometers")
+                .replace("centimetres", "centimeters")
+                .replace("millimetres", "millimeters")
+                .replace("tonnes", "tons"))
 
 
 def _words_to_number(words: str) -> str:
@@ -116,13 +129,28 @@ def _words_to_number(words: str) -> str:
 
 
 def _words_to_number_single(words: str) -> str:
-    """Parse ONE number written out in words (no range)."""
+    """Parse ONE number written out in words (no range).
+
+    v36: supports decimal fractions via "point" ("twenty-six point three"
+    -> "26.3", "point two five" -> "0.25").  Before this, the regex
+    grabbed only the LAST word before the unit ("three kilometers" out of
+    "twenty-six point three kilometers per second"), producing fake
+    contradicted claims (Oumuamua run, 2026-08-13).
+    """
     total, cur = 0, 0
+    frac_digits = ""
+    in_frac = False
     for tok in re.split(r"[- ]", words.strip()):
         tok = tok.lower()
+        if tok == "point":
+            in_frac = True
+            continue
         if tok not in _WORD_NUM:
             continue
         v = _WORD_NUM[tok]
+        if in_frac:
+            frac_digits += str(v)
+            continue
         if v == 100:
             cur = (cur or 1) * v
         elif v >= 1000:
@@ -131,6 +159,8 @@ def _words_to_number_single(words: str) -> str:
         else:
             cur += v
     total += cur
+    if frac_digits:
+        return f"{total}.{frac_digits}" if total else f"0.{frac_digits}"
     return str(total) if total else ""
 
 # Phenomena that must NEVER be conflated (curated from expert review +
@@ -483,7 +513,9 @@ class ClaimVerifier:
             for ft in fact_texts:
                 if u:
                     # unit-anchored: number AND unit must co-occur
-                    if v in ft and u.lower() in ft:
+                    # (v36: normalize British/US spellings so "kilometres"
+                    # in the pack matches "kilometers" in narration)
+                    if v in ft and _norm_units(u.lower()) in _norm_units(ft):
                         hit = ft
                         break
                 else:
