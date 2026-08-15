@@ -679,6 +679,7 @@ def stage_ai_imagery(result_scenes, out_dir: str) -> dict:
     t0 = time.time()
     os.makedirs("cache/generated", exist_ok=True)
     from src.providers.image_gen import NvidiaNimProvider, PollinationsProvider
+    from src.utils.config import get_config
     from concurrent.futures import ThreadPoolExecutor, as_completed
 
     prov = NvidiaNimProvider()
@@ -736,8 +737,23 @@ def stage_ai_imagery(result_scenes, out_dir: str) -> dict:
             continue
         sem = primary.asset_plan.semantic_score or primary.semantic_score or 0.0
         prov_name = primary.asset_plan.provider.value if primary.asset_plan.provider else ""
-        weak = sem < 0.65 or prov_name in ("placeholder", "emergency", "stock")
-        if not weak:
+        # v38 (ckdigital 2026-08-15): FLUX-first visuals.  The old gate checked
+        # for provider in ("placeholder","emergency","stock") — but "stock" is
+        # NOT a valid ProviderType (Pexels shots report "pexels"), so AI stills
+        # were never generated for stock-sourced scenes (Saturn run: ai_imagery
+        # generated 0 stills, 10/15 shots stayed stock -> Jupiter-looking planet
+        # during Saturn narration).  Now: generate a FLUX still for every
+        # non-animated primary shot (NIM flux.2-klein-4b -> Pollinations
+        # fallback), so the visual is drawn from the scene's own description
+        # instead of hoping a stock clip matches.  Pexels remains only the
+        # fallback when generation fails.  MANIM/GENERATED/REUSE shots keep
+        # their existing visual.  Toggle: pipeline.ai_imagery.prefer_generated
+        # (default true).
+        prefer_generated = get_config("pipeline.ai_imagery.prefer_generated", True)
+        is_animated = prov_name in ("manim", "generated", "reuse")
+        weak = (prefer_generated or sem < 0.65 or prov_name in (
+            "placeholder", "emergency", "stock", "pexels", "pixabay", "wikimedia"))
+        if not weak or is_animated:
             continue
         visual_goal = ""
         if scene.visual_plan and scene.visual_plan.visual_description:

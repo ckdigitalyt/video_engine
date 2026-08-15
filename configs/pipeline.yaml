@@ -39,6 +39,16 @@ pipeline:
     # than this margin (a 1.05x margin keeps rounding noise away).
     zoom_headroom_margin: 1.05
 
+  # v38 (ckdigital 2026-08-15): FLUX-first visuals.  Generate a FLUX
+  # still (NIM flux.2-klein-4b -> Pollinations) for every non-animated
+  # primary shot so the visual is drawn from the scene's own description
+  # instead of hoping a Pexels stock clip matches the narration (the
+  # Saturn run showed a Jupiter-looking planet during Saturn narration
+  # because the AI-stills gate never matched Pexels providers).  Pexels
+  # remains the fallback only when generation fails.
+  ai_imagery:
+    prefer_generated: true
+
   # Fallback is handled by FallbackDirector — no static clip
   fallback:
     video: ""  # Empty: FallbackDirector handles all degradation
@@ -74,12 +84,17 @@ pipeline:
     # leveraged first and DeepSeek cost stays minimal; the old "Gemini 429
     # kills the run" failure mode is gone because ChainLLMProvider retries
     # the next provider in the chain on each call.
-    default: "gemini"
+    # v37 (ckdigital direction 2026-08-13): default is GEMINI37 (gemini-3.7-flash, free).
+    # 3.7 verified live (model listed + completion OK; intermittent 503 high-demand).
+    # DeepSeek was the paid default (v36) and burned cost on every script call —
+    # now the free chain (3.7 -> 2.5 -> groq/openrouter) is tried FIRST and
+    # deepseek-v4-pro is auto-appended LAST by the factory (paid last resort).
+    default: "gemini37"
     # Fallback provider when the default is unavailable (deepseek last resort)
     fallback: "deepseek"
     # Cost-chain preference order (primary is always tried first).
-    # v19g (ckdigital direction): Mistral EXCLUDED — small model, not for
-    # script work.  DeepSeek is auto-appended LAST by the factory.
+    # v37: gemini37 first (newer/free), then 2.5, groq, openrouter;
+    # DeepSeek auto-appended LAST by the factory.
     chain: ["gemini", "groq", "openrouter"]
     # Role-specific provider overrides
     # v19g.1 (ckdigital directive): planner was still "mistral" — a leftover.
