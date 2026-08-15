@@ -32,7 +32,7 @@ from typing import Optional
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(override=True)  # runtime injects masked/placeholder API keys; .env has the real ones
 
 from src.providers.llm_provider import set_usage_stage, DeepSeekUsage
 from src.providers.tts_provider import strip_paralinguistic_tags

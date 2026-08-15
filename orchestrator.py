@@ -35,7 +35,7 @@ from src.models.schemas import (
 )
 from src.subtitles.engine import SubtitleEngine
 
-load_dotenv()
+load_dotenv(override=True)  # runtime injects masked/placeholder API keys; .env has the real ones
 
 # ── Providers ──────────────────────────────────────────────────────────────
 

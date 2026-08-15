@@ -20,7 +20,7 @@ import time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(override=True)  # runtime injects masked/placeholder API keys; .env has the real ones
 
 REVIEW_PROMPT = """You are the executive producer of a world-class documentary studio.
 Review this rendered documentary video END-TO-END (watch the actual video frames
