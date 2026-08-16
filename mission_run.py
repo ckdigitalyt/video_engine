@@ -621,21 +621,25 @@ def stage_storyboard_and_direct(
 # AI image generation (stage 8b) — NVIDIA NIM (benchmarked default)
 # ═══════════════════════════════════════════════════════════════════════ #
 
+# v42: base prompts are style-NEUTRAL subject descriptions — the locked
+# cartoon brand suffix (_AI_STYLE_SUFFIX, from style_bible.STYLE_SUFFIX)
+# is appended by every caller, so no "photorealistic" wording may live
+# here (it contradicted the v40 cartoon lock in the final prompt).
 AI_IMAGE_PROMPTS = {
     "spacecraft": (
-        "Photorealistic documentary image of the Voyager 1 spacecraft, "
-        "large dish antenna, golden record attached, deep interstellar "
-        "space with faint stars, cinematic NASA style, high detail"
+        "The Voyager 1 spacecraft, large dish antenna, golden record "
+        "attached, deep interstellar space with faint stars, documentary "
+        "style, high detail"
     ),
     "golden_record": (
         "Close-up of the Voyager Golden Record, gold-plated copper "
         "phonograph record with its cover and stylus, floating in space, "
-        "cinematic lighting, photorealistic"
+        "cinematic lighting"
     ),
     "interstellar": (
         "Voyager 1 spacecraft receding into interstellar space, tiny "
-        "silhouette against vast starfield, pale blue dot earth in distance, "
-        "cinematic, photorealistic, documentary style"
+        "silhouette against vast starfield, pale blue dot earth in "
+        "distance, documentary style"
     ),
 }
 
@@ -650,13 +654,13 @@ AI_IMAGE_PROMPTS = {
 # DEFAULT_STYLE_MODIFIER + STYLE_TOKEN="cartoon illustration") — thick
 # dark outlines, cel shading, soft gradients, glow, friendly faces, and
 # the recurring mascot injected via style_bible.styled_prompt().
-_AI_STYLE_SUFFIX = (
-    ", hand-drawn 2D cartoon illustration, thick dark outlines, cel shading, "
-    "soft gradients, glow, friendly expressive cartoon faces, bold clean "
-    "shapes, scientific explainer art, consistent color palette, 16:9 composition"
-    ", a cute small green alien observer in a tiny round spaceship may appear "
-    "as a recurring mascot, friendly and curious"
-)
+# v42: NO local copy anymore — this is derived from style_bible.STYLE_SUFFIX
+# (style modifier + locked palette NAMES + mascot + friendly faces) so
+# mission_run and mission_stills share ONE brand string; the palette hexes
+# are backed by names the generators actually honor.  If the channel brand
+# changes, edit style_bible.py only.
+from src.director.style_bible import STYLE_SUFFIX as _BRAND_SUFFIX
+_AI_STYLE_SUFFIX = ", " + _BRAND_SUFFIX
 
 
 def _still_to_kenburns(image_path: str, out_path: str, duration: float = 9.0) -> str:
@@ -701,7 +705,45 @@ def stage_ai_imagery(result_scenes, out_dir: str) -> dict:
         print("  !! No NVIDIA_API_KEY — falling back to Pollinations only")
         prov = None
 
-    def _gen(prompt: str, out_path: str) -> bool:
+    # v41 (2026-08-16): perceptual dedup for AI stills.  The paradox test
+    # run generated 4 byte-identical semantic stills (4 different prompts
+    # but the NIM time-seed window + cache returned the same image) and all
+    # 4 entered the timeline — the final video repeated one image 4x.
+    # mission_stills has an _is_dup dhash guard; mission_run's
+    # stage_ai_imagery did not.  Now every still (fresh OR cached) is
+    # dhash-checked against already-placed images; duplicates are
+    # regenerated with a deterministic different seed (up to
+    # _AI_DEDUP_ATTEMPTS) or rejected so the shot keeps its pre-existing
+    # visual instead of repeating an image.
+    import threading
+    from src.qa.deterministic_qa import dhash, hamming
+    from src.providers.image_gen import deterministic_seed
+    _AI_DEDUP_ATTEMPTS = 3
+    _placed_hashes: list = []
+    _placed_lock = threading.Lock()
+
+    def _img_hash(path: str):
+        try:
+            from PIL import Image
+            with Image.open(path) as im:
+                return dhash(im)
+        except Exception:
+            return None
+
+    def _is_dup_placed(path: str) -> bool:
+        h = _img_hash(path)
+        if h is None:
+            return False  # fail-open: cannot verify
+        with _placed_lock:
+            return any(hamming(h, ph) < 6 for ph in _placed_hashes)
+
+    def _register_placed(path: str) -> None:
+        h = _img_hash(path)
+        if h is not None:
+            with _placed_lock:
+                _placed_hashes.append(h)
+
+    def _gen(prompt: str, out_path: str, seed: Optional[int] = None) -> bool:
         """Try NIM, then Pollinations. Returns True on success."""
         attempts = []
         if prov is not None:
@@ -710,7 +752,7 @@ def stage_ai_imagery(result_scenes, out_dir: str) -> dict:
             attempts.append(("pollinations", fallback))
         for name, p in attempts:
             try:
-                p.generate(prompt, out_path, width=2560, height=1440)
+                p.generate(prompt, out_path, width=2560, height=1440, seed=seed)
                 print(f"  [AI] {name}: generated {os.path.basename(out_path)} ({os.path.getsize(out_path)//1024} KB)")
                 return True
             except Exception as e:
@@ -785,9 +827,29 @@ def stage_ai_imagery(result_scenes, out_dir: str) -> dict:
 
     # ── Parallel generation: image → Ken Burns clip ──────────────────
     def _gen_task(t: dict):
+        # v41 dedup: even CACHED images are checked — the paradox 06:39
+        # run cached 4 byte-identical stills and a later run would
+        # re-inject all 4 (cache only checks existence).
+        if os.path.exists(t["img_path"]) and _is_dup_placed(t["img_path"]):
+            print(f"  [AI] !! {t['kind']} cached image is a duplicate — regenerating")
+            try:
+                os.remove(t["img_path"])
+            except OSError:
+                pass
         if not os.path.exists(t["img_path"]):
-            if not _gen(t["prompt"], t["img_path"]):
-                return t, None, True  # generation failed on all providers
+            ok = False
+            for attempt in range(_AI_DEDUP_ATTEMPTS):
+                if not _gen(t["prompt"], t["img_path"],
+                            seed=deterministic_seed(t["prompt"], attempt)):
+                    return t, None, True  # generation failed on all providers
+                if not _is_dup_placed(t["img_path"]):
+                    ok = True
+                    break
+                print(f"  [AI] !! {t['kind']} duplicate of a placed still — "
+                      f"regenerating (attempt {attempt + 1})")
+            if not ok:
+                return t, None, True  # could not produce a distinct image
+        _register_placed(t["img_path"])
         clip_path = t["clip_path"]
         if not os.path.exists(clip_path):
             clip_path = _still_to_kenburns(t["img_path"], clip_path, duration=9.0)
@@ -2561,6 +2623,11 @@ def main():
     # v40: create the style bible BEFORE imagery so placed-token records
     # flow into the same object the QA gates use (was created after, so
     # style-drift checks were vacuous).
+    # v42 fix: import here — v40 called create_style_bible() before the
+    # later local import at the narration stage, which made the name a
+    # function-local and raised UnboundLocalError on EVERY fresh run once
+    # the claim gate passed (v40+v41 shipped with this landmine).
+    from src.director.style_bible import create_style_bible
     style_bible = create_style_bible("jade").reset_episode()
     ai_stats = stage_ai_imagery(result_scenes, out_dir)
     run_report["stages"]["ai_imagery"] = ai_stats
@@ -2587,7 +2654,6 @@ def main():
     # default chatterbox — the locked kurzgesagt_like narrator).  Both
     # runners share stage_narration_dynamic so they can't diverge again.
     from src.qa.voice_lock import lock_voice
-    from src.director.style_bible import create_style_bible
     from src.utils.config import get_config as _gc
     _voice_provider = _gc("voices.provider", "fish")
     # Resolve the narrator ONCE before locking (2026-08-09): Fish Audio
