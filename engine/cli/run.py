@@ -66,12 +66,20 @@ def _render_scene(scene_file: Path, scene_name: str, out_dir: Path,
                   resolution: tuple[int, int], fps: int) -> Path:
     """Render one Manim scene to MP4.  Returns the clip path."""
     manim_exe = shutil.which("manim") or str(MANIM_BIN)
-    # Low quality is too low-res to be useful; use -ql fallback is 480p.  For
-    # dev we render at the requested resolution via --resolution + -ql (fast).
     w, h = resolution
+    # Map resolution to manim quality flag: 480p15 / 720p30 / 1080p60 / 4K60
+    if h >= 2160:
+        qflag = "-qk"
+    elif h >= 1080:
+        qflag = "-qh"
+    elif h >= 720:
+        qflag = "-qm"
+    else:
+        qflag = "-ql"
     cmd = [
-        manim_exe, "-ql",
+        manim_exe, qflag,
         "--format", "mp4",
+        "--fps", str(fps),
         "--media_dir", str(out_dir),
         str(scene_file), scene_name,
     ]
@@ -127,14 +135,44 @@ def run(topic: str, out_root: str | Path, use_llm: bool = False,
     # 5) Render
     clip = _render_scene(scene_file, scene_name, workdir, resolution, fps)
 
-    # 6) Compose (silence audio for now; TTS/narration hook follows)
+    # 6) Compose: narration (TTS) + subtitles + final audio mix
     final = out / "final.mp4"
-    compose_final([clip], narration=None, music=None, subtitles=None,
-                  out=final, resolution=resolution, fps=fps)
+    narration_audio = None
+    srt_path = None
+    if narration:
+        try:
+            from engine.audio.timeline import synthesize_narration
+            from engine.composition.ffmpeg_compositor import generate_srt
+            narration_audio, words = synthesize_narration(
+                narration, workdir / "narration", voice="")
+            if words:
+                # group words into caption lines (max 4 words, karaoke-friendly)
+                entries = []
+                for i in range(0, len(words), 4):
+                    chunk = words[i:i + 4]
+                    entries.append({
+                        "start": chunk[0]["start"],
+                        "end": chunk[-1]["end"],
+                        "text": " ".join(w["word"] for w in chunk),
+                    })
+                srt_path = generate_srt(entries, workdir / "narration.srt")
+                print(f"[tts] narration {narration_audio.name} "
+                      f"({len(words)} words, {entries[-1]['end']:.1f}s)")
+        except Exception as e:  # noqa: BLE001
+            print(f"[tts] narration synthesis failed, proceeding silent: {e}")
+            narration_audio = None
 
-    # 7) QA gates
-    audio_metrics = {"integrated_lufs": -14.0, "true_peak_db": -6.0,
-                     "clipping": False}
+    compose_final([clip], narration=narration_audio, music=None,
+                  subtitles=srt_path, out=final, resolution=resolution, fps=fps)
+
+    # 7) QA gates (real audio metrics from the final mix, §22)
+    try:
+        from engine.audio.timeline import measure_loudness
+        audio_metrics = measure_loudness(final)
+    except Exception as e:  # noqa: BLE001
+        print(f"[qa] loudness measurement failed: {e}")
+        audio_metrics = {"integrated_lufs": None, "true_peak_db": None,
+                         "clipping": False}
     motion_metrics = {
         "beat_count": len(beatsheet["beats"]),
         "avg_beat_duration": (sum(b["duration"] for b in beatsheet["beats"])

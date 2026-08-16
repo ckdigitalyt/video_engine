@@ -135,16 +135,20 @@ class KokoroProvider(TTSProvider):
         out_wav.parent.mkdir(parents=True, exist_ok=True)
         words: list[dict] = []
         t = 0.0
-        with open(out_wav, "wb") as f:
+        import wave
+        with wave.open(str(out_wav), "wb") as wf:
+            wf.setnchannels(1)
+            wf.setsampwidth(2)
+            wf.setframerate(24000)  # Kokoro fixed sample rate; set once
             for s in sentences:
-                samples, sr = kokoro.create(s, voice=voice or "af_heart",
-                                            speed=1.0, is_tts=True)
-                import numpy as np
+                samples, sr = kokoro.create(s, voice=voice or "af_sarah",
+                                            speed=1.0, lang="en-us",
+                                            is_phonemes=False, trim=True)
                 dur = len(samples) / sr
                 # sentence-level timing; each word spans the sentence
                 for w in s.split():
                     words.append({"word": w, "start": t, "end": t + dur})
-                f.write(_samples_to_pcm(samples))
+                wf.writeframes(_samples_to_pcm(samples))
                 t += dur
         return {"duration": t, "words": words}
 
@@ -165,8 +169,8 @@ def _import(mod: str) -> Any:
 
 
 _PROVIDERS: dict[str, TTSProvider] = {
-    EdgeTTSProvider.name: EdgeTTSProvider(),
-    KokoroProvider.name: KokoroProvider(),
+    KokoroProvider.name: KokoroProvider(),   # local primary (§17)
+    EdgeTTSProvider.name: EdgeTTSProvider(), # external fallback
 }
 
 
@@ -180,6 +184,33 @@ def get_provider(name: str | None = None) -> TTSProvider:
     raise RuntimeError("No TTS provider available")
 
 
+def synthesize_narration(text: str, out_audio: Path, voice: str = "") -> tuple[Path, list[dict]]:
+    """Synthesize narration with the best available provider.
+
+    Returns (audio_path, words).  Tries local Kokoro first, falls back to
+    Edge-TTS.  Audio extension depends on provider (wav for kokoro, mp3 for
+    edge_tts).  Never blocks the architecture on a single provider.
+    """
+    out_audio = Path(out_audio)
+    out_audio.parent.mkdir(parents=True, exist_ok=True)
+    for prov in _PROVIDERS.values():
+        if not prov.available():
+            continue
+        try:
+            wav = out_audio.with_suffix(".wav")
+            meta = prov.synthesize(text, wav, voice=voice)
+            if meta.get("duration", 0) > 0 and wav.exists():
+                return wav, meta.get("words", [])
+            # edge_tts writes mp3 next to the wav path
+            mp3 = out_audio.with_suffix(".mp3")
+            if meta.get("duration", 0) > 0 and mp3.exists():
+                return mp3, meta.get("words", [])
+        except Exception as e:  # noqa: BLE001
+            print(f"[tts] provider {prov.name} failed: {e}")
+            continue
+    raise RuntimeError("No TTS provider produced audio")
+
+
 # ──────────────────────────────────────────────────────────────────────────
 # FFmpeg masters (Gate 8 — Audio): LUFS loudness, true peak, clipping
 # ──────────────────────────────────────────────────────────────────────────
@@ -191,7 +222,11 @@ def ffmpeg() -> str:
 
 
 def measure_loudness(path: Path) -> dict:
-    """Measure integrated LUFS + true peak via FFmpeg ebur128 filter."""
+    """Measure integrated LUFS + true peak via FFmpeg ebur128 filter.
+
+    ebur128 reports values on 'I:' (integrated) and 'Peak:' lines that
+    follow the 'Integrated loudness:' / 'True peak:' headers.
+    """
     cmd = [
         ffmpeg(), "-hide_banner", "-i", str(path),
         "-filter_complex", "ebur128=peak=true",
@@ -202,14 +237,15 @@ def measure_loudness(path: Path) -> dict:
     lufs = None
     peak = None
     for line in out.splitlines():
-        if "Integrated loudness:" in line:
+        stripped = line.strip()
+        if stripped.startswith("I:") and lufs is None:
             try:
-                lufs = float(line.split(":")[1].split()[0].strip())
+                lufs = float(stripped.split("I:")[1].split()[0].strip())
             except (IndexError, ValueError):
                 pass
-        if "True peak:" in line:
+        elif stripped.startswith("Peak:") and peak is None:
             try:
-                peak = float(line.split(":")[1].split()[0].strip())
+                peak = float(stripped.split("Peak:")[1].split()[0].strip())
             except (IndexError, ValueError):
                 pass
     return {"integrated_lufs": lufs, "true_peak_db": peak,
@@ -218,22 +254,18 @@ def measure_loudness(path: Path) -> dict:
 
 def normalize_to_target(input_path: Path, output_path: Path,
                         target_lufs: float = -14.0) -> Path:
-    """Normalize to a target loudness using dynamic (or static) normalization.
+    """Normalize to target loudness with loudnorm (EBU R128).
 
-    Previous test video was ~-29 LUFS — far too quiet.  We normalize toward
-    -14 LUFS integrated (dialnorm standard for YouTube delivery).
+    Previous test video was ~-29 LUFS — far too quiet.  loudnorm targets
+    integrated LUFS AND caps true peak (TP=-1.5), so we never clip while
+    reaching delivery loudness.  Static gain is NOT used: it would push
+    true peak past 0 dBFS on peaky TTS.
     """
     out = Path(output_path)
     out.parent.mkdir(parents=True, exist_ok=True)
-    # measure first
-    m = measure_loudness(input_path)
-    cur = m.get("integrated_lufs")
-    if cur is None:
-        raise RuntimeError("could not measure loudness")
-    gain = target_lufs - cur
     cmd = [
-        ffmgen(), "-y", "-i", str(input_path),
-        "-filter:a", f"volume={gain:.2f}dB",
+        ffmpeg(), "-y", "-i", str(input_path),
+        "-af", f"loudnorm=I={target_lufs}:TP=-1.5:LRA=11",
         "-c:a", "aac", "-b:a", "192k", str(out),
     ]
     subprocess.run(cmd, check=True, capture_output=True)

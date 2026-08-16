@@ -122,13 +122,16 @@ def compose_final(beat_clips: list[Path],
     else:
         video_with_v = silent_video
 
-    # 5) final mux: video + mastered audio
+    # 5) final mux: video + mastered audio (pad audio to video length so a
+    #    shorter narration never truncates the visuals, §21 voice-dominant)
     final = workdir / "final.mp4" if out.name == "final.mp4" else out
+    vid_dur = _probe_duration(video_with_v)
     subprocess.run([
         ffmpeg(), "-y", "-i", str(video_with_v), "-i", str(mastered),
         "-map", "0:v:0", "-map", "1:a:0",
-        "-c:v", "copy", "-c:a", "copy",
-        "-shortest", str(final),
+        "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",
+        "-af", "apad", "-t", str(vid_dur),
+        str(final),
     ], check=True, capture_output=True)
 
     # 6) audio QA metrics on final
