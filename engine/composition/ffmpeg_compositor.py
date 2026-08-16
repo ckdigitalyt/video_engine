@@ -122,15 +122,24 @@ def compose_final(beat_clips: list[Path],
     else:
         video_with_v = silent_video
 
-    # 5) final mux: video + mastered audio (pad audio to video length so a
-    #    shorter narration never truncates the visuals, §21 voice-dominant)
+    # 5) final mux: video + mastered audio.  Voice-dominant (§21): if the
+    #    narration is LONGER than the video, extend the video (clone last
+    #    frame) rather than truncating the voice — narration never gets cut.
     final = workdir / "final.mp4" if out.name == "final.mp4" else out
     vid_dur = _probe_duration(video_with_v)
+    nar_dur = _probe_duration(mastered) if mastered is not None else 0.0
+    final_dur = max(vid_dur, nar_dur + 0.2)
+    vf_args: list[str] = []
+    vcodec_args = ["-c:v", "copy"]
+    if final_dur > vid_dur + 0.05:
+        vf_args = ["-vf", f"tpad=stop_mode=clone:stop_duration={final_dur - vid_dur:.2f}"]
+        vcodec_args = ["-c:v", "libx264", "-preset", "fast", "-crf", "20"]
     subprocess.run([
         ffmpeg(), "-y", "-i", str(video_with_v), "-i", str(mastered),
         "-map", "0:v:0", "-map", "1:a:0",
-        "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",
-        "-af", "apad", "-t", str(vid_dur),
+        *vcodec_args, "-c:a", "aac", "-b:a", "192k",
+        "-af", "apad", "-t", str(final_dur),
+        *vf_args,
         str(final),
     ], check=True, capture_output=True)
 

@@ -226,9 +226,12 @@ def _direct_generic(topic: str, narration: str) -> tuple[dict, dict]:
     t = 0.0
     for i, sent in enumerate(sentences):
         intent = intent_cycle[min(i, len(intent_cycle) - 1)]
-        # scale beat duration to sentence length (rough: words * 0.16s + pad)
+        # scale beat duration to sentence length at REAL speech rate
+        # (~0.32 s/word for typical TTS at 150wpm) plus sentence pad so
+        # narration NEVER gets truncated by a too-short beat (§21 voice-
+        # dominant: video fits the voice, never the reverse).
         words = len(sent.split())
-        dur = round(max(1.0, min(4.0, words * 0.18 + 0.9)), 2)
+        dur = round(max(1.4, min(4.0, words * 0.32 + 0.6)), 2)
         beats.append({
             "beat_id": f"b{i + 1:03d}",
             "start": round(t, 2),
