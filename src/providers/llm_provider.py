@@ -199,7 +199,8 @@ class GeminiProvider(LLMProvider):
     def __init__(self, **kwargs):
         api_key = os.environ.get("GEMINI_API_KEY")
         self._client = genai.Client(api_key=api_key)
-        self._model_name = get_config("llm.gemini.model", "gemini-1.5-flash")
+        # Per-provider model override (e.g. llm.gemini37.model), else gemini default
+        self._model_name = kwargs.get("model") or get_config("llm.gemini.model", "gemini-1.5-flash")
 
     def generate_text(self, prompt: str, image_path: Optional[str] = None, **kwargs) -> str:
         if image_path and os.path.exists(image_path):

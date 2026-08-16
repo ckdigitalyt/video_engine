@@ -10,15 +10,20 @@ the algorithm can never drift again:
 
   * MANIM_SCENES / TOPIC_MANIM / _TOPIC_HINTS / _manim_scene_for()
       — which animated explanation clips exist and which scenes may use them
-        (topic registry; generic beats DISABLED under realistic direction).
+        (topic registry; generic beats are a last resort).
   * VECTOR_BEATS / _vector_beat_for()
-      — Kurzgesagt-style flat-vector animated beats (cache/vector/*.mp4),
-        DISABLED under the 2026-08-10 realistic direction.
+      — Kurzgesagt-style flat-vector animated beats, rendered per-video
+        into results/<slug>/vector/ (ENABLED under the cartoon direction).
   * FIXED_JADE_STYLE / STYLE_MODIFIERS / _style_prompt_for()
       — ONE locked art direction + palette for all stylized shots.
 
-Channel direction (2026-08-10, ckdigital): REALISTIC images only —
-photorealistic stills, no flat-vector illustrations or vector beats.
+Channel direction (2026-08-16, v40/v42, ckdigital): CARTOON ONLY —
+hand-drawn 2D cartoon illustration with thick dark outlines, cel shading,
+soft gradients, glow, friendly expressive faces + a recurring green-alien
+mascot (see style_bible.STYLE_SUFFIX — the single brand string both runners
+append to every styled prompt).  Flat-vector beats are enabled again (they
+match the cartoon look and guarantee motion on fresh topics); generic Manim
+beats remain available only when their clip files exist.
 """
 
 import os
@@ -178,10 +183,10 @@ def manim_scene_for(scene_text: str, intent: str = "default") -> str:
             ("how big", "how far", "million", "billion", "fit inside", "size")
         ):
             return MANIM_SCENES.get(mapping["scale"], "") or ""
-    # v12: generic fallback (any topic, any intent) — DISABLED under the
-    # 2026-08-10 realistic direction (generic beats = flat diagrams the
-    # review flagged).  Unregistered topics now use Ken Burns on
-    # photorealistic stills instead of generic Manim/vector beats.
+    # v12 generic fallback (any topic, any intent).  v42: ENABLED again
+    # under the cartoon direction — but only fires when the generic clip
+    # file actually exists in cache/manim (unregistered topics otherwise
+    # get Ken Burns on cartoon AI stills + vector beats).
     if not GENERIC_MANIM_BEATS_ENABLED:
         return ""
     generic = TOPIC_MANIM.get("__generic__", {})
@@ -212,12 +217,12 @@ def manim_script_for(clip_path: str) -> str:
 
 # 2026-08-10: channel direction REVERSED by ckdigital — realistic images
 # only, NO flat-vector illustrations or Kurzgesagt-style vector motion.
-# The flat-vector beats are therefore DISABLED (flag below); scenes get
-# motion from Ken Burns on photorealistic stills + topic manim instead.
-# The generic (topic-agnostic) Manim beats are also disabled — they render
-# the same flat diagram look the review flagged (clock at 0:01, bar
-# charts); only topic-registered Manim scenes (black_hole_lensing, ...)
-# remain available.
+# 2026-08-16 (v40/v42): ckdigital RE-REVERSED to the cartoon direction;
+# the flat-vector beats are ENABLED again (flags True) — they match the
+# locked cartoon look and guarantee motion on fresh topics that have no
+# bespoke Manim scene.  Beats are rendered per-video into
+# results/<slug>/vector/; generic (topic-agnostic) Manim beats are only
+# placed when their clip file actually exists in cache/manim.
 FLAT_VECTOR_BEATS_ENABLED = True
 GENERIC_MANIM_BEATS_ENABLED = True
 
@@ -263,6 +268,8 @@ def render_vector_beats(vector_dir: str, label: str = "",
 
     2026-08-10: DISABLED by default (realistic direction, no flat-vector
     beats) — returns {} immediately unless FLAT_VECTOR_BEATS_ENABLED.
+    2026-08-16 (v40/v42): ENABLED under the cartoon direction (see the
+    flag comment) — per-video Kurzgesagt-style motion for fresh topics.
 
     Returns {template: clip_path} for the templates that rendered OK.
     """
@@ -278,6 +285,13 @@ def render_vector_beats(vector_dir: str, label: str = "",
 
     def _one(template: str) -> str:
         out = os.path.join(vector_dir, f"vector_{template}.mp4")
+        # v42: idempotent — a beat already rendered for THIS video (e.g. a
+        # resume/fix rerun after a crash) is reused as-is: the placement
+        # gate (vector_beat_for: size + ffprobe) validates it and falls
+        # back to Ken Burns stills when invalid, and re-rendering here
+        # would only reproduce the same result at 2-5 min per template.
+        if os.path.exists(out):
+            return out
         try:
             _render(template, out, duration=_DUR.get(template),
                     label=label)
@@ -312,7 +326,8 @@ def vector_beat_for(intent: str = "default", vector_dir: str = "") -> str:
     failed ffmpeg composite) must never enter the timeline.
 
     2026-08-10: DISABLED by default (realistic direction) — returns ""
-    unless FLAT_VECTOR_BEATS_ENABLED."""
+    unless FLAT_VECTOR_BEATS_ENABLED.
+    2026-08-16 (v40/v42): ENABLED under the cartoon direction."""
     if not FLAT_VECTOR_BEATS_ENABLED:
         return ""
     tpl = VECTOR_TEMPLATES.get(intent, VECTOR_TEMPLATES["default"])

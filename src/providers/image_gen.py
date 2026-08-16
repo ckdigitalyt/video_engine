@@ -48,6 +48,30 @@ def deterministic_seed(prompt: str, salt: int = 0) -> int:
     return zlib.crc32(f"{salt}:{prompt}".encode("utf-8")) % 100000
 
 
+# v42: sanity guard for provider outputs.  A misconfigured/broken image
+# endpoint can return a tiny or corrupt payload that HTTP-succeeds; every
+# caller (stage_ai_imagery, FallbackDirector, mission_stills._ai_still)
+# treats a written file as success, so a 6 KB error blob used to sail
+# straight into the timeline (6174 run: NIM returned 6 KB "images" for
+# every prompt and the v41 dedup had to reject them all — the video then
+# fell back to stock footage).  Real 2560x1440 images are never < ~15 KB
+# and always parse as a non-trivial image.
+_MIN_IMAGE_BYTES = 15_000
+
+
+def _looks_like_image(path: str) -> bool:
+    """True when *path* holds a parseable image of sane dimensions."""
+    try:
+        if not os.path.exists(path) or os.path.getsize(path) < _MIN_IMAGE_BYTES:
+            return False
+        from PIL import Image
+        with Image.open(path) as im:
+            im.verify()  # raises on corrupt/truncated files
+        return True
+    except Exception:
+        return False
+
+
 # ═══════════════════════════════════════════════════════════════════════ #
 # Interface
 # ═══════════════════════════════════════════════════════════════════════ #
@@ -185,12 +209,32 @@ class NvidiaNimProvider(ImageGenProvider):
                     raw = base64.b64decode(b64)
                     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
                     Path(output_path).write_bytes(raw)
+                    # v42: sanity-guard the written file — a broken/misconfigured
+                    # NIM endpoint returns tiny error/placeholder payloads that
+                    # "succeed" (6174 run: every still came back 6 KB and the
+                    # v41 dedup had to reject them all, so the video fell back
+                    # to stock).  A real 2560x1440 image is never < ~20 KB or
+                    # unparseable; reject and let the caller fail over.
+                    if not _looks_like_image(output_path):
+                        try:
+                            Path(output_path).unlink()
+                        except OSError:
+                            pass
+                        raise RuntimeError(
+                            f"NIM returned a non-image payload "
+                            f"({Path(output_path).stat().st_size if Path(output_path).exists() else 0} bytes)")
                     return output_path
                 img_url = body.get("url") or (body.get("data") or [{}])[0].get("url")
                 if img_url:
                     with urllib.request.urlopen(img_url, timeout=120) as r:
                         Path(output_path).parent.mkdir(parents=True, exist_ok=True)
                         Path(output_path).write_bytes(r.read())
+                    if not _looks_like_image(output_path):
+                        try:
+                            Path(output_path).unlink()
+                        except OSError:
+                            pass
+                        raise RuntimeError("NIM URL image failed sanity check")
                     return output_path
                 last_err = RuntimeError(f"unexpected NIM response shape: {list(body)[:5]}")
             except urllib.error.HTTPError as e:
@@ -357,6 +401,16 @@ class PollinationsProvider(ImageGenProvider):
             raise RuntimeError(f"Pollinations returned non-image response ({len(raw)} bytes)")
         Path(output_path).parent.mkdir(parents=True, exist_ok=True)
         Path(output_path).write_bytes(raw)
+        # v42: same sanity guard as NIM — tiny/corrupt payloads must not
+        # "succeed" and enter the timeline (see _looks_like_image).
+        if not _looks_like_image(output_path):
+            try:
+                Path(output_path).unlink()
+            except OSError:
+                pass
+            raise RuntimeError(
+                f"Pollinations payload failed image sanity check "
+                f"({os.path.getsize(output_path) if os.path.exists(output_path) else 0} bytes)")
         return output_path
 
 

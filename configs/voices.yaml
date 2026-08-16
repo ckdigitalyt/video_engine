@@ -12,6 +12,12 @@ voices:
   # fails QA).  Chatterbox is the fallback if the Fish API fails.
   provider: "fish"
 
+  # 2026-08-16 (ckdigital): FREE AUDIO ONLY while the algorithm is being
+  # finalized. Keep on FREE providers only (Fish free, Chatterbox, Kokoro, Edge); do NOT switch to paid services (ElevenLabs, paid Fish tier).
+  # ElevenLabs stays disabled/rollback-only until ckdigital explicitly
+  # re-enables it after algorithm finalization.
+  allow_paid: false
+
   fish:
     # PRIMARY NARRATOR — 2026-08-09 (ckdigital direction).
     # Model: s2.1-pro-free (FREE tier — ckdigital approved 2026-08-09 20:38

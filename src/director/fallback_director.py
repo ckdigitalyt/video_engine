@@ -464,10 +464,16 @@ class FallbackDirector:
     # unrelated images (same lesson as mission_run._AI_STYLE_SUFFIX).
     # 2026-08-10: realistic direction — "photorealistic" keyword required
     # for style-drift QA (STYLE_TOKEN="photorealistic").
-    _GEN_STYLE_SUFFIX = (
-        ", photorealistic cinematic documentary still, consistent color "
-        "palette, soft natural lighting, high detail, 16:9 composition"
-    )
+    # v42: THE locked cartoon brand suffix (single source of truth).  This
+    # was the last hardcoded "photorealistic cinematic documentary still"
+    # holdout from the 2026-08-10 era — every plan-time generated still
+    # (gen_*.png -> Ken Burns) ignored the v40 cartoon lock, so final
+    # videos mixed cartoon AI stills with photoreal fallback stills
+    # (6174 run review: "visual style lacks continuity").  Now derived
+    # from style_bible.STYLE_SUFFIX so ALL generated imagery on ALL future
+    # videos carries the same brand (style + palette + mascot).
+    from src.director.style_bible import STYLE_SUFFIX as _BRAND_STYLE_SUFFIX
+    _GEN_STYLE_SUFFIX = ", " + _BRAND_STYLE_SUFFIX
 
     def _generate_ai_still(self, prompt: str, out_path: str) -> Optional[str]:
         """Generate one still via Pollinations (free) -> NIM FLUX ->

@@ -281,12 +281,35 @@ def _guarded_ai_prompt(base: str, scene_text: str, style_mod: str = "") -> str:
     text (both reviewers flagged AI-generated faces in the DAVINCI+/EnVision
     scene and a man-with-microchip stock photo in the Venera scene).  The
     guard is skipped only when the narration itself is about humans.
+
+    v42 (cartoon lock): the old guard hardcoded ``photorealistic documentary
+    still`` — under the v40 cartoon direction every prompt became
+    "photorealistic ... hand-drawn 2D cartoon illustration" (contradictory
+    tokens that push the generator toward realism and fight the locked
+    style).  Now the guard is STYLE-AWARE: cartoon prompts keep the
+    no-text/no-photoreal-humans guard (friendly cartoon faces + mascot are
+    the brand and stay ALLOWED) and receive the centralized brand suffix
+    (style + palette names + mascot) from style_bible.STYLE_SUFFIX instead
+    of the bare style modifier — so stills-runner prompts carry the SAME
+    locked brand as mission_run.  Photoreal prompts keep the legacy guard.
     """
     base = (base or "").strip()
     if not base:
         return base
     if _PEOPLE_RE.search(scene_text or ""):
+        # v42: people scenes still carry the locked brand suffix (cartoon)
+        # so every still on the channel shares the identity; the guard is
+        # simply skipped because humans are on-topic here.
+        if style_mod and "photorealistic" not in style_mod:
+            from src.director.style_bible import STYLE_SUFFIX as _BRAND_SUFFIX
+            return base + ". " + _BRAND_SUFFIX
         return base + ((". " + style_mod) if style_mod else "")
+    if style_mod and "photorealistic" not in style_mod:
+        # v42 cartoon branch: brand suffix from the single source of truth.
+        from src.director.style_bible import STYLE_SUFFIX as _BRAND_SUFFIX
+        guard = (", no text, no watermarks, no logos, "
+                 "no photorealistic humans, no photographs")
+        return base + guard + (". " + _BRAND_SUFFIX)
     guard = (", photorealistic documentary still, no people, no human faces, "
              "no text, no watermarks, no logos")
     return base + guard + ((". " + style_mod) if style_mod else "")
@@ -326,7 +349,7 @@ def _ai_still(prompt: str, out_path: str, seed: Optional[int] = None) -> str:
         if time.time() < _AI_PROVIDER_DISABLED_UNTIL.get(name, 0.0):
             continue
         try:
-            prov.generate(prompt, out_path, width=2560, height=1440, seed=seed)
+            prov.generate(prompt, out_path, width=3840, height=2160, seed=seed)
             _AI_PROVIDER_FAILS[name] = 0
             _AI_PROVIDER_DISABLED_UNTIL.pop(name, None)
             print(f"  [AI] {name}: {os.path.basename(out_path)} ({os.path.getsize(out_path)//1024} KB)")
@@ -565,9 +588,10 @@ def _still_plan_for(scene_text: str, spec=None, scene=None) -> list:
     for q in (scene or {}).get("search_queries", []) or []:
         q = (q or "").strip()
         if q:
-            # (2026-08-10 realistic direction: the query is the SUBJECT of
-            # a photorealistic AI still, not a stock-photo search.)
-            # v25: subject guard keeps people/faces out of AI stills.
+            # v42 (cartoon lock): the query is the SUBJECT of a cartoon AI
+            # still, not a stock-photo search; NASA/Wikimedia photoreal
+            # photos remain the fallback for photoreal-requested scenes.
+            # v25: subject guard keeps photoreal people/faces out of AI stills.
             if vector_direction:
                 plan += [("ai", _guarded_ai_prompt(q, scene_text, style_mod))]
             else:
@@ -759,9 +783,11 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                 stats["rejected"] += 1
                 print(f"  [manim-gate] rejected {os.path.basename(manim)} "
                       f"({(mv.errors or ['not kinetic'])[:1]})")
-        # 1b) v13: ANIMATED beat (Kurzgesagt-style motion) — DISABLED under
-        #     the 2026-08-10 realistic direction (flat-vector beats off);
-        #     scenes use Ken Burns on photorealistic stills + topic manim.
+        # 1b) v13 + v42: ANIMATED beat (Kurzgesagt-style motion) — ENABLED
+        #     under the cartoon direction (matches the locked cartoon look
+        #     and guarantees motion on fresh topics); rendered per-video
+        #     into results/<slug>/vector/.  Scenes still get Ken Burns
+        #     cartoon AI stills + topic Manim on top.
         if not shots or shots[0].get("kind") != "manim":
             vbeat = _vector_beat_for(intent, vector_dir=vector_dir)
             if vbeat and vbeat not in manim_used:

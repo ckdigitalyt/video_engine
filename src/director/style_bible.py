@@ -53,6 +53,16 @@ DEFAULT_STYLE_MODIFIER = (
 # warm star orange/red, earth blue, UV violet accent, ink outline.
 DEFAULT_PALETTE = ["#0A0E26", "#FF8A46", "#4682C8", "#B85CC8", "#1A1A24"]
 
+# v42: HUMAN-READABLE palette names — generators (FLUX/NIM/Pollinations)
+# honor color NAMES far more reliably than raw hex codes.  These names map
+# 1:1 to DEFAULT_PALETTE so the on-screen grade and the prompt agree; the
+# names travel inside STYLE_SUFFIX so EVERY styled prompt on EVERY future
+# video carries the same locked brand colors (virality consistency).
+DEFAULT_PALETTE_NAMES = (
+    "consistent color palette: deep space navy, warm star orange, "
+    "earth blue, violet purple accent, dark ink outlines"
+)
+
 # Token that must appear in every styled prompt (used by drift QA).
 STYLE_TOKEN = "cartoon illustration"
 
@@ -62,6 +72,20 @@ STYLE_TOKEN = "cartoon illustration"
 DEFAULT_MASCOT = (
     "a cute small green alien observer with big white eyes, floating in a "
     "tiny round spaceship, friendly and curious"
+)
+
+# v42: THE single locked brand suffix for every stylized still prompt on
+# every video (style modifier + palette names + mascot + friendly faces).
+# Previously the palette hex codes were never put into prompts, and each
+# runner carried its own drift-prone copy of the mascot text (mission_run
+# hardcoded a variant in _AI_STYLE_SUFFIX; mission_stills had NO mascot
+# and NO palette).  One source of truth = one recognizable channel brand
+# across all future videos.  Keep DEFAULT_STYLE_MODIFIER/STYLE_TOKEN in
+# sync with src/director/visual_direction.FIXED_JADE_STYLE.
+STYLE_SUFFIX = (
+    f"{DEFAULT_STYLE_MODIFIER}, {DEFAULT_PALETTE_NAMES}, "
+    f"recurring mascot: {DEFAULT_MASCOT}, "
+    "celestial bodies may have friendly cartoon faces"
 )
 
 DEFAULT_SUBJECT_SHEET = [
@@ -128,15 +152,22 @@ class StyleBible:
     # ── Prompt helpers ─────────────────────────────────────────────────
 
     def styled_prompt(self, base: str, photoreal: bool = False) -> str:
-        """Append the locked style modifier (or the photoreal identity).
+        """Append the locked brand suffix (or the photoreal identity).
 
         v40: subject sheet (mascot + friendly faces) is injected into every
         styled prompt so the recurring character becomes part of the brand.
+        v42: the suffix is the single STYLE_SUFFIX constant — style modifier
+        + locked palette names + mascot + friendly faces — so the palette
+        actually travels into the prompt (it never did before).
         """
         if photoreal:
             return f"{base}. photorealistic, cinematic, high detail, no text"
         sheet = " ".join(s["description"] for s in (self.subject_sheet or []))
-        return f"{base}. {self.style_modifier}. {sheet}"
+        return f"{base}. {STYLE_SUFFIX}. {sheet}"
+
+    def palette_prompt(self) -> str:
+        """v42: the locked palette as prompt text (for grading/reference)."""
+        return DEFAULT_PALETTE_NAMES
 
     def reset_episode(self) -> "StyleBible":
         """Clear per-episode placed-token records (identity persists).

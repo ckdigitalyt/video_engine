@@ -397,10 +397,15 @@ class TestEdgeCases:
 
 class TestConfig:
     def test_default_config_keys_exist(self, tmp_project: Path) -> None:
-        """Verify config file has all required subtitle keys."""
+        """Verify config file has all required subtitle keys.
+
+        v42: font_size 28 -> 40 and bottom_margin 80 -> 100 (mobile-first
+        virality — 28px at 1080p reads as tiny on phones).
+        """
         from src.utils.config import get_config
         assert get_config("subtitles.enabled") is True
-        assert get_config("subtitles.font_size") == 28
+        assert get_config("subtitles.font_size") == 40
+        assert get_config("subtitles.bottom_margin") == 100
         assert get_config("subtitles.max_words_per_line") == 4
         assert get_config("subtitles.animation") == "fade"
         assert get_config("subtitles.min_silence_ms") == 200

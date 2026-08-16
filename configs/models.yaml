@@ -12,14 +12,24 @@
 
 llm:
   deepseek:
-    model: "deepseek-v4-flash"
-    script_model: "deepseek-v4-flash"
+    model: "deepseek-v4-pro"
+    script_model: "deepseek-v4-pro"
     max_tokens: 2000
     temperature: 0.7
 
   gemini:
     model: "models/gemini-2.5-flash"
     script_model: "models/gemini-2.5-flash"
+
+  # v37 (ckdigital 2026-08-13): gemini-3.7-flash verified live (model listed +
+  # completion OK, intermittent 503 high-demand).  Used as pipeline PRIMARY so
+  # paid DeepSeek only runs when the free chain (3.7 -> 2.5 -> groq/openrouter)
+  # all fail.
+  gemini37:
+    model: "models/gemini-3.7-flash"
+    script_model: "models/gemini-3.7-flash"
+    max_tokens: 2000
+    temperature: 0.7
 
   mistral:
     model: "mistral-small-latest"

@@ -752,7 +752,7 @@ def stage_ai_imagery(result_scenes, out_dir: str) -> dict:
             attempts.append(("pollinations", fallback))
         for name, p in attempts:
             try:
-                p.generate(prompt, out_path, width=2560, height=1440, seed=seed)
+                p.generate(prompt, out_path, width=3840, height=2160, seed=seed)
                 print(f"  [AI] {name}: generated {os.path.basename(out_path)} ({os.path.getsize(out_path)//1024} KB)")
                 return True
             except Exception as e:
@@ -972,7 +972,7 @@ def _ensure_timeline_coverage(result_scenes, timeline_path: str) -> dict:
             attempts.append(fallback)
         for p in attempts:
             try:
-                p.generate(prompt, out_path, width=2560, height=1440)
+                p.generate(prompt, out_path, width=3840, height=2160)
                 if os.path.exists(out_path):
                     return True
             except Exception as e:

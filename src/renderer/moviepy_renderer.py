@@ -115,7 +115,7 @@ def parse_timeline(raw: dict) -> Timeline:
     """Convert a raw dict (from timeline.json) into a typed Timeline model."""
     rs = raw.get("render_settings", {})
     render_settings = RenderSettings(
-        resolution=rs.get("resolution", [1920, 1080]),
+        resolution=rs.get("resolution", [3840, 2160]),
         fps=rs.get("fps", 30),
     )
     audio_timeline = [
@@ -406,6 +406,35 @@ class MoviePyRenderer(Renderer):
                     txt_clip = txt_clip.crossfadeout(fade_out / 1000.0)
 
                 video_clips.append(txt_clip)
+
+        # ── End-card CTA overlay (review fix) ─────────────────────────
+        # Reviewers flagged "no explicit call to action".  Burn a centered
+        # CTA banner over the last N seconds of the video (default 3s).
+        # Controlled by config cta.* — disabled by default so it only
+        # appears when a topic/scene requests it (math-motion shorts want
+        # the subscribe/follow push; other videos may not).
+        cta_text = get_config("cta.text", "")
+        cta_duration = float(get_config("cta.duration_s", 3.0))
+        cta_enabled = bool(get_config("cta.enabled", False))
+        if cta_enabled and cta_text and video_clips:
+            import moviepy.editor as mp_ed
+            total_dur = max(0.0, max(
+                (c.duration if c.duration is not None else 0.0) + getattr(c, "start", 0.0)
+                for c in video_clips
+            ))
+            cta_start = max(0.0, total_dur - cta_duration)
+            cta = _pil_text_clip(
+                text=cta_text,
+                fontsize=int(get_config("cta.font_size", 52)),
+                color=get_config("cta.color", "#FFFFFF"),
+                stroke_color=get_config("cta.outline", "#000000"),
+                stroke_width=int(get_config("cta.stroke_width", 2)),
+            )
+            cta = cta.set_position(
+                ("center", target_res[1] * 0.62)
+            ).set_start(cta_start).set_duration(cta_duration).crossfadein(0.3).crossfadeout(0.3)
+            video_clips.append(cta)
+            print(f"-> End-card CTA '{cta_text}' @ {cta_start:.1f}s-{total_dur:.1f}s")
 
         # ── Composite ──────────────────────────────────────────────────
         if audio_clips:

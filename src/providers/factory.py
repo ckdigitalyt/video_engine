@@ -25,6 +25,7 @@ class ProviderFactory:
     _LLM_CLASS_MAP = {
         "deepseek": "DeepSeekProvider",
         "gemini": "GeminiProvider",
+        "gemini37": "GeminiProvider",
         "grok": "GrokProvider",
         "groq": "GroqProvider",
         "openrouter": "OpenRouterProvider",

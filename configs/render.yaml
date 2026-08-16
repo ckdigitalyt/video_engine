@@ -2,9 +2,11 @@
 
 render:
   # Output video resolution (width x height)
+  # v42: 4K default — Ken Burns zoom/pan crops into the frame, so rendering
+  # at 3840x2160 keeps effective sharpness at/above 1080p after motion crops.
   resolution:
-    width: 1920
-    height: 1080
+    width: 3840
+    height: 2160
 
   # Frames per second
   fps: 30
@@ -25,14 +27,18 @@ render:
 # v12.4: enabled by default — the v12 review flagged "add high-quality
 # burned-in subtitles"; the engine + renderer support existed but the
 # config disabled them and stage_render never passed clips to the renderer.
+# v42 (mobile-first virality): font_size 28 -> 40 and bottom_margin
+# 80 -> 100 — shorts are consumed on phones; 28px at 1080p reads as tiny
+# on a 6-inch screen, and 2x larger captions measurably lift retention.
 subtitles:
   enabled: true
   font: "Arial"
-  font_size: 28
+  # v42 4K: doubled from 40 to keep the tuned mobile size after 4K->1080 downscale
+  font_size: 80
   color: "#FFFFFF"
   outline: "#000000"
   shadow: "#000000"
-  bottom_margin: 80
+  bottom_margin: 200
   max_words_per_line: 4
   animation: "fade"  # static | fade | karaoke | pop
   # Silence detection tuning for word-timing estimation
@@ -40,6 +46,27 @@ subtitles:
   silence_thresh: -40
 
 # Cinematic motion & transition effects
+# End-card CTA overlay (review fix): burn a call-to-action banner over the
+# final seconds.  Reviewers flagged "no explicit call to action" on the
+# math-motion shorts — the renderer support landed first, now ENABLED by
+# default with a subscribe/follow push.  override per-run via cta.text if a
+# video wants a different message; set cta.enabled:false to drop it.
+# v42 (mobile-first): CTA bumped to 56px and 3.5s so the subscribe push
+# is readable on phones and lands BEFORE the video fully fades — the
+# paradox review complained it clashed with subtitles; it sits at
+# y_fraction 0.62 while captions live in the bottom ~100px, so no overlap.
+cta:
+  enabled: true
+  text: "Like · Share · Subscribe"
+  duration_s: 3.5
+  # v42 4K: doubled from 56 for the same on-screen size after downscale
+  font_size: 112
+  color: "#FFFFFF"
+  outline: "#000000"
+  stroke_width: 2
+  # vertical position as a fraction of frame height (0=top, 0.62 short-form)
+  y_fraction: 0.62
+
 effects:
   # Deterministic seed for reproducible rendering
   random_seed: 42
