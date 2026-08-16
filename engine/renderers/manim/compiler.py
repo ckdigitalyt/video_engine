@@ -73,6 +73,27 @@ def compile_beat(beat: dict) -> list[str]:
     """Return a list of Manim code statements (body) for one beat."""
     _math_guard(beat)
     stmts: list[str] = []
+
+    # Narrative beat types render from the shot's visual_type directly (these
+    # use only narrative primitives — kinetic title, question, claim,
+    # comparison, cycle — and generalize to ANY topic, no math coupling).
+    visual_type = beat.get("visual_type", "").lower()
+    narration = beat.get("narration", "")
+    _narrative_visuals = ("kinetic_title", "question", "claim", "comparison", "cycle")
+    if visual_type in _narrative_visuals:
+        content = narration or " "
+        if visual_type == "kinetic_title":
+            # take first few words as a kinetic emphasis
+            word = " ".join(content.split()[:5])
+            stmts.append(f"KineticTypography(self, {word!r})")
+        elif visual_type == "question":
+            stmts.append(f"QuestionReveal(self, {content!r})")
+        elif visual_type == "cycle":
+            stmts.append(f"CycleReveal(self, {content!r})")
+        else:  # claim, comparison as a plain claim reveal
+            stmts.append(f"ClaimReveal(self, {content!r})")
+        return stmts
+
     for tf in beat.get("transformations", []):
         t = tf.get("type")
         prim = _TRANSFORM_MAP.get(t)

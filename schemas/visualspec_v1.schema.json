@@ -47,6 +47,10 @@
           "type": "array",
           "items": {"type": "string"},
           "description": "Narration words that should get visual emphasis"
+        },
+        "visual_type": {
+          "type": "string",
+          "description": "Narrative visual class for this beat (kinetic_title|question|claim|comparison|cycle|digit_sort|subtract|attractor|fixed_point|exception|conclusion|highlight|iterate).  When set, the compiler prefers narrative primitives that generalize to any topic."
         }
       },
       "additionalProperties": false

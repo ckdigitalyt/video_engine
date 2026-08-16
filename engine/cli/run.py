@@ -57,6 +57,7 @@ def _compile_visualspec(beatsheet: dict, shotlist: dict) -> dict:
             "transformations": shot.get("actions", []),
             "camera": shot.get("camera", {"type": "static"}),
             "audio_cues": shot.get("audio_cues", []),
+            "visual_type": shot.get("visual_type", ""),
         })
     return {"version": "v1", "beats": vs_beats,
             "metadata": {"style_spec": "v1"}}
