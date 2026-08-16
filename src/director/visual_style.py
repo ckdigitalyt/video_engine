@@ -139,7 +139,7 @@ class VisualStyle:
         LLM prompt fragment used during scene generation to guide narration style.
     """
 
-    aesthetic: str = "photorealistic"
+    aesthetic: str = "cartoon"
     sub_aesthetic: Optional[str] = None
     color_palette: list[str] = field(default_factory=lambda: ["#87CEEB", "#2F4F4F", "#708090", "#F5F5DC", "#A9A9A9"])
     mood: str = "neutral"

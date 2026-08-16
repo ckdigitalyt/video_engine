@@ -645,18 +645,31 @@ AI_IMAGE_PROMPTS = {
 # (stage_cinematic_grade) then unifies color further at render time.
 # 2026-08-10: realistic direction — "photorealistic" keyword required for
 # style-drift QA (STYLE_TOKEN="photorealistic").
+# 2026-08-16: ckdigital re-reversed — flat-2D cartoon explainer style.
+# 2026-08-16 (v40): cartoon methodology locked (matches style_bible
+# DEFAULT_STYLE_MODIFIER + STYLE_TOKEN="cartoon illustration") — thick
+# dark outlines, cel shading, soft gradients, glow, friendly faces, and
+# the recurring mascot injected via style_bible.styled_prompt().
 _AI_STYLE_SUFFIX = (
-    ", photorealistic cinematic documentary still, consistent color "
-    "palette, soft natural lighting, high detail, 16:9 composition"
+    ", hand-drawn 2D cartoon illustration, thick dark outlines, cel shading, "
+    "soft gradients, glow, friendly expressive cartoon faces, bold clean "
+    "shapes, scientific explainer art, consistent color palette, 16:9 composition"
+    ", a cute small green alien observer in a tiny round spaceship may appear "
+    "as a recurring mascot, friendly and curious"
 )
 
 
 def _still_to_kenburns(image_path: str, out_path: str, duration: float = 9.0) -> str:
-    """Convert a still image to a Ken Burns motion clip (1920x1080@30)."""
+    """Convert a still image to a Ken Burns motion clip (1920x1080@30).
+
+    v40 (DeepSeek review 2026-08-16: "Ken Burns effect is too subtle"):
+    deeper zoom range (1.0 -> 1.30) and faster start so every still visibly
+    moves; the old 1.25 ceiling read as near-static on long holds.
+    """
     frames = int(duration * 30)
     vf = (
         f"scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080,"
-        f"zoompan=z='if(eq(on,1),1.0,min(1.25,zoom+0.004))':"
+        f"zoompan=z='if(eq(on,1),1.0,min(1.30,zoom+0.006))':"
         f"x='(iw-iw/zoom)/2':y='(ih-ih/zoom)/2':d={frames}:s=1920x1080:fps=30"
     )
     subprocess.run(
@@ -793,8 +806,18 @@ def stage_ai_imagery(result_scenes, out_dir: str) -> dict:
             generated += 1
 
     # ── Inject serially (mutates shared scene/shot objects) ──────────
+    # v40: record the locked style token for each placed still so the
+    # style-drift QA actually has data to check (was vacuous before).
+    _sb = None
+    try:
+        from src.director.style_bible import create_style_bible
+        _sb = create_style_bible("jade")
+    except Exception:
+        _sb = None
     for t, clip_path in results:
         scene = t["scene"]
+        if _sb is not None:
+            _sb.placed_style_tokens[os.path.basename(clip_path)] = t.get("prompt", "")
         if t["is_semantic"]:
             primary = t["primary"]
             primary.asset_plan.filepath = clip_path
@@ -827,6 +850,9 @@ def stage_ai_imagery(result_scenes, out_dir: str) -> dict:
                 else:
                     continue
                 break
+
+    if _sb is not None and _sb.placed_style_tokens:
+        _sb.save()
 
     print(f"  Generated {generated}, injected {injected}, semantic-injected {sem_injected} "
           f"({(time.time()-t0):.1f}s)")
@@ -1889,9 +1915,9 @@ def stage_music_mix(video_path: str, music_path: str, out_path: str,
         _narr_mean_db = float(_vm.group(1)) if _vm else -31.0
     except Exception:
         _narr_mean_db = -31.0
-    _thr_db = max(-45.0, min(-12.0, _narr_mean_db - 8.0))  # 8 dB below mean
+    _thr_db = max(-45.0, min(-12.0, _narr_mean_db - 10.0))  # v40: 10 dB below mean
     _thr_lin = 10 ** (_thr_db / 20.0)
-    SIDECHAIN = f"threshold={_thr_lin:.5f}:ratio=3.5:attack=20:release=250"
+    SIDECHAIN = f"threshold={_thr_lin:.5f}:ratio=5.0:attack=15:release=260"
     print(f"  [mix] duck threshold {_thr_lin:.5f} ({_thr_db:.1f} dB) — "
           f"relative to narration mean {_narr_mean_db:.1f} dB (v31)")
     # Jade spec §4: never allow abrupt music starts/stops — fade the bed
@@ -2310,6 +2336,8 @@ def main():
                     help="Max total renders (1=no improvement pass, 2=one rerender; default 2)")
     ap.add_argument("--music", default="cache/music/cinematic.mp3")
     ap.add_argument("--music-db", type=float, default=-6.0)
+    ap.add_argument("--resume-script", default=None,
+                    help="Path to a fixed script_final.json — skips research/script/review, re-runs the claim gate, continues from storyboard")
     args = ap.parse_args()
 
     # v9.1: scale scene count + word budget with the requested duration
@@ -2355,12 +2383,32 @@ def main():
     lib.load_all()
     ep = mods["EditorialPlanner"](knowledge_library=lib)
 
+    # v40: --resume-script — skip research/script/review stages and load a
+    # manually-fixed script (+ its research pack) so the claim gate can
+    # re-verify it and the run continues from storyboard.  Used when the
+    # claim gate hard-blocks an LLM-generated script.
+    if args.resume_script:
+        print(f"\n[resume] loading fixed script from {args.resume_script}", flush=True)
+        with open(args.resume_script) as _f:
+            scenes_data = json.load(_f)
+        with open(os.path.join(out_dir, "research.json")) as _f:
+            research = json.load(_f)
+        try:
+            with open(os.path.join(out_dir, "script_review_report.json")) as _f:
+                review_report = json.load(_f)
+        except Exception:
+            review_report = {}
+        _kaggle = None
+        print(f"  Loaded {len(scenes_data)} scenes from resume script", flush=True)
+
     # ── Stage 1-2: Research + verification ────────────────────────────
-    research = stage_research(topic, llm)
-    research = stage_fact_verification(research, llm)
+    if not args.resume_script:
+        research = stage_research(topic, llm)
+        research = stage_fact_verification(research, llm)
     # v19 (ckdigital direction): Kaggle datasets as a bonus research source
     # (fail-soft — never blocks the run).
-    _kaggle = stage_kaggle_research(topic)
+    if not args.resume_script:
+        _kaggle = stage_kaggle_research(topic)
     if _kaggle:
         research["kaggle_datasets"] = _kaggle
         _ks = research.setdefault("key_sources", [])
@@ -2375,11 +2423,13 @@ def main():
                                         "elapsed_s": research.get("_elapsed_s")}
 
     # ── Stage 3: Script ───────────────────────────────────────────────
-    scenes_data = stage_script(topic, research, llm)
-    _write_json(os.path.join(out_dir, "script_draft.json"), scenes_data)
+    if not args.resume_script:
+        scenes_data = stage_script(topic, research, llm)
+        _write_json(os.path.join(out_dir, "script_draft.json"), scenes_data)
 
     # ── Stage 4: Script review ────────────────────────────────────────
-    scenes_data, review_report = stage_script_review(scenes_data, research, provider_name)
+    if not args.resume_script:
+        scenes_data, review_report = stage_script_review(scenes_data, research, provider_name)
     # Post-review word-budget enforcement (reviewers can expand the script;
     # re-compress to keep the runtime near the target).  Learned from v1 run.
     total_words = sum(len(s.get("narration", "").split()) for s in scenes_data)
@@ -2403,6 +2453,14 @@ def main():
     # Post-review TTS normalization (v3): expand abbreviations, spell out
     # dates/numbers so Kokoro narrates "September fifth, nineteen seventy-
     # seven" instead of "Sept five".  Fixes v2 review finding.
+    # v40 (Gemini review 2026-08-16): script-level quality guards —
+    # 1) no verbatim repetition across consecutive scenes (Scene 4
+    # duplicated Scene 3's ozone/crops lines, scored 4/10 pacing),
+    # 2) hedge uncertain quantitative claims (DeepSeek review: "548
+    # light-years" stated as fact; "shreds" too definitive).
+    from script_guards import dedupe_scene_repetition, hedge_uncertain_claims
+    scenes_data = dedupe_scene_repetition(scenes_data)
+    scenes_data = hedge_uncertain_claims(scenes_data)
     from src.utils.tts_normalize import normalize_narration
     for s in scenes_data:
         s["narration"] = normalize_narration(s.get("narration", ""))
@@ -2500,8 +2558,26 @@ def main():
     run_report["stages"]["director"] = director_stats
 
     # ── Stage 8b: AI imagery (NVIDIA NIM, benchmarked default) ────────
+    # v40: create the style bible BEFORE imagery so placed-token records
+    # flow into the same object the QA gates use (was created after, so
+    # style-drift checks were vacuous).
+    style_bible = create_style_bible("jade").reset_episode()
     ai_stats = stage_ai_imagery(result_scenes, out_dir)
     run_report["stages"]["ai_imagery"] = ai_stats
+    # v40: persist placed-token records + run the palette check now that
+    # placed_style_tokens has real data (drift/palette QA were vacuous).
+    # Reload from cache — stage_ai_imagery saved its recorded tokens.
+    try:
+        style_bible = create_style_bible("jade")
+        if style_bible.placed_style_tokens:
+            style_bible.save()
+            _placed = list(style_bible.placed_style_tokens.keys())
+            _pal = style_bible.check_palette([os.path.join("cache", "generated", p)
+                                              for p in _placed])
+            run_report["stages"]["palette_check"] = _pal
+            print(f"  [palette] {_pal['detail']}")
+    except Exception as _e:
+        print(f"  !! palette check skipped: {str(_e)[:100]}")
 
     # ── Stage 10: Narration ───────────────────────────────────────────
     cache_audio = "cache/audio"
@@ -2535,8 +2611,9 @@ def main():
         _voice_id = _gc("voices.chatterbox.voice_id", "kurzgesagt_like")
     voice_lock = lock_voice(provider=_voice_provider, voice_id=_voice_id,
                             speaker_id="jade-narrator-001").reset_episode()
-    style_bible = create_style_bible("jade").reset_episode()
     run_report["voice_lock"] = voice_lock.to_dict()
+    # style_bible was created + persisted before stage_ai_imagery (v40);
+    # record it in the report here with any placed tokens intact.
     run_report["style_bible"] = style_bible.to_dict()
     _audio_durs, narration_stats = stage_narration_dynamic(
         scenes_data, cache_audio, provider=_voice_provider,

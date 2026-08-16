@@ -36,16 +36,41 @@ DEFAULT_BIBLE_PATH = "cache/style_bible.json"
 # 2026-08-05: channel direction switched to flat-vector documentary
 # illustration (Kurzgesagt-style).  2026-08-10: ckdigital reversed it —
 # NO flat-vector illustrations; AI stills must be REALISTIC / photoreal.
+# 2026-08-16: ckdigital re-reversed it — match the flat-2D cartoon
+# explainer reference (JEE rank video); flat-vector Kurzgesagt style.
+# 2026-08-16 (v40): ckdigital direction — cartoon methodology locked:
+# hand-drawn 2D cartoon with thick dark outlines, cel shading, soft
+# gradients, glow, and friendly expressive faces on celestial bodies /
+# recurring mascot.  Palette and mascot are FIXED across ALL videos so
+# the channel builds one recognizable visual brand (virality factor).
 DEFAULT_STYLE_MODIFIER = (
-    "photorealistic cinematic documentary still, realistic textures and "
-    "lighting, natural color palette, sharp focus, high detail, "
-    "16:9 composition, no text"
+    "hand-drawn 2D cartoon illustration, thick dark outlines, cel shading, "
+    "soft gradients, glow, friendly expressive cartoon faces, bold clean "
+    "shapes, scientific explainer art, no text, 16:9 composition"
 )
 
-DEFAULT_PALETTE = ["#14213D", "#5C7A99", "#C9A66B", "#2A9D8F", "#EDE6D6"]
+# Channel brand palette (v40, locked for every video): deep space navy,
+# warm star orange/red, earth blue, UV violet accent, ink outline.
+DEFAULT_PALETTE = ["#0A0E26", "#FF8A46", "#4682C8", "#B85CC8", "#1A1A24"]
 
 # Token that must appear in every styled prompt (used by drift QA).
-STYLE_TOKEN = "photorealistic"
+STYLE_TOKEN = "cartoon illustration"
+
+# Recurring brand mascot: injected into the subject sheet + every styled
+# prompt so the channel has a recognizable recurring character.  The
+# renderer draws it (or a friendly face) into hook/outro keyframes.
+DEFAULT_MASCOT = (
+    "a cute small green alien observer with big white eyes, floating in a "
+    "tiny round spaceship, friendly and curious"
+)
+
+DEFAULT_SUBJECT_SHEET = [
+    {"name": "mascot", "description": DEFAULT_MASCOT,
+     "usage": "hook scene, outro scene, any scene needing a relatable character"},
+    {"name": "friendly_faces",
+     "description": "celestial bodies (stars, sun, planets) may have friendly cartoon faces",
+     "usage": "stars/sun/planets when narration is awe/hook oriented"},
+]
 
 
 @dataclass
@@ -56,7 +81,8 @@ class StyleBible:
     style_modifier: str = DEFAULT_STYLE_MODIFIER
     palette: list = field(default_factory=lambda: list(DEFAULT_PALETTE))
     reference_frame_prompt: str = ""
-    subject_sheet: list = field(default_factory=list)
+    subject_sheet: list = field(default_factory=lambda: list(DEFAULT_SUBJECT_SHEET))
+    mascot: str = DEFAULT_MASCOT
     bible_path: str = DEFAULT_BIBLE_PATH
     # record of which style token each placed still was generated with
     placed_style_tokens: dict = field(default_factory=dict)  # shot file -> token
@@ -91,7 +117,8 @@ class StyleBible:
                 style_modifier=d.get("style_modifier", DEFAULT_STYLE_MODIFIER),
                 palette=d.get("palette", list(DEFAULT_PALETTE)),
                 reference_frame_prompt=d.get("reference_frame_prompt", ""),
-                subject_sheet=d.get("subject_sheet", []),
+                subject_sheet=d.get("subject_sheet", list(DEFAULT_SUBJECT_SHEET)),
+                mascot=d.get("mascot", DEFAULT_MASCOT),
                 bible_path=bible_path,
                 placed_style_tokens=d.get("placed_style_tokens", {}),
             )
@@ -101,10 +128,15 @@ class StyleBible:
     # ── Prompt helpers ─────────────────────────────────────────────────
 
     def styled_prompt(self, base: str, photoreal: bool = False) -> str:
-        """Append the locked style modifier (or the photoreal identity)."""
+        """Append the locked style modifier (or the photoreal identity).
+
+        v40: subject sheet (mascot + friendly faces) is injected into every
+        styled prompt so the recurring character becomes part of the brand.
+        """
         if photoreal:
             return f"{base}. photorealistic, cinematic, high detail, no text"
-        return f"{base}. {self.style_modifier}"
+        sheet = " ".join(s["description"] for s in (self.subject_sheet or []))
+        return f"{base}. {self.style_modifier}. {sheet}"
 
     def reset_episode(self) -> "StyleBible":
         """Clear per-episode placed-token records (identity persists).

@@ -28,10 +28,10 @@ visual_director:
 
   # ── Aesthetic Mapping (category → visual style) ────────────────────
   aesthetic_mapping:
-    Space: "space"
+    Space: "cartoon"
     History: "archival"
-    Science: "photorealistic"
-    Nature: "photorealistic"
-    Technology: "cinematic"
+    Science: "cartoon"
+    Nature: "cartoon"
+    Technology: "cartoon"
     Finance: "educational"
-    General: "documentary"
+    General: "cartoon"

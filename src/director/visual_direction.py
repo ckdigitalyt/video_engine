@@ -37,6 +37,10 @@ MANIM_SCENES = {
     "pulsar_density": "cache/manim/pulsar_density.mp4",
     "black_hole_lensing": "cache/manim/black_hole_lensing.mp4",
     "moon_phases": "cache/manim/moon_phases.mp4",
+    # 2026-08-16: TRUE 3D Gabriel's Horn (surface of revolution) — fixes
+    # the #1 review blocker ("flat 2D curve kills the paradox") for
+    # paradox / surface-of-revolution / infinite-vs-finite math topics.
+    "horn_revolution": "cache/manim/horn_revolution.mp4",
     # v12: topic-agnostic generic beats — every topic gets motion
     "generic_clock": "cache/manim/generic_ClockSeven.mp4",
     "generic_waves": "cache/manim/generic_BrainWaves.mp4",
@@ -61,6 +65,11 @@ TOPIC_MANIM = {
     "moon":    {"explanation": "moon_phases", "journey": "moon_phases",
                  "emotion": "moon_phases", "scale": "moon_phases",
                  "structure": "moon_phases"},
+    "paradox": {"explanation": "horn_revolution", "structure": "horn_revolution",
+                 "emotion": "horn_revolution", "climax": "horn_revolution",
+                 "scale": "horn_revolution", "journey": "horn_revolution",
+                 "context": "horn_revolution", "timeline": "horn_revolution",
+                 "default": "horn_revolution"},
     # v12: generic fallback — topic-agnostic beats mapped by intent.  A
     # fresh topic with no bespoke scenes still gets real animation.
     "__generic__": {
@@ -92,6 +101,10 @@ _TOPIC_HINTS = {
     "moon":    ("the moon", "lunar", "moon's", "apollo", "craters",
                  "maria", "regolith", "tidal locking", "moon phases",
                  "earth's companion"),
+    "paradox": ("gabriel's horn", "gabriels horn", "surface of revolution",
+                 "infinite surface", "finite volume, infinite", "infinite area",
+                 "painter's paradox", "paint the surface", "tapers forever",
+                 "taper forever", "rotat.*curve.*1/x", "torricelli"),
 }
 
 # Distinctive CORE subject terms per topic.  A scene must contain at least
@@ -108,6 +121,12 @@ _TOPIC_CORE = {
     "black_holes": ("black hole", "event horizon", "singularity",
                      "accretion", "photon ring"),
     "moon":    ("moon", "lunar", "apollo", "craters"),
+    # 2026-08-16: Gabriel's Horn / surface-of-revolution / infinite-area
+    # paradox topics.  Distinctive core terms so an unrelated "surface"
+    # word can't falsely pull the horn into a wrong scene.
+    "paradox": ("gabriel's horn", "surface of revolution", "infinite surface",
+                 "finite volume", "finite volume infinite surface", "horn",
+                 "infinite area", "painter's paradox"),
 }
 
 
@@ -140,15 +159,25 @@ def manim_scene_for(scene_text: str, intent: str = "default") -> str:
             # not actually about this topic's subject; skip its Manim.
     if topic and topic in TOPIC_MANIM:
         mapping = TOPIC_MANIM[topic]
-        # intent-priority: scale/explanation beats are the natural Manim beats
-        for key in ("scale", "explanation", "timeline", "journey", "structure"):
-            if intent == key and key in mapping:
-                return MANIM_SCENES[mapping[key]]
-            # also trigger on scale words even when intent is generic
-            if (key == "scale" and key in mapping and
-                    any(k in scene_text.lower() for k in
-                        ("how big", "how far", "million", "billion", "fit inside", "size"))):
-                return MANIM_SCENES[mapping[key]]
+        # v36 fix (2026-08-16): the intent-priority loop only returned a
+        # topic's OWN scene for 5 hardcoded intents (scale/explanation/
+        # timeline/journey/structure); any other intent (default, emotion,
+        # context, climax, hook) fell through to the generic fallback and
+        # returned generic_GrowingBars even when the topic registered a
+        # scene for it.  That's why the Gabriel's Horn paradox run shipped
+        # 4 Ken-Burns stills and ZERO horn clips.  Now a topic's own
+        # mapping wins for ANY intent it defines (incl. default), and the
+        # scale-word trigger still works.  Generic beats are only a LAST
+        # resort for intents the topic genuinely lacks.
+        beat = mapping.get(intent) or mapping.get("default")
+        if beat:
+            return MANIM_SCENES.get(beat, "") or ""
+        # scale-word trigger even when intent is generic/unknown
+        if "scale" in mapping and any(
+            k in scene_text.lower() for k in
+            ("how big", "how far", "million", "billion", "fit inside", "size")
+        ):
+            return MANIM_SCENES.get(mapping["scale"], "") or ""
     # v12: generic fallback (any topic, any intent) — DISABLED under the
     # 2026-08-10 realistic direction (generic beats = flat diagrams the
     # review flagged).  Unregistered topics now use Ken Burns on
@@ -189,8 +218,8 @@ def manim_script_for(clip_path: str) -> str:
 # the same flat diagram look the review flagged (clock at 0:01, bar
 # charts); only topic-registered Manim scenes (black_hole_lensing, ...)
 # remain available.
-FLAT_VECTOR_BEATS_ENABLED = False
-GENERIC_MANIM_BEATS_ENABLED = False
+FLAT_VECTOR_BEATS_ENABLED = True
+GENERIC_MANIM_BEATS_ENABLED = True
 
 # v12: flat-vector ANIMATED beats (Blender, Workbench FLAT) — the
 # Kurzgesagt-style vector motion the OLD channel direction called for.
@@ -322,11 +351,16 @@ def vector_beat_for(intent: str = "default", vector_dir: str = "") -> str:
 # that carry an explicit visual_style that is NOT in the fixed set.
 # 2026-08-05: channel direction — flat-vector Kurzgesagt-style.
 # 2026-08-10: ckdigital reversed it — realistic images only.
-# Matches style_bible DEFAULT_STYLE_MODIFIER + STYLE_TOKEN="photorealistic".
+# 2026-08-16: ckdigital re-reversed — match flat-2D cartoon explainer
+# reference (JEE rank video).  Matches style_bible DEFAULT_STYLE_MODIFIER
+# + STYLE_TOKEN="cartoon illustration".
+# 2026-08-16 (v40): cartoon methodology locked — thick dark outlines,
+# cel shading, soft gradients, glow, friendly expressive faces + recurring
+# mascot.  Same locked identity as style_bible (channel brand).
 FIXED_JADE_STYLE = (
-    "photorealistic cinematic documentary still, realistic textures and "
-    "lighting, natural color palette, sharp focus, high detail, "
-    "16:9 composition, no text"
+    "hand-drawn 2D cartoon illustration, thick dark outlines, cel shading, "
+    "soft gradients, glow, friendly expressive cartoon faces, bold clean "
+    "shapes, scientific explainer art, no text, 16:9 composition"
 )
 
 STYLE_MODIFIERS = {
