@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AudioCue v1",
+  "description": "A sound event placed on the audio timeline, tied to a visual event.",
+  "type": "object",
+  "required": ["version", "cues"],
+  "properties": {
+    "version": {"type": "string", "const": "v1"},
+    "cues": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/AudioCue"}
+    }
+  },
+  "definitions": {
+    "AudioCue": {
+      "type": "object",
+      "required": ["type", "time"],
+      "properties": {
+        "type": {"type": "string", "enum": ["tick", "click", "pop", "whoosh", "impact", "rise", "reveal", "success", "failure", "transition", "ambient"]},
+        "time": {"type": "number", "minimum": 0},
+        "relative_time": {"type": "number", "minimum": 0, "maximum": 1},
+        "volume": {"type": "number", "minimum": 0, "maximum": 1},
+        "duration": {"type": "number", "minimum": 0},
+        "pitch": {"type": "number"}
+      },
+      "additionalProperties": false
+    }
+  }
+}

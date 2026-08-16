@@ -1,0 +1,66 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "StyleSpec v1",
+  "description": "Centralized visual style — one aesthetic for the whole channel.  DeepSeek never invents its own palette.",
+  "type": "object",
+  "required": ["version", "background", "primary_text", "accent_colors"],
+  "properties": {
+    "version": {"type": "string", "const": "v1"},
+    "background": {"type": "string"},
+    "surface": {"type": "string"},
+    "primary_text": {"type": "string"},
+    "secondary_text": {"type": "string"},
+    "accent_colors": {"type": "array", "items": {"type": "string"}},
+    "danger": {"type": "string"},
+    "success": {"type": "string"},
+    "warning": {"type": "string"},
+    "font_family": {"type": "string"},
+    "font_sizes": {
+      "type": "object",
+      "properties": {
+        "title": {"type": "number"},
+        "heading": {"type": "number"},
+        "body": {"type": "number"},
+        "caption": {"type": "number"},
+        "small": {"type": "number"},
+        "digit": {"type": "number"},
+        "equation": {"type": "number"}
+      }
+    },
+    "stroke_widths": {
+      "type": "object",
+      "properties": {
+        "text": {"type": "number"},
+        "shape": {"type": "number"},
+        "digit": {"type": "number"}
+      }
+    },
+    "corner_radius": {"type": "number"},
+    "camera_style": {"type": "string"},
+    "transition_style": {"type": "string"},
+    "caption_style": {
+      "type": "object",
+      "properties": {
+        "enabled": {"type": "boolean"},
+        "font": {"type": "string"},
+        "font_size": {"type": "number"},
+        "color": {"type": "string"},
+        "background": {"type": "string"},
+        "bottom_margin": {"type": "number"},
+        "max_words_per_line": {"type": "number"},
+        "animation": {"type": "string"}
+      }
+    },
+    "glow_level": {"type": "number", "minimum": 0, "maximum": 1},
+    "particle_style": {
+      "type": "object",
+      "properties": {
+        "enabled": {"type": "boolean"},
+        "density": {"type": "number"},
+        "color": {"type": "string"},
+        "max_count": {"type": "number"}
+      }
+    }
+  },
+  "additionalProperties": false
+}

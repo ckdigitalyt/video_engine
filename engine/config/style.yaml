@@ -1,0 +1,71 @@
+# style.yaml — Centralized visual style specification (StyleSpec v1)
+# One spec controls the visual identity of every video on the channel.
+# Do NOT let LLM calls invent their own aesthetic — always merge against this.
+
+style:
+  version: "v1"
+
+  # ── Palette ──────────────────────────────────────────────────────────────
+  background: "#0B0E14"          # deep near-black with blue cast
+  surface: "#141A24"             # raised panels / digits background
+  primary_text: "#F5F7FA"
+  secondary_text: "#9AA7B8"
+  accent_colors:
+    - "#4FC3F7"                  # cyan — primary accent / highlighted digits
+    - "#FFB74D"                  # amber — attention / results
+    - "#81C784"                  # green — correct / convergence / success
+    - "#E57373"                  # red   — error / exception / failure
+    - "#BA68C8"                  # violet — narrative / question
+    - "#FFD54F"                  # yellow — emphasis (kinetic text)
+  danger: "#E57373"
+  success: "#81C784"
+  warning: "#FFB74D"
+
+  # ── Typography ───────────────────────────────────────────────────────────
+  font_family: "DejaVu Sans"     # bundled with Manim; no external font dep
+  font_sizes:
+    title: 48
+    heading: 40
+    body: 32
+    caption: 26
+    small: 22
+    digit: 64                       # large moving digits (Kaprekar)
+    equation: 44
+
+  # ── Strokes / geometry ───────────────────────────────────────────────────
+  stroke_widths:
+    text: 1
+    shape: 4
+    digit: 2.5
+  corner_radius: 0.15
+
+  # ── Camera style ─────────────────────────────────────────────────────────
+  camera_style: "cinematic"       # slow purposeful pushes, no random motion
+  transition_style: "cut"         # cut for beat density; fade only at section breaks
+
+  # ── Captions (accessibility layer, NOT primary explanation) ──────────────
+  caption_style:
+    enabled: true
+    font: "Arial"
+    font_size: 40
+    color: "#FFFFFF"
+    background: "rgba(0,0,0,0.65)"
+    bottom_margin: 100
+    max_words_per_line: 4
+    animation: "karaoke"          # highlighted active word tracking narration
+    safe_left: 80
+    safe_right: 80
+
+  # ── Effects ──────────────────────────────────────────────────────────────
+  glow_level: 0.35                # 0..1, control glow intensity
+  particle_style:
+    enabled: true
+    density: 0.6
+    color: "#4FC3F7"
+    max_count: 120                # controlled, explanatory particles only
+
+  # ── Motion defaults ──────────────────────────────────────────────────────
+  motion:
+    default_duration: 0.8
+    easing: "smooth"              # bezier smooth easing
+    camera_pull_back_factor: 1.4

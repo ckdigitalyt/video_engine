@@ -1,0 +1,79 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "QAReport v1",
+  "description": "Quality assurance report measuring a rendered video against the ten quality gates.",
+  "type": "object",
+  "required": ["version", "video_id", "gates", "passed", "motion_metrics", "audio_metrics"],
+  "properties": {
+    "version": {"type": "string", "const": "v1"},
+    "video_id": {"type": "string"},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "gates": {
+      "type": "object",
+      "properties": {
+        "schema": {"$ref": "#/definitions/Gate"},
+        "semantic": {"$ref": "#/definitions/Gate"},
+        "mathematical": {"$ref": "#/definitions/Gate"},
+        "layout": {"$ref": "#/definitions/Gate"},
+        "contrast": {"$ref": "#/definitions/Gate"},
+        "motion": {"$ref": "#/definitions/Gate"},
+        "continuity": {"$ref": "#/definitions/Gate"},
+        "audio": {"$ref": "#/definitions/Gate"},
+        "technical": {"$ref": "#/definitions/Gate"},
+        "overall": {"$ref": "#/definitions/Gate"}
+      }
+    },
+    "passed": {"type": "boolean"},
+    "motion_metrics": {"$ref": "#/definitions/MotionMetrics"},
+    "audio_metrics": {"$ref": "#/definitions/AudioMetrics"},
+    "errors": {"type": "array", "items": {"type": "string"}},
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "beat": {"type": "string"},
+          "severity": {"type": "string", "enum": ["high", "medium", "low"]},
+          "type": {"type": "string"}
+        }
+      }
+    },
+    "score": {"type": "number", "minimum": 0, "maximum": 100}
+  },
+  "definitions": {
+    "Gate": {
+      "type": "object",
+      "required": ["passed"],
+      "properties": {
+        "passed": {"type": "boolean"},
+        "errors": {"type": "array", "items": {"type": "string"}},
+        "warnings": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": false
+    },
+    "MotionMetrics": {
+      "type": "object",
+      "properties": {
+        "pixel_motion_ratio": {"type": "number", "minimum": 0, "maximum": 100},
+        "meaningful_state_changes_per_min": {"type": "number"},
+        "camera_changes": {"type": "number"},
+        "text_reveals": {"type": "number"},
+        "static_periods_over_4s": {"type": "array", "items": {"type": "number"}},
+        "purposeful_pauses": {"type": "number"},
+        "dead_air_periods": {"type": "number"},
+        "beat_count": {"type": "number"},
+        "avg_beat_duration": {"type": "number"}
+      }
+    },
+    "AudioMetrics": {
+      "type": "object",
+      "properties": {
+        "integrated_lufs": {"type": "number"},
+        "true_peak_db": {"type": "number"},
+        "clipping": {"type": "boolean"},
+        "silence_detected": {"type": "boolean"},
+        "voice_music_balance_ok": {"type": "boolean"}
+      }
+    }
+  }
+}
