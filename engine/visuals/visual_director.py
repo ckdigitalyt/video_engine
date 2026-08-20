@@ -126,11 +126,16 @@ def _verify_math_in_prompt(prompt: str, topic: str) -> str:
 def direct(topic: str, narration: str,
            research_facts: list[str] | None = None,
            story_structure: Optional[dict] = None,
-           use_llm: bool = True) -> tuple[dict, dict]:
+           use_llm: bool = True,
+           target_duration: float | None = None) -> tuple[dict, dict]:
     """Produce (beatsheet, shotlist) for the topic."
 
     `use_llm=False` uses the deterministic Kaprekar template director (works
     with no API — proves the architecture is not LLM-dependent for math).
+
+    `target_duration` (narration length) is forwarded to the deterministic
+    Kaprekar director so total animation matches the voice (§19/§20) instead
+    of freeze-framing a tail.
     """
     if research_facts is None:
         research_facts = []
@@ -140,7 +145,7 @@ def direct(topic: str, narration: str,
         except RuntimeError:
             # graceful fallback to deterministic director
             pass
-    return _direct_deterministic(topic, narration)
+    return _direct_deterministic(topic, narration, target_duration=target_duration)
 
 
 def _direct_llm(topic: str, narration: str, research_facts: list[str],
@@ -320,13 +325,20 @@ def _cue_for(intent: str) -> dict:
     return table.get(intent, {"type": "ambient", "relative_time": 0.3, "volume": 0.25})
 
 
-def _direct_deterministic(topic: str, narration: str) -> tuple[dict, dict]:
+def _direct_deterministic(topic: str, narration: str,
+                          target_duration: float | None = None) -> tuple[dict, dict]:
     """Deterministic Kaprekar template director (no LLM required).
 
     Builds a fresh benchmark beat sheet + shot list that demonstrates:
     hook/question -> digits move -> sorting -> subtraction -> iteration ->
     attractor convergence -> exception -> 6174 reveal -> narrative ending.
     This is the Phase-11 benchmark path and is fully math-verified.
+
+    ``target_duration`` (optional) sizes the TOTAL animation to a desired
+    length (the measured narration duration).  Per §19-20 the visual must
+    be designed around the narration, never padded by freeze-framing a
+    final frame: when set, beat durations are scaled so the sum of all
+    beats equals ``target_duration`` exactly.
     """
     if "kaprekar" not in (topic or "").lower():
         # non-Kaprekar topics route to the generic narrative director — this is
@@ -338,9 +350,8 @@ def _direct_deterministic(topic: str, narration: str) -> tuple[dict, dict]:
     orbit = [c["detail"] for c in v.checks if c["name"] == "all_steps_valid"]
     orbit_str = orbit[0].split("orbit: ")[1] if orbit else "3524 -> 3087 -> 8352 -> 6174"
 
-    # build beats with real timings (~0.5-4s each, meaningful change per beat)
-    beats = []
-    t = 0.0
+    # The full benchmark sequence: (weight_frac, intent, beat_intent, narration,
+    # objects, visual_change_required, audio_cues).
     plan = [
         (0.10, "hook", "hook", "Pick any four-digit number.", ["number_main"], True, []),
         (0.05, "pose_question", "pose_question", "What happens if we keep rearranging its digits?", ["number_main", "question"], True, [{"type": "tick", "relative_time": 0.3, "volume": 0.3}]),
@@ -355,11 +366,24 @@ def _direct_deterministic(topic: str, narration: str) -> tuple[dict, dict]:
         (0.08, "tension", "discovery", "A simple rule, a stubborn constant.", ["number_main"], True, [{"type": "rise", "relative_time": 0.4, "volume": 0.4}]),
     ]
 
-    for frac, intent, beat_intent, nar, objs, vcr, cues in plan:
+    # Pre-compute each beat's weight (proportional duration) so we can size
+    # the whole sequence to ``target_duration`` if provided (narration is the
+    # temporal source of truth, §20).  When unset we keep the legacy fixed
+    # scale (~12.5s total).
+    base_durs = [frac * 3.3 + 0.8 for frac, *_ in plan]
+    base_total = sum(base_durs)
+    scale = 1.0
+    if target_duration and base_total > 0:
+        scale = max(target_duration, sum(base_durs)) / base_total
+
+    beats = []
+    t = 0.0
+    for idx, item in enumerate(plan):
+        frac, intent, beat_intent, nar, objs, vcr, cues = item
         # interpolate the verified orbit into narration where relevant
         nar = nar.replace("6174", "6174")
         start = t
-        dur = frac * 3.3 + 0.8  # beat ~1.1-2.4s
+        dur = base_durs[idx] * scale
         beats.append({
             "beat_id": f"b{len(beats) + 1:03d}",
             "start": round(start, 2),
@@ -373,6 +397,7 @@ def _direct_deterministic(topic: str, narration: str) -> tuple[dict, dict]:
             "audio_cues": cues,
         })
         t += dur
+    total_dur = t
 
     # build shots mapping each beat to a manim visual
     shots = []

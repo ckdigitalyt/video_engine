@@ -1,4 +1,0 @@
-REVISION_REQUIRED
-blocked by:
-  publish: hook_strength
-  pre_render: shot_hold, pacing, resolution_headroom

@@ -1,2204 +1,0 @@
-[duration] target=120s scenes=10 words 282-330
-[asset_router] Loaded env vars from /home/ubuntu/video_engine/.env
-
-[1/16] RESEARCH
-  14 facts, 8 sources (7.5s)
-
-[2/16] FACT VERIFICATION
-  Verified 12/14 facts
-
-[3/16] SCRIPT DEVELOPMENT
-  10 scenes drafted, 147 words (~59s at 150wpm)
-  !! Under word budget (147 < 282) — expanding once
-  !! Expansion JSON failed — retrying once
-  !! Expansion JSON failed again — keeping draft
-  !! Still under word budget (147 < 282) — deterministic expansion
-  Deterministically expanded to 283 words (~113s)
-
-[4/16] SCRIPT REVIEW (2 reviewers, ≤2 passes)
-
-── Script Review pass 1/2 ──
-  [             Fact Reviewer] score=4.5/10 conf=0.98 issues=13 (critical:2 major:5 minor:1 nit:5)
-  [     Storytelling Reviewer] score=3.5/10 conf=0.98 issues=7 (critical:2 major:3 minor:1 nit:1)
-  Gate: FAIL (scores={'fact_reviewer': 4.5, 'storytelling_reviewer': 3.5})
-  Revised 10 scenes from consolidated feedback.
-
-── Script Review pass 2/2 ──
-  [             Fact Reviewer] score=7.5/10 conf=0.98 issues=6 (major:1 minor:2 nit:3)
-  [     Storytelling Reviewer] score=8.5/10 conf=0.98 issues=8 (major:2 minor:3 nit:3)
-  Gate: FAIL (scores={'fact_reviewer': 7.5, 'storytelling_reviewer': 8.5})
-  Max passes reached — using best available script.
-  Gate passed: False after 2 pass(es) (scores: {'fact_reviewer': 7.5, 'storytelling_reviewer': 8.5})
-
-[5-9/16] STORYBOARD → VISUAL PLANNING → ASSET ROUTING → GENERATION → ANIMATION
--> AssetRouter: topic='The 52-Hertz Whale: the loneliest voice in the ocean' → category='Nature'
-
-============================================================
-  Visual Director (BEAT MODE): Aesthetic: photorealistic | Mood: bright | Pace: medium | Sub-aesthetic: nature
-  Topic: The 52-Hertz Whale: the loneliest voice in the ocean
-============================================================
-
-
-──────────────────────────────────────────────────
-  Scene 0: Opening Hook: The Mystery Call
-──────────────────────────────────────────────────
-
-──────────────────────────────────────────────────
-  Scene 1: The First Detection: 1989
-──────────────────────────────────────────────────
-
-──────────────────────────────────────────────────
-  Scene 2: The Loneliness Factor
-──────────────────────────────────────────────────
-
-──────────────────────────────────────────────────
-  Scene 3: 30 Years of Silence
-──────────────────────────────────────────────────
-
-──────────────────────────────────────────────────
-  Scene 4: The Hybrid Hypothesis
-──────────────────────────────────────────────────
-
-──────────────────────────────────────────────────
-  Scene 5: The North Pacific Range
-──────────────────────────────────────────────────
-
-──────────────────────────────────────────────────
-  Scene 6: The Human Connection
-──────────────────────────────────────────────────
-
-──────────────────────────────────────────────────
-  Scene 7: The Conservation Lesson
-──────────────────────────────────────────────────
-
-──────────────────────────────────────────────────
-  Scene 8: The Unanswered Question
-──────────────────────────────────────────────────
-
-──────────────────────────────────────────────────
-  Scene 9: The Legacy
-──────────────────────────────────────────────────
-
-  [BeatDirector] Planning beats for scene 0...
-
-  [BeatDirector] Planning beats for scene 1...
-
-  [BeatDirector] Planning beats for scene 2...
-  [BeatDirector] Concept terms (10): ['whale swimming deep', 'ocean waves crashing', 'blue whale breaching', 'underwater sonar bubbles']...
-  [BeatDirector] 5 beats, 5 shots
-  [BeatDirector] Concept terms (10): ['whale sonar screen', 'ocean hydrophone underwater', 'navy submarine control room', 'whale call spectrogram']...
-  [BeatDirector] 3 beats, 3 shots
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep primary shot' -> cache/video/scene_3_b0_s0.mp4
--> Cache MISS: 'whale swimming deep primary shot' — calling Pexels API
-  [BeatDirector] Concept terms (10): ['whale swimming deep', 'ocean sonar equipment', 'underwater hydrophone recording', 'blue whale dorsal fin']...
-  [BeatDirector] 6 beats, 6 shots
-  Candidate 1: id=5608046 1920x1080 dur=8s score=0.800 ← SELECTED
-  Candidate 2: id=10377082 1920x1080 dur=37s score=0.600
-  Candidate 3: id=15546563 3840x2160 dur=50s score=0.600
-  Candidate 4: id=5607993 1920x1080 dur=21s score=0.600
-  Candidate 5: id=10377084 1920x1080 dur=29s score=0.600
-  Candidate 6: id=8906187 1920x1080 dur=25s score=0.600
-  Candidate 7: id=10377449 1920x1080 dur=29s score=0.600
-  Candidate 8: id=20601591 3840x2160 dur=16s score=0.600
-  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
-  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'sonar equipment screen primary shot' -> cache/video/scene_0_b2_s0.mp4
--> Cache MISS: 'whale sonar screen primary shot' — calling Pexels API
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep primary shot' -> cache/video/scene_3_b0_s0.mp4
--> Cache MISS: 'whale swimming deep primary shot' — calling Pexels API
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep primary shot' -> cache/video/scene_3_b0_s0.mp4
--> Pixabay Cache MISS: 'whale swimming deep primary shot' — calling Pixabay API
-  Candidate 1: id=5608046 1920x1080 dur=8s score=0.800 ← SELECTED
-  Candidate 2: id=10377082 1920x1080 dur=37s score=0.600
-  Candidate 3: id=15546563 3840x2160 dur=50s score=0.600
-  Candidate 4: id=5607993 1920x1080 dur=21s score=0.600
-  Candidate 5: id=10377084 1920x1080 dur=29s score=0.600
-  Candidate 6: id=8906187 1920x1080 dur=25s score=0.600
-  Candidate 7: id=10377449 1920x1080 dur=29s score=0.600
-  Candidate 8: id=20601591 3840x2160 dur=16s score=0.600
-  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
-  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep primary shot' -> cache/video/scene_3_b0_s0.mp4
--> Pixabay Cache MISS: 'whale swimming deep primary shot' — calling Pixabay API
-  Pixabay Candidate 1: id=35427 1920x1080 dur=6s score=0.900 ← SELECTED
-  Pixabay Candidate 2: id=13823 1920x1080 dur=8s score=0.800
-  Pixabay Candidate 3: id=244188 3840x2160 dur=8s score=0.800
-  Pixabay Candidate 4: id=18390 3840x2160 dur=11s score=0.650
-  Pixabay Candidate 5: id=117702 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 6: id=37712 1920x1080 dur=27s score=0.600
-  Pixabay Candidate 7: id=26572 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 8: id=312 1920x1080 dur=35s score=0.600
-  Pixabay Candidate 9: id=345377 3840x2160 dur=49s score=0.600
-  Pixabay Candidate 10: id=39393 3840x2160 dur=56s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
-  Candidate 1: id=4571364 4096x2160 dur=7s score=0.877 ← SELECTED
-  Candidate 2: id=7102652 1920x1080 dur=28s score=0.600
-  Candidate 3: id=5607993 1920x1080 dur=21s score=0.600
-  Candidate 4: id=15546563 3840x2160 dur=50s score=0.600
-  Candidate 5: id=14146687 3840x2160 dur=129s score=0.600
-  Candidate 6: id=27941813 3840x2160 dur=31s score=0.400
-  Candidate 7: id=27941815 3840x2160 dur=82s score=0.400
-  Candidate 8: id=28097890 3840x2160 dur=90s score=0.400
-  Candidate 9: id=28097887 3840x2160 dur=57s score=0.400
-  Candidate 10: id=26245637 3840x2160 dur=16s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep primary shot' -> cache/video/scene_3_b0_s0.mp4
--> Wikimedia Cache MISS: 'whale swimming deep primary shot' — calling Wikimedia API
--> AssetLibrary EVICT (below 1920x1080 floor): 'sonar equipment screen primary shot' -> cache/video/scene_0_b2_s0.mp4
--> Pixabay Cache MISS: 'whale sonar screen primary shot' — calling Pixabay API
-  Pixabay Candidate 1: id=52039 1920x1080 dur=5s score=0.969 ← SELECTED
-  Pixabay Candidate 2: id=88883 1920x1080 dur=6s score=0.923
-  Pixabay Candidate 3: id=30438 1920x1080 dur=7s score=0.877
-  Pixabay Candidate 4: id=244188 3840x2160 dur=8s score=0.831
-  Pixabay Candidate 5: id=2420 1920x1080 dur=10s score=0.738
-  Pixabay Candidate 6: id=179493 1920x1080 dur=10s score=0.738
-  Pixabay Candidate 7: id=18390 3840x2160 dur=11s score=0.692
-  Pixabay Candidate 8: id=117702 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 9: id=202987 3840x2160 dur=15s score=0.600
-  Pixabay Candidate 10: id=25102 1920x1080 dur=20s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'sonar equipment screen primary shot' -> cache/video/scene_0_b2_s0.mp4
--> Wikimedia Cache MISS: 'whale sonar screen primary shot' — calling Wikimedia API
-  Pixabay Candidate 1: id=35427 1920x1080 dur=6s score=0.900 ← SELECTED
-  Pixabay Candidate 2: id=13823 1920x1080 dur=8s score=0.800
-  Pixabay Candidate 3: id=244188 3840x2160 dur=8s score=0.800
-  Pixabay Candidate 4: id=18390 3840x2160 dur=11s score=0.650
-  Pixabay Candidate 5: id=117702 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 6: id=37712 1920x1080 dur=27s score=0.600
-  Pixabay Candidate 7: id=26572 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 8: id=312 1920x1080 dur=35s score=0.600
-  Pixabay Candidate 9: id=345377 3840x2160 dur=49s score=0.600
-  Pixabay Candidate 10: id=39393 3840x2160 dur=56s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep primary shot' -> cache/video/scene_3_b0_s0.mp4
--> Wikimedia Cache MISS: 'whale swimming deep primary shot' — calling Wikimedia API
-  Wikimedia Candidate 1: id=91987192 812x1306
-  Wikimedia Candidate 2: id=92304344 735x1162
-  Wikimedia Candidate 3: id=94852483 514x804
-  Wikimedia Candidate 4: id=95835691 572x954
-  Wikimedia Candidate 5: id=95874353 727x1093
--> Router selected: 'wikimedia' for query 'whale swimming deep primary shot'
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_2_b3_s0.mp4
--> Cache MISS: 'whale swimming deep' — calling Pexels API
-  Candidate 1: id=15546563 3840x2160 dur=50s score=0.600 ← SELECTED
-  Candidate 2: id=10377082 1920x1080 dur=37s score=0.600
-  Candidate 3: id=5607993 1920x1080 dur=21s score=0.600
-  Candidate 4: id=10377084 1920x1080 dur=29s score=0.600
-  Candidate 5: id=6510690 1920x1080 dur=15s score=0.600
-  Candidate 6: id=10377449 1920x1080 dur=29s score=0.600
-  Candidate 7: id=8906187 1920x1080 dur=25s score=0.600
-  Candidate 8: id=20601591 3840x2160 dur=16s score=0.600
-  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
-  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
-  Wikimedia Candidate 1: id=151208121 1085x1575
--> Router selected: 'wikimedia' for query 'whale sonar screen primary shot'
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_2_b3_s0.mp4
--> Pixabay Cache MISS: 'whale swimming deep' — calling Pixabay API
-  Wikimedia Candidate 1: id=91987192 812x1306
-  Wikimedia Candidate 2: id=92304344 735x1162
-  Wikimedia Candidate 3: id=94852483 514x804
-  Wikimedia Candidate 4: id=95835691 572x954
-  Wikimedia Candidate 5: id=95874353 727x1093
--> Router selected: 'wikimedia' for query 'whale swimming deep primary shot'
--> Already on disk: cache/video/scene_1_b0_s0.mp4
-    [BeatDirector] Shot accepted: primary shot for beat 0 (provider=pexels)
--> AssetLibrary REUSE: 'ocean hydrophone underwater primary shot' similar to 'ocean hydrophone underwater primary shot' -> cache/video/scene_3_b1_s0.mp4
--> Router selected: 'pexels' for query 'ocean hydrophone underwater primary shot'
-  Pixabay Candidate 1: id=275007 3840x2160 dur=6s score=0.900 ← SELECTED
-  Pixabay Candidate 2: id=35427 1920x1080 dur=6s score=0.900
-  Pixabay Candidate 3: id=13823 1920x1080 dur=8s score=0.800
-  Pixabay Candidate 4: id=244188 3840x2160 dur=8s score=0.800
-  Pixabay Candidate 5: id=117702 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 6: id=37712 1920x1080 dur=27s score=0.600
-  Pixabay Candidate 7: id=26572 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 8: id=312 1920x1080 dur=35s score=0.600
-  Pixabay Candidate 9: id=345377 3840x2160 dur=49s score=0.600
-  Pixabay Candidate 10: id=39393 3840x2160 dur=56s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_2_b3_s0.mp4
--> Wikimedia Cache MISS: 'whale swimming deep' — calling Wikimedia API
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_2_b3_s0.mp4
--> Cache MISS: 'whale swimming deep' — calling Pexels API
-  Candidate 1: id=15546563 3840x2160 dur=50s score=0.600 ← SELECTED
-  Candidate 2: id=10377082 1920x1080 dur=37s score=0.600
-  Candidate 3: id=5607993 1920x1080 dur=21s score=0.600
-  Candidate 4: id=10377084 1920x1080 dur=29s score=0.600
-  Candidate 5: id=6510690 1920x1080 dur=15s score=0.600
-  Candidate 6: id=10377449 1920x1080 dur=29s score=0.600
-  Candidate 7: id=8906187 1920x1080 dur=25s score=0.600
-  Candidate 8: id=20601591 3840x2160 dur=16s score=0.600
-  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
-  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_2_b3_s0.mp4
--> Pixabay Cache MISS: 'whale swimming deep' — calling Pixabay API
--> Already on disk: cache/video/scene_1_b1_s0.mp4
-    [BeatDirector] Shot accepted: primary shot for beat 1 (provider=pexels)
--> AssetLibrary EVICT (below 1920x1080 floor): 'navy submarine sonar room primary shot' -> cache/video/scene_3_b0_s0.mp4
--> Cache MISS: 'navy submarine control room primary shot' — calling Pexels API
-  Pixabay Candidate 1: id=275007 3840x2160 dur=6s score=0.900 ← SELECTED
-  Pixabay Candidate 2: id=35427 1920x1080 dur=6s score=0.900
-  Pixabay Candidate 3: id=13823 1920x1080 dur=8s score=0.800
-  Pixabay Candidate 4: id=244188 3840x2160 dur=8s score=0.800
-  Pixabay Candidate 5: id=117702 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 6: id=37712 1920x1080 dur=27s score=0.600
-  Pixabay Candidate 7: id=26572 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 8: id=312 1920x1080 dur=35s score=0.600
-  Pixabay Candidate 9: id=345377 3840x2160 dur=49s score=0.600
-  Pixabay Candidate 10: id=39393 3840x2160 dur=56s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Wikimedia Cache MISS: 'whale swimming deep' — calling Wikimedia API
-  Candidate 1: id=12191466 3840x2160 dur=5s score=0.969 ← SELECTED
-  Candidate 2: id=10895591 3840x2160 dur=7s score=0.877
-  Candidate 3: id=31522473 3840x2160 dur=7s score=0.677
-  Candidate 4: id=6442792 1920x1080 dur=12s score=0.646
-  Candidate 5: id=7088050 4096x2160 dur=30s score=0.600
-  Candidate 6: id=7670467 1920x1080 dur=15s score=0.600
-  Candidate 7: id=2837541 1920x1080 dur=13s score=0.600
-  Candidate 8: id=7664745 1920x1080 dur=13s score=0.600
-  Candidate 9: id=38779095 1920x1080 dur=10s score=0.538
-  Candidate 10: id=37429801 1920x1080 dur=16s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'navy submarine sonar room primary shot' -> cache/video/scene_3_b0_s0.mp4
--> Pixabay Cache MISS: 'navy submarine control room primary shot' — calling Pixabay API
-  Wikimedia Candidate 1: id=59326000 716x1089
-  Wikimedia Candidate 2: id=91793954 1027x1687
-  Wikimedia Candidate 3: id=92515049 779x1237
-  Wikimedia Candidate 4: id=95900299 662x1064
-  Wikimedia Candidate 5: id=98214895 770x1170
--> Router selected: 'wikimedia' for query 'whale swimming deep'
-  Pixabay Candidate 1: id=216582 3840x2160 dur=6s score=0.923 ← SELECTED
-  Pixabay Candidate 2: id=200994 1920x1080 dur=6s score=0.923
-  Pixabay Candidate 3: id=2420 1920x1080 dur=10s score=0.738
-  Pixabay Candidate 4: id=159948 1920x1080 dur=10s score=0.738
-  Pixabay Candidate 5: id=18390 3840x2160 dur=11s score=0.692
-  Pixabay Candidate 6: id=200993 1920x1080 dur=12s score=0.646
-  Pixabay Candidate 7: id=200991 1920x1080 dur=12s score=0.646
-  Pixabay Candidate 8: id=200992 1920x1080 dur=13s score=0.600
-  Pixabay Candidate 9: id=89894 1920x1080 dur=51s score=0.600
-  Pixabay Candidate 10: id=156473 3840x2160 dur=60s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'navy submarine sonar room primary shot' -> cache/video/scene_3_b0_s0.mp4
--> Wikimedia Cache MISS: 'navy submarine control room primary shot' — calling Wikimedia API
--> AssetLibrary EVICT (below 1920x1080 floor): 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' -> cache/video/scene_3_b0_s0.mp4
--> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
--> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
-  Wikimedia Candidate 1: id=59326000 716x1089
-  Wikimedia Candidate 2: id=91793954 1027x1687
-  Wikimedia Candidate 3: id=92515049 779x1237
-  Wikimedia Candidate 4: id=95900299 662x1064
-  Wikimedia Candidate 5: id=98214895 770x1170
--> Router selected: 'wikimedia' for query 'whale swimming deep'
--> Wikimedia API rate limited, retry 1 in 3s...
--> Already on disk: cache/video/scene_2_b0_s0.mp4
-    [BeatDirector] Shot accepted: primary shot for beat 0 (provider=pexels)
--> AssetLibrary REUSE: 'ocean waves crashing primary shot' similar to 'ocean waves dark primary shot' -> cache/video/scene_9_b1_s0.mp4
--> Router selected: 'pexels' for query 'ocean waves crashing primary shot'
--> AssetLibrary EVICT (below 1920x1080 floor): 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' -> cache/video/scene_3_b0_s0.mp4
--> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
--> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Cache MISS: 'whale swimming deep' — calling Pexels API
-  Candidate 1: id=15546563 3840x2160 dur=50s score=0.600 ← SELECTED
-  Candidate 2: id=10377082 1920x1080 dur=37s score=0.600
-  Candidate 3: id=5607993 1920x1080 dur=21s score=0.600
-  Candidate 4: id=10377084 1920x1080 dur=29s score=0.600
-  Candidate 5: id=6510690 1920x1080 dur=15s score=0.600
-  Candidate 6: id=10377449 1920x1080 dur=29s score=0.600
-  Candidate 7: id=8906187 1920x1080 dur=25s score=0.600
-  Candidate 8: id=20601591 3840x2160 dur=16s score=0.600
-  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
-  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Pixabay Cache MISS: 'whale swimming deep' — calling Pixabay API
--> AssetLibrary EVICT (below 1920x1080 floor): 'sonar equipment screen primary shot' -> cache/video/scene_0_b2_s0.mp4
--> Cache MISS: 'ocean sonar equipment primary shot' — calling Pexels API
-  Candidate 1: id=8822536 3840x2160 dur=10s score=0.700 ← SELECTED
-  Candidate 2: id=8824132 3840x2160 dur=10s score=0.700
-  Candidate 3: id=12208290 1920x1080 dur=27s score=0.600
-  Candidate 4: id=7543407 1920x1080 dur=19s score=0.600
-  Candidate 5: id=6651688 1920x1080 dur=121s score=0.600
-  Candidate 6: id=15660444 3840x2160 dur=12s score=0.600
-  Candidate 7: id=2850617 1920x1080 dur=16s score=0.600
-  Candidate 8: id=8916728 4096x2160 dur=12s score=0.600
-  Candidate 9: id=31708327 3840x2160 dur=16s score=0.400
-  Candidate 10: id=30911575 3840x2160 dur=20s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'sonar equipment screen primary shot' -> cache/video/scene_0_b2_s0.mp4
--> Pixabay Cache MISS: 'ocean sonar equipment primary shot' — calling Pixabay API
-  Pixabay Candidate 1: id=275007 3840x2160 dur=6s score=0.900 ← SELECTED
-  Pixabay Candidate 2: id=35427 1920x1080 dur=6s score=0.900
-  Pixabay Candidate 3: id=13823 1920x1080 dur=8s score=0.800
-  Pixabay Candidate 4: id=244188 3840x2160 dur=8s score=0.800
-  Pixabay Candidate 5: id=117702 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 6: id=37712 1920x1080 dur=27s score=0.600
-  Pixabay Candidate 7: id=26572 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 8: id=312 1920x1080 dur=35s score=0.600
-  Pixabay Candidate 9: id=345377 3840x2160 dur=49s score=0.600
-  Pixabay Candidate 10: id=39393 3840x2160 dur=56s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Wikimedia Cache MISS: 'whale swimming deep' — calling Wikimedia API
-  Pixabay Candidate 1: id=2420 1920x1080 dur=10s score=0.700 ← SELECTED
-  Pixabay Candidate 2: id=5180 1920x1080 dur=10s score=0.700
-  Pixabay Candidate 3: id=18390 3840x2160 dur=11s score=0.650
-  Pixabay Candidate 4: id=345377 3840x2160 dur=49s score=0.600
-  Pixabay Candidate 5: id=293788 3840x2160 dur=13s score=0.600
-  Pixabay Candidate 6: id=158230 3840x2160 dur=24s score=0.600
-  Pixabay Candidate 7: id=3741 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 8: id=38388 3840x2160 dur=19s score=0.600
-  Pixabay Candidate 9: id=8437 1920x1080 dur=18s score=0.600
-  Pixabay Candidate 10: id=65390 3840x2160 dur=18s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'sonar equipment screen primary shot' -> cache/video/scene_0_b2_s0.mp4
--> Wikimedia Cache MISS: 'ocean sonar equipment primary shot' — calling Wikimedia API
--> Wikimedia API rate limited, retry 1 in 3s...
--> Wikimedia API rate limited, retry 1 in 3s...
--> Wikimedia API rate limited, retry 2 in 6s...
--> Wikimedia API rate limited, retry 2 in 6s...
--> Wikimedia API rate limited, retry 2 in 6s...
-  Wikimedia Candidate 1: id=91654379 1147x1645
-  Wikimedia Candidate 2: id=91654444 1168x1645
-  Wikimedia Candidate 3: id=91654573 1143x1645
-  Wikimedia Candidate 4: id=91654611 1156x1645
-  Wikimedia Candidate 5: id=91654872 1185x1645
--> Router selected: 'wikimedia' for query 'navy submarine control room primary shot'
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale sonar signal' -> cache/video/scene_2_b0_s0.mp4
--> Cache MISS: 'whale sonar screen' — calling Pexels API
-  Candidate 1: id=11279748 1920x1080 dur=7s score=0.877 ← SELECTED
-  Candidate 2: id=5608046 1920x1080 dur=8s score=0.831
-  Candidate 3: id=5607993 1920x1080 dur=21s score=0.600
-  Candidate 4: id=15546563 3840x2160 dur=50s score=0.600
-  Candidate 5: id=14146687 3840x2160 dur=129s score=0.600
-  Candidate 6: id=28097887 3840x2160 dur=57s score=0.400
-  Candidate 7: id=28097890 3840x2160 dur=90s score=0.400
-  Candidate 8: id=27941813 3840x2160 dur=31s score=0.400
-  Candidate 9: id=27941815 3840x2160 dur=82s score=0.400
-  Candidate 10: id=26245637 3840x2160 dur=16s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale sonar signal' -> cache/video/scene_2_b0_s0.mp4
--> Pixabay Cache MISS: 'whale sonar screen' — calling Pixabay API
-  Wikimedia Candidate 1: id=59326000 716x1089
-  Wikimedia Candidate 2: id=91793954 1027x1687
-  Wikimedia Candidate 3: id=92515049 779x1237
-  Wikimedia Candidate 4: id=95900299 662x1064
-  Wikimedia Candidate 5: id=98214895 770x1170
--> Router selected: 'wikimedia' for query 'whale swimming deep'
-  Wikimedia Candidate 1: id=91404711 1275x1650
-  Wikimedia Candidate 2: id=91573379 1258x1633
-  Wikimedia Candidate 3: id=91601083 635x831
-  Wikimedia Candidate 4: id=91602778 1118x1587
-  Wikimedia Candidate 5: id=91612646 1266x1700
--> Router selected: 'wikimedia' for query 'ocean sonar equipment primary shot'
--> AssetLibrary EVICT (below 1920x1080 floor): 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' -> cache/video/scene_3_b0_s0.mp4
--> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
--> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Cache MISS: 'whale swimming deep' — calling Pexels API
-  Candidate 1: id=15546563 3840x2160 dur=50s score=0.600 ← SELECTED
-  Candidate 2: id=10377082 1920x1080 dur=37s score=0.600
-  Candidate 3: id=5607993 1920x1080 dur=21s score=0.600
-  Candidate 4: id=10377084 1920x1080 dur=29s score=0.600
-  Candidate 5: id=6510690 1920x1080 dur=15s score=0.600
-  Candidate 6: id=10377449 1920x1080 dur=29s score=0.600
-  Candidate 7: id=8906187 1920x1080 dur=25s score=0.600
-  Candidate 8: id=20601591 3840x2160 dur=16s score=0.600
-  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
-  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Pixabay Cache MISS: 'whale swimming deep' — calling Pixabay API
--> AssetLibrary EVICT (below 1920x1080 floor): 'blue whale swimming primary shot' -> cache/video/scene_4_b0_s0.mp4
--> Cache MISS: 'blue whale breaching primary shot' — calling Pexels API
-  Candidate 1: id=4571364 4096x2160 dur=7s score=0.850 ← SELECTED
-  Candidate 2: id=11521069 3840x2160 dur=7s score=0.850
-  Candidate 3: id=18680289 1920x1080 dur=16s score=0.600
-  Candidate 4: id=8906187 1920x1080 dur=25s score=0.600
-  Candidate 5: id=7102652 1920x1080 dur=28s score=0.600
-  Candidate 6: id=27941813 3840x2160 dur=31s score=0.400
-  Candidate 7: id=27941815 3840x2160 dur=82s score=0.400
-  Candidate 8: id=28097887 3840x2160 dur=57s score=0.400
-  Candidate 9: id=28097890 3840x2160 dur=90s score=0.400
-  Candidate 10: id=4520420 1920x1012 dur=3s score=0.000
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'blue whale swimming primary shot' -> cache/video/scene_4_b0_s0.mp4
--> Pixabay Cache MISS: 'blue whale breaching primary shot' — calling Pixabay API
-  Pixabay Candidate 1: id=52039 1920x1080 dur=5s score=0.969 ← SELECTED
-  Pixabay Candidate 2: id=88883 1920x1080 dur=6s score=0.923
-  Pixabay Candidate 3: id=30438 1920x1080 dur=7s score=0.877
-  Pixabay Candidate 4: id=244188 3840x2160 dur=8s score=0.831
-  Pixabay Candidate 5: id=2420 1920x1080 dur=10s score=0.738
-  Pixabay Candidate 6: id=179493 1920x1080 dur=10s score=0.738
-  Pixabay Candidate 7: id=117702 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 8: id=202987 3840x2160 dur=15s score=0.600
-  Pixabay Candidate 9: id=25102 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 10: id=98191 1920x1080 dur=16s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale sonar signal' -> cache/video/scene_2_b0_s0.mp4
--> Wikimedia Cache MISS: 'whale sonar screen' — calling Wikimedia API
-  Wikimedia Candidate 1: id=91608279 1247x1662
-  Wikimedia Candidate 2: id=92248902 1275x1650
-  Wikimedia Candidate 3: id=92459819 1252x1595
-  Wikimedia Candidate 4: id=97540775 1204x1635
-  Wikimedia Candidate 5: id=149178922 1085x1575
--> Router selected: 'wikimedia' for query 'whale sonar screen'
--> AssetLibrary EVICT (below 1920x1080 floor): 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' -> cache/video/scene_3_b0_s0.mp4
--> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
--> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
-  Pixabay Candidate 1: id=275007 3840x2160 dur=6s score=0.900 ← SELECTED
-  Pixabay Candidate 2: id=35427 1920x1080 dur=6s score=0.900
-  Pixabay Candidate 3: id=13823 1920x1080 dur=8s score=0.800
-  Pixabay Candidate 4: id=244188 3840x2160 dur=8s score=0.800
-  Pixabay Candidate 5: id=117702 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 6: id=37712 1920x1080 dur=27s score=0.600
-  Pixabay Candidate 7: id=26572 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 8: id=312 1920x1080 dur=35s score=0.600
-  Pixabay Candidate 9: id=345377 3840x2160 dur=49s score=0.600
-  Pixabay Candidate 10: id=39393 3840x2160 dur=56s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Wikimedia Cache MISS: 'whale swimming deep' — calling Wikimedia API
--> Wikimedia image info rate limited, retry 1 in 3s...
-
-  [BeatDirector] Planning beats for scene 3...
--> Wikimedia image info rate limited, retry 2 in 6s...
-  Pixabay Candidate 1: id=335486 1920x1080 dur=7s score=0.850 ← SELECTED
-  Pixabay Candidate 2: id=244188 3840x2160 dur=8s score=0.800
-  Pixabay Candidate 3: id=18390 3840x2160 dur=11s score=0.650
-  Pixabay Candidate 4: id=117702 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 5: id=293788 3840x2160 dur=13s score=0.600
-  Pixabay Candidate 6: id=13441 3840x2160 dur=27s score=0.600
-  Pixabay Candidate 7: id=7093 1920x1080 dur=30s score=0.600
-  Pixabay Candidate 8: id=33592 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 9: id=2142 1920x1080 dur=36s score=0.600
-  Pixabay Candidate 10: id=33594 1920x1080 dur=20s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'blue whale swimming primary shot' -> cache/video/scene_4_b0_s0.mp4
--> Wikimedia Cache MISS: 'blue whale breaching primary shot' — calling Wikimedia API
-  [BeatDirector] Concept terms (10): ['whale swimming deep', 'ocean sonar waves', 'ship deck radio', 'underwater microphone close-up']...
-  [BeatDirector] 3 beats, 3 shots
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep primary shot' -> cache/video/scene_1_b0_s0.mp4
--> Cache MISS: 'whale swimming deep primary shot' — calling Pexels API
--> Wikimedia API rate limited, retry 1 in 3s...
-  Candidate 1: id=5608046 1920x1080 dur=8s score=0.831 ← SELECTED
-  Candidate 2: id=10377082 1920x1080 dur=37s score=0.600
-  Candidate 3: id=15546563 3840x2160 dur=50s score=0.600
-  Candidate 4: id=5607993 1920x1080 dur=21s score=0.600
-  Candidate 5: id=10377084 1920x1080 dur=29s score=0.600
-  Candidate 6: id=8906187 1920x1080 dur=25s score=0.600
-  Candidate 7: id=10377449 1920x1080 dur=29s score=0.600
-  Candidate 8: id=20601591 3840x2160 dur=16s score=0.600
-  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
-  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep primary shot' -> cache/video/scene_1_b0_s0.mp4
--> Pixabay Cache MISS: 'whale swimming deep primary shot' — calling Pixabay API
--> Wikimedia API rate limited, retry 2 in 6s...
--> Wikimedia image info rate limited, retry 3 in 9s...
--> Wikimedia API rate limited, retry 3 in 9s...
-  Pixabay Candidate 1: id=35427 1920x1080 dur=6s score=0.923 ← SELECTED
-  Pixabay Candidate 2: id=13823 1920x1080 dur=8s score=0.831
-  Pixabay Candidate 3: id=244188 3840x2160 dur=8s score=0.831
-  Pixabay Candidate 4: id=18390 3840x2160 dur=11s score=0.692
-  Pixabay Candidate 5: id=117702 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 6: id=37712 1920x1080 dur=27s score=0.600
-  Pixabay Candidate 7: id=26572 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 8: id=312 1920x1080 dur=35s score=0.600
-  Pixabay Candidate 9: id=345377 3840x2160 dur=49s score=0.600
-  Pixabay Candidate 10: id=39393 3840x2160 dur=56s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep primary shot' -> cache/video/scene_1_b0_s0.mp4
--> Wikimedia Cache MISS: 'whale swimming deep primary shot' — calling Wikimedia API
--> Wikimedia API rate limited, retry 1 in 3s...
--> Wikimedia image info request failed: Expecting value: line 1 column 1 (char 0)
--> Router: all providers exhausted for 'whale swimming deep' — returning empty
--> AssetLibrary EVICT (below 1920x1080 floor): 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' -> cache/video/scene_3_b0_s0.mp4
--> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
--> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
--> AssetLibrary EVICT (below 1920x1080 floor): 'hydrophone underwater recording primary shot' -> cache/video/scene_7_b2_s0.mp4
--> Cache MISS: 'underwater hydrophone recording primary shot' — calling Pexels API
-  Candidate 1: id=8823292 3840x2160 dur=8s score=0.800 ← SELECTED
-  Candidate 2: id=8686153 1920x1080 dur=9s score=0.750
-  Candidate 3: id=36006201 3840x2160 dur=8s score=0.600
-  Candidate 4: id=8382683 4096x2160 dur=28s score=0.600
-  Candidate 5: id=8822982 3840x2160 dur=14s score=0.600
-  Candidate 6: id=11194812 1920x1080 dur=21s score=0.600
-  Candidate 7: id=8823131 3840x2160 dur=15s score=0.600
-  Candidate 8: id=8823625 3840x2160 dur=19s score=0.600
-  Candidate 9: id=36309931 3840x2160 dur=9s score=0.550
-  Candidate 10: id=35790681 3840x2160 dur=12s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'hydrophone underwater recording primary shot' -> cache/video/scene_7_b2_s0.mp4
--> Pixabay Cache MISS: 'underwater hydrophone recording primary shot' — calling Pixabay API
--> Wikimedia API rate limited, retry 2 in 6s...
--> Wikimedia API request failed: Expecting value: line 1 column 1 (char 0)
--> Router: all providers exhausted for 'blue whale breaching primary shot' — returning empty
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Cache MISS: 'whale swimming deep' — calling Pexels API
-  Candidate 1: id=15546563 3840x2160 dur=50s score=0.600 ← SELECTED
-  Candidate 2: id=10377082 1920x1080 dur=37s score=0.600
-  Candidate 3: id=5607993 1920x1080 dur=21s score=0.600
-  Candidate 4: id=10377084 1920x1080 dur=29s score=0.600
-  Candidate 5: id=6510690 1920x1080 dur=15s score=0.600
-  Candidate 6: id=10377449 1920x1080 dur=29s score=0.600
-  Candidate 7: id=8906187 1920x1080 dur=25s score=0.600
-  Candidate 8: id=20601591 3840x2160 dur=16s score=0.600
-  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
-  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Pixabay Cache MISS: 'whale swimming deep' — calling Pixabay API
--> Wikimedia API rate limited, retry 3 in 9s...
--> Wikimedia API request failed: Expecting value: line 1 column 1 (char 0)
--> Router: all providers exhausted for 'whale swimming deep primary shot' — returning empty
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Cache MISS: 'whale swimming deep' — calling Pexels API
-  Candidate 1: id=15546563 3840x2160 dur=50s score=0.600 ← SELECTED
-  Candidate 2: id=10377082 1920x1080 dur=37s score=0.600
-  Candidate 3: id=5607993 1920x1080 dur=21s score=0.600
-  Candidate 4: id=10377084 1920x1080 dur=29s score=0.600
-  Candidate 5: id=6510690 1920x1080 dur=15s score=0.600
-  Candidate 6: id=10377449 1920x1080 dur=29s score=0.600
-  Candidate 7: id=8906187 1920x1080 dur=25s score=0.600
-  Candidate 8: id=20601591 3840x2160 dur=16s score=0.600
-  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
-  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Pixabay Cache MISS: 'whale swimming deep' — calling Pixabay API
--> Pixabay API request failed: Expecting value: line 1 column 1 (char 0)
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Wikimedia Cache MISS: 'whale swimming deep' — calling Wikimedia API
-  Wikimedia Candidate 1: id=59326000 716x1089
-  Wikimedia Candidate 2: id=91793954 1027x1687
-  Wikimedia Candidate 3: id=92515049 779x1237
-  Wikimedia Candidate 4: id=95900299 662x1064
-  Wikimedia Candidate 5: id=98214895 770x1170
--> Router selected: 'wikimedia' for query 'whale swimming deep'
--> AssetLibrary EVICT (below 1920x1080 floor): 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' -> cache/video/scene_3_b0_s0.mp4
--> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
--> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
--> AssetLibrary REUSE: 'ocean sonar waves primary shot' similar to 'ocean waves dark primary shot' -> cache/video/scene_9_b1_s0.mp4
--> Router selected: 'pexels' for query 'ocean sonar waves primary shot'
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Cache MISS: 'whale swimming deep' — calling Pexels API
-  Candidate 1: id=15546563 3840x2160 dur=50s score=0.600 ← SELECTED
-  Candidate 2: id=10377082 1920x1080 dur=37s score=0.600
-  Candidate 3: id=5607993 1920x1080 dur=21s score=0.600
-  Candidate 4: id=10377084 1920x1080 dur=29s score=0.600
-  Candidate 5: id=6510690 1920x1080 dur=15s score=0.600
-  Candidate 6: id=10377449 1920x1080 dur=29s score=0.600
-  Candidate 7: id=8906187 1920x1080 dur=25s score=0.600
-  Candidate 8: id=20601591 3840x2160 dur=16s score=0.600
-  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
-  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Pixabay Cache MISS: 'whale swimming deep' — calling Pixabay API
-  Pixabay Candidate 1: id=24265 1920x1080 dur=6s score=0.900 ← SELECTED
-  Pixabay Candidate 2: id=122739 3840x2160 dur=7s score=0.850
-  Pixabay Candidate 3: id=16166 1920x1080 dur=8s score=0.800
-  Pixabay Candidate 4: id=110877 1920x1080 dur=9s score=0.750
-  Pixabay Candidate 5: id=18390 3840x2160 dur=11s score=0.650
-  Pixabay Candidate 6: id=37712 1920x1080 dur=27s score=0.600
-  Pixabay Candidate 7: id=26818 3840x2160 dur=16s score=0.600
-  Pixabay Candidate 8: id=110879 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 9: id=244754 2560x1440 dur=30s score=0.600
-  Pixabay Candidate 10: id=122740 3840x2160 dur=15s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'hydrophone underwater recording primary shot' -> cache/video/scene_7_b2_s0.mp4
--> Wikimedia Cache MISS: 'underwater hydrophone recording primary shot' — calling Wikimedia API
-  Wikimedia Candidate 1: id=91577583 1202x1618
-  Wikimedia Candidate 2: id=91612646 1266x1700
-  Wikimedia Candidate 3: id=92060338 1172x1562
-  Wikimedia Candidate 4: id=92226512 1208x1627
-  Wikimedia Candidate 5: id=92472823 1275x1650
--> Router selected: 'wikimedia' for query 'underwater hydrophone recording primary shot'
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Cache MISS: 'whale swimming deep' — calling Pexels API
-  Candidate 1: id=15546563 3840x2160 dur=50s score=0.600 ← SELECTED
-  Candidate 2: id=10377082 1920x1080 dur=37s score=0.600
-  Candidate 3: id=5607993 1920x1080 dur=21s score=0.600
-  Candidate 4: id=10377084 1920x1080 dur=29s score=0.600
-  Candidate 5: id=6510690 1920x1080 dur=15s score=0.600
-  Candidate 6: id=10377449 1920x1080 dur=29s score=0.600
-  Candidate 7: id=8906187 1920x1080 dur=25s score=0.600
-  Candidate 8: id=20601591 3840x2160 dur=16s score=0.600
-  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
-  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Pixabay Cache MISS: 'whale swimming deep' — calling Pixabay API
-  Pixabay Candidate 1: id=275007 3840x2160 dur=6s score=0.900 ← SELECTED
-  Pixabay Candidate 2: id=35427 1920x1080 dur=6s score=0.900
-  Pixabay Candidate 3: id=13823 1920x1080 dur=8s score=0.800
-  Pixabay Candidate 4: id=244188 3840x2160 dur=8s score=0.800
-  Pixabay Candidate 5: id=117702 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 6: id=37712 1920x1080 dur=27s score=0.600
-  Pixabay Candidate 7: id=26572 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 8: id=312 1920x1080 dur=35s score=0.600
-  Pixabay Candidate 9: id=345377 3840x2160 dur=49s score=0.600
-  Pixabay Candidate 10: id=39393 3840x2160 dur=56s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Wikimedia Cache MISS: 'whale swimming deep' — calling Wikimedia API
-  Pixabay Candidate 1: id=275007 3840x2160 dur=6s score=0.900 ← SELECTED
-  Pixabay Candidate 2: id=35427 1920x1080 dur=6s score=0.900
-  Pixabay Candidate 3: id=13823 1920x1080 dur=8s score=0.800
-  Pixabay Candidate 4: id=244188 3840x2160 dur=8s score=0.800
-  Pixabay Candidate 5: id=117702 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 6: id=37712 1920x1080 dur=27s score=0.600
-  Pixabay Candidate 7: id=26572 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 8: id=312 1920x1080 dur=35s score=0.600
-  Pixabay Candidate 9: id=345377 3840x2160 dur=49s score=0.600
-  Pixabay Candidate 10: id=39393 3840x2160 dur=56s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Wikimedia Cache MISS: 'whale swimming deep' — calling Wikimedia API
-  Wikimedia Candidate 1: id=59326000 716x1089
-  Wikimedia Candidate 2: id=91793954 1027x1687
-  Wikimedia Candidate 3: id=92515049 779x1237
-  Wikimedia Candidate 4: id=95900299 662x1064
-  Wikimedia Candidate 5: id=98214895 770x1170
--> Router selected: 'wikimedia' for query 'whale swimming deep'
-  Wikimedia Candidate 1: id=59326000 716x1089
-  Wikimedia Candidate 2: id=91793954 1027x1687
-  Wikimedia Candidate 3: id=92515049 779x1237
-  Wikimedia Candidate 4: id=95900299 662x1064
-  Wikimedia Candidate 5: id=98214895 770x1170
--> Router selected: 'wikimedia' for query 'whale swimming deep'
--> AssetLibrary EVICT (below 1920x1080 floor): 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' -> cache/video/scene_3_b0_s0.mp4
--> AssetLibrary EVICT (below 1920x1080 floor): 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' -> cache/video/scene_3_b0_s0.mp4
--> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
--> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
--> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
--> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
--> AssetLibrary EVICT (below 1920x1080 floor): 'blue whale swimming primary shot' -> cache/video/scene_4_b0_s0.mp4
--> Cache MISS: 'blue whale dorsal fin primary shot' — calling Pexels API
--> AssetLibrary REUSE: 'underwater sonar bubbles primary shot' similar to 'underwater sonar equipment primary shot' -> cache/video/scene_0_b0_s0.mp4
--> Router selected: 'pexels' for query 'underwater sonar bubbles primary shot'
-  Candidate 1: id=4332086 4096x2160 dur=4s score=1.000 ← SELECTED
-  Candidate 2: id=4332083 4096x2160 dur=6s score=0.900
-  Candidate 3: id=4326984 4096x2160 dur=7s score=0.850
-  Candidate 4: id=4571364 4096x2160 dur=7s score=0.850
-  Candidate 5: id=35763061 3840x2160 dur=5s score=0.750
-  Candidate 6: id=4332084 4096x2160 dur=20s score=0.600
-  Candidate 7: id=4332085 4096x2160 dur=17s score=0.600
-  Candidate 8: id=8906187 1920x1080 dur=25s score=0.600
-  Candidate 9: id=31873891 3840x2160 dur=14s score=0.400
-  Candidate 10: id=27941815 3840x2160 dur=82s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'blue whale swimming primary shot' -> cache/video/scene_4_b0_s0.mp4
--> Pixabay Cache MISS: 'blue whale dorsal fin primary shot' — calling Pixabay API
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Cache MISS: 'whale swimming deep' — calling Pexels API
-  Candidate 1: id=15546563 3840x2160 dur=50s score=0.600 ← SELECTED
-  Candidate 2: id=10377082 1920x1080 dur=37s score=0.600
-  Candidate 3: id=5607993 1920x1080 dur=21s score=0.600
-  Candidate 4: id=10377084 1920x1080 dur=29s score=0.600
-  Candidate 5: id=6510690 1920x1080 dur=15s score=0.600
-  Candidate 6: id=10377449 1920x1080 dur=29s score=0.600
-  Candidate 7: id=8906187 1920x1080 dur=25s score=0.600
-  Candidate 8: id=20601591 3840x2160 dur=16s score=0.600
-  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
-  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Pixabay Cache MISS: 'whale swimming deep' — calling Pixabay API
-  Pixabay Candidate 1: id=244188 3840x2160 dur=8s score=0.800 ← SELECTED
-  Pixabay Candidate 2: id=18390 3840x2160 dur=11s score=0.650
-  Pixabay Candidate 3: id=117702 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 4: id=293788 3840x2160 dur=13s score=0.600
-  Pixabay Candidate 5: id=27547 1920x1080 dur=23s score=0.600
-  Pixabay Candidate 6: id=206783 3840x2160 dur=48s score=0.600
-  Pixabay Candidate 7: id=13441 3840x2160 dur=27s score=0.600
-  Pixabay Candidate 8: id=6681 1920x1080 dur=24s score=0.600
-  Pixabay Candidate 9: id=7093 1920x1080 dur=30s score=0.600
-  Pixabay Candidate 10: id=206772 3840x2160 dur=28s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'blue whale swimming primary shot' -> cache/video/scene_4_b0_s0.mp4
--> Wikimedia Cache MISS: 'blue whale dorsal fin primary shot' — calling Wikimedia API
-  Wikimedia Candidate 1: id=91670509 1010x1562
-  Wikimedia Candidate 2: id=92107933 1008x1647
-  Wikimedia Candidate 3: id=92233082 760x1245
-  Wikimedia Candidate 4: id=92435032 800x1272
-  Wikimedia Candidate 5: id=92435043 804x1250
--> Router selected: 'wikimedia' for query 'blue whale dorsal fin primary shot'
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Cache MISS: 'whale swimming deep' — calling Pexels API
-  Candidate 1: id=15546563 3840x2160 dur=50s score=0.600 ← SELECTED
-  Candidate 2: id=10377082 1920x1080 dur=37s score=0.600
-  Candidate 3: id=5607993 1920x1080 dur=21s score=0.600
-  Candidate 4: id=10377084 1920x1080 dur=29s score=0.600
-  Candidate 5: id=6510690 1920x1080 dur=15s score=0.600
-  Candidate 6: id=10377449 1920x1080 dur=29s score=0.600
-  Candidate 7: id=8906187 1920x1080 dur=25s score=0.600
-  Candidate 8: id=20601591 3840x2160 dur=16s score=0.600
-  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
-  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Pixabay Cache MISS: 'whale swimming deep' — calling Pixabay API
-  Pixabay Candidate 1: id=275007 3840x2160 dur=6s score=0.900 ← SELECTED
-  Pixabay Candidate 2: id=35427 1920x1080 dur=6s score=0.900
-  Pixabay Candidate 3: id=13823 1920x1080 dur=8s score=0.800
-  Pixabay Candidate 4: id=244188 3840x2160 dur=8s score=0.800
-  Pixabay Candidate 5: id=117702 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 6: id=37712 1920x1080 dur=27s score=0.600
-  Pixabay Candidate 7: id=26572 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 8: id=312 1920x1080 dur=35s score=0.600
-  Pixabay Candidate 9: id=345377 3840x2160 dur=49s score=0.600
-  Pixabay Candidate 10: id=39393 3840x2160 dur=56s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Wikimedia Cache MISS: 'whale swimming deep' — calling Wikimedia API
--> Wikimedia API rate limited, retry 1 in 3s...
--> Wikimedia API rate limited, retry 2 in 6s...
-  Pixabay Candidate 1: id=275007 3840x2160 dur=6s score=0.923 ← SELECTED
-  Pixabay Candidate 2: id=35427 1920x1080 dur=6s score=0.923
-  Pixabay Candidate 3: id=13823 1920x1080 dur=8s score=0.831
-  Pixabay Candidate 4: id=244188 3840x2160 dur=8s score=0.831
-  Pixabay Candidate 5: id=117702 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 6: id=37712 1920x1080 dur=27s score=0.600
-  Pixabay Candidate 7: id=26572 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 8: id=312 1920x1080 dur=35s score=0.600
-  Pixabay Candidate 9: id=345377 3840x2160 dur=49s score=0.600
-  Pixabay Candidate 10: id=39393 3840x2160 dur=56s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Wikimedia Cache MISS: 'whale swimming deep' — calling Wikimedia API
--> Wikimedia API rate limited, retry 1 in 3s...
--> Wikimedia API rate limited, retry 3 in 9s...
--> Wikimedia API rate limited, retry 2 in 6s...
-  Pixabay Candidate 1: id=275007 3840x2160 dur=6s score=0.900 ← SELECTED
-  Pixabay Candidate 2: id=35427 1920x1080 dur=6s score=0.900
-  Pixabay Candidate 3: id=13823 1920x1080 dur=8s score=0.800
-  Pixabay Candidate 4: id=244188 3840x2160 dur=8s score=0.800
-  Pixabay Candidate 5: id=117702 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 6: id=37712 1920x1080 dur=27s score=0.600
-  Pixabay Candidate 7: id=26572 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 8: id=312 1920x1080 dur=35s score=0.600
-  Pixabay Candidate 9: id=345377 3840x2160 dur=49s score=0.600
-  Pixabay Candidate 10: id=39393 3840x2160 dur=56s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Wikimedia Cache MISS: 'whale swimming deep' — calling Wikimedia API
--> Wikimedia API rate limited, retry 1 in 3s...
--> Wikimedia API rate limited, retry 2 in 6s...
--> Wikimedia API rate limited, retry 3 in 9s...
--> Wikimedia API request failed: Expecting value: line 1 column 1 (char 0)
--> Router: all providers exhausted for 'whale swimming deep' — returning empty
--> AssetLibrary EVICT (below 1920x1080 floor): 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' -> cache/video/scene_3_b0_s0.mp4
--> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
--> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
--> Cache MISS: 'ship hull rusty primary shot' — calling Pexels API
-  Candidate 1: id=16672736 1920x1080 dur=4s score=1.000 ← SELECTED
-  Candidate 2: id=11644836 1920x1080 dur=9s score=0.750
-  Candidate 3: id=16089171 3840x2160 dur=30s score=0.600
-  Candidate 4: id=11634794 1920x1080 dur=54s score=0.600
-  Candidate 5: id=10194437 1920x1080 dur=22s score=0.600
-  Candidate 6: id=13076550 3840x2160 dur=35s score=0.600
-  Candidate 7: id=14637126 1920x1080 dur=23s score=0.600
-  Candidate 8: id=38415765 3840x2160 dur=11s score=0.450
-  Candidate 9: id=35872096 3840x2160 dur=30s score=0.400
-  Candidate 10: id=33256979 3840x2160 dur=18s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> Pixabay Cache MISS: 'ship hull rusty primary shot' — calling Pixabay API
-  Wikimedia Candidate 1: id=59326000 716x1089
-  Wikimedia Candidate 2: id=91793954 1027x1687
-  Wikimedia Candidate 3: id=92515049 779x1237
-  Wikimedia Candidate 4: id=95900299 662x1064
-  Wikimedia Candidate 5: id=98214895 770x1170
--> Router selected: 'wikimedia' for query 'whale swimming deep'
--> AssetLibrary EVICT (below 1920x1080 floor): 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' -> cache/video/scene_3_b0_s0.mp4
--> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
--> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
--> AssetLibrary REUSE: 'Pacific Ocean waves primary shot' similar to 'ocean waves dark primary shot' -> cache/video/scene_9_b1_s0.mp4
--> Router selected: 'pexels' for query 'Pacific Ocean waves primary shot'
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Cache MISS: 'whale swimming deep' — calling Pexels API
-  Candidate 1: id=15546563 3840x2160 dur=50s score=0.600 ← SELECTED
-  Candidate 2: id=10377082 1920x1080 dur=37s score=0.600
-  Candidate 3: id=5607993 1920x1080 dur=21s score=0.600
-  Candidate 4: id=10377084 1920x1080 dur=29s score=0.600
-  Candidate 5: id=6510690 1920x1080 dur=15s score=0.600
-  Candidate 6: id=10377449 1920x1080 dur=29s score=0.600
-  Candidate 7: id=8906187 1920x1080 dur=25s score=0.600
-  Candidate 8: id=20601591 3840x2160 dur=16s score=0.600
-  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
-  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Pixabay Cache MISS: 'whale swimming deep' — calling Pixabay API
-  Wikimedia Candidate 1: id=59326000 716x1089
-  Wikimedia Candidate 2: id=91793954 1027x1687
-  Wikimedia Candidate 3: id=92515049 779x1237
-  Wikimedia Candidate 4: id=95900299 662x1064
-  Wikimedia Candidate 5: id=98214895 770x1170
--> Router selected: 'wikimedia' for query 'whale swimming deep'
--> AssetLibrary EVICT (below 1920x1080 floor): 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' -> cache/video/scene_3_b0_s0.mp4
--> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
--> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
--> Cache MISS: 'ship deck radio primary shot' — calling Pexels API
-  Candidate 1: id=29844352 1920x1080 dur=5s score=0.769 ← SELECTED
-  Candidate 2: id=4571529 1920x1080 dur=12s score=0.646
-  Candidate 3: id=26728856 1920x1080 dur=8s score=0.630
-  Candidate 4: id=20142904 3840x2160 dur=16s score=0.600
-  Candidate 5: id=6651688 1920x1080 dur=121s score=0.600
-  Candidate 6: id=13752447 1920x1080 dur=30s score=0.600
-  Candidate 7: id=4571674 1920x1080 dur=13s score=0.600
-  Candidate 8: id=29541412 3840x2160 dur=113s score=0.400
-  Candidate 9: id=37457234 3840x2160 dur=20s score=0.400
-  Candidate 10: id=37293049 3840x2160 dur=18s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> Pixabay Cache MISS: 'ship deck radio primary shot' — calling Pixabay API
-  Pixabay Candidate 1: id=18390 3840x2160 dur=11s score=0.650 ← SELECTED
-  Pixabay Candidate 2: id=3713 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 3: id=10715 1920x1080 dur=58s score=0.600
-  Pixabay Candidate 4: id=140730 1920x1080 dur=15s score=0.600
-  Pixabay Candidate 5: id=2849 1920x1080 dur=76s score=0.600
-  Pixabay Candidate 6: id=23544 3840x2160 dur=32s score=0.600
-  Pixabay Candidate 7: id=110247 3840x2160 dur=12s score=0.600
-  Pixabay Candidate 8: id=33014 3840x2160 dur=18s score=0.600
-  Pixabay Candidate 9: id=236893 3840x2160 dur=23s score=0.600
-  Pixabay Candidate 10: id=39331 1920x1080 dur=16s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> Wikimedia Cache MISS: 'ship hull rusty primary shot' — calling Wikimedia API
-  Wikimedia Candidate 1: id=92515838 733x1158
-  Wikimedia Candidate 2: id=93541304 925x1514
-  Wikimedia Candidate 3: id=94758221 1279x1460
-  Wikimedia Candidate 4: id=95249290 847x1262
-  Wikimedia Candidate 5: id=95924842 754x1175
--> Router selected: 'wikimedia' for query 'ship hull rusty primary shot'
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Cache MISS: 'whale swimming deep' — calling Pexels API
-  Candidate 1: id=15546563 3840x2160 dur=50s score=0.600 ← SELECTED
-  Candidate 2: id=10377082 1920x1080 dur=37s score=0.600
-  Candidate 3: id=5607993 1920x1080 dur=21s score=0.600
-  Candidate 4: id=10377084 1920x1080 dur=29s score=0.600
-  Candidate 5: id=6510690 1920x1080 dur=15s score=0.600
-  Candidate 6: id=10377449 1920x1080 dur=29s score=0.600
-  Candidate 7: id=8906187 1920x1080 dur=25s score=0.600
-  Candidate 8: id=20601591 3840x2160 dur=16s score=0.600
-  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
-  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Pixabay Cache MISS: 'whale swimming deep' — calling Pixabay API
-  Pixabay Candidate 1: id=18390 3840x2160 dur=11s score=0.692 ← SELECTED
-  Pixabay Candidate 2: id=234409 3840x2160 dur=12s score=0.646
-  Pixabay Candidate 3: id=110247 3840x2160 dur=12s score=0.646
-  Pixabay Candidate 4: id=184009 3840x2160 dur=12s score=0.646
-  Pixabay Candidate 5: id=3713 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 6: id=32231 1920x1080 dur=31s score=0.600
-  Pixabay Candidate 7: id=10715 1920x1080 dur=58s score=0.600
-  Pixabay Candidate 8: id=140730 1920x1080 dur=15s score=0.600
-  Pixabay Candidate 9: id=2849 1920x1080 dur=76s score=0.600
-  Pixabay Candidate 10: id=23544 3840x2160 dur=32s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> Wikimedia Cache MISS: 'ship deck radio primary shot' — calling Wikimedia API
-  Wikimedia Candidate 1: id=91655211 1275x1645
-  Wikimedia Candidate 2: id=92249151 1275x1650
-  Wikimedia Candidate 3: id=92325312 1183x1600
-  Wikimedia Candidate 4: id=92328406 1275x1650
-  Wikimedia Candidate 5: id=92328449 1275x1650
--> Router selected: 'wikimedia' for query 'ship deck radio primary shot'
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Cache MISS: 'whale swimming deep' — calling Pexels API
-  Candidate 1: id=15546563 3840x2160 dur=50s score=0.600 ← SELECTED
-  Candidate 2: id=10377082 1920x1080 dur=37s score=0.600
-  Candidate 3: id=5607993 1920x1080 dur=21s score=0.600
-  Candidate 4: id=10377084 1920x1080 dur=29s score=0.600
-  Candidate 5: id=6510690 1920x1080 dur=15s score=0.600
-  Candidate 6: id=10377449 1920x1080 dur=29s score=0.600
-  Candidate 7: id=8906187 1920x1080 dur=25s score=0.600
-  Candidate 8: id=20601591 3840x2160 dur=16s score=0.600
-  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
-  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Pixabay Cache MISS: 'whale swimming deep' — calling Pixabay API
-  Pixabay Candidate 1: id=275007 3840x2160 dur=6s score=0.900 ← SELECTED
-  Pixabay Candidate 2: id=35427 1920x1080 dur=6s score=0.900
-  Pixabay Candidate 3: id=13823 1920x1080 dur=8s score=0.800
-  Pixabay Candidate 4: id=244188 3840x2160 dur=8s score=0.800
-  Pixabay Candidate 5: id=117702 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 6: id=37712 1920x1080 dur=27s score=0.600
-  Pixabay Candidate 7: id=26572 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 8: id=312 1920x1080 dur=35s score=0.600
-  Pixabay Candidate 9: id=345377 3840x2160 dur=49s score=0.600
-  Pixabay Candidate 10: id=39393 3840x2160 dur=56s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Wikimedia Cache MISS: 'whale swimming deep' — calling Wikimedia API
-  Pixabay Candidate 1: id=275007 3840x2160 dur=6s score=0.923 ← SELECTED
-  Pixabay Candidate 2: id=35427 1920x1080 dur=6s score=0.923
-  Pixabay Candidate 3: id=13823 1920x1080 dur=8s score=0.831
-  Pixabay Candidate 4: id=244188 3840x2160 dur=8s score=0.831
-  Pixabay Candidate 5: id=117702 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 6: id=37712 1920x1080 dur=27s score=0.600
-  Pixabay Candidate 7: id=26572 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 8: id=312 1920x1080 dur=35s score=0.600
-  Pixabay Candidate 9: id=345377 3840x2160 dur=49s score=0.600
-  Pixabay Candidate 10: id=39393 3840x2160 dur=56s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Wikimedia Cache MISS: 'whale swimming deep' — calling Wikimedia API
--> Wikimedia image info rate limited, retry 1 in 3s...
--> Wikimedia image info rate limited, retry 1 in 3s...
--> Wikimedia image info rate limited, retry 2 in 6s...
--> Wikimedia image info rate limited, retry 2 in 6s...
-  Pixabay Candidate 1: id=275007 3840x2160 dur=6s score=0.900 ← SELECTED
-  Pixabay Candidate 2: id=35427 1920x1080 dur=6s score=0.900
-  Pixabay Candidate 3: id=13823 1920x1080 dur=8s score=0.800
-  Pixabay Candidate 4: id=244188 3840x2160 dur=8s score=0.800
-  Pixabay Candidate 5: id=117702 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 6: id=37712 1920x1080 dur=27s score=0.600
-  Pixabay Candidate 7: id=26572 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 8: id=312 1920x1080 dur=35s score=0.600
-  Pixabay Candidate 9: id=345377 3840x2160 dur=49s score=0.600
-  Pixabay Candidate 10: id=39393 3840x2160 dur=56s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Wikimedia Cache MISS: 'whale swimming deep' — calling Wikimedia API
--> Wikimedia API rate limited, retry 1 in 3s...
--> Wikimedia API rate limited, retry 2 in 6s...
--> Wikimedia image info rate limited, retry 3 in 9s...
--> Wikimedia image info rate limited, retry 3 in 9s...
--> Wikimedia API rate limited, retry 3 in 9s...
--> Wikimedia image info request failed: Expecting value: line 1 column 1 (char 0)
--> Router: all providers exhausted for 'whale swimming deep' — returning empty
--> AssetLibrary EVICT (below 1920x1080 floor): 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' -> cache/video/scene_3_b0_s0.mp4
--> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
--> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
--> Wikimedia image info request failed: Expecting value: line 1 column 1 (char 0)
--> Router: all providers exhausted for 'whale swimming deep' — returning empty
--> AssetLibrary EVICT (below 1920x1080 floor): 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' -> cache/video/scene_3_b0_s0.mp4
--> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
--> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
--> Cache MISS: 'marine biologist analyzing data primary shot' — calling Pexels API
-  Candidate 1: id=8512857 3840x2160 dur=10s score=0.700 ← SELECTED
-  Candidate 2: id=7687653 3840x2160 dur=11s score=0.650
-  Candidate 3: id=7687789 3840x2160 dur=11s score=0.650
-  Candidate 4: id=3195707 3840x2160 dur=15s score=0.600
-  Candidate 5: id=3196222 3840x2160 dur=13s score=0.600
-  Candidate 6: id=38461227 1920x1080 dur=8s score=0.600
-  Candidate 7: id=7580275 4096x2160 dur=13s score=0.600
-  Candidate 8: id=34331848 3840x2160 dur=9s score=0.550
-  Candidate 9: id=32643318 3840x2160 dur=14s score=0.400
-  Candidate 10: id=33818383 3840x2160 dur=14s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> Pixabay Cache MISS: 'marine biologist analyzing data primary shot' — calling Pixabay API
-  Pixabay Candidate 1: id=24265 1920x1080 dur=6s score=0.900 ← SELECTED
-  Pixabay Candidate 2: id=110877 1920x1080 dur=9s score=0.750
-  Pixabay Candidate 3: id=18390 3840x2160 dur=11s score=0.650
-  Pixabay Candidate 4: id=2176 1920x1080 dur=30s score=0.600
-  Pixabay Candidate 5: id=244754 2560x1440 dur=30s score=0.600
-  Pixabay Candidate 6: id=7529 1920x1080 dur=46s score=0.600
-  Pixabay Candidate 7: id=10480 1920x1080 dur=112s score=0.600
-  Pixabay Candidate 8: id=14900 3840x2160 dur=24s score=0.600
-  Pixabay Candidate 9: id=10835 1920x1080 dur=12s score=0.600
-  Pixabay Candidate 10: id=847 1920x1080 dur=30s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> Wikimedia Cache MISS: 'marine biologist analyzing data primary shot' — calling Wikimedia API
--> Wikimedia API rate limited, retry 1 in 3s...
--> Wikimedia API rate limited, retry 2 in 6s...
--> Wikimedia API request failed: Expecting value: line 1 column 1 (char 0)
--> Router: all providers exhausted for 'whale swimming deep' — returning empty
--> AssetLibrary EVICT (below 1920x1080 floor): 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' -> cache/video/scene_3_b0_s0.mp4
--> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
--> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
--> Wikimedia API rate limited, retry 3 in 9s...
-
-  [BeatDirector] Planning beats for scene 4...
-  [BeatDirector] Concept terms (10): ['whale swimming deep', 'ocean surface waves', 'blue whale call', 'underwater hydrophone recording']...
-  [BeatDirector] 3 beats, 3 shots
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep primary shot' -> cache/video/scene_1_b0_s0.mp4
--> Cache MISS: 'whale swimming deep primary shot' — calling Pexels API
-  Candidate 1: id=5608046 1920x1080 dur=8s score=0.831 ← SELECTED
-  Candidate 2: id=10377082 1920x1080 dur=37s score=0.600
-  Candidate 3: id=15546563 3840x2160 dur=50s score=0.600
-  Candidate 4: id=5607993 1920x1080 dur=21s score=0.600
-  Candidate 5: id=10377084 1920x1080 dur=29s score=0.600
-  Candidate 6: id=8906187 1920x1080 dur=25s score=0.600
-  Candidate 7: id=10377449 1920x1080 dur=29s score=0.600
-  Candidate 8: id=20601591 3840x2160 dur=16s score=0.600
-  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
-  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep primary shot' -> cache/video/scene_1_b0_s0.mp4
--> Pixabay Cache MISS: 'whale swimming deep primary shot' — calling Pixabay API
-  Pixabay Candidate 1: id=35427 1920x1080 dur=6s score=0.923 ← SELECTED
-  Pixabay Candidate 2: id=13823 1920x1080 dur=8s score=0.831
-  Pixabay Candidate 3: id=244188 3840x2160 dur=8s score=0.831
-  Pixabay Candidate 4: id=18390 3840x2160 dur=11s score=0.692
-  Pixabay Candidate 5: id=117702 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 6: id=37712 1920x1080 dur=27s score=0.600
-  Pixabay Candidate 7: id=26572 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 8: id=312 1920x1080 dur=35s score=0.600
-  Pixabay Candidate 9: id=345377 3840x2160 dur=49s score=0.600
-  Pixabay Candidate 10: id=39393 3840x2160 dur=56s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep primary shot' -> cache/video/scene_1_b0_s0.mp4
--> Wikimedia Cache MISS: 'whale swimming deep primary shot' — calling Wikimedia API
--> Wikimedia API rate limited, retry 1 in 3s...
-  Wikimedia Candidate 1: id=91435071 1275x1650
-  Wikimedia Candidate 2: id=91554563 895x1347
-  Wikimedia Candidate 3: id=91601083 635x831
-  Wikimedia Candidate 4: id=98881366 943x1377
-  Wikimedia Candidate 5: id=99358769 1275x1650
--> Router selected: 'wikimedia' for query 'marine biologist analyzing data primary shot'
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Cache MISS: 'whale swimming deep' — calling Pexels API
-  Candidate 1: id=15546563 3840x2160 dur=50s score=0.600 ← SELECTED
-  Candidate 2: id=10377082 1920x1080 dur=37s score=0.600
-  Candidate 3: id=5607993 1920x1080 dur=21s score=0.600
-  Candidate 4: id=10377084 1920x1080 dur=29s score=0.600
-  Candidate 5: id=6510690 1920x1080 dur=15s score=0.600
-  Candidate 6: id=10377449 1920x1080 dur=29s score=0.600
-  Candidate 7: id=8906187 1920x1080 dur=25s score=0.600
-  Candidate 8: id=20601591 3840x2160 dur=16s score=0.600
-  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
-  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Pixabay Cache MISS: 'whale swimming deep' — calling Pixabay API
-  Pixabay Candidate 1: id=275007 3840x2160 dur=6s score=0.900 ← SELECTED
-  Pixabay Candidate 2: id=35427 1920x1080 dur=6s score=0.900
-  Pixabay Candidate 3: id=13823 1920x1080 dur=8s score=0.800
-  Pixabay Candidate 4: id=244188 3840x2160 dur=8s score=0.800
-  Pixabay Candidate 5: id=117702 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 6: id=37712 1920x1080 dur=27s score=0.600
-  Pixabay Candidate 7: id=26572 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 8: id=312 1920x1080 dur=35s score=0.600
-  Pixabay Candidate 9: id=345377 3840x2160 dur=49s score=0.600
-  Pixabay Candidate 10: id=39393 3840x2160 dur=56s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Wikimedia Cache MISS: 'whale swimming deep' — calling Wikimedia API
-  Wikimedia Candidate 1: id=91987192 812x1306
-  Wikimedia Candidate 2: id=92304344 735x1162
-  Wikimedia Candidate 3: id=94852483 514x804
-  Wikimedia Candidate 4: id=95835691 572x954
-  Wikimedia Candidate 5: id=95874353 727x1093
--> Router selected: 'wikimedia' for query 'whale swimming deep primary shot'
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Cache MISS: 'whale swimming deep' — calling Pexels API
-  Candidate 1: id=15546563 3840x2160 dur=50s score=0.600 ← SELECTED
-  Candidate 2: id=10377082 1920x1080 dur=37s score=0.600
-  Candidate 3: id=5607993 1920x1080 dur=21s score=0.600
-  Candidate 4: id=10377084 1920x1080 dur=29s score=0.600
-  Candidate 5: id=6510690 1920x1080 dur=15s score=0.600
-  Candidate 6: id=10377449 1920x1080 dur=29s score=0.600
-  Candidate 7: id=8906187 1920x1080 dur=25s score=0.600
-  Candidate 8: id=20601591 3840x2160 dur=16s score=0.600
-  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
-  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Pixabay Cache MISS: 'whale swimming deep' — calling Pixabay API
-  Wikimedia Candidate 1: id=59326000 716x1089
-  Wikimedia Candidate 2: id=91793954 1027x1687
-  Wikimedia Candidate 3: id=92515049 779x1237
-  Wikimedia Candidate 4: id=95900299 662x1064
-  Wikimedia Candidate 5: id=98214895 770x1170
--> Router selected: 'wikimedia' for query 'whale swimming deep'
--> AssetLibrary EVICT (below 1920x1080 floor): 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' -> cache/video/scene_3_b0_s0.mp4
--> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
--> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
-
-  [BeatDirector] Planning beats for scene 5...
-  [BeatDirector] Concept terms (10): ['whale swimming open ocean', 'North Pacific waves horizon', 'whale tail splash', 'ocean surface time-lapse']...
-  [BeatDirector] 3 beats, 3 shots
--> AssetLibrary EVICT (below 1920x1080 floor): 'blue whale swimming primary shot' -> cache/video/scene_4_b0_s0.mp4
--> Cache MISS: 'whale swimming open ocean primary shot' — calling Pexels API
-  Candidate 1: id=4571364 4096x2160 dur=7s score=0.877 ← SELECTED
-  Candidate 2: id=5608046 1920x1080 dur=8s score=0.831
-  Candidate 3: id=4332085 4096x2160 dur=17s score=0.600
-  Candidate 4: id=15546563 3840x2160 dur=50s score=0.600
-  Candidate 5: id=12306699 3840x2160 dur=18s score=0.600
-  Candidate 6: id=6625561 3840x2160 dur=30s score=0.600
-  Candidate 7: id=27941813 3840x2160 dur=31s score=0.400
-  Candidate 8: id=28097890 3840x2160 dur=90s score=0.400
-  Candidate 9: id=27941815 3840x2160 dur=82s score=0.400
-  Candidate 10: id=26245637 3840x2160 dur=16s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'blue whale swimming primary shot' -> cache/video/scene_4_b0_s0.mp4
--> Pixabay Cache MISS: 'whale swimming open ocean primary shot' — calling Pixabay API
-  Pixabay Candidate 1: id=35427 1920x1080 dur=6s score=0.923 ← SELECTED
-  Pixabay Candidate 2: id=244188 3840x2160 dur=8s score=0.831
-  Pixabay Candidate 3: id=18390 3840x2160 dur=11s score=0.692
-  Pixabay Candidate 4: id=10835 1920x1080 dur=12s score=0.646
-  Pixabay Candidate 5: id=117702 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 6: id=345377 3840x2160 dur=49s score=0.600
-  Pixabay Candidate 7: id=293788 3840x2160 dur=13s score=0.600
-  Pixabay Candidate 8: id=10480 1920x1080 dur=112s score=0.600
-  Pixabay Candidate 9: id=134822 4096x2160 dur=59s score=0.600
-  Pixabay Candidate 10: id=37712 1920x1080 dur=27s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'blue whale swimming primary shot' -> cache/video/scene_4_b0_s0.mp4
--> Wikimedia Cache MISS: 'whale swimming open ocean primary shot' — calling Wikimedia API
--> Wikimedia image info rate limited, retry 1 in 3s...
--> Wikimedia image info rate limited, retry 2 in 6s...
--> Wikimedia image info rate limited, retry 3 in 9s...
--> Wikimedia image info request failed: Expecting value: line 1 column 1 (char 0)
--> Router: all providers exhausted for 'whale swimming open ocean primary shot' — returning empty
--> Cache MISS: 'whale swimming open ocean' — calling Pexels API
-  Candidate 1: id=5608046 1920x1080 dur=8s score=0.831 ← SELECTED
-  Candidate 2: id=4332085 4096x2160 dur=17s score=0.600
-  Candidate 3: id=6625561 3840x2160 dur=30s score=0.600
-  Candidate 4: id=15546563 3840x2160 dur=50s score=0.600
-  Candidate 5: id=10377082 1920x1080 dur=37s score=0.600
-  Candidate 6: id=14146687 3840x2160 dur=129s score=0.600
-  Candidate 7: id=28097890 3840x2160 dur=90s score=0.400
-  Candidate 8: id=27941813 3840x2160 dur=31s score=0.400
-  Candidate 9: id=28097887 3840x2160 dur=57s score=0.400
-  Candidate 10: id=26245637 3840x2160 dur=16s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> Pixabay Cache MISS: 'whale swimming open ocean' — calling Pixabay API
-  Pixabay Candidate 1: id=35427 1920x1080 dur=6s score=0.923 ← SELECTED
-  Pixabay Candidate 2: id=244188 3840x2160 dur=8s score=0.831
-  Pixabay Candidate 3: id=134264 3840x2160 dur=11s score=0.692
-  Pixabay Candidate 4: id=10835 1920x1080 dur=12s score=0.646
-  Pixabay Candidate 5: id=117702 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 6: id=345377 3840x2160 dur=49s score=0.600
-  Pixabay Candidate 7: id=10480 1920x1080 dur=112s score=0.600
-  Pixabay Candidate 8: id=134822 4096x2160 dur=59s score=0.600
-  Pixabay Candidate 9: id=37712 1920x1080 dur=27s score=0.600
-  Pixabay Candidate 10: id=364463 3840x2160 dur=21s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> Wikimedia Cache MISS: 'whale swimming open ocean' — calling Wikimedia API
--> Wikimedia API rate limited, retry 1 in 3s...
-
-  [BeatDirector] Planning beats for scene 6...
-  [BeatDirector] Concept terms (10): ['whale tail underwater', 'ocean hydrophone equipment', 'deep sea sonar screen', 'whale dorsal fin']...
-  [BeatDirector] 1 beats, 2 shots
--> AssetLibrary EVICT (below 1920x1080 floor): 'blue whale underwater primary shot' -> cache/video/scene_1_b0_s0.mp4
--> Cache MISS: 'whale tail underwater primary shot' — calling Pexels API
-  Pixabay Candidate 1: id=275007 3840x2160 dur=6s score=0.923 ← SELECTED
-  Pixabay Candidate 2: id=35427 1920x1080 dur=6s score=0.923
-  Pixabay Candidate 3: id=13823 1920x1080 dur=8s score=0.831
-  Pixabay Candidate 4: id=244188 3840x2160 dur=8s score=0.831
-  Pixabay Candidate 5: id=117702 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 6: id=37712 1920x1080 dur=27s score=0.600
-  Pixabay Candidate 7: id=26572 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 8: id=312 1920x1080 dur=35s score=0.600
-  Pixabay Candidate 9: id=345377 3840x2160 dur=49s score=0.600
-  Pixabay Candidate 10: id=39393 3840x2160 dur=56s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Wikimedia Cache MISS: 'whale swimming deep' — calling Wikimedia API
-  Candidate 1: id=4332083 4096x2160 dur=6s score=0.940 ← SELECTED
-  Candidate 2: id=4332086 4096x2160 dur=4s score=0.693
-  Candidate 3: id=5607993 1920x1080 dur=21s score=0.600
-  Candidate 4: id=10377082 1920x1080 dur=37s score=0.600
-  Candidate 5: id=7102652 1920x1080 dur=28s score=0.600
-  Candidate 6: id=10377084 1920x1080 dur=29s score=0.600
-  Candidate 7: id=1669815 1920x1080 dur=24s score=0.600
-  Candidate 8: id=28097890 3840x2160 dur=90s score=0.400
-  Candidate 9: id=4520420 1920x1012 dur=3s score=0.000
-  Candidate 10: id=4520422 1920x1012 dur=3s score=0.000
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'blue whale underwater primary shot' -> cache/video/scene_1_b0_s0.mp4
--> Pixabay Cache MISS: 'whale tail underwater primary shot' — calling Pixabay API
--> Wikimedia API rate limited, retry 1 in 3s...
-  Pixabay Candidate 1: id=16166 1920x1080 dur=8s score=0.954 ← SELECTED
-  Pixabay Candidate 2: id=244188 3840x2160 dur=8s score=0.954
-  Pixabay Candidate 3: id=24265 1920x1080 dur=6s score=0.940
-  Pixabay Candidate 4: id=110877 1920x1080 dur=9s score=0.923
-  Pixabay Candidate 5: id=18390 3840x2160 dur=11s score=0.861
-  Pixabay Candidate 6: id=26818 3840x2160 dur=16s score=0.707
-  Pixabay Candidate 7: id=117702 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 8: id=37712 1920x1080 dur=27s score=0.600
-  Pixabay Candidate 9: id=110879 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 10: id=244754 2560x1440 dur=30s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'blue whale underwater primary shot' -> cache/video/scene_1_b0_s0.mp4
--> Wikimedia Cache MISS: 'whale tail underwater primary shot' — calling Wikimedia API
--> Wikimedia API rate limited, retry 2 in 6s...
--> Wikimedia API rate limited, retry 1 in 3s...
--> Wikimedia API rate limited, retry 2 in 6s...
--> Wikimedia API rate limited, retry 2 in 6s...
--> Wikimedia API rate limited, retry 3 in 9s...
--> Wikimedia API rate limited, retry 3 in 9s...
--> Wikimedia API rate limited, retry 3 in 9s...
--> Wikimedia API request failed: Expecting value: line 1 column 1 (char 0)
--> Router: all providers exhausted for 'whale swimming open ocean' — returning empty
--> AssetLibrary EVICT (below 1920x1080 floor): 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' -> cache/video/scene_3_b0_s0.mp4
--> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
--> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
--> AssetLibrary EVICT (below 1920x1080 floor): 'pacific ocean horizon primary shot' -> cache/video/scene_4_b4_s0.mp4
--> Cache MISS: 'North Pacific waves horizon primary shot' — calling Pexels API
-  Candidate 1: id=5285733 1920x1080 dur=5s score=0.969 ← SELECTED
-  Candidate 2: id=1093659 3840x2160 dur=12s score=0.646
-  Candidate 3: id=14274844 3840x2160 dur=15s score=0.600
-  Candidate 4: id=3989834 3840x2160 dur=31s score=0.600
-  Candidate 5: id=38075567 3840x2160 dur=10s score=0.538
-  Candidate 6: id=30134972 3840x2160 dur=11s score=0.492
-  Candidate 7: id=32226037 3840x2160 dur=20s score=0.400
-  Candidate 8: id=34780895 3840x2160 dur=107s score=0.400
-  Candidate 9: id=38802575 1920x1080 dur=49s score=0.400
-  Candidate 10: id=30155318 3840x2160 dur=36s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'pacific ocean horizon primary shot' -> cache/video/scene_4_b4_s0.mp4
--> Pixabay Cache MISS: 'North Pacific waves horizon primary shot' — calling Pixabay API
--> Wikimedia API request failed: Expecting value: line 1 column 1 (char 0)
--> Router: all providers exhausted for 'whale swimming deep' — returning empty
--> AssetLibrary EVICT (below 1920x1080 floor): 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' -> cache/video/scene_3_b0_s0.mp4
--> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
--> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
--> AssetLibrary REUSE: 'ocean surface waves primary shot' similar to 'ocean waves dark primary shot' -> cache/video/scene_9_b1_s0.mp4
--> Router selected: 'pexels' for query 'ocean surface waves primary shot'
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Cache MISS: 'whale swimming deep' — calling Pexels API
-  Candidate 1: id=15546563 3840x2160 dur=50s score=0.600 ← SELECTED
-  Candidate 2: id=10377082 1920x1080 dur=37s score=0.600
-  Candidate 3: id=5607993 1920x1080 dur=21s score=0.600
-  Candidate 4: id=10377084 1920x1080 dur=29s score=0.600
-  Candidate 5: id=6510690 1920x1080 dur=15s score=0.600
-  Candidate 6: id=10377449 1920x1080 dur=29s score=0.600
-  Candidate 7: id=8906187 1920x1080 dur=25s score=0.600
-  Candidate 8: id=20601591 3840x2160 dur=16s score=0.600
-  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
-  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Pixabay Cache MISS: 'whale swimming deep' — calling Pixabay API
--> Wikimedia API request failed: Expecting value: line 1 column 1 (char 0)
--> Router: all providers exhausted for 'whale tail underwater primary shot' — returning empty
--> AssetLibrary EVICT (below 1920x1080 floor): 'blue whale underwater' -> cache/video/scene_1_b3_s0.mp4
--> Cache MISS: 'whale tail underwater' — calling Pexels API
-  Candidate 1: id=11279748 1920x1080 dur=7s score=0.984 ← SELECTED
-  Candidate 2: id=17036401 3840x2160 dur=14s score=0.769
-  Candidate 3: id=10377082 1920x1080 dur=37s score=0.600
-  Candidate 4: id=6625561 3840x2160 dur=30s score=0.600
-  Candidate 5: id=10377084 1920x1080 dur=29s score=0.600
-  Candidate 6: id=1669815 1920x1080 dur=24s score=0.600
-  Candidate 7: id=28097890 3840x2160 dur=90s score=0.400
-  Candidate 8: id=28097887 3840x2160 dur=57s score=0.400
-  Candidate 9: id=4520420 1920x1012 dur=3s score=0.000
-  Candidate 10: id=4520422 1920x1012 dur=3s score=0.000
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'blue whale underwater' -> cache/video/scene_1_b3_s0.mp4
--> Pixabay Cache MISS: 'whale tail underwater' — calling Pixabay API
-  Pixabay Candidate 1: id=201415 3840x2160 dur=9s score=0.784 ← SELECTED
-  Pixabay Candidate 2: id=24216 1920x1080 dur=31s score=0.600
-  Pixabay Candidate 3: id=217115 3840x2160 dur=39s score=0.600
-  Pixabay Candidate 4: id=309911 2160x3840 dur=36s score=0.600
-  Pixabay Candidate 5: id=198488 1920x1080 dur=60s score=0.600
-  Pixabay Candidate 6: id=21528 1920x1080 dur=30s score=0.600
-  Pixabay Candidate 7: id=21175 3840x2160 dur=13s score=0.600
-  Pixabay Candidate 8: id=261489 2562x1439 dur=18s score=0.600
-  Pixabay Candidate 9: id=132020 3840x2160 dur=15s score=0.600
-  Pixabay Candidate 10: id=348904 3840x2160 dur=42s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'pacific ocean horizon primary shot' -> cache/video/scene_4_b4_s0.mp4
--> Wikimedia Cache MISS: 'North Pacific waves horizon primary shot' — calling Wikimedia API
-  Wikimedia Candidate 1: id=91544404 902x1179
-  Wikimedia Candidate 2: id=92256621 1477x2070
-  Wikimedia Candidate 3: id=92530297 731x1104
-  Wikimedia Candidate 4: id=93239832 897x1375
-  Wikimedia Candidate 5: id=95351067 791x1352
--> Router selected: 'wikimedia' for query 'North Pacific waves horizon primary shot'
--> Cache MISS: 'whale swimming open ocean' — calling Pexels API
-  Candidate 1: id=5608046 1920x1080 dur=8s score=0.831 ← SELECTED
-  Candidate 2: id=4332085 4096x2160 dur=17s score=0.600
-  Candidate 3: id=6625561 3840x2160 dur=30s score=0.600
-  Candidate 4: id=15546563 3840x2160 dur=50s score=0.600
-  Candidate 5: id=10377082 1920x1080 dur=37s score=0.600
-  Candidate 6: id=14146687 3840x2160 dur=129s score=0.600
-  Candidate 7: id=28097890 3840x2160 dur=90s score=0.400
-  Candidate 8: id=27941813 3840x2160 dur=31s score=0.400
-  Candidate 9: id=28097887 3840x2160 dur=57s score=0.400
-  Candidate 10: id=26245637 3840x2160 dur=16s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> Pixabay Cache MISS: 'whale swimming open ocean' — calling Pixabay API
-  Pixabay Candidate 1: id=275007 3840x2160 dur=6s score=0.923 ← SELECTED
-  Pixabay Candidate 2: id=35427 1920x1080 dur=6s score=0.923
-  Pixabay Candidate 3: id=13823 1920x1080 dur=8s score=0.831
-  Pixabay Candidate 4: id=244188 3840x2160 dur=8s score=0.831
-  Pixabay Candidate 5: id=117702 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 6: id=37712 1920x1080 dur=27s score=0.600
-  Pixabay Candidate 7: id=26572 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 8: id=312 1920x1080 dur=35s score=0.600
-  Pixabay Candidate 9: id=345377 3840x2160 dur=49s score=0.600
-  Pixabay Candidate 10: id=39393 3840x2160 dur=56s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Wikimedia Cache MISS: 'whale swimming deep' — calling Wikimedia API
-  Wikimedia Candidate 1: id=59326000 716x1089
-  Wikimedia Candidate 2: id=91793954 1027x1687
-  Wikimedia Candidate 3: id=92515049 779x1237
-  Wikimedia Candidate 4: id=95900299 662x1064
-  Wikimedia Candidate 5: id=98214895 770x1170
--> Router selected: 'wikimedia' for query 'whale swimming deep'
--> AssetLibrary EVICT (below 1920x1080 floor): 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' -> cache/video/scene_3_b0_s0.mp4
--> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
--> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
--> AssetLibrary EVICT (below 1920x1080 floor): 'blue whale swimming primary shot' -> cache/video/scene_4_b0_s0.mp4
--> Cache MISS: 'blue whale call primary shot' — calling Pexels API
-  Pixabay Candidate 1: id=16166 1920x1080 dur=8s score=0.954 ← SELECTED
-  Pixabay Candidate 2: id=244188 3840x2160 dur=8s score=0.954
-  Pixabay Candidate 3: id=345494 3840x2160 dur=9s score=0.923
-  Pixabay Candidate 4: id=110877 1920x1080 dur=9s score=0.923
-  Pixabay Candidate 5: id=26818 3840x2160 dur=16s score=0.707
-  Pixabay Candidate 6: id=117702 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 7: id=37712 1920x1080 dur=27s score=0.600
-  Pixabay Candidate 8: id=110879 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 9: id=244754 2560x1440 dur=30s score=0.600
-  Pixabay Candidate 10: id=10480 1920x1080 dur=112s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'blue whale underwater' -> cache/video/scene_1_b3_s0.mp4
--> Wikimedia Cache MISS: 'whale tail underwater' — calling Wikimedia API
-  Candidate 1: id=4571364 4096x2160 dur=7s score=0.877 ← SELECTED
-  Candidate 2: id=11279748 1920x1080 dur=7s score=0.877
-  Candidate 3: id=7102652 1920x1080 dur=28s score=0.600
-  Candidate 4: id=8906187 1920x1080 dur=25s score=0.600
-  Candidate 5: id=10377082 1920x1080 dur=37s score=0.600
-  Candidate 6: id=10377084 1920x1080 dur=29s score=0.600
-  Candidate 7: id=27941813 3840x2160 dur=31s score=0.400
-  Candidate 8: id=27941815 3840x2160 dur=82s score=0.400
-  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
-  Candidate 10: id=28097890 3840x2160 dur=90s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'blue whale swimming primary shot' -> cache/video/scene_4_b0_s0.mp4
--> Pixabay Cache MISS: 'blue whale call primary shot' — calling Pixabay API
-  Wikimedia Candidate 1: id=84773992 4056x1935
-  Wikimedia Candidate 2: id=84773993 4283x2151
-  Wikimedia Candidate 3: id=84773995 4188x1740
-  Wikimedia Candidate 4: id=84774006 4272x1401
-  Wikimedia Candidate 5: id=84774012 3698x1845
--> Router selected: 'wikimedia' for query 'whale tail underwater'
--> Downloading from Wikimedia…
--> Saved: cache/video/scene_6_b0_s0.mp4
-    [BeatDirector] Download failed or empty: https://upload.wikimedia.org/wikipedia/commons/2/2d/Physeter
--> AssetLibrary EVICT (below 1920x1080 floor): 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' -> cache/video/scene_3_b0_s0.mp4
--> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
--> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
--> Cache MISS: 'ocean hydrophone equipment cutaway shot' — calling Pexels API
-  Candidate 1: id=3792293 1920x1080 dur=8s score=0.667 ← SELECTED
-  Candidate 2: id=6079429 3840x2160 dur=18s score=0.600
-  Candidate 3: id=8822598 3840x2160 dur=9s score=0.600
-  Candidate 4: id=6695078 1920x1080 dur=32s score=0.600
-  Candidate 5: id=8824132 3840x2160 dur=10s score=0.600
-  Candidate 6: id=7504608 4096x2160 dur=38s score=0.600
-  Candidate 7: id=7691713 3840x2160 dur=26s score=0.600
-  Candidate 8: id=6079432 3840x2160 dur=18s score=0.600
-  Candidate 9: id=8822964 3840x2160 dur=9s score=0.600
-  Candidate 10: id=36006201 3840x2160 dur=8s score=0.467
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> Pixabay Cache MISS: 'ocean hydrophone equipment cutaway shot' — calling Pixabay API
-  Pixabay Candidate 1: id=35427 1920x1080 dur=6s score=0.923 ← SELECTED
-  Pixabay Candidate 2: id=244188 3840x2160 dur=8s score=0.831
-  Pixabay Candidate 3: id=134264 3840x2160 dur=11s score=0.692
-  Pixabay Candidate 4: id=10835 1920x1080 dur=12s score=0.646
-  Pixabay Candidate 5: id=117702 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 6: id=345377 3840x2160 dur=49s score=0.600
-  Pixabay Candidate 7: id=10480 1920x1080 dur=112s score=0.600
-  Pixabay Candidate 8: id=134822 4096x2160 dur=59s score=0.600
-  Pixabay Candidate 9: id=37712 1920x1080 dur=27s score=0.600
-  Pixabay Candidate 10: id=364463 3840x2160 dur=21s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> Wikimedia Cache MISS: 'whale swimming open ocean' — calling Wikimedia API
-  Wikimedia Candidate 1: id=52210407 4629x2604
-  Wikimedia Candidate 2: id=91793954 1027x1687
-  Wikimedia Candidate 3: id=93831033 1225x1770
-  Wikimedia Candidate 4: id=95412617 2048x2048
-  Wikimedia Candidate 5: id=95412984 4000x2250
--> Router selected: 'wikimedia' for query 'whale swimming open ocean'
--> Already on disk: cache/video/scene_5_b1_s0.mp4
-    [BeatDirector] Shot accepted: primary shot for beat 1 (provider=pexels)
--> AssetLibrary REUSE: 'whale tail splash primary shot' similar to 'whale tail splash primary shot' -> cache/video/scene_1_b2_s0.mp4
--> Router selected: 'pexels' for query 'whale tail splash primary shot'
--> Already on disk: cache/video/scene_5_b2_s0.mp4
-    [BeatDirector] Shot accepted: primary shot for beat 2 (provider=pexels)
-  Pixabay Candidate 1: id=244188 3840x2160 dur=8s score=0.831 ← SELECTED
-  Pixabay Candidate 2: id=86866 1920x1080 dur=10s score=0.738
-  Pixabay Candidate 3: id=18390 3840x2160 dur=11s score=0.692
-  Pixabay Candidate 4: id=117702 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 5: id=293788 3840x2160 dur=13s score=0.600
-  Pixabay Candidate 6: id=13441 3840x2160 dur=27s score=0.600
-  Pixabay Candidate 7: id=204420 3840x2160 dur=15s score=0.600
-  Pixabay Candidate 8: id=7093 1920x1080 dur=30s score=0.600
-  Pixabay Candidate 9: id=33592 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 10: id=204421 3840x2160 dur=22s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'blue whale swimming primary shot' -> cache/video/scene_4_b0_s0.mp4
--> Wikimedia Cache MISS: 'blue whale call primary shot' — calling Wikimedia API
--> Wikimedia image info rate limited, retry 1 in 3s...
--> Wikimedia image info rate limited, retry 2 in 6s...
-
-  [BeatDirector] Planning beats for scene 7...
-  [BeatDirector] Concept terms (10): ['whale swimming deep', 'ocean sonar waves', 'solitary whale call', 'underwater hydrophone recording']...
-  [BeatDirector] 5 beats, 5 shots
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep primary shot' -> cache/video/scene_1_b0_s0.mp4
--> Cache MISS: 'whale swimming deep primary shot' — calling Pexels API
-  Candidate 1: id=5608046 1920x1080 dur=8s score=0.800 ← SELECTED
-  Candidate 2: id=10377082 1920x1080 dur=37s score=0.600
-  Candidate 3: id=15546563 3840x2160 dur=50s score=0.600
-  Candidate 4: id=5607993 1920x1080 dur=21s score=0.600
-  Candidate 5: id=10377084 1920x1080 dur=29s score=0.600
-  Candidate 6: id=8906187 1920x1080 dur=25s score=0.600
-  Candidate 7: id=10377449 1920x1080 dur=29s score=0.600
-  Candidate 8: id=20601591 3840x2160 dur=16s score=0.600
-  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
-  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep primary shot' -> cache/video/scene_1_b0_s0.mp4
--> Pixabay Cache MISS: 'whale swimming deep primary shot' — calling Pixabay API
--> Wikimedia image info rate limited, retry 3 in 9s...
-  Pixabay Candidate 1: id=345377 3840x2160 dur=49s score=0.600 ← SELECTED
-  Pixabay Candidate 2: id=293788 3840x2160 dur=13s score=0.600
-  Pixabay Candidate 3: id=18390 3840x2160 dur=11s score=0.600
-  Pixabay Candidate 4: id=158230 3840x2160 dur=24s score=0.600
-  Pixabay Candidate 5: id=3741 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 6: id=38388 3840x2160 dur=19s score=0.600
-  Pixabay Candidate 7: id=5180 1920x1080 dur=10s score=0.600
-  Pixabay Candidate 8: id=65390 3840x2160 dur=18s score=0.600
-  Pixabay Candidate 9: id=8437 1920x1080 dur=18s score=0.600
-  Pixabay Candidate 10: id=232561 2560x1440 dur=19s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> Wikimedia Cache MISS: 'ocean hydrophone equipment cutaway shot' — calling Wikimedia API
--> Wikimedia API rate limited, retry 1 in 3s...
--> Wikimedia API rate limited, retry 2 in 6s...
--> Wikimedia image info request failed: Expecting value: line 1 column 1 (char 0)
--> Router: all providers exhausted for 'blue whale call primary shot' — returning empty
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Cache MISS: 'whale swimming deep' — calling Pexels API
-  Candidate 1: id=15546563 3840x2160 dur=50s score=0.600 ← SELECTED
-  Candidate 2: id=10377082 1920x1080 dur=37s score=0.600
-  Candidate 3: id=5607993 1920x1080 dur=21s score=0.600
-  Candidate 4: id=10377084 1920x1080 dur=29s score=0.600
-  Candidate 5: id=6510690 1920x1080 dur=15s score=0.600
-  Candidate 6: id=10377449 1920x1080 dur=29s score=0.600
-  Candidate 7: id=8906187 1920x1080 dur=25s score=0.600
-  Candidate 8: id=20601591 3840x2160 dur=16s score=0.600
-  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
-  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Pixabay Cache MISS: 'whale swimming deep' — calling Pixabay API
--> Wikimedia API rate limited, retry 3 in 9s...
-  Pixabay Candidate 1: id=35427 1920x1080 dur=6s score=0.900 ← SELECTED
-  Pixabay Candidate 2: id=13823 1920x1080 dur=8s score=0.800
-  Pixabay Candidate 3: id=244188 3840x2160 dur=8s score=0.800
-  Pixabay Candidate 4: id=18390 3840x2160 dur=11s score=0.650
-  Pixabay Candidate 5: id=117702 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 6: id=37712 1920x1080 dur=27s score=0.600
-  Pixabay Candidate 7: id=26572 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 8: id=312 1920x1080 dur=35s score=0.600
-  Pixabay Candidate 9: id=345377 3840x2160 dur=49s score=0.600
-  Pixabay Candidate 10: id=39393 3840x2160 dur=56s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep primary shot' -> cache/video/scene_1_b0_s0.mp4
--> Wikimedia Cache MISS: 'whale swimming deep primary shot' — calling Wikimedia API
--> Wikimedia API rate limited, retry 1 in 3s...
--> Wikimedia API rate limited, retry 2 in 6s...
--> Wikimedia API request failed: Expecting value: line 1 column 1 (char 0)
--> Router: all providers exhausted for 'ocean hydrophone equipment cutaway shot' — returning empty
--> AssetLibrary REUSE: 'whale tail underwater' similar to 'whale tail underwater' -> cache/video/scene_6_b0_s0.mp4
--> Router selected: 'pexels' for query 'whale tail underwater'
--> AssetLibrary EVICT (below 1920x1080 floor): 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' -> cache/video/scene_3_b0_s0.mp4
--> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
--> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
--> Wikimedia API rate limited, retry 3 in 9s...
-  Pixabay Candidate 1: id=275007 3840x2160 dur=6s score=0.923 ← SELECTED
-  Pixabay Candidate 2: id=35427 1920x1080 dur=6s score=0.923
-  Pixabay Candidate 3: id=13823 1920x1080 dur=8s score=0.831
-  Pixabay Candidate 4: id=244188 3840x2160 dur=8s score=0.831
-  Pixabay Candidate 5: id=117702 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 6: id=37712 1920x1080 dur=27s score=0.600
-  Pixabay Candidate 7: id=26572 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 8: id=312 1920x1080 dur=35s score=0.600
-  Pixabay Candidate 9: id=345377 3840x2160 dur=49s score=0.600
-  Pixabay Candidate 10: id=39393 3840x2160 dur=56s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Wikimedia Cache MISS: 'whale swimming deep' — calling Wikimedia API
--> Wikimedia API rate limited, retry 1 in 3s...
-  Wikimedia Candidate 1: id=59326000 716x1089
-  Wikimedia Candidate 2: id=91793954 1027x1687
-  Wikimedia Candidate 3: id=92515049 779x1237
-  Wikimedia Candidate 4: id=95900299 662x1064
-  Wikimedia Candidate 5: id=98214895 770x1170
--> Router selected: 'wikimedia' for query 'whale swimming deep'
--> AssetLibrary EVICT (below 1920x1080 floor): 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' -> cache/video/scene_3_b0_s0.mp4
--> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
--> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
-  Wikimedia Candidate 1: id=91987192 812x1306
-  Wikimedia Candidate 2: id=92304344 735x1162
-  Wikimedia Candidate 3: id=94852483 514x804
-  Wikimedia Candidate 4: id=95835691 572x954
-  Wikimedia Candidate 5: id=95874353 727x1093
--> Router selected: 'wikimedia' for query 'whale swimming deep primary shot'
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Cache MISS: 'whale swimming deep' — calling Pexels API
-
-  [BeatDirector] Planning beats for scene 8...
-  Candidate 1: id=15546563 3840x2160 dur=50s score=0.600 ← SELECTED
-  Candidate 2: id=10377082 1920x1080 dur=37s score=0.600
-  Candidate 3: id=5607993 1920x1080 dur=21s score=0.600
-  Candidate 4: id=10377084 1920x1080 dur=29s score=0.600
-  Candidate 5: id=6510690 1920x1080 dur=15s score=0.600
-  Candidate 6: id=10377449 1920x1080 dur=29s score=0.600
-  Candidate 7: id=8906187 1920x1080 dur=25s score=0.600
-  Candidate 8: id=20601591 3840x2160 dur=16s score=0.600
-  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
-  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Pixabay Cache MISS: 'whale swimming deep' — calling Pixabay API
-  [BeatDirector] Concept terms (10): ['whale swimming deep', 'ocean waves time-lapse', 'whale call underwater', 'ship sonar screen']...
-  [BeatDirector] 3 beats, 3 shots
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep primary shot' -> cache/video/scene_1_b0_s0.mp4
--> Cache MISS: 'whale swimming deep primary shot' — calling Pexels API
-  Candidate 1: id=5608046 1920x1080 dur=8s score=0.831 ← SELECTED
-  Candidate 2: id=10377082 1920x1080 dur=37s score=0.600
-  Candidate 3: id=15546563 3840x2160 dur=50s score=0.600
-  Candidate 4: id=5607993 1920x1080 dur=21s score=0.600
-  Candidate 5: id=10377084 1920x1080 dur=29s score=0.600
-  Candidate 6: id=8906187 1920x1080 dur=25s score=0.600
-  Candidate 7: id=10377449 1920x1080 dur=29s score=0.600
-  Candidate 8: id=20601591 3840x2160 dur=16s score=0.600
-  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
-  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep primary shot' -> cache/video/scene_1_b0_s0.mp4
--> Pixabay Cache MISS: 'whale swimming deep primary shot' — calling Pixabay API
-
-  [BeatDirector] Planning beats for scene 9...
-  [BeatDirector] Concept terms (10): ['whale swimming deep', 'ocean waves time-lapse', 'underwater sonar pulses', 'abandoned shipwreck rust']...
-  [BeatDirector] 1 beats, 2 shots
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep primary shot' -> cache/video/scene_1_b0_s0.mp4
--> Cache MISS: 'whale swimming deep primary shot' — calling Pexels API
-  Candidate 1: id=5608046 1920x1080 dur=8s score=0.954 ← SELECTED
-  Candidate 2: id=20601591 3840x2160 dur=16s score=0.707
-  Candidate 3: id=10377082 1920x1080 dur=37s score=0.600
-  Candidate 4: id=15546563 3840x2160 dur=50s score=0.600
-  Candidate 5: id=5607993 1920x1080 dur=21s score=0.600
-  Candidate 6: id=10377084 1920x1080 dur=29s score=0.600
-  Candidate 7: id=8906187 1920x1080 dur=25s score=0.600
-  Candidate 8: id=10377449 1920x1080 dur=29s score=0.600
-  Candidate 9: id=26245637 3840x2160 dur=16s score=0.507
-  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep primary shot' -> cache/video/scene_1_b0_s0.mp4
--> Pixabay Cache MISS: 'whale swimming deep primary shot' — calling Pixabay API
-  Pixabay Candidate 1: id=35427 1920x1080 dur=6s score=0.923 ← SELECTED
-  Pixabay Candidate 2: id=13823 1920x1080 dur=8s score=0.831
-  Pixabay Candidate 3: id=244188 3840x2160 dur=8s score=0.831
-  Pixabay Candidate 4: id=18390 3840x2160 dur=11s score=0.692
-  Pixabay Candidate 5: id=117702 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 6: id=37712 1920x1080 dur=27s score=0.600
-  Pixabay Candidate 7: id=26572 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 8: id=312 1920x1080 dur=35s score=0.600
-  Pixabay Candidate 9: id=345377 3840x2160 dur=49s score=0.600
-  Pixabay Candidate 10: id=39393 3840x2160 dur=56s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep primary shot' -> cache/video/scene_1_b0_s0.mp4
--> Wikimedia Cache MISS: 'whale swimming deep primary shot' — calling Wikimedia API
-  Pixabay Candidate 1: id=275007 3840x2160 dur=6s score=0.900 ← SELECTED
-  Pixabay Candidate 2: id=35427 1920x1080 dur=6s score=0.900
-  Pixabay Candidate 3: id=13823 1920x1080 dur=8s score=0.800
-  Pixabay Candidate 4: id=244188 3840x2160 dur=8s score=0.800
-  Pixabay Candidate 5: id=117702 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 6: id=37712 1920x1080 dur=27s score=0.600
-  Pixabay Candidate 7: id=26572 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 8: id=312 1920x1080 dur=35s score=0.600
-  Pixabay Candidate 9: id=345377 3840x2160 dur=49s score=0.600
-  Pixabay Candidate 10: id=39393 3840x2160 dur=56s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Wikimedia Cache MISS: 'whale swimming deep' — calling Wikimedia API
--> Wikimedia image info rate limited, retry 1 in 3s...
--> Wikimedia image info rate limited, retry 1 in 3s...
--> Wikimedia image info rate limited, retry 2 in 6s...
--> Wikimedia image info rate limited, retry 2 in 6s...
-  Pixabay Candidate 1: id=13823 1920x1080 dur=8s score=0.954 ← SELECTED
-  Pixabay Candidate 2: id=244188 3840x2160 dur=8s score=0.954
-  Pixabay Candidate 3: id=35427 1920x1080 dur=6s score=0.940
-  Pixabay Candidate 4: id=18390 3840x2160 dur=11s score=0.861
-  Pixabay Candidate 5: id=117702 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 6: id=37712 1920x1080 dur=27s score=0.600
-  Pixabay Candidate 7: id=26572 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 8: id=312 1920x1080 dur=35s score=0.600
-  Pixabay Candidate 9: id=345377 3840x2160 dur=49s score=0.600
-  Pixabay Candidate 10: id=39393 3840x2160 dur=56s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep primary shot' -> cache/video/scene_1_b0_s0.mp4
--> Wikimedia Cache MISS: 'whale swimming deep primary shot' — calling Wikimedia API
--> Wikimedia image info rate limited, retry 3 in 9s...
--> Wikimedia image info rate limited, retry 3 in 9s...
--> Wikimedia API rate limited, retry 1 in 3s...
--> Wikimedia API rate limited, retry 2 in 6s...
--> Wikimedia image info request failed: Expecting value: line 1 column 1 (char 0)
--> Router: all providers exhausted for 'whale swimming deep primary shot' — returning empty
--> Wikimedia image info request failed: Expecting value: line 1 column 1 (char 0)
--> Router: all providers exhausted for 'whale swimming deep' — returning empty
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Cache MISS: 'whale swimming deep' — calling Pexels API
--> AssetLibrary EVICT (below 1920x1080 floor): 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' -> cache/video/scene_3_b0_s0.mp4
-  Candidate 1: id=15546563 3840x2160 dur=50s score=0.600 ← SELECTED
-  Candidate 2: id=10377082 1920x1080 dur=37s score=0.600
-  Candidate 3: id=5607993 1920x1080 dur=21s score=0.600
-  Candidate 4: id=10377084 1920x1080 dur=29s score=0.600
-  Candidate 5: id=6510690 1920x1080 dur=15s score=0.600
-  Candidate 6: id=10377449 1920x1080 dur=29s score=0.600
-  Candidate 7: id=8906187 1920x1080 dur=25s score=0.600
-  Candidate 8: id=20601591 3840x2160 dur=16s score=0.600
-  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
-  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
--> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Pixabay Cache MISS: 'whale swimming deep' — calling Pixabay API
--> AssetLibrary REUSE: 'ocean sonar waves primary shot' similar to 'ocean waves dark primary shot' -> cache/video/scene_9_b1_s0.mp4
--> Router selected: 'pexels' for query 'ocean sonar waves primary shot'
-  Pixabay Candidate 1: id=275007 3840x2160 dur=6s score=0.923 ← SELECTED
-  Pixabay Candidate 2: id=35427 1920x1080 dur=6s score=0.923
-  Pixabay Candidate 3: id=13823 1920x1080 dur=8s score=0.831
-  Pixabay Candidate 4: id=244188 3840x2160 dur=8s score=0.831
-  Pixabay Candidate 5: id=117702 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 6: id=37712 1920x1080 dur=27s score=0.600
-  Pixabay Candidate 7: id=26572 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 8: id=312 1920x1080 dur=35s score=0.600
-  Pixabay Candidate 9: id=345377 3840x2160 dur=49s score=0.600
-  Pixabay Candidate 10: id=39393 3840x2160 dur=56s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Wikimedia API rate limited, retry 3 in 9s...
--> Wikimedia Cache MISS: 'whale swimming deep' — calling Wikimedia API
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Cache MISS: 'whale swimming deep' — calling Pexels API
-  Candidate 1: id=15546563 3840x2160 dur=50s score=0.600 ← SELECTED
-  Candidate 2: id=10377082 1920x1080 dur=37s score=0.600
-  Candidate 3: id=5607993 1920x1080 dur=21s score=0.600
-  Candidate 4: id=10377084 1920x1080 dur=29s score=0.600
-  Candidate 5: id=6510690 1920x1080 dur=15s score=0.600
-  Candidate 6: id=10377449 1920x1080 dur=29s score=0.600
-  Candidate 7: id=8906187 1920x1080 dur=25s score=0.600
-  Candidate 8: id=20601591 3840x2160 dur=16s score=0.600
-  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
-  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> Wikimedia API rate limited, retry 1 in 3s...
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Pixabay Cache MISS: 'whale swimming deep' — calling Pixabay API
-  Pixabay Candidate 1: id=275007 3840x2160 dur=6s score=0.900 ← SELECTED
-  Pixabay Candidate 2: id=35427 1920x1080 dur=6s score=0.900
-  Pixabay Candidate 3: id=13823 1920x1080 dur=8s score=0.800
-  Pixabay Candidate 4: id=244188 3840x2160 dur=8s score=0.800
-  Pixabay Candidate 5: id=117702 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 6: id=37712 1920x1080 dur=27s score=0.600
-  Pixabay Candidate 7: id=26572 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 8: id=312 1920x1080 dur=35s score=0.600
-  Pixabay Candidate 9: id=345377 3840x2160 dur=49s score=0.600
-  Pixabay Candidate 10: id=39393 3840x2160 dur=56s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Wikimedia Cache MISS: 'whale swimming deep' — calling Wikimedia API
--> Wikimedia API rate limited, retry 1 in 3s...
--> Wikimedia API rate limited, retry 2 in 6s...
--> Wikimedia API rate limited, retry 2 in 6s...
-  Wikimedia Candidate 1: id=91987192 812x1306
-  Wikimedia Candidate 2: id=92304344 735x1162
-  Wikimedia Candidate 3: id=94852483 514x804
-  Wikimedia Candidate 4: id=95835691 572x954
-  Wikimedia Candidate 5: id=95874353 727x1093
--> Router selected: 'wikimedia' for query 'whale swimming deep primary shot'
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Cache MISS: 'whale swimming deep' — calling Pexels API
-  Candidate 1: id=6510690 1920x1080 dur=15s score=0.738 ← SELECTED
-  Candidate 2: id=20601591 3840x2160 dur=16s score=0.707
-  Candidate 3: id=15546563 3840x2160 dur=50s score=0.600
-  Candidate 4: id=10377082 1920x1080 dur=37s score=0.600
-  Candidate 5: id=5607993 1920x1080 dur=21s score=0.600
-  Candidate 6: id=10377084 1920x1080 dur=29s score=0.600
-  Candidate 7: id=10377449 1920x1080 dur=29s score=0.600
-  Candidate 8: id=8906187 1920x1080 dur=25s score=0.600
-  Candidate 9: id=26245637 3840x2160 dur=16s score=0.507
-  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'whale swimming deep' -> cache/video/scene_1_b1_s0.mp4
--> Pixabay Cache MISS: 'whale swimming deep' — calling Pixabay API
-  Wikimedia Candidate 1: id=59326000 716x1089
-  Wikimedia Candidate 2: id=91793954 1027x1687
-  Wikimedia Candidate 3: id=92515049 779x1237
-  Wikimedia Candidate 4: id=95900299 662x1064
-  Wikimedia Candidate 5: id=98214895 770x1170
--> Router selected: 'wikimedia' for query 'whale swimming deep'
--> Already on disk: cache/video/scene_8_b0_s0.mp4
-    [BeatDirector] Shot accepted: primary shot for beat 0 (provider=pexels)
--> AssetLibrary EVICT (below 1920x1080 floor): 'ocean waves time-lapse primary shot' -> cache/video/scene_1_b1_s0.mp4
--> Cache MISS: 'ocean waves time-lapse primary shot' — calling Pexels API
-  Candidate 1: id=36592043 3840x2160 dur=6s score=0.723 ← SELECTED
-  Candidate 2: id=11888087 1920x1080 dur=13s score=0.600
-  Candidate 3: id=5348631 3840x2160 dur=63s score=0.600
-  Candidate 4: id=17875165 3840x2160 dur=23s score=0.600
-  Candidate 5: id=38808914 3840x2160 dur=9s score=0.584
-  Candidate 6: id=28738510 5760x3240 dur=11s score=0.492
-  Candidate 7: id=38808913 3840x2160 dur=13s score=0.400
-  Candidate 8: id=36389606 3840x2160 dur=59s score=0.400
-  Candidate 9: id=38663430 3840x2160 dur=19s score=0.400
-  Candidate 10: id=28870121 5760x3240 dur=17s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'ocean waves time-lapse primary shot' -> cache/video/scene_1_b1_s0.mp4
--> Pixabay Cache MISS: 'ocean waves time-lapse primary shot' — calling Pixabay API
-  Wikimedia Candidate 1: id=59326000 716x1089
-  Wikimedia Candidate 2: id=91793954 1027x1687
-  Wikimedia Candidate 3: id=92515049 779x1237
-  Wikimedia Candidate 4: id=95900299 662x1064
-  Wikimedia Candidate 5: id=98214895 770x1170
--> Router selected: 'wikimedia' for query 'whale swimming deep'
--> AssetLibrary EVICT (below 1920x1080 floor): 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' -> cache/video/scene_3_b0_s0.mp4
--> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
--> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
--> AssetLibrary EVICT (below 1920x1080 floor): 'underwater whale call primary shot' -> cache/video/scene_7_b0_s0.mp4
--> Cache MISS: 'solitary whale call primary shot' — calling Pexels API
-  Candidate 1: id=4571364 4096x2160 dur=7s score=0.850 ← SELECTED
-  Candidate 2: id=11279748 1920x1080 dur=7s score=0.850
-  Candidate 3: id=7102652 1920x1080 dur=28s score=0.600
-  Candidate 4: id=5607993 1920x1080 dur=21s score=0.600
-  Candidate 5: id=8906187 1920x1080 dur=25s score=0.600
-  Candidate 6: id=27941813 3840x2160 dur=31s score=0.400
-  Candidate 7: id=36628330 3840x2160 dur=13s score=0.400
-  Candidate 8: id=27941815 3840x2160 dur=82s score=0.400
-  Candidate 9: id=36628340 3840x2160 dur=18s score=0.400
-  Candidate 10: id=36628334 3840x2160 dur=15s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'underwater whale call primary shot' -> cache/video/scene_7_b0_s0.mp4
--> Pixabay Cache MISS: 'solitary whale call primary shot' — calling Pixabay API
-  Pixabay Candidate 1: id=13823 1920x1080 dur=8s score=0.954 ← SELECTED
-  Pixabay Candidate 2: id=244188 3840x2160 dur=8s score=0.954
-  Pixabay Candidate 3: id=275007 3840x2160 dur=6s score=0.940
-  Pixabay Candidate 4: id=35427 1920x1080 dur=6s score=0.940
-  Pixabay Candidate 5: id=117702 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 6: id=37712 1920x1080 dur=27s score=0.600
-  Pixabay Candidate 7: id=26572 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 8: id=312 1920x1080 dur=35s score=0.600
-  Pixabay Candidate 9: id=345377 3840x2160 dur=49s score=0.600
-  Pixabay Candidate 10: id=39393 3840x2160 dur=56s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary diversity: penalty=0.30 for 'whale swimming deep' — skipping reuse
--> Wikimedia Cache MISS: 'whale swimming deep' — calling Wikimedia API
-  Pixabay Candidate 1: id=16111 3840x2160 dur=10s score=0.738 ← SELECTED
-  Pixabay Candidate 2: id=190332 3840x2160 dur=14s score=0.600
-  Pixabay Candidate 3: id=22555 2560x1440 dur=17s score=0.600
-  Pixabay Candidate 4: id=24105 3840x2160 dur=29s score=0.600
-  Pixabay Candidate 5: id=17869 3840x2160 dur=20s score=0.600
-  Pixabay Candidate 6: id=71457 3840x2160 dur=31s score=0.600
-  Pixabay Candidate 7: id=23263 3840x2160 dur=33s score=0.600
-  Pixabay Candidate 8: id=72763 3840x2160 dur=21s score=0.600
-  Pixabay Candidate 9: id=44702 3840x2160 dur=45s score=0.600
-  Pixabay Candidate 10: id=2213 1280x720 dur=13s score=0.000
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'ocean waves time-lapse primary shot' -> cache/video/scene_1_b1_s0.mp4
--> Wikimedia Cache MISS: 'ocean waves time-lapse primary shot' — calling Wikimedia API
-  Wikimedia Candidate 1: id=59326000 716x1089
-  Wikimedia Candidate 2: id=91793954 1027x1687
-  Wikimedia Candidate 3: id=92515049 779x1237
-  Wikimedia Candidate 4: id=95900299 662x1064
-  Wikimedia Candidate 5: id=98214895 770x1170
--> Router selected: 'wikimedia' for query 'whale swimming deep'
-  Wikimedia Candidate 1: id=91372153 1239x1752
-  Wikimedia Candidate 2: id=91450698 787x1395
-  Wikimedia Candidate 3: id=91510245 2468x3218
-  Wikimedia Candidate 4: id=91537817 620x1022
-  Wikimedia Candidate 5: id=91691894 787x1343
--> Router selected: 'wikimedia' for query 'ocean waves time-lapse primary shot'
-  Pixabay Candidate 1: id=244188 3840x2160 dur=8s score=0.800 ← SELECTED
-  Pixabay Candidate 2: id=86866 1920x1080 dur=10s score=0.700
-  Pixabay Candidate 3: id=18390 3840x2160 dur=11s score=0.650
-  Pixabay Candidate 4: id=117702 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 5: id=242824 3840x2160 dur=19s score=0.600
-  Pixabay Candidate 6: id=204420 3840x2160 dur=15s score=0.600
-  Pixabay Candidate 7: id=7093 1920x1080 dur=30s score=0.600
-  Pixabay Candidate 8: id=33592 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 9: id=204421 3840x2160 dur=22s score=0.600
-  Pixabay Candidate 10: id=88244 3840x2160 dur=13s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'underwater whale call primary shot' -> cache/video/scene_7_b0_s0.mp4
--> Wikimedia Cache MISS: 'solitary whale call primary shot' — calling Wikimedia API
--> AssetLibrary EVICT (below 1920x1080 floor): 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' -> cache/video/scene_3_b0_s0.mp4
--> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
--> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
--> AssetLibrary REUSE: 'whale swimming deep' similar to 'whale swimming deep' -> cache/video/scene_8_b0_s0.mp4
--> Router selected: 'pexels' for query 'whale swimming deep'
--> Wikimedia API rate limited, retry 1 in 3s...
--> AssetLibrary EVICT (below 1920x1080 floor): 'ocean waves time-lapse primary shot' -> cache/video/scene_1_b1_s0.mp4
--> Cache MISS: 'ocean waves time-lapse cutaway shot' — calling Pexels API
--> AssetLibrary EVICT (below 1920x1080 floor): 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' -> cache/video/scene_3_b0_s0.mp4
--> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
--> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
-  Candidate 1: id=36592043 3840x2160 dur=6s score=0.600 ← SELECTED
-  Candidate 2: id=11888087 1920x1080 dur=13s score=0.600
-  Candidate 3: id=2876707 1920x1080 dur=25s score=0.600
-  Candidate 4: id=6748729 3840x1600 dur=46s score=0.600
-  Candidate 5: id=38808913 3840x2160 dur=13s score=0.400
-  Candidate 6: id=38808914 3840x2160 dur=9s score=0.400
-  Candidate 7: id=28738510 5760x3240 dur=11s score=0.400
-  Candidate 8: id=38663430 3840x2160 dur=19s score=0.400
-  Candidate 9: id=30119080 3840x2160 dur=17s score=0.400
-  Candidate 10: id=34620659 3840x2160 dur=22s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'ocean waves time-lapse primary shot' -> cache/video/scene_1_b1_s0.mp4
--> Pixabay Cache MISS: 'ocean waves time-lapse cutaway shot' — calling Pixabay API
--> AssetLibrary EVICT (below 1920x1080 floor): 'underwater whale call primary shot' -> cache/video/scene_7_b0_s0.mp4
--> Cache MISS: 'whale call underwater primary shot' — calling Pexels API
-  Candidate 1: id=11279748 1920x1080 dur=7s score=0.877 ← SELECTED
-  Candidate 2: id=4571364 4096x2160 dur=7s score=0.877
-  Candidate 3: id=5607993 1920x1080 dur=21s score=0.600
-  Candidate 4: id=15546563 3840x2160 dur=50s score=0.600
-  Candidate 5: id=10377082 1920x1080 dur=37s score=0.600
-  Candidate 6: id=7102652 1920x1080 dur=28s score=0.600
-  Candidate 7: id=10377084 1920x1080 dur=29s score=0.600
-  Candidate 8: id=14146687 3840x2160 dur=129s score=0.600
-  Candidate 9: id=1669815 1920x1080 dur=24s score=0.600
-  Candidate 10: id=28097890 3840x2160 dur=90s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'underwater whale call primary shot' -> cache/video/scene_7_b0_s0.mp4
--> Pixabay Cache MISS: 'whale call underwater primary shot' — calling Pixabay API
-  Pixabay Candidate 1: id=190332 3840x2160 dur=14s score=0.600 ← SELECTED
-  Pixabay Candidate 2: id=22555 2560x1440 dur=17s score=0.600
-  Pixabay Candidate 3: id=17869 3840x2160 dur=20s score=0.600
-  Pixabay Candidate 4: id=24105 3840x2160 dur=29s score=0.600
-  Pixabay Candidate 5: id=71457 3840x2160 dur=31s score=0.600
-  Pixabay Candidate 6: id=23263 3840x2160 dur=33s score=0.600
-  Pixabay Candidate 7: id=72763 3840x2160 dur=21s score=0.600
-  Pixabay Candidate 8: id=16111 3840x2160 dur=10s score=0.600
-  Pixabay Candidate 9: id=44702 3840x2160 dur=45s score=0.600
-  Pixabay Candidate 10: id=2213 1280x720 dur=13s score=0.000
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'ocean waves time-lapse primary shot' -> cache/video/scene_1_b1_s0.mp4
--> Wikimedia Cache MISS: 'ocean waves time-lapse cutaway shot' — calling Wikimedia API
--> Wikimedia API rate limited, retry 1 in 3s...
--> Wikimedia API rate limited, retry 2 in 6s...
-  Pixabay Candidate 1: id=24265 1920x1080 dur=6s score=0.923 ← SELECTED
-  Pixabay Candidate 2: id=16166 1920x1080 dur=8s score=0.831
-  Pixabay Candidate 3: id=244188 3840x2160 dur=8s score=0.831
-  Pixabay Candidate 4: id=110877 1920x1080 dur=9s score=0.784
-  Pixabay Candidate 5: id=18390 3840x2160 dur=11s score=0.692
-  Pixabay Candidate 6: id=117702 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 7: id=37712 1920x1080 dur=27s score=0.600
-  Pixabay Candidate 8: id=26818 3840x2160 dur=16s score=0.600
-  Pixabay Candidate 9: id=110879 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 10: id=244754 2560x1440 dur=30s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'underwater whale call primary shot' -> cache/video/scene_7_b0_s0.mp4
--> Wikimedia Cache MISS: 'whale call underwater primary shot' — calling Wikimedia API
--> Wikimedia API rate limited, retry 1 in 3s...
--> Wikimedia API rate limited, retry 2 in 6s...
--> Wikimedia API rate limited, retry 2 in 6s...
--> Wikimedia API rate limited, retry 3 in 9s...
--> Wikimedia API rate limited, retry 3 in 9s...
--> Wikimedia API rate limited, retry 3 in 9s...
--> Wikimedia API request failed: Expecting value: line 1 column 1 (char 0)
--> Router: all providers exhausted for 'solitary whale call primary shot' — returning empty
--> AssetLibrary diversity: penalty=0.30 for 'whale swimming deep' — skipping reuse
--> Cache MISS: 'whale swimming deep' — calling Pexels API
-  Candidate 1: id=15546563 3840x2160 dur=50s score=0.600 ← SELECTED
-  Candidate 2: id=10377082 1920x1080 dur=37s score=0.600
-  Candidate 3: id=5607993 1920x1080 dur=21s score=0.600
-  Candidate 4: id=10377084 1920x1080 dur=29s score=0.600
-  Candidate 5: id=6510690 1920x1080 dur=15s score=0.600
-  Candidate 6: id=10377449 1920x1080 dur=29s score=0.600
-  Candidate 7: id=8906187 1920x1080 dur=25s score=0.600
-  Candidate 8: id=20601591 3840x2160 dur=16s score=0.600
-  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
-  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary REUSE: 'whale swimming deep' similar to 'whale swimming deep' -> cache/video/scene_8_b0_s0.mp4
--> Router selected: 'pixabay' for query 'whale swimming deep'
--> AssetLibrary EVICT (below 1920x1080 floor): 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' -> cache/video/scene_3_b0_s0.mp4
--> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
--> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
--> AssetLibrary EVICT (below 1920x1080 floor): 'hydrophone underwater recording primary shot' -> cache/video/scene_7_b2_s0.mp4
--> Cache MISS: 'underwater hydrophone recording primary shot' — calling Pexels API
-  Candidate 1: id=8823292 3840x2160 dur=8s score=0.800 ← SELECTED
-  Candidate 2: id=8686153 1920x1080 dur=9s score=0.750
-  Candidate 3: id=36006201 3840x2160 dur=8s score=0.600
-  Candidate 4: id=8382683 4096x2160 dur=28s score=0.600
-  Candidate 5: id=8822982 3840x2160 dur=14s score=0.600
-  Candidate 6: id=11194812 1920x1080 dur=21s score=0.600
-  Candidate 7: id=8823131 3840x2160 dur=15s score=0.600
-  Candidate 8: id=8823625 3840x2160 dur=19s score=0.600
-  Candidate 9: id=36309931 3840x2160 dur=9s score=0.550
-  Candidate 10: id=35790681 3840x2160 dur=12s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'hydrophone underwater recording primary shot' -> cache/video/scene_7_b2_s0.mp4
--> Pixabay Cache MISS: 'underwater hydrophone recording primary shot' — calling Pixabay API
--> Wikimedia API request failed: Expecting value: line 1 column 1 (char 0)
--> Router: all providers exhausted for 'ocean waves time-lapse cutaway shot' — returning empty
--> AssetLibrary diversity: penalty=0.30 for 'whale swimming deep' — skipping reuse
--> Cache MISS: 'whale swimming deep' — calling Pexels API
-  Candidate 1: id=15546563 3840x2160 dur=50s score=0.600 ← SELECTED
-  Candidate 2: id=10377082 1920x1080 dur=37s score=0.600
-  Candidate 3: id=5607993 1920x1080 dur=21s score=0.600
-  Candidate 4: id=10377084 1920x1080 dur=29s score=0.600
-  Candidate 5: id=6510690 1920x1080 dur=15s score=0.600
-  Candidate 6: id=10377449 1920x1080 dur=29s score=0.600
-  Candidate 7: id=8906187 1920x1080 dur=25s score=0.600
-  Candidate 8: id=20601591 3840x2160 dur=16s score=0.600
-  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
-  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary diversity: penalty=0.30 for 'whale swimming deep' — skipping reuse
--> Pixabay Cache MISS: 'whale swimming deep' — calling Pixabay API
-  Pixabay Candidate 1: id=275007 3840x2160 dur=6s score=0.800 ← SELECTED
-  Pixabay Candidate 2: id=35427 1920x1080 dur=6s score=0.800
-  Pixabay Candidate 3: id=13823 1920x1080 dur=8s score=0.667
-  Pixabay Candidate 4: id=244188 3840x2160 dur=8s score=0.667
-  Pixabay Candidate 5: id=117702 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 6: id=37712 1920x1080 dur=27s score=0.600
-  Pixabay Candidate 7: id=26572 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 8: id=312 1920x1080 dur=35s score=0.600
-  Pixabay Candidate 9: id=345377 3840x2160 dur=49s score=0.600
-  Pixabay Candidate 10: id=39393 3840x2160 dur=56s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary diversity: penalty=0.30 for 'whale swimming deep' — skipping reuse
--> Wikimedia Cache MISS: 'whale swimming deep' — calling Wikimedia API
-  Pixabay Candidate 1: id=24265 1920x1080 dur=6s score=0.900 ← SELECTED
-  Pixabay Candidate 2: id=122739 3840x2160 dur=7s score=0.850
-  Pixabay Candidate 3: id=16166 1920x1080 dur=8s score=0.800
-  Pixabay Candidate 4: id=110877 1920x1080 dur=9s score=0.750
-  Pixabay Candidate 5: id=18390 3840x2160 dur=11s score=0.650
-  Pixabay Candidate 6: id=37712 1920x1080 dur=27s score=0.600
-  Pixabay Candidate 7: id=26818 3840x2160 dur=16s score=0.600
-  Pixabay Candidate 8: id=110879 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 9: id=244754 2560x1440 dur=30s score=0.600
-  Pixabay Candidate 10: id=122740 3840x2160 dur=15s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary EVICT (below 1920x1080 floor): 'hydrophone underwater recording primary shot' -> cache/video/scene_7_b2_s0.mp4
--> Wikimedia Cache MISS: 'underwater hydrophone recording primary shot' — calling Wikimedia API
--> Wikimedia API rate limited, retry 1 in 3s...
--> Wikimedia API rate limited, retry 1 in 3s...
--> Wikimedia API request failed: Expecting value: line 1 column 1 (char 0)
--> Router: all providers exhausted for 'whale call underwater primary shot' — returning empty
--> AssetLibrary diversity: penalty=0.30 for 'whale swimming deep' — skipping reuse
--> Cache MISS: 'whale swimming deep' — calling Pexels API
-  Candidate 1: id=15546563 3840x2160 dur=50s score=0.600 ← SELECTED
-  Candidate 2: id=10377082 1920x1080 dur=37s score=0.600
-  Candidate 3: id=5607993 1920x1080 dur=21s score=0.600
-  Candidate 4: id=10377084 1920x1080 dur=29s score=0.600
-  Candidate 5: id=6510690 1920x1080 dur=15s score=0.600
-  Candidate 6: id=10377449 1920x1080 dur=29s score=0.600
-  Candidate 7: id=8906187 1920x1080 dur=25s score=0.600
-  Candidate 8: id=20601591 3840x2160 dur=16s score=0.600
-  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
-  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary diversity: penalty=0.30 for 'whale swimming deep' — skipping reuse
--> Pixabay Cache MISS: 'whale swimming deep' — calling Pixabay API
-  Pixabay Candidate 1: id=275007 3840x2160 dur=6s score=0.923 ← SELECTED
-  Pixabay Candidate 2: id=35427 1920x1080 dur=6s score=0.923
-  Pixabay Candidate 3: id=13823 1920x1080 dur=8s score=0.831
-  Pixabay Candidate 4: id=244188 3840x2160 dur=8s score=0.831
-  Pixabay Candidate 5: id=117702 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 6: id=37712 1920x1080 dur=27s score=0.600
-  Pixabay Candidate 7: id=26572 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 8: id=312 1920x1080 dur=35s score=0.600
-  Pixabay Candidate 9: id=345377 3840x2160 dur=49s score=0.600
-  Pixabay Candidate 10: id=39393 3840x2160 dur=56s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary diversity: penalty=0.30 for 'whale swimming deep' — skipping reuse
--> Wikimedia Cache MISS: 'whale swimming deep' — calling Wikimedia API
--> Wikimedia API rate limited, retry 1 in 3s...
--> Wikimedia API rate limited, retry 2 in 6s...
--> Wikimedia API rate limited, retry 2 in 6s...
--> Wikimedia API rate limited, retry 2 in 6s...
--> Wikimedia API rate limited, retry 3 in 9s...
--> Wikimedia API rate limited, retry 3 in 9s...
--> Wikimedia API rate limited, retry 3 in 9s...
--> Wikimedia API request failed: Expecting value: line 1 column 1 (char 0)
--> Router: all providers exhausted for 'whale swimming deep' — returning empty
--> AssetLibrary EVICT (below 1920x1080 floor): 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' -> cache/video/scene_3_b0_s0.mp4
--> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
--> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
--> Wikimedia API request failed: Expecting value: line 1 column 1 (char 0)
--> Router: all providers exhausted for 'underwater hydrophone recording primary shot' — returning empty
--> AssetLibrary diversity: penalty=0.30 for 'whale swimming deep' — skipping reuse
--> Cache MISS: 'whale swimming deep' — calling Pexels API
-  Candidate 1: id=15546563 3840x2160 dur=50s score=0.600 ← SELECTED
-  Candidate 2: id=10377082 1920x1080 dur=37s score=0.600
-  Candidate 3: id=5607993 1920x1080 dur=21s score=0.600
-  Candidate 4: id=10377084 1920x1080 dur=29s score=0.600
-  Candidate 5: id=6510690 1920x1080 dur=15s score=0.600
-  Candidate 6: id=10377449 1920x1080 dur=29s score=0.600
-  Candidate 7: id=8906187 1920x1080 dur=25s score=0.600
-  Candidate 8: id=20601591 3840x2160 dur=16s score=0.600
-  Candidate 9: id=26245637 3840x2160 dur=16s score=0.400
-  Candidate 10: id=28097887 3840x2160 dur=57s score=0.400
--> Router: provider 'pexels' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary diversity: penalty=0.30 for 'whale swimming deep' — skipping reuse
--> Pixabay Cache MISS: 'whale swimming deep' — calling Pixabay API
-  Pixabay Candidate 1: id=275007 3840x2160 dur=6s score=0.900 ← SELECTED
-  Pixabay Candidate 2: id=35427 1920x1080 dur=6s score=0.900
-  Pixabay Candidate 3: id=13823 1920x1080 dur=8s score=0.800
-  Pixabay Candidate 4: id=244188 3840x2160 dur=8s score=0.800
-  Pixabay Candidate 5: id=117702 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 6: id=37712 1920x1080 dur=27s score=0.600
-  Pixabay Candidate 7: id=26572 1920x1080 dur=20s score=0.600
-  Pixabay Candidate 8: id=312 1920x1080 dur=35s score=0.600
-  Pixabay Candidate 9: id=345377 3840x2160 dur=49s score=0.600
-  Pixabay Candidate 10: id=39393 3840x2160 dur=56s score=0.600
--> Router: provider 'pixabay' error: name '_pick_best_variant_link' is not defined
--> AssetLibrary diversity: penalty=0.30 for 'whale swimming deep' — skipping reuse
--> Wikimedia Cache MISS: 'whale swimming deep' — calling Wikimedia API
--> Wikimedia API rate limited, retry 1 in 3s...
--> Wikimedia API request failed: Expecting value: line 1 column 1 (char 0)
--> Router: all providers exhausted for 'whale swimming deep' — returning empty
--> AssetLibrary EVICT (below 1920x1080 floor): 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' -> cache/video/scene_3_b0_s0.mp4
--> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
--> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
--> Wikimedia API rate limited, retry 2 in 6s...
-  Wikimedia Candidate 1: id=59326000 716x1089
-  Wikimedia Candidate 2: id=91793954 1027x1687
-  Wikimedia Candidate 3: id=92515049 779x1237
-  Wikimedia Candidate 4: id=95900299 662x1064
-  Wikimedia Candidate 5: id=98214895 770x1170
--> Router selected: 'wikimedia' for query 'whale swimming deep'
--> AssetLibrary EVICT (below 1920x1080 floor): 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' -> cache/video/scene_3_b0_s0.mp4
--> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
--> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
--> AssetLibrary REUSE: 'whale tail splash primary shot' similar to 'whale tail splash primary shot' -> cache/video/scene_5_b2_s0.mp4
--> Router selected: 'pexels' for query 'whale tail splash primary shot'
--> AssetLibrary REUSE: 'whale swimming deep' similar to 'whale swimming deep' -> cache/video/scene_8_b0_s0.mp4
--> Router selected: 'pexels' for query 'whale swimming deep'
--> AssetLibrary EVICT (below 1920x1080 floor): 'the 52-hertz whale: the loneliest voice in the ocean documentary stock footage' -> cache/video/scene_3_b0_s0.mp4
--> Cache HIT: 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage' → cache/video/scene_5_b0_s0.mp4
--> Router selected: 'pexels' for query 'The 52-Hertz Whale: the loneliest voice in the ocean documentary stock footage'
-
-==================================================
-  Storyboard Validation...
-  ⚠ Storyboard issues found:
-    - Diversity: Scene 0, beat 1: duplicate detected: same asset placeholder/animated_gradient was already used in scene 0
-    - Diversity: Scene 0, beat 2: duplicate detected: same asset placeholder/animated_gradient was already used in scene 0
-    - Diversity: Scene 0, beat 3: duplicate detected: same asset placeholder/animated_gradient was already used in scene 0
-    - Diversity: Scene 0, beat 4: duplicate detected: same asset placeholder/animated_gradient was already used in scene 0
-    - Diversity: Scene 0, beat 5: duplicate detected: same asset placeholder/animated_gradient was already used in scene 0
-  (Continuing with best effort)
-
-==================================================
-  Beat Director Results:
-    Shots requested: 35
-    Shots accepted:  35
-    Queries tried:   97
-    Gate rejections: 69
-    Fallbacks:       29
-    Success rate:    100.0%
-==================================================
-
-  [vector] rendering 3 beats (algo, per-video, label='the_52_hertz_whale__the_loneliest_voice_in_t') ...
-  [vector] 3/3 beats ready (645.4s)
-  [manim] Injected generic_PulseMotif.mp4 into scene 0 (7.0s)
-  [manim] Injected generic_GrowingBars.mp4 into scene 1 (7.0s)
-  [manim] Injected generic_CycleLoop.mp4 into scene 9 (7.0s)
-  [animation] manim x3, vector x0
-  Shots: 35 | Avg 4.3s | Providers: {'manim': 3, 'placeholder': 25, 'pexels': 5, 'emergency': 2} | Fallbacks: 27
-
-[8b/16] AI IMAGE GENERATION (NIM primary → Pollinations fallback, parallel)
-  [AI] !! nim failed: NVIDIA NIM generation failed: HTTP Error 404: Not Found
-  [AI] pollinations: generated ai_sem_4_28677.png (51 KB)
-  [AI] !! nim failed: NVIDIA NIM generation failed: HTTP Error 404: Not Found
-  [AI] !! nim failed: NVIDIA NIM generation failed: HTTP Error 404: Not Found
-  [AI] !! pollinations failed: HTTP Error 429: Too Many Requests
-  [AI] !! semantic_1 generation failed on all providers
-  [AI] pollinations: generated ai_sem_3_85049.png (50 KB)
-  [AI] !! nim failed: NVIDIA NIM generation failed: HTTP Error 404: Not Found
-  [AI] pollinations: generated ai_sem_5_63410.png (41 KB)
-  [AI] !! nim failed: NVIDIA NIM generation failed: HTTP Error 404: Not Found
-  [AI] pollinations: generated ai_sem_6_14090.png (53 KB)
-  [AI] !! nim failed: NVIDIA NIM generation failed: HTTP Error 404: Not Found
-  [AI] pollinations: generated ai_sem_7_84187.png (48 KB)
-  [AI] injected interstellar into scene 6 (6.5s)
-  [AI] injected interstellar into scene 3 (6.0s)
-  [AI] semantic still injected into scene 4 (→ 0.90, 6.0s)
-  [AI] semantic still injected into scene 3 (→ 0.90, 6.0s)
-  [AI] semantic still injected into scene 5 (→ 0.90, 6.0s)
-  [AI] semantic still injected into scene 6 (→ 0.90, 6.5s)
-  [AI] semantic still injected into scene 7 (→ 0.90, 6.0s)
-  Generated 7, injected 2, semantic-injected 5 (302.1s)
-  [fish] voice verified: 'Narrator' (id=0327fdb5da9e4fd782899a8058c8ae2b)
-  [fish] voice verified: 'Narrator' (id=0327fdb5da9e4fd782899a8058c8ae2b)
-  [fish] synthesizing (model=s2.1-pro-free, voice=0327fdb5da9e4fd782899a8058c8ae2b): '[measured] A single note, fifty-two hert...'
-  [fish] saved cache/audio/scene_0.wav (2034 KB)
-  [fish] synthesizing (model=s2.1-pro-free, voice=0327fdb5da9e4fd782899a8058c8ae2b): '[measured] In nineteen eighty-nine, the ...'
-  [fish] saved cache/audio/scene_1.wav (1368 KB)
-  [fish] synthesizing (model=s2.1-pro-free, voice=0327fdb5da9e4fd782899a8058c8ae2b): '[calm] Blue whales hum at ten to forty h...'
-  [fish] saved cache/audio/scene_2.wav (1782 KB)
-  [fish] synthesizing (model=s2.1-pro-free, voice=0327fdb5da9e4fd782899a8058c8ae2b): '[calm] For thirty years, it’s called, tw...'
-  [fish] saved cache/audio/scene_3.wav (1300 KB)
-  [fish] synthesizing (model=s2.1-pro-free, voice=0327fdb5da9e4fd782899a8058c8ae2b): '[measured] Science suspects it may be a ...'
-  [fish] saved cache/audio/scene_4.wav (1480 KB)
-  [fish] synthesizing (model=s2.1-pro-free, voice=0327fdb5da9e4fd782899a8058c8ae2b): '[calm] From thirty-two degrees north to ...'
-  [fish] saved cache/audio/scene_5.wav (1521 KB)
-  [fish] synthesizing (model=s2.1-pro-free, voice=0327fdb5da9e4fd782899a8058c8ae2b): '[measured] You can hear it live on hydro...'
-  [fish] saved cache/audio/scene_6.wav (981 KB)
-  [fish] synthesizing (model=s2.1-pro-free, voice=0327fdb5da9e4fd782899a8058c8ae2b): '[calm] For thirty years, one voice. Alon...'
-  [fish] saved cache/audio/scene_7.wav (2101 KB)
-  [fish] synthesizing (model=s2.1-pro-free, voice=0327fdb5da9e4fd782899a8058c8ae2b): '[measured] Why does it call? Is it lost?...'
-  [fish] saved cache/audio/scene_8.wav (931 KB)
-  [fish] synthesizing (model=s2.1-pro-free, voice=0327fdb5da9e4fd782899a8058c8ae2b): '[measured] Decades later, the mystery re...'
-  [fish] saved cache/audio/scene_9.wav (499 KB)
-[timeline] Wrote results/the_52_hertz_whale__the_loneliest_voice_in_t/timeline.json
-  !! PRE-RENDER GATE BLOCKED: ['shot_hold', 'pacing', 'resolution_headroom']
-
-[12/16] RENDERING → results/the_52_hertz_whale__the_loneliest_voice_in_t/the_52_hertz_whale__the_loneliest_voice_in_t_v1.mp4
-  [subs] 184 subtitle clips (10 scenes)
--> Adding 184 animated subtitle clips...
-Rendering results/the_52_hertz_whale__the_loneliest_voice_in_t/the_52_hertz_whale__the_loneliest_voice_in_t_v1.mp4 on CPU...
-Moviepy - Building video results/the_52_hertz_whale__the_loneliest_voice_in_t/the_52_hertz_whale__the_loneliest_voice_in_t_v1.mp4.
-MoviePy - Writing audio in the_52_hertz_whale__the_loneliest_voice_in_t_v1TEMP_MPY_wvf_snd.mp4
-chunk:   0%|          | 0/1792 [00:00<?, ?it/s, now=None]chunk:   6%|▌         | 109/1792 [00:00<00:02, 836.66it/s, now=None]chunk:  11%|█         | 193/1792 [00:00<00:01, 820.30it/s, now=None]chunk:  15%|█▌        | 275/1792 [00:00<00:02, 688.35it/s, now=None]chunk:  19%|█▉        | 346/1792 [00:00<00:02, 661.78it/s, now=None]chunk:  23%|██▎       | 416/1792 [00:00<00:02, 666.84it/s, now=None]chunk:  27%|██▋       | 484/1792 [00:00<00:02, 636.73it/s, now=None]chunk:  31%|███       | 549/1792 [00:00<00:01, 624.97it/s, now=None]chunk:  35%|███▌      | 636/1792 [00:00<00:01, 689.49it/s, now=None]chunk:  39%|███▉      | 706/1792 [00:01<00:01, 676.55it/s, now=None]chunk:  44%|████▎     | 780/1792 [00:01<00:01, 681.56it/s, now=None]chunk:  48%|████▊     | 856/1792 [00:01<00:01, 696.62it/s, now=None]chunk:  52%|█████▏    | 926/1792 [00:01<00:01, 674.12it/s, now=None]chunk:  55%|█████▌    | 994/1792 [00:01<00:01, 632.62it/s, now=None]chunk:  60%|██████    | 1076/1792 [00:01<00:01, 659.67it/s, now=None]chunk:  64%|██████▍   | 1152/1792 [00:01<00:00, 687.11it/s, now=None]chunk:  69%|██████▉   | 1239/1792 [00:01<00:00, 738.31it/s, now=None]chunk:  73%|███████▎  | 1314/1792 [00:01<00:00, 680.59it/s, now=None]chunk:  78%|███████▊  | 1396/1792 [00:02<00:00, 708.01it/s, now=None]chunk:  82%|████████▏ | 1476/1792 [00:02<00:00, 730.29it/s, now=None]chunk:  87%|████████▋ | 1553/1792 [00:02<00:00, 740.82it/s, now=None]chunk:  91%|█████████ | 1628/1792 [00:02<00:00, 728.90it/s, now=None]chunk:  95%|█████████▍| 1702/1792 [00:02<00:00, 720.65it/s, now=None]chunk: 100%|█████████▉| 1787/1792 [00:02<00:00, 754.54it/s, now=None]                                                                     MoviePy - Done.
-Moviepy - Writing video results/the_52_hertz_whale__the_loneliest_voice_in_t/the_52_hertz_whale__the_loneliest_voice_in_t_v1.mp4
-
-t:   0%|          | 0/2438 [00:00<?, ?it/s, now=None]t:   0%|          | 5/2438 [00:00<00:55, 43.83it/s, now=None]t:   0%|          | 10/2438 [00:00<01:01, 39.68it/s, now=None]t:   1%|          | 14/2438 [00:00<01:03, 37.98it/s, now=None]t:   1%|          | 18/2438 [00:00<01:03, 37.93it/s, now=None]t:   1%|          | 22/2438 [00:00<01:04, 37.63it/s, now=None]t:   1%|          | 26/2438 [00:00<01:04, 37.65it/s, now=None]t:   1%|          | 30/2438 [00:00<01:04, 37.55it/s, now=None]t:   1%|▏         | 34/2438 [00:00<01:03, 37.61it/s, now=None]t:   2%|▏         | 38/2438 [00:01<01:04, 37.33it/s, now=None]t:   2%|▏         | 42/2438 [00:01<01:03, 37.81it/s, now=None]t:   2%|▏         | 46/2438 [00:01<01:04, 37.32it/s, now=None]t:   2%|▏         | 50/2438 [00:01<01:07, 35.62it/s, now=None]t:   2%|▏         | 54/2438 [00:01<01:07, 35.42it/s, now=None]t:   2%|▏         | 58/2438 [00:01<01:07, 35.09it/s, now=None]t:   3%|▎         | 62/2438 [00:01<01:08, 34.68it/s, now=None]t:   3%|▎         | 66/2438 [00:01<01:09, 34.17it/s, now=None]t:   3%|▎         | 70/2438 [00:01<01:06, 35.46it/s, now=None]t:   3%|▎         | 74/2438 [00:02<01:05, 36.04it/s, now=None]t:   3%|▎         | 78/2438 [00:02<01:06, 35.66it/s, now=None]t:   3%|▎         | 82/2438 [00:02<01:06, 35.20it/s, now=None]t:   4%|▎         | 86/2438 [00:02<01:07, 34.61it/s, now=None]t:   4%|▎         | 90/2438 [00:02<01:07, 34.66it/s, now=None]t:   4%|▍         | 94/2438 [00:02<01:10, 33.42it/s, now=None]t:   4%|▍         | 98/2438 [00:02<01:08, 34.41it/s, now=None]t:   4%|▍         | 102/2438 [00:02<01:07, 34.70it/s, now=None]t:   4%|▍         | 106/2438 [00:02<01:08, 34.12it/s, now=None]t:   5%|▍         | 110/2438 [00:03<01:08, 34.01it/s, now=None]t:   5%|▍         | 114/2438 [00:03<01:09, 33.53it/s, now=None]t:   5%|▍         | 118/2438 [00:03<01:07, 34.35it/s, now=None]t:   5%|▌         | 122/2438 [00:03<01:05, 35.62it/s, now=None]t:   5%|▌         | 126/2438 [00:03<01:09, 33.24it/s, now=None]t:   5%|▌         | 130/2438 [00:03<01:10, 32.91it/s, now=None]t:   5%|▌         | 134/2438 [00:03<01:11, 32.24it/s, now=None]t:   6%|▌         | 138/2438 [00:03<01:10, 32.45it/s, now=None]t:   6%|▌         | 142/2438 [00:04<01:09, 33.03it/s, now=None]t:   6%|▌         | 146/2438 [00:04<01:10, 32.50it/s, now=None]t:   6%|▌         | 150/2438 [00:04<01:13, 31.14it/s, now=None]t:   6%|▋         | 154/2438 [00:04<01:10, 32.55it/s, now=None]t:   6%|▋         | 158/2438 [00:04<01:06, 34.23it/s, now=None]t:   7%|▋         | 162/2438 [00:04<01:05, 34.73it/s, now=None]t:   7%|▋         | 166/2438 [00:04<01:02, 36.09it/s, now=None]t:   7%|▋         | 170/2438 [00:04<01:01, 36.85it/s, now=None]t:   7%|▋         | 174/2438 [00:04<01:00, 37.12it/s, now=None]t:   7%|▋         | 179/2438 [00:05<01:00, 37.57it/s, now=None]t:   8%|▊         | 183/2438 [00:05<00:59, 38.20it/s, now=None]t:   8%|▊         | 188/2438 [00:05<00:57, 39.12it/s, now=None]t:   8%|▊         | 193/2438 [00:05<00:56, 40.00it/s, now=None]t:   8%|▊         | 198/2438 [00:05<00:56, 39.97it/s, now=None]t:   8%|▊         | 202/2438 [00:05<00:57, 39.17it/s, now=None]t:   8%|▊         | 206/2438 [00:05<00:57, 38.74it/s, now=None]t:   9%|▊         | 210/2438 [00:05<00:57, 38.61it/s, now=None]t:   9%|▉         | 214/2438 [00:05<00:57, 38.94it/s, now=None]t:   9%|▉         | 219/2438 [00:06<00:55, 39.64it/s, now=None]t:   9%|▉         | 224/2438 [00:06<00:52, 42.00it/s, now=None]t:   9%|▉         | 229/2438 [00:06<00:50, 43.75it/s, now=None]t:  10%|▉         | 234/2438 [00:06<00:49, 44.43it/s, now=None]t:  10%|▉         | 239/2438 [00:06<00:48, 45.00it/s, now=None]t:  10%|█         | 244/2438 [00:06<00:50, 43.33it/s, now=None]t:  10%|█         | 249/2438 [00:06<00:53, 41.15it/s, now=None]t:  10%|█         | 254/2438 [00:06<00:54, 40.40it/s, now=None]t:  11%|█         | 259/2438 [00:07<00:53, 41.09it/s, now=None]t:  11%|█         | 264/2438 [00:07<00:52, 41.38it/s, now=None]t:  11%|█         | 269/2438 [00:07<00:53, 40.67it/s, now=None]t:  11%|█         | 274/2438 [00:07<00:54, 39.69it/s, now=None]t:  11%|█▏        | 279/2438 [00:07<00:53, 40.15it/s, now=None]t:  12%|█▏        | 284/2438 [00:07<00:55, 38.63it/s, now=None]t:  12%|█▏        | 288/2438 [00:07<00:57, 37.72it/s, now=None]t:  12%|█▏        | 293/2438 [00:07<00:55, 38.65it/s, now=None]t:  12%|█▏        | 297/2438 [00:07<00:55, 38.55it/s, now=None]t:  12%|█▏        | 302/2438 [00:08<00:53, 39.84it/s, now=None]t:  13%|█▎        | 307/2438 [00:08<00:52, 40.81it/s, now=None]t:  13%|█▎        | 312/2438 [00:08<00:50, 42.02it/s, now=None]t:  13%|█▎        | 317/2438 [00:08<00:49, 42.91it/s, now=None]t:  13%|█▎        | 322/2438 [00:08<00:48, 43.21it/s, now=None]t:  13%|█▎        | 327/2438 [00:08<00:49, 42.90it/s, now=None]t:  14%|█▎        | 332/2438 [00:08<00:49, 42.87it/s, now=None]t:  14%|█▍        | 337/2438 [00:08<00:50, 41.49it/s, now=None]t:  14%|█▍        | 342/2438 [00:09<00:50, 41.18it/s, now=None]t:  14%|█▍        | 347/2438 [00:09<00:49, 42.47it/s, now=None]t:  14%|█▍        | 352/2438 [00:09<00:47, 43.49it/s, now=None]t:  15%|█▍        | 357/2438 [00:09<00:47, 43.62it/s, now=None]t:  15%|█▍        | 362/2438 [00:09<00:52, 39.52it/s, now=None]t:  15%|█▌        | 367/2438 [00:09<00:57, 36.13it/s, now=None]t:  15%|█▌        | 371/2438 [00:09<00:56, 36.86it/s, now=None]t:  15%|█▌        | 375/2438 [00:09<00:55, 37.10it/s, now=None]t:  16%|█▌        | 379/2438 [00:10<00:57, 35.67it/s, now=None]t:  16%|█▌        | 383/2438 [00:10<00:59, 34.39it/s, now=None]t:  16%|█▌        | 387/2438 [00:10<01:00, 34.11it/s, now=None]t:  16%|█▌        | 391/2438 [00:10<01:01, 33.40it/s, now=None]t:  16%|█▌        | 395/2438 [00:10<01:02, 32.72it/s, now=None]t:  16%|█▋        | 399/2438 [00:10<01:05, 31.35it/s, now=None]t:  17%|█▋        | 403/2438 [00:10<01:03, 32.20it/s, now=None]t:  17%|█▋        | 407/2438 [00:10<01:02, 32.65it/s, now=None]t:  17%|█▋        | 411/2438 [00:11<01:02, 32.36it/s, now=None]t:  17%|█▋        | 415/2438 [00:11<01:01, 32.88it/s, now=None]t:  17%|█▋        | 419/2438 [00:11<00:58, 34.32it/s, now=None]t:  17%|█▋        | 423/2438 [00:11<00:59, 34.09it/s, now=None]t:  18%|█▊        | 427/2438 [00:11<01:00, 33.45it/s, now=None]t:  18%|█▊        | 431/2438 [00:11<00:58, 34.15it/s, now=None]t:  18%|█▊        | 435/2438 [00:11<00:58, 34.37it/s, now=None]t:  18%|█▊        | 439/2438 [00:11<00:57, 34.70it/s, now=None]t:  18%|█▊        | 443/2438 [00:11<00:57, 34.52it/s, now=None]t:  18%|█▊        | 447/2438 [00:12<00:59, 33.74it/s, now=None]t:  18%|█▊        | 451/2438 [00:12<00:58, 33.97it/s, now=None]t:  19%|█▊        | 455/2438 [00:12<00:59, 33.45it/s, now=None]t:  19%|█▉        | 459/2438 [00:12<01:00, 32.60it/s, now=None]t:  19%|█▉        | 463/2438 [00:12<00:58, 33.77it/s, now=None]t:  19%|█▉        | 467/2438 [00:12<00:56, 34.75it/s, now=None]t:  19%|█▉        | 472/2438 [00:12<00:54, 36.03it/s, now=None]t:  20%|█▉        | 476/2438 [00:12<00:55, 35.65it/s, now=None]t:  20%|█▉        | 481/2438 [00:13<00:52, 37.31it/s, now=None]t:  20%|█▉        | 486/2438 [00:13<00:49, 39.46it/s, now=None]t:  20%|██        | 491/2438 [00:13<00:47, 41.39it/s, now=None]t:  20%|██        | 496/2438 [00:13<00:44, 43.28it/s, now=None]t:  21%|██        | 501/2438 [00:13<00:42, 45.14it/s, now=None]t:  21%|██        | 506/2438 [00:13<00:42, 45.62it/s, now=None]t:  21%|██        | 511/2438 [00:13<00:42, 45.15it/s, now=None]t:  21%|██        | 517/2438 [00:13<00:39, 48.56it/s, now=None]t:  21%|██▏       | 523/2438 [00:13<00:38, 49.53it/s, now=None]t:  22%|██▏       | 529/2438 [00:14<00:37, 50.32it/s, now=None]t:  22%|██▏       | 535/2438 [00:14<00:38, 49.83it/s, now=None]t:  22%|██▏       | 540/2438 [00:14<00:39, 48.41it/s, now=None]t:  22%|██▏       | 545/2438 [00:14<00:38, 48.59it/s, now=None]t:  23%|██▎       | 550/2438 [00:14<00:38, 48.58it/s, now=None]t:  23%|██▎       | 555/2438 [00:14<00:40, 46.80it/s, now=None]t:  23%|██▎       | 560/2438 [00:14<00:40, 46.51it/s, now=None]t:  23%|██▎       | 565/2438 [00:14<00:40, 46.17it/s, now=None]t:  23%|██▎       | 571/2438 [00:14<00:37, 49.45it/s, now=None]t:  24%|██▎       | 576/2438 [00:14<00:37, 49.56it/s, now=None]t:  24%|██▍       | 581/2438 [00:15<00:37, 48.88it/s, now=None]t:  24%|██▍       | 587/2438 [00:15<00:37, 49.76it/s, now=None]t:  24%|██▍       | 593/2438 [00:15<00:35, 51.32it/s, now=None]t:  25%|██▍       | 599/2438 [00:15<00:36, 49.86it/s, now=None]t:  25%|██▍       | 605/2438 [00:15<00:39, 46.33it/s, now=None]t:  25%|██▌       | 610/2438 [00:15<00:41, 43.88it/s, now=None]t:  25%|██▌       | 615/2438 [00:15<00:41, 43.94it/s, now=None]t:  25%|██▌       | 620/2438 [00:15<00:42, 42.98it/s, now=None]t:  26%|██▌       | 625/2438 [00:16<00:43, 42.04it/s, now=None]t:  26%|██▌       | 630/2438 [00:16<00:41, 43.85it/s, now=None]t:  26%|██▌       | 635/2438 [00:16<00:42, 42.89it/s, now=None]t:  26%|██▋       | 640/2438 [00:16<00:43, 41.64it/s, now=None]t:  26%|██▋       | 645/2438 [00:16<00:48, 37.06it/s, now=None]t:  27%|██▋       | 649/2438 [00:16<00:49, 36.05it/s, now=None]t:  27%|██▋       | 654/2438 [00:16<00:47, 37.48it/s, now=None]t:  27%|██▋       | 658/2438 [00:16<00:48, 36.80it/s, now=None]t:  27%|██▋       | 662/2438 [00:17<00:50, 34.89it/s, now=None]t:  27%|██▋       | 666/2438 [00:17<00:50, 35.33it/s, now=None]t:  27%|██▋       | 670/2438 [00:17<00:49, 35.88it/s, now=None]t:  28%|██▊       | 675/2438 [00:17<00:47, 36.95it/s, now=None]t:  28%|██▊       | 679/2438 [00:17<00:50, 35.04it/s, now=None]t:  28%|██▊       | 683/2438 [00:17<00:55, 31.90it/s, now=None]t:  28%|██▊       | 688/2438 [00:17<00:50, 34.36it/s, now=None]t:  28%|██▊       | 692/2438 [00:17<00:50, 34.43it/s, now=None]t:  29%|██▊       | 696/2438 [00:18<00:49, 34.93it/s, now=None]t:  29%|██▊       | 700/2438 [00:18<00:49, 35.01it/s, now=None]t:  29%|██▉       | 704/2438 [00:18<00:49, 35.11it/s, now=None]t:  29%|██▉       | 708/2438 [00:18<00:48, 35.92it/s, now=None]t:  29%|██▉       | 712/2438 [00:18<00:51, 33.49it/s, now=None]t:  29%|██▉       | 716/2438 [00:18<00:52, 32.66it/s, now=None]t:  30%|██▉       | 720/2438 [00:18<00:51, 33.09it/s, now=None]t:  30%|██▉       | 724/2438 [00:18<00:51, 33.30it/s, now=None]t:  30%|██▉       | 728/2438 [00:19<00:49, 34.21it/s, now=None]t:  30%|███       | 732/2438 [00:19<00:48, 35.27it/s, now=None]t:  30%|███       | 736/2438 [00:19<00:49, 34.52it/s, now=None]t:  30%|███       | 740/2438 [00:19<00:49, 34.14it/s, now=None]t:  31%|███       | 745/2438 [00:19<00:46, 36.56it/s, now=None]t:  31%|███       | 749/2438 [00:19<00:47, 35.47it/s, now=None]t:  31%|███       | 753/2438 [00:19<00:49, 34.07it/s, now=None]t:  31%|███       | 758/2438 [00:19<00:46, 35.78it/s, now=None]t:  31%|███▏      | 762/2438 [00:19<00:46, 35.72it/s, now=None]t:  31%|███▏      | 766/2438 [00:20<00:45, 36.44it/s, now=None]t:  32%|███▏      | 771/2438 [00:20<00:43, 38.64it/s, now=None]t:  32%|███▏      | 775/2438 [00:20<00:43, 38.49it/s, now=None]t:  32%|███▏      | 779/2438 [00:20<00:42, 38.59it/s, now=None]t:  32%|███▏      | 784/2438 [00:20<00:40, 40.36it/s, now=None]t:  32%|███▏      | 789/2438 [00:20<00:40, 40.36it/s, now=None]t:  33%|███▎      | 794/2438 [00:20<00:41, 39.87it/s, now=None]t:  33%|███▎      | 798/2438 [00:20<00:42, 38.59it/s, now=None]t:  33%|███▎      | 803/2438 [00:21<00:41, 39.50it/s, now=None]t:  33%|███▎      | 808/2438 [00:21<00:41, 39.66it/s, now=None]t:  33%|███▎      | 813/2438 [00:21<00:39, 40.96it/s, now=None]t:  34%|███▎      | 818/2438 [00:21<00:37, 42.66it/s, now=None]t:  34%|███▍      | 823/2438 [00:21<00:37, 43.58it/s, now=None]t:  34%|███▍      | 828/2438 [00:21<00:36, 44.26it/s, now=None]t:  34%|███▍      | 833/2438 [00:21<00:36, 43.95it/s, now=None]t:  34%|███▍      | 838/2438 [00:21<00:36, 43.80it/s, now=None]t:  35%|███▍      | 843/2438 [00:21<00:37, 42.35it/s, now=None]t:  35%|███▍      | 848/2438 [00:22<00:36, 43.06it/s, now=None]t:  35%|███▍      | 853/2438 [00:22<00:37, 42.30it/s, now=None]t:  35%|███▌      | 858/2438 [00:22<00:37, 42.03it/s, now=None]t:  35%|███▌      | 863/2438 [00:22<00:37, 41.47it/s, now=None]t:  36%|███▌      | 868/2438 [00:22<00:38, 41.13it/s, now=None]t:  36%|███▌      | 873/2438 [00:22<00:37, 41.20it/s, now=None]t:  36%|███▌      | 878/2438 [00:22<00:37, 41.79it/s, now=None]t:  36%|███▌      | 883/2438 [00:22<00:37, 41.96it/s, now=None]t:  36%|███▋      | 888/2438 [00:23<00:36, 42.53it/s, now=None]t:  37%|███▋      | 893/2438 [00:23<00:37, 40.67it/s, now=None]t:  37%|███▋      | 898/2438 [00:23<00:38, 39.95it/s, now=None]t:  37%|███▋      | 903/2438 [00:23<00:37, 40.76it/s, now=None]t:  37%|███▋      | 908/2438 [00:23<00:38, 39.78it/s, now=None]t:  37%|███▋      | 912/2438 [00:23<00:39, 38.83it/s, now=None]t:  38%|███▊      | 916/2438 [00:23<00:40, 37.48it/s, now=None]t:  38%|███▊      | 920/2438 [00:23<00:41, 36.27it/s, now=None]t:  38%|███▊      | 924/2438 [00:23<00:41, 36.39it/s, now=None]t:  38%|███▊      | 928/2438 [00:24<00:43, 34.50it/s, now=None]t:  38%|███▊      | 932/2438 [00:24<00:42, 35.07it/s, now=None]t:  38%|███▊      | 936/2438 [00:24<00:42, 35.15it/s, now=None]t:  39%|███▊      | 940/2438 [00:24<00:41, 36.15it/s, now=None]t:  39%|███▉      | 945/2438 [00:24<00:38, 39.09it/s, now=None]t:  39%|███▉      | 950/2438 [00:24<00:35, 41.43it/s, now=None]t:  39%|███▉      | 955/2438 [00:24<00:42, 35.23it/s, now=None]t:  39%|███▉      | 959/2438 [00:24<00:45, 32.72it/s, now=None]t:  39%|███▉      | 963/2438 [00:25<00:48, 30.16it/s, now=None]t:  40%|███▉      | 967/2438 [00:25<00:46, 31.31it/s, now=None]t:  40%|███▉      | 972/2438 [00:25<00:43, 33.61it/s, now=None]t:  40%|████      | 976/2438 [00:25<00:41, 34.82it/s, now=None]t:  40%|████      | 980/2438 [00:25<00:43, 33.69it/s, now=None]t:  40%|████      | 984/2438 [00:25<00:44, 33.02it/s, now=None]t:  41%|████      | 988/2438 [00:25<00:41, 34.75it/s, now=None]t:  41%|████      | 992/2438 [00:25<00:44, 32.36it/s, now=None]t:  41%|████      | 996/2438 [00:26<00:44, 32.22it/s, now=None]t:  41%|████      | 1000/2438 [00:26<00:43, 32.93it/s, now=None]t:  41%|████      | 1004/2438 [00:26<00:41, 34.38it/s, now=None]t:  41%|████▏     | 1008/2438 [00:26<00:47, 29.90it/s, now=None]t:  42%|████▏     | 1012/2438 [00:26<01:00, 23.42it/s, now=None]t:  42%|████▏     | 1015/2438 [00:26<01:04, 22.10it/s, now=None]t:  42%|████▏     | 1019/2438 [00:27<01:01, 23.08it/s, now=None]t:  42%|████▏     | 1022/2438 [00:27<01:01, 23.12it/s, now=None]t:  42%|████▏     | 1025/2438 [00:27<00:59, 23.66it/s, now=None]t:  42%|████▏     | 1028/2438 [00:27<01:05, 21.42it/s, now=None]t:  42%|████▏     | 1031/2438 [00:27<01:08, 20.56it/s, now=None]t:  42%|████▏     | 1034/2438 [00:27<01:11, 19.71it/s, now=None]t:  43%|████▎     | 1037/2438 [00:28<01:14, 18.79it/s, now=None]t:  43%|████▎     | 1039/2438 [00:28<01:22, 16.95it/s, now=None]t:  43%|████▎     | 1042/2438 [00:28<01:12, 19.14it/s, now=None]t:  43%|████▎     | 1044/2438 [00:28<01:14, 18.70it/s, now=None]t:  43%|████▎     | 1047/2438 [00:28<01:13, 19.00it/s, now=None]t:  43%|████▎     | 1050/2438 [00:28<01:07, 20.51it/s, now=None]t:  43%|████▎     | 1053/2438 [00:28<01:01, 22.43it/s, now=None]t:  43%|████▎     | 1057/2438 [00:28<00:55, 24.67it/s, now=None]t:  43%|████▎     | 1060/2438 [00:29<00:53, 25.80it/s, now=None]t:  44%|████▎     | 1064/2438 [00:29<00:48, 28.23it/s, now=None]t:  44%|████▍     | 1068/2438 [00:29<00:46, 29.28it/s, now=None]t:  44%|████▍     | 1072/2438 [00:29<00:44, 30.46it/s, now=None]t:  44%|████▍     | 1076/2438 [00:29<00:43, 31.25it/s, now=None]t:  44%|████▍     | 1080/2438 [00:29<00:44, 30.24it/s, now=None]t:  44%|████▍     | 1084/2438 [00:29<00:44, 30.47it/s, now=None]t:  45%|████▍     | 1088/2438 [00:29<00:42, 32.10it/s, now=None]t:  45%|████▍     | 1093/2438 [00:29<00:37, 36.07it/s, now=None]t:  45%|████▌     | 1098/2438 [00:30<00:34, 38.71it/s, now=None]t:  45%|████▌     | 1102/2438 [00:30<00:34, 38.88it/s, now=None]t:  45%|████▌     | 1106/2438 [00:30<00:34, 38.86it/s, now=None]t:  46%|████▌     | 1110/2438 [00:30<00:34, 38.68it/s, now=None]t:  46%|████▌     | 1114/2438 [00:30<00:33, 39.03it/s, now=None]t:  46%|████▌     | 1118/2438 [00:30<00:34, 38.64it/s, now=None]t:  46%|████▌     | 1123/2438 [00:30<00:32, 40.58it/s, now=None]t:  46%|████▋     | 1128/2438 [00:30<00:31, 42.16it/s, now=None]t:  46%|████▋     | 1133/2438 [00:30<00:30, 42.57it/s, now=None]t:  47%|████▋     | 1138/2438 [00:31<00:32, 40.01it/s, now=None]t:  47%|████▋     | 1143/2438 [00:31<00:33, 38.94it/s, now=None]t:  47%|████▋     | 1147/2438 [00:31<00:33, 38.56it/s, now=None]t:  47%|████▋     | 1151/2438 [00:31<00:33, 38.76it/s, now=None]t:  47%|████▋     | 1155/2438 [00:31<00:32, 39.01it/s, now=None]t:  48%|████▊     | 1159/2438 [00:31<00:33, 38.62it/s, now=None]t:  48%|████▊     | 1164/2438 [00:31<00:32, 39.59it/s, now=None]t:  48%|████▊     | 1169/2438 [00:31<00:31, 39.74it/s, now=None]t:  48%|████▊     | 1173/2438 [00:32<00:33, 37.38it/s, now=None]t:  48%|████▊     | 1177/2438 [00:32<00:36, 34.34it/s, now=None]t:  48%|████▊     | 1181/2438 [00:32<00:37, 33.50it/s, now=None]t:  49%|████▊     | 1185/2438 [00:32<00:37, 33.75it/s, now=None]t:  49%|████▉     | 1189/2438 [00:32<00:36, 34.39it/s, now=None]t:  49%|████▉     | 1193/2438 [00:32<00:36, 33.89it/s, now=None]t:  49%|████▉     | 1197/2438 [00:32<00:39, 31.27it/s, now=None]t:  49%|████▉     | 1201/2438 [00:32<00:37, 32.89it/s, now=None]t:  49%|████▉     | 1205/2438 [00:33<00:37, 33.24it/s, now=None]t:  50%|████▉     | 1209/2438 [00:33<00:45, 27.16it/s, now=None]t:  50%|████▉     | 1213/2438 [00:33<00:43, 27.87it/s, now=None]t:  50%|████▉     | 1217/2438 [00:33<00:40, 30.21it/s, now=None]t:  50%|█████     | 1221/2438 [00:33<00:39, 31.15it/s, now=None]t:  50%|█████     | 1225/2438 [00:33<00:39, 30.42it/s, now=None]t:  50%|█████     | 1229/2438 [00:33<00:37, 32.50it/s, now=None]t:  51%|█████     | 1233/2438 [00:33<00:37, 32.32it/s, now=None]t:  51%|█████     | 1237/2438 [00:34<00:35, 34.13it/s, now=None]t:  51%|█████     | 1241/2438 [00:34<00:33, 35.35it/s, now=None]t:  51%|█████     | 1245/2438 [00:34<00:34, 35.01it/s, now=None]t:  51%|█████     | 1249/2438 [00:34<00:33, 35.84it/s, now=None]t:  51%|█████▏    | 1253/2438 [00:34<00:35, 33.72it/s, now=None]t:  52%|█████▏    | 1257/2438 [00:34<00:35, 33.36it/s, now=None]t:  52%|█████▏    | 1261/2438 [00:34<00:34, 34.22it/s, now=None]t:  52%|█████▏    | 1265/2438 [00:34<00:38, 30.40it/s, now=None]t:  52%|█████▏    | 1269/2438 [00:35<00:38, 30.13it/s, now=None]t:  52%|█████▏    | 1273/2438 [00:35<00:39, 29.57it/s, now=None]t:  52%|█████▏    | 1277/2438 [00:35<00:40, 28.58it/s, now=None]t:  53%|█████▎    | 1280/2438 [00:35<00:40, 28.73it/s, now=None]t:  53%|█████▎    | 1284/2438 [00:35<00:38, 29.95it/s, now=None]t:  53%|█████▎    | 1288/2438 [00:35<00:37, 30.32it/s, now=None]t:  53%|█████▎    | 1292/2438 [00:35<00:36, 31.20it/s, now=None]t:  53%|█████▎    | 1296/2438 [00:35<00:35, 31.91it/s, now=None]t:  53%|█████▎    | 1300/2438 [00:36<00:35, 32.14it/s, now=None]t:  53%|█████▎    | 1304/2438 [00:36<00:35, 32.30it/s, now=None]t:  54%|█████▎    | 1308/2438 [00:36<00:34, 32.91it/s, now=None]t:  54%|█████▍    | 1312/2438 [00:36<00:32, 34.31it/s, now=None]t:  54%|█████▍    | 1316/2438 [00:36<00:31, 35.64it/s, now=None]t:  54%|█████▍    | 1320/2438 [00:36<00:31, 35.98it/s, now=None]t:  54%|█████▍    | 1325/2438 [00:36<00:28, 39.27it/s, now=None]t:  55%|█████▍    | 1330/2438 [00:36<00:26, 41.08it/s, now=None]t:  55%|█████▍    | 1335/2438 [00:36<00:27, 39.78it/s, now=None]t:  55%|█████▍    | 1340/2438 [00:37<00:28, 38.77it/s, now=None]t:  55%|█████▌    | 1345/2438 [00:37<00:27, 39.38it/s, now=None]t:  55%|█████▌    | 1350/2438 [00:37<00:27, 39.68it/s, now=None]t:  56%|█████▌    | 1355/2438 [00:37<00:26, 41.21it/s, now=None]t:  56%|█████▌    | 1360/2438 [00:37<00:25, 41.78it/s, now=None]t:  56%|█████▌    | 1365/2438 [00:37<00:25, 42.54it/s, now=None]t:  56%|█████▌    | 1370/2438 [00:37<00:25, 42.20it/s, now=None]t:  56%|█████▋    | 1375/2438 [00:37<00:24, 43.87it/s, now=None]t:  57%|█████▋    | 1380/2438 [00:38<00:24, 42.82it/s, now=None]t:  57%|█████▋    | 1385/2438 [00:38<00:24, 42.46it/s, now=None]t:  57%|█████▋    | 1390/2438 [00:38<00:23, 44.26it/s, now=None]t:  57%|█████▋    | 1395/2438 [00:38<00:23, 44.42it/s, now=None]t:  57%|█████▋    | 1400/2438 [00:38<00:23, 43.27it/s, now=None]t:  58%|█████▊    | 1405/2438 [00:38<00:25, 41.05it/s, now=None]t:  58%|█████▊    | 1410/2438 [00:38<00:26, 39.33it/s, now=None]t:  58%|█████▊    | 1414/2438 [00:38<00:26, 39.09it/s, now=None]t:  58%|█████▊    | 1419/2438 [00:38<00:25, 39.23it/s, now=None]t:  58%|█████▊    | 1423/2438 [00:39<00:26, 38.26it/s, now=None]t:  59%|█████▊    | 1427/2438 [00:39<00:26, 37.45it/s, now=None]t:  59%|█████▊    | 1431/2438 [00:39<00:27, 36.83it/s, now=None]t:  59%|█████▉    | 1435/2438 [00:39<00:31, 31.61it/s, now=None]t:  59%|█████▉    | 1439/2438 [00:39<00:32, 31.13it/s, now=None]t:  59%|█████▉    | 1443/2438 [00:39<00:39, 25.43it/s, now=None]t:  59%|█████▉    | 1446/2438 [00:39<00:37, 26.36it/s, now=None]t:  59%|█████▉    | 1449/2438 [00:40<00:42, 23.39it/s, now=None]t:  60%|█████▉    | 1452/2438 [00:40<00:41, 23.95it/s, now=None]t:  60%|█████▉    | 1455/2438 [00:40<00:42, 23.37it/s, now=None]t:  60%|█████▉    | 1458/2438 [00:40<00:41, 23.61it/s, now=None]t:  60%|█████▉    | 1461/2438 [00:40<00:42, 22.95it/s, now=None]t:  60%|██████    | 1464/2438 [00:40<00:44, 21.90it/s, now=None]t:  60%|██████    | 1467/2438 [00:40<00:47, 20.54it/s, now=None]t:  60%|██████    | 1470/2438 [00:41<00:44, 21.86it/s, now=None]t:  60%|██████    | 1473/2438 [00:41<00:41, 23.43it/s, now=None]t:  61%|██████    | 1476/2438 [00:41<00:39, 24.60it/s, now=None]t:  61%|██████    | 1479/2438 [00:41<00:37, 25.46it/s, now=None]t:  61%|██████    | 1483/2438 [00:41<00:33, 28.53it/s, now=None]t:  61%|██████    | 1487/2438 [00:41<00:34, 27.68it/s, now=None]t:  61%|██████    | 1491/2438 [00:41<00:31, 29.76it/s, now=None]t:  61%|██████▏   | 1495/2438 [00:41<00:29, 31.97it/s, now=None]t:  61%|██████▏   | 1499/2438 [00:42<00:31, 29.69it/s, now=None]t:  62%|██████▏   | 1503/2438 [00:42<00:30, 30.36it/s, now=None]t:  62%|██████▏   | 1507/2438 [00:42<00:30, 30.66it/s, now=None]t:  62%|██████▏   | 1511/2438 [00:42<00:32, 28.53it/s, now=None]t:  62%|██████▏   | 1515/2438 [00:42<00:32, 28.73it/s, now=None]t:  62%|██████▏   | 1518/2438 [00:42<00:36, 25.31it/s, now=None]t:  62%|██████▏   | 1521/2438 [00:42<00:34, 26.33it/s, now=None]t:  63%|██████▎   | 1524/2438 [00:42<00:36, 25.26it/s, now=None]t:  63%|██████▎   | 1527/2438 [00:43<00:35, 25.40it/s, now=None]t:  63%|██████▎   | 1531/2438 [00:43<00:32, 27.63it/s, now=None]t:  63%|██████▎   | 1535/2438 [00:43<00:31, 28.58it/s, now=None]t:  63%|██████▎   | 1538/2438 [00:43<00:31, 28.93it/s, now=None]t:  63%|██████▎   | 1541/2438 [00:43<00:35, 25.51it/s, now=None]t:  63%|██████▎   | 1544/2438 [00:43<00:35, 25.04it/s, now=None]t:  63%|██████▎   | 1548/2438 [00:43<00:32, 27.09it/s, now=None]t:  64%|██████▎   | 1551/2438 [00:43<00:32, 27.57it/s, now=None]t:  64%|██████▍   | 1555/2438 [00:44<00:29, 30.07it/s, now=None]t:  64%|██████▍   | 1559/2438 [00:44<00:27, 31.48it/s, now=None]t:  64%|██████▍   | 1563/2438 [00:44<00:26, 32.84it/s, now=None]t:  64%|██████▍   | 1567/2438 [00:44<00:25, 33.85it/s, now=None]t:  64%|██████▍   | 1572/2438 [00:44<00:23, 37.39it/s, now=None]t:  65%|██████▍   | 1577/2438 [00:44<00:21, 40.71it/s, now=None]t:  65%|██████▍   | 1582/2438 [00:44<00:20, 42.16it/s, now=None]t:  65%|██████▌   | 1587/2438 [00:44<00:19, 44.03it/s, now=None]t:  65%|██████▌   | 1592/2438 [00:44<00:18, 45.17it/s, now=None]t:  66%|██████▌   | 1597/2438 [00:45<00:18, 45.27it/s, now=None]t:  66%|██████▌   | 1602/2438 [00:45<00:18, 45.70it/s, now=None]t:  66%|██████▌   | 1608/2438 [00:45<00:17, 47.61it/s, now=None]t:  66%|██████▌   | 1614/2438 [00:45<00:16, 50.95it/s, now=None]t:  66%|██████▋   | 1620/2438 [00:45<00:17, 48.03it/s, now=None]t:  67%|██████▋   | 1625/2438 [00:45<00:18, 42.79it/s, now=None]t:  67%|██████▋   | 1630/2438 [00:45<00:18, 44.01it/s, now=None]t:  67%|██████▋   | 1636/2438 [00:45<00:16, 47.85it/s, now=None]t:  67%|██████▋   | 1641/2438 [00:45<00:16, 47.87it/s, now=None]t:  68%|██████▊   | 1646/2438 [00:46<00:17, 46.25it/s, now=None]t:  68%|██████▊   | 1651/2438 [00:46<00:16, 47.08it/s, now=None]t:  68%|██████▊   | 1656/2438 [00:46<00:18, 43.44it/s, now=None]t:  68%|██████▊   | 1661/2438 [00:46<00:18, 41.55it/s, now=None]t:  68%|██████▊   | 1666/2438 [00:46<00:19, 39.03it/s, now=None]t:  68%|██████▊   | 1670/2438 [00:46<00:20, 37.23it/s, now=None]t:  69%|██████▊   | 1674/2438 [00:46<00:20, 37.26it/s, now=None]t:  69%|██████▉   | 1678/2438 [00:46<00:20, 36.96it/s, now=None]t:  69%|██████▉   | 1682/2438 [00:47<00:21, 35.63it/s, now=None]t:  69%|██████▉   | 1686/2438 [00:47<00:21, 34.72it/s, now=None]t:  69%|██████▉   | 1690/2438 [00:47<00:21, 34.58it/s, now=None]t:  69%|██████▉   | 1694/2438 [00:47<00:22, 33.67it/s, now=None]t:  70%|██████▉   | 1698/2438 [00:47<00:21, 33.88it/s, now=None]t:  70%|██████▉   | 1702/2438 [00:47<00:22, 32.67it/s, now=None]t:  70%|██████▉   | 1706/2438 [00:47<00:22, 32.08it/s, now=None]t:  70%|███████   | 1710/2438 [00:47<00:22, 31.81it/s, now=None]t:  70%|███████   | 1714/2438 [00:48<00:23, 30.32it/s, now=None]t:  70%|███████   | 1718/2438 [00:48<00:23, 30.50it/s, now=None]t:  71%|███████   | 1722/2438 [00:48<00:22, 31.78it/s, now=None]t:  71%|███████   | 1726/2438 [00:48<00:21, 32.58it/s, now=None]t:  71%|███████   | 1730/2438 [00:48<00:20, 34.10it/s, now=None]t:  71%|███████   | 1734/2438 [00:48<00:19, 35.27it/s, now=None]t:  71%|███████▏  | 1738/2438 [00:48<00:19, 36.55it/s, now=None]t:  71%|███████▏  | 1742/2438 [00:48<00:18, 37.43it/s, now=None]t:  72%|███████▏  | 1746/2438 [00:48<00:18, 36.90it/s, now=None]t:  72%|███████▏  | 1750/2438 [00:49<00:18, 37.33it/s, now=None]t:  72%|███████▏  | 1754/2438 [00:49<00:21, 31.96it/s, now=None]t:  72%|███████▏  | 1758/2438 [00:49<00:21, 31.32it/s, now=None]t:  72%|███████▏  | 1762/2438 [00:49<00:26, 25.87it/s, now=None]t:  72%|███████▏  | 1765/2438 [00:49<00:26, 25.59it/s, now=None]t:  73%|███████▎  | 1769/2438 [00:49<00:24, 27.81it/s, now=None]t:  73%|███████▎  | 1773/2438 [00:49<00:21, 30.65it/s, now=None]t:  73%|███████▎  | 1778/2438 [00:50<00:18, 34.77it/s, now=None]t:  73%|███████▎  | 1783/2438 [00:50<00:17, 37.75it/s, now=None]t:  73%|███████▎  | 1787/2438 [00:50<00:18, 35.32it/s, now=None]t:  74%|███████▎  | 1792/2438 [00:50<00:17, 37.72it/s, now=None]t:  74%|███████▎  | 1797/2438 [00:50<00:16, 38.49it/s, now=None]t:  74%|███████▍  | 1801/2438 [00:50<00:19, 32.26it/s, now=None]t:  74%|███████▍  | 1805/2438 [00:50<00:19, 32.74it/s, now=None]t:  74%|███████▍  | 1810/2438 [00:50<00:18, 34.59it/s, now=None]t:  74%|███████▍  | 1814/2438 [00:51<00:18, 33.69it/s, now=None]t:  75%|███████▍  | 1819/2438 [00:51<00:17, 36.30it/s, now=None]t:  75%|███████▍  | 1824/2438 [00:51<00:15, 38.77it/s, now=None]t:  75%|███████▌  | 1829/2438 [00:51<00:15, 39.69it/s, now=None]t:  75%|███████▌  | 1834/2438 [00:51<00:15, 39.15it/s, now=None]t:  75%|███████▌  | 1838/2438 [00:51<00:16, 36.64it/s, now=None]t:  76%|███████▌  | 1842/2438 [00:51<00:16, 36.78it/s, now=None]t:  76%|███████▌  | 1846/2438 [00:51<00:16, 36.56it/s, now=None]t:  76%|███████▌  | 1850/2438 [00:52<00:16, 35.87it/s, now=None]t:  76%|███████▌  | 1854/2438 [00:52<00:16, 36.01it/s, now=None]t:  76%|███████▌  | 1858/2438 [00:52<00:15, 36.36it/s, now=None]t:  76%|███████▋  | 1863/2438 [00:52<00:14, 38.58it/s, now=None]t:  77%|███████▋  | 1867/2438 [00:52<00:14, 38.56it/s, now=None]t:  77%|███████▋  | 1871/2438 [00:52<00:14, 38.01it/s, now=None]t:  77%|███████▋  | 1875/2438 [00:52<00:15, 37.02it/s, now=None]t:  77%|███████▋  | 1879/2438 [00:52<00:14, 37.61it/s, now=None]t:  77%|███████▋  | 1884/2438 [00:52<00:14, 38.59it/s, now=None]t:  77%|███████▋  | 1888/2438 [00:53<00:14, 37.72it/s, now=None]t:  78%|███████▊  | 1893/2438 [00:53<00:14, 38.13it/s, now=None]t:  78%|███████▊  | 1897/2438 [00:53<00:14, 38.15it/s, now=None]t:  78%|███████▊  | 1901/2438 [00:53<00:13, 38.43it/s, now=None]t:  78%|███████▊  | 1905/2438 [00:53<00:14, 36.73it/s, now=None]t:  78%|███████▊  | 1909/2438 [00:53<00:16, 31.22it/s, now=None]t:  78%|███████▊  | 1913/2438 [00:53<00:18, 29.04it/s, now=None]t:  79%|███████▊  | 1917/2438 [00:53<00:17, 30.63it/s, now=None]t:  79%|███████▉  | 1921/2438 [00:54<00:16, 31.09it/s, now=None]t:  79%|███████▉  | 1925/2438 [00:54<00:15, 32.72it/s, now=None]t:  79%|███████▉  | 1930/2438 [00:54<00:14, 36.22it/s, now=None]t:  79%|███████▉  | 1935/2438 [00:54<00:13, 38.22it/s, now=None]t:  80%|███████▉  | 1939/2438 [00:54<00:12, 38.62it/s, now=None]t:  80%|███████▉  | 1943/2438 [00:54<00:14, 34.19it/s, now=None]t:  80%|███████▉  | 1947/2438 [00:54<00:14, 32.80it/s, now=None]t:  80%|████████  | 1951/2438 [00:54<00:17, 27.13it/s, now=None]t:  80%|████████  | 1954/2438 [00:55<00:19, 24.60it/s, now=None]t:  80%|████████  | 1957/2438 [00:55<00:19, 24.13it/s, now=None]t:  80%|████████  | 1961/2438 [00:55<00:18, 26.44it/s, now=None]t:  81%|████████  | 1964/2438 [00:55<00:17, 26.82it/s, now=None]t:  81%|████████  | 1968/2438 [00:55<00:16, 28.16it/s, now=None]t:  81%|████████  | 1971/2438 [00:55<00:16, 27.94it/s, now=None]t:  81%|████████  | 1974/2438 [00:55<00:16, 27.91it/s, now=None]t:  81%|████████  | 1977/2438 [00:55<00:17, 25.86it/s, now=None]t:  81%|████████▏ | 1981/2438 [00:56<00:16, 27.43it/s, now=None]t:  81%|████████▏ | 1985/2438 [00:56<00:15, 29.60it/s, now=None]t:  82%|████████▏ | 1989/2438 [00:56<00:14, 31.00it/s, now=None]t:  82%|████████▏ | 1993/2438 [00:56<00:13, 31.82it/s, now=None]t:  82%|████████▏ | 1997/2438 [00:56<00:13, 32.23it/s, now=None]t:  82%|████████▏ | 2001/2438 [00:56<00:13, 32.86it/s, now=None]t:  82%|████████▏ | 2005/2438 [00:56<00:13, 31.94it/s, now=None]t:  82%|████████▏ | 2010/2438 [00:56<00:12, 35.27it/s, now=None]t:  83%|████████▎ | 2015/2438 [00:57<00:11, 37.65it/s, now=None]t:  83%|████████▎ | 2020/2438 [00:57<00:10, 38.68it/s, now=None]t:  83%|████████▎ | 2025/2438 [00:57<00:10, 39.07it/s, now=None]t:  83%|████████▎ | 2030/2438 [00:57<00:10, 40.67it/s, now=None]t:  83%|████████▎ | 2035/2438 [00:57<00:09, 42.59it/s, now=None]t:  84%|████████▎ | 2040/2438 [00:57<00:09, 42.58it/s, now=None]t:  84%|████████▍ | 2045/2438 [00:57<00:09, 43.52it/s, now=None]t:  84%|████████▍ | 2050/2438 [00:57<00:08, 44.24it/s, now=None]t:  84%|████████▍ | 2055/2438 [00:57<00:08, 44.16it/s, now=None]t:  84%|████████▍ | 2060/2438 [00:58<00:08, 43.59it/s, now=None]t:  85%|████████▍ | 2065/2438 [00:58<00:08, 43.51it/s, now=None]t:  85%|████████▍ | 2070/2438 [00:58<00:08, 42.04it/s, now=None]t:  85%|████████▌ | 2075/2438 [00:58<00:08, 40.64it/s, now=None]t:  85%|████████▌ | 2080/2438 [00:58<00:09, 39.66it/s, now=None]t:  85%|████████▌ | 2084/2438 [00:58<00:09, 38.83it/s, now=None]t:  86%|████████▌ | 2088/2438 [00:58<00:08, 38.91it/s, now=None]t:  86%|████████▌ | 2093/2438 [00:58<00:08, 40.37it/s, now=None]t:  86%|████████▌ | 2098/2438 [00:59<00:08, 40.50it/s, now=None]t:  86%|████████▋ | 2103/2438 [00:59<00:08, 40.17it/s, now=None]t:  86%|████████▋ | 2108/2438 [00:59<00:07, 41.58it/s, now=None]t:  87%|████████▋ | 2113/2438 [00:59<00:07, 42.64it/s, now=None]t:  87%|████████▋ | 2118/2438 [00:59<00:07, 42.01it/s, now=None]t:  87%|████████▋ | 2123/2438 [00:59<00:07, 42.43it/s, now=None]t:  87%|████████▋ | 2128/2438 [00:59<00:07, 42.53it/s, now=None]t:  87%|████████▋ | 2133/2438 [00:59<00:07, 41.59it/s, now=None]t:  88%|████████▊ | 2138/2438 [00:59<00:07, 42.81it/s, now=None]t:  88%|████████▊ | 2143/2438 [01:00<00:06, 43.23it/s, now=None]t:  88%|████████▊ | 2148/2438 [01:00<00:07, 41.30it/s, now=None]t:  88%|████████▊ | 2153/2438 [01:00<00:06, 41.19it/s, now=None]t:  89%|████████▊ | 2158/2438 [01:00<00:06, 41.39it/s, now=None]t:  89%|████████▊ | 2163/2438 [01:00<00:06, 42.24it/s, now=None]t:  89%|████████▉ | 2168/2438 [01:00<00:06, 43.72it/s, now=None]t:  89%|████████▉ | 2173/2438 [01:00<00:06, 43.88it/s, now=None]t:  89%|████████▉ | 2178/2438 [01:00<00:05, 44.45it/s, now=None]t:  90%|████████▉ | 2183/2438 [01:01<00:05, 43.47it/s, now=None]t:  90%|████████▉ | 2188/2438 [01:01<00:05, 42.46it/s, now=None]t:  90%|████████▉ | 2193/2438 [01:01<00:05, 42.45it/s, now=None]t:  90%|█████████ | 2198/2438 [01:01<00:05, 40.22it/s, now=None]t:  90%|█████████ | 2203/2438 [01:01<00:06, 36.99it/s, now=None]t:  91%|█████████ | 2207/2438 [01:01<00:06, 36.53it/s, now=None]t:  91%|█████████ | 2211/2438 [01:01<00:06, 35.70it/s, now=None]t:  91%|█████████ | 2215/2438 [01:01<00:06, 35.02it/s, now=None]t:  91%|█████████ | 2219/2438 [01:02<00:06, 36.28it/s, now=None]t:  91%|█████████ | 2223/2438 [01:02<00:06, 35.22it/s, now=None]t:  91%|█████████▏| 2227/2438 [01:02<00:05, 35.53it/s, now=None]t:  92%|█████████▏| 2231/2438 [01:02<00:05, 35.10it/s, now=None]t:  92%|█████████▏| 2235/2438 [01:02<00:06, 30.54it/s, now=None]t:  92%|█████████▏| 2239/2438 [01:02<00:07, 28.09it/s, now=None]t:  92%|█████████▏| 2242/2438 [01:02<00:06, 28.13it/s, now=None]t:  92%|█████████▏| 2246/2438 [01:02<00:06, 28.35it/s, now=None]t:  92%|█████████▏| 2250/2438 [01:03<00:06, 29.04it/s, now=None]t:  92%|█████████▏| 2253/2438 [01:03<00:06, 27.29it/s, now=None]t:  93%|█████████▎| 2256/2438 [01:03<00:06, 26.65it/s, now=None]t:  93%|█████████▎| 2259/2438 [01:03<00:06, 27.14it/s, now=None]t:  93%|█████████▎| 2262/2438 [01:03<00:06, 26.38it/s, now=None]t:  93%|█████████▎| 2265/2438 [01:03<00:06, 27.16it/s, now=None]t:  93%|█████████▎| 2268/2438 [01:03<00:06, 27.15it/s, now=None]t:  93%|█████████▎| 2272/2438 [01:03<00:05, 28.83it/s, now=None]t:  93%|█████████▎| 2275/2438 [01:03<00:05, 28.65it/s, now=None]t:  93%|█████████▎| 2278/2438 [01:04<00:05, 28.23it/s, now=None]t:  94%|█████████▎| 2282/2438 [01:04<00:05, 29.58it/s, now=None]t:  94%|█████████▍| 2286/2438 [01:04<00:05, 28.98it/s, now=None]t:  94%|█████████▍| 2289/2438 [01:04<00:05, 26.78it/s, now=None]t:  94%|█████████▍| 2292/2438 [01:04<00:05, 27.58it/s, now=None]t:  94%|█████████▍| 2295/2438 [01:04<00:05, 28.11it/s, now=None]t:  94%|█████████▍| 2298/2438 [01:04<00:05, 24.20it/s, now=None]t:  94%|█████████▍| 2301/2438 [01:05<00:06, 22.43it/s, now=None]t:  95%|█████████▍| 2304/2438 [01:05<00:06, 21.27it/s, now=None]t:  95%|█████████▍| 2308/2438 [01:05<00:05, 24.01it/s, now=None]t:  95%|█████████▍| 2311/2438 [01:05<00:05, 22.92it/s, now=None]t:  95%|█████████▍| 2314/2438 [01:05<00:05, 21.17it/s, now=None]t:  95%|█████████▌| 2317/2438 [01:05<00:05, 20.59it/s, now=None]t:  95%|█████████▌| 2320/2438 [01:05<00:05, 20.97it/s, now=None]t:  95%|█████████▌| 2324/2438 [01:06<00:05, 21.89it/s, now=None]t:  95%|█████████▌| 2327/2438 [01:06<00:05, 21.70it/s, now=None]t:  96%|█████████▌| 2330/2438 [01:06<00:04, 23.33it/s, now=None]t:  96%|█████████▌| 2333/2438 [01:06<00:05, 20.99it/s, now=None]t:  96%|█████████▌| 2336/2438 [01:06<00:05, 18.84it/s, now=None]t:  96%|█████████▌| 2339/2438 [01:06<00:04, 19.81it/s, now=None]t:  96%|█████████▌| 2342/2438 [01:07<00:05, 18.78it/s, now=None]t:  96%|█████████▌| 2344/2438 [01:07<00:06, 15.23it/s, now=None]t:  96%|█████████▋| 2347/2438 [01:07<00:05, 16.58it/s, now=None]t:  96%|█████████▋| 2350/2438 [01:07<00:04, 17.80it/s, now=None]t:  97%|█████████▋| 2353/2438 [01:07<00:04, 19.77it/s, now=None]t:  97%|█████████▋| 2356/2438 [01:07<00:03, 20.53it/s, now=None]t:  97%|█████████▋| 2359/2438 [01:07<00:04, 19.57it/s, now=None]t:  97%|█████████▋| 2362/2438 [01:08<00:04, 18.80it/s, now=None]t:  97%|█████████▋| 2364/2438 [01:08<00:03, 18.98it/s, now=None]t:  97%|█████████▋| 2367/2438 [01:08<00:03, 20.50it/s, now=None]t:  97%|█████████▋| 2370/2438 [01:08<00:03, 21.41it/s, now=None]t:  97%|█████████▋| 2373/2438 [01:08<00:03, 20.06it/s, now=None]t:  97%|█████████▋| 2377/2438 [01:08<00:02, 23.49it/s, now=None]t:  98%|█████████▊| 2380/2438 [01:08<00:02, 22.83it/s, now=None]t:  98%|█████████▊| 2383/2438 [01:09<00:02, 21.92it/s, now=None]t:  98%|█████████▊| 2386/2438 [01:09<00:02, 21.68it/s, now=None]t:  98%|█████████▊| 2389/2438 [01:09<00:02, 20.86it/s, now=None]t:  98%|█████████▊| 2392/2438 [01:09<00:02, 20.03it/s, now=None]t:  98%|█████████▊| 2395/2438 [01:09<00:01, 21.79it/s, now=None]t:  98%|█████████▊| 2398/2438 [01:09<00:01, 23.52it/s, now=None]t:  98%|█████████▊| 2401/2438 [01:09<00:01, 24.87it/s, now=None]t:  99%|█████████▊| 2404/2438 [01:09<00:01, 25.21it/s, now=None]t:  99%|█████████▉| 2408/2438 [01:10<00:01, 28.47it/s, now=None]t:  99%|█████████▉| 2412/2438 [01:10<00:00, 30.40it/s, now=None]t:  99%|█████████▉| 2416/2438 [01:10<00:00, 32.05it/s, now=None]t:  99%|█████████▉| 2420/2438 [01:10<00:00, 33.00it/s, now=None]t:  99%|█████████▉| 2424/2438 [01:10<00:00, 33.02it/s, now=None]t: 100%|█████████▉| 2428/2438 [01:10<00:00, 33.28it/s, now=None]t: 100%|█████████▉| 2432/2438 [01:10<00:00, 34.34it/s, now=None]t: 100%|█████████▉| 2436/2438 [01:10<00:00, 34.75it/s, now=None]                                                                Moviepy - Done !
-Moviepy - video ready results/the_52_hertz_whale__the_loneliest_voice_in_t/the_52_hertz_whale__the_loneliest_voice_in_t_v1.mp4
-  Rendered 81.3s, 10.0 MB (79.6s)
-  [grade] organic texture pass (grain=8, strength=1.0)
-  Graded 81.3s (378.2s)
-
-[11/16] MUSIC & SOUND (ffmpeg sidechain ducking, bed=cinematic.mp3)
-  !! cinematic.mp3 is silent (-91 dB) — using synth bed
-  [sfx] event-driven SFX timeline: sfx_timeline_run.wav
-  Music mixed (ducked under narration): 81.3s, 50.6 MB, mean=-15.9 dB ✓
-  [audio-qa] passed=True narration_clipping=True; ducking_depth=True
-
-[13/16] VIDEO REVIEW (Gemini Flash, end-to-end)
-→ Uploading results/the_52_hertz_whale__the_loneliest_voice_in_t/the_52_hertz_whale__the_loneliest_voice_in_t_v1_mixed.mp4 to Gemini...
-→ Uploaded: files/s946evj4jz5c (FileState.PROCESSING)
-→ Reviewing with gemini-2.5-flash...
-  Score: 45/100 (conf 0.9) | recs: 6
-  Score 45 < 70 → improvement loop active (max 2 renders)
-
-[14/16] IMPROVEMENT PASS planning (iteration 2/2)
-    FLAG   [unclassified] Replace the bar chart and blurry blue blob (0:11-0:19) with visuals directly related to sonar, 
-    FLAG   [unclassified] Remove the alien in the desert visual (0:19-0:24) entirely. This is completely irrelevant and h
-    FLAG   [unclassified] Replace the small, blurry picture-in-picture element at 0:49-0:54 with a clear animated map sho
-    FLAG   [unclassified] Develop a consistent visual style. Either commit to abstract motion graphics (Manim-like) throu
-    FLAG   [new_asset] Minimize solid color screens with text. Instead, use subtle background footage (e.g., deep ocean, 
-  → No auto-applicable changes; stopping improvement loop.
-  !! FINAL pre-render gate STILL blocked: ['shot_hold', 'pacing', 'resolution_headroom']
-  !! PUBLISH GATE: not publish-ready → ['hook_strength']
-
-  [status] REVISION_REQUIRED — blocked by: {'publish': ['hook_strength'], 'pre_render': ['shot_hold', 'pacing', 'resolution_headroom']}
-
-[15-16/16] FINAL OUTPUT + POSTMORTEM
-
-[DEEPSEEK USAGE — this run]
-  calls: 0 | input: 0 tok (cached 0 → hit 0%) | output: 0 tok
-  estimated cost: $0.0000
-
-================================================================
-MISSION RUN COMPLETE — The 52-Hertz Whale: the loneliest voice in the ocean
-  Video:  results/the_52_hertz_whale__the_loneliest_voice_in_t/the_52_hertz_whale__the_loneliest_voice_in_t_v1_mixed.mp4
-  Report: results/the_52_hertz_whale__the_loneliest_voice_in_t/run_report.json
-  Postmortem: /home/ubuntu/video_engine/src/docs/mission/postmortems/postmortem-the-52-hertz-whale-the-loneliest-voice-in-the-ocean.md
-  Final review score: 45/100
-================================================================

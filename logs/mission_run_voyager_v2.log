@@ -1,304 +1,0 @@
-[asset_router] Loaded env vars from /home/ubuntu/video_engine/.env
-
-[1/16] RESEARCH
-  15 facts, 7 sources (14.1s)
-
-[2/16] FACT VERIFICATION
-  !! Verification pass failed ('"fact"') — keeping research confidence.
-  Verified 15/15 facts
-
-[3/16] SCRIPT DEVELOPMENT
-  5 scenes drafted, 94 words (~38s at 150wpm)
-
-[4/16] SCRIPT REVIEW (4 independent reviewers, ≤3 passes)
-
-── Script Review pass 1/3 ──
-  [             Fact Reviewer] score=9.5/10 conf=0.99 issues=1 (nit:1)
-  [        Documentary Editor] score=6.2/10 conf=0.88 issues=7 (critical:2 major:2 minor:1 nit:2)
-  [Audience Retention Reviewer] score=6.5/10 conf=0.80 issues=5 (major:2 minor:2 nit:1)
-  [     Storytelling Reviewer] score=6.2/10 conf=0.90 issues=5 (major:3 minor:1 nit:1)
-  Gate: FAIL (scores={'fact_reviewer': 9.5, 'documentary_editor': 6.2, 'retention_reviewer': 6.5, 'storytelling_reviewer': 6.2})
-  Revised 5 scenes from consolidated feedback.
-
-── Script Review pass 2/3 ──
-  [             Fact Reviewer] score=6.5/10 conf=0.90 issues=5 (critical:1 major:1 minor:2 nit:1)
-  [        Documentary Editor] score=6.5/10 conf=0.85 issues=7 (critical:1 major:3 minor:2 nit:1)
-  [Audience Retention Reviewer] score=7.5/10 conf=0.85 issues=6 (critical:1 major:2 minor:2 nit:1)
-  [     Storytelling Reviewer] score=5.3/10 conf=0.87 issues=6 (critical:1 major:2 minor:1 nit:2)
-  Gate: FAIL (scores={'fact_reviewer': 6.5, 'documentary_editor': 6.5, 'retention_reviewer': 7.5, 'storytelling_reviewer': 5.3})
-  Revised 5 scenes from consolidated feedback.
-
-── Script Review pass 3/3 ──
-  [             Fact Reviewer] score=7.5/10 conf=0.90 issues=7 (critical:2 major:2 minor:3)
-  [        Documentary Editor] score=6.5/10 conf=0.90 issues=7 (major:4 minor:2 nit:1)
-  [Audience Retention Reviewer] score=7.2/10 conf=0.88 issues=5 (major:2 minor:2 nit:1)
-  [     Storytelling Reviewer] score=7.4/10 conf=0.88 issues=7 (major:2 minor:4 nit:1)
-  Gate: FAIL (scores={'fact_reviewer': 7.5, 'documentary_editor': 6.5, 'retention_reviewer': 7.2, 'storytelling_reviewer': 7.4})
-  Max passes reached — using best available script.
-  Gate passed: False after 3 pass(es) (scores: {'fact_reviewer': 7.5, 'documentary_editor': 6.5, 'retention_reviewer': 7.2, 'storytelling_reviewer': 7.4})
-  !! Post-review over budget (448 words) — compressing
-  Compressed to 137 words
-
-[5-9/16] STORYBOARD → VISUAL PLANNING → ASSET ROUTING → GENERATION → ANIMATION
--> AssetRouter: topic='Voyager 1: the farthest human-made object' → category='Space'
-
-============================================================
-  Visual Director (BEAT MODE): Aesthetic: space | Mood: mysterious | Pace: slow | Sub-aesthetic: space
-  Topic: Voyager 1: the farthest human-made object
-============================================================
-
-
-──────────────────────────────────────────────────
-  Scene 0: The Whisper
-──────────────────────────────────────────────────
-
-  [BeatDirector] Planning beats for scene 0...
-  [BeatDirector] Concept terms (10): ['radio telescope array night', 'deep space network dish rotating', 'satellite dish tracking stars', 'night sky milky way timelapse']...
-  [BeatDirector] 2 beats, 3 shots
--> AssetLibrary REUSE: 'radio telescope array night primary shot' similar to 'radio telescope night sky primary shot' -> cache/video/scene_0_b0_s0.mp4
--> Router selected: 'pexels' for query 'radio telescope array night primary shot'
--> Cache MISS: 'radio telescope array night' — calling Pexels API
-  Candidate 1: id=17808868 3840x2160 dur=5s score=0.995 ← SELECTED
-  Candidate 2: id=16544208 2560x1440 dur=8s score=0.882
-  Candidate 3: id=11431384 3840x2160 dur=8s score=0.882
-  Candidate 4: id=27442169 5760x3240 dur=5s score=0.795
-  Candidate 5: id=17808869 3840x2160 dur=13s score=0.683
-  Candidate 6: id=30560746 3840x2160 dur=10s score=0.602
-  Candidate 7: id=2954004 1920x1080 dur=25s score=0.600
-  Candidate 8: id=4473000 1920x1080 dur=29s score=0.600
-  Candidate 9: id=16923263 4096x2304 dur=16s score=0.600
-  Candidate 10: id=25921138 3840x2160 dur=16s score=0.400
--> Router selected: 'pexels' for query 'radio telescope array night'
--> AssetLibrary REUSE: 'Voyager 1: the farthest human-made object documentary stock footage' similar to 'voyager 1: the farthest human-made object documentary stock footage' -> cache/video/scene_3_b3_s0.mp4
--> Router selected: 'pexels' for query 'Voyager 1: the farthest human-made object documentary stock footage'
--> Already on disk: cache/video/scene_0_b0_s0.mp4
-    [BeatDirector] Shot accepted: primary shot for beat 0 (provider=pexels)
--> Cache MISS: 'deep space network dish rotating cutaway shot' — calling Pexels API
-  Candidate 1: id=6420488 1920x1080 dur=29s score=0.600 ← SELECTED
-  Candidate 2: id=38605307 3840x2160 dur=33s score=0.400
-  Candidate 3: id=34651404 3840x2160 dur=18s score=0.400
-  Candidate 4: id=34900581 3840x2160 dur=12s score=0.400
-  Candidate 5: id=29779825 3840x2160 dur=62s score=0.400
-  Candidate 6: id=34901465 3840x2160 dur=12s score=0.400
-  Candidate 7: id=29780173 3840x2160 dur=29s score=0.400
-  Candidate 8: id=34707892 3840x2160 dur=16s score=0.400
-  Candidate 9: id=34897919 3840x2160 dur=14s score=0.400
-  Candidate 10: id=31373081 3840x2160 dur=50s score=0.400
--> Router selected: 'pexels' for query 'deep space network dish rotating cutaway shot'
--> Downloading from Pexels…
--> Saved: cache/video/scene_0_b0_s1.mp4
-    [BeatDirector] Shot accepted: cutaway shot for beat 0 (provider=pexels)
--> AssetLibrary REUSE: 'satellite dish tracking stars primary shot' similar to 'satellite dish night sky primary shot' -> cache/video/scene_0_b0_s0.mp4
--> Router selected: 'pexels' for query 'satellite dish tracking stars primary shot'
--> Already on disk: cache/video/scene_0_b1_s0.mp4
-    [BeatDirector] Shot accepted: primary shot for beat 1 (provider=pexels)
-
-──────────────────────────────────────────────────
-  Scene 1: The Launch
-──────────────────────────────────────────────────
-
-  [BeatDirector] Planning beats for scene 1...
-  [BeatDirector] Concept terms (10): ['Titan rocket launch closeup', 'Cape Canaveral skyline aerial', '1970s NASA control room', 'Rocket liftoff smoke trail']...
-  [BeatDirector] 1 beats, 2 shots
--> AssetLibrary REUSE: 'Titan rocket launch closeup primary shot' similar to 'rocket launch close up primary shot' -> cache/video/scene_1_b0_s0.mp4
--> Router selected: 'pexels' for query 'Titan rocket launch closeup primary shot'
--> Already on disk: cache/video/scene_1_b0_s0.mp4
-    [BeatDirector] Shot accepted: primary shot for beat 0 (provider=pexels)
--> Cache MISS: 'Cape Canaveral skyline aerial cutaway shot' — calling Pexels API
-  Candidate 1: id=3858868 3840x2160 dur=15s score=0.654 ← SELECTED
-  Candidate 2: id=854261 1920x1080 dur=34s score=0.600
-  Candidate 3: id=854269 1920x1080 dur=63s score=0.600
-  Candidate 4: id=854258 1920x1080 dur=114s score=0.600
-  Candidate 5: id=18674371 3840x2160 dur=18s score=0.600
-  Candidate 6: id=20441624 3840x2160 dur=24s score=0.600
-  Candidate 7: id=14996509 3840x2160 dur=31s score=0.600
-  Candidate 8: id=27583550 3840x2160 dur=17s score=0.400
-  Candidate 9: id=30988829 1920x1080 dur=44s score=0.400
-  Candidate 10: id=31006907 3840x2160 dur=33s score=0.400
--> Router selected: 'pexels' for query 'Cape Canaveral skyline aerial cutaway shot'
--> Downloading from Pexels…
--> Saved: cache/video/scene_1_b0_s1.mp4
-    [BeatDirector] Shot accepted: cutaway shot for beat 0 (provider=pexels)
-
-──────────────────────────────────────────────────
-  Scene 2: The Journey
-──────────────────────────────────────────────────
-
-  [BeatDirector] Planning beats for scene 2...
-  [BeatDirector] Concept terms (10): ['Jupiter Io volcanic eruption', 'Saturn rings close-up', 'interstellar space starfield', 'spacecraft Voyager trajectory animation']...
-  [BeatDirector] 2 beats, 3 shots
--> AssetLibrary REUSE: 'Jupiter Io volcanic eruption primary shot' similar to 'io volcanic eruption close-up primary shot' -> cache/video/scene_2_b1_s0.mp4
--> Router selected: 'pexels' for query 'Jupiter Io volcanic eruption primary shot'
--> Already on disk: cache/video/scene_2_b0_s0.mp4
-    [BeatDirector] Shot accepted: primary shot for beat 0 (provider=pexels)
--> AssetLibrary REUSE: 'Saturn rings close-up cutaway shot' similar to 'saturn rings close-up primary shot' -> cache/video/scene_1_b1_s0.mp4
--> Router selected: 'pexels' for query 'Saturn rings close-up cutaway shot'
--> Already on disk: cache/video/scene_2_b0_s1.mp4
-    [BeatDirector] Shot accepted: cutaway shot for beat 0 (provider=pexels)
--> AssetLibrary REUSE: 'interstellar space starfield primary shot' similar to 'deep space starfield primary shot' -> cache/video/scene_2_b1_s0.mp4
--> Router selected: 'pexels' for query 'interstellar space starfield primary shot'
--> AssetLibrary diversity: penalty=0.30 for 'jupiter io volcanic eruption primary shot' — skipping reuse
--> Cache MISS: 'Jupiter Io volcanic eruption' — calling Pexels API
-  Candidate 1: id=5307917 3840x2160 dur=8s score=0.965 ← SELECTED
-  Candidate 2: id=9320060 1920x1080 dur=14s score=0.788
-  Candidate 3: id=855240 1920x1080 dur=15s score=0.759
-  Candidate 4: id=32032509 3840x2160 dur=10s score=0.706
-  Candidate 5: id=855239 1920x1080 dur=17s score=0.700
-  Candidate 6: id=13438865 3840x2160 dur=17s score=0.700
-  Candidate 7: id=855241 1920x1080 dur=52s score=0.600
-  Candidate 8: id=6497571 3840x2160 dur=29s score=0.600
-  Candidate 9: id=35495263 3840x2160 dur=39s score=0.400
-  Candidate 10: id=852419 1280x720 dur=22s score=0.378
--> Router selected: 'pexels' for query 'Jupiter Io volcanic eruption'
--> Already on disk: cache/video/scene_2_b1_s0.mp4
-    [BeatDirector] Shot accepted: primary shot for beat 1 (provider=pexels)
-
-──────────────────────────────────────────────────
-  Scene 3: The Fading Light
-──────────────────────────────────────────────────
-
-  [BeatDirector] Planning beats for scene 3...
-  [BeatDirector] Concept terms (10): ['spacecraft probe deep space', 'satellite antenna extreme closeup', 'star field moving background', 'solar panel sunlight reflection']...
-  [BeatDirector] 2 beats, 3 shots
--> AssetLibrary REUSE: 'spacecraft probe deep space primary shot' similar to 'spacecraft deep space primary shot' -> cache/video/scene_3_b1_s0.mp4
--> Router selected: 'pexels' for query 'spacecraft probe deep space primary shot'
--> Already on disk: cache/video/scene_3_b0_s0.mp4
-    [BeatDirector] Shot accepted: primary shot for beat 0 (provider=pexels)
--> Cache MISS: 'satellite antenna extreme closeup cutaway shot' — calling Pexels API
-  Candidate 1: id=3792293 1920x1080 dur=8s score=0.667 ← SELECTED
-  Candidate 2: id=2954006 1920x1080 dur=22s score=0.600
-  Candidate 3: id=2954002 1920x1080 dur=26s score=0.600
-  Candidate 4: id=6420488 1920x1080 dur=29s score=0.600
-  Candidate 5: id=6322221 1920x1080 dur=13s score=0.600
-  Candidate 6: id=5612427 1920x1080 dur=35s score=0.600
-  Candidate 7: id=18069804 3840x2160 dur=18s score=0.600
-  Candidate 8: id=2954003 1920x1080 dur=18s score=0.600
-  Candidate 9: id=854256 1920x1080 dur=27s score=0.600
-  Candidate 10: id=25744122 3840x2160 dur=14s score=0.400
--> Router selected: 'pexels' for query 'satellite antenna extreme closeup cutaway shot'
--> AssetLibrary diversity: penalty=0.30 for 'spacecraft probe deep space primary shot' — skipping reuse
--> Cache MISS: 'spacecraft probe deep space' — calling Pexels API
-  Candidate 1: id=7615697 3840x2160 dur=17s score=0.600 ← SELECTED
-  Candidate 2: id=31084233 3840x2160 dur=10s score=0.400
-  Candidate 3: id=34707654 3840x2160 dur=16s score=0.400
-  Candidate 4: id=29779825 3840x2160 dur=62s score=0.400
-  Candidate 5: id=34707892 3840x2160 dur=16s score=0.400
-  Candidate 6: id=34651404 3840x2160 dur=18s score=0.400
-  Candidate 7: id=34932151 3840x2160 dur=16s score=0.400
-  Candidate 8: id=38235216 3840x2160 dur=22s score=0.400
-  Candidate 9: id=854239 1280x720 dur=22s score=0.378
-  Candidate 10: id=854240 1280x720 dur=52s score=0.378
--> Router selected: 'pexels' for query 'spacecraft probe deep space'
--> Downloading from Pexels…
--> Saved: cache/video/scene_3_b0_s1.mp4
-    [BeatDirector] Shot accepted: cutaway shot for beat 0 (provider=pexels)
--> Cache MISS: 'star field moving background primary shot' — calling Pexels API
-  Candidate 1: id=3877749 3840x2160 dur=9s score=0.935 ← SELECTED
-  Candidate 2: id=36735105 1920x1080 dur=10s score=0.706
-  Candidate 3: id=32992023 1920x1080 dur=10s score=0.706
-  Candidate 4: id=12540073 3840x2160 dur=25s score=0.600
-  Candidate 5: id=4618643 1920x1080 dur=23s score=0.600
-  Candidate 6: id=33038905 1920x1080 dur=119s score=0.400
-  Candidate 7: id=34750442 1920x1080 dur=120s score=0.400
-  Candidate 8: id=34735010 1920x1080 dur=120s score=0.400
-  Candidate 9: id=34985000 1920x1080 dur=120s score=0.400
-  Candidate 10: id=36986963 1920x1080 dur=120s score=0.400
--> Router selected: 'pexels' for query 'star field moving background primary shot'
--> AssetLibrary diversity: penalty=0.30 for 'spacecraft probe deep space' — skipping reuse
--> Cache HIT: 'spacecraft probe deep space' → cache/video/scene_3_b0_s1.mp4
--> Router selected: 'pexels' for query 'spacecraft probe deep space'
--> AssetLibrary REUSE: 'Voyager 1: the farthest human-made object documentary stock footage' similar to 'voyager 1: the farthest human-made object documentary stock footage' -> cache/video/scene_0_b0_s0.mp4
--> Router selected: 'pexels' for query 'Voyager 1: the farthest human-made object documentary stock footage'
-
-──────────────────────────────────────────────────
-  Scene 4: The Long Goodbye
-──────────────────────────────────────────────────
-
-  [BeatDirector] Planning beats for scene 4...
-  [BeatDirector] Concept terms (10): ['deep space stars timelapse', 'silent night sky telescope', 'vintage golden record closeup', 'spacecraft drifting animation']...
-  [BeatDirector] 3 beats, 3 shots
--> AssetLibrary REUSE: 'deep space stars timelapse primary shot' similar to 'deep space stars dark primary shot' -> cache/video/scene_0_b3_s0.mp4
--> Router selected: 'pexels' for query 'deep space stars timelapse primary shot'
--> Already on disk: cache/video/scene_4_b0_s0.mp4
-    [BeatDirector] Shot accepted: primary shot for beat 0 (provider=pexels)
--> AssetLibrary REUSE: 'silent night sky telescope primary shot' similar to 'radio telescope night sky primary shot' -> cache/video/scene_0_b0_s0.mp4
--> Router selected: 'pexels' for query 'silent night sky telescope primary shot'
--> Already on disk: cache/video/scene_4_b1_s0.mp4
-    [BeatDirector] Shot accepted: primary shot for beat 1 (provider=pexels)
--> AssetLibrary REUSE: 'vintage golden record closeup primary shot' similar to 'golden record close up primary shot' -> cache/video/scene_3_b0_s0.mp4
--> Router selected: 'pexels' for query 'vintage golden record closeup primary shot'
--> Already on disk: cache/video/scene_4_b2_s0.mp4
-    [BeatDirector] Shot accepted: primary shot for beat 2 (provider=pexels)
-
-==================================================
-  Storyboard Validation...
-  ⚠ Storyboard issues found:
-    - Diversity: Scene 2, beat 0: content fingerprint match with scene 0
-    - Diversity: Scene 3, beat 1: query similarity 1.00 with scene 3: 'spacecraft probe deep space' vs 'spacecraft probe deep space'
-  (Continuing with best effort)
-
-==================================================
-  Beat Director Results:
-    Shots requested: 14
-    Shots accepted:  14
-    Queries tried:   20
-    Gate rejections: 7
-    Fallbacks:       1
-    Success rate:    100.0%
-==================================================
-
-  Shots: 14 | Avg 4.6s | Providers: {'pexels': 13, 'nasa': 1} | Fallbacks: 0
-
-[10/16] NARRATION (Kokoro George)
-Loading Kokoro TTS engine...
-Synthesizing speech: 'We’re about to lose the most enduring vo...'
-Voice track saved to cache/audio/scene_0.wav
-Synthesizing speech: 'Launched Sept 5, 1977, from Cape Canaver...'
-Voice track saved to cache/audio/scene_1.wav
-Synthesizing speech: 'It found volcanoes on Jupiter’s moon Io,...'
-Voice track saved to cache/audio/scene_2.wav
-Synthesizing speech: 'Power has decayed from 470 to 250 watts,...'
-Voice track saved to cache/audio/scene_3.wav
-Synthesizing speech: 'After the signal fades, it will drift si...'
-Voice track saved to cache/audio/scene_4.wav
-  Voice tracks: 5 (57.8s)
-
-[12/16] RENDERING → results/voyager_1__the_farthest_human_made_object/voyager_1__the_farthest_human_made_object_v1.mp4
-[timeline] Wrote results/voyager_1__the_farthest_human_made_object/timeline.json
-Rendering results/voyager_1__the_farthest_human_made_object/voyager_1__the_farthest_human_made_object_v1.mp4 on CPU...
-Moviepy - Building video results/voyager_1__the_farthest_human_made_object/voyager_1__the_farthest_human_made_object_v1.mp4.
-MoviePy - Writing audio in voyager_1__the_farthest_human_made_object_v1TEMP_MPY_wvf_snd.mp4
-chunk:   0%|          | 0/1395 [00:00<?, ?it/s, now=None]chunk:   8%|▊         | 109/1395 [00:00<00:02, 579.62it/s, now=None]chunk:  13%|█▎        | 179/1395 [00:00<00:02, 604.57it/s, now=None]chunk:  17%|█▋        | 241/1395 [00:00<00:02, 551.59it/s, now=None]chunk:  22%|██▏       | 306/1395 [00:00<00:01, 582.67it/s, now=None]chunk:  27%|██▋       | 371/1395 [00:00<00:01, 591.05it/s, now=None]chunk:  31%|███▏      | 438/1395 [00:00<00:01, 612.67it/s, now=None]chunk:  36%|███▌      | 500/1395 [00:00<00:01, 575.93it/s, now=None]chunk:  40%|████      | 559/1395 [00:00<00:01, 557.49it/s, now=None]chunk:  45%|████▌     | 634/1395 [00:01<00:01, 590.20it/s, now=None]chunk:  51%|█████     | 706/1395 [00:01<00:01, 617.95it/s, now=None]chunk:  55%|█████▌    | 769/1395 [00:01<00:01, 584.58it/s, now=None]chunk:  59%|█████▉    | 828/1395 [00:01<00:01, 551.37it/s, now=None]chunk:  64%|██████▍   | 890/1395 [00:01<00:00, 565.55it/s, now=None]chunk:  68%|██████▊   | 950/1395 [00:01<00:00, 571.78it/s, now=None]chunk:  72%|███████▏  | 1008/1395 [00:01<00:00, 571.73it/s, now=None]chunk:  77%|███████▋  | 1071/1395 [00:01<00:00, 587.84it/s, now=None]chunk:  81%|████████  | 1131/1395 [00:01<00:00, 568.42it/s, now=None]chunk:  85%|████████▌ | 1190/1395 [00:02<00:00, 572.62it/s, now=None]chunk:  91%|█████████ | 1266/1395 [00:02<00:00, 624.65it/s, now=None]chunk:  95%|█████████▌| 1329/1395 [00:02<00:00, 584.26it/s, now=None]chunk: 100%|█████████▉| 1390/1395 [00:02<00:00, 587.42it/s, now=None]                                                                     MoviePy - Done.
-Moviepy - Writing video results/voyager_1__the_farthest_human_made_object/voyager_1__the_farthest_human_made_object_v1.mp4
-
-t:   0%|          | 0/1897 [00:00<?, ?it/s, now=None]t:   0%|          | 4/1897 [00:00<00:57, 32.69it/s, now=None]t:   0%|          | 8/1897 [00:00<01:07, 27.98it/s, now=None]t:   1%|          | 11/1897 [00:00<01:10, 26.72it/s, now=None]t:   1%|          | 14/1897 [00:00<01:21, 23.19it/s, now=None]t:   1%|          | 17/1897 [00:00<01:18, 24.01it/s, now=None]t:   1%|          | 20/1897 [00:00<01:21, 23.02it/s, now=None]t:   1%|          | 23/1897 [00:00<01:23, 22.53it/s, now=None]t:   1%|▏         | 26/1897 [00:01<01:24, 22.14it/s, now=None]t:   2%|▏         | 29/1897 [00:01<01:27, 21.23it/s, now=None]t:   2%|▏         | 32/1897 [00:01<01:27, 21.40it/s, now=None]t:   2%|▏         | 35/1897 [00:01<01:26, 21.42it/s, now=None]t:   2%|▏         | 38/1897 [00:01<01:25, 21.70it/s, now=None]t:   2%|▏         | 41/1897 [00:01<01:26, 21.52it/s, now=None]t:   2%|▏         | 44/1897 [00:01<01:25, 21.55it/s, now=None]t:   2%|▏         | 47/1897 [00:02<01:31, 20.11it/s, now=None]t:   3%|▎         | 50/1897 [00:02<01:28, 20.98it/s, now=None]t:   3%|▎         | 53/1897 [00:02<01:21, 22.64it/s, now=None]t:   3%|▎         | 57/1897 [00:02<01:13, 25.09it/s, now=None]t:   3%|▎         | 60/1897 [00:02<01:15, 24.24it/s, now=None]t:   3%|▎         | 63/1897 [00:02<01:18, 23.37it/s, now=None]t:   3%|▎         | 66/1897 [00:02<01:24, 21.69it/s, now=None]t:   4%|▎         | 69/1897 [00:03<01:25, 21.47it/s, now=None]t:   4%|▍         | 72/1897 [00:03<01:36, 18.88it/s, now=None]t:   4%|▍         | 74/1897 [00:03<01:39, 18.39it/s, now=None]t:   4%|▍         | 76/1897 [00:03<01:49, 16.58it/s, now=None]t:   4%|▍         | 79/1897 [00:03<01:39, 18.18it/s, now=None]t:   4%|▍         | 81/1897 [00:03<01:40, 18.13it/s, now=None]t:   4%|▍         | 84/1897 [00:03<01:44, 17.37it/s, now=None]t:   5%|▍         | 86/1897 [00:04<02:14, 13.46it/s, now=None]t:   5%|▍         | 88/1897 [00:04<02:20, 12.92it/s, now=None]t:   5%|▍         | 91/1897 [00:04<01:54, 15.74it/s, now=None]t:   5%|▍         | 93/1897 [00:04<01:58, 15.21it/s, now=None]t:   5%|▌         | 96/1897 [00:04<01:45, 17.13it/s, now=None]t:   5%|▌         | 98/1897 [00:05<02:33, 11.74it/s, now=None]t:   5%|▌         | 100/1897 [00:05<02:23, 12.49it/s, now=None]t:   5%|▌         | 102/1897 [00:05<02:29, 12.02it/s, now=None]t:   5%|▌         | 104/1897 [00:05<02:23, 12.47it/s, now=None]t:   6%|▌         | 106/1897 [00:05<02:12, 13.53it/s, now=None]t:   6%|▌         | 108/1897 [00:05<02:29, 11.95it/s, now=None]t:   6%|▌         | 110/1897 [00:06<02:42, 11.03it/s, now=None]t:   6%|▌         | 112/1897 [00:06<02:30, 11.87it/s, now=None]t:   6%|▌         | 114/1897 [00:06<02:50, 10.46it/s, now=None]t:   6%|▌         | 116/1897 [00:06<02:31, 11.75it/s, now=None]t:   6%|▌         | 118/1897 [00:06<02:19, 12.74it/s, now=None]t:   6%|▋         | 120/1897 [00:06<02:19, 12.75it/s, now=None]t:   6%|▋         | 122/1897 [00:07<02:31, 11.72it/s, now=None]t:   7%|▋         | 124/1897 [00:07<02:51, 10.33it/s, now=None]t:   7%|▋         | 126/1897 [00:07<02:55, 10.10it/s, now=None]t:   7%|▋         | 128/1897 [00:07<03:04,  9.60it/s, now=None]t:   7%|▋         | 130/1897 [00:08<03:07,  9.42it/s, now=None]t:   7%|▋         | 132/1897 [00:08<02:57,  9.92it/s, now=None]t:   7%|▋         | 134/1897 [00:08<03:05,  9.52it/s, now=None]t:   7%|▋         | 136/1897 [00:08<02:55, 10.03it/s, now=None]t:   7%|▋         | 138/1897 [00:08<02:57,  9.91it/s, now=None]t:   7%|▋         | 140/1897 [00:08<02:41, 10.86it/s, now=None]t:   7%|▋         | 142/1897 [00:09<02:38, 11.04it/s, now=None]t:   8%|▊         | 144/1897 [00:09<02:22, 12.31it/s, now=None]t:   8%|▊         | 146/1897 [00:09<02:43, 10.70it/s, now=None]t:   8%|▊         | 148/1897 [00:09<02:47, 10.44it/s, now=None]t:   8%|▊         | 150/1897 [00:09<02:53, 10.09it/s, now=None]t:   8%|▊         | 152/1897 [00:10<03:10,  9.15it/s, now=None]t:   8%|▊         | 154/1897 [00:10<03:22,  8.60it/s, now=None]t:   8%|▊         | 156/1897 [00:10<02:55,  9.94it/s, now=None]t:   8%|▊         | 158/1897 [00:10<02:57,  9.80it/s, now=None]t:   8%|▊         | 160/1897 [00:10<02:31, 11.50it/s, now=None]t:   9%|▊         | 163/1897 [00:11<02:17, 12.58it/s, now=None]t:   9%|▊         | 165/1897 [00:11<02:16, 12.70it/s, now=None]t:   9%|▉         | 167/1897 [00:11<02:05, 13.82it/s, now=None]t:   9%|▉         | 170/1897 [00:11<01:43, 16.62it/s, now=None]t:   9%|▉         | 172/1897 [00:11<01:49, 15.70it/s, now=None]t:   9%|▉         | 174/1897 [00:11<01:52, 15.32it/s, now=None]t:   9%|▉         | 176/1897 [00:11<01:45, 16.25it/s, now=None]t:   9%|▉         | 178/1897 [00:12<02:02, 14.06it/s, now=None]t:  10%|▉         | 181/1897 [00:12<01:37, 17.53it/s, now=None]t:  10%|▉         | 183/1897 [00:12<01:56, 14.73it/s, now=None]t:  10%|▉         | 186/1897 [00:12<02:06, 13.52it/s, now=None]t:  10%|▉         | 189/1897 [00:12<01:45, 16.19it/s, now=None]t:  10%|█         | 191/1897 [00:12<02:11, 12.93it/s, now=None]t:  10%|█         | 193/1897 [00:13<02:08, 13.29it/s, now=None]t:  10%|█         | 196/1897 [00:13<01:44, 16.23it/s, now=None]t:  10%|█         | 198/1897 [00:13<01:54, 14.85it/s, now=None]t:  11%|█         | 200/1897 [00:13<01:53, 14.89it/s, now=None]t:  11%|█         | 203/1897 [00:13<01:45, 16.12it/s, now=None]t:  11%|█         | 206/1897 [00:13<01:32, 18.37it/s, now=None]t:  11%|█         | 210/1897 [00:13<01:14, 22.75it/s, now=None]t:  11%|█         | 213/1897 [00:14<01:11, 23.67it/s, now=None]t:  11%|█▏        | 218/1897 [00:14<00:57, 29.25it/s, now=None]t:  12%|█▏        | 223/1897 [00:14<00:54, 30.67it/s, now=None]t:  12%|█▏        | 227/1897 [00:14<00:51, 32.44it/s, now=None]t:  12%|█▏        | 231/1897 [00:14<00:50, 33.32it/s, now=None]t:  12%|█▏        | 235/1897 [00:14<00:48, 34.28it/s, now=None]t:  13%|█▎        | 241/1897 [00:14<00:41, 39.63it/s, now=None]t:  13%|█▎        | 246/1897 [00:14<00:49, 33.40it/s, now=None]t:  13%|█▎        | 250/1897 [00:15<00:52, 31.48it/s, now=None]t:  13%|█▎        | 254/1897 [00:15<00:52, 31.39it/s, now=None]t:  14%|█▍        | 261/1897 [00:15<00:40, 40.19it/s, now=None]t:  14%|█▍        | 268/1897 [00:15<00:35, 46.18it/s, now=None]t:  14%|█▍        | 273/1897 [00:15<00:41, 38.83it/s, now=None]t:  15%|█▍        | 278/1897 [00:15<00:44, 36.17it/s, now=None]t:  15%|█▍        | 282/1897 [00:15<00:45, 35.78it/s, now=None]t:  15%|█▌        | 286/1897 [00:16<00:45, 35.74it/s, now=None]t:  15%|█▌        | 290/1897 [00:16<00:44, 35.75it/s, now=None]t:  15%|█▌        | 294/1897 [00:16<00:46, 34.44it/s, now=None]t:  16%|█▌        | 298/1897 [00:16<00:44, 35.60it/s, now=None]t:  16%|█▌        | 303/1897 [00:16<00:42, 37.61it/s, now=None]t:  16%|█▌        | 308/1897 [00:16<00:39, 40.27it/s, now=None]t:  16%|█▋        | 313/1897 [00:16<00:38, 41.64it/s, now=None]t:  17%|█▋        | 318/1897 [00:16<00:36, 43.79it/s, now=None]t:  17%|█▋        | 324/1897 [00:16<00:34, 45.69it/s, now=None]t:  17%|█▋        | 329/1897 [00:17<00:35, 44.38it/s, now=None]t:  18%|█▊        | 336/1897 [00:17<00:30, 50.61it/s, now=None]t:  18%|█▊        | 342/1897 [00:17<00:30, 51.55it/s, now=None]t:  18%|█▊        | 348/1897 [00:17<00:30, 50.58it/s, now=None]t:  19%|█▊        | 354/1897 [00:17<00:31, 49.27it/s, now=None]t:  19%|█▉        | 360/1897 [00:17<00:30, 50.01it/s, now=None]t:  19%|█▉        | 366/1897 [00:17<00:29, 51.15it/s, now=None]t:  20%|█▉        | 372/1897 [00:17<00:28, 52.82it/s, now=None]t:  20%|█▉        | 378/1897 [00:17<00:28, 54.13it/s, now=None]t:  20%|██        | 384/1897 [00:18<00:30, 50.14it/s, now=None]t:  21%|██        | 390/1897 [00:18<00:28, 52.02it/s, now=None]t:  21%|██        | 396/1897 [00:18<00:28, 53.57it/s, now=None]t:  21%|██        | 402/1897 [00:18<00:27, 55.17it/s, now=None]t:  22%|██▏       | 408/1897 [00:18<00:28, 52.28it/s, now=None]t:  22%|██▏       | 414/1897 [00:18<00:30, 48.84it/s, now=None]t:  22%|██▏       | 420/1897 [00:18<00:28, 51.58it/s, now=None]t:  22%|██▏       | 426/1897 [00:18<00:31, 46.67it/s, now=None]t:  23%|██▎       | 431/1897 [00:19<00:35, 41.51it/s, now=None]t:  23%|██▎       | 436/1897 [00:19<00:36, 40.58it/s, now=None]t:  23%|██▎       | 441/1897 [00:19<00:36, 40.01it/s, now=None]t:  24%|██▎       | 446/1897 [00:19<00:36, 40.27it/s, now=None]t:  24%|██▍       | 451/1897 [00:19<00:35, 40.47it/s, now=None]t:  24%|██▍       | 456/1897 [00:19<00:35, 41.04it/s, now=None]t:  24%|██▍       | 461/1897 [00:19<00:35, 40.59it/s, now=None]t:  25%|██▍       | 466/1897 [00:19<00:36, 39.09it/s, now=None]t:  25%|██▍       | 470/1897 [00:20<00:38, 37.48it/s, now=None]t:  25%|██▍       | 474/1897 [00:20<00:44, 32.12it/s, now=None]t:  25%|██▌       | 479/1897 [00:20<00:39, 36.19it/s, now=None]t:  25%|██▌       | 483/1897 [00:20<00:41, 33.97it/s, now=None]t:  26%|██▌       | 487/1897 [00:20<00:43, 32.77it/s, now=None]t:  26%|██▌       | 491/1897 [00:20<00:43, 32.47it/s, now=None]t:  26%|██▌       | 496/1897 [00:20<00:38, 36.33it/s, now=None]t:  26%|██▋       | 501/1897 [00:20<00:35, 39.76it/s, now=None]t:  27%|██▋       | 506/1897 [00:21<00:36, 37.83it/s, now=None]t:  27%|██▋       | 510/1897 [00:21<00:37, 37.42it/s, now=None]t:  27%|██▋       | 515/1897 [00:21<00:36, 37.38it/s, now=None]t:  27%|██▋       | 519/1897 [00:21<00:40, 33.78it/s, now=None]t:  28%|██▊       | 523/1897 [00:21<00:43, 31.88it/s, now=None]t:  28%|██▊       | 527/1897 [00:21<00:44, 31.08it/s, now=None]t:  28%|██▊       | 531/1897 [00:21<00:41, 33.18it/s, now=None]t:  28%|██▊       | 536/1897 [00:21<00:36, 36.86it/s, now=None]t:  29%|██▊       | 541/1897 [00:22<00:33, 40.17it/s, now=None]t:  29%|██▉       | 547/1897 [00:22<00:30, 44.19it/s, now=None]t:  29%|██▉       | 553/1897 [00:22<00:27, 48.29it/s, now=None]t:  29%|██▉       | 559/1897 [00:22<00:27, 48.66it/s, now=None]t:  30%|██▉       | 564/1897 [00:22<00:34, 38.52it/s, now=None]t:  30%|██▉       | 569/1897 [00:22<00:37, 35.43it/s, now=None]t:  30%|███       | 573/1897 [00:22<00:36, 35.87it/s, now=None]t:  30%|███       | 577/1897 [00:23<00:39, 33.05it/s, now=None]t:  31%|███       | 581/1897 [00:23<00:39, 33.04it/s, now=None]t:  31%|███       | 585/1897 [00:23<00:46, 28.03it/s, now=None]t:  31%|███       | 591/1897 [00:23<00:38, 33.70it/s, now=None]t:  31%|███▏      | 595/1897 [00:23<00:39, 33.22it/s, now=None]t:  32%|███▏      | 600/1897 [00:23<00:37, 34.76it/s, now=None]t:  32%|███▏      | 606/1897 [00:23<00:39, 32.68it/s, now=None]t:  32%|███▏      | 610/1897 [00:24<00:41, 30.85it/s, now=None]t:  32%|███▏      | 614/1897 [00:24<00:47, 26.84it/s, now=None]t:  33%|███▎      | 617/1897 [00:24<00:54, 23.62it/s, now=None]t:  33%|███▎      | 620/1897 [00:24<00:53, 23.92it/s, now=None]t:  33%|███▎      | 625/1897 [00:24<00:43, 29.37it/s, now=None]t:  33%|███▎      | 629/1897 [00:24<00:42, 29.78it/s, now=None]t:  33%|███▎      | 634/1897 [00:24<00:37, 33.68it/s, now=None]t:  34%|███▎      | 639/1897 [00:25<00:35, 35.75it/s, now=None]t:  34%|███▍      | 643/1897 [00:25<00:35, 35.67it/s, now=None]t:  34%|███▍      | 647/1897 [00:25<00:35, 34.77it/s, now=None]t:  34%|███▍      | 652/1897 [00:25<00:32, 37.83it/s, now=None]t:  35%|███▍      | 657/1897 [00:25<00:31, 39.02it/s, now=None]t:  35%|███▍      | 662/1897 [00:25<00:29, 41.21it/s, now=None]t:  35%|███▌      | 667/1897 [00:25<00:29, 42.00it/s, now=None]t:  35%|███▌      | 672/1897 [00:25<00:28, 42.70it/s, now=None]t:  36%|███▌      | 677/1897 [00:25<00:28, 42.68it/s, now=None]t:  36%|███▌      | 682/1897 [00:26<00:28, 42.27it/s, now=None]t:  36%|███▌      | 687/1897 [00:26<00:27, 43.83it/s, now=None]t:  36%|███▋      | 692/1897 [00:26<00:30, 39.39it/s, now=None]t:  37%|███▋      | 697/1897 [00:26<00:30, 38.82it/s, now=None]t:  37%|███▋      | 701/1897 [00:26<00:32, 37.12it/s, now=None]t:  37%|███▋      | 705/1897 [00:26<00:35, 33.83it/s, now=None]t:  37%|███▋      | 710/1897 [00:26<00:32, 36.29it/s, now=None]t:  38%|███▊      | 714/1897 [00:27<00:34, 34.36it/s, now=None]t:  38%|███▊      | 718/1897 [00:27<00:36, 32.43it/s, now=None]t:  38%|███▊      | 722/1897 [00:27<00:35, 32.72it/s, now=None]t:  38%|███▊      | 726/1897 [00:27<00:37, 31.27it/s, now=None]t:  38%|███▊      | 730/1897 [00:27<00:37, 31.19it/s, now=None]t:  39%|███▊      | 734/1897 [00:27<00:38, 30.04it/s, now=None]t:  39%|███▉      | 739/1897 [00:27<00:36, 31.80it/s, now=None]t:  39%|███▉      | 743/1897 [00:27<00:38, 29.86it/s, now=None]t:  39%|███▉      | 748/1897 [00:28<00:34, 33.48it/s, now=None]t:  40%|███▉      | 752/1897 [00:28<00:34, 33.31it/s, now=None]t:  40%|███▉      | 756/1897 [00:28<00:36, 31.62it/s, now=None]t:  40%|████      | 760/1897 [00:28<00:35, 31.91it/s, now=None]t:  40%|████      | 764/1897 [00:28<00:35, 31.90it/s, now=None]t:  40%|████      | 768/1897 [00:28<00:35, 32.18it/s, now=None]t:  41%|████      | 772/1897 [00:28<00:35, 31.51it/s, now=None]t:  41%|████      | 776/1897 [00:29<00:37, 29.78it/s, now=None]t:  41%|████      | 780/1897 [00:29<00:35, 31.73it/s, now=None]t:  41%|████▏     | 784/1897 [00:29<00:35, 31.47it/s, now=None]t:  42%|████▏     | 788/1897 [00:29<00:36, 30.51it/s, now=None]t:  42%|████▏     | 792/1897 [00:29<00:41, 26.75it/s, now=None]t:  42%|████▏     | 797/1897 [00:29<00:36, 30.33it/s, now=None]t:  42%|████▏     | 801/1897 [00:29<00:34, 31.85it/s, now=None]t:  42%|████▏     | 805/1897 [00:29<00:37, 29.34it/s, now=None]t:  43%|████▎     | 809/1897 [00:30<00:39, 27.48it/s, now=None]t:  43%|████▎     | 813/1897 [00:30<00:37, 29.20it/s, now=None]t:  43%|████▎     | 817/1897 [00:30<00:37, 28.86it/s, now=None]t:  43%|████▎     | 820/1897 [00:30<00:37, 28.67it/s, now=None]t:  43%|████▎     | 823/1897 [00:30<00:39, 27.31it/s, now=None]t:  44%|████▎     | 826/1897 [00:30<00:41, 26.12it/s, now=None]t:  44%|████▎     | 829/1897 [00:30<00:46, 23.14it/s, now=None]t:  44%|████▍     | 832/1897 [00:31<00:46, 22.93it/s, now=None]t:  44%|████▍     | 835/1897 [00:31<00:50, 20.97it/s, now=None]t:  44%|████▍     | 839/1897 [00:31<00:49, 21.23it/s, now=None]t:  44%|████▍     | 842/1897 [00:31<00:47, 22.02it/s, now=None]t:  45%|████▍     | 845/1897 [00:31<00:46, 22.81it/s, now=None]t:  45%|████▍     | 848/1897 [00:31<00:43, 24.08it/s, now=None]t:  45%|████▍     | 851/1897 [00:31<00:49, 21.25it/s, now=None]t:  45%|████▌     | 854/1897 [00:32<00:51, 20.14it/s, now=None]t:  45%|████▌     | 857/1897 [00:32<00:50, 20.54it/s, now=None]t:  45%|████▌     | 860/1897 [00:32<00:52, 19.92it/s, now=None]t:  45%|████▌     | 863/1897 [00:32<00:47, 21.70it/s, now=None]t:  46%|████▌     | 866/1897 [00:32<00:50, 20.38it/s, now=None]t:  46%|████▌     | 869/1897 [00:32<00:49, 20.86it/s, now=None]t:  46%|████▌     | 872/1897 [00:33<00:55, 18.41it/s, now=None]t:  46%|████▌     | 874/1897 [00:33<00:57, 17.82it/s, now=None]t:  46%|████▌     | 877/1897 [00:33<00:51, 19.87it/s, now=None]t:  46%|████▋     | 880/1897 [00:33<00:45, 22.13it/s, now=None]t:  47%|████▋     | 884/1897 [00:33<00:40, 24.97it/s, now=None]t:  47%|████▋     | 889/1897 [00:33<00:33, 29.80it/s, now=None]t:  47%|████▋     | 894/1897 [00:33<00:28, 34.65it/s, now=None]t:  47%|████▋     | 898/1897 [00:33<00:34, 29.29it/s, now=None]t:  48%|████▊     | 902/1897 [00:34<00:38, 25.80it/s, now=None]t:  48%|████▊     | 906/1897 [00:34<00:35, 28.17it/s, now=None]t:  48%|████▊     | 910/1897 [00:34<00:36, 27.10it/s, now=None]t:  48%|████▊     | 913/1897 [00:34<00:37, 26.21it/s, now=None]t:  48%|████▊     | 916/1897 [00:34<00:39, 24.71it/s, now=None]t:  48%|████▊     | 919/1897 [00:34<00:39, 24.80it/s, now=None]t:  49%|████▊     | 923/1897 [00:34<00:37, 26.16it/s, now=None]t:  49%|████▉     | 926/1897 [00:35<00:40, 24.19it/s, now=None]t:  49%|████▉     | 930/1897 [00:35<00:42, 23.00it/s, now=None]t:  49%|████▉     | 933/1897 [00:35<00:39, 24.15it/s, now=None]t:  49%|████▉     | 936/1897 [00:35<00:38, 25.27it/s, now=None]t:  49%|████▉     | 939/1897 [00:35<00:41, 22.96it/s, now=None]t:  50%|████▉     | 942/1897 [00:35<00:44, 21.62it/s, now=None]t:  50%|████▉     | 945/1897 [00:35<00:44, 21.18it/s, now=None]t:  50%|████▉     | 948/1897 [00:36<00:50, 18.76it/s, now=None]t:  50%|█████     | 954/1897 [00:36<00:36, 25.54it/s, now=None]t:  50%|█████     | 957/1897 [00:36<00:38, 24.54it/s, now=None]t:  51%|█████     | 961/1897 [00:36<00:34, 27.40it/s, now=None]t:  51%|█████     | 966/1897 [00:36<00:30, 30.21it/s, now=None]t:  51%|█████     | 971/1897 [00:36<00:29, 31.65it/s, now=None]t:  52%|█████▏    | 977/1897 [00:36<00:25, 36.23it/s, now=None]t:  52%|█████▏    | 981/1897 [00:37<00:26, 34.22it/s, now=None]t:  52%|█████▏    | 985/1897 [00:37<00:25, 35.47it/s, now=None]t:  52%|█████▏    | 989/1897 [00:37<00:27, 32.81it/s, now=None]t:  52%|█████▏    | 993/1897 [00:37<00:26, 33.85it/s, now=None]t:  53%|█████▎    | 999/1897 [00:37<00:22, 39.62it/s, now=None]t:  53%|█████▎    | 1004/1897 [00:37<00:25, 35.34it/s, now=None]t:  53%|█████▎    | 1008/1897 [00:37<00:24, 36.13it/s, now=None]t:  53%|█████▎    | 1014/1897 [00:37<00:23, 37.94it/s, now=None]t:  54%|█████▎    | 1018/1897 [00:38<00:24, 36.33it/s, now=None]t:  54%|█████▍    | 1024/1897 [00:38<00:21, 41.29it/s, now=None]t:  54%|█████▍    | 1029/1897 [00:38<00:20, 41.87it/s, now=None]t:  55%|█████▍    | 1034/1897 [00:38<00:20, 42.53it/s, now=None]t:  55%|█████▍    | 1040/1897 [00:38<00:18, 46.96it/s, now=None]t:  55%|█████▌    | 1045/1897 [00:38<00:19, 43.77it/s, now=None]t:  55%|█████▌    | 1050/1897 [00:38<00:20, 40.52it/s, now=None]t:  56%|█████▌    | 1055/1897 [00:38<00:22, 37.37it/s, now=None]t:  56%|█████▌    | 1060/1897 [00:39<00:21, 39.37it/s, now=None]t:  56%|█████▌    | 1065/1897 [00:39<00:20, 40.66it/s, now=None]t:  56%|█████▋    | 1071/1897 [00:39<00:18, 44.01it/s, now=None]t:  57%|█████▋    | 1077/1897 [00:39<00:17, 45.81it/s, now=None]t:  57%|█████▋    | 1083/1897 [00:39<00:17, 47.55it/s, now=None]t:  57%|█████▋    | 1089/1897 [00:39<00:16, 50.15it/s, now=None]t:  58%|█████▊    | 1095/1897 [00:39<00:15, 51.96it/s, now=None]t:  58%|█████▊    | 1102/1897 [00:39<00:14, 55.14it/s, now=None]t:  58%|█████▊    | 1108/1897 [00:39<00:14, 55.88it/s, now=None]t:  59%|█████▊    | 1114/1897 [00:40<00:14, 53.99it/s, now=None]t:  59%|█████▉    | 1120/1897 [00:40<00:14, 54.34it/s, now=None]t:  59%|█████▉    | 1126/1897 [00:40<00:14, 54.37it/s, now=None]t:  60%|█████▉    | 1132/1897 [00:40<00:14, 52.01it/s, now=None]t:  60%|█████▉    | 1138/1897 [00:40<00:14, 51.90it/s, now=None]t:  60%|██████    | 1144/1897 [00:40<00:14, 52.91it/s, now=None]t:  61%|██████    | 1150/1897 [00:40<00:13, 53.42it/s, now=None]t:  61%|██████    | 1156/1897 [00:40<00:13, 53.94it/s, now=None]t:  61%|██████▏   | 1162/1897 [00:40<00:14, 51.74it/s, now=None]t:  62%|██████▏   | 1168/1897 [00:41<00:14, 51.83it/s, now=None]t:  62%|██████▏   | 1175/1897 [00:41<00:13, 55.13it/s, now=None]t:  62%|██████▏   | 1181/1897 [00:41<00:13, 54.52it/s, now=None]t:  63%|██████▎   | 1187/1897 [00:41<00:15, 47.19it/s, now=None]t:  63%|██████▎   | 1192/1897 [00:41<00:15, 45.81it/s, now=None]t:  63%|██████▎   | 1197/1897 [00:41<00:15, 45.77it/s, now=None]t:  63%|██████▎   | 1202/1897 [00:41<00:14, 46.65it/s, now=None]t:  64%|██████▎   | 1207/1897 [00:41<00:15, 44.67it/s, now=None]t:  64%|██████▍   | 1212/1897 [00:42<00:15, 43.31it/s, now=None]t:  64%|██████▍   | 1217/1897 [00:42<00:16, 41.92it/s, now=None]t:  64%|██████▍   | 1222/1897 [00:42<00:16, 41.68it/s, now=None]t:  65%|██████▍   | 1227/1897 [00:42<00:16, 39.88it/s, now=None]t:  65%|██████▍   | 1232/1897 [00:42<00:16, 39.74it/s, now=None]t:  65%|██████▌   | 1237/1897 [00:42<00:16, 40.31it/s, now=None]t:  65%|██████▌   | 1242/1897 [00:42<00:16, 40.08it/s, now=None]t:  66%|██████▌   | 1247/1897 [00:42<00:16, 40.34it/s, now=None]t:  66%|██████▌   | 1253/1897 [00:43<00:14, 43.39it/s, now=None]t:  66%|██████▋   | 1259/1897 [00:43<00:13, 45.79it/s, now=None]t:  67%|██████▋   | 1264/1897 [00:43<00:14, 44.24it/s, now=None]t:  67%|██████▋   | 1269/1897 [00:43<00:14, 44.04it/s, now=None]t:  67%|██████▋   | 1274/1897 [00:43<00:14, 43.21it/s, now=None]t:  67%|██████▋   | 1280/1897 [00:43<00:13, 45.92it/s, now=None]t:  68%|██████▊   | 1285/1897 [00:43<00:13, 46.04it/s, now=None]t:  68%|██████▊   | 1290/1897 [00:44<00:17, 34.23it/s, now=None]t:  68%|██████▊   | 1295/1897 [00:44<00:16, 37.18it/s, now=None]t:  69%|██████▊   | 1300/1897 [00:44<00:15, 39.21it/s, now=None]t:  69%|██████▉   | 1305/1897 [00:44<00:15, 39.39it/s, now=None]t:  69%|██████▉   | 1310/1897 [00:44<00:15, 37.97it/s, now=None]t:  69%|██████▉   | 1314/1897 [00:44<00:15, 37.21it/s, now=None]t:  70%|██████▉   | 1319/1897 [00:44<00:15, 37.23it/s, now=None]t:  70%|██████▉   | 1324/1897 [00:44<00:15, 38.06it/s, now=None]t:  70%|███████   | 1328/1897 [00:44<00:14, 38.06it/s, now=None]t:  70%|███████   | 1332/1897 [00:45<00:14, 37.88it/s, now=None]t:  70%|███████   | 1337/1897 [00:45<00:13, 40.76it/s, now=None]t:  71%|███████   | 1342/1897 [00:45<00:13, 42.05it/s, now=None]t:  71%|███████   | 1349/1897 [00:45<00:11, 49.10it/s, now=None]t:  72%|███████▏  | 1357/1897 [00:45<00:10, 52.77it/s, now=None]t:  72%|███████▏  | 1363/1897 [00:45<00:14, 38.08it/s, now=None]t:  72%|███████▏  | 1368/1897 [00:45<00:15, 34.84it/s, now=None]t:  72%|███████▏  | 1372/1897 [00:46<00:15, 34.85it/s, now=None]t:  73%|███████▎  | 1376/1897 [00:46<00:15, 34.66it/s, now=None]t:  73%|███████▎  | 1380/1897 [00:46<00:15, 34.08it/s, now=None]t:  73%|███████▎  | 1384/1897 [00:46<00:15, 33.87it/s, now=None]t:  73%|███████▎  | 1388/1897 [00:46<00:15, 32.87it/s, now=None]t:  73%|███████▎  | 1392/1897 [00:46<00:15, 32.02it/s, now=None]t:  74%|███████▎  | 1396/1897 [00:46<00:15, 31.52it/s, now=None]t:  74%|███████▍  | 1400/1897 [00:46<00:15, 32.24it/s, now=None]t:  74%|███████▍  | 1404/1897 [00:47<00:15, 32.77it/s, now=None]t:  74%|███████▍  | 1408/1897 [00:47<00:14, 34.35it/s, now=None]t:  74%|███████▍  | 1412/1897 [00:47<00:14, 32.75it/s, now=None]t:  75%|███████▍  | 1416/1897 [00:47<00:14, 32.30it/s, now=None]t:  75%|███████▍  | 1420/1897 [00:47<00:16, 29.16it/s, now=None]t:  75%|███████▌  | 1423/1897 [00:47<00:16, 28.70it/s, now=None]t:  75%|███████▌  | 1428/1897 [00:47<00:14, 31.67it/s, now=None]t:  75%|███████▌  | 1432/1897 [00:47<00:15, 30.00it/s, now=None]t:  76%|███████▌  | 1436/1897 [00:48<00:14, 31.77it/s, now=None]t:  76%|███████▌  | 1440/1897 [00:48<00:13, 33.08it/s, now=None]t:  76%|███████▌  | 1444/1897 [00:48<00:13, 34.70it/s, now=None]t:  76%|███████▋  | 1448/1897 [00:48<00:13, 33.40it/s, now=None]t:  77%|███████▋  | 1452/1897 [00:48<00:16, 27.50it/s, now=None]t:  77%|███████▋  | 1455/1897 [00:48<00:15, 28.05it/s, now=None]t:  77%|███████▋  | 1459/1897 [00:48<00:16, 26.41it/s, now=None]t:  77%|███████▋  | 1464/1897 [00:49<00:14, 30.16it/s, now=None]t:  77%|███████▋  | 1469/1897 [00:49<00:12, 34.49it/s, now=None]t:  78%|███████▊  | 1474/1897 [00:49<00:11, 37.92it/s, now=None]t:  78%|███████▊  | 1478/1897 [00:49<00:12, 33.64it/s, now=None]t:  78%|███████▊  | 1482/1897 [00:49<00:12, 33.71it/s, now=None]t:  78%|███████▊  | 1486/1897 [00:49<00:12, 33.36it/s, now=None]t:  79%|███████▊  | 1490/1897 [00:49<00:11, 34.75it/s, now=None]t:  79%|███████▉  | 1495/1897 [00:49<00:10, 36.74it/s, now=None]t:  79%|███████▉  | 1499/1897 [00:49<00:10, 36.24it/s, now=None]t:  79%|███████▉  | 1503/1897 [00:50<00:10, 36.23it/s, now=None]t:  79%|███████▉  | 1507/1897 [00:50<00:10, 36.31it/s, now=None]t:  80%|███████▉  | 1512/1897 [00:50<00:10, 38.02it/s, now=None]t:  80%|███████▉  | 1517/1897 [00:50<00:09, 38.44it/s, now=None]t:  80%|████████  | 1522/1897 [00:50<00:09, 39.97it/s, now=None]t:  80%|████████  | 1527/1897 [00:50<00:08, 41.44it/s, now=None]t:  81%|████████  | 1532/1897 [00:50<00:08, 41.34it/s, now=None]t:  81%|████████  | 1537/1897 [00:50<00:08, 40.21it/s, now=None]t:  81%|████████▏ | 1542/1897 [00:51<00:08, 40.14it/s, now=None]t:  82%|████████▏ | 1547/1897 [00:51<00:08, 41.73it/s, now=None]t:  82%|████████▏ | 1552/1897 [00:51<00:07, 43.56it/s, now=None]t:  82%|████████▏ | 1557/1897 [00:51<00:07, 44.50it/s, now=None]t:  82%|████████▏ | 1562/1897 [00:51<00:07, 44.49it/s, now=None]t:  83%|████████▎ | 1567/1897 [00:51<00:07, 42.68it/s, now=None]t:  83%|████████▎ | 1572/1897 [00:51<00:07, 42.87it/s, now=None]t:  83%|████████▎ | 1577/1897 [00:51<00:07, 41.15it/s, now=None]t:  83%|████████▎ | 1582/1897 [00:51<00:07, 41.10it/s, now=None]t:  84%|████████▎ | 1587/1897 [00:52<00:07, 40.30it/s, now=None]t:  84%|████████▍ | 1592/1897 [00:52<00:07, 40.76it/s, now=None]t:  84%|████████▍ | 1598/1897 [00:52<00:06, 43.67it/s, now=None]t:  85%|████████▍ | 1604/1897 [00:52<00:06, 46.47it/s, now=None]t:  85%|████████▍ | 1610/1897 [00:52<00:05, 49.70it/s, now=None]t:  85%|████████▌ | 1616/1897 [00:52<00:05, 51.85it/s, now=None]t:  86%|████████▌ | 1622/1897 [00:52<00:05, 53.36it/s, now=None]t:  86%|████████▌ | 1628/1897 [00:52<00:04, 54.43it/s, now=None]t:  86%|████████▌ | 1634/1897 [00:53<00:05, 48.60it/s, now=None]t:  86%|████████▋ | 1640/1897 [00:53<00:06, 41.38it/s, now=None]t:  87%|████████▋ | 1645/1897 [00:53<00:07, 32.54it/s, now=None]t:  87%|████████▋ | 1649/1897 [00:53<00:08, 29.15it/s, now=None]t:  87%|████████▋ | 1653/1897 [00:53<00:09, 26.67it/s, now=None]t:  87%|████████▋ | 1656/1897 [00:53<00:09, 25.31it/s, now=None]t:  87%|████████▋ | 1659/1897 [00:54<00:10, 23.56it/s, now=None]t:  88%|████████▊ | 1662/1897 [00:54<00:09, 24.67it/s, now=None]t:  88%|████████▊ | 1667/1897 [00:54<00:07, 29.97it/s, now=None]t:  88%|████████▊ | 1673/1897 [00:54<00:06, 36.18it/s, now=None]t:  89%|████████▊ | 1679/1897 [00:54<00:05, 39.40it/s, now=None]t:  89%|████████▉ | 1684/1897 [00:54<00:06, 33.17it/s, now=None]t:  89%|████████▉ | 1688/1897 [00:54<00:06, 30.67it/s, now=None]t:  89%|████████▉ | 1692/1897 [00:55<00:06, 32.69it/s, now=None]t:  89%|████████▉ | 1697/1897 [00:55<00:05, 36.35it/s, now=None]t:  90%|████████▉ | 1702/1897 [00:55<00:05, 37.15it/s, now=None]t:  90%|████████▉ | 1707/1897 [00:55<00:04, 38.47it/s, now=None]t:  90%|█████████ | 1711/1897 [00:55<00:05, 33.97it/s, now=None]t:  90%|█████████ | 1715/1897 [00:55<00:05, 31.26it/s, now=None]t:  91%|█████████ | 1719/1897 [00:55<00:06, 27.53it/s, now=None]t:  91%|█████████ | 1723/1897 [00:56<00:06, 27.30it/s, now=None]t:  91%|█████████ | 1726/1897 [00:56<00:07, 24.11it/s, now=None]t:  91%|█████████ | 1729/1897 [00:56<00:06, 24.66it/s, now=None]t:  91%|█████████▏| 1732/1897 [00:56<00:06, 25.23it/s, now=None]t:  91%|█████████▏| 1735/1897 [00:56<00:06, 23.99it/s, now=None]t:  92%|█████████▏| 1739/1897 [00:56<00:06, 25.03it/s, now=None]t:  92%|█████████▏| 1742/1897 [00:56<00:05, 26.16it/s, now=None]t:  92%|█████████▏| 1745/1897 [00:57<00:06, 23.55it/s, now=None]t:  92%|█████████▏| 1748/1897 [00:57<00:06, 22.07it/s, now=None]t:  92%|█████████▏| 1751/1897 [00:57<00:06, 22.12it/s, now=None]t:  92%|█████████▏| 1754/1897 [00:57<00:06, 22.95it/s, now=None]t:  93%|█████████▎| 1757/1897 [00:57<00:06, 22.98it/s, now=None]t:  93%|█████████▎| 1760/1897 [00:57<00:06, 21.02it/s, now=None]t:  93%|█████████▎| 1764/1897 [00:57<00:05, 23.81it/s, now=None]t:  93%|█████████▎| 1767/1897 [00:57<00:05, 23.54it/s, now=None]t:  93%|█████████▎| 1770/1897 [00:58<00:05, 23.01it/s, now=None]t:  93%|█████████▎| 1773/1897 [00:58<00:05, 21.50it/s, now=None]t:  94%|█████████▎| 1776/1897 [00:58<00:06, 19.97it/s, now=None]t:  94%|█████████▍| 1779/1897 [00:58<00:06, 19.59it/s, now=None]t:  94%|█████████▍| 1782/1897 [00:58<00:05, 20.65it/s, now=None]t:  94%|█████████▍| 1785/1897 [00:58<00:05, 19.32it/s, now=None]t:  94%|█████████▍| 1787/1897 [00:59<00:05, 18.93it/s, now=None]t:  94%|█████████▍| 1790/1897 [00:59<00:05, 19.76it/s, now=None]t:  95%|█████████▍| 1793/1897 [00:59<00:05, 20.08it/s, now=None]t:  95%|█████████▍| 1796/1897 [00:59<00:04, 20.85it/s, now=None]t:  95%|█████████▍| 1799/1897 [00:59<00:04, 21.25it/s, now=None]t:  95%|█████████▌| 1803/1897 [00:59<00:04, 23.36it/s, now=None]t:  95%|█████████▌| 1806/1897 [00:59<00:03, 24.01it/s, now=None]t:  95%|█████████▌| 1809/1897 [01:00<00:04, 21.43it/s, now=None]t:  96%|█████████▌| 1812/1897 [01:00<00:04, 20.93it/s, now=None]t:  96%|█████████▌| 1815/1897 [01:00<00:03, 22.87it/s, now=None]t:  96%|█████████▌| 1818/1897 [01:00<00:03, 23.23it/s, now=None]t:  96%|█████████▌| 1822/1897 [01:00<00:02, 26.02it/s, now=None]t:  96%|█████████▋| 1826/1897 [01:00<00:02, 27.09it/s, now=None]t:  96%|█████████▋| 1829/1897 [01:00<00:02, 24.78it/s, now=None]t:  97%|█████████▋| 1832/1897 [01:01<00:03, 20.86it/s, now=None]t:  97%|█████████▋| 1835/1897 [01:01<00:03, 18.49it/s, now=None]t:  97%|█████████▋| 1837/1897 [01:01<00:03, 18.64it/s, now=None]t:  97%|█████████▋| 1840/1897 [01:01<00:02, 20.74it/s, now=None]t:  97%|█████████▋| 1843/1897 [01:01<00:02, 19.54it/s, now=None]t:  97%|█████████▋| 1846/1897 [01:01<00:02, 21.36it/s, now=None]t:  98%|█████████▊| 1850/1897 [01:01<00:02, 22.00it/s, now=None]t:  98%|█████████▊| 1853/1897 [01:02<00:01, 22.41it/s, now=None]t:  98%|█████████▊| 1856/1897 [01:02<00:01, 22.87it/s, now=None]t:  98%|█████████▊| 1860/1897 [01:02<00:01, 26.17it/s, now=None]t:  98%|█████████▊| 1863/1897 [01:02<00:01, 25.06it/s, now=None]t:  98%|█████████▊| 1866/1897 [01:02<00:01, 24.93it/s, now=None]t:  99%|█████████▊| 1869/1897 [01:02<00:01, 26.01it/s, now=None]t:  99%|█████████▊| 1872/1897 [01:02<00:01, 24.41it/s, now=None]t:  99%|█████████▉| 1875/1897 [01:02<00:01, 19.76it/s, now=None]t:  99%|█████████▉| 1878/1897 [01:03<00:00, 20.92it/s, now=None]t:  99%|█████████▉| 1881/1897 [01:03<00:00, 21.76it/s, now=None]t:  99%|█████████▉| 1884/1897 [01:03<00:00, 21.93it/s, now=None]t:  99%|█████████▉| 1887/1897 [01:03<00:00, 22.03it/s, now=None]t: 100%|█████████▉| 1890/1897 [01:03<00:00, 23.08it/s, now=None]t: 100%|█████████▉| 1893/1897 [01:03<00:00, 21.50it/s, now=None]t: 100%|█████████▉| 1896/1897 [01:03<00:00, 22.31it/s, now=None]                                                                Moviepy - Done !
-Moviepy - video ready results/voyager_1__the_farthest_human_made_object/voyager_1__the_farthest_human_made_object_v1.mp4
-  Rendered 63.2s, 16.2 MB (72.7s)
-
-[11/16] MUSIC & SOUND (ffmpeg sidechain ducking, bed=cinematic.mp3)
-  Music mixed (ducked under narration): 63.2s, 16.6 MB
-
-[13/16] VIDEO REVIEW (Gemini Pro, end-to-end)
-→ Uploading results/voyager_1__the_farthest_human_made_object/voyager_1__the_farthest_human_made_object_v1_mixed.mp4 to Gemini...
-→ Uploaded: files/fztl8pdu80cg (FileState.PROCESSING)
-→ Reviewing with gemini-2.5-pro...
-    !! gemini-2.5-pro failed: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and 
-→ Reviewing with gemini-3.5-flash...
-  Score: 35/100 (conf 0.95) | recs: 4
-
-[14/16] IMPROVEMENT PASS planning (iteration 2/3)
-    APPLY  [other] Fix the video rendering layout. Ensure all video assets fill the entire 16:9 canvas instead of being cropped a
-    APPLY  [transitions] [transitions][medium] Improve visual continuity by avoiding sudden jumps between full-screen shots and the gli
-    FLAG   [unclassified] Re-record the voiceover to correctly pronounce dates and numbers: 'September fifth' instead of 
-    FLAG   [new_asset] Replace the cheesy 3D alien shots at 00:00 and 00:26 with high-quality space animations or archiva
-  → No timeline mutations possible; stopping improvement loop.
-
-[15-16/16] FINAL OUTPUT + POSTMORTEM
-
-================================================================
-MISSION RUN COMPLETE — Voyager 1: the farthest human-made object
-  Video:  results/voyager_1__the_farthest_human_made_object/voyager_1__the_farthest_human_made_object_v1_mixed.mp4
-  Report: results/voyager_1__the_farthest_human_made_object/run_report.json
-  Postmortem: /home/ubuntu/video_engine/src/docs/mission/postmortems/postmortem-voyager-1-the-farthest-human-made-object.md
-  Final review score: 35/100
-================================================================

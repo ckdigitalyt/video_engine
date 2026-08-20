@@ -224,8 +224,12 @@ def ffmpeg() -> str:
 def measure_loudness(path: Path) -> dict:
     """Measure integrated LUFS + true peak via FFmpeg ebur128 filter.
 
-    ebur128 reports values on 'I:' (integrated) and 'Peak:' lines that
-    follow the 'Integrated loudness:' / 'True peak:' headers.
+    ebur128 prints instantaneous 'I:' / 'Peak:' lines DURING the run and a
+    final summary at the end.  We parse the FINAL summary only: the 'I:'
+    line that follows the 'Integrated loudness:' header and the 'Peak:'
+    line that follows the 'True peak:' header (in the last 'Summary:'
+    section).  Grabbing the first 'I:' line (as before) could match an
+    early instantaneous measurement — wrong.
     """
     cmd = [
         ffmpeg(), "-hide_banner", "-i", str(path),
@@ -234,22 +238,50 @@ def measure_loudness(path: Path) -> dict:
     ]
     proc = subprocess.run(cmd, capture_output=True, text=True)
     out = proc.stderr
-    lufs = None
-    peak = None
-    for line in out.splitlines():
-        stripped = line.strip()
-        if stripped.startswith("I:") and lufs is None:
-            try:
-                lufs = float(stripped.split("I:")[1].split()[0].strip())
-            except (IndexError, ValueError):
-                pass
-        elif stripped.startswith("Peak:") and peak is None:
-            try:
-                peak = float(stripped.split("Peak:")[1].split()[0].strip())
-            except (IndexError, ValueError):
-                pass
+    lines = out.splitlines()
+
+    # Restrict to the final summary section (after the last 'Summary:' line).
+    summary_idx = max((i for i, ln in enumerate(lines)
+                       if "Summary:" in ln), default=0)
+    summary = lines[summary_idx:]
+
+    lufs = _value_after_header(summary, "Integrated loudness:", "I:")
+    peak = _value_after_header(summary, "True peak:", "Peak:")
+    if lufs is None or peak is None:
+        # Robust fallback: summary section absent -> take the LAST I:/Peak:
+        # lines of the whole log (the summary is always printed last).
+        for ln in reversed(lines):
+            stripped = ln.strip()
+            if lufs is None and stripped.startswith("I:"):
+                lufs = _parse_float_after(stripped, "I:")
+            elif peak is None and stripped.startswith("Peak:"):
+                peak = _parse_float_after(stripped, "Peak:")
+            if lufs is not None and peak is not None:
+                break
     return {"integrated_lufs": lufs, "true_peak_db": peak,
             "clipping": peak is not None and peak > -1.0}
+
+
+def _parse_float_after(stripped: str, marker: str) -> Optional[float]:
+    try:
+        return float(stripped.split(marker)[1].split()[0].strip())
+    except (IndexError, ValueError):
+        return None
+
+
+def _value_after_header(lines: list[str], header: str, marker: str) -> Optional[float]:
+    """Find the first line after `header` (within the summary section) that
+    starts with `marker` and parse the number after it."""
+    for i, ln in enumerate(lines):
+        if header in ln:
+            for following in lines[i + 1:]:
+                stripped = following.strip()
+                if stripped.startswith(marker):
+                    return _parse_float_after(stripped, marker)
+                if "Summary:" in following and header not in following:
+                    break
+            break
+    return None
 
 
 def normalize_to_target(input_path: Path, output_path: Path,
@@ -266,7 +298,8 @@ def normalize_to_target(input_path: Path, output_path: Path,
     cmd = [
         ffmpeg(), "-y", "-i", str(input_path),
         "-af", f"loudnorm=I={target_lufs}:TP=-1.5:LRA=11",
-        "-c:a", "aac", "-b:a", "192k", str(out),
+        "-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-ac", "2",
+        str(out),
     ]
     subprocess.run(cmd, check=True, capture_output=True)
     return out
@@ -295,7 +328,7 @@ def duck_music_under_narration(narration: Path, music: Path, out_mix: Path,
         "[nar][duck]amix=inputs=2:duration=first:dropout_transition=2:normalize=0,"
         f"volume={music_volume if music_volume else 0.35}[aout]".format(thr=sidechain_threshold),
         "-map", "[aout]",
-        "-c:a", "aac", "-b:a", "192k", str(out),
+        "-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-ac", "2", str(out),
     ]
     subprocess.run(cmd, check=True, capture_output=True)
     return out

@@ -51,7 +51,7 @@ def verify_kaprekar_step(value: str, ndigits: int = 4, from_value: str | None = 
     v = Verification(ok=True)
 
     err = _digits_ok(value, ndigits)
-    if from_value is not None and _digits_ok(from_value, ndigits):
+    if from_value is not None and not _digits_ok(from_value, ndigits):
         desc = "".join(sorted(from_value, reverse=True))
         asc = "".join(sorted(from_value))
         diff = str(int(desc) - int(asc)).zfill(ndigits)
