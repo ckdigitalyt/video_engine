@@ -104,7 +104,9 @@
                    "connection", "flow", "pipeline", "decision", "timeline",
                    "cause_effect", "comparison", "hierarchy", "question",
                    "experiment", "hypothesis", "observation", "reveal",
-                   "counterexample", "payoff"]
+                   "counterexample", "payoff",
+                   "microphone", "processor", "interference", "kernel",
+                   "steam", "shell"]
         },
         "value": {"type": "string"},
         "initial": {"type": "string"},

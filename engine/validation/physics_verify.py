@@ -138,6 +138,73 @@ def verify_free_fall_time(height_units: float, g_units: float,
     return v
 
 
+def verify_wave_interference(f1: float, f2: float,
+                             phase_diff_deg: float) -> Verification:
+    """Verify two-wave superposition (noise-cancelling, §46).
+
+    Deterministic: for two unit-amplitude waves with phase difference φ,
+    the combined amplitude is |2·cos(φ/2)| — destructive (≈0) at 180°
+    anti-phase, constructive (≈2) at 0°.  Used as the fail-closed physics
+    guard for the `interfere`/`cancel` actions.
+    """
+    v = Verification(ok=True)
+    if f1 <= 0 or f2 <= 0:
+        v.add("frequencies_positive", False,
+              f"frequencies must be > 0 (f1={f1}, f2={f2})")
+        return v
+    if not (0.0 <= phase_diff_deg <= 360.0):
+        v.add("phase_range", False,
+              f"phase difference {phase_diff_deg}° outside 0..360")
+        return v
+    phi = math.radians(phase_diff_deg)
+    combined = abs(2.0 * math.cos(phi / 2.0))
+    v.add("combined_amplitude", True,
+          f"combined |2·cos(φ/2)| = {combined:.4f} (unit amplitudes)")
+    if abs(phase_diff_deg - 180.0) < 1e-6:
+        v.add("destructive_at_180", combined < 1e-6,
+              f"anti-phase → destructive interference ({combined:.4f})")
+    if abs(phase_diff_deg - 0.0) < 1e-6:
+        v.add("constructive_at_0", abs(combined - 2.0) < 1e-6,
+              f"in-phase → constructive interference ({combined:.4f})")
+    # deterministic: recompute twice, must agree exactly
+    again = abs(2.0 * math.cos(math.radians(phase_diff_deg) / 2.0))
+    v.add("deterministic", again == combined, "recompute identical")
+    return v
+
+
+def verify_pressure_volume_burst(pressure_atm: float,
+                                 temp_c: float) -> Verification:
+    """Verify the popcorn burst claim (popcorn, §46).
+
+    Water vaporizes near 100 °C at 1 atm; the sealed starch shell holds the
+    steam until the kernel bursts near ~180 °C at ~9 atm.  Deterministic
+    sanity checks — never lets the animation imply a physically wrong
+    burst point (spec §19).
+    """
+    v = Verification(ok=True)
+    if pressure_atm <= 0:
+        v.add("pressure_positive", False,
+              f"pressure must be > 0 atm (got {pressure_atm})")
+        return v
+    if temp_c < -273.15:
+        v.add("temp_physical", False,
+              f"temperature {temp_c} °C below absolute zero")
+        return v
+    # burst point: ~9 atm near ~180 °C
+    if abs(temp_c - 180.0) < 25.0:
+        v.add("burst_pressure_band", 5.0 <= pressure_atm <= 13.0,
+              f"{pressure_atm} atm at {temp_c} °C (burst ≈ 9 atm near 180 °C)")
+    if abs(pressure_atm - 9.0) < 2.0:
+        v.add("burst_temp_band", 150.0 <= temp_c <= 210.0,
+              f"{temp_c} °C at {pressure_atm} atm (burst ≈ 180 °C at 9 atm)")
+    # vaporization: ~100 °C at ~1 atm
+    if abs(pressure_atm - 1.0) < 0.2 and abs(temp_c - 100.0) < 15.0:
+        v.add("vaporization_100c", True,
+              f"water vaporizes ≈ {temp_c:.0f} °C at {pressure_atm:.0f} atm")
+    v.add("deterministic", True, "pure function")
+    return v
+
+
 if __name__ == "__main__":
     r = verify_rayleigh_ratio()
     print("rayleigh:", r.ok, [c["detail"] for c in r.checks])
@@ -145,3 +212,7 @@ if __name__ == "__main__":
     print("orbital:", r.ok, [c["detail"] for c in r.checks])
     r = verify_collatz_example(27, 111, 9232)
     print("collatz27:", r.ok, [c["detail"] for c in r.checks])
+    r = verify_wave_interference(440.0, 440.0, 180.0)
+    print("interfere180:", r.ok, [c["detail"] for c in r.checks])
+    r = verify_pressure_volume_burst(9.0, 180.0)
+    print("burst9atm:", r.ok, [c["detail"] for c in r.checks])

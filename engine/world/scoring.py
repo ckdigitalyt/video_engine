@@ -40,6 +40,8 @@ _DEMONSTRATING_ACTIONS: frozenset[str] = frozenset({
     "flow", "branch", "merge", "assemble", "disassemble", "trace",
     "cross_section", "reveal_inside", "accelerate", "decelerate", "curve",
     "subtract", "sort", "measure",
+    # §46 acoustics / phase-change
+    "interfere", "cancel", "burst",
 })
 
 # Actions that visualize a concept but are not the mechanism itself.

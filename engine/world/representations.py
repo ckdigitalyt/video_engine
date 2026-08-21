@@ -81,6 +81,17 @@ _RULES: list[tuple[frozenset[str], RepType, tuple[RepType, ...], str]] = [
                 "vibration", "resonance", "acoustic"}),
      RepType.SIMULATION, (RepType.SIGNAL_FLOW,),
      "wave topics: simulation + signal flow"),
+    (frozenset({"noise", "cancell", "cancellation", "headphone",
+                "headphones", "interference", "anti-phase", "silence",
+                "active noise"}),
+     RepType.SIMULATION, (RepType.SIGNAL_FLOW,),
+     "noise-cancelling topics: simulation + signal flow (wave → mic → "
+     "processor → inverse wave → superposition)"),
+    (frozenset({"popcorn", "pop", "steam", "pressure", "explosion",
+                "burst", "kernel", "boil", "vaporiz", "vaporis"}),
+     RepType.EXPERIMENT, (RepType.CAUSE_EFFECT,),
+     "phase-change/explosion topics: experiment + cause-effect (heat → "
+     "pressure → burst → fluff)"),
     (frozenset({"history", "historical", "event", "timeline", "century",
                 "era", "origin", "discovery of"}),
      RepType.TIMELINE, (RepType.REAL_MEDIA,),

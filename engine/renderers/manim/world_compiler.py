@@ -60,6 +60,8 @@ _NATURAL_ENTER: dict[str, float] = {
     "CauseEffectChain": 0.8, "QuestionMark": 0.7, "ExperimentBadge": 0.5,
     "RevealText": 0.7, "PayoffText": 0.8, "MeasureValue": 0.7,
     "AssembleBodies": 0.6, "DisassembleBodies": 0.6,
+    "InterferencePattern": 0.8, "WaveSuperposition": 0.8,
+    "PressureKernel": 0.8, "BurstExplosion": 0.6,
 }
 _CAMERA_NATURAL = 0.9
 
@@ -95,6 +97,23 @@ def _physics_guard(beat: dict, world: WorldState) -> None:
             if not v.ok:
                 raise WorldCompileError(
                     f"beat {bid}: scatter physics failed: "
+                    + "; ".join(f["detail"] for f in v.failures()))
+        if name in ("interfere", "cancel"):
+            v = PH.verify_wave_interference(
+                float(params.get("f1", params.get("frequency", 1.0))),
+                float(params.get("f2", params.get("frequency", 1.0))),
+                float(params.get("phase_deg", 180.0)))
+            if not v.ok:
+                raise WorldCompileError(
+                    f"beat {bid}: interference physics failed: "
+                    + "; ".join(f["detail"] for f in v.failures()))
+        if name == "burst":
+            v = PH.verify_pressure_volume_burst(
+                float(params.get("pressure_atm", 9.0)),
+                float(params.get("temp_c", 180.0)))
+            if not v.ok:
+                raise WorldCompileError(
+                    f"beat {bid}: burst physics failed: "
                     + "; ".join(f["detail"] for f in v.failures()))
         if name == "orbit":
             r = float(params.get("radius", 3.4))

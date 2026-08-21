@@ -36,6 +36,13 @@ class Action:
     # compare / measure
     COMPARE = "compare"
     MEASURE = "measure"
+    # wave / signal processing (§46: noise-cancelling)
+    INTERFERE = "interfere"
+    CANCEL = "cancel"
+    # phase-change / burst (§46: popcorn)
+    BURST = "burst"
+    # phase-change / burst (§46: popcorn)
+    BURST = "burst"
     # camera
     ZOOM_INTO = "zoom_into"
     ZOOM_OUT_OF = "zoom_out_of"
@@ -139,6 +146,18 @@ ACTION_REGISTRY: dict[str, ActionSpec] = {
     Action.MEASURE: ActionSpec(
         Action.MEASURE, ["MeasureValue"], (), camera="zoom_to",
         explanation_level=4),
+    Action.INTERFERE: ActionSpec(
+        Action.INTERFERE, ["InterferencePattern", "WaveSuperposition"],
+        ("wave", "interference"), camera="zoom_to", explanation_level=5),
+    Action.CANCEL: ActionSpec(
+        Action.CANCEL, ["WaveSuperposition", "InterferencePattern"],
+        ("wave", "interference"), camera="zoom_to", explanation_level=5),
+    Action.BURST: ActionSpec(
+        Action.BURST, ["PressureKernel", "BurstExplosion"],
+        ("kernel", "explosion"), camera="zoom_to", explanation_level=5),
+    Action.BURST: ActionSpec(
+        Action.BURST, ["PressureKernel", "BurstExplosion"],
+        ("kernel", "explosion"), camera="zoom_to", explanation_level=5),
     Action.ZOOM_INTO: ActionSpec(
         Action.ZOOM_INTO, [], (), camera="zoom_to", explanation_level=2),
     Action.ZOOM_OUT_OF: ActionSpec(

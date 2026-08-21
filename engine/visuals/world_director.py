@@ -371,13 +371,185 @@ def _plan_cause_effect(topic: str, world: WorldState,
     return beats
 
 
+def _plan_wave(topic: str, world: WorldState,
+               script: list[dict]) -> list[dict]:
+    """Noise-cancelling (SIGNAL_FLOW/SIMULATION): source wave → mic →
+    processor → inverse wave → interference hero → silence payoff (§46)."""
+    beats: list[dict] = []
+    bid = [0]
+    def nxt(role, narration, objects, actions, vtype="", camera=None,
+            imp="medium"):
+        bid[0] += 1
+        beats.append(_mkbeat(f"b{bid[0]:03d}", role, narration, 2.6,
+                             objects, actions, vtype, camera, imp))
+    wave = next((e for e in world.entities if e.type == "wave"), None)
+    mic = next((e for e in world.entities if e.type == "microphone"), None)
+    proc = next((e for e in world.entities if e.type == "processor"), None)
+    inv = next((e for e in world.entities
+                if e.type == "wave" and e.id != (wave.id if wave else "")),
+               None)
+    comb = next((e for e in world.entities
+                 if e.type == "interference"), None)
+    ear = next((e for e in world.entities if e.type == "ear"), None)
+    w = wave.id if wave else "noise_wave"
+    m = mic.id if mic else "microphone"
+    p = proc.id if proc else "processor"
+    i = inv.id if inv else "inverse_wave"
+    c = comb.id if comb else "combined_wave"
+
+    nxt("hook", script[0]["narration"] if script else
+        "How do noise-cancelling headphones work?",
+        [], [], "kinetic_title", {"type": "zoom_to", "target": w}, "high")
+    nxt("question", script[1]["narration"] if len(script) > 1 else
+        "Sound is a wave — peaks and troughs.",
+        _entity_objs(world, w),
+        [{"action": "flow", "target": w,
+          "params": {"nodes": [{"position": [-4, 0, 0]},
+                               {"position": [0, 0, 0]},
+                               {"position": [4, 0, 0]}]}}],
+        camera={"type": "pan"})
+    nxt("simple_experiment", script[2]["narration"] if len(script) > 2 else
+        "A microphone samples the incoming noise wave.",
+        _entity_objs(world, w, m),
+        [{"action": "flow", "target": m,
+          "params": {"nodes": [{"position": [-3, 0, 0]},
+                               {"position": [0, 0, 0]},
+                               {"position": [3, 0, 0]}]}}],
+        camera={"type": "zoom_to", "target": m})
+    nxt("change_variable", script[3]["narration"] if len(script) > 3 else
+        "The processor builds the exact inverse wave.",
+        _entity_objs(world, m, p),
+        [{"action": "flow", "target": p,
+          "params": {"nodes": [{"position": [-3, 0, 0]},
+                               {"position": [0, 0, 0]},
+                               {"position": [3, 0, 0]}]}}],
+        camera={"type": "zoom_to", "target": p})
+    nxt("observe", script[4]["narration"] if len(script) > 4 else
+        "The inverse wave is 180 degrees out of phase.",
+        _entity_objs(world, i),
+        [{"action": "focus_on", "target": i,
+          "params": {"phase_deg": 180.0}}],
+        camera={"type": "zoom_to", "target": i})
+    # HERO: peak meets trough -> destructive interference
+    nxt("discover_principle", script[5]["narration"] if len(script) > 5 else
+        "Peak meets trough, everywhere at once.",
+        _entity_objs(world, w, i, c),
+        [{"action": "interfere", "target": c,
+          "params": {"frequency": 1.0, "amplitude": 0.5,
+                      "phase_deg": 180.0}}],
+        camera={"type": "zoom_to", "target": c}, imp="high")
+    nxt("explain_principle", script[6]["narration"] if len(script) > 6 else
+        "Peak plus trough equals silence — destructive interference.",
+        _entity_objs(world, c),
+        [{"action": "cancel", "target": c,
+          "params": {"frequency": 1.0, "amplitude": 0.5,
+                      "phase_deg": 180.0, "label": "silence"}}],
+        "reveal", {"type": "zoom_to", "target": c}, "high")
+    nxt("payoff", script[-1]["narration"] if script else
+        "That is how noise-cancelling headphones work.",
+        [], [], "payoff", {"type": "pull_out"}, "high")
+    return beats
+
+
+def _plan_experiment(topic: str, world: WorldState,
+                     script: list[dict]) -> list[dict]:
+    """Popcorn (EXPERIMENT): kernel → heat → steam → pressure rises →
+    burst hero → fluff payoff (§46)."""
+    beats: list[dict] = []
+    bid = [0]
+    def nxt(role, narration, objects, actions, vtype="", camera=None,
+            imp="medium"):
+        bid[0] += 1
+        beats.append(_mkbeat(f"b{bid[0]:03d}", role, narration, 2.6,
+                             objects, actions, vtype, camera, imp))
+    kernel = next((e for e in world.entities if e.type == "kernel"), None)
+    water = next((e for e in world.entities
+                  if e.type == "particle" and "water" in e.id), None)
+    steam = next((e for e in world.entities if e.type == "steam"), None)
+    shell = next((e for e in world.entities if e.type == "shell"), None)
+    fluff = next((e for e in world.entities
+                  if e.type == "particle" and "fluff" in e.id), None)
+    k = kernel.id if kernel else "kernel"
+    s = steam.id if steam else "steam"
+    sh = shell.id if shell else "shell"
+    f = fluff.id if fluff else "fluff"
+
+    nxt("hook", script[0]["narration"] if script else "Why does popcorn pop?",
+        [], [], "kinetic_title", {"type": "zoom_to", "target": k}, "high")
+    nxt("question", script[1]["narration"] if len(script) > 1 else
+        "Inside every kernel is a drop of water.",
+        _entity_objs(world, k),
+        [{"action": "focus_on", "target": k}],
+        camera={"type": "zoom_to", "target": k})
+    nxt("simple_experiment", script[2]["narration"] if len(script) > 2 else
+        "Heat the kernel and the water starts to boil.",
+        _entity_objs(world, k, water.id if water else ""),
+        [{"action": "flow", "target": k,
+          "params": {"nodes": [{"position": [-3, 0, 0]},
+                               {"position": [0, 0, 0]},
+                               {"position": [3, 0, 0]}]}}],
+        camera={"type": "pan"})
+    nxt("change_variable", script[3]["narration"] if len(script) > 3 else
+        "The shell traps the steam — it cannot escape.",
+        _entity_objs(world, sh, s),
+        [{"action": "flow", "target": s,
+          "params": {"nodes": [{"position": [-2, -1, 0]},
+                               {"position": [0, 0, 0]},
+                               {"position": [2, 1, 0]}]}}],
+        camera={"type": "zoom_to", "target": sh})
+    nxt("observe", script[4]["narration"] if len(script) > 4 else
+        "Pressure climbs, higher and higher.",
+        _entity_objs(world, k),
+        [{"action": "measure", "target": k,
+          "params": {"value": "~9 atm", "label": "pressure"}}],
+        camera={"type": "zoom_to", "target": k})
+    # HERO: near 180 °C the shell cannot hold it -> burst
+    nxt("discover_principle", script[5]["narration"] if len(script) > 5 else
+        "About nine atmospheres of pressure — then it bursts.",
+        _entity_objs(world, k, sh),
+        [{"action": "burst", "target": k,
+          "params": {"pressure_atm": 9.0, "temp_c": 180.0}}],
+        camera={"type": "zoom_to", "target": k}, imp="high")
+    nxt("explain_principle", script[6]["narration"] if len(script) > 6 else
+        "The shell ruptures, steam escapes, and the starch puffs out.",
+        _entity_objs(world, f),
+        [{"action": "flow", "target": f,
+          "params": {"nodes": [{"position": [-3, 0, 0]},
+                               {"position": [0, 0, 0]},
+                               {"position": [3, 0, 0]}]}}],
+        "reveal", {"type": "zoom_to", "target": f}, "high")
+    nxt("payoff", script[-1]["narration"] if script else
+        "That is why popcorn pops.",
+        [], [], "payoff", {"type": "pull_out"}, "high")
+    return beats
+
+
 REP_PLANNERS = {
     RepType.SIGNAL_FLOW: _plan_signal_flow,
     RepType.PHYSICAL_MODEL: _plan_physical,
     RepType.SIMULATION: _plan_simulation,
     RepType.MATHEMATICAL_TRANSFORMATION: _plan_math,
     RepType.CAUSE_EFFECT: _plan_cause_effect,
+    RepType.EXPERIMENT: _plan_experiment,
 }
+
+
+def _select_planner(world: WorldState,
+                    rep: Any) -> Any:
+    """Content-aware planner selection (§11, §46).
+
+    The world's entity structure decides the visual grammar before the
+    representation family is consulted: acoustics worlds (microphone /
+    processor / interference) get the wave planner; phase-change worlds
+    (kernel / shell / steam) get the experiment planner; everything else
+    falls back to the representation-family table.
+    """
+    types = {e.type for e in world.entities}
+    if types & {"microphone", "processor", "interference"}:
+        return _plan_wave
+    if types & {"kernel", "shell", "steam"}:
+        return _plan_experiment
+    return REP_PLANNERS.get(rep.primary, _plan_cause_effect)
 
 
 # ────────────────────────────────────────────────────────────────────────
@@ -411,8 +583,9 @@ def build_visualspec(topic: str, world: WorldState,
             script = [{"role": "hook", "narration": topic},
                       {"role": "payoff", "narration": "That is the story."}]
 
-    # pick the planner for the representation family
-    planner = REP_PLANNERS.get(rep.primary, _plan_cause_effect)
+    # pick the planner: content-aware (world structure decides the
+    # grammar, §11/§46), falling back to the representation family
+    planner = _select_planner(world, rep)
     beats = planner(topic, world, script)
     if not beats:
         beats = _plan_cause_effect(topic, world, script)

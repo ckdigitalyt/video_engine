@@ -160,6 +160,93 @@ _KNOWLEDGE: dict[str, dict] = {
         ],
         "sources": ["https://en.wikipedia.org/wiki/Collatz_conjecture"],
     },
+    "noise cancelling": {
+        "summary": ("Noise-cancelling headphones sample the incoming sound "
+                    "wave with a microphone, build its exact inverse (180° "
+                    "out of phase), and play both together. The two waves "
+                    "meet peak-to-trough and cancel by destructive "
+                    "interference — the listener hears near silence."),
+        "facts": [
+            Fact(claim="Two identical sound waves meeting 180° out of phase "
+                       "(anti-phase) cancel by destructive interference",
+                 formula="A_net = |A1 - A2| at Δφ = 180°",
+                 units="relative amplitude",
+                 assumptions=["equal amplitudes for full cancellation",
+                              "ideal anti-phase"],
+                 source="Superposition principle; Active noise control, "
+                        "Wikipedia"),
+            Fact(claim="Active noise cancellation samples ambient sound with "
+                       "a microphone, inverts its phase (~180°), and plays "
+                       "the inverse wave through the speaker so the two "
+                       "superpose destructively",
+                 formula="",
+                 units="",
+                 assumptions=["ideal electronics, no latency", "sealed or "
+                              "well-coupled headphone cup"],
+                 source="Active noise control, Wikipedia"),
+            Fact(claim="Combined amplitude of two equal waves depends on the "
+                       "phase difference",
+                 formula="A_net = 2A·|cos(Δφ/2)|",
+                 units="relative amplitude",
+                 assumptions=["two equal-amplitude sinusoidal waves"],
+                 source="verified deterministically by engine "
+                        "physics_verify.verify_wave_interference"),
+        ],
+        "sources": ["https://en.wikipedia.org/wiki/Active_noise_control"],
+        "script": {
+            "hook": "How do noise-cancelling headphones make the world quiet?",
+            "question": "Sound is a wave — peaks and troughs moving through the air.",
+            "simple_experiment": "A microphone samples the incoming noise wave.",
+            "change_variable": "The processor builds the exact inverse wave.",
+            "observe": "Inverse wave: 180 degrees out of phase.",
+            "push_extreme": "Peak meets trough, everywhere at once.",
+            "discover_principle": "Peak plus trough equals silence.",
+            "explain_principle": "Destructive interference cancels the sound.",
+            "payoff": "That is how noise-cancelling headphones work.",
+        },
+    },
+    "popcorn": {
+        "summary": ("A popcorn kernel is a hard starch shell holding a drop "
+                    "of water. Heating turns the water to steam near 100 °C; "
+                    "the shell traps the steam so pressure climbs until, "
+                    "near 180 °C at roughly 9 atmospheres, the shell bursts "
+                    "and the starch puffs into the flake we eat."),
+        "facts": [
+            Fact(claim="Water inside the kernel vaporizes to steam near "
+                       "100 °C at atmospheric pressure",
+                 formula="T_vap ≈ 100 °C at ~1 atm",
+                 units="°C",
+                 assumptions=["liquid water at ~1 atm inside the kernel"],
+                 source="ACS, 'The Science of Popcorn'"),
+            Fact(claim="The sealed starch shell holds the steam, so internal "
+                       "pressure rises until the kernel bursts near ~180 °C "
+                       "at about 9 atm",
+                 formula="P_burst ≈ 9 atm at T ≈ 180 °C",
+                 units="atm / °C",
+                 assumptions=["typical popcorn maize kernel"],
+                 source="ACS, 'The Science of Popcorn'; pressurized-steam "
+                        "phase-change physics"),
+            Fact(claim="When the shell ruptures, the sudden pressure drop "
+                       "flashes the starch into the puffed flake",
+                 formula="",
+                 units="",
+                 assumptions=[],
+                 source="ACS, 'The Science of Popcorn'"),
+        ],
+        "sources": ["https://www.acs.org/education/whatischemistry/"
+                     "adventures-in-chemistry/science-of-popcorn.html"],
+        "script": {
+            "hook": "Why does popcorn pop?",
+            "question": "Inside every kernel is a drop of water.",
+            "simple_experiment": "Heat the kernel and the water starts to boil.",
+            "change_variable": "The shell traps the steam — it cannot escape.",
+            "observe": "Pressure climbs, higher and higher.",
+            "push_extreme": "Near 180 degrees Celsius the shell cannot hold it.",
+            "discover_principle": "About nine atmospheres of pressure — then it bursts.",
+            "explain_principle": "The shell ruptures, steam escapes, and the starch puffs out.",
+            "payoff": "That is why popcorn pops.",
+        },
+    },
     "mcgurk": {
         "summary": ("The McGurk effect: when you see a mouth saying 'ga' "
                     "while hearing the sound 'ba', your brain fuses the "
@@ -204,6 +291,19 @@ _ALIASES = {
     "mcgurk": "mcgurk",
     "mcgurk effect": "mcgurk",
     "why do we hear what we see": "mcgurk",
+    "how do noise cancelling headphones work": "noise cancelling",
+    "how do noisecancelling headphones work": "noise cancelling",
+    "noise cancelling headphones": "noise cancelling",
+    "noisecancelling headphones": "noise cancelling",
+    "noise cancellation": "noise cancelling",
+    "noisecancellation": "noise cancelling",
+    "noise cancelling": "noise cancelling",
+    "noisecancelling": "noise cancelling",
+    "noise canceling": "noise cancelling",
+    "noisecanceling": "noise cancelling",
+    "why does popcorn pop": "popcorn",
+    "how does popcorn pop": "popcorn",
+    "popcorn": "popcorn",
 }
 
 
@@ -395,6 +495,114 @@ def _mcgurk_world(topic: str) -> WorldState:
     )
 
 
+def _noise_world(topic: str) -> WorldState:
+    """Noise-cancelling headphones: sound wave → microphone → processor →
+    inverse wave → combined (interference) → silence.  §46 grammar:
+    SIMULATION/SIGNAL_FLOW-flavored (wave + mic + inverse signal +
+    interference)."""
+    return WorldState(
+        topic=topic,
+        representation="SIGNAL_FLOW",
+        representation_secondary=["SIMULATION"],
+        entities=[
+            Entity("noise_wave", EntityType.WAVE,
+                   {"label": "noise wave", "amplitude": 0.5,
+                    "wavelength_units": 1.4, "cycles": 3}),
+            Entity("microphone", EntityType.MICROPHONE,
+                   {"label": "microphone"}),
+            Entity("processor", EntityType.PROCESSOR,
+                   {"label": "processor"}),
+            Entity("inverse_wave", EntityType.WAVE,
+                   {"label": "inverse wave", "amplitude": 0.5,
+                    "wavelength_units": 1.4, "cycles": 3}),
+            Entity("combined_wave", EntityType.INTERFERENCE,
+                   {"label": "combined wave"}),
+            Entity("ear", EntityType.EAR, {"label": "ear"}),
+        ],
+        relationships=[
+            Relationship("noise_wave", "microphone", "reaches"),
+            Relationship("microphone", "processor", "feeds"),
+            Relationship("processor", "inverse_wave", "generates"),
+            Relationship("inverse_wave", "combined_wave", "converts"),
+            Relationship("combined_wave", "ear", "reaches"),
+        ],
+        signals=[
+            Signal("noise_in", "sound_wave", "noise_wave", "microphone",
+                   {"phase_deg": 0}),
+            Signal("mic_signal", "electrical", "microphone", "processor",
+                   {}),
+            Signal("inverse_out", "sound_wave", "processor",
+                   "combined_wave", {"phase_deg": 180}),
+            Signal("quiet", "sound_wave", "combined_wave", "ear",
+                   {"amplitude": "near zero"}),
+        ],
+        measurements=[
+            Measurement("phase_diff", "angle", 180, "degrees",
+                        {"note": "anti-phase"}),
+        ],
+        camera=CameraFocus("combined_wave", ["zoom_into", "follow"]),
+        hero_mechanism=HeroMechanism(
+            concept="sound wave + inverse wave (180° anti-phase) → "
+                    "destructive interference → silence",
+            visualization="wave_inverse_interference",
+            target_beat="b005"),
+        facts=_KNOWLEDGE["noise cancelling"]["facts"],
+    )
+
+
+def _popcorn_world(topic: str) -> WorldState:
+    """Popcorn: kernel (shell) + water/steam + rising pressure → burst →
+    fluff.  §46 grammar: EXPERIMENT-flavored (heat → pressure → burst →
+    fluff)."""
+    return WorldState(
+        topic=topic,
+        representation="EXPERIMENT",
+        representation_secondary=["CAUSE_EFFECT"],
+        entities=[
+            Entity("kernel", EntityType.KERNEL,
+                   {"label": "kernel", "pressure_atm": 9.0,
+                    "temp_c": 180.0}),
+            Entity("water", EntityType.PARTICLE,
+                   {"label": "water", "count": 30}),
+            Entity("steam", EntityType.STEAM,
+                   {"label": "steam", "count": 60}),
+            Entity("shell", EntityType.SHELL,
+                   {"label": "starch shell"}),
+            Entity("fluff", EntityType.PARTICLE,
+                   {"label": "fluff", "count": 90}),
+        ],
+        relationships=[
+            Relationship("kernel", "water", "contains"),
+            Relationship("water", "steam", "converts"),
+            Relationship("steam", "shell", "pressurizes"),
+            Relationship("shell", "kernel", "holds"),
+            Relationship("kernel", "fluff", "generates"),
+        ],
+        signals=[
+            Signal("heat_in", "energy", "kernel", "water",
+                   {"temp_c": 100}),
+            Signal("steam_rise", "energy", "water", "steam",
+                   {"pressure_atm": 9}),
+            Signal("burst", "energy", "steam", "fluff", {}),
+        ],
+        measurements=[
+            Measurement("vaporization", "temperature", "~100 °C", "°C",
+                        {"claim": "water vaporizes"}),
+            Measurement("burst_pressure", "pressure", "~9 atm", "atm",
+                        {"claim": "shell bursts"}),
+            Measurement("burst_temp", "temperature", "~180 °C", "°C",
+                        {"claim": "burst point"}),
+        ],
+        camera=CameraFocus("kernel", ["zoom_into", "follow"]),
+        hero_mechanism=HeroMechanism(
+            concept="heat → water vaporizes (~100 °C) → steam pressure "
+                    "rises → shell bursts (~9 atm near ~180 °C) → fluff",
+            visualization="pressure_build_up_explosion",
+            target_beat="b006"),
+        facts=_KNOWLEDGE["popcorn"]["facts"],
+    )
+
+
 def _generic_world(topic: str) -> WorldState:
     return WorldState(
         topic=topic,
@@ -420,6 +628,8 @@ _WORLD_BUILDERS = {
     "kaprekar": _kaprekar_world,
     "collatz": _collatz_world,
     "mcgurk": _mcgurk_world,
+    "noise cancelling": _noise_world,
+    "popcorn": _popcorn_world,
 }
 
 

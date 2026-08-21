@@ -1016,6 +1016,138 @@ def PayoffText(scene: Scene, scene_state: SceneState,
 
 
 # ────────────────────────────────────────────────────────────────────────
+# §46 primitives: noise-cancelling interference + popcorn burst
+# ────────────────────────────────────────────────────────────────────────
+def InterferencePattern(scene: Scene, scene_state: SceneState,
+                        oid: str = "interference",
+                        frequency: float = 1.0, amplitude: float = 0.5,
+                        phase_deg: float = 180.0, color: str = "#4FC3F7",
+                        label: str = "",
+                        duration: float | None = None) -> Any:
+    """Two travelling waves + combined wave (noise-cancelling hero, §46).
+
+    Wave A (noise) and wave B (inverse, phase-shifted) superpose; the
+    combined curve shows cancellation at 180° anti-phase.  Deterministic.
+    """
+    d = _motion_default(duration, 3.2)
+    cycles = 2.0
+    total_len = 1.6 * cycles
+    ph = math.radians(phase_deg)
+
+    def _f(p: float, t: float):
+        return [t * total_len - total_len / 2,
+                amplitude * math.sin(2 * math.pi * cycles * t + p), 0]
+
+    wa = ParametricFunction(lambda t: _f(0.0, t), t_range=[0, 1],
+                            color="#FFB74D", stroke_width=3)
+    wb = ParametricFunction(lambda t: _f(ph, t), t_range=[0, 1],
+                            color="#4FC3F7", stroke_width=3)
+    combined_amp = amplitude * abs(2.0 * math.cos(ph / 2.0))
+    wc = ParametricFunction(
+        lambda t: [t * total_len - total_len / 2,
+                   combined_amp * math.sin(2 * math.pi * cycles * t), 0],
+        t_range=[0, 1], color="#66BB6A", stroke_width=4)
+    wa.shift(UP * 1.4)
+    wb.shift(UP * 0.0)
+    wc.shift(DOWN * 1.4)
+    group: Any = VGroup(wa, wb, wc)
+    if label:
+        lbl = _label(label, 20, color)
+        lbl.next_to(group, DOWN, buff=0.15)
+        group = VGroup(group, lbl)
+    scene.play(FadeIn(group), run_time=d)
+    scene_state.enter(oid, "interference", persistent=False, mobject=group)
+    scene_state.exit(oid)
+    scene_state.record_enter(oid)
+    scene_state.record_exit(oid)
+    return group
+
+
+def WaveSuperposition(scene: Scene, scene_state: SceneState,
+                      oid: str = "superposition",
+                      frequency: float = 1.0, amplitude: float = 0.5,
+                      phase_deg: float = 180.0, color: str = "#66BB6A",
+                      label: str = "",
+                      duration: float | None = None) -> Any:
+    """Combined-wave payoff for the `cancel` action (§46).
+
+    At 180° anti-phase the combined curve is (near) flat — the "silence"
+    moment.  Deterministic; same family as InterferencePattern.
+    """
+    return InterferencePattern(
+        scene, scene_state, oid=oid, frequency=frequency,
+        amplitude=amplitude, phase_deg=phase_deg, color=color,
+        label=label or "silence", duration=duration)
+
+
+def PressureKernel(scene: Scene, scene_state: SceneState,
+                   oid: str = "kernel", pressure_atm: float = 9.0,
+                   temp_c: float = 180.0, radius: float = 0.9,
+                   color: str = "#8D6E63", label: str = "",
+                   duration: float | None = None) -> Any:
+    """Popcorn kernel: starch shell + water/steam dots + pressure gauge.
+
+    Deterministic: shell circle, inner water dots, a gauge bar climbing
+    toward the burst point (≈9 atm near 180 °C).  §46 hero family.
+    """
+    d = _motion_default(duration, 2.8)
+    shell = Circle(radius=radius, color=color, stroke_width=4)
+    shell.move_to(ORIGIN)
+    drops = VGroup(*[
+        Dot(radius=0.05, color="#4FC3F7").move_to(
+            [radius * 0.45 * math.cos(a), radius * 0.45 * math.sin(a), 0])
+        for a in [i * math.pi / 4 for i in range(8)]])
+    gx = radius + 1.0
+    gauge_base = Line([gx, -1.2, 0], [gx, 1.2, 0],
+                      color="#90A4AE", stroke_width=2)
+    frac = min(1.0, max(0.0, pressure_atm / 9.0))
+    gauge = Line([gx, -1.2, 0], [gx, -1.2 + 2.4 * frac, 0],
+                 color="#FF5252", stroke_width=4)
+    gauge_label = _label(f"{pressure_atm:.0f} atm", 16, "#FF5252")
+    gauge_label.next_to(gauge_base, RIGHT, buff=0.1)
+    group: Any = VGroup(shell, drops, gauge_base, gauge, gauge_label)
+    if label:
+        lbl = _label(label, 18, color)
+        lbl.next_to(shell, DOWN, buff=0.2)
+        group = VGroup(group, lbl)
+    scene.play(FadeIn(shell), run_time=d * 0.5)
+    scene.play(FadeIn(drops), run_time=d * 0.4)
+    scene.play(GrowFromCenter(gauge), run_time=d * 0.6)
+    scene.play(FadeIn(gauge_label), run_time=d * 0.3)
+    scene_state.enter(oid, "kernel", persistent=False, mobject=group)
+    scene_state.exit(oid)
+    scene_state.record_enter(oid)
+    scene_state.record_exit(oid)
+    return group
+
+
+def BurstExplosion(scene: Scene, scene_state: SceneState,
+                   at: Sequence[float] = (0, 0, 0), radius: float = 1.0,
+                   color: str = "#FFB74D", label: str = "",
+                   duration: float | None = None) -> None:
+    """Kernel burst: expanding ring + outward fluff dots (popcorn hero)."""
+    d = _motion_default(duration, 1.6)
+    ring = Circle(radius=0.1, color=color, stroke_width=5)
+    ring.move_to(at)
+    scene.play(GrowFromCenter(ring), run_time=d * 0.5)
+    ring2 = ring.copy().scale(radius / 0.1)
+    ring2.set_stroke(opacity=0.0)
+    scene.play(Transform(ring, ring2), run_time=d * 0.4)
+    flakes = VGroup(*[
+        Dot(radius=0.08, color="#FFE0B2").move_to(
+            [at[0] + radius * 1.5 * math.cos(a),
+             at[1] + radius * 1.5 * math.sin(a), 0])
+        for a in [i * math.pi / 6 for i in range(12)]])
+    scene.play(FadeIn(flakes), run_time=d * 0.5)
+    scene.play(FadeOut(VGroup(ring, flakes)), run_time=0.2)
+    scene_state.enter("burst", "particle", zone=Zone.CENTER,
+                      persistent=False, mobject=ring)
+    scene_state.exit("burst")
+    scene_state.record_enter("burst")
+    scene_state.record_exit("burst")
+
+
+# ────────────────────────────────────────────────────────────────────────
 # registry for the compiler
 # ────────────────────────────────────────────────────────────────────────
 WORLD_PRIMITIVES: dict[str, object] = {
@@ -1091,6 +1223,13 @@ ENTITY_MATERIALIZERS: dict[str, str] = {
     "decision": "Node",
     "number": "MovingBody",
     "digit_array": "MovingBody",
+    # §46 acoustics / phase-change entities
+    "microphone": "Node",
+    "processor": "Node",
+    "interference": "InterferencePattern",
+    "kernel": "PressureKernel",
+    "steam": "ParticleField",
+    "shell": "PressureKernel",
 }
 
 
@@ -1188,6 +1327,31 @@ def materialize_entity(scene: Scene, scene_state: SceneState,
     if prim == "Wave":
         return Wave(scene, scene_state, oid=eid, color=color, label=label,
                     duration=duration)
+    if prim == "InterferencePattern":
+        return InterferencePattern(
+            scene, scene_state, oid=eid,
+            frequency=float(_prop(props, "frequency", 1.0)),
+            amplitude=float(_prop(props, "amplitude", 0.5)),
+            phase_deg=float(_prop(props, "phase_deg", 180.0)),
+            color=color, label=label, duration=duration)
+    if prim == "WaveSuperposition":
+        return WaveSuperposition(
+            scene, scene_state, oid=eid,
+            frequency=float(_prop(props, "frequency", 1.0)),
+            amplitude=float(_prop(props, "amplitude", 0.5)),
+            phase_deg=float(_prop(props, "phase_deg", 180.0)),
+            color=color, label=label or "silence", duration=duration)
+    if prim == "PressureKernel":
+        return PressureKernel(
+            scene, scene_state, oid=eid,
+            pressure_atm=float(_prop(props, "pressure_atm", 9.0)),
+            temp_c=float(_prop(props, "temp_c", 180.0)),
+            color=color, label=label, duration=duration)
+    if prim == "BurstExplosion":
+        return BurstExplosion(
+            scene, scene_state, at=position,
+            radius=float(_prop(props, "radius", 1.0)),
+            color=color, label=label, duration=duration)
     if prim == "SignalPulse":
         start = _pos(props, [-3, 0])
         end = _pos(props, [3, 0])
@@ -1246,6 +1410,7 @@ ACTION_NATURAL_DURATION: dict[str, float] = {
     "cross_section": 1.2, "reveal_inside": 1.4, "highlight": 0.6,
     "reveal": 1.2, "sort": 1.2, "subtract": 3.0, "morph": 1.2,
     "transform": 1.2, "count_down": 1.8,
+    "interfere": 3.4, "cancel": 3.4, "burst": 2.2,
 }
 
 
@@ -1388,6 +1553,41 @@ def apply_action(scene: Scene, scene_state: SceneState,
                         red_nm=float(params.get("red_nm", 650.0)),
                         label=str(params.get("label", "")),
                         duration=duration)
+        return
+    if name in ("interfere", "cancel"):
+        from engine.validation.physics_verify import verify_wave_interference
+        f1 = float(params.get("f1", params.get("frequency", 1.0)))
+        f2 = float(params.get("f2", params.get("frequency", 1.0)))
+        ph = float(params.get("phase_deg", 180.0))
+        v = verify_wave_interference(f1, f2, ph)
+        if not v.ok:
+            raise ValueError("interfere/cancel failed physics verification: "
+                             + "; ".join(f["detail"] for f in v.failures()))
+        amp = float(params.get("amplitude", 0.5))
+        lbl = str(params.get("label", ""))
+        if name == "interfere":
+            InterferencePattern(scene, scene_state, oid=target or "interference",
+                                frequency=f1, amplitude=amp, phase_deg=ph,
+                                label=lbl, duration=duration)
+        else:
+            WaveSuperposition(scene, scene_state, oid=target or "superposition",
+                              frequency=f1, amplitude=amp, phase_deg=ph,
+                              label=lbl or "silence", duration=duration)
+        return
+    if name == "burst":
+        from engine.validation.physics_verify import verify_pressure_volume_burst
+        patm = float(params.get("pressure_atm", 9.0))
+        tc = float(params.get("temp_c", 180.0))
+        v = verify_pressure_volume_burst(patm, tc)
+        if not v.ok:
+            raise ValueError("burst action failed physics verification: "
+                             + "; ".join(f["detail"] for f in v.failures()))
+        PressureKernel(scene, scene_state, oid=target or "kernel",
+                       pressure_atm=patm, temp_c=tc,
+                       label=str(params.get("label", "")), duration=duration)
+        BurstExplosion(scene, scene_state, at=_pos_of(target, [0, 0]),
+                       radius=float(params.get("radius", 1.0)),
+                       duration=duration)
         return
     if name == "flow":
         nodes = params.get("nodes", []) or []

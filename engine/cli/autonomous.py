@@ -190,6 +190,46 @@ def run_autonomous(topic: str, out_root: str | Path,
         "representation_secondary": [r.value for r in rep.secondary],
     }, indent=2))
 
+    # ── 3b) spec-§5 artifact contract (15 named artifacts) ────────────
+    # topic / research / facts / story / hero / visual plan / beats /
+    # shots / visualspec / world / audio_timeline / qa / repair / learning
+    (out / "topic.json").write_text(json.dumps({"topic": topic}, indent=2))
+    (out / "facts.json").write_text(json.dumps(
+        [f.__dict__ for f in research_result.facts], indent=2))
+    (out / "story.json").write_text(json.dumps({
+        "template": plan.template_name,
+        "rationale": plan.rationale,
+        "roles": plan.roles,
+    }, indent=2))
+    (out / "hero.json").write_text(json.dumps(
+        hero.__dict__ if hero else None, indent=2))
+    (out / "visual_plan.json").write_text(json.dumps({
+        "representation": rep.primary.value,
+        "representation_secondary": [r.value for r in rep.secondary],
+        "rationale": rep.rationale,
+        "beat_count": len(vs["beats"]),
+    }, indent=2))
+    (out / "beats.json").write_text(json.dumps(vs["beats"], indent=2))
+    shots = []
+    for i, b in enumerate(vs["beats"]):
+        shots.append({
+            "shot_id": f"s{i:03d}",
+            "beat_id": b["beat_id"],
+            "objects": b["objects"],
+            "semantic_actions": b["semantic_actions"],
+            "camera": b["camera"],
+            "visual_type": b["visual_type"],
+        })
+    (out / "shots.json").write_text(json.dumps(shots, indent=2))
+    (out / "repair_plan.json").write_text(json.dumps(
+        {"status": "not_run",
+         "note": "Phase E (automatic repair) not yet implemented"},
+        indent=2))
+    (out / "learning.json").write_text(json.dumps(
+        {"status": "not_run",
+         "note": "Phase F (learning agent) not yet implemented"},
+        indent=2))
+
     # ── 4) compile ─────────────────────────────────────────────────────
     scene_file = workdir / "world_scene.py"
     scene_name = "WorldScene"
@@ -230,6 +270,7 @@ def run_autonomous(topic: str, out_root: str | Path,
             motion_metrics=motion_metrics,
             expected_res=resolution, expected_fps=fps)
         (out / "qareport.json").write_text(json.dumps(report, indent=2))
+        (out / "qa.json").write_text(json.dumps(report, indent=2))
 
         # ── 8) artifacts ──────────────────────────────────────────────
         audio_dur = _probe_audio_duration(narration_audio) if narration_audio else 0.0
@@ -238,6 +279,12 @@ def run_autonomous(topic: str, out_root: str | Path,
         (out / "script.json").write_text(json.dumps(
             _script_from_words(narration, words, audio_dur), indent=2))
         (out / "audio_timing.json").write_text(json.dumps({
+            "duration_s": round(audio_dur, 3),
+            "words": words,
+            "provider": (narration_audio.suffix.lstrip(".")
+                         if narration_audio else None),
+        }, indent=2))
+        (out / "audio_timeline.json").write_text(json.dumps({
             "duration_s": round(audio_dur, 3),
             "words": words,
             "provider": (narration_audio.suffix.lstrip(".")

@@ -53,6 +53,14 @@ class EntityType:
     MOLECULE = "molecule"
     LENS = "lens"
     CELL = "cell"
+    # acoustics / signal processing (noise-cancelling, §46)
+    MICROPHONE = "microphone"
+    PROCESSOR = "processor"
+    INTERFERENCE = "interference"
+    # phase-change / mechanics (popcorn, §46)
+    KERNEL = "kernel"
+    STEAM = "steam"
+    SHELL = "shell"
     # human / psychology (schematic glyphs, not anthropomorphic)
     FACE = "face"
     EYE = "eye"
@@ -101,6 +109,7 @@ REL_KINDS: set[str] = {
     "reflects", "refracts", "causes", "flows_into", "transforms", "feeds",
     "depends_on", "compares_to", "attracts", "holds", "contains",
     "generates", "converts", "precedes", "follows", "signals",
+    "pressurizes",
 }
 
 # Signal kinds

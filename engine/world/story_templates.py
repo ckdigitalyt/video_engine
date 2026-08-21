@@ -141,6 +141,12 @@ def _hero_visualization_for(topic: str, rep: RepType | None) -> str:
         return "orbit_generation"
     if "mcgurk" in t or "illusion" in t:
         return "signal_integration"
+    if "noise" in t or "cancell" in t or "headphone" in t \
+            or "interference" in t or "anti-phase" in t:
+        return "wave_inverse_interference"
+    if "popcorn" in t or "pop" in t or "steam" in t \
+            or "pressure" in t or "burst" in t or "kernel" in t:
+        return "pressure_build_up_explosion"
     if "collatz" in t:
         return "trajectory_generation"
     if "kaprekar" in t:
@@ -170,6 +176,12 @@ def hero_for(topic: str, plan: StoryPlan,
             "continuous falling + sideways velocity = orbit",
         "signal_integration":
             "audio signal + visual mouth signal -> brain -> perceived sound",
+        "wave_inverse_interference":
+            "sound wave + inverse wave (180° anti-phase) -> destructive "
+            "interference -> silence",
+        "pressure_build_up_explosion":
+            "heat -> water vaporizes (~100 °C) -> steam pressure rises -> "
+            "shell bursts (~9 atm near ~180 °C) -> fluff",
         "trajectory_generation":
             "number -> even/odd rule -> transformation -> trajectory",
         "attractor_convergence":
