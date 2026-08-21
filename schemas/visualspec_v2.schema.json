@@ -1,0 +1,207 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "VisualSpec v2",
+  "description": "The semantic visual specification for the autonomous engine (JADE_TO_DO v0.3 §4–§10). Adds the world model, representation, hero mechanism, semantic actions and per-beat visual explanation scores on top of v1. DeepSeek decides WHAT/WHY/WHEN; the deterministic compiler decides HOW.",
+  "type": "object",
+  "required": ["version", "beats"],
+  "properties": {
+    "version": {"type": "string", "const": "v2"},
+    "beats": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/definitions/VisualBeat"}
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "topic": {"type": "string"},
+        "representation": {"type": "string"},
+        "representation_secondary": {"type": "array", "items": {"type": "string"}},
+        "story_template": {"type": "string"},
+        "hero_mechanism": {"$ref": "#/definitions/HeroMechanism"},
+        "world": {"type": "object"},
+        "facts": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/Fact"}
+        },
+        "explanation_report": {
+          "type": "object",
+          "description": "Per-beat visual explanation scores (spec §10)"
+        },
+        "style_spec": {"type": "string"}
+      },
+      "additionalProperties": false
+    }
+  },
+  "definitions": {
+    "VisualBeat": {
+      "type": "object",
+      "required": ["beat_id", "intent", "objects", "transformations"],
+      "properties": {
+        "beat_id": {"type": "string", "pattern": "^b[0-9]{3}$"},
+        "narration": {"type": "string"},
+        "start": {"type": "number", "minimum": 0},
+        "end": {"type": "number", "minimum": 0},
+        "duration": {"type": "number", "minimum": 0.1},
+        "intent": {"type": "string"},
+        "importance": {"type": "string", "enum": ["high", "medium", "low"]},
+        "role": {
+          "type": "string",
+          "description": "Story-template role this beat fulfils (hook/question/...)"
+        },
+        "objects": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/ObjectSpec"}
+        },
+        "transformations": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/Transformation"}
+        },
+        "semantic_actions": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/SemanticAction"},
+          "description": "Semantic action grammar (spec §7): orbit/fall/scatter/flow/..."
+        },
+        "camera": {"$ref": "#/definitions/CameraSpec"},
+        "audio_cues": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/AudioCue"}
+        },
+        "kinetic_words": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "visual_type": {"type": "string"},
+        "explanation_score": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 5,
+          "description": "Visual explanation score 0–5 (spec §10); avg >= 3.5 required"
+        },
+        "text_primary": {
+          "type": "boolean",
+          "description": "True when the primary visual is text (feeds text-dominance ratio)"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ObjectSpec": {
+      "type": "object",
+      "required": ["id", "type"],
+      "properties": {
+        "id": {"type": "string"},
+        "type": {
+          "type": "string",
+          "enum": ["digit_array", "number_display", "equation", "fraction",
+                   "matrix", "graph", "vector", "shape", "text", "number",
+                   "celestial_body", "moving_body", "orbit_path",
+                   "trajectory", "projectile", "velocity_vector",
+                   "force_vector", "gravity_field", "reference_frame",
+                   "wave", "signal", "light_ray", "light_source", "medium",
+                   "scatterer", "particle", "field", "atom", "molecule",
+                   "lens", "cell", "face", "eye", "ear", "mouth", "brain",
+                   "person", "attention", "memory", "perception", "node",
+                   "connection", "flow", "pipeline", "decision", "timeline",
+                   "cause_effect", "comparison", "hierarchy", "question",
+                   "experiment", "hypothesis", "observation", "reveal",
+                   "counterexample", "payoff"]
+        },
+        "value": {"type": "string"},
+        "initial": {"type": "string"},
+        "initial_state": {"type": "object"},
+        "position": {
+          "type": "object",
+          "properties": {"x": {"type": "number"}, "y": {"type": "number"}}
+        },
+        "properties": {"type": "object"},
+        "persistent": {"type": "boolean", "default": true},
+        "kinetic_typography": {"type": "boolean", "default": false}
+      },
+      "additionalProperties": false
+    },
+    "Transformation": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["sort", "reverse", "subtract", "morph", "move",
+                   "highlight", "reveal", "transform", "digit_permute",
+                   "swap", "multiply", "count_down", "converge", "orbital",
+                   "orbit", "fall", "accelerate", "decelerate", "collide",
+                   "miss", "curve", "follow", "trace", "branch", "merge",
+                   "oscillate", "flow", "scatter", "assemble", "disassemble",
+                   "compare", "measure", "zoom_into", "zoom_out_of",
+                   "focus_on", "cross_section", "reveal_inside"]
+        },
+        "targets": {"type": "array", "items": {"type": "string"}},
+        "target_objects": {"type": "array", "items": {"type": "string"}},
+        "from": {},
+        "to": {},
+        "mode": {"type": "string"},
+        "params": {"type": "object"},
+        "parameters": {"type": "object"}
+      },
+      "additionalProperties": false
+    },
+    "SemanticAction": {
+      "type": "object",
+      "required": ["action", "target"],
+      "properties": {
+        "action": {"type": "string"},
+        "target": {"type": "string"},
+        "from": {},
+        "to": {},
+        "params": {"type": "object"}
+      },
+      "additionalProperties": false
+    },
+    "CameraSpec": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["static", "follow", "zoom_to", "zoom_from", "pan",
+                   "push_in", "pull_out", "reveal", "reframe", "focus"]
+        },
+        "target": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "AudioCue": {
+      "type": "object",
+      "required": ["type", "relative_time"],
+      "properties": {
+        "type": {"type": "string", "enum": ["tick", "click", "whoosh",
+                   "impact", "reveal", "transition", "success", "failure",
+                   "rise", "pop"]},
+        "relative_time": {"type": "number", "minimum": 0, "maximum": 1},
+        "volume": {"type": "number", "minimum": 0, "maximum": 1}
+      },
+      "additionalProperties": false
+    },
+    "HeroMechanism": {
+      "type": "object",
+      "required": ["concept", "visualization"],
+      "properties": {
+        "concept": {"type": "string"},
+        "visualization": {"type": "string"},
+        "target_beat": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "Fact": {
+      "type": "object",
+      "required": ["claim", "source"],
+      "properties": {
+        "claim": {"type": "string"},
+        "formula": {"type": "string"},
+        "units": {"type": "string"},
+        "assumptions": {"type": "array", "items": {"type": "string"}},
+        "source": {"type": "string"},
+        "verified": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    }
+  }
+}

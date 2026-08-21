@@ -1,0 +1,353 @@
+#!/usr/bin/env python3
+"""engine.cli.autonomous — autonomous topic->video pipeline (v0.3 §25–27, §31).
+
+Input: ONLY a topic (no storyboard, no narration, no scene selection).
+
+Stages (each writes deterministic artifacts):
+    research (verified facts + sources)
+    -> world model (entities/relationships/signals/forces/hero)
+    -> representation selection
+    -> story template + hero mechanism
+    -> script (narration)
+    -> local TTS (kokoro first — no network needed)
+    -> timed beats (narration is the temporal source of truth)
+    -> v2 VisualSpec (semantic actions + explanation scores)
+    -> world compiler -> Manim scene
+    -> render -> compose (narration + captions + master) -> v2 QA gates
+    -> spec-§27 comparison report
+
+Usage:
+    python -m engine.cli.autonomous --topic "Why is the sky blue?" --out results/sky_blue
+    python -m engine.cli.autonomous --topic "Why is the sky blue?" --no-render  # compile only
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import time
+from pathlib import Path
+
+from engine.audio.timeline import synthesize_narration, measure_loudness
+from engine.cli.run import (
+    _caption_entries_sequential,
+    _peak_usage,
+    _probe_audio_duration,
+    _render_scene,
+    _script_from_words,
+    _state_log_from_visualspec,
+)
+from engine.composition.ffmpeg_compositor import (
+    build_contact_sheet,
+    compose_final,
+    generate_srt,
+)
+from engine.qa import gates as qa_gates
+from engine.renderers.manim.world_compiler import compile_world_to_file
+from engine.validation.schema import validate_visualspec_v2, validate_worldmodel
+from engine.visuals.world_director import build_visualspec, script_for
+from engine.world.actions import ACTION_REGISTRY
+from engine.world.knowledge import build_world, research
+from engine.world.representations import select_representation
+from engine.world.scoring import score_beatsheet
+from engine.world.story_templates import select_template
+from engine.world.world_model import WorldState
+
+
+# Primitives promoted from MathMotion Lab v0.2 (provenance tracking, §27).
+_FROM_MATHMOTION_LAB = [
+    "CelestialBody", "OrbitPath", "MovingBody", "FollowBody", "FallBody",
+    "MissBody", "TracePath", "ImpactBurst", "VelocityVector", "ForceVector",
+    "ProjectilePath", "CurvePath", "ScatteringField",
+]
+
+# Simulation-class actions (counted as simulation beats, §27).
+_SIMULATION_ACTIONS = {
+    "orbit", "fall", "accelerate", "decelerate", "collide", "miss",
+    "oscillate", "scatter", "flow", "branch", "merge", "assemble",
+    "disassemble", "trace",
+}
+
+
+def _time_beats(vs: dict, narration_sentences: list[str],
+                words: list[dict], narration_dur: float) -> dict:
+    """Size each beat to its narration (temporal source of truth, §19/§20).
+
+    Per-sentence timing when word alignment matches the beat order;
+    proportional scaling otherwise.  Never freeze-frames a tail.
+    """
+    beats = vs["beats"]
+    if not words or narration_dur <= 0:
+        return vs
+    order = sorted(words, key=lambda w: w["start"])
+    # sentence word counts
+    counts = [len(s.split()) for s in narration_sentences]
+    total_words = sum(counts)
+    if total_words == len(order) and len(counts) == len(beats):
+        # aligned: beat i gets sentence i's window + pad
+        widx = 0
+        for i, beat in enumerate(beats):
+            n = counts[i]
+            chunk = order[widx:widx + n]
+            widx += n
+            if chunk:
+                dur = max(1.4, chunk[-1]["end"] - chunk[0]["start"] + 0.45)
+                beat["duration"] = round(dur, 2)
+    else:
+        # proportional scale so total animation == narration
+        total = sum(float(b.get("duration", 1.5)) for b in beats)
+        if total > 0:
+            scale = narration_dur / total
+            for b in beats:
+                b["duration"] = round(max(1.4, float(b.get("duration", 1.5))
+                                          * scale), 2)
+    # recompute start/end + refresh the explanation report (durations feed
+    # the text-dominance ratio)
+    t = 0.0
+    for b in beats:
+        b["start"] = round(t, 2)
+        b["end"] = round(t + float(b["duration"]), 2)
+        t += float(b["duration"])
+    vs["metadata"]["explanation_report"] = score_beatsheet(beats).to_dict()
+    return vs
+
+
+def _count_primitives(vs: dict) -> int:
+    """Distinct procedural primitives referenced by the spec (via actions)."""
+    used = set()
+    for b in vs.get("beats", []):
+        for a in b.get("semantic_actions", []) or []:
+            name = str(a.get("action", a.get("type", "")))
+            spec = ACTION_REGISTRY.get(name)
+            if spec:
+                used.update(spec.primitives)
+    return len(used)
+
+
+def run_autonomous(topic: str, out_root: str | Path,
+                   resolution: tuple[int, int] = (1280, 720), fps: int = 30,
+                   render: bool = True) -> dict:
+    """Full autonomous topic -> video pipeline.  Returns the QA report +
+    the spec-§27 comparison fields."""
+    t0 = time.time()
+    out = Path(out_root)
+    out.mkdir(parents=True, exist_ok=True)
+    workdir = out / "work"
+    workdir.mkdir(parents=True, exist_ok=True)
+
+    # ── 1) research + world + representation + story (autonomous) ──────
+    research_result = research(topic)
+    world = build_world(topic)
+    rep = select_representation(topic)
+    plan = select_template(topic, rep.primary)
+    hero = world.hero_mechanism
+    (out / "research.json").write_text(json.dumps({
+        "topic": topic,
+        "summary": research_result.summary,
+        "facts": [f.__dict__ for f in research_result.facts],
+        "sources": research_result.sources,
+    }, indent=2))
+    (out / "world.json").write_text(json.dumps(world.to_dict(), indent=2))
+
+    # ── 2) script + local TTS (temporal source of truth) ───────────────
+    script = script_for(topic, plan.roles, world)
+    narration = ". ".join(s["narration"] for s in script if s["narration"])
+    if not narration:
+        narration = topic
+    narration_audio = None
+    words: list[dict] = []
+    narration_dur = 0.0
+    try:
+        narration_audio, words = synthesize_narration(
+            narration, workdir / "narration", voice="")
+        if words:
+            narration_dur = max(w["end"] for w in words)
+        else:
+            narration_dur = _probe_audio_duration(narration_audio)
+    except Exception as e:  # noqa: BLE001
+        print(f"[tts] narration failed ({e}); proceeding silent")
+        narration_audio = None
+        words = []
+        narration_dur = 0.0
+
+    # ── 3) v2 VisualSpec + timed beats ─────────────────────────────────
+    vs = build_visualspec(topic, world, story_plan=plan)
+    sentences = [s["narration"] for s in script]
+    vs = _time_beats(vs, sentences, words, narration_dur)
+    errs = validate_visualspec_v2(vs)
+    if errs:
+        raise RuntimeError("v2 spec invalid:\n" + "\n".join(errs[:10]))
+    errs = validate_worldmodel(vs["metadata"]["world"])
+    if errs:
+        raise RuntimeError("world invalid:\n" + "\n".join(errs[:10]))
+    (out / "visualspec.json").write_text(json.dumps(vs, indent=2))
+    (out / "story_plan.json").write_text(json.dumps({
+        "template": plan.template_name,
+        "rationale": plan.rationale,
+        "roles": plan.roles,
+        "hero_mechanism": hero.__dict__ if hero else None,
+        "representation": rep.primary.value,
+        "representation_secondary": [r.value for r in rep.secondary],
+    }, indent=2))
+
+    # ── 4) compile ─────────────────────────────────────────────────────
+    scene_file = workdir / "world_scene.py"
+    scene_name = "WorldScene"
+    compile_world_to_file(vs, scene_file, scene_name)
+
+    report: dict = {}
+    if render:
+        # ── 5) render ────────────────────────────────────────────────
+        clip = _render_scene(scene_file, scene_name, workdir, resolution, fps)
+
+        # ── 6) compose: narration + captions + master ─────────────────
+        final = out / "final.mp4"
+        srt_path = None
+        if words:
+            order = sorted(words, key=lambda w: w["start"])
+            entries = _caption_entries_sequential(order)
+            srt_path = generate_srt(entries, workdir / "narration.srt")
+            print(f"[tts] narration {narration_audio.name} "
+                  f"({len(words)} words, {entries[-1]['end']:.1f}s)")
+        compose_result = compose_final(
+            [clip], narration=narration_audio, music=None,
+            subtitles=srt_path, out=final, resolution=resolution, fps=fps)
+
+        # ── 7) QA (v2: proven gates + explanation + text dominance) ───
+        try:
+            audio_metrics = measure_loudness(final)
+        except Exception as e:  # noqa: BLE001
+            print(f"[qa] loudness failed: {e}")
+            audio_metrics = {"integrated_lufs": None, "true_peak_db": None,
+                             "clipping": False}
+        motion_metrics = {
+            "beat_count": len(vs["beats"]),
+            "avg_beat_duration": (sum(b["duration"] for b in vs["beats"])
+                                  / max(1, len(vs["beats"]))),
+        }
+        report = qa_gates.run_all_v2(
+            vs, video_path=final, audio_metrics=audio_metrics,
+            motion_metrics=motion_metrics,
+            expected_res=resolution, expected_fps=fps)
+        (out / "qareport.json").write_text(json.dumps(report, indent=2))
+
+        # ── 8) artifacts ──────────────────────────────────────────────
+        audio_dur = _probe_audio_duration(narration_audio) if narration_audio else 0.0
+        if words:
+            audio_dur = max(audio_dur, words[-1]["end"])
+        (out / "script.json").write_text(json.dumps(
+            _script_from_words(narration, words, audio_dur), indent=2))
+        (out / "audio_timing.json").write_text(json.dumps({
+            "duration_s": round(audio_dur, 3),
+            "words": words,
+            "provider": (narration_audio.suffix.lstrip(".")
+                         if narration_audio else None),
+        }, indent=2))
+        (out / "scene_state_log.json").write_text(json.dumps(
+            _state_log_from_visualspec(vs), indent=2))
+
+        actual_dur = qa_gates.probe_duration_ffprobe(final)
+        actual_info = qa_gates.probe_streams(final)
+        actual_res = None
+        actual_fps = None
+        for s in actual_info.get("streams", []):
+            if s.get("codec_type") == "video":
+                actual_res = [s.get("width"), s.get("height")]
+                fr = s.get("avg_frame_rate", "0/1").split("/")
+                try:
+                    actual_fps = round(float(fr[0]) / float(fr[1]), 2)
+                except (ValueError, ZeroDivisionError):
+                    actual_fps = None
+                break
+        diag = {
+            "resolution": list(resolution), "fps": fps,
+            "actual_duration_s": round(actual_dur, 3),
+            "actual_resolution": actual_res, "actual_fps": actual_fps,
+            "audio_duration_s": round(audio_dur, 3),
+            "compose": compose_result,
+        }
+        try:
+            sheet = build_contact_sheet(final, out / "contact_sheet.jpg")
+            diag["contact_sheet"] = str(sheet)
+        except Exception as e:  # noqa: BLE001
+            diag["contact_sheet"] = None
+        (out / "render_diagnostics.json").write_text(json.dumps(diag, indent=2))
+
+        report["runtime_s"] = round(time.time() - t0, 1)
+        report["video"] = str(final)
+        report["actual_duration_s"] = round(actual_dur, 3)
+        report["audio_duration_s"] = round(audio_dur, 3)
+        report["integrated_lufs"] = audio_metrics.get("integrated_lufs")
+        report["true_peak_db"] = audio_metrics.get("true_peak_db")
+
+    # ── 9) spec-§27 comparison fields ──────────────────────────────────
+    expl = (vs.get("metadata", {}) or {}).get("explanation_report", {})
+    sim_beats = sum(1 for b in vs["beats"]
+                    for a in b.get("semantic_actions", []) or []
+                    if str(a.get("action", a.get("type", "")))
+                    in _SIMULATION_ACTIONS)
+    v27 = {
+        "topic": topic,
+        "story_template_selected": plan.template_name,
+        "template_rationale": plan.rationale,
+        "hero_mechanism": hero.__dict__ if hero else None,
+        "beat_count": len(vs["beats"]),
+        "representation_types": [rep.primary.value]
+            + [r.value for r in rep.secondary],
+        "text_dominant_ratio": expl.get("text_dominance_ratio"),
+        "average_visual_explanation_score": expl.get("average_explanation_score"),
+        "explanation_passed_avg_ge_3_5": expl.get("passed_avg_ge_3_5"),
+        "procedural_primitive_count": _count_primitives(vs),
+        "simulation_beat_count": sim_beats,
+        "audio_duration_s": report.get("audio_duration_s", narration_dur),
+        "render_time_s": report.get("runtime_s"),
+        "qa_technical_score": report.get("technical_correctness"),
+        "qa_perceptual_score": report.get("perceptual_quality"),
+        "qa_passed": report.get("passed"),
+        "facts": [f.__dict__ for f in world.facts],
+        "provenance": {
+            "from_mathmotion_lab": _FROM_MATHMOTION_LAB,
+            "from_video_engine": [
+                "SceneState lifecycle", "math/physics verifiers",
+                "strict schemas", "10-gate QA (ffprobe/ebur128/frame)",
+                "kokoro local TTS", "ffmpeg compose + LUFS master",
+                "deterministic seeds", "YAML style config",
+            ],
+        },
+    }
+    report["v03_report"] = v27
+    (out / "v03_report.json").write_text(json.dumps(v27, indent=2))
+    return report
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser(
+        description="Autonomous topic -> video (v0.3, no storyboard input)")
+    ap.add_argument("--topic", required=True, help="Bare topic, e.g. "
+                    "'Why is the sky blue?'")
+    ap.add_argument("--out", default="", help="Output directory (default: "
+                    "results/<topic-slug>)")
+    ap.add_argument("--res", choices=["dev", "hd", "4k"], default="dev",
+                    help="dev=1280x720 (default), hd=1920x1080, 4k=3840x2160")
+    ap.add_argument("--fps", type=int, default=30)
+    ap.add_argument("--no-render", action="store_true",
+                    help="Compile only (no Manim render)")
+    args = ap.parse_args()
+
+    res = {"dev": (1280, 720), "hd": (1920, 1080), "4k": (3840, 2160)}[args.res]
+    out_root = args.out or f"results/{args.topic.lower()[:40]}" \
+        .replace(" ", "_").replace("?", "").replace("'", "").strip("_")
+    report = run_autonomous(args.topic, out_root, resolution=res,
+                            fps=args.fps, render=not args.no_render)
+    print(json.dumps(report.get("v03_report", report), indent=2))
+    if not args.no_render:
+        if report.get("passed"):
+            print("\n✅ PASSED:", report.get("video"))
+        else:
+            print("\n❌ FAILED QA:")
+            for e in report.get("errors", []):
+                print("  -", e)
+
+
+if __name__ == "__main__":
+    main()

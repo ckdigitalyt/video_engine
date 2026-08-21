@@ -81,9 +81,14 @@ def test_reorder_keeps_same_mobjects():
 
     animate_digit_reorder(scene, digits, "3524", "5432", duration=0.5)
 
-    # same physical objects — no duplicates, no ghosts
-    assert [id(d) for d in digits] == ids_before
-    assert [d.vid for d in digits] == vids_before
+    # same physical objects — no duplicates, no ghosts.
+    # NB: submobjects are intentionally reordered to the VISUAL target
+    # order (so `_reading(group)` reflects the on-screen arrangement for
+    # subsequent beats), so identity is compared as a multiset, not by
+    # position.
+    assert sorted(id(d) for d in digits) == sorted(ids_before)
+    assert sorted(d.vid for d in digits) == sorted(vids_before)
+    assert len(digits) == 4
     assert len(scene.added) == 0          # nothing new was added to stage
     # only MoveToTarget animations were played (no FadeIn of new copies)
     anims = [a for played, _ in scene.played for a in played]

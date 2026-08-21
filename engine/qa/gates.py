@@ -556,6 +556,183 @@ def run_all(beatsheet: dict, shotlist: dict, visualspec: dict,
     return report
 
 
+# ── v2 semantic gates: visual explanation + text dominance (spec §9, §10) ─
+def gate_explanation(visualspec: dict) -> GateResult:
+    """Perceptual gate: avg visual explanation score >= 3.5 and the video
+    is not dominated by level 0-2 beats (spec §10)."""
+    g = _gate("explanation")
+    try:
+        report = (visualspec.get("metadata", {}) or {}).get("explanation_report")
+        if report is None:
+            from engine.world.scoring import score_beatsheet
+            report = score_beatsheet(visualspec.get("beats", [])).to_dict()
+        avg = float(report.get("average_explanation_score", 0.0))
+        dominated = bool(report.get("dominated_by_level_0_2", False))
+        if avg < 3.5:
+            g.errors.append(f"avg visual explanation score {avg:.2f} < 3.5")
+        if dominated:
+            g.errors.append("video dominated by level 0-2 beats — send back "
+                            "to the VisualDirector")
+        g.passed = not g.errors
+        g.warnings.append(f"avg explanation {avg:.2f}")
+    except Exception as e:  # noqa: BLE001
+        g.errors.append(f"explanation gate failed: {e}")
+        g.passed = False
+    return g
+
+
+def gate_text_dominance(visualspec: dict) -> GateResult:
+    """Perceptual gate: text-dominance ratio < 0.35 (spec §9 — kinetic
+    text is a fallback, not the default)."""
+    g = _gate("text_dominance")
+    try:
+        report = (visualspec.get("metadata", {}) or {}).get("explanation_report")
+        if report is None:
+            from engine.world.scoring import score_beatsheet
+            report = score_beatsheet(visualspec.get("beats", [])).to_dict()
+        ratio = float(report.get("text_dominance_ratio", 1.0))
+        if ratio >= 0.35:
+            g.errors.append(f"text-dominance ratio {ratio:.2f} >= 0.35")
+        g.passed = not g.errors
+        g.warnings.append(f"text ratio {ratio:.2f}")
+    except Exception as e:  # noqa: BLE001
+        g.errors.append(f"text-dominance gate failed: {e}")
+        g.passed = False
+    return g
+
+
+# v2 entity types -> v1 Object.type enum (spec §1: v1 gates run
+# unchanged; unknown v2 world types collapse to the generic "shape").
+_V1_TYPE_MAP = {
+    "light_source": "shape", "medium": "shape", "scatterer": "shape",
+    "eye": "shape", "signal": "shape", "particle": "shape",
+    "body": "shape", "planet": "shape", "observer": "shape",
+    "molecule": "shape", "atom": "shape", "wave": "shape",
+    "field": "shape", "label": "text", "node": "shape",
+    "connection": "graph", "equation": "equation",
+    "number": "number", "vector": "vector", "text": "text",
+    "graph": "graph", "fraction": "fraction", "matrix": "matrix",
+}
+
+
+def _v1_object(obj: dict) -> dict:
+    """Map a v2 object (world entity) to the v1 Object schema.
+
+    v2 objects carry rich `properties` and open-ended `type` values;
+    the v1 schema only allows id/type/value/position with a closed
+    type enum.  Strip unknowns, remap the type, hoist position.
+    """
+    if not isinstance(obj, dict):
+        return {"id": str(obj), "type": "shape"}
+    props = obj.get("properties", {}) or {}
+    out = {"id": str(obj.get("id", "obj")),
+           "type": _V1_TYPE_MAP.get(str(obj.get("type", "shape")),
+                                    "shape")}
+    val = obj.get("value")
+    if val is not None:
+        out["value"] = str(val)
+    pos = props.get("position") or (obj.get("position"))
+    if isinstance(pos, dict) and "x" in pos and "y" in pos:
+        out["position"] = {"x": float(pos["x"]), "y": float(pos["y"])}
+    return out
+
+
+def _v1_shims(visualspec: dict) -> tuple[dict, dict, dict]:
+    """Derive v1-compatible beatsheet/shotlist/visualspec from a v2 spec
+    so the proven v1 gates can run unchanged (spec §1: never replace
+    proven correctness work)."""
+    beats = visualspec.get("beats", [])
+    bs_beats, sl_shots, vs_beats = [], [], []
+    for i, b in enumerate(beats):
+        bid = b.get("beat_id", f"b{i + 1:03d}")
+        dur = float(b.get("duration", 1.5))
+        bs_beats.append({
+            "beat_id": bid, "start": 0.0, "end": dur, "duration": dur,
+            "narration": b.get("narration", ""),
+            "intent": b.get("intent", "explanation"),
+            "importance": b.get("importance", "medium"),
+            "objects": [o.get("id") for o in b.get("objects", [])
+                         if isinstance(o, dict) and o.get("id")],
+            "visual_change_required": True,
+        })
+        sl_shots.append({
+            "shot_id": f"s{i + 1:03d}", "beat_id": bid,
+            "visual_type": b.get("visual_type", "") or "highlight",
+            "renderer": "manim",
+            "objects": [_v1_object(o) for o in b.get("objects", [])],
+            "actions": [t for t in b.get("transformations", [])
+                         if isinstance(t, dict) and t.get("type")],
+            "camera": b.get("camera", {"type": "static"}),
+        })
+        vs_beats.append({
+            "beat_id": bid,
+            "intent": b.get("intent", "explanation"),
+            "duration": dur,
+            "narration": b.get("narration", ""),
+            "objects": [_v1_object(o) for o in b.get("objects", [])],
+            "transformations": [t for t in b.get("transformations", [])
+                                 if isinstance(t, dict) and t.get("type")],
+            "camera": b.get("camera", {"type": "static"}),
+            "visual_type": b.get("visual_type", ""),
+        })
+    topic = (visualspec.get("metadata", {}) or {}).get("topic", "")
+    return ({"version": "v1", "beats": bs_beats},
+            {"version": "v1", "shots": sl_shots},
+            {"version": "v1", "beats": vs_beats,
+             "metadata": {"topic": topic}})
+
+
+def run_all_v2(visualspec: dict, video_path: Optional[Path] = None,
+               audio_metrics: Optional[dict] = None,
+               motion_metrics: Optional[dict] = None,
+               expected_res: tuple = (1280, 720),
+               expected_fps: int = 30) -> dict:
+    """QA runner for v2 VisualSpecs (world model + semantic actions).
+
+    Runs the proven v1 gates on v1 shims, then adds the v0.3 semantic
+    gates (explanation score, text-dominance ratio) and recomputes the
+    perceptual score with them included (spec §10, §27, §28).
+    """
+    bs, sl, vs = _v1_shims(visualspec)
+    report = run_all(bs, sl, vs, {"version": "v1", "cues": []},
+                     video_path=video_path, audio_metrics=audio_metrics,
+                     motion_metrics=motion_metrics,
+                     expected_res=expected_res, expected_fps=expected_fps)
+
+    eg = gate_explanation(visualspec)
+    tg = gate_text_dominance(visualspec)
+    report["gates"]["explanation"] = {"passed": eg.passed,
+                                        "errors": eg.errors,
+                                        "warnings": eg.warnings}
+    report["gates"]["text_dominance"] = {"passed": tg.passed,
+                                           "errors": tg.errors,
+                                           "warnings": tg.warnings}
+    # recompute perceptual with the two new semantic gates
+    perc_keys = ["semantic", "layout", "motion", "continuity",
+                 "explanation", "text_dominance"]
+    perc = [report["gates"][k] for k in perc_keys if k in report["gates"]]
+    perceptual = int(round(100.0 * sum(1 for g in perc if g["passed"])
+                           / max(1, len(perc))))
+    if report.get("frame_visual_qa"):
+        longest = report["frame_visual_qa"].get("longest_static_interval_s", 0.0)
+        if longest >= DEAD_AIR_THRESHOLD_S:
+            perceptual = max(0, perceptual - 15)
+        if report.get("frame_layout_qa") \
+                and report["frame_layout_qa"].get("conflict_frames"):
+            perceptual = max(0, perceptual - 10)
+    tech = report.get("technical_correctness", 0)
+    report["perceptual_quality"] = perceptual
+    report["score"] = int(round(0.6 * tech + 0.4 * perceptual))
+    report["passed"] = (tech >= TECH_PASS_THRESHOLD
+                         and perceptual >= PERC_PASS_THRESHOLD)
+    for e in eg.errors + tg.errors:
+        if e not in report["errors"]:
+            report["errors"].append(e)
+    report["explanation_report"] = (visualspec.get("metadata", {}) or {}).get(
+        "explanation_report", {})
+    return report
+
+
 if __name__ == "__main__":
     bs = {"version": "v1", "beats": [
         {"beat_id": "b001", "start": 0.0, "end": 1.5, "narration": "Try this.",
@@ -566,12 +743,6 @@ if __name__ == "__main__":
          "objects": ["number_main"], "visual_change_required": True},
     ]}
     sl = {"version": "v1", "shots": [
-        {"shot_id": "s001", "beat_id": "b001", "visual_type": "highlight",
-         "renderer": "manim", "objects": [{"id": "number_main", "type": "number"}]},
-        {"shot_id": "s002", "beat_id": "b002", "visual_type": "digit_sort",
-         "renderer": "manim", "objects": [{"id": "number_main", "type": "digit_array"}]},
-    ]}
-    vs = {"version": "v1", "beats": [
         {"beat_id": "b001", "intent": "hook", "duration": 1.5,
          "objects": [{"id": "number_main", "type": "number"}],
          "transformations": [{"type": "highlight", "from": "3524", "to": "3524"}]},

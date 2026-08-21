@@ -77,6 +77,14 @@ def validate_visualspec(vs: dict) -> list[str]:
     return validate(vs, "visualspec_v1")
 
 
+def validate_visualspec_v2(vs: dict) -> list[str]:
+    return validate(vs, "visualspec_v2")
+
+
+def validate_worldmodel(wm: dict) -> list[str]:
+    return validate(wm, "worldmodel_v1")
+
+
 def validate_audiocue(ac: dict) -> list[str]:
     return validate(ac, "audio_cue_v1")
 

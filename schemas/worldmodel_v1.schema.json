@@ -1,0 +1,176 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "WorldModel v1",
+  "description": "The semantic world model (JADE_TO_DO v0.3 §4/§5/§18): entities, relationships, forces, signals, paths, states, measurements, labels, camera focus, hero mechanism and factual constraints. Strict contract validated before direction.",
+  "type": "object",
+  "required": ["topic", "representation", "entities"],
+  "properties": {
+    "topic": {"type": "string"},
+    "representation": {"type": "string"},
+    "representation_secondary": {"type": "array", "items": {"type": "string"}},
+    "entities": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/Entity"}
+    },
+    "relationships": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/Relationship"}
+    },
+    "forces": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/Force"}
+    },
+    "signals": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/Signal"}
+    },
+    "paths": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/Path"}
+    },
+    "states": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/State"}
+    },
+    "measurements": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/Measurement"}
+    },
+    "labels": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/Label"}
+    },
+    "camera": {"$ref": "#/definitions/CameraFocus"},
+    "hero_mechanism": {"$ref": "#/definitions/HeroMechanism"},
+    "facts": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/Fact"}
+    }
+  },
+  "definitions": {
+    "Entity": {
+      "type": "object",
+      "required": ["id", "type"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "type": {"type": "string"},
+        "properties": {"type": "object"},
+        "count": {"type": ["integer", "null"], "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "Relationship": {
+      "type": "object",
+      "required": ["source", "target", "type"],
+      "properties": {
+        "source": {"type": "string"},
+        "target": {"type": "string"},
+        "type": {"type": "string"},
+        "label": {"type": "string"},
+        "properties": {"type": "object"}
+      },
+      "additionalProperties": false
+    },
+    "Force": {
+      "type": "object",
+      "required": ["source", "target"],
+      "properties": {
+        "source": {"type": "string"},
+        "target": {"type": "string"},
+        "kind": {"type": "string"},
+        "magnitude": {"type": ["number", "null"]},
+        "formula": {"type": ["string", "null"]},
+        "properties": {"type": "object"}
+      },
+      "additionalProperties": false
+    },
+    "Signal": {
+      "type": "object",
+      "required": ["id", "kind", "source", "target"],
+      "properties": {
+        "id": {"type": "string"},
+        "kind": {"type": "string"},
+        "source": {"type": "string"},
+        "target": {"type": "string"},
+        "properties": {"type": "object"}
+      },
+      "additionalProperties": false
+    },
+    "Path": {
+      "type": "object",
+      "required": ["id", "kind"],
+      "properties": {
+        "id": {"type": "string"},
+        "kind": {"type": "string"},
+        "entities": {"type": "array", "items": {"type": "string"}},
+        "properties": {"type": "object"}
+      },
+      "additionalProperties": false
+    },
+    "State": {
+      "type": "object",
+      "required": ["id", "kind"],
+      "properties": {
+        "id": {"type": "string"},
+        "kind": {"type": "string"},
+        "value": {},
+        "properties": {"type": "object"}
+      },
+      "additionalProperties": false
+    },
+    "Measurement": {
+      "type": "object",
+      "required": ["id", "kind"],
+      "properties": {
+        "id": {"type": "string"},
+        "kind": {"type": "string"},
+        "value": {},
+        "units": {"type": "string"},
+        "properties": {"type": "object"}
+      },
+      "additionalProperties": false
+    },
+    "Label": {
+      "type": "object",
+      "required": ["id", "text"],
+      "properties": {
+        "id": {"type": "string"},
+        "text": {"type": "string"},
+        "at": {"type": "string"},
+        "properties": {"type": "object"}
+      },
+      "additionalProperties": false
+    },
+    "CameraFocus": {
+      "type": "object",
+      "properties": {
+        "target": {"type": "string"},
+        "choreography": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": false
+    },
+    "HeroMechanism": {
+      "type": "object",
+      "required": ["concept", "visualization"],
+      "properties": {
+        "concept": {"type": "string"},
+        "visualization": {"type": "string"},
+        "target_beat": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "Fact": {
+      "type": "object",
+      "required": ["claim", "source"],
+      "properties": {
+        "claim": {"type": "string"},
+        "formula": {"type": "string"},
+        "units": {"type": "string"},
+        "assumptions": {"type": "array", "items": {"type": "string"}},
+        "source": {"type": "string"},
+        "verified": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    }
+  }
+}
