@@ -28,6 +28,10 @@
           "type": "object",
           "description": "Per-beat visual explanation scores (spec §10)"
         },
+        "composition_report": {
+          "type": "object",
+          "description": "Phase B §21: per-beat attention metrics (focal/empty/contrast)"
+        },
         "style_spec": {"type": "string"}
       },
       "additionalProperties": false
@@ -81,6 +85,10 @@
         "text_primary": {
           "type": "boolean",
           "description": "True when the primary visual is text (feeds text-dominance ratio)"
+        },
+        "composition": {
+          "$ref": "#/definitions/CompositionPlan",
+          "description": "Phase B §20: per-beat composition decision (focal/scale/hierarchy/negative space)"
         }
       },
       "additionalProperties": false
@@ -166,7 +174,44 @@
           "enum": ["static", "follow", "zoom_to", "zoom_from", "pan",
                    "push_in", "pull_out", "reveal", "reframe", "focus"]
         },
-        "target": {"type": "string"}
+        "target": {"type": ["string", "null"]},
+        "scale": {"type": "number", "minimum": 0.1, "maximum": 1.5}
+      },
+      "additionalProperties": false
+    },
+    "CompositionPlan": {
+      "type": "object",
+      "required": ["beat_id", "pacing", "attention_metrics"],
+      "properties": {
+        "beat_id": {"type": "string"},
+        "focal_object": {"type": ["string", "null"]},
+        "supporting_objects": {"type": "array", "items": {"type": "string"}},
+        "background": {"type": "array", "items": {"type": "string"}},
+        "text": {"type": ["string", "null"]},
+        "camera": {"$ref": "#/definitions/CameraSpec"},
+        "hierarchy": {"type": "array", "items": {"type": "string"}},
+        "arrangement": {"type": "object"},
+        "negative_space": {"type": "number", "minimum": 0, "maximum": 1},
+        "zoom": {"type": ["string", "null"]},
+        "reframe": {"type": ["string", "null"]},
+        "exits": {"type": "array", "items": {"type": "string"}},
+        "remains": {"type": "array", "items": {"type": "string"}},
+        "pacing": {
+          "type": "string",
+          "enum": ["fast_reveal", "slow_explanation", "pause", "build",
+                   "escalation", "climax", "release"]
+        },
+        "attention_metrics": {
+          "type": "object",
+          "properties": {
+            "focal_area_ratio": {"type": "number", "minimum": 0, "maximum": 1},
+            "semantic_object_area": {"type": "number", "minimum": 0, "maximum": 1},
+            "empty_area_ratio": {"type": "number", "minimum": 0, "maximum": 1},
+            "text_area_ratio": {"type": "number", "minimum": 0, "maximum": 1},
+            "focal_contrast": {"type": "number", "minimum": 0, "maximum": 1}
+          },
+          "additionalProperties": false
+        }
       },
       "additionalProperties": false
     },

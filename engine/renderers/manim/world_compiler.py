@@ -258,25 +258,36 @@ def _legacy_digit_call(beat: dict, state: SceneState) -> tuple[str, float] | Non
 
 
 def _camera_call(beat: dict, world: WorldState) -> tuple[str, float] | None:
-    """Emit a camera operation for the beat (v0.3 executes cameras)."""
+    """Emit a camera operation for the beat (v0.3 executes cameras).
+
+    Phase B (§20): the per-beat composition plan may carry an explicit
+    camera scale (focal-frame tightness driven by pacing); it overrides
+    the static defaults when present.
+    """
     cam = beat.get("camera") or {}
     ctype = str(cam.get("type", "static"))
     target = str(cam.get("target", world.camera.target if world else ""))
+    comp = beat.get("composition") or {}
+    comp_cam = comp.get("camera") or {}
+    scale = cam.get("scale") or comp_cam.get("scale")
     if ctype in ("static", "reveal", "reframe"):
         return None
     if not target:
         return None
     if ctype in ("zoom_to", "push_in", "focus"):
+        s = float(scale) if scale else 0.72
         return (f"camera_focus(self, camera_target(self._state, {target!r}), "
-                f"scale=0.72, duration=@D@)", _CAMERA_NATURAL)
+                f"scale={s}, duration=@D@)", _CAMERA_NATURAL)
     if ctype in ("zoom_from", "pull_out", "zoom_out_of"):
         return (f"camera_reset(self, duration=@D@)", _CAMERA_NATURAL)
     if ctype == "follow":
+        s = float(scale) if scale else 0.85
         return (f"camera_focus(self, camera_target(self._state, {target!r}), "
-                f"scale=0.85, duration=@D@)", _CAMERA_NATURAL)
+                f"scale={s}, duration=@D@)", _CAMERA_NATURAL)
     if ctype == "pan":
+        s = float(scale) if scale else 0.9
         return (f"camera_focus(self, camera_target(self._state, {target!r}), "
-                f"scale=0.9, duration=@D@)", _CAMERA_NATURAL)
+                f"scale={s}, duration=@D@)", _CAMERA_NATURAL)
     return None
 
 

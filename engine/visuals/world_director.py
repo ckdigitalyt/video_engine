@@ -35,6 +35,7 @@ from engine.world.story_templates import (
     ROLE_INTENTS, hero_for, select_template,
 )
 from engine.world.world_model import WorldState
+from engine.visuals.composition_planner import attach_composition
 
 # ────────────────────────────────────────────────────────────────────────
 # script: role -> narration sentence (generic defaults; topics may carry
@@ -611,4 +612,6 @@ def build_visualspec(topic: str, world: WorldState,
     }
     report = score_beatsheet(beats, world)
     vs["metadata"]["explanation_report"] = report.to_dict()
+    # Phase B (§20–21): composition/attention as a first-class stage.
+    attach_composition(vs, world)
     return vs

@@ -601,6 +601,50 @@ def gate_text_dominance(visualspec: dict) -> GateResult:
     return g
 
 
+def gate_composition(visualspec: dict) -> GateResult:
+    """Phase B gate (§20–21): attention clarity, not density.
+
+    Requires every beat to carry a composition plan with exactly one
+    focal point (release/pause beats may be full-frame), sane negative
+    space (avg empty >= 0.20) and decent focal contrast (avg >= 0.5).
+    """
+    g = _gate("composition")
+    try:
+        report = (visualspec.get("metadata", {}) or {}).get("composition_report")
+        if report is None:
+            from engine.visuals.composition_planner import plan_composition
+            beats = visualspec.get("beats", [])
+            wd = (visualspec.get("metadata", {}) or {}).get("world")
+            world = None
+            if wd:
+                from engine.world.world_model import WorldState
+                try:
+                    world = WorldState.from_dict(wd)
+                except Exception:  # noqa: BLE001
+                    world = None
+            report = plan_composition(beats, world).to_dict()
+        avg_contrast = float(report.get("avg_focal_contrast", 0.0))
+        avg_empty = float(report.get("avg_empty_area_ratio", 0.0))
+        multi = report.get("beats_with_multiple_focal", []) or []
+        no_focal = report.get("beats_without_focal", []) or []
+        if avg_contrast < 0.5:
+            g.errors.append(f"avg focal contrast {avg_contrast:.2f} < 0.5")
+        if avg_empty < 0.20:
+            g.errors.append(f"avg empty-area ratio {avg_empty:.2f} < 0.20 "
+                            "(density maximized, attention unclear)")
+        if multi:
+            g.errors.append(f"beats with multiple focal points: {multi}")
+        if len(no_focal) > max(1, len(visualspec.get("beats", [])) * 0.35):
+            g.errors.append(f"too many beats without a focal point: {no_focal}")
+        g.passed = not g.errors
+        g.warnings.append(f"focal contrast {avg_contrast:.2f}, "
+                          f"empty ratio {avg_empty:.2f}")
+    except Exception as e:  # noqa: BLE001
+        g.errors.append(f"composition gate failed: {e}")
+        g.passed = False
+    return g
+
+
 # v2 entity types -> v1 Object.type enum (spec §1: v1 gates run
 # unchanged; unknown v2 world types collapse to the generic "shape").
 _V1_TYPE_MAP = {
@@ -701,15 +745,19 @@ def run_all_v2(visualspec: dict, video_path: Optional[Path] = None,
 
     eg = gate_explanation(visualspec)
     tg = gate_text_dominance(visualspec)
+    cg = gate_composition(visualspec)
     report["gates"]["explanation"] = {"passed": eg.passed,
                                         "errors": eg.errors,
                                         "warnings": eg.warnings}
     report["gates"]["text_dominance"] = {"passed": tg.passed,
                                            "errors": tg.errors,
                                            "warnings": tg.warnings}
-    # recompute perceptual with the two new semantic gates
+    report["gates"]["composition"] = {"passed": cg.passed,
+                                        "errors": cg.errors,
+                                        "warnings": cg.warnings}
+    # recompute perceptual with the semantic gates
     perc_keys = ["semantic", "layout", "motion", "continuity",
-                 "explanation", "text_dominance"]
+                 "explanation", "text_dominance", "composition"]
     perc = [report["gates"][k] for k in perc_keys if k in report["gates"]]
     perceptual = int(round(100.0 * sum(1 for g in perc if g["passed"])
                            / max(1, len(perc))))
@@ -725,11 +773,13 @@ def run_all_v2(visualspec: dict, video_path: Optional[Path] = None,
     report["score"] = int(round(0.6 * tech + 0.4 * perceptual))
     report["passed"] = (tech >= TECH_PASS_THRESHOLD
                          and perceptual >= PERC_PASS_THRESHOLD)
-    for e in eg.errors + tg.errors:
+    for e in eg.errors + tg.errors + cg.errors:
         if e not in report["errors"]:
             report["errors"].append(e)
     report["explanation_report"] = (visualspec.get("metadata", {}) or {}).get(
         "explanation_report", {})
+    report["composition_report"] = (visualspec.get("metadata", {}) or {}).get(
+        "composition_report", {})
     return report
 
 
