@@ -558,21 +558,30 @@ def run_all(beatsheet: dict, shotlist: dict, visualspec: dict,
 
 # ── v2 semantic gates: visual explanation + text dominance (spec §9, §10) ─
 def gate_explanation(visualspec: dict) -> GateResult:
-    """Perceptual gate: avg visual explanation score >= 3.5 and the video
-    is not dominated by level 0-2 beats (spec §10)."""
+    """Perceptual gate: avg visual explanation score >= 3.5, the video
+    is not dominated by level 0-2 beats (spec §10), and the explanatory
+    purposes (demonstrate/illustrate/compare) dominate support classes
+    (spec §13 — visuals must explain, not decorate)."""
     g = _gate("explanation")
     try:
-        report = (visualspec.get("metadata", {}) or {}).get("explanation_report")
-        if report is None:
-            from engine.world.scoring import score_beatsheet
-            report = score_beatsheet(visualspec.get("beats", [])).to_dict()
+        # Always recompute from the ACTUAL beats: planning-time reports go
+        # stale after local repair / recompose (§30), and scoring is cheap
+        # and deterministic.  The cached metadata report stays as the
+        # planning record in the artifact, but the gate judges reality.
+        from engine.world.scoring import score_beatsheet
+        report = score_beatsheet(visualspec.get("beats", [])).to_dict()
         avg = float(report.get("average_explanation_score", 0.0))
         dominated = bool(report.get("dominated_by_level_0_2", False))
+        expl_dominated = bool(report.get("explanatory_dominated", False))
         if avg < 3.5:
             g.errors.append(f"avg visual explanation score {avg:.2f} < 3.5")
         if dominated:
             g.errors.append("video dominated by level 0-2 beats — send back "
                             "to the VisualDirector")
+        if expl_dominated:
+            g.errors.append("support purposes (emphasize/transition/"
+                            "atmosphere) dominate — visuals must explain, "
+                            "not decorate (§13)")
         g.passed = not g.errors
         g.warnings.append(f"avg explanation {avg:.2f}")
     except Exception as e:  # noqa: BLE001
