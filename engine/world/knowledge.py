@@ -545,7 +545,7 @@ def _noise_world(topic: str) -> WorldState:
             concept="sound wave + inverse wave (180° anti-phase) → "
                     "destructive interference → silence",
             visualization="wave_inverse_interference",
-            target_beat="b005"),
+            target_beat="b006"),
         facts=_KNOWLEDGE["noise cancelling"]["facts"],
     )
 

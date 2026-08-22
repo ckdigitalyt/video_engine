@@ -233,7 +233,11 @@
       "properties": {
         "concept": {"type": "string"},
         "visualization": {"type": "string"},
-        "target_beat": {"type": "string"}
+        "target_beat": {"type": "string"},
+        "representation": {"type": "string"},
+        "objects": {"type": "array", "items": {"type": "string"}},
+        "actions": {"type": "array", "items": {"type": "string"}},
+        "why_this_visual": {"type": "string"}
       },
       "additionalProperties": false
     },

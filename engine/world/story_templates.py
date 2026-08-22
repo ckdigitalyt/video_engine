@@ -158,6 +158,87 @@ def _hero_visualization_for(topic: str, rep: RepType | None) -> str:
     return "transformation_sequence"
 
 
+# ── hero mechanism spec (§9: concept + objects + actions + why_this_visual)
+# Each entry: (concept, objects, actions, why_this_visual).  The objects and
+# actions must resolve to real world entities / Action vocabulary (§17) so
+# the hero stays compilable — never invented ad hoc.
+_HERO_SPEC: dict[str, tuple[str, tuple[str, ...], tuple[str, ...], str]] = {
+    "wavelength_dependent_scattering": (
+        "shorter wavelengths scatter more strongly (I ∝ 1/λ⁴)",
+        ("light_source", "scatterer", "eye"),
+        ("scatter", "trace"),
+        "white light enters the atmosphere; short wavelengths deflect "
+        "sideways into the observer's line of sight — the mechanism of "
+        "the blue sky in one continuous motion",
+    ),
+    "orbit_generation": (
+        "continuous falling + sideways velocity = orbit",
+        ("celestial_body", "moving_body", "orbit_path"),
+        ("fall", "miss", "orbit"),
+        "the satellite keeps falling toward the planet but keeps missing "
+        "it — orbit as perpetual fall, which is the whole idea",
+    ),
+    "signal_integration": (
+        "audio signal + visual mouth signal -> brain -> perceived sound",
+        ("mouth", "ear", "brain"),
+        ("merge", "flow"),
+        "two conflicting signals (visual mouth + audio) converge in the "
+        "brain and fuse into a third perceived sound",
+    ),
+    "wave_inverse_interference": (
+        "sound wave + inverse wave (180° anti-phase) -> destructive "
+        "interference -> silence",
+        ("wave", "microphone", "processor", "interference"),
+        ("flow", "transform", "interfere", "cancel"),
+        "the inverse wave meets the original and they cancel at the ear — "
+        "silence made visible as superposition",
+    ),
+    "pressure_build_up_explosion": (
+        "heat -> water vaporizes (~100 °C) -> steam pressure rises -> "
+        "shell bursts (~9 atm near ~180 °C) -> fluff",
+        ("kernel", "steam", "shell"),
+        ("flow", "burst"),
+        "pressure builds inside the sealed kernel until the shell gives "
+        "way in one burst — the pop as a pressure release",
+    ),
+    "trajectory_generation": (
+        "number -> even/odd rule -> transformation -> trajectory",
+        ("number", "trajectory"),
+        ("transform", "trace"),
+        "each number is transformed by a fixed rule and the chain of "
+        "values traces the trajectory",
+    ),
+    "attractor_convergence": (
+        "every orbit falls into the same attractor",
+        ("number", "node", "connection"),
+        ("converge", "flow"),
+        "divergent starting numbers all funnel into one fixed point — "
+        "convergence made visible",
+    ),
+    "deterministic_simulation": (
+        "state evolves according to deterministic rules",
+        ("particle", "field"),
+        ("accelerate", "flow"),
+        "the same initial state always produces the same evolution — the "
+        "essence of a simulation",
+    ),
+    "signal_flow": (
+        "signal travels through a causal chain",
+        ("signal", "node", "connection"),
+        ("flow", "trace"),
+        "the signal moves step by step through the chain, making the "
+        "causal order visible",
+    ),
+    "transformation_sequence": (
+        "one state transforms into the next",
+        ("node", "connection"),
+        ("transform", "flow"),
+        "each state morphs into its successor, showing the sequence of "
+        "change",
+    ),
+}
+
+
 def hero_for(topic: str, plan: StoryPlan,
              rep: RepType | None = None) -> HeroMechanism:
     """Emit the hero_mechanism for a plan (spec §13).
@@ -169,30 +250,13 @@ def hero_for(topic: str, plan: StoryPlan,
     # hero beat index: the role that proves the principle; for the
     # experiment-driven template that is "explain_principle" (role 7 of 9).
     hero_idx = max(0, len(plan.roles) - 2)
-    concept = {
-        "wavelength_dependent_scattering":
-            "shorter wavelengths scatter more strongly (I ∝ 1/λ⁴)",
-        "orbit_generation":
-            "continuous falling + sideways velocity = orbit",
-        "signal_integration":
-            "audio signal + visual mouth signal -> brain -> perceived sound",
-        "wave_inverse_interference":
-            "sound wave + inverse wave (180° anti-phase) -> destructive "
-            "interference -> silence",
-        "pressure_build_up_explosion":
-            "heat -> water vaporizes (~100 °C) -> steam pressure rises -> "
-            "shell bursts (~9 atm near ~180 °C) -> fluff",
-        "trajectory_generation":
-            "number -> even/odd rule -> transformation -> trajectory",
-        "attractor_convergence":
-            "every orbit falls into the same attractor",
-        "deterministic_simulation":
-            "state evolves according to deterministic rules",
-        "signal_flow": "signal travels through a causal chain",
-        "transformation_sequence": "one state transforms into the next",
-    }.get(visualization, "the central mechanism, demonstrated visually")
+    concept, objects, actions, why = _HERO_SPEC[visualization]
     return HeroMechanism(
         concept=concept,
         visualization=visualization,
         target_beat=f"b{hero_idx + 1:03d}",
+        representation=rep.value if rep else "",
+        objects=list(objects),
+        actions=list(actions),
+        why_this_visual=why,
     )

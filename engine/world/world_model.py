@@ -216,10 +216,20 @@ class Fact:
 
 @dataclass
 class HeroMechanism:
-    """The one hero animation that proves the central mechanism (§13)."""
+    """The one hero animation that proves the central mechanism (§13, §9).
+
+    Spec §9 wants the hero to be a first-class object:
+      {concept, representation, objects, actions, why_this_visual}
+    `why_this_visual` is the design-intent record (§12) — the answer to
+    "If the viewer remembers only one visual, what should it be?" (§10).
+    """
     concept: str
     visualization: str                    # primitive/pattern name
     target_beat: str = ""                 # e.g. "b004"
+    representation: str = ""              # RepType name (e.g. SIMULATION)
+    objects: list[str] = field(default_factory=list)      # entity ids/roles
+    actions: list[str] = field(default_factory=list)      # action names
+    why_this_visual: str = ""             # §12 design-intent rationale
 
 
 # ────────────────────────────────────────────────────────────────────────

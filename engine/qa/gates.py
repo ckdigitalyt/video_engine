@@ -601,6 +601,52 @@ def gate_text_dominance(visualspec: dict) -> GateResult:
     return g
 
 
+def gate_hero_quality(visualspec: dict) -> GateResult:
+    """Phase C gate (§9–10, §12): hero mechanism is first-class + QC'd.
+
+    Every video must have exactly one hero mechanism (the visual the
+    viewer should remember), with a why_this_visual rationale, real
+    objects/actions (spec §9 shape), and a hero beat that actually
+    exists, is marked importance=high, and demonstrates (explanation
+    score >= 4).  A plan without a clear hero FAILs (§10) so the
+    VisualDirector must revise instead of rendering decoration.
+    """
+    g = _gate("hero_quality")
+    try:
+        md = visualspec.get("metadata", {}) or {}
+        hero = md.get("hero_mechanism")
+        if not hero:
+            g.errors.append("no hero_mechanism in metadata (§9)")
+            g.passed = False
+            return g
+        if not hero.get("why_this_visual"):
+            g.errors.append("hero lacks why_this_visual rationale (§12)")
+        if not hero.get("objects"):
+            g.errors.append("hero objects empty (§9)")
+        if not hero.get("actions"):
+            g.errors.append("hero actions empty (§9)")
+        tb = hero.get("target_beat", "")
+        beats = visualspec.get("beats", [])
+        hero_beat = next((b for b in beats if b.get("beat_id") == tb), None)
+        if tb and not hero_beat:
+            g.errors.append(f"hero target_beat {tb} not found in beats")
+        if hero_beat is not None:
+            if hero_beat.get("importance") != "high":
+                g.errors.append(f"hero beat {tb} not importance=high")
+            score = float(hero_beat.get("explanation_score", 0) or 0)
+            if score < 4:
+                g.errors.append(
+                    f"hero beat {tb} explanation_score {score:.1f} < 4 "
+                    "(hero must demonstrate, not decorate)")
+        g.passed = not g.errors
+        g.warnings.append(
+            f"hero={hero.get('visualization')} @ {tb or '?'}")
+    except Exception as e:  # noqa: BLE001
+        g.errors.append(f"hero-quality gate failed: {e}")
+        g.passed = False
+    return g
+
+
 def gate_composition(visualspec: dict) -> GateResult:
     """Phase B gate (§20–21): attention clarity, not density.
 
@@ -746,6 +792,7 @@ def run_all_v2(visualspec: dict, video_path: Optional[Path] = None,
     eg = gate_explanation(visualspec)
     tg = gate_text_dominance(visualspec)
     cg = gate_composition(visualspec)
+    hg = gate_hero_quality(visualspec)
     report["gates"]["explanation"] = {"passed": eg.passed,
                                         "errors": eg.errors,
                                         "warnings": eg.warnings}
@@ -755,9 +802,13 @@ def run_all_v2(visualspec: dict, video_path: Optional[Path] = None,
     report["gates"]["composition"] = {"passed": cg.passed,
                                         "errors": cg.errors,
                                         "warnings": cg.warnings}
+    report["gates"]["hero_quality"] = {"passed": hg.passed,
+                                         "errors": hg.errors,
+                                         "warnings": hg.warnings}
     # recompute perceptual with the semantic gates
     perc_keys = ["semantic", "layout", "motion", "continuity",
-                 "explanation", "text_dominance", "composition"]
+                 "explanation", "text_dominance", "composition",
+                 "hero_quality"]
     perc = [report["gates"][k] for k in perc_keys if k in report["gates"]]
     perceptual = int(round(100.0 * sum(1 for g in perc if g["passed"])
                            / max(1, len(perc))))
@@ -773,7 +824,7 @@ def run_all_v2(visualspec: dict, video_path: Optional[Path] = None,
     report["score"] = int(round(0.6 * tech + 0.4 * perceptual))
     report["passed"] = (tech >= TECH_PASS_THRESHOLD
                          and perceptual >= PERC_PASS_THRESHOLD)
-    for e in eg.errors + tg.errors + cg.errors:
+    for e in eg.errors + tg.errors + cg.errors + hg.errors:
         if e not in report["errors"]:
             report["errors"].append(e)
     report["explanation_report"] = (visualspec.get("metadata", {}) or {}).get(

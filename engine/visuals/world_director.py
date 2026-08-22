@@ -569,7 +569,19 @@ def build_visualspec(topic: str, world: WorldState,
     plan = story_plan or select_template(topic, rep.primary)
     hero = hero_for(topic, plan, rep.primary)
     if world.hero_mechanism is not None:
+        # World heroes are authored minimal (concept/visualization/beat);
+        # enrich with the full §9 shape (objects/actions/why_this_visual)
+        # from the hero spec, keyed by visualization name (§12).
         hero = world.hero_mechanism
+        full = hero_for(topic, plan, rep.primary)
+        if not hero.representation:
+            hero.representation = full.representation or rep.primary.value
+        if not hero.objects:
+            hero.objects = list(full.objects)
+        if not hero.actions:
+            hero.actions = list(full.actions)
+        if not hero.why_this_visual:
+            hero.why_this_visual = full.why_this_visual
 
     # script (narration)
     if narration_override:
