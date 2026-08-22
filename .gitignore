@@ -14,3 +14,14 @@ timeline.json
 .coverage
 coverage.json
 _ignore_placeholder.txt
+
+# Run artifacts
+logs/
+media/
+tmp/
+results/
+*.bak
+*.out
+concat_list.txt
+video_engine_consolidated.py
+rebuild_smoke.py
