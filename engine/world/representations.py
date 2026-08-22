@@ -77,6 +77,10 @@ _RULES: list[tuple[frozenset[str], RepType, tuple[RepType, ...], str]] = [
                 "prism", "lens"}),
      RepType.SIMULATION, (RepType.SIGNAL_FLOW,),
      "optics/atmosphere topics: simulation + signal flow"),
+    (frozenset({"microwave", "dielectric", "radiation"}),
+     RepType.CAUSE_EFFECT, (RepType.EXPERIMENT,),
+     "microwave/radiation heating: cause-effect (wave -> water molecule "
+     "vibration -> heat); experiment when a kernel-like world exists"),
     (frozenset({"wave", "sound", "audio", "frequency", "oscillation",
                 "vibration", "resonance", "acoustic"}),
      RepType.SIMULATION, (RepType.SIGNAL_FLOW,),
@@ -119,6 +123,26 @@ def _normalize(topic: str) -> str:
     return (topic or "").lower().strip()
 
 
+def _kw_in(keyword: str, text: str) -> bool:
+    """Substring match that respects word boundaries for short keywords
+    ("lip" in "slippery" must be False; "noise" in "noise-cancelling"
+    must be True).  Punctuation/hyphens count as boundaries."""
+    k = keyword.lower()
+    if len(k) >= 5 or "-" in k or "+" in k:
+        return k in text
+    start = 0
+    while True:
+        i = text.find(k, start)
+        if i < 0:
+            return False
+        before_ok = i == 0 or not (text[i-1].isalnum())
+        after = i + len(k)
+        after_ok = after >= len(text) or not (text[after].isalnum())
+        if before_ok and after_ok:
+            return True
+        start = i + 1
+
+
 def select_representation(topic: str,
                           llm_override: str | None = None) -> Representation:
     """Choose the visual representation for a topic (deterministic rules).
@@ -129,7 +153,8 @@ def select_representation(topic: str,
     """
     t = _normalize(topic)
     for keywords, primary, secondary, rationale in _RULES:
-        if any(k in t for k in keywords):
+        # word-boundary match: "lip" must not match inside "slippery"
+        if any(_kw_in(k, t) for k in keywords):
             return Representation(primary, list(secondary),
                                   "manim", rationale)
     # no mechanism keyword matched -> weakest useful default

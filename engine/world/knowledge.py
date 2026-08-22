@@ -306,13 +306,39 @@ _ALIASES = {
     "popcorn": "popcorn",
 }
 
+# Keyword fallback (§34 unseen-topic generalization): long-form phrasings
+# of the known worlds resolve by distinctive keyword instead of an exact
+# alias, so unseen phrasings still reach the right semantic world
+# (e.g. "How noise-cancelling headphones work" -> noise cancelling).
+_KEYWORD_TOPICS: tuple[tuple[frozenset[str], str], ...] = (
+    (frozenset({"sky", "blue", "scatter", "atmosphere", "sunset",
+                "rayleigh"}), "sky blue"),
+    (frozenset({"orbit", "satellite", "gravity", "kepler", "planet"}),
+     "satellite orbit"),
+    (frozenset({"kaprekar", "6174"}), "kaprekar"),
+    (frozenset({"collatz", "3n+1"}), "collatz"),
+    (frozenset({"mcgurk", "lipreading", "lip reading", "hear what we"
+                "see"}), "mcgurk"),
+    (frozenset({"noise", "cancell", "headphone", "active noise"}),
+     "noise cancelling"),
+    (frozenset({"popcorn", "kernel", "burst"}), "popcorn"),
+)
+
 
 def _resolve_topic(topic: str) -> str:
     import re
     t = (topic or "").lower().strip()
     # normalize: strip punctuation so "Why is the sky blue?" matches
     norm = re.sub(r"[^a-z0-9+ ]", "", t).strip()
-    return _ALIASES.get(norm, _ALIASES.get(t, t))
+    hit = _ALIASES.get(norm) or _ALIASES.get(t)
+    if hit:
+        return hit
+    # §34: keyword fallback for unseen phrasings of known worlds
+    words = set(re.findall(r"[a-z0-9+]+", t))
+    for keywords, key in _KEYWORD_TOPICS:
+        if words & keywords:
+            return key
+    return t
 
 
 def research(topic: str) -> ResearchResult:

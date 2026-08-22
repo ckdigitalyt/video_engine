@@ -126,9 +126,15 @@ def _count_primitives(vs: dict) -> int:
 
 def run_autonomous(topic: str, out_root: str | Path,
                    resolution: tuple[int, int] = (1280, 720), fps: int = 30,
-                   render: bool = True) -> dict:
+                   render: bool = True,
+                   visualspec: dict | None = None) -> dict:
     """Full autonomous topic -> video pipeline.  Returns the QA report +
-    the spec-§27 comparison fields."""
+    the spec-§27 comparison fields.
+
+    ``visualspec`` (optional) lets the §36 daily runner inject a plan
+    that already passed preflight + local repair, so the expensive
+    render stage never sees a plan that would fail QA (§37 budget).
+    """
     t0 = time.time()
     out = Path(out_root)
     out.mkdir(parents=True, exist_ok=True)
@@ -171,7 +177,15 @@ def run_autonomous(topic: str, out_root: str | Path,
         narration_dur = 0.0
 
     # ── 3) v2 VisualSpec + timed beats ─────────────────────────────────
-    vs = build_visualspec(topic, world, story_plan=plan)
+    if visualspec is not None:
+        # §36/§37: plan already passed preflight + local repair; keep the
+        # world/plan artifacts consistent with the injected spec
+        vs = dict(visualspec)
+        plan_name = (vs.get("metadata", {}) or {}).get(
+            "story_template", plan.template_name)
+        plan.template_name = plan_name
+    else:
+        vs = build_visualspec(topic, world, story_plan=plan)
     sentences = [s["narration"] for s in script]
     vs = _time_beats(vs, sentences, words, narration_dur)
     errs = validate_visualspec_v2(vs)

@@ -781,6 +781,41 @@ def _v1_shims(visualspec: dict) -> tuple[dict, dict, dict]:
              "metadata": {"topic": topic}})
 
 
+def run_preflight_v2(visualspec: dict) -> dict:
+    """Planning-level QA — the gates that can run BEFORE rendering (§28).
+
+    These gates judge the plan (schema, semantics, explanation,
+    text-dominance, composition, hero QC) and need no video file:
+    used by the §33 regression suite and pre-render preflight so a bad
+    plan is rejected before expensive rendering.
+    """
+    bs, sl, vs = _v1_shims(visualspec)
+    report: dict = {"gates": {}, "errors": [], "warnings": []}
+    for name, fn in (
+        ("schema", lambda: gate_schema(bs, sl, vs, {})),
+        ("semantic", lambda: gate_semantic(bs, vs)),
+        ("explanation", lambda: gate_explanation(visualspec)),
+        ("text_dominance", lambda: gate_text_dominance(visualspec)),
+        ("composition", lambda: gate_composition(visualspec)),
+        ("hero_quality", lambda: gate_hero_quality(visualspec)),
+    ):
+        g = fn()
+        report["gates"][name] = {"passed": g.passed,
+                                   "errors": g.errors,
+                                   "warnings": g.warnings}
+        for e in g.errors:
+            if e not in report["errors"]:
+                report["errors"].append(e)
+    perc_keys = ["schema", "semantic", "explanation", "text_dominance",
+                 "composition", "hero_quality"]
+    perc = [report["gates"][k] for k in perc_keys if k in report["gates"]]
+    report["perceptual_quality"] = int(round(
+        100.0 * sum(1 for g in perc if g["passed"]) / max(1, len(perc))))
+    report["passed"] = all(g["passed"] for g in perc)
+    report["score"] = report["perceptual_quality"]
+    return report
+
+
 def run_all_v2(visualspec: dict, video_path: Optional[Path] = None,
                audio_metrics: Optional[dict] = None,
                motion_metrics: Optional[dict] = None,

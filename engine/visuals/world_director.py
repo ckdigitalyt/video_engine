@@ -174,15 +174,20 @@ def _plan_signal_flow(topic: str, world: WorldState,
             [{"action": "merge", "target": hub.id,
               "params": {"from": [[-4, 1.5, 0], [4, 1.5, 0]]}}],
             camera={"type": "zoom_to", "target": hub.id}, imp="high")
-    # perception result
+    # perception result — hero: DEMONSTRATE the integration, don't
+    # decorate it (§9/§13): the two signals (ear "ba", eye "ga") merge
+    # into the perceived sound "da".  merge is a demonstrating action
+    # so the hero beat scores >= 4 and passes the hero-quality gate.
     if sink is not None:
         nxt("discover_principle",
             script[5]["narration"] if len(script) > 5 else
             "One integrated perception.",
-            _entity_objs(world, sink.id),
-            [{"action": "reveal", "target": sink.id,
-              "params": {"text": "da"}}],
-            "reveal", {"type": "zoom_to", "target": sink.id}, "high")
+            _entity_objs(world, sink.id) + _entity_objs(
+                world, *[s.id for s in sources]),
+            [{"action": "merge", "target": sink.id,
+              "params": {"from": [[-4, 1.5, 0], [4, 1.5, 0]],
+                          "text": "ba + ga \u2192 da"}}],
+            "", {"type": "zoom_to", "target": sink.id}, "high")
     nxt("payoff", script[-1]["narration"] if script else
         "You hear what you see.",
         [], [], "payoff", {"type": "pull_out"}, "high")
@@ -270,8 +275,8 @@ def _plan_simulation(topic: str, world: WorldState,
         [], "kinetic_title", {"type": "zoom_to", "target": s}, "high")
     nxt("question", script[1]["narration"] if len(script) > 1 else
         "White light meets the air.",
-        _entity_objs(world, s, atm),
-        [{"action": "flow", "target": atm.id,
+        _entity_objs(world, s, atm.id if atm else ""),
+        [{"action": "flow", "target": atm.id if atm else s,
           "params": {"nodes": [{"position": [-4.5, 0, 0]},
                                {"position": [-1, 0, 0]},
                                {"position": [2.5, 0, 0]}]}}],
@@ -357,15 +362,34 @@ def _plan_cause_effect(topic: str, world: WorldState,
                    if e.type == "cause_effect" and e.id != cause.id),
                   None) if cause else None
     nxt("hook", script[0]["narration"] if script else topic,
-        [], [], "kinetic_title", {"type": "zoom_to"}, "high")
+        _entity_objs(world, cause.id if cause else "cause"),
+        [], "kinetic_title", {"type": "zoom_to",
+                              "target": cause.id if cause else "cause"},
+        "high")
     nxt("question", script[1]["narration"] if len(script) > 1 else
         "One thing leads to another.",
         _entity_objs(world, *(x.id for x in [cause, effect] if x)),
-        [{"action": "flow", "target": "",
+        [{"action": "flow", "target": effect.id if effect else "effect",
           "params": {"nodes": [{"position": [-3, 0, 0]},
                                {"position": [0, 0, 0]},
                                {"position": [3, 0, 0]}]}}],
         camera={"type": "pan"})
+    # hero: the mechanism itself, demonstrated (not decorated)
+    nxt("discover_principle", script[2]["narration"] if len(script) > 2 else
+        "The cause drives the effect, step by step.",
+        _entity_objs(world, *(x.id for x in [cause, effect] if x)),
+        [{"action": "merge", "target": effect.id if effect else "effect",
+          "params": {"from": [[-3, 0, 0], [3, 0, 0]]}}],
+        camera={"type": "zoom_to",
+                "target": effect.id if effect else "effect"}, imp="high")
+    # measure the outcome (level 4)
+    nxt("observe", script[3]["narration"] if len(script) > 3 else
+        "And the result is measurable.",
+        _entity_objs(world, effect.id if effect else ""),
+        [{"action": "measure", "target": effect.id if effect else "effect",
+          "params": {"value": "Δ", "label": "effect"}}],
+        "reveal", {"type": "zoom_to",
+                    "target": effect.id if effect else "effect"})
     nxt("payoff", script[-1]["narration"] if script else
         "Cause, effect, explained.",
         [], [], "payoff", {"type": "pull_out"}, "high")
