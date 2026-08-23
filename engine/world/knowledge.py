@@ -270,6 +270,58 @@ _KNOWLEDGE: dict[str, dict] = {
         ],
         "sources": ["https://en.wikipedia.org/wiki/McGurk_effect"],
     },
+    "monty hall": {
+        "summary": ("Three doors, one car, two goats. You pick a door, "
+                    "then the host — who knows where the car is — always "
+                    "opens a different door hiding a goat. Should you "
+                    "switch? Switching wins 2/3 of the time; staying wins "
+                    "only 1/3, because your first pick locks in the 1/3 "
+                    "chance and the host's reveal concentrates the "
+                    "remaining 2/3 onto the other unopened door."),
+        "facts": [
+            Fact(claim="With three doors the first pick has a 1/3 chance "
+                       "of the car; the two other doors together hold the "
+                       "remaining 2/3",
+                 formula="P(first pick) = 1/3",
+                 units="probability",
+                 assumptions=["one car, two goats, host always reveals a "
+                              "goat"],
+                 source="vos Savant, Parade 1990; Wikipedia 'Monty Hall "
+                        "problem'"),
+            Fact(claim="The host always opens a goat door from the two "
+                       "you did not pick — never the car — so the other "
+                       "unopened door keeps the full 2/3 chance",
+                 formula="P(switch) = 2/3",
+                 units="probability",
+                 assumptions=["host knows the car's location and always "
+                              "reveals a goat"],
+                 source="Wikipedia 'Monty Hall problem'"),
+            Fact(claim="Switching wins with probability 2/3, staying with "
+                       "1/3",
+                 formula="P(win|switch) = 2/3; P(win|stay) = 1/3",
+                 units="probability",
+                 assumptions=["standard rules: host always reveals a goat "
+                              "and always offers the switch"],
+                 source="vos Savant, Parade 1990; Wikipedia"),
+            Fact(claim="With n doors, switching wins with probability "
+                       "(n−1)/n",
+                 formula="P(win|switch) = (n−1)/n",
+                 units="probability",
+                 assumptions=["host reveals n−2 goats and always offers "
+                              "the switch"],
+                 source="Wikipedia 'Monty Hall problem'"),
+        ],
+        "sources": ["https://en.wikipedia.org/wiki/Monty_Hall_problem"],
+        "script": {
+            "hook": "Three doors, one car, two goats.",
+            "prediction": "Pick a door — one in three chance of the car.",
+            "test": "The host opens another door — always a goat.",
+            "surprise": "Your door is still one in three.",
+            "explain_principle": "The other door now holds the full two "
+                                 "thirds — so switch!",
+            "payoff": "Always switch: two thirds beats one third.",
+        },
+    },
 }
 
 # aliases so natural topic phrasings resolve
@@ -322,6 +374,8 @@ _KEYWORD_TOPICS: tuple[tuple[frozenset[str], str], ...] = (
     (frozenset({"noise", "cancell", "headphone", "active noise"}),
      "noise cancelling"),
     (frozenset({"popcorn", "kernel", "burst"}), "popcorn"),
+    (frozenset({"monty", "hall", "goat", "game show", "prize"}),
+     "monty hall"),
 )
 
 
@@ -629,6 +683,50 @@ def _popcorn_world(topic: str) -> WorldState:
     )
 
 
+def _monty_world(topic: str) -> WorldState:
+    """Monty Hall: three doors (one car, two goats); host always reveals
+    a goat; the remaining door absorbs the full 2/3 — switching wins.
+    §46 grammar: EXPERIMENT (predict → test → surprise → explain)."""
+    return WorldState(
+        topic=topic,
+        representation="EXPERIMENT",
+        representation_secondary=["MATHEMATICAL_TRANSFORMATION"],
+        entities=[
+            Entity("door1", EntityType.DECISION, {"label": "Door 1"}),
+            Entity("door2", EntityType.DECISION, {"label": "Door 2"}),
+            Entity("door3", EntityType.DECISION, {"label": "Door 3"}),
+            Entity("car", EntityType.PAYOFF, {"label": "car"}),
+            Entity("goat1", EntityType.NODE, {"label": "goat"}),
+            Entity("goat2", EntityType.NODE, {"label": "goat"}),
+            Entity("host", EntityType.NODE, {"label": "host"}),
+        ],
+        relationships=[
+            Relationship("door1", "car", "contains"),
+            Relationship("door2", "goat1", "contains"),
+            Relationship("door3", "goat2", "contains"),
+            Relationship("host", "door2", "signals"),
+        ],
+        signals=[
+            Signal("reveal", "information", "host", "door2", {}),
+        ],
+        measurements=[
+            Measurement("pick_prob", "probability", "1/3",
+                        "probability",
+                        {"claim": "first pick wins 1/3"}),
+            Measurement("switch_prob", "probability", "2/3",
+                        "probability",
+                        {"claim": "switching wins 2/3"}),
+        ],
+        camera=CameraFocus("door1", ["zoom_to", "follow"]),
+        hero_mechanism=HeroMechanism(
+            concept="initial pick = 1/3; host reveals a goat; the "
+                    "remaining door absorbs the full 2/3 — switch",
+            visualization="reveal_switch_demonstration",
+            target_beat="b005"),
+        facts=_KNOWLEDGE["monty hall"]["facts"],
+    )
+
+
 def _generic_world(topic: str) -> WorldState:
     return WorldState(
         topic=topic,
@@ -656,6 +754,7 @@ _WORLD_BUILDERS = {
     "mcgurk": _mcgurk_world,
     "noise cancelling": _noise_world,
     "popcorn": _popcorn_world,
+    "monty hall": _monty_world,
 }
 
 

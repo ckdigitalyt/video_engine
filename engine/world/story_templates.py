@@ -94,6 +94,8 @@ TEMPLATES: dict[str, StoryTemplate] = {
 
 # Keyword -> template preference (first match wins).
 _TEMPLATE_RULES: list[tuple[frozenset[str], str]] = [
+    (frozenset({"monty", "hall", "goat", "switch", "prize", "game"
+                "show"}), "prediction_test_surprise_explanation"),
     (frozenset({"why", "because", "reason", "explain", "how", "physics",
                 "orbit", "gravity", "sky", "scatter", "light", "wave",
                 "sound", "number", "math"}), "experiment_driven"),
@@ -151,6 +153,8 @@ def _hero_visualization_for(topic: str, rep: RepType | None) -> str:
         return "trajectory_generation"
     if "kaprekar" in t:
         return "attractor_convergence"
+    if "monty" in t or "hall" in t or "goat" in t or "switch" in t:
+        return "reveal_switch_demonstration"
     if rep == RepType.SIMULATION:
         return "deterministic_simulation"
     if rep == RepType.SIGNAL_FLOW:
@@ -235,6 +239,15 @@ _HERO_SPEC: dict[str, tuple[str, tuple[str, ...], tuple[str, ...], str]] = {
         ("transform", "flow"),
         "each state morphs into its successor, showing the sequence of "
         "change",
+    ),
+    "reveal_switch_demonstration": (
+        "initial pick = 1/3; host reveals a goat; the remaining door "
+        "absorbs the full 2/3 — switching wins",
+        ("door", "car", "goat"),
+        ("reveal", "measure", "compare"),
+        "the host opens a goat door and the probability visibly "
+        "concentrates on the one remaining door — the 2/3 switch payoff "
+        "made obvious",
     ),
 }
 

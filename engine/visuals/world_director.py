@@ -549,6 +549,67 @@ def _plan_experiment(topic: str, world: WorldState,
     return beats
 
 
+def _plan_monty(topic: str, world: WorldState,
+                 script: list[dict]) -> list[dict]:
+    """Monty Hall (EXPERIMENT): three doors, one car, two goats — pick a
+    door, the host reveals a goat, the remaining door absorbs the full
+    2/3; switching wins (prediction → test → surprise → explanation)."""
+    beats: list[dict] = []
+    bid = [0]
+    def nxt(role, narration, objects, actions, vtype="", camera=None,
+            imp="medium"):
+        bid[0] += 1
+        beats.append(_mkbeat(f"b{bid[0]:03d}", role, narration, 2.6,
+                             objects, actions, vtype, camera, imp))
+    d1 = next((e for e in world.entities if e.id == "door1"), None)
+    d2 = next((e for e in world.entities if e.id == "door2"), None)
+    d3 = next((e for e in world.entities if e.id == "door3"), None)
+    car = next((e for e in world.entities if e.type == "payoff"), None)
+    goat = next((e for e in world.entities
+                 if e.id in ("goat1", "goat2")), None)
+    a = d1.id if d1 else "door1"
+    b = d2.id if d2 else "door2"
+    c = d3.id if d3 else "door3"
+    ca = car.id if car else "car"
+    g = goat.id if goat else "goat1"
+
+    nxt("hook", script[0]["narration"] if script else
+        "Three doors, one car, two goats.",
+        _entity_objs(world, a, b, c), [], "kinetic_title",
+        {"type": "zoom_to", "target": a}, "high")
+    nxt("prediction", script[1]["narration"] if len(script) > 1 else
+        "Pick a door — one in three chance of the car.",
+        _entity_objs(world, a),
+        [{"action": "measure", "target": a,
+          "params": {"value": "1/3", "label": "your pick"}}],
+        camera={"type": "zoom_to", "target": a})
+    nxt("test", script[2]["narration"] if len(script) > 2 else
+        "The host opens another door — always a goat.",
+        _entity_objs(world, b, g),
+        [{"action": "reveal_inside", "target": b,
+          "params": {"reveals": "goat"}}],
+        camera={"type": "zoom_to", "target": b})
+    nxt("surprise", script[3]["narration"] if len(script) > 3 else
+        "Your door is still one in three.",
+        _entity_objs(world, a),
+        [{"action": "measure", "target": a,
+          "params": {"value": "1/3", "label": "still 1/3"}}],
+        camera={"type": "zoom_to", "target": a})
+    # HERO: the remaining door absorbed the full 2/3 — switch
+    nxt("explain_principle", script[4]["narration"] if len(script) > 4 else
+        "The other door now holds the full two thirds — so switch!",
+        _entity_objs(world, c, ca),
+        [{"action": "measure", "target": c,
+          "params": {"value": "2/3", "label": "switch"}},
+         {"action": "compare", "target": c, "params": {"vs": a}}],
+        camera={"type": "zoom_to", "target": c}, imp="high")
+    nxt("payoff", script[5]["narration"] if len(script) > 5 else
+        "Always switch: two thirds beats one third.",
+        _entity_objs(world, a, b, c, ca), [], "payoff",
+        {"type": "pull_out"}, "high")
+    return beats
+
+
 REP_PLANNERS = {
     RepType.SIGNAL_FLOW: _plan_signal_flow,
     RepType.PHYSICAL_MODEL: _plan_physical,
@@ -574,6 +635,9 @@ def _select_planner(world: WorldState,
         return _plan_wave
     if types & {"kernel", "shell", "steam"}:
         return _plan_experiment
+    if world.hero_mechanism and world.hero_mechanism.visualization == \
+            "reveal_switch_demonstration":
+        return _plan_monty
     return REP_PLANNERS.get(rep.primary, _plan_cause_effect)
 
 
