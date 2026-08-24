@@ -159,6 +159,25 @@ _KNOWLEDGE: dict[str, dict] = {
                  source="Wikipedia: 'Collatz conjecture' (example)"),
         ],
         "sources": ["https://en.wikipedia.org/wiki/Collatz_conjecture"],
+        "script": {
+            "hook": "The simplest rule in all of math. And nobody can "
+                     "prove it.",
+            "question": "Start with any whole number. If it's even, "
+                         "halve it. If it's odd, triple it and add one.",
+            "simple_experiment": "Take 6. Even — so halve it: 6 becomes "
+                                  "3.",
+            "change_variable": "3 is odd — triple it and add one: 3 "
+                                "becomes 10.",
+            "observe": "Keep going: 10 → 5 → 16 → 8 → 4 → 2 → 1.",
+            "push_extreme": "27 climbs all the way to 9232 before "
+                             "crashing down — 111 steps.",
+            "discover_principle": "Every number we've ever tried ends "
+                                   "at 1.",
+            "explain_principle": "The Collatz rule always seems to reach "
+                                  "1 — but nobody has proved it for every "
+                                  "number.",
+            "payoff": "A one-line rule. An unsolved problem since 1937.",
+        },
     },
     "noise cancelling": {
         "summary": ("Noise-cancelling headphones sample the incoming sound "

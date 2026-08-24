@@ -610,6 +610,94 @@ def _plan_monty(topic: str, world: WorldState,
     return beats
 
 
+def _plan_collatz(topic: str, world: WorldState,
+                  script: list[dict]) -> list[dict]:
+    """Collatz (MATHEMATICAL_TRANSFORMATION): one line of arithmetic, an
+    unsolved mystery — start with any number, even→n/2 odd→3n+1, and the
+    path always seems to fall to 1.  Hero: the trajectory itself."""
+    beats: list[dict] = []
+    bid = [0]
+
+    def nxt(role, narration, objects, actions, vtype="", camera=None,
+            imp="medium", dur=2.6):
+        bid[0] += 1
+        beats.append(_mkbeat(f"b{bid[0]:03d}", role, narration, dur,
+                             objects, actions, vtype, camera, imp))
+
+    n = "number_main"
+    rule = "rule"
+    by_role = {s.get("role"): s.get("narration", "") for s in script}
+
+    def line(role, fallback):
+        return by_role.get(role) or fallback
+
+    # hook — the contradiction that sells the video
+    nxt("hook", line("hook", "The simplest rule in math. Nobody can "
+                            "prove it."),
+        _entity_objs(world, n), [], "kinetic_title",
+        {"type": "zoom_to", "target": n}, "high")
+    # question — state the rule
+    nxt("question", line("question", "Pick a number. Even? Halve it. "
+                                   "Odd? Triple it and add one."),
+        _entity_objs(world, n, rule),
+        [{"action": "measure", "target": n,
+          "params": {"value": "even → n/2 · odd → 3n+1",
+                      "label": "the rule"}}],
+        camera={"type": "zoom_to", "target": rule})
+    # simple experiment — 6 → 3
+    nxt("simple_experiment", line("simple_experiment", "Try 6. Even — "
+                                   "so it becomes 3."),
+        _entity_objs(world, n),
+        [{"action": "measure", "target": n,
+          "params": {"value": "6 → 3", "label": "even: halve"}}],
+        camera={"type": "zoom_to", "target": n})
+    # HERO — the trajectory: 3 → 10 → 5 → 16 → 8 → 4 → 2 → 1
+    nxt("change_variable", line("change_variable", "3 is odd — triple "
+                                  "and add one: 3 becomes 10."),
+        _entity_objs(world, n, rule),
+        [{"action": "trace", "target": n,
+          "params": {"color": "#00d4ff"}},
+         {"action": "measure", "target": n,
+          "params": {"value": "3 → 10", "label": "odd: 3n+1"}}],
+        camera={"type": "follow", "target": n}, imp="high")
+    nxt("observe", line("observe", "Keep going — it hops up and down, "
+                                   "then collapses."),
+        _entity_objs(world, n),
+        [{"action": "measure", "target": n,
+          "params": {"value": "10 → 5 → 16 → 8 → 4 → 2 → 1",
+                      "label": "the path"}}],
+        camera={"type": "follow", "target": n})
+    # push to extreme — 27
+    nxt("push_extreme", line("push_extreme", "Try 27. It explodes to "
+                               "9232 before crashing down — 111 steps."),
+        _entity_objs(world, n),
+        [{"action": "measure", "target": n,
+          "params": {"value": "climbs to 9232",
+                      "label": "27 · 111 steps"}}],
+        camera={"type": "pull_out"}, dur=3.0)
+    # discover principle — every path ends at 1
+    nxt("discover_principle", line("discover_principle", "Every number "
+                                    "we have ever tried ends at 1."),
+        _entity_objs(world, n),
+        [{"action": "converge", "target": n}],
+        camera={"type": "pull_out"}, dur=3.0)
+    # explain — and the catch
+    nxt("explain_principle", line("explain_principle", "It looks like a "
+                                   "law of numbers. But nobody has proved "
+                                   "it for every number."),
+        _entity_objs(world, n),
+        [{"action": "measure", "target": n,
+          "params": {"value": "unsolved since 1937",
+                      "label": "no proof yet"}}],
+        camera={"type": "zoom_to", "target": n})
+    # payoff
+    nxt("payoff", line("payoff", "One line of arithmetic. Ninety years "
+                                  "of math. Still unproven."),
+        _entity_objs(world, n), [], "payoff",
+        {"type": "pull_out"}, "high")
+    return beats
+
+
 REP_PLANNERS = {
     RepType.SIGNAL_FLOW: _plan_signal_flow,
     RepType.PHYSICAL_MODEL: _plan_physical,
@@ -638,6 +726,9 @@ def _select_planner(world: WorldState,
     if world.hero_mechanism and world.hero_mechanism.visualization == \
             "reveal_switch_demonstration":
         return _plan_monty
+    if world.hero_mechanism and world.hero_mechanism.visualization == \
+            "trajectory_generation":
+        return _plan_collatz
     return REP_PLANNERS.get(rep.primary, _plan_cause_effect)
 
 
