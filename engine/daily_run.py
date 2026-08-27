@@ -91,6 +91,20 @@ def _slugify(topic: str) -> str:
     return s[:48] or "topic"
 
 
+def _resolve_run_dir(base: Path) -> Path:
+    """Idempotent run dirs (P0-4): never overwrite a previous run's
+    artifacts.  If the target dir exists and is non-empty, use a
+    ``-r2``, ``-r3`` … suffix so yesterday's final.mp4 survives."""
+    if not base.exists() or not any(base.iterdir()):
+        return base
+    n = 2
+    while True:
+        cand = base.parent / f"{base.name}-r{n}"
+        if not cand.exists() or not any(cand.iterdir()):
+            return cand
+        n += 1
+
+
 def _default_candidates() -> list[TopicCandidate]:
     """Candidate pool: regression + unseen topics, scored §24."""
     out: list[TopicCandidate] = []
@@ -130,6 +144,7 @@ def run_daily(topic: Optional[str] = None,
     slug = _slugify(topic)
     day = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     out = Path(out_root) if out_root else Path("results") / day / slug
+    out = _resolve_run_dir(out)
     out.mkdir(parents=True, exist_ok=True)
     result = DailyResult(topic=topic, slug=slug, artifacts_dir=str(out))
 
@@ -216,30 +231,81 @@ def run_daily(topic: Optional[str] = None,
             result.video = str(report.get("video", ""))
             (out / "qa.json").write_text(json.dumps(report, indent=2))
             if not result.qa_passed:
-                result.outcome = REPAIR
+                # P0-1: post-render failure is no longer a dead end.
+                # ONE stage-scoped retry: apply the repair critic's
+                # suggestions to the visualspec if available, then
+                # re-render (the per-clip cache purge in _render_scene
+                # makes the re-render safe).  Never a silent REPAIR
+                # terminal state: either PASS, or ABORT with the QA
+                # errors surfaced in result.errors.
+                result.errors.extend(str(e) for e in
+                                     report.get("errors", [])[:5])
                 result.outcome_reason = (
-                    "rendered output failed full QA — repair needed "
-                    "(not published)")
-                for e in report.get("errors", [])[:5]:
-                    result.errors.append(str(e))
+                    "rendered output failed full QA — one render retry "
+                    "with repair-critic suggestions")
+                try:
+                    crit = critique_preview(vs)
+                    rp = apply_repair(vs, crit, max_iterations=1)
+                    (out / "render_retry_repair.json").write_text(
+                        json.dumps(rp.to_dict(), indent=2))
+                except Exception as e:  # noqa: BLE001
+                    result.errors.append(
+                        f"render retry: repair suggestion failed ({e}); "
+                        "re-rendering as-is")
+                try:
+                    report = run_autonomous(
+                        topic, out, resolution=resolution, fps=fps,
+                        render=True, visualspec=vs)
+                    result.qa_passed = bool(report.get("passed"))
+                    result.qa_score = int(report.get("score", 0) or 0)
+                    result.video = str(report.get("video", ""))
+                    (out / "qa.json").write_text(
+                        json.dumps(report, indent=2))
+                    (out / "qareport.json").write_text(
+                        json.dumps(report, indent=2))
+                except Exception as e:  # noqa: BLE001
+                    result.qa_passed = False
+                    result.errors.append(f"render retry failed: {e}")
+                if result.qa_passed:
+                    result.outcome_reason = (
+                        "render passed full QA after 1 retry")
+                else:
+                    result.outcome = ABORT
+                    result.outcome_reason = (
+                        "rendered output failed full QA after 1 render "
+                        "retry — aborting (never published)")
+                    for e in report.get("errors", [])[:5]:
+                        if str(e) not in result.errors:
+                            result.errors.append(str(e))
 
         # ── 7) learning + history (§25, §31) ─────────────────────────
-        try:
-            record_topic(topic, "science", base=history_base)
-        except Exception:  # noqa: BLE001
-            pass
+        # P0-4 state hygiene: record_topic ONLY on PASS — failed topics
+        # must not get recency-suppressed (it silently shrank tomorrow's
+        # candidate pool).
+        if result.outcome == PASS:
+            try:
+                record_topic(topic, "science", base=history_base)
+            except Exception as e:  # noqa: BLE001
+                result.errors.append(f"record_topic failed: {e}")
         from engine.learning.memory import distill_learning
         try:
+            # distill_learning expects Critique/RepairPlan dataclasses —
+            # passing dicts used to raise AttributeError, which the old
+            # bare except swallowed, leaving learning.json 'not_run'
+            # forever (P0-5).  Pass None safely; the QA report carries
+            # the failure signal.
             rec = distill_learning(topic, {
                 "passed": result.qa_passed or result.outcome == PASS,
-                "perceptual_quality": result.perceptual_quality,
+                "score": result.qa_score,
+                "errors": list(result.errors),
                 "outcome": result.outcome,
-            }, {"problem": result.outcome_reason})
+            }, critique=None, repair_plan=None)
             (out / "learning.json").write_text(
                 json.dumps(rec.to_dict(), indent=2))
-        except Exception:  # noqa: BLE001
+        except Exception as e:  # noqa: BLE001
+            result.errors.append(f"learning stage failed: {e}")
             (out / "learning.json").write_text(json.dumps(
-                {"status": "not_run"}, indent=2))
+                {"status": "not_run", "error": str(e)}, indent=2))
 
         # ── 8) daily summary artifact ────────────────────────────────
         result.runtime_s = time.time() - t0

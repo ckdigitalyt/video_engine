@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shutil
 import subprocess
 import time
@@ -40,6 +41,10 @@ from engine.visuals.visual_director import direct
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 MANIM_BIN = REPO_ROOT / "venv" / "bin" / "manim"
+
+# Per-beat pre-concat QA (review §6/§P0-2): every rendered clip must have
+# no contiguous dark run longer than the gate's BLACK_RUN_MAX_S.
+BEAT_LUMA_SAMPLE_FPS = 4.0
 
 
 # ── Stage helpers ─────────────────────────────────────────────────────
@@ -67,17 +72,97 @@ def _compile_visualspec(beatsheet: dict, shotlist: dict) -> dict:
             "metadata": {"style_spec": "v1"}}
 
 
+def _sample_luma(video_path: Path, sample_fps: float = BEAT_LUMA_SAMPLE_FPS) -> list[float]:
+    """Sample mean grayscale luma (0-1) per frame at ``sample_fps``.
+
+    Used by the pre-concat QA to build the per-beat luma map written to
+    ``work/beat_luma.json``.  Mirrors the sampling in
+    ``engine.qa.gates._sample_gray_frames`` (ffmpeg fps filter + scale).
+    """
+    import numpy as np
+    w, h = 64, 36
+    proc = subprocess.run(
+        ["ffmpeg", "-v", "error", "-i", str(video_path),
+         "-vf", f"fps={sample_fps},scale={w}:{h}",
+         "-f", "rawvideo", "-pix_fmt", "gray", "-"],
+        capture_output=True)
+    data = proc.stdout
+    n = len(data) // (w * h)
+    if n == 0:
+        return []
+    frames = np.frombuffer(data[:n * w * h], dtype=np.uint8)
+    frames = frames.reshape(n, w, h)
+    return [round(float(f.mean()) / 255.0, 5) for f in frames]
+
+
+def _write_beat_luma(work_dir: Path, video_path: Path,
+                     attempts: int = 1,
+                     errors: list[str] | None = None) -> Path:
+    """Write the per-second luma map for a rendered clip to beat_luma.json."""
+    means = _sample_luma(video_path)
+    doc = {
+        "clip": str(video_path),
+        "sample_fps": BEAT_LUMA_SAMPLE_FPS,
+        "attempts": attempts,
+        "duration_s": round(len(means) / BEAT_LUMA_SAMPLE_FPS, 2),
+        "min_luma": min(means) if means else None,
+        "samples": [
+            {"t": round(i / BEAT_LUMA_SAMPLE_FPS, 2), "luma": m}
+            for i, m in enumerate(means)
+        ],
+        "errors": list(errors or []),
+    }
+    p = Path(work_dir) / "beat_luma.json"
+    p.write_text(json.dumps(doc, indent=2))
+    return p
+
+
+def _annotate_beat_luma(beat_luma_path: Path, beats: list[dict]) -> None:
+    """Annotate beat_luma.json with per-beat mean/min luma (beat start/end
+    are on the same timeline as the single rendered scene clip)."""
+    try:
+        doc = json.loads(Path(beat_luma_path).read_text())
+    except Exception:  # noqa: BLE001
+        return
+    fps = float(doc.get("sample_fps") or BEAT_LUMA_SAMPLE_FPS)
+    samples = doc.get("samples") or []
+    per_beat = []
+    for b in beats:
+        s = float(b.get("start", 0.0))
+        e = float(b.get("end", s + float(b.get("duration", 0.0))))
+        vals = [x["luma"] for x in samples if s <= x["t"] < e]
+        per_beat.append({
+            "beat_id": b.get("beat_id", ""),
+            "start": round(s, 2), "end": round(e, 2),
+            "mean_luma": (round(sum(vals) / len(vals), 5)
+                          if vals else None),
+            "min_luma": (min(vals) if vals else None),
+        })
+    doc["per_beat"] = per_beat
+    Path(beat_luma_path).write_text(json.dumps(doc, indent=2))
+
+
 def _render_scene(scene_file: Path, scene_name: str, out_dir: Path,
                   resolution: tuple[int, int], fps: int) -> Path:
-    """Render one Manim scene to MP4.  Returns the clip path."""
+    """Render one Manim scene to MP4.  Returns the clip path.
+
+    Pre-concat QA (P0-2): after rendering, sample the clip and apply the
+    black-frame gate; on failure purge the manim media cache and re-render
+    ONCE (manim hashes animation code but not render config, so a stale
+    cached clip is the likeliest silent-failure mode); if the re-render
+    still fails, raise with the offending time ranges — a black clip must
+    never reach the compositor.
+    """
     manim_exe = shutil.which("manim") or str(MANIM_BIN)
     w, h = resolution
-    # Purge manim's partial-movie cache for this media dir: manim hashes
-    # animation code but NOT render config (e.g. background colour), so
-    # stale cached clips from previous runs would silently keep old
-    # pixels (the Gabriel's Horn black-frame regression).
-    import shutil as _sh
-    _sh.rmtree(Path(out_dir) / "videos", ignore_errors=True)
+
+    def _purge_cache() -> None:
+        # Purge manim's partial-movie cache for this media dir: manim hashes
+        # animation code but NOT render config (e.g. background colour), so
+        # stale cached clips from previous runs would silently keep old
+        # pixels (the Gabriel's Horn black-frame regression).
+        shutil.rmtree(Path(out_dir) / "videos", ignore_errors=True)
+
     # Map resolution to manim quality flag: 480p15 / 720p30 / 1080p60 / 4K60
     if h >= 2160:
         qflag = "-qk"
@@ -87,21 +172,55 @@ def _render_scene(scene_file: Path, scene_name: str, out_dir: Path,
         qflag = "-qm"
     else:
         qflag = "-ql"
-    cmd = [
-        manim_exe, qflag,
-        "--format", "mp4",
-        "--fps", str(fps),
-        "--media_dir", str(out_dir),
-        str(scene_file), scene_name,
-    ]
-    proc = subprocess.run(cmd, capture_output=True, text=True)
-    if proc.returncode != 0:
-        raise RuntimeError(f"Manim render failed:\n{proc.stderr[-3000:]}")
-    import glob
-    cands = sorted(glob.glob(str(out_dir / "**" / f"{scene_name}.mp4"), recursive=True))
-    if not cands:
-        raise RuntimeError("no rendered mp4 found")
-    return Path(cands[-1])
+
+    def _manim_once() -> Path:
+        _purge_cache()
+        cmd = [
+            manim_exe, qflag,
+            "--format", "mp4",
+            "--fps", str(fps),
+            "--media_dir", str(out_dir),
+            str(scene_file), scene_name,
+        ]
+        # manim runs the scene file in a fresh interpreter; make sure the
+        # generated scene's `import engine` bootstrap works even when the
+        # scene file (or media dir) lives outside the repo.
+        env = dict(os.environ)
+        existing = env.get("PYTHONPATH", "")
+        if str(REPO_ROOT) not in existing.split(os.pathsep):
+            env["PYTHONPATH"] = os.pathsep.join(
+                [str(REPO_ROOT)] + ([existing] if existing else []))
+        proc = subprocess.run(cmd, capture_output=True, text=True, env=env)
+        if proc.returncode != 0:
+            raise RuntimeError(f"Manim render failed:\n{proc.stderr[-3000:]}")
+        import glob
+        cands = sorted(glob.glob(
+            str(out_dir / "**" / f"{scene_name}.mp4"), recursive=True))
+        if not cands:
+            raise RuntimeError("no rendered mp4 found")
+        return Path(cands[-1])
+
+    errors: list[str] = []
+    attempts = 0
+    clip = _manim_once()
+    attempts = 1
+    gate = qa_gates.gate_black_frames(clip, sample_fps=BEAT_LUMA_SAMPLE_FPS)
+    if not gate.passed:
+        errors = list(gate.errors)
+        # ONE stage-scoped retry (no runaway loops): cache purge + re-render
+        clip = _manim_once()
+        attempts = 2
+        gate = qa_gates.gate_black_frames(
+            clip, sample_fps=BEAT_LUMA_SAMPLE_FPS)
+        if not gate.passed:
+            errors = list(gate.errors)
+            _write_beat_luma(out_dir, clip, attempts=attempts, errors=errors)
+            raise RuntimeError(
+                "rendered clip failed black-frame QA after 1 re-render "
+                "(cache purged); offending time ranges: "
+                + "; ".join(errors))
+    _write_beat_luma(out_dir, clip, attempts=attempts, errors=[])
+    return clip
 
 
 def _caption_entries_sequential(words: list[dict], max_words: int = 4) -> list[dict]:

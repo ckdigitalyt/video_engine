@@ -467,7 +467,13 @@ from manim import config as _manim_config
 
 # dark navy (not pure black): cinematic dark look that always clears the
 # black-frame luma gate (must be set before Scene instantiation)
-_manim_config.background_colour = "#0b0f1a"
+# NOTE: manim's attribute is 'background_color' (US spelling).  The
+# previous 'background_colour' assignment was a silent no-op — manim
+# 0.20.1 accepts arbitrary attribute writes on ManimConfig without any
+# effect — so scenes rendered on pure black and the opening beats
+# (thin line art on black) failed the black-frame luma gate (the
+# Gabriel's Horn 0-8s black opening, 2026-08-27).
+_manim_config.background_color = "#0b0f1a"
 from engine.visuals.scene_state import SceneState
 from engine.primitives.world_primitives import (
     materialize_entity, apply_action, CelestialBody, OrbitPath, MovingBody,
@@ -517,9 +523,10 @@ def camera_reset(scene, duration=0.9):
 
 class {scene_name}(Scene):
     def construct(self):
-        # dark navy (not pure black): keeps the cinematic dark look while
-        # guaranteeing every frame clears the black-frame luma gate
-        self.camera.background_colour = "#0b0f1a"
+        # dark navy (not pure black): belt-and-braces — the module-level
+        # config above is authoritative; this also pins the camera in case
+        # the scene is imported into a session whose config differs
+        self.camera.background_color = "#0b0f1a"
         self._state = SceneState()
         self._world = WorldState.from_dict({world_literal})
 {chr(10).join(body)}

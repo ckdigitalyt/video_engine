@@ -122,13 +122,21 @@ def is_visualizable(topic: str, min_visual: float = 0.4) -> bool:
     return default_scores(topic)["visual_potential"] >= min_visual
 
 
-# ── history tracking (§25) ─────────────────────────────────────────────
+# ── history tracking (§25) ─────────────────────────────────────────────────
 HISTORY_FILENAME = "topic_history.json"
+
+# P0-4: pin the default history location to the repo root regardless of
+# CWD — Path.cwd() made topic history silently CWD-dependent (it only
+# worked because cron cd'd to the repo root first).
+REPO_ROOT = Path(__file__).resolve().parents[2]
+
+
+def _history_path(base: Optional[Path] = None) -> Path:
+    return (Path(base) if base else REPO_ROOT) / HISTORY_FILENAME
 
 
 def load_history(base: Optional[Path] = None) -> dict:
-    p = Path(base) if base else Path.cwd()
-    f = p / HISTORY_FILENAME
+    f = _history_path(base)
     if f.exists():
         try:
             return json.loads(f.read_text())
@@ -146,8 +154,7 @@ def record_topic(topic: str, category: str, base: Optional[Path] = None,
     hist["recent"] = hist["recent"][-max_recent:]
     counts = hist.setdefault("category_counts", {})
     counts[category] = counts.get(category, 0) + 1
-    f = Path(base) if base else Path.cwd()
-    (f / HISTORY_FILENAME).write_text(json.dumps(hist, indent=2))
+    _history_path(base).write_text(json.dumps(hist, indent=2))
     return hist
 
 

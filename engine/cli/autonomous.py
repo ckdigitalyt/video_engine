@@ -25,11 +25,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 import time
 from pathlib import Path
 
 from engine.audio.timeline import synthesize_narration, measure_loudness
 from engine.cli.run import (
+    _annotate_beat_luma,
     _caption_entries_sequential,
     _peak_usage,
     _probe_audio_duration,
@@ -131,6 +133,76 @@ def _count_primitives(vs: dict) -> int:
             if spec:
                 used.update(spec.primitives)
     return len(used)
+
+
+def _hero_timestamp(beats: list[dict], vs: dict) -> float:
+    """Deterministic hero-frame timestamp (seconds) for the thumbnail.
+
+    Prefers the hero mechanism's target beat; falls back to the beat at
+    ~35% of the total duration.  Returns a timestamp 60% into that beat
+    so the hero visual is fully on stage.
+    """
+    if not beats:
+        return 0.0
+    hero = (vs.get("metadata", {}) or {}).get("hero_mechanism") or {}
+    target = str(hero.get("target_beat", ""))
+    beat = next((b for b in beats if b.get("beat_id") == target), None)
+    if beat is None:
+        beat = beats[min(len(beats) - 1, int(len(beats) * 0.35))]
+    start = float(beat.get("start", 0.0) or 0.0)
+    dur = float(beat.get("duration", 0.0) or 0.0)
+    return max(0.0, start + 0.6 * dur)
+
+
+def emit_packaging(out_dir: str | Path, topic: str, beats: list[dict],
+                   vs: dict, video_path: str | Path | None = None,
+                   qa_report: dict | None = None) -> dict:
+    """Emit deterministic publishing artifacts for a finished run (P0-6).
+
+    Writes ``youtube_metadata.json`` (3 title variants <=100 chars,
+    description, tags derived from topic tokens, chapters) and a
+    1280x720 ``thumbnail.jpg`` extracted from the hero frame of the
+    rendered video (falls back to the deterministic Pillow layout
+    thumbnail when the video is unavailable).  No API calls, fully
+    deterministic content.
+
+    Returns a small status dict; packaging failures never block a PASS
+    video, so callers should treat exceptions as non-fatal.
+    """
+    from engine.publishing.metadata import generate_metadata, save
+    out = Path(out_dir)
+    meta = generate_metadata(
+        topic=topic,
+        beatsheet={"version": "v1", "beats": beats,
+                   "metadata": {"topic": topic}},
+        qareport=qa_report,
+    )
+    # Enforce YouTube's 100-char title limit on every variant.
+    meta["title_candidates"] = [t[:100] for t in
+                                meta.get("title_candidates", [])][:3]
+    meta["title"] = meta["title_candidates"][0] if meta["title_candidates"] else topic[:100]
+    meta["thumbnail"] = "thumbnail.jpg"
+
+    thumb_path = out / "thumbnail.jpg"
+    if video_path and Path(video_path).exists():
+        ts = _hero_timestamp(beats, vs)
+        proc = subprocess.run(
+            ["ffmpeg", "-v", "error", "-y",
+             "-ss", f"{ts:.2f}", "-i", str(video_path),
+             "-frames:v", "1", "-vf", "scale=1280:720",
+             str(thumb_path)],
+            capture_output=True, text=True)
+        if proc.returncode != 0 or not thumb_path.exists():
+            thumb_path = None
+    if thumb_path is None:
+        # deterministic Pillow/SVG layout thumbnail fallback
+        from engine.publishing.thumbnail import generate_thumbnail
+        thumb_path = Path(generate_thumbnail(run_dir=None, topic=topic,
+                                             out_dir=str(out)))
+    save(meta, str(out), filename="youtube_metadata.json")
+    return {"metadata": str(out / "youtube_metadata.json"),
+            "thumbnail": str(thumb_path),
+            "hero_timestamp_s": round(_hero_timestamp(beats, vs), 2)}
 
 
 def run_autonomous(topic: str, out_root: str | Path,
@@ -263,6 +335,13 @@ def run_autonomous(topic: str, out_root: str | Path,
         # ── 5) render ────────────────────────────────────────────────
         clip = _render_scene(scene_file, scene_name, workdir, resolution, fps)
 
+        # per-beat luma map artifact (pre-concat QA, P0-2)
+        try:
+            _annotate_beat_luma(workdir / "beat_luma.json",
+                                vs.get("beats", []))
+        except Exception as e:  # noqa: BLE001
+            print(f"[qa] beat-luma annotation failed: {e}")
+
         # ── 6) compose: narration + captions + master ─────────────────
         final = out / "final.mp4"
         srt_path = None
@@ -349,6 +428,17 @@ def run_autonomous(topic: str, out_root: str | Path,
         report["audio_duration_s"] = round(audio_dur, 3)
         report["integrated_lufs"] = audio_metrics.get("integrated_lufs")
         report["true_peak_db"] = audio_metrics.get("true_peak_db")
+
+        # ── 8b) packaging (P0-6): every PASS run emits publishing
+        # artifacts deterministically; never blocks the PASS video
+        if report.get("passed"):
+            try:
+                report["packaging"] = emit_packaging(
+                    out, topic, vs.get("beats", []), vs,
+                    video_path=final, qa_report=report)
+            except Exception as e:  # noqa: BLE001
+                print(f"[publish] packaging failed (non-fatal): {e}")
+                report["packaging"] = {"error": str(e)}
 
     # ── 9) spec-§27 comparison fields ──────────────────────────────────
     expl = (vs.get("metadata", {}) or {}).get("explanation_report", {})
