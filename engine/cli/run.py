@@ -72,6 +72,12 @@ def _render_scene(scene_file: Path, scene_name: str, out_dir: Path,
     """Render one Manim scene to MP4.  Returns the clip path."""
     manim_exe = shutil.which("manim") or str(MANIM_BIN)
     w, h = resolution
+    # Purge manim's partial-movie cache for this media dir: manim hashes
+    # animation code but NOT render config (e.g. background colour), so
+    # stale cached clips from previous runs would silently keep old
+    # pixels (the Gabriel's Horn black-frame regression).
+    import shutil as _sh
+    _sh.rmtree(Path(out_dir) / "videos", ignore_errors=True)
     # Map resolution to manim quality flag: 480p15 / 720p30 / 1080p60 / 4K60
     if h >= 2160:
         qflag = "-qk"

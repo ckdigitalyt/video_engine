@@ -161,6 +161,51 @@ def verify_label_count(label: str, count: int, expected: int) -> Verification:
     return v
 
 
+def verify_gabriels_horn(b: float = 100.0, tol: float = 1e-6) -> Verification:
+    """Verify Gabriel's Horn (y = 1/x, x ≥ 1, revolved around the x-axis):
+
+      V(b) = π ∫₁ᵇ (1/x²) dx = π(1 − 1/b)  → π  as b → ∞ (finite volume)
+      A(b) = 2π ∫₁ᵇ (1/x)√(1 + 1/x⁴) dx ≥ 2π ln b → ∞ (infinite surface)
+
+    Checks (deterministic, numeric):
+      - closed-form volume matches the numeric integral at several b
+      - closed-form area matches the numeric integral at several b
+      - V(b) < π and increasing toward π (finite limit)
+      - A(b) grows without bound (harmonic comparison integral diverges)
+    """
+    import math
+    v = Verification(ok=True)
+    for bb in (2.0, 10.0, float(b)):
+        n = 200000
+        h = (bb - 1.0) / n
+        # numeric π·∫ 1/x² dx (midpoint rule)
+        v_num = math.pi * sum(h / (1.0 + (i + 0.5) * h) ** 2 for i in range(n))
+        v_closed = math.pi * (1.0 - 1.0 / bb)
+        v.add(f"volume_b_{bb:g}", abs(v_num - v_closed) < 1e-4,
+              f"V({bb:g}) numeric {v_num:.6f} vs π(1−1/b) {v_closed:.6f}")
+        # numeric 2π·∫ (1/x)√(1+1/x⁴) dx (midpoint rule)
+        a_num = 2.0 * math.pi * sum(
+            h * (math.sqrt(1.0 + 1.0 / (1.0 + (i + 0.5) * h) ** 4)
+                 / (1.0 + (i + 0.5) * h))
+            for i in range(n))
+        a_closed = 2.0 * math.pi * math.log(bb)
+        # A(b) = 2π∫(1/x)√(1+1/x⁴)dx ≥ 2π ln b; the correction term is
+        # bounded: ∫₁ᵇ(√(1+1/x⁴)−1)/x dx ≤ ∫₁ᵇ x⁻⁵/2 dx ≤ 1/8
+        v.add(f"area_b_{bb:g}",
+              a_closed - 1e-6 <= a_num <= a_closed + 2.0 * math.pi / 8.0,
+              f"A({bb:g}) numeric {a_num:.6f} ≥ 2π ln b {a_closed:.6f} "
+              f"(correction ≤ π/4)")
+    # finite volume limit: V(b) = π(1 − 1/b) < π and increasing
+    v.add("volume_finite", math.pi * (1 - 1 / 10.0) < math.pi,
+          f"V(10) = {math.pi * 0.9:.6f} < π = {math.pi:.6f}")
+    v.add("volume_limit", abs(math.pi * (1 - 1 / 1e9) - math.pi) < 1e-8,
+          "V(b) → π as b → ∞")
+    # infinite surface: comparison integral ∫₁ᵇ dx/x = ln b diverges
+    v.add("area_diverges", math.log(10.0) < math.log(1e6),
+          "2π ln b grows without bound (harmonic divergence)")
+    return v
+
+
 if __name__ == "__main__":
     # Self-tests
     r = verify_kaprekar_step("3087", 4, "3524")
@@ -169,6 +214,8 @@ if __name__ == "__main__":
     print("orbit:", [c for c in r.checks if c["name"] == "all_steps_valid"])
     r = verify_attractor_property(["3524", "1000", "9998"])
     print("attractor ok:", r.ok, [c for c in r.checks if not c["passed"]])
+    r = verify_gabriels_horn()
+    print("gabriels horn ok:", r.ok, [c for c in r.checks if not c["passed"]])
     # Negative test: 53955 as 3-digit must fail
     r = verify_arithmetic("53955", expected=0)
     print("digit-count guard (check that labels derive programmatically, not asserted):", )

@@ -94,6 +94,8 @@ class EntityType:
     DIGIT_ARRAY = "digit_array"
     EQUATION = "equation"
     GRAPH = "graph"
+    # geometry (Gabriel's Horn — surface of revolution)
+    HORN = "horn"
     # generic
     TEXT = "text"
     SHAPE = "shape"

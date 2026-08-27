@@ -35,6 +35,12 @@ DEAD_AIR_THRESHOLD_S = 6.0     # >= this is dead air (narration advances but fra
 TECH_PASS_THRESHOLD = 80
 PERC_PASS_THRESHOLD = 70
 
+# virality gates (v0.3, 2026-08 deep-review directive)
+BLACK_LUMA_THRESHOLD = 0.02    # mean frame luma below this = black
+BLACK_RUN_MAX_S = 0.5          # contiguous black run > this fails (post-render)
+TEMPLATE_SIMILARITY_MAX = 0.75 # narration vs generic filler fuzzy ratio
+MIN_TOPIC_TOKENS = 3           # distinct domain tokens required in script
+
 # ebur128 summary values are in the last "Summary:" section, e.g.:
 #   [Parsed_ebur128_0 @ ...] Summary:
 #   [Parsed_ebur128_0 @ ...]   Integrated loudness:
@@ -116,6 +122,237 @@ def gate_semantic(beatsheet: dict, visualspec: dict) -> GateResult:
         tfs = [t["type"] for t in b.get("transformations", [])]
         if "reverse" in nar and "reverse" not in tfs and "sort" not in tfs:
             g.warnings.append(f"{bid}: narration mentions reverse but no sort/reverse visual")
+    return g
+
+
+# ── Virality gate: script topic-specificity (pre-TTS) ──────────────────
+_TOPIC_TOKEN_STOPWORDS = frozenset({
+    "the", "and", "for", "are", "but", "not", "you", "all", "can",
+    "her", "was", "one", "out", "has", "have", "with", "this", "that",
+    "from", "what", "why", "how", "when", "where", "who", "into", "its",
+    "it's", "his", "their", "they", "them", "than", "then", "more",
+    "most", "much", "very", "over", "under", "about", "after", "before",
+    "because", "does", "did", "will", "would", "could", "should",
+    "there", "here", "never", "always", "exactly", "equal", "equals",
+    "times", "per", "units", "unit", "area", "volume", "value", "claim",
+})
+
+
+def _generic_sentence_bank() -> list[str]:
+    """The generic template filler bank, sourced from the templates code
+    (world_director.ROLE_SENTENCES) so the two can never drift."""
+    try:
+        from engine.visuals.world_director import ROLE_SENTENCES
+        return sorted({s.strip() for s in ROLE_SENTENCES.values() if s.strip()})
+    except Exception:  # noqa: BLE001
+        return []
+
+
+def gate_script_specificity(visualspec: dict) -> GateResult:
+    """Pre-TTS virality gate: the narration must be ABOUT the topic.
+
+    Hard-fails when the topic has research facts (production path) and:
+      - fewer than MIN_TOPIC_TOKENS distinct domain tokens from
+        topic+facts appear in the script, or
+      - the script carries no numeric claim (digit or math symbol), or
+      - any narration sentence is >TEMPLATE_SIMILARITY_MAX similar to a
+        generic template filler line ("What is really going on here?",
+        "Now you know.", ...) — the topic-agnostic template leak that
+        produced the content-free Gabriel's Horn video.
+
+    Topics WITHOUT facts only get warnings here — they can never reach a
+    render anyway: run_daily hard-fails them earlier with outcome
+    no_topic_knowledge.
+    """
+    import difflib
+    import re
+    g = _gate("script_specificity")
+    md = visualspec.get("metadata", {}) or {}
+    topic = str(md.get("topic", ""))
+    facts = md.get("facts", []) or []
+    narrations = [str(b.get("narration", "")).strip()
+                  for b in visualspec.get("beats", [])
+                  if b.get("narration")]
+    if not narrations:
+        g.passed = False
+        g.errors.append("no narration in visualspec — empty script")
+        return g
+    script_text = " ".join(narrations).lower()
+
+    if not facts:
+        g.warnings.append(
+            "topic has no research facts — script is topic-agnostic; "
+            "daily_run must hard-fail such topics (no_topic_knowledge)")
+        g.passed = True
+        return g
+
+    tokens: set[str] = set()
+
+    def _collect(text: str) -> None:
+        for w in re.findall(r"[a-z][a-z\-']{2,}", text.lower()):
+            w = w.strip("'-")
+            if len(w) >= 3 and w not in _TOPIC_TOKEN_STOPWORDS:
+                tokens.add(w)
+
+    _collect(topic)
+    for f in facts:
+        if isinstance(f, dict):
+            _collect(str(f.get("claim", "")))
+            _collect(str(f.get("formula", "")))
+        else:
+            _collect(getattr(f, "claim", ""))
+            _collect(getattr(f, "formula", ""))
+    present = sorted(t for t in tokens if t in script_text)
+    if len(present) < MIN_TOPIC_TOKENS:
+        g.passed = False
+        g.errors.append(
+            f"script specificity: only {len(present)} topic domain tokens "
+            f"{present[:8]} (need >= {MIN_TOPIC_TOKENS}) — narration is "
+            f"not about '{topic}'")
+    facts_mathy = False
+    for f in facts:
+        txt = (str(f.get("claim", "")) + str(f.get("formula", ""))) \
+            if isinstance(f, dict) else \
+            (str(getattr(f, "claim", "")) + str(getattr(f, "formula", "")))
+        if re.search(r"[0-9\u03c0\u221e\u2248\u221a\u222b\u00d7\u00b1=<>]",
+                     txt):
+            facts_mathy = True
+            break
+    if facts_mathy and not re.search(
+            r"[0-9\u03c0\u221e\u2248\u221a\u222b\u00d7\u00b1=<>]", script_text):
+        g.passed = False
+        g.errors.append("script specificity: no numeric claim (digit or "
+                        "math symbol) in narration")
+    bank = _generic_sentence_bank()
+    for n in narrations:
+        nl = n.lower().strip()
+        for filler in bank:
+            ratio = difflib.SequenceMatcher(None, nl, filler.lower()).ratio()
+            if ratio > TEMPLATE_SIMILARITY_MAX:
+                g.passed = False
+                g.errors.append(
+                    f"template leak: narration {n[:60]!r} is "
+                    f"{ratio:.0%} similar to generic filler {filler!r}")
+    g.warnings.append(f"topic tokens present: {present[:8]}")
+    return g
+
+
+# ── Virality gate: scene coverage (planning level) ────────────────────
+def _beat_object_ids(beat: dict) -> list[str]:
+    ids = []
+    for o in beat.get("objects", []) or []:
+        if isinstance(o, dict):
+            ids.append(str(o.get("id", "")))
+        else:
+            ids.append(str(o))
+    return [i for i in ids if i]
+
+
+def _beat_action_keys(beat: dict) -> tuple:
+    keys = []
+    for a in beat.get("semantic_actions", []) or []:
+        if isinstance(a, dict):
+            keys.append((str(a.get("action", a.get("type", ""))),
+                         str(a.get("target", ""))))
+    return tuple(sorted(keys))
+
+
+def gate_scene_coverage(visualspec: dict) -> GateResult:
+    """Planning-level virality gate (the Gabriel's Horn black-frame fix):
+
+      1. Every beat must map to REAL content: a beat with no entities and
+         no semantic actions (narration + camera only) renders BLACK
+         FRAMES — hard fail.
+      2. A single diagram/asset may not span > 2 consecutive script
+         lines: more than 2 consecutive beats with an identical
+         (object-ids + action) signature mean one static rig covers the
+         whole video (the generic cause->effect failure mode).
+    """
+    g = _gate("scene_coverage")
+    beats = visualspec.get("beats", [])
+    for b in beats:
+        bid = b.get("beat_id", "?")
+        objs = _beat_object_ids(b)
+        acts = _beat_action_keys(b)
+        tfs = [str(t.get("type", ""))
+               for t in b.get("transformations", []) or []
+               if isinstance(t, dict)]
+        if not objs and not acts and not tfs:
+            g.passed = False
+            g.errors.append(
+                f"{bid}: beat maps to an EMPTY scene (no entities, no "
+                f"actions) — narration {str(b.get('narration', ''))[:40]!r} "
+                "would render black frames")
+    # static-rig span: identical signature across consecutive beats
+    run_len = 0
+    prev_sig = None
+    for b in beats:
+        sig = (tuple(sorted(_beat_object_ids(b))), _beat_action_keys(b))
+        if sig == prev_sig:
+            run_len += 1
+        else:
+            run_len = 1
+            prev_sig = sig
+        if run_len > 2:
+            g.passed = False
+            g.errors.append(
+                f"{b.get('beat_id', '?')}: single diagram/asset spans "
+                f"> 2 consecutive script lines (static rig, signature "
+                f"{sig[0]}/{sig[1]}) — 1:1 line-to-scene coverage required")
+    return g
+
+
+# ── Virality gate: black frames (post-render, real pixels) ────────────
+def gate_black_frames(video_path: Path,
+                      allow_scripted_black: bool = False,
+                      sample_fps: float = 4.0) -> GateResult:
+    """Post-render virality gate on REAL sampled pixels: fail when any
+    contiguous run longer than BLACK_RUN_MAX_S has mean luma below
+    BLACK_LUMA_THRESHOLD (the ~5.2s black climax of the Gabriel's Horn
+    video would have been caught here).
+
+    ``allow_scripted_black`` (visualspec metadata 'allow_scripted_black')
+    downgrades detected runs to warnings for intentional fadeouts."""
+    import numpy as np
+    g = _gate("black_frames")
+    vp = Path(video_path)
+    if not vp.exists():
+        g.passed = False
+        g.errors.append(f"video file missing: {video_path}")
+        return g
+    frames = _sample_gray_frames(vp, sample_fps)
+    if not frames:
+        g.passed = False
+        g.errors.append("no frames could be sampled for black-frame QA")
+        return g
+    means = [float(f.mean()) / 255.0 for f in frames]
+    runs: list[tuple[float, float, float]] = []  # (start_s, end_s, luma)
+    start = None
+    for i, m in enumerate(means):
+        if m < BLACK_LUMA_THRESHOLD:
+            if start is None:
+                start = i
+        else:
+            if start is not None:
+                runs.append((start / sample_fps, i / sample_fps,
+                             float(np.mean(means[start:i]))))
+                start = None
+    if start is not None:
+        runs.append((start / sample_fps, len(means) / sample_fps,
+                     float(np.mean(means[start:]))))
+    long_runs = [r for r in runs if (r[1] - r[0]) > BLACK_RUN_MAX_S]
+    for a, b_, luma in long_runs:
+        msg = (f"black frames: contiguous run {a:.2f}s–{b_:.2f}s "
+               f"({b_ - a:.2f}s) with mean luma {luma:.4f} < "
+               f"{BLACK_LUMA_THRESHOLD}")
+        if allow_scripted_black:
+            g.warnings.append(msg + " (allowed: scripted black)")
+        else:
+            g.passed = False
+            g.errors.append(msg)
+    g.warnings.append(
+        f"black-frame scan: {len(frames)} frames @ {sample_fps:g}fps, "
+        f"{len(long_runs)} run(s) > {BLACK_RUN_MAX_S}s")
     return g
 
 
@@ -798,6 +1035,9 @@ def run_preflight_v2(visualspec: dict) -> dict:
         ("text_dominance", lambda: gate_text_dominance(visualspec)),
         ("composition", lambda: gate_composition(visualspec)),
         ("hero_quality", lambda: gate_hero_quality(visualspec)),
+        ("script_specificity",
+         lambda: gate_script_specificity(visualspec)),
+        ("scene_coverage", lambda: gate_scene_coverage(visualspec)),
     ):
         g = fn()
         report["gates"][name] = {"passed": g.passed,
@@ -807,7 +1047,8 @@ def run_preflight_v2(visualspec: dict) -> dict:
             if e not in report["errors"]:
                 report["errors"].append(e)
     perc_keys = ["schema", "semantic", "explanation", "text_dominance",
-                 "composition", "hero_quality"]
+                 "composition", "hero_quality", "script_specificity",
+                 "scene_coverage"]
     perc = [report["gates"][k] for k in perc_keys if k in report["gates"]]
     report["perceptual_quality"] = int(round(
         100.0 * sum(1 for g in perc if g["passed"]) / max(1, len(perc))))
@@ -849,10 +1090,18 @@ def run_all_v2(visualspec: dict, video_path: Optional[Path] = None,
     report["gates"]["hero_quality"] = {"passed": hg.passed,
                                          "errors": hg.errors,
                                          "warnings": hg.warnings}
+    if video_path is not None:
+        allow_black = bool((visualspec.get("metadata", {}) or {}).get(
+            "allow_scripted_black", False))
+        bf = gate_black_frames(Path(video_path),
+                               allow_scripted_black=allow_black)
+        report["gates"]["black_frames"] = {"passed": bf.passed,
+                                             "errors": bf.errors,
+                                             "warnings": bf.warnings}
     # recompute perceptual with the semantic gates
     perc_keys = ["semantic", "layout", "motion", "continuity",
                  "explanation", "text_dominance", "composition",
-                 "hero_quality"]
+                 "hero_quality", "black_frames"]
     perc = [report["gates"][k] for k in perc_keys if k in report["gates"]]
     perceptual = int(round(100.0 * sum(1 for g in perc if g["passed"])
                            / max(1, len(perc))))
@@ -868,7 +1117,13 @@ def run_all_v2(visualspec: dict, video_path: Optional[Path] = None,
     report["score"] = int(round(0.6 * tech + 0.4 * perceptual))
     report["passed"] = (tech >= TECH_PASS_THRESHOLD
                          and perceptual >= PERC_PASS_THRESHOLD)
-    for e in eg.errors + tg.errors + cg.errors + hg.errors:
+    # black frames at the climax are publish-blocking, not a score ding:
+    # force-fail regardless of thresholds (Gabriel's Horn failure mode)
+    if video_path is not None and not report["gates"].get(
+            "black_frames", {}).get("passed", True):
+        report["passed"] = False
+    bf_errors = report["gates"].get("black_frames", {}).get("errors", [])
+    for e in eg.errors + tg.errors + cg.errors + hg.errors + bf_errors:
         if e not in report["errors"]:
             report["errors"].append(e)
     report["explanation_report"] = (visualspec.get("metadata", {}) or {}).get(

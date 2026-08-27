@@ -288,6 +288,86 @@ _KNOWLEDGE: dict[str, dict] = {
                  source="McGurk & MacDonald 1976"),
         ],
         "sources": ["https://en.wikipedia.org/wiki/McGurk_effect"],
+        "script": {
+            "hook": "Your eyes can change what your ears hear.",
+            "question": "Watch a mouth say ga — and hear the sound ba.",
+            "simple_experiment": "The eyes send their signal to the "
+                                  "brain.",
+            "change_variable": "The ears send theirs — ba — at the same "
+                                "time.",
+            "observe": "The brain fuses both signals into one "
+                        "perception.",
+            "push_extreme": "You hear da — a sound nobody actually made.",
+            "discover_principle": "Hearing is not ears alone; vision "
+                                   "shapes speech perception.",
+            "explain_principle": "The brain integrates audio and vision "
+                                  "— McGurk and MacDonald proved it in "
+                                  "1976.",
+            "payoff": "You hear what you see.",
+        },
+    },
+    "gabriels horn": {
+        "summary": ("Gabriel's Horn (Torricelli's trumpet) is the curve "
+                    "y = 1/x for x ≥ 1 revolved around the x-axis. It has "
+                    "FINITE volume (exactly π cubic units) but INFINITE "
+                    "surface area (2π·ln b as b → ∞): you can fill it with "
+                    "paint, but you can never paint its surface."),
+        "facts": [
+            Fact(claim="Volume of revolution of y = 1/x from x = 1 to b is "
+                       "π(1 − 1/b), so as b → ∞ the horn holds exactly π "
+                       "cubic units of paint",
+                 formula="V = π∫₁^∞ (1/x²) dx = π",
+                 units="cubic units",
+                 assumptions=["y = 1/x for x ≥ 1 revolved around the "
+                              "x-axis", "improper integral converges"],
+                 source="Torricelli 1643; standard calculus — verified "
+                        "deterministically by engine "
+                        "math_verify.verify_gabriels_horn"),
+            Fact(claim="Surface area of revolution of y = 1/x from x = 1 "
+                       "to b is 2π ln b, which diverges to infinity as "
+                       "b → ∞",
+                 formula="A = 2π∫₁^b (1/x)√(1+1/x⁴) dx ≥ 2π∫₁^b dx/x "
+                         "= 2π ln b",
+                 units="square units",
+                 assumptions=["same surface of revolution",
+                              "comparison with the divergent harmonic "
+                              "integral ∫ dx/x"],
+                 source="Torricelli 1643; standard calculus — verified "
+                        "deterministically by engine "
+                        "math_verify.verify_gabriels_horn"),
+            Fact(claim="Painter's paradox: finite volume (π) but infinite "
+                       "surface area — the horn can be filled with paint "
+                       "yet never painted",
+                 formula="V = π < ∞, A = lim(b→∞) 2π ln b = ∞",
+                 units="",
+                 assumptions=[],
+                 source="Torricelli 1643; standard calculus"),
+        ],
+        "sources": ["https://en.wikipedia.org/wiki/Gabriel%27s_Horn"],
+        "endcard": "V = π, A = ∞",
+        "script": {
+            "hook": "This shape holds exactly π paint — but can never "
+                    "be painted.",
+            "question": "Take the curve y equals one over x, and spin it "
+                        "around the x-axis.",
+            "simple_experiment": "What you get is Gabriel's Horn — "
+                                  "Torricelli's trumpet.",
+            "change_variable": "Pour paint into it: the fill volume "
+                                "converges to exactly π.",
+            "observe": "V equals π times one minus one over b — as b "
+                        "grows, the fill approaches π and never exceeds "
+                        "it.",
+            "push_extreme": "Now measure the inside wall: its area is 2π "
+                             "times the log of b — and it never stops "
+                             "growing.",
+            "discover_principle": "Finite volume, infinite surface: you "
+                                   "can fill it, but you can never paint "
+                                   "it.",
+            "explain_principle": "The tail thins faster than it lengthens "
+                                  "— so volume converges while surface "
+                                  "area diverges.",
+            "payoff": "Gabriel's Horn: volume π, surface infinite.",
+        },
     },
     "monty hall": {
         "summary": ("Three doors, one car, two goats. You pick a door, "
@@ -375,6 +455,15 @@ _ALIASES = {
     "why does popcorn pop": "popcorn",
     "how does popcorn pop": "popcorn",
     "popcorn": "popcorn",
+    "gabriels horn": "gabriels horn",
+    "gabriel horn": "gabriels horn",
+    "gabriel's horn": "gabriels horn",
+    "torricelli trumpet": "gabriels horn",
+    "torricellis trumpet": "gabriels horn",
+    "torricelli's trumpet": "gabriels horn",
+    "painters paradox": "gabriels horn",
+    "painter's paradox": "gabriels horn",
+    "the shape you can fill but never paint": "gabriels horn",
 }
 
 # Keyword fallback (§34 unseen-topic generalization): long-form phrasings
@@ -395,6 +484,8 @@ _KEYWORD_TOPICS: tuple[tuple[frozenset[str], str], ...] = (
     (frozenset({"popcorn", "kernel", "burst"}), "popcorn"),
     (frozenset({"monty", "hall", "goat", "game show", "prize"}),
      "monty hall"),
+    (frozenset({"gabriel", "gabriels", "horn", "torricelli", "trumpet",
+                "painter", "painters"}), "gabriels horn"),
 )
 
 
@@ -746,6 +837,49 @@ def _monty_world(topic: str) -> WorldState:
     )
 
 
+def _gabriel_world(topic: str) -> WorldState:
+    """Gabriel's Horn: the revolved y = 1/x curve — fill it (finite
+    volume π) but never paint it (infinite surface).  §46 grammar:
+    MATHEMATICAL_TRANSFORMATION-flavored (curve → horn → fill →
+    paradox)."""
+    return WorldState(
+        topic=topic,
+        representation="MATHEMATICAL_TRANSFORMATION",
+        representation_secondary=["EXPERIMENT", "GRAPH"],
+        entities=[
+            Entity("horn", EntityType.HORN,
+                   {"label": "y = 1/x, x ≥ 1", "position": [0, 2.7, 0]}),
+            Entity("paint", EntityType.PARTICLE,
+                   {"label": "paint", "count": 60,
+                    "position": [-2.5, 2.2, 0]}),
+            Entity("payoff_card", EntityType.PAYOFF,
+                   {"text": "V = π, A = ∞"}),
+        ],
+        relationships=[
+            Relationship("horn", "paint", "contains"),
+            Relationship("horn", "payoff_card", "generates"),
+        ],
+        measurements=[
+            Measurement("fill_volume", "volume", "π",
+                        "cubic units", {"claim": "finite fill volume"}),
+            Measurement("surface_area", "area", "∞",
+                        "square units", {"claim": "infinite surface"}),
+        ],
+        camera=CameraFocus("horn", ["zoom_into", "follow"]),
+        hero_mechanism=HeroMechanism(
+            concept="finite volume (π) vs infinite surface area — the "
+                    "painter's paradox",
+            visualization="painter_paradox_fill",
+            target_beat="b007",
+            objects=["horn"],
+            actions=["fill"],
+            why_this_visual="The horn fills with paint (V = π) while its "
+                            "surface runs off to infinity (A = ∞) — the "
+                            "paradox in one shot."),
+        facts=_KNOWLEDGE["gabriels horn"]["facts"],
+    )
+
+
 def _generic_world(topic: str) -> WorldState:
     return WorldState(
         topic=topic,
@@ -774,6 +908,7 @@ _WORLD_BUILDERS = {
     "noise cancelling": _noise_world,
     "popcorn": _popcorn_world,
     "monty hall": _monty_world,
+    "gabriels horn": _gabriel_world,
 }
 
 

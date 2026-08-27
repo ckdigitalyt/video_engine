@@ -142,6 +142,21 @@ def run_daily(topic: Optional[str] = None,
             "facts": [f.__dict__ for f in research_result.facts],
             "sources": research_result.sources,
         }, indent=2))
+
+        # ── 1b) no-facts hard-fail: never render a topic-agnostic script ──
+        # The content-free Gabriel's Horn failure: unknown topics used to
+        # fall through to a generic template script that never mentioned
+        # the subject. Refuse BEFORE any planning/render work.
+        if not research_result.facts:
+            result.outcome = ABORT
+            result.outcome_reason = (
+                "no_topic_knowledge: no verified research facts for this "
+                "topic — refusing to generate a topic-agnostic script")
+            result.runtime_s = time.time() - t0
+            (out / "daily_report.json").write_text(
+                json.dumps(result.to_dict(), indent=2))
+            return result
+
         vs, ctx = _plan(topic)
         (out / "visualspec.json").write_text(json.dumps(vs, indent=2))
         (out / "story_plan.json").write_text(json.dumps({

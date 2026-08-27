@@ -30,9 +30,9 @@ from typing import Any, Optional, Sequence
 
 from manim import (
     DOWN, LEFT, ORIGIN, RIGHT, UP,
-    Arrow, Circle, DashedLine, Dot, FadeIn, FadeOut, GrowFromCenter,
-    Indicate, Line, ParametricFunction, Scene, Text, Transform, VGroup,
-    ValueTracker,
+    Arrow, Circle, Create, DashedLine, Dot, FadeIn, FadeOut, GrowFromCenter,
+    Indicate, Line, ParametricFunction, Polygon, Scene, Text, Transform,
+    VGroup, ValueTracker, VMobject,
 )
 
 from engine.config.loader import get_style
@@ -1015,6 +1015,77 @@ def PayoffText(scene: Scene, scene_state: SceneState,
     scene_state.record_enter(oid)
 
 
+# ────────────────────────────────────────────────────────────────
+# geometry: Gabriel's Horn surface of revolution (y = 1/x, x ≥ 1)
+# — shared deterministic profile used by HornProfile + PaintFill so the
+# fill region always matches the drawn horn exactly.
+# ────────────────────────────────────────────────────────────────
+def _horn_profile(x_max: float = 6.0,
+                  samples: int = 72) -> tuple[list, list]:
+    """Screen-space sample points of y = 1/x (top) and y = −1/x (bottom)
+    for x in [1, x_max].  Deterministic; shared geometry contract."""
+    x0, x1 = -4.2, 4.2                      # screen x span
+    ys = 1.5                                # y scale (1/x at x=1 -> 1.5)
+    xs = [1.0 + i * (x_max - 1.0) / (samples - 1)
+          for i in range(samples)]
+    def sx(x: float) -> float:
+        return x0 + (x - 1.0) * (x1 - x0) / (x_max - 1.0)
+    top = [[sx(x), ys / x, 0.0] for x in xs]
+    bottom = [[sx(x), -ys / x, 0.0] for x in xs]
+    return top, bottom
+
+
+def HornProfile(scene: Scene, scene_state: SceneState, oid: str = "horn",
+                label: str = "y = 1/x, x ≥ 1", color: str = "#3A86D6",
+                duration: float | None = None) -> None:
+    """Draw Gabriel's Horn: the revolved y = 1/x silhouette (top + bottom
+    branches), the x-axis, the mouth cap at x = 1, and a label.
+    Deterministic; the surface itself is the persistent stage object."""
+    d = _motion_default(duration, 1.2)
+    top, bottom = _horn_profile()
+    upper = VMobject(color=color, stroke_width=4)
+    upper.set_points_as_corners(top)
+    lower = VMobject(color=color, stroke_width=4)
+    lower.set_points_as_corners(bottom)
+    axis = Line([top[0][0], 0, 0], [top[-1][0] + 0.3, 0, 0],
+                color="#78909C", stroke_width=2)
+    mouth = Line(top[0], bottom[0], color=color, stroke_width=4)
+    group = VGroup(upper, lower, axis, mouth)
+    if label:
+        lbl = _label(label, 22)
+        lbl.next_to(axis, DOWN, buff=0.25)
+        group.add(lbl)
+    scene.play(Create(group), run_time=d)
+    scene_state.enter(oid, "horn", value=label, persistent=True,
+                      mobject=group)
+    scene_state.record_enter(oid)
+
+
+def PaintFill(scene: Scene, scene_state: SceneState, oid: str = "fill",
+              target_oid: str = "horn", label: str = "V = π",
+              color: str = "#42A5F5", duration: float | None = None) -> None:
+    """Fill the horn's interior with paint (the finite-volume side of the
+    painter's paradox).  Uses the shared profile so the fill region always
+    matches the drawn horn.  TEMP mobject: removed at end of beat."""
+    d = _motion_default(duration, 2.0)
+    top, bottom = _horn_profile()
+    corners = top + list(reversed(bottom))
+    fill = Polygon(*corners, color=color, fill_opacity=0.55,
+                   stroke_width=0)
+    group = VGroup(fill)
+    if label:
+        lbl = _label(label, 30, "#FFD54F")
+        lbl.move_to([(top[0][0] + top[-1][0]) / 2, 0.75, 0])
+        group.add(lbl)
+    scene.play(FadeIn(group, scale=0.96), run_time=d * 0.7)
+    scene.play(Indicate(fill, scale_factor=1.03), run_time=d * 0.3)
+    scene_state.enter(oid, "shape", value=label, persistent=False,
+                      mobject=group)
+    scene_state.exit(oid)
+    scene_state.record_enter(oid)
+    scene_state.record_exit(oid)
+
+
 # ────────────────────────────────────────────────────────────────────────
 # §46 primitives: noise-cancelling interference + popcorn burst
 # ────────────────────────────────────────────────────────────────────────
@@ -1192,6 +1263,8 @@ WORLD_PRIMITIVES: dict[str, object] = {
     "ExperimentBadge": ExperimentBadge,
     "RevealText": RevealText,
     "PayoffText": PayoffText,
+    "HornProfile": HornProfile,
+    "PaintFill": PaintFill,
 }
 
 # Entity type -> materializer primitive (used by the world compiler).
@@ -1230,6 +1303,8 @@ ENTITY_MATERIALIZERS: dict[str, str] = {
     "kernel": "PressureKernel",
     "steam": "ParticleField",
     "shell": "PressureKernel",
+    # geometry (Gabriel's Horn)
+    "horn": "HornProfile",
 }
 
 
@@ -1410,7 +1485,7 @@ ACTION_NATURAL_DURATION: dict[str, float] = {
     "cross_section": 1.2, "reveal_inside": 1.4, "highlight": 0.6,
     "reveal": 1.2, "sort": 1.2, "subtract": 3.0, "morph": 1.2,
     "transform": 1.2, "count_down": 1.8,
-    "interfere": 3.4, "cancel": 3.4, "burst": 2.2,
+    "interfere": 3.4, "cancel": 3.4, "burst": 2.2, "fill": 2.2,
 }
 
 
@@ -1588,6 +1663,19 @@ def apply_action(scene: Scene, scene_state: SceneState,
         BurstExplosion(scene, scene_state, at=_pos_of(target, [0, 0]),
                        radius=float(params.get("radius", 1.0)),
                        duration=duration)
+        return
+    if name == "fill":
+        # Gabriel's Horn painter's paradox: finite volume, infinite surface.
+        # Deterministic math verification before any pixels move (spec §18).
+        from engine.validation.math_verify import verify_gabriels_horn
+        v = verify_gabriels_horn()
+        if not v.ok:
+            raise ValueError("fill action failed math verification: "
+                             + "; ".join(f["detail"] for f in v.failures()))
+        PaintFill(scene, scene_state, oid=target or "fill",
+                  target_oid=target or "horn",
+                  label=str(params.get("label", params.get("value", "V = π"))),
+                  duration=duration)
         return
     if name == "flow":
         nodes = params.get("nodes", []) or []

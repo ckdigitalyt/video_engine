@@ -71,6 +71,11 @@ _RULES: list[tuple[frozenset[str], RepType, tuple[RepType, ...], str]] = [
                 "theorem", "trajectory"}),
      RepType.MATHEMATICAL_TRANSFORMATION, (RepType.GRAPH,),
      "number-theory topics: transformation + graph"),
+    (frozenset({"gabriel", "gabriels", "horn", "torricelli", "trumpet",
+                "painter", "painters", "revolution"}),
+     RepType.MATHEMATICAL_TRANSFORMATION, (RepType.EXPERIMENT, RepType.GRAPH),
+     "calculus/geometry topics (Gabriel's Horn): mathematical "
+     "transformation + experiment"),
     (frozenset({"sky", "blue", "scatter", "scattering", "atmosphere",
                 "atmospheric", "optics", "light", "refraction", "color",
                 "colour", "rayleigh", "sunset", "wavelength", "rainbow",

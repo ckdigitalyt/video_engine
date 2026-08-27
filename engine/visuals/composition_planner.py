@@ -260,6 +260,13 @@ def plan_beat(beat: dict, world: Optional[WorldState],
     refs = set(ref_ids)
     focal = _pick_focal(beat, ref_ids)
     supports = [r for r in ref_ids if r != focal]
+    # release beats (payoff / end card) read as resolution: no tight focal
+    # object — the loose 0.92 frame + focal would fail hero-tightness
+    # expectations (pacing/scale mismatch)
+    pacing = _pacing_for(beat, importance)
+    if pacing == "release":
+        focal = None
+        supports = []
     # background = persistent world entities not referenced this beat
     background: list[str] = []
     if world is not None:

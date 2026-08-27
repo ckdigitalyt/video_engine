@@ -101,6 +101,15 @@ def _time_beats(vs: dict, narration_sentences: list[str],
             for b in beats:
                 b["duration"] = round(max(1.4, float(b.get("duration", 1.5))
                                           * scale), 2)
+    # keep total beat duration == narration (±2%): prevents the
+    # compositor's black tpad tail (video shorter than narration) that
+    # both looks broken and trips the black-frame QA gate
+    total = sum(float(b.get("duration", 1.5)) for b in beats)
+    if total > 0 and abs(narration_dur - total) > 0.02 * narration_dur:
+        scale = narration_dur / total
+        for b in beats:
+            b["duration"] = round(max(1.4, float(b.get("duration", 1.5))
+                                      * scale), 2)
     # recompute start/end + refresh the explanation report (durations feed
     # the text-dominance ratio)
     t = 0.0

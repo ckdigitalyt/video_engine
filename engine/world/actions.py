@@ -41,8 +41,8 @@ class Action:
     CANCEL = "cancel"
     # phase-change / burst (§46: popcorn)
     BURST = "burst"
-    # phase-change / burst (§46: popcorn)
-    BURST = "burst"
+    # geometry / fill (Gabriel's Horn painter's paradox)
+    FILL = "fill"
     # camera
     ZOOM_INTO = "zoom_into"
     ZOOM_OUT_OF = "zoom_out_of"
@@ -155,9 +155,9 @@ ACTION_REGISTRY: dict[str, ActionSpec] = {
     Action.BURST: ActionSpec(
         Action.BURST, ["PressureKernel", "BurstExplosion"],
         ("kernel", "explosion"), camera="zoom_to", explanation_level=5),
-    Action.BURST: ActionSpec(
-        Action.BURST, ["PressureKernel", "BurstExplosion"],
-        ("kernel", "explosion"), camera="zoom_to", explanation_level=5),
+    Action.FILL: ActionSpec(
+        Action.FILL, ["PaintFill"], (),
+        camera="zoom_to", explanation_level=5),
     Action.ZOOM_INTO: ActionSpec(
         Action.ZOOM_INTO, [], (), camera="zoom_to", explanation_level=2),
     Action.ZOOM_OUT_OF: ActionSpec(

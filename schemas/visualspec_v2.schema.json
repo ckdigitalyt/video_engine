@@ -114,7 +114,7 @@
                    "experiment", "hypothesis", "observation", "reveal",
                    "counterexample", "payoff",
                    "microphone", "processor", "interference", "kernel",
-                   "steam", "shell"]
+                   "steam", "shell", "horn"]
         },
         "value": {"type": "string"},
         "initial": {"type": "string"},

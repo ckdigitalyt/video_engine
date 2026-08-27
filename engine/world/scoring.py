@@ -42,6 +42,8 @@ _DEMONSTRATING_ACTIONS: frozenset[str] = frozenset({
     "subtract", "sort", "measure",
     # §46 acoustics / phase-change
     "interfere", "cancel", "burst",
+    # geometry (Gabriel's Horn painter's paradox)
+    "fill",
 })
 
 # Actions that visualize a concept but are not the mechanism itself.

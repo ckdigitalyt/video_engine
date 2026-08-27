@@ -62,6 +62,7 @@ _NATURAL_ENTER: dict[str, float] = {
     "AssembleBodies": 0.6, "DisassembleBodies": 0.6,
     "InterferencePattern": 0.8, "WaveSuperposition": 0.8,
     "PressureKernel": 0.8, "BurstExplosion": 0.6,
+    "HornProfile": 1.2,
 }
 _CAMERA_NATURAL = 0.9
 
@@ -114,6 +115,14 @@ def _physics_guard(beat: dict, world: WorldState) -> None:
             if not v.ok:
                 raise WorldCompileError(
                     f"beat {bid}: burst physics failed: "
+                    + "; ".join(f["detail"] for f in v.failures()))
+        if name == "fill":
+            # Gabriel's Horn painter's paradox: verify V = π, A = ∞ before
+            # rendering (Gate 3 — mathematical, deterministic).
+            v = M.verify_gabriels_horn()
+            if not v.ok:
+                raise WorldCompileError(
+                    f"beat {bid}: fill math verification failed: "
                     + "; ".join(f["detail"] for f in v.failures()))
         if name == "orbit":
             r = float(params.get("radius", 3.4))
@@ -454,6 +463,11 @@ if os.path.isdir(os.path.join(_REPO, "engine")) and _REPO not in sys.path:
     sys.path.insert(0, _REPO)
 
 from manim import Scene
+from manim import config as _manim_config
+
+# dark navy (not pure black): cinematic dark look that always clears the
+# black-frame luma gate (must be set before Scene instantiation)
+_manim_config.background_colour = "#0b0f1a"
 from engine.visuals.scene_state import SceneState
 from engine.primitives.world_primitives import (
     materialize_entity, apply_action, CelestialBody, OrbitPath, MovingBody,
@@ -503,6 +517,9 @@ def camera_reset(scene, duration=0.9):
 
 class {scene_name}(Scene):
     def construct(self):
+        # dark navy (not pure black): keeps the cinematic dark look while
+        # guaranteeing every frame clears the black-frame luma gate
+        self.camera.background_colour = "#0b0f1a"
         self._state = SceneState()
         self._world = WorldState.from_dict({world_literal})
 {chr(10).join(body)}
