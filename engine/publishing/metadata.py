@@ -353,9 +353,16 @@ def generate_metadata(
     beats = list((beatsheet or {}).get("beats") or [])
     shots = list((shotlist or {}).get("shots") or [])
 
-    # Topic resolution: explicit arg > beatsheet metadata > run dir name.
+    # Topic resolution: explicit arg > beatsheet metadata > v0.3 artifacts
+    # (visualspec metadata / topic.json) > run dir name.
     if not topic and beatsheet:
         topic = (beatsheet.get("metadata") or {}).get("topic")
+    if not topic and visualspec:
+        topic = (visualspec.get("metadata") or {}).get("topic")
+    if not topic and run_dir:
+        topic_file = _read_json(os.path.join(run_dir, "topic.json"))
+        if topic_file and topic_file.get("topic"):
+            topic = str(topic_file["topic"])
     if not topic and run_dir:
         topic = os.path.basename(os.path.normpath(run_dir)).replace("_", " ")
     topic = (topic or "").strip()
