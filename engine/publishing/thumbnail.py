@@ -192,6 +192,15 @@ def _topic_from_run(run_dir: str) -> Optional[str]:
         topic = (beatsheet.get("metadata") or {}).get("topic")
         if topic:
             return str(topic)
+    # v0.3 runs: topic lives in topic.json / visualspec.json metadata
+    topic_file = _read_json(os.path.join(run_dir, "topic.json"))
+    if topic_file and topic_file.get("topic"):
+        return str(topic_file["topic"])
+    vs = _read_json(os.path.join(run_dir, "visualspec.json"))
+    if vs:
+        topic = (vs.get("metadata") or {}).get("topic")
+        if topic:
+            return str(topic)
     return None
 
 
