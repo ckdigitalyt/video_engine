@@ -14,6 +14,7 @@ collapses the two into one fake 100/100.
 from __future__ import annotations
 
 import json
+import re
 import shutil
 import subprocess
 from dataclasses import dataclass, field
@@ -827,6 +828,180 @@ def gate_explanation(visualspec: dict) -> GateResult:
     return g
 
 
+# ── Virality gate: text crossfade overlap (planning level) ────────────
+_TEXT_LAYER_ENTER_RE = re.compile(
+    r"\b(RevealText|PayoffText|QuestionMark|KineticTypography|ClaimReveal|"
+    r"CycleReveal|MeasureValue|Comparison)\(self")
+_TEXT_PRIM_OID = {
+    "RevealText": "reveal", "PayoffText": "payoff",
+    "QuestionMark": "question", "KineticTypography": "kinetic",
+    "ClaimReveal": "claim", "CycleReveal": "cycle",
+    "Comparison": "comparison",
+}
+_BEAT_RE = re.compile(r"begin_beat\(\s*['\"]([^'\"]+)['\"]\s*\)")
+_TEXT_EXIT_RE = re.compile(
+    r"\b(?:exit_object|clear_object)\(\s*self\s*,\s*self\._state\s*,"
+    r"\s*['\"]([^'\"]+)['\"]")
+
+
+def _extract_py_literal(line: str, prefix: str) -> Optional[str]:
+    """Extract the balanced ``{...}`` literal following ``prefix`` on a
+    generated single-statement source line (None when absent/unbalanced).
+    Handles nested braces and quoted strings with backslash escapes."""
+    i = line.find(prefix)
+    if i < 0:
+        return None
+    j = line.find("{", i + len(prefix))
+    if j < 0:
+        return None
+    depth = 0
+    quote = None
+    esc = False
+    for k in range(j, len(line)):
+        ch = line[k]
+        if quote:
+            if esc:
+                esc = False
+            elif ch == "\\":
+                esc = True
+            elif ch == quote:
+                quote = None
+            continue
+        if ch in ("'", '"'):
+            quote = ch
+        elif ch == "{":
+            depth += 1
+        elif ch == "}":
+            depth -= 1
+            if depth == 0:
+                return line[j:k + 1]
+    return None
+
+
+def analyze_text_layer_source(source: str) -> list[str]:
+    """Statically simulate the TEXT-layer lifecycle of a compiled world
+    scene and return overlap errors (empty list = clean).
+
+    The generated scene is one statement per line, so the simulation is a
+    deterministic line scan: text layers enter via text-entity
+    materializations, text semantic actions (measure/fill/compare/reveal,
+    per ``world_primitives.text_layer_oid``) and the direct narrative
+    primitives; they leave via ``exit_object``/``clear_object``.  A text
+    layer entering while ANY text layer is still on stage is the
+    crossfade-overlap bug (two superimposed formula layers, Gabriel's
+    Horn -r3 t≈13–33s).  The one legal overlap-shaped pattern is a
+    measure that retargets a text card already on stage — an in-place
+    REPLACEMENT (``world_primitives._replace_text_layer``), never a
+    second layer.
+    """
+    import ast
+    from engine.primitives.world_primitives import (
+        TEXT_ENTITY_TYPES, TEXT_LAYER_ACTIONS, text_layer_oid)
+    errors: list[str] = []
+    stage: dict[str, str] = {}  # text-layer oid -> beat it entered
+    beat = "?"
+
+    def _overlap(oid: str) -> None:
+        held = ", ".join(f"'{o}'" for o in sorted(stage))
+        errors.append(
+            f"beat {beat}: text layer '{oid}' enters while text layer(s) "
+            f"[{held}] still on stage — crossfade overlap (the previous "
+            "text layer must be exited or replaced first)")
+
+    for raw in source.splitlines():
+        line = raw.strip()
+        if not line:
+            continue
+        m = _BEAT_RE.search(line)
+        if m:
+            beat = m.group(1)
+            continue
+        if "exit_object(" in line or "clear_object(" in line:
+            m = _TEXT_EXIT_RE.search(line)
+            if m:
+                stage.pop(m.group(1), None)
+            continue
+        if "materialize_entity(" in line:
+            lit = _extract_py_literal(
+                line, "materialize_entity(self, self._state, ")
+            if lit:
+                try:
+                    ent = ast.literal_eval(lit)
+                except (ValueError, SyntaxError):
+                    ent = None
+                if (isinstance(ent, dict)
+                        and str(ent.get("type", "")) in TEXT_ENTITY_TYPES):
+                    oid = str(ent.get("id", ""))
+                    if stage:
+                        _overlap(oid)
+                    stage[oid] = beat
+            continue
+        if "apply_action(" in line:
+            lit = _extract_py_literal(line, "apply_action(self, self._state, ")
+            if lit:
+                try:
+                    act = ast.literal_eval(lit)
+                except (ValueError, SyntaxError):
+                    act = None
+                if isinstance(act, dict):
+                    name = str(act.get("action", ""))
+                    if name in TEXT_LAYER_ACTIONS:
+                        target = str(act.get("target", ""))
+                        if name == "measure" and target in stage:
+                            # in-place replacement of an on-stage text card
+                            continue
+                        oid = text_layer_oid(name, target) or name
+                        if stage:
+                            _overlap(oid)
+                        stage[oid] = beat
+            continue
+        m = _TEXT_LAYER_ENTER_RE.search(line)
+        if m:
+            prim = m.group(1)
+            mo = re.search(r"\boid\s*=\s*['\"]([^'\"]+)['\"]", line)
+            oid = mo.group(1) if mo else _TEXT_PRIM_OID.get(prim,
+                                                            prim.lower())
+            if stage:
+                _overlap(oid)
+            stage[oid] = beat
+    return errors
+
+
+def gate_text_overlap(visualspec: dict) -> GateResult:
+    """Planning-level virality gate: text crossfade overlap.
+
+    Compiles the VisualSpec to scene source (dry — no rendering) and
+    statically simulates the text-layer lifecycle (see
+    ``analyze_text_layer_source``).  Fails when any text/label/formula
+    layer would be on stage while the next one enters — the Gabriel's
+    Horn -r3 failure that superimposed two formula layers for ~20s
+    (t≈13–33s, 2026-08-27).  Deterministic and fast: pure source
+    analysis, no pixels.  A spec that cannot compile fails here too —
+    it could never render anyway.
+    """
+    g = _gate("text_overlap")
+    try:
+        from engine.renderers.manim.world_compiler import (
+            WorldCompileError, emit_world_scene)
+        source = emit_world_scene(visualspec)
+    except WorldCompileError as e:
+        g.passed = False
+        g.errors.append(f"text_overlap: visualspec does not compile: {e}")
+        return g
+    except Exception as e:  # noqa: BLE001
+        g.passed = False
+        g.errors.append(f"text_overlap: compile crashed: {e}")
+        return g
+    errors = analyze_text_layer_source(source)
+    if errors:
+        g.passed = False
+        g.errors.extend(errors)
+    g.warnings.append(
+        "text-layer lifecycle simulated on compiled scene source "
+        "(planning level)")
+    return g
+
+
 def gate_text_dominance(visualspec: dict) -> GateResult:
     """Perceptual gate: text-dominance ratio < 0.35 (spec §9 — kinetic
     text is a fallback, not the default)."""
@@ -1038,6 +1213,7 @@ def run_preflight_v2(visualspec: dict) -> dict:
         ("script_specificity",
          lambda: gate_script_specificity(visualspec)),
         ("scene_coverage", lambda: gate_scene_coverage(visualspec)),
+        ("text_overlap", lambda: gate_text_overlap(visualspec)),
     ):
         g = fn()
         report["gates"][name] = {"passed": g.passed,
@@ -1048,7 +1224,7 @@ def run_preflight_v2(visualspec: dict) -> dict:
                 report["errors"].append(e)
     perc_keys = ["schema", "semantic", "explanation", "text_dominance",
                  "composition", "hero_quality", "script_specificity",
-                 "scene_coverage"]
+                 "scene_coverage", "text_overlap"]
     perc = [report["gates"][k] for k in perc_keys if k in report["gates"]]
     report["perceptual_quality"] = int(round(
         100.0 * sum(1 for g in perc if g["passed"]) / max(1, len(perc))))

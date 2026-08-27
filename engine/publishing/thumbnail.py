@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import sys
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
@@ -40,6 +41,136 @@ MUTED = (154, 167, 184)  # #9AA7B8 secondary text
 
 WIDTH, HEIGHT = 1280, 720
 SUPERSAMPLE = 2  # render at 2x, downscale with LANCZOS for clean text
+
+# Designed-thumbnail palette (matches the render background #0B0F1A).
+NAVY = (11, 15, 26)
+HEADLINE_CLAIM_COLOR = (245, 247, 250)   # #F5F7FA near-white
+HEADLINE_TWIST_COLOR = (255, 213, 79)    # #FFD54F amber (payoff color)
+
+
+def split_hook(hook: str) -> Tuple[str, str]:
+    """Split a hook sentence into ``(claim, twist)`` on its paradox hinge.
+
+    "This shape holds exactly π paint — but can never be painted" →
+    ("This shape holds exactly π paint", "can never be painted").
+    Deterministic; returns ``(hook, "")`` when there is no hinge.
+    """
+    text = (hook or "").strip().rstrip(".!?\"'")
+    if not text:
+        return "", ""
+    for sep in (" — ", " — ", " – ", " - "):
+        if sep in text:
+            claim, twist = text.split(sep, 1)
+            twist = twist.strip()
+            if twist.lower().startswith("but "):
+                twist = twist[4:].strip()
+            if claim.strip() and twist:
+                return claim.strip(), twist
+    m = re.search(r",\s+but\s+|\s+but\s+", text)
+    if m:
+        claim = text[: m.start()].strip().rstrip(",")
+        twist = text[m.end():].strip()
+        if claim and twist:
+            return claim, twist
+    return text, ""
+
+
+def compose_designed_thumbnail(frame_path: Optional[str] = None,
+                               topic: str = "", hook: str = "",
+                               out_path: str = "thumbnail.jpg") -> str:
+    """Compose a DESIGNED 1280x720 ``thumbnail.jpg`` (deterministic, PIL).
+
+    Never a raw video frame: the hero frame (when available) is used as a
+    dimmed backdrop under a navy wash + bottom gradient consistent with
+    the video's dark-navy look, with a large two-tone headline derived
+    from the hook's claim/twist split ("THIS SHAPE HOLDS EXACTLY π PAINT"
+    near-white / "CAN NEVER BE PAINTED" amber).  Raises when Pillow is
+    missing — callers fall back to the SVG layout thumbnail.
+    """
+    if not HAS_PIL:
+        raise RuntimeError("compose_designed_thumbnail needs Pillow")
+
+    scale = SUPERSAMPLE
+    W, H = WIDTH * scale, HEIGHT * scale
+
+    base = None
+    if frame_path and os.path.exists(frame_path):
+        try:
+            base = Image.open(frame_path).convert("RGB")
+        except Exception:  # noqa: BLE001 — unreadable frame → navy base
+            base = None
+    if base is not None:
+        # cover-crop the frame to 16:9 so it never distorts
+        src_w, src_h = base.size
+        target_ratio = W / H
+        src_ratio = src_w / src_h
+        if src_ratio > target_ratio:
+            new_w = int(src_h * target_ratio)
+            x0 = (src_w - new_w) // 2
+            base = base.crop((x0, 0, x0 + new_w, src_h))
+        else:
+            new_h = int(src_w / target_ratio)
+            y0 = max(0, int((src_h - new_h) * 0.35))  # bias above center
+            base = base.crop((0, y0, src_w, y0 + new_h))
+        base = base.resize((W, H), Image.LANCZOS)
+    else:
+        base = Image.new("RGB", (W, H), NAVY)
+
+    # navy wash + bottom gradient for headline legibility
+    wash = Image.new("L", (1, H))
+    for y in range(H):
+        t = max(0.0, (y - 0.30 * H) / (0.70 * H))
+        wash.putpixel((0, y), int(95 + 135 * t))
+    wash = wash.resize((W, H))
+    base.paste(Image.new("RGB", (W, H), NAVY), (0, 0), wash)
+    img = base
+    draw = ImageDraw.Draw(img)
+
+    # headline: claim (near-white) + twist (amber), large, word-wrapped
+    claim, twist = split_hook(hook)
+    if not claim:
+        claim = (topic or "").split(":")[0].strip() or "Untitled video"
+
+    margin = 80 * scale
+    max_width = W - 2 * margin
+
+    def _lines_for(text: str, font) -> List[str]:
+        return _wrap(text.upper(), font, max_width)
+
+    font_size = 88
+    while font_size >= 44:
+        font = _pick_font("bold", font_size * scale)
+        claim_lines = _lines_for(claim, font)
+        twist_lines = _lines_for(twist, font) if twist else []
+        if len(claim_lines) <= 2 and len(twist_lines) <= 1:
+            break
+        font_size -= 6
+    if not claim_lines:
+        claim_lines = [claim.upper()]
+
+    line_h = int(font_size * 1.22 * scale)
+    total_h = line_h * (len(claim_lines) + len(twist_lines))
+    y = H - 96 * scale - total_h
+
+    # accent bar left of the headline block
+    draw.rectangle((36 * scale, y + 6 * scale, 50 * scale,
+                    y + total_h - 6 * scale), fill=ACCENT)
+
+    for line in claim_lines:
+        draw.text((margin, y), line, font=font,
+                  fill=HEADLINE_CLAIM_COLOR,
+                  stroke_width=4 * scale, stroke_fill=NAVY)
+        y += line_h
+    for line in twist_lines:
+        draw.text((margin, y), line, font=font,
+                  fill=HEADLINE_TWIST_COLOR,
+                  stroke_width=4 * scale, stroke_fill=NAVY)
+        y += line_h
+
+    os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
+    img = img.resize((WIDTH, HEIGHT), Image.LANCZOS)
+    img.save(out_path, "JPEG", quality=92)
+    return out_path
 
 
 # ────────────────────────────────────────────────────────────────────────────

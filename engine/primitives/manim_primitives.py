@@ -269,18 +269,50 @@ def enter_attractor(scene: Scene, scene_state: SceneState, value: str = "6174",
     return text
 
 
+def _on_stage(scene: Scene, mob) -> bool:
+    """True when the mobject (or any of its family members) is currently
+    in the scene's mobjects list.
+
+    Identity-based (Mobject equality is identity in manim 0.20).  Family
+    -wide because primitives may add a group's CHILDREN individually
+    (e.g. Comparison fades in left/right separately, never the wrapper
+    VGroup) — an identity-only check then missed live pixels and the
+    compiler's exit faded nothing.
+    """
+    fam = {id(m) for m in mob.get_family()}
+    return any(id(m) in fam for m in scene.mobjects)
+
+
+def _stage_members(scene: Scene, mob) -> list:
+    """The mobjects of ``mob``'s family that are actually on stage."""
+    fam = {id(m) for m in mob.get_family()}
+    return [m for m in scene.mobjects if id(m) in fam]
+
+
 def exit_object(scene: Scene, scene_state: SceneState, oid: str,
                 duration: float | None = None) -> None:
     """Idempotent EXIT: fade the object out and record its exit.
 
     Safe to call twice (compiler may sweep an object the primitive already
-    removed) — a second call is a no-op.
+    removed) — a second call is a no-op.  The mobject handle is cleared
+    after removal so 'exit declared + handle still set' always means
+    'pixels still on stage'.
     """
     obj = scene_state.get(oid)
     if obj is None or obj.exit_beat is not None or obj.mobject is None:
         return
-    d = _motion_default(duration, 0.4)
-    scene.play(FadeOut(obj.mobject), run_time=d)
+    present = _stage_members(scene, obj.mobject)
+    if present:
+        d = _motion_default(duration, 0.4)
+        if len(present) == 1 and present[0] is obj.mobject:
+            scene.play(FadeOut(obj.mobject), run_time=d)
+        else:
+            # children were added individually — fade exactly what is on
+            # stage (manim renders the wrapped family, then removes the
+            # wrapper; the zero-opacity originals left in scene.mobjects
+            # are invisible and inert)
+            scene.play(FadeOut(VGroup(*present)), run_time=d)
+    obj.mobject = None
     scene_state.exit(oid)
     scene_state.record_exit(oid)
 

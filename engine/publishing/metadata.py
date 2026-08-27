@@ -35,6 +35,7 @@ _STOPWORDS = frozenset(
     off again further once here there all any both each few more most other
     some such only own same so than too very can will just should now let
     keep keeps keep_ lets let's s t don't doesnt won't well really way
+    never always without every still even maybe often thing things
     """.split()
 )
 
@@ -123,12 +124,23 @@ def _truncate_words(text: str, max_len: int) -> str:
 
 
 def _join_pair(left: str, sep: str, right: str, max_len: int) -> str:
-    """Join ``left`` + ``sep`` + ``right`` within ``max_len``, truncating the
-    right side first so the topic (left) survives intact."""
-    budget = max_len - len(left) - len(sep)
-    if budget <= 0:
+    """Join ``left`` + ``sep`` + ``right`` within ``max_len``.
+
+    Only composes the pair when BOTH sides fit whole; otherwise returns
+    the left side alone (word-boundary truncated).  This kills the
+    naive-concatenation artifact class where a long topic squeezed the
+    hook down to a mid-word fragment ("…paint: This", "…— Th…" —
+    the truncated Gabriel's Horn titles, 2026-08-27).
+    """
+    left = _clean_title_text(left)
+    right = _clean_title_text(right)
+    if not left:
+        return _truncate_words(right, max_len)
+    if not right:
         return _truncate_words(left, max_len)
-    return f"{left}{sep}{_truncate_words(right, budget)}"
+    if len(left) + len(sep) + len(right) <= max_len:
+        return f"{left}{sep}{right}"
+    return _truncate_words(left, max_len)
 
 
 def _key_narration_phrase(beats: Sequence[Dict[str, Any]]) -> str:
@@ -151,11 +163,15 @@ def _key_narration_phrase(beats: Sequence[Dict[str, Any]]) -> str:
 # ────────────────────────────────────────────────────────────────────────────
 
 def _title_candidates(topic: str, phrase: str) -> List[str]:
-    """Three hook-based title candidates, each <= 60 chars, YouTube-safe.
+    """Three clean title candidates, each <= 60 chars (YouTube title sweet
+    spot), each a complete readable phrase — never a truncated
+    topic+hook concatenation:
 
-    1. topic: hook phrase
-    2. hook phrase | topic
-    3. topic — hook phrase (shortened)
+    1. the hook, standalone (a complete claim)
+    2. topic name (text before ':') + hook, when both fit whole
+    3. hook clause | topic name, when both fit whole
+
+    Every variant is word-boundary clean and <= MAX_TITLE_CHARS.
     """
     t = _clean_title_text(topic)
     p = _clean_title_text(phrase)
@@ -163,20 +179,49 @@ def _title_candidates(topic: str, phrase: str) -> List[str]:
         t = "Untitled video"
     if not p:
         p = t
-    short_p = _truncate_words(p, 36)
+    # Topic short name: the part before the first colon — a real title
+    # usually names the object ("Gabriel's Horn"), not the full topic
+    # sentence.
+    name = t.split(":")[0].strip() or t
+    clause = p
+    if len(p) > 40:
+        first = re.split(r"[—–;,]", p)[0].strip()
+        if len(first) >= 12:
+            clause = first
     candidates = [
-        _join_pair(t, ": ", p, MAX_TITLE_CHARS),
-        _join_pair(p, " | ", t, MAX_TITLE_CHARS),
-        _join_pair(t, " — ", short_p, MAX_TITLE_CHARS),
+        _truncate_words(p, MAX_TITLE_CHARS),
+        max((_join_pair(name, ": ", p, MAX_TITLE_CHARS),
+             _join_pair(name, ": ", clause, MAX_TITLE_CHARS)), key=len),
+        _join_pair(clause, " | ", name, MAX_TITLE_CHARS),
     ]
-    # Deduplicate while preserving order.
+    # Deduplicate while preserving order; pad from the topic when a
+    # variant collapsed onto another so three distinct options remain.
     seen: set = set()
     unique = []
     for c in candidates:
         key = c.lower()
-        if key not in seen:
+        if c and key not in seen:
             seen.add(key)
             unique.append(c)
+    for fallback in (_truncate_words(t, MAX_TITLE_CHARS),
+                     _truncate_words(name, MAX_TITLE_CHARS)):
+        if len(unique) >= 3:
+            break
+        if fallback and fallback.lower() not in seen:
+            seen.add(fallback.lower())
+            unique.append(fallback)
+    # Last resort when topic and hook are too entangled for whole-phrase
+    # pairs: a word-boundary-truncated hook after the topic name (still
+    # never a mid-word cut, and only when at least 4 words survive).
+    while len(unique) < 3:
+        budget = MAX_TITLE_CHARS - len(name) - 3
+        trimmed = _truncate_words(p, max(budget, 0))
+        if (not trimmed or len(trimmed.split()) < 4
+                or f"{name} | {trimmed}".lower() in seen):
+            break
+        cand = f"{name} | {trimmed}"
+        seen.add(cand.lower())
+        unique.append(cand)
     return unique or [_truncate_words(t, MAX_TITLE_CHARS)]
 
 

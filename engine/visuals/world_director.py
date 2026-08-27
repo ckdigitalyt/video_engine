@@ -478,10 +478,31 @@ def _plan_math(topic: str, world: WorldState,
         visual_type = shot["visual_type"] if shot else "highlight"
         objects = shot["objects"] if shot else []
         actions = shot["actions"] if shot else []
+        # Legacy v1 shot actions are type-keyed transformations; the v2
+        # SemanticAction schema requires action+target (and forbids
+        # 'type'/'mode').  Convert so the wrapped spec can actually pass
+        # Gate 1 — before 2026-08-27 these specs failed validate_visualspec_v2
+        # and could NEVER reach the world compiler (latent bug exposed by
+        # the compile-level text-overlap gate).
+        sa = []
+        for a in actions:
+            if not isinstance(a, dict) or not a.get("type"):
+                continue
+            # 'reveal' becomes a text layer — give it its own oid, never
+            # the number rig's 'number_main' (overlap-safe, see
+            # engine.qa.gates.gate_text_overlap).
+            target = "reveal" if a["type"] == "reveal" else "number_main"
+            act: dict = {"action": str(a["type"]), "target": target}
+            for k in ("from", "to"):
+                if a.get(k) is not None:
+                    act[k] = a[k]
+            extra = {k: v for k, v in a.items()
+                     if k not in ("type", "from", "to")}
+            if extra:
+                act["params"] = extra
+            sa.append(act)
         beat = _mkbeat(b["beat_id"], b.get("intent", "explanation"),
-                       b["narration"], b["duration"], objects,
-                       [dict(a, type=a["type"]) for a in actions
-                        if isinstance(a, dict) and a.get("type")],
+                       b["narration"], b["duration"], objects, sa,
                        visual_type, shot.get("camera") if shot else None,
                        b.get("importance", "medium"))
         beats.append(beat)

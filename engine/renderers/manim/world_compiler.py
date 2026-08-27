@@ -47,6 +47,7 @@ from engine.world.world_model import WorldState
 
 from engine.primitives.world_primitives import (
     ACTION_NATURAL_DURATION, ENTITY_MATERIALIZERS,
+    TEXT_LAYER_ACTIONS, is_text_layer_replacement, text_layer_oid,
 )
 
 
@@ -334,6 +335,9 @@ def _compile_beat(beat: dict, state: SceneState, future_ids: set[str],
                           f"duration=@D@)", 0.4))
             state.exit(oid)
             state.record_exit(oid)
+            # mirror the runtime handle clear (exit_object) so the
+            # compile-time SceneState stays honest about what is on stage
+            obj.mobject = None
 
     # ── ENTER materialization (world entities) ────────────────────────
     for obj in beat.get("objects", []):
@@ -350,8 +354,16 @@ def _compile_beat(beat: dict, state: SceneState, future_ids: set[str],
                 f"beat {bid}: cannot materialize object {oid!r} of unknown "
                 f"world type {otype!r}")
         ent = world.entity(oid)
-        entity_dict = ent.to_dict() if hasattr(ent, "to_dict") else \
-            {"id": oid, "type": otype, "properties": obj.get("properties", {})}
+        if ent is not None and hasattr(ent, "to_dict"):
+            entity_dict = ent.to_dict()
+        else:
+            props = dict(obj.get("properties", {}) or {})
+            if obj.get("value") is not None and "text" not in props:
+                # text-typed objects (equation/reveal/payoff) carry their
+                # display string in `value` — surface it for the text
+                # materializers
+                props["text"] = str(obj.get("value"))
+            entity_dict = {"id": oid, "type": otype, "properties": props}
         natural = _NATURAL_ENTER.get(ENTITY_MATERIALIZERS.get(otype, ""), 0.6)
         calls.append((f"materialize_entity(self, self._state, "
                       f"{repr(entity_dict)}, duration=@D@)", natural))
@@ -379,6 +391,26 @@ def _compile_beat(beat: dict, state: SceneState, future_ids: set[str],
         calls.append((f"apply_action(self, self._state, "
                       f"{repr(act)}, self._world, duration=@D@)",
                       natural))
+
+    # ── text-layer lifecycle (compile-time mirror) ─────────────────
+    # Actions that create a text/label/formula layer register it in the
+    # compile-time SceneState so the NEXT beat's EXIT sweep fades it out
+    # before the next text layer enters.  Without this mirror the
+    # compiler never saw action-created layers (apply_action is opaque),
+    # so nothing ever faded them — every fill/measure/compare stacked a
+    # new formula layer on the previous one (the garbled t≈13–33s
+    # crossfade in the Gabriel's Horn -r3 render, 2026-08-27; QA gate:
+    # engine.qa.gates.gate_text_overlap).
+    for a in actions:
+        name = str(a.get("action", a.get("type", "")))
+        if name not in TEXT_LAYER_ACTIONS:
+            continue
+        if is_text_layer_replacement(beat, a):
+            continue  # in-place text swap — no second layer
+        oid = text_layer_oid(name, str(a.get("target", "")))
+        if oid:
+            state.enter(oid, "text_layer", value="", persistent=False)
+            state.record_enter(oid)
 
     # ── narrative fallback (kinetic text LAST, spec §9) ───────────────
     if not calls:

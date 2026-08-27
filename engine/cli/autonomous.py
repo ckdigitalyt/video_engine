@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 import subprocess
 import time
 from pathlib import Path
@@ -169,7 +170,8 @@ def emit_packaging(out_dir: str | Path, topic: str, beats: list[dict],
     Returns a small status dict; packaging failures never block a PASS
     video, so callers should treat exceptions as non-fatal.
     """
-    from engine.publishing.metadata import generate_metadata, save
+    from engine.publishing.metadata import (
+        MAX_TITLE_CHARS, generate_metadata, save)
     out = Path(out_dir)
     meta = generate_metadata(
         topic=topic,
@@ -177,24 +179,48 @@ def emit_packaging(out_dir: str | Path, topic: str, beats: list[dict],
                    "metadata": {"topic": topic}},
         qareport=qa_report,
     )
-    # Enforce YouTube's 100-char title limit on every variant.
-    meta["title_candidates"] = [t[:100] for t in
+    # YouTube title limit (metadata.py already emits clean <=60-char
+    # variants; this clamp is a belt-and-braces guarantee).
+    meta["title_candidates"] = [t[:MAX_TITLE_CHARS] for t in
                                 meta.get("title_candidates", [])][:3]
-    meta["title"] = meta["title_candidates"][0] if meta["title_candidates"] else topic[:100]
+    meta["title"] = meta["title_candidates"][0] if meta["title_candidates"] else topic[:MAX_TITLE_CHARS]
     meta["thumbnail"] = "thumbnail.jpg"
 
     thumb_path = out / "thumbnail.jpg"
+    made = False
     if video_path and Path(video_path).exists():
         ts = _hero_timestamp(beats, vs)
+        frame_path = out / "_hero_frame.png"
         proc = subprocess.run(
             ["ffmpeg", "-v", "error", "-y",
              "-ss", f"{ts:.2f}", "-i", str(video_path),
              "-frames:v", "1", "-vf", "scale=1280:720",
-             str(thumb_path)],
+             str(frame_path)],
             capture_output=True, text=True)
-        if proc.returncode != 0 or not thumb_path.exists():
-            thumb_path = None
-    if thumb_path is None:
+        if proc.returncode == 0 and frame_path.exists():
+            # DESIGNED thumbnail (review 2026-08-27: "never export the
+            # thumbnail from a transition frame"): the hero frame dimmed
+            # under the navy wash + a hook-derived two-tone headline.
+            try:
+                from engine.publishing.metadata import _key_narration_phrase
+                from engine.publishing.thumbnail import (
+                    compose_designed_thumbnail)
+                compose_designed_thumbnail(
+                    frame_path=str(frame_path), topic=topic,
+                    hook=_key_narration_phrase(beats),
+                    out_path=str(thumb_path))
+                made = thumb_path.exists()
+            except Exception:  # noqa: BLE001 — packaging never blocks PASS
+                made = False
+            if not made:
+                # raw hero-frame fallback (previous behavior)
+                shutil.copyfile(frame_path, thumb_path)
+                made = True
+        try:
+            frame_path.unlink()
+        except OSError:
+            pass
+    if not made:
         # deterministic Pillow/SVG layout thumbnail fallback
         from engine.publishing.thumbnail import generate_thumbnail
         thumb_path = Path(generate_thumbnail(run_dir=None, topic=topic,

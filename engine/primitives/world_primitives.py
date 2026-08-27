@@ -830,16 +830,25 @@ def CauseEffectChain(scene: Scene, scene_state: SceneState,
             group.add(arrow)
         y -= 1.4
     scene.play(FadeIn(group), run_time=d * 0.6)
+    # Honest TEMP lifecycle (see MeasureValue): the chain stays on stage
+    # for its beat; the compiler's EXIT sweep removes it.
     scene_state.enter(oid, "cause_effect", persistent=False, mobject=group)
-    scene_state.exit(oid)
     scene_state.record_enter(oid)
-    scene_state.record_exit(oid)
 
 
 def MeasureValue(scene: Scene, scene_state: SceneState, oid: str,
                  value: str, label: str = "", at: Sequence[float] = (0, 0, 0),
                  color: str = "#FFB74D", duration: float | None = None) -> Text:
-    """A measured value with units (spec §4 measurements).  TEMP."""
+    """A measured value with units (spec §4 measurements).  TEMP.
+
+    Lifecycle is HONEST: the mobject is faded IN here and stays on stage
+    for the rest of its beat; the compiler's next-beat EXIT sweep fades
+    it out (exit_object) before any new text layer enters.  The previous
+    version declared enter+exit in the same breath WITHOUT ever removing
+    the pixels — so every measure/fill/compare stacked a new formula
+    layer on top of the old one (the t≈13–33s garbled crossfade in the
+    Gabriel's Horn -r3 render, 2026-08-27).
+    """
     d = _motion_default(duration, 0.7)
     text = value if label == "" else f"{label}: {value}"
     mob = Text(text, font=_font(), font_size=30, color=color)
@@ -847,9 +856,7 @@ def MeasureValue(scene: Scene, scene_state: SceneState, oid: str,
     scene.play(FadeIn(mob, scale=1.3), run_time=d)
     scene_state.enter(f"{oid}_measure", "measurement", value=text,
                       persistent=False, mobject=mob)
-    scene_state.exit(f"{oid}_measure")
     scene_state.record_enter(f"{oid}_measure")
-    scene_state.record_exit(f"{oid}_measure")
     return mob
 
 
@@ -1079,11 +1086,13 @@ def PaintFill(scene: Scene, scene_state: SceneState, oid: str = "fill",
         group.add(lbl)
     scene.play(FadeIn(group, scale=0.96), run_time=d * 0.7)
     scene.play(Indicate(fill, scale_factor=1.03), run_time=d * 0.3)
+    # Honest TEMP lifecycle: pixels stay for this beat, the compiler's
+    # next-beat EXIT sweep fades them before the next text layer enters
+    # (the old code declared enter+exit instantly and never removed the
+    # fill+label group — stacked formula layers, see MeasureValue note).
     scene_state.enter(oid, "shape", value=label, persistent=False,
                       mobject=group)
-    scene_state.exit(oid)
     scene_state.record_enter(oid)
-    scene_state.record_exit(oid)
 
 
 # ────────────────────────────────────────────────────────────────────────
@@ -1296,6 +1305,7 @@ ENTITY_MATERIALIZERS: dict[str, str] = {
     "decision": "Node",
     "number": "MovingBody",
     "digit_array": "MovingBody",
+    "equation": "RevealText",
     # §46 acoustics / phase-change entities
     "microphone": "Node",
     "processor": "Node",
@@ -1489,6 +1499,74 @@ ACTION_NATURAL_DURATION: dict[str, float] = {
 }
 
 
+# ────────────────────────────────────────────────────────────────────────
+# text-layer contract (shared by runtime, world compiler and QA gate)
+# ────────────────────────────────────────────────────────────────────────
+# Semantic actions that schedule a TEXT/label/formula layer on stage.
+# This is the text crossfade-overlap bug class: two of these layers on
+# stage at once garble both (Gabriel's Horn -r3, t≈13–33s, 2026-08-27).
+TEXT_LAYER_ACTIONS: tuple[str, ...] = ("measure", "fill", "compare", "reveal")
+
+# Entity obj_types that ARE text layers (PayoffText / RevealText /
+# QuestionMark / _enter_text primitives enter with these types).
+TEXT_ENTITY_TYPES: frozenset[str] = frozenset(
+    {"payoff", "reveal", "text", "question"})
+
+
+def text_layer_oid(action: str, target: str) -> str | None:
+    """SceneState oid of the text layer an action creates (single source
+    of truth for the runtime AND the QA text-overlap gate)."""
+    if action == "measure":
+        return f"{target or 'measure'}_measure"
+    if action == "fill":
+        return f"{target}_fill" if target else "fill"
+    if action == "compare":
+        return "comparison"
+    if action == "reveal":
+        return target or "reveal"
+    return None
+
+
+def is_text_layer_replacement(beat: dict, action: dict) -> bool:
+    """True when the action retargets a TEXT entity declared in the same
+    beat (e.g. measure on a payoff card): an in-place replacement of that
+    layer, never a second overlapping one."""
+    name = str(action.get("action", action.get("type", "")))
+    target = str(action.get("target", ""))
+    if name != "measure" or not target:
+        return False
+    for obj in beat.get("objects", []) or []:
+        if (isinstance(obj, dict)
+                and str(obj.get("id", "")) == target
+                and str(obj.get("type", "")) in TEXT_ENTITY_TYPES):
+            return True
+    return False
+
+
+def _replace_text_layer(scene: Scene, scene_state: SceneState, oid: str,
+                        text: str, duration: float | None = None) -> None:
+    """Replace a text entity's displayed text IN PLACE (fade-swap at the
+    same position, same SceneState oid).  Never creates a second layer."""
+    obj = scene_state.get(oid)
+    if obj is None or obj.mobject is None:
+        return
+    if str(obj.value or "") == text:
+        # same string already on stage — pure confirmation, no pixels move
+        scene_state.update(oid, {"op": "measure_confirm"}, value=text)
+        scene_state.record_update(oid)
+        return
+    d = _motion_default(duration, 0.7)
+    old = obj.mobject
+    at = old.get_center()
+    scene.play(FadeOut(old), run_time=d * 0.5)
+    mob = Text(text, font=_font(), font_size=38, color="#FFD54F")
+    mob.move_to(at)
+    scene.play(FadeIn(mob, scale=1.2), run_time=d * 0.5)
+    scene_state.update(oid, {"op": "measure_replace"}, value=text,
+                       mobject=mob)
+    scene_state.record_update(oid)
+
+
 def apply_action(scene: Scene, scene_state: SceneState,
                  action: dict, world: dict,
                  duration: float | None = None) -> None:
@@ -1672,7 +1750,13 @@ def apply_action(scene: Scene, scene_state: SceneState,
         if not v.ok:
             raise ValueError("fill action failed math verification: "
                              + "; ".join(f["detail"] for f in v.failures()))
-        PaintFill(scene, scene_state, oid=target or "fill",
+        # NOTE: the fill's fill+label group gets its OWN oid (<target>_fill),
+        # never the target's id.  The old code passed oid=target, which
+        # OVERWROTE the persistent target entity in SceneState (mobject
+        # handle replaced by the fill polygon) and orphaned the real
+        # entity — positions and later exits then misfired.
+        PaintFill(scene, scene_state,
+                  oid=f"{target}_fill" if target else "fill",
                   target_oid=target or "horn",
                   label=str(params.get("label", params.get("value", "V = π"))),
                   duration=duration)
@@ -1724,9 +1808,22 @@ def apply_action(scene: Scene, scene_state: SceneState,
                    scene_state=scene_state, duration=duration)
         return
     if name == "measure":
+        value = str(action.get("to", params.get("value", "")))
+        label = str(params.get("label", ""))
+        tgt_obj = scene_state.get(target or "")
+        if (tgt_obj is not None and tgt_obj.exit_beat is None
+                and tgt_obj.obj_type in TEXT_ENTITY_TYPES):
+            # measure ON an existing text entity (payoff/reveal/question
+            # card): REPLACE its text in place.  A second layer here is
+            # the text crossfade-overlap bug class — never stack.
+            _replace_text_layer(
+                scene, scene_state, oid=target,
+                text=value if value else f"{label}: {value}",
+                duration=duration)
+            return
         MeasureValue(scene, scene_state, oid=target or "measure",
-                     value=str(action.get("to", params.get("value", ""))),
-                     label=str(params.get("label", "")),
+                     value=value,
+                     label=label,
                      at=_pos_of(target, [0, 2]),
                      duration=duration)
         return
