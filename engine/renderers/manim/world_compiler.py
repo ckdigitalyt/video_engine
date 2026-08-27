@@ -16,6 +16,14 @@ Same correctness contract as the v1 compiler:
   4. Semantic actions resolve through the ActionRegistry to trusted
      primitives; unknown actions raise CompileError (never a no-op).
   5. Duration budget per beat: animations + self.wait() must fit.
+     Runtime wait-fill (2026-08-27): the budget assumes every primitive
+     consumes its requested run_time, but some silently no-op (camera
+     ops without a movable camera frame) or play fixed sub-runtimes,
+     leaving beats short — which surfaced as a pure-black padding tail
+     in the compositor and aborted the run on the black-frame gate.
+     Each beat therefore measures the real rendered clock (Scene.time
+     advances exactly with rendered frames) and wait-fills the leftover
+     to the planned budget; _ve_finish logs planned-vs-rendered drift.
   6. Kinetic text is a FALLBACK (spec §9): only beats whose visual_type
      is a text class get narrative text; demonstration beats use
      semantic actions on world entities.
@@ -415,7 +423,58 @@ def _compile_beat(beat: dict, state: SceneState, future_ids: set[str],
             f"duration ({dur:.2f}s)")
     stmts.append(f"self.wait({wait:.3f})")
     state.record_persist()
-    return stmts, total_anim
+    return stmts, total_anim, dur
+
+
+# Runtime duration-accounting helpers injected into every generated
+# scene (plain string; NOT an f-string — keep braces literal).
+_VE_SCENE_HELPERS = '''
+    def _ve_mark(self, bid):
+        # start-of-beat duration accounting (see _ve_hold)
+        self._ve_t0 = self.time
+
+    def _ve_hold(self, bid, planned):
+        # Wait-fill guard: the compile-time budget assumed every
+        # primitive consumes its requested run_time; primitives that
+        # no-op silently (e.g. camera ops without a movable frame) or
+        # play fixed sub-runtimes leave the beat short.  Scene.time
+        # advances exactly with rendered frames, so the leftover is
+        # rendered as real scene time (never compositor black padding).
+        fps = float(_manim_config.frame_rate)
+        elapsed = self.time - self._ve_t0
+        leftover = planned - elapsed
+        self._ve_beats.append(dict(beat=bid, planned=round(planned, 3),
+                                   animated=round(elapsed, 3),
+                                   held=round(max(leftover, 0.0), 3)))
+        if leftover * fps > 1.5:  # more than 1.5 frames short
+            self.wait(leftover)
+
+    def _ve_finish(self, planned_total):
+        # Duration-vs-plan sanity log: top up any residual shortfall
+        # (per-beat frame quantization) and report drift so future
+        # scene/compositor divergence is visible in render logs.
+        fps = float(_manim_config.frame_rate)
+        rendered = self.time
+        drift = rendered - planned_total
+        if -drift * fps > 1.5:
+            self.wait(planned_total - rendered)
+            rendered = self.time
+            drift = rendered - planned_total
+        print("[ve-duration] scene planned=%.3fs rendered=%.3fs "
+              "drift=%+.3fs (fps=%g)"
+              % (planned_total, rendered, drift, fps))
+        for e in self._ve_beats:
+            if (e["planned"] - e["animated"]) * fps > 1.5:
+                print("[ve-duration] beat %s: planned=%.3fs "
+                      "animated=%.3fs wait-filled=%.3fs"
+                      % (e["beat"], e["planned"], e["animated"],
+                         e["held"]))
+        if os.environ.get("VE_DURATION_LOG"):
+            import json as _dj
+            _dj.dump(dict(planned=planned_total, rendered=rendered,
+                          drift=drift, fps=fps, beats=self._ve_beats),
+                     open(os.environ["VE_DURATION_LOG"], "w"), indent=2)
+'''
 
 
 def emit_world_scene(vs: dict, scene_name: str = "WorldScene") -> str:
@@ -434,14 +493,19 @@ def emit_world_scene(vs: dict, scene_name: str = "WorldScene") -> str:
     beats = vs["beats"]
     state = SceneState()
     body: list[str] = []
+    total_planned = 0.0
     for idx, beat in enumerate(beats):
         bid = beat.get("beat_id", f"b{idx + 1:03d}")
         future_ids = _future_refs(beats, idx)
-        stmts, _ = _compile_beat(beat, state, future_ids, world, bid)
+        stmts, _, dur = _compile_beat(beat, state, future_ids, world, bid)
+        total_planned += dur
         body.append(f"        # ---- beat {bid}: {beat.get('intent','')} ----")
         body.append("        self._state.begin_beat(%r)" % bid)
+        body.append("        self._ve_mark(%r)" % bid)
         body.extend("        " + s for s in stmts)
         body.append("        self._state.record_persist()")
+        body.append("        self._ve_hold(%r, %.3f)" % (bid, dur))
+    body.append("        self._ve_finish(%.3f)" % total_planned)
 
     world_literal = repr(world.to_dict())  # Python literal (None/True/False)
     hero = (vs.get("metadata", {}) or {}).get("hero_mechanism") or {}
@@ -522,6 +586,7 @@ def camera_reset(scene, duration=0.9):
 
 
 class {scene_name}(Scene):
+{_VE_SCENE_HELPERS}
     def construct(self):
         # dark navy (not pure black): belt-and-braces — the module-level
         # config above is authoritative; this also pins the camera in case
@@ -529,6 +594,8 @@ class {scene_name}(Scene):
         self.camera.background_color = "#0b0f1a"
         self._state = SceneState()
         self._world = WorldState.from_dict({world_literal})
+        self._ve_t0 = 0.0
+        self._ve_beats: list = []
 {chr(10).join(body)}
         if os.environ.get("VE_SCENE_STATE_LOG"):
             self._state.write_log(os.environ["VE_SCENE_STATE_LOG"])
