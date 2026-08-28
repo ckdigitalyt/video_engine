@@ -146,16 +146,21 @@ def sfx_cues_from_beats(beats: list[dict],
     """Pick 3–4 spot-SFX moments from beat semantics.
 
     Priority: hook whoosh → fill/pour → formula-reveal pop → end-card
-    sting.  Times are beat starts (seconds); dedup close moments.
+    sting.  Times are beat starts (seconds; accumulated from durations
+    when the spec is not yet time-anchored).  Dedup close moments.
     """
     cues: list[dict] = []
-    for b in beats or []:
+    t = 0.0
+    for i, b in enumerate(beats or []):
+        start = float(b.get("start", 0.0) or 0.0)
+        if start <= 0.0:
+            start = t
+        t = start + float(b.get("duration", 0.0) or 0.0)
         role = str(b.get("role", "") or b.get("intent", "")).lower()
         actions = " ".join(str(a.get("action", a.get("type", "")))
                            for a in (b.get("semantic_actions", []) or []) +
                            (b.get("transformations", []) or []))
-        start = float(b.get("start", 0.0) or 0.0)
-        is_final = b is (beats[-1] if beats else None)
+        is_final = i == len(beats) - 1
         kind = None
         if not cues and ("hook" in role or "question" in role):
             kind = "whoosh"
@@ -170,7 +175,12 @@ def sfx_cues_from_beats(beats: list[dict],
                          "volume": 1.0})
     # sting on the final beat even when the role filters missed it
     if beats and not any(c["type"] == "sting" for c in cues):
-        cues.append({"time": round(float(beats[-1].get("start", 0.0) or 0.0), 3),
+        last_start = 0.0
+        acc = 0.0
+        for b in beats:
+            last_start = float(b.get("start", 0.0) or 0.0) or acc
+            acc = last_start + float(b.get("duration", 0.0) or 0.0)
+        cues.append({"time": round(last_start, 3),
                      "type": "sting", "volume": 1.0})
     cues.sort(key=lambda c: c["time"])
     # keep the LAST sting (end card) plus the earliest others
