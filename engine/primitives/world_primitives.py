@@ -32,7 +32,7 @@ from manim import (
     DOWN, LEFT, ORIGIN, RIGHT, UP,
     Arrow, Circle, Create, DashedLine, Dot, FadeIn, FadeOut, GrowFromCenter,
     Indicate, Line, ParametricFunction, Polygon, Scene, Text, Transform,
-    VGroup, ValueTracker, VMobject,
+    VGroup, ValueTracker, VMobject, there_and_back,
 )
 
 from engine.config.loader import get_style
@@ -853,7 +853,8 @@ def MeasureValue(scene: Scene, scene_state: SceneState, oid: str,
     text = value if label == "" else f"{label}: {value}"
     mob = Text(text, font=_font(), font_size=30, color=color)
     mob.move_to(at)
-    scene.play(FadeIn(mob, scale=1.3), run_time=d)
+    from engine.qa.fade import clamp_fade
+    scene.play(FadeIn(mob, scale=1.3), run_time=clamp_fade(d))
     scene_state.enter(f"{oid}_measure", "measurement", value=text,
                       persistent=False, mobject=mob)
     scene_state.record_enter(f"{oid}_measure")
@@ -1059,8 +1060,12 @@ def HornProfile(scene: Scene, scene_state: SceneState, oid: str = "horn",
     mouth = Line(top[0], bottom[0], color=color, stroke_width=4)
     group = VGroup(upper, lower, axis, mouth)
     if label:
-        lbl = _label(label, 22)
-        lbl.next_to(axis, DOWN, buff=0.25)
+        # wave-2 contrast rule (review v3 §4.8): the y = 1/x label was a
+        # low-contrast gray overlapping the blue fill — render it WHITE
+        # above the horn mouth where it never collides with the fill
+        lbl = _label(label, 22, "#F5F7FA")
+        lbl.move_to([top[0][0] + 0.4,
+                     max(p[1] for p in top) + 0.55, 0])
         group.add(lbl)
     scene.play(Create(group), run_time=d)
     scene_state.enter(oid, "horn", value=label, persistent=True,
@@ -1084,8 +1089,12 @@ def PaintFill(scene: Scene, scene_state: SceneState, oid: str = "fill",
         lbl = _label(label, 30, "#FFD54F")
         lbl.move_to([(top[0][0] + top[-1][0]) / 2, 0.75, 0])
         group.add(lbl)
-    scene.play(FadeIn(group, scale=0.96), run_time=d * 0.7)
-    scene.play(Indicate(fill, scale_factor=1.03), run_time=d * 0.3)
+    from engine.qa.fade import clamp_fade
+    scene.play(FadeIn(group, scale=0.96), run_time=clamp_fade(d * 0.7))
+    # color-safe pulse: scale-only (Indicate recolors yellow -> the blue
+    # fill reads OLIVE mid-flick; review v3 §4.8 'muddy olive fill')
+    scene.play(fill.animate(rate_func=there_and_back).scale(1.03),
+               run_time=clamp_fade(d * 0.3))
     # Honest TEMP lifecycle: pixels stay for this beat, the compiler's
     # next-beat EXIT sweep fades them before the next text layer enters
     # (the old code declared enter+exit instantly and never removed the

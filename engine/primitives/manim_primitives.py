@@ -303,7 +303,9 @@ def exit_object(scene: Scene, scene_state: SceneState, oid: str,
         return
     present = _stage_members(scene, obj.mobject)
     if present:
-        d = _motion_default(duration, 0.4)
+        from engine.qa.fade import clamp_fade
+        # wave-2 fade rule (a): exits fade in <=0.4s (no sampled ghosts)
+        d = clamp_fade(_motion_default(duration, 0.4))
         if len(present) == 1 and present[0] is obj.mobject:
             scene.play(FadeOut(obj.mobject), run_time=d)
         else:
@@ -704,9 +706,12 @@ def ConvergenceParticles(scene: Scene, scene_state: SceneState,
 def _enter_text(scene: Scene, scene_state: SceneState | None, oid: str,
                 text: str, color: str, font_size: int,
                 run_time: float, zone: Zone = Zone.CENTER):
+    from engine.qa.fade import clamp_fade
     mob = Text(text, font=_font(), font_size=font_size, color=color)
     mob.move_to(zone_offset(zone))
-    scene.play(FadeIn(mob), run_time=run_time)
+    # wave-2 fade rule (a): text fades complete in <=0.4s so no 1fps
+    # review sample ever catches a <=50%-opacity ghost
+    scene.play(FadeIn(mob), run_time=clamp_fade(run_time))
     if scene_state is not None:
         scene_state.enter(oid, "text", value=text, zone=zone,
                           persistent=False, mobject=mob)
