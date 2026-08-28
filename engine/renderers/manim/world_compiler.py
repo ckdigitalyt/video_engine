@@ -42,6 +42,7 @@ from engine.validation.schema import validate_visualspec_v2, validate_worldmodel
 from engine.validation import math_verify as M
 from engine.validation import physics_verify as PH
 from engine.visuals.scene_state import SceneState, Zone
+from engine.visuals.tween import tween_statements_for_beat
 from engine.world.actions import resolve
 from engine.world.world_model import WorldState
 
@@ -427,6 +428,14 @@ def _compile_beat(beat: dict, state: SceneState, future_ids: set[str],
     if cam is not None:
         calls.append(cam)
 
+    # ── continuous scene-param tweens (wave-2 motion, review §4.1) ────
+    # Numeric scene params (fill level, camera x/zoom, particle drift,
+    # counters) tween across the WHOLE beat budget instead of flipping
+    # state — kills the static-hold slideshows the frame-diff gate fails.
+    for p in tween_statements_for_beat(beat):
+        calls.append((f"tween_param(self, {p['param']!r}, {p['to']!r}, "
+                      f"duration=@D@)", max(dur - MARGIN, 0.5)))
+
     if not calls:
         raise WorldCompileError(
             f"beat {bid}: no visual content (no entities, no actions, no "
@@ -461,6 +470,52 @@ def _compile_beat(beat: dict, state: SceneState, future_ids: set[str],
 # Runtime duration-accounting helpers injected into every generated
 # scene (plain string; NOT an f-string — keep braces literal).
 _VE_SCENE_HELPERS = '''
+    def _param_value(self, param):
+        tr = self._param_trackers.get(param)
+        return float(tr.get_value()) if tr is not None else float(
+            self._params.get(param, 0.0))
+
+    def _apply_param(self, param, value):
+        # Generic visible hook for tweened params: the paint fill level
+        # modulates every live fill polygon's opacity so the tween is a
+        # real per-frame pixel change (not a silent tracker update).
+        if param != "fill_level":
+            return
+        op = 0.15 + 0.5 * max(0.0, min(1.0, float(value)))
+        for oid, obj in list(self._state.objects.items()):
+            mob = getattr(obj, "mobject", None)
+            if mob is None or not str(oid).endswith("_fill"):
+                continue
+            try:
+                for m in mob.family():
+                    fo = getattr(m, "fill_opacity", 0)
+                    if isinstance(fo, (int, float)) and fo > 0:
+                        m.set_fill(opacity=op)
+            except Exception:
+                pass
+
+    def tween_param(self, param, to_value, duration):
+        # Wave-2 motion: animate a numeric scene param CONTINUOUSLY over
+        # the beat.  Camera params drive the frame in the same play;
+        # fill_level has a visible opacity hook (see _apply_param).
+        to_value = float(to_value)
+        prev = self._param_value(param)
+        tracker = self._param_trackers.get(param)
+        if tracker is None:
+            tracker = ValueTracker(prev)
+            self._param_trackers[param] = tracker
+        tracker.add_updater(lambda tr, _p=param: self._apply_param(
+            _p, tr.get_value()))
+        anims = [tracker.animate.set_value(to_value)]
+        frame = getattr(self.camera, "frame", None)
+        if frame is not None and prev != to_value:
+            if param == "camera_zoom" and abs(prev) > 1e-6:
+                anims.append(frame.animate.scale(to_value / prev))
+            elif param == "camera_x":
+                anims.append(frame.animate.shift((to_value - prev, 0, 0)))
+        self.play(*anims, run_time=max(duration, 0.1))
+        self._params[param] = to_value
+
     def _ve_mark(self, bid):
         # start-of-beat duration accounting (see _ve_hold)
         self._ve_t0 = self.time
@@ -560,6 +615,7 @@ if os.path.isdir(os.path.join(_REPO, "engine")) and _REPO not in sys.path:
 
 from manim import Scene
 from manim import config as _manim_config
+from manim import ValueTracker
 
 # dark navy (not pure black): cinematic dark look that always clears the
 # black-frame luma gate (must be set before Scene instantiation)
@@ -626,6 +682,10 @@ class {scene_name}(Scene):
         self.camera.background_color = "#0b0f1a"
         self._state = SceneState()
         self._world = WorldState.from_dict({world_literal})
+        self._params = {{"fill_level": 0.0, "camera_x": 0.0,
+                        "camera_zoom": 1.0, "particle_drift": 0.0,
+                        "counter_value": 0.0}}
+        self._param_trackers = {{}}
         self._ve_t0 = 0.0
         self._ve_beats: list = []
 {chr(10).join(body)}

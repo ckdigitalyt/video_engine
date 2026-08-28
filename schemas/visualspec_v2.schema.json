@@ -61,6 +61,21 @@
           "type": "array",
           "items": {"$ref": "#/definitions/Transformation"}
         },
+        "scene_params": {
+          "type": "array",
+          "description": "Wave-2 motion contract: numeric scene params that tween continuously across this beat (no state-flip holds).",
+          "items": {
+            "type": "object",
+            "required": ["param", "to"],
+            "properties": {
+              "param": {"type": "string"},
+              "from": {"type": "number"},
+              "to": {"type": "number"},
+              "ease": {"type": "string", "enum": ["linear", "smooth"]}
+            },
+            "additionalProperties": false
+          }
+        },
         "semantic_actions": {
           "type": "array",
           "items": {"$ref": "#/definitions/SemanticAction"},

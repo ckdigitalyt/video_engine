@@ -42,6 +42,12 @@ BLACK_RUN_MAX_S = 0.5          # contiguous black run > this fails (post-render)
 TEMPLATE_SIMILARITY_MAX = 0.75 # narration vs generic filler fuzzy ratio
 MIN_TOPIC_TOKENS = 3           # distinct domain tokens required in script
 
+# wave-2 gates (glm_review_v3 §4, 2026-08-28)
+FRAME_DIFF_SAMPLE_FPS = 4.0    # frame-diff sampling rate
+FRAME_DIFF_WINDOW_S = 1.5      # any static window this long fails
+FRAME_DIFF_MOTION_FLOOR = 0.005  # <0.5% pixels changing = static
+CLOSURE_FINAL_WINDOW_S = 3.0   # hero must survive the final N seconds
+
 # ebur128 summary values are in the last "Summary:" section, e.g.:
 #   [Parsed_ebur128_0 @ ...] Summary:
 #   [Parsed_ebur128_0 @ ...]   Integrated loudness:
@@ -56,6 +62,7 @@ class GateResult:
     passed: bool = True
     errors: list[str] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
+    metrics: dict = field(default_factory=dict)
 
 
 def _gate(name: str) -> GateResult:
@@ -457,6 +464,132 @@ def gate_continuity(visualspec: dict) -> GateResult:
                     if any(o.get("id") == "number_main" for o in b.get("objects", [])))
     if main_used < max(1, len(visualspec["beats"]) // 2):
         g.warnings.append("number_main not persistent across most beats (weak object continuity)")
+    return g
+
+
+# ── Gate 7b: Frame-diff motion (wave-2, review v3 §4.1) ─────────────
+def _extract_gray_frames(video_path: Path, sample_fps: float = 4.0,
+                         w: int = 256, h: int = 144,
+                         max_seconds: float = 180.0) -> tuple[list, int, int]:
+    """Decode small grayscale frames for pixel-diff analysis (one ffmpeg
+    pass, rawvideo on stdout — cheap even for 4K sources)."""
+    cmd = [
+        ffmpeg(), "-v", "error", "-i", str(video_path),
+        "-t", str(max_seconds),
+        "-vf", f"fps={sample_fps},scale={w}:{h},format=gray",
+        "-f", "rawvideo", "-",
+    ]
+    proc = subprocess.run(cmd, capture_output=True, timeout=300)
+    data = proc.stdout
+    frame_len = w * h
+    frames = [data[i:i + frame_len]
+              for i in range(0, len(data) - frame_len + 1, frame_len)]
+    return frames, w, h
+
+
+def gate_frame_diff(video_path: Path, sample_fps: float = FRAME_DIFF_SAMPLE_FPS,
+                    window_s: float = FRAME_DIFF_WINDOW_S) -> GateResult:
+    """Wave-2 motion gate: fail when any 1.5s window has near-zero pixel
+    change (the v3 static-slideshow failure class — ~12s of identical
+    frames t≈16–28).  Complements gate_motion, which uses full-frame
+    scene metrics; this one is a hard pixel-level floor."""
+    g = _gate("frame_diff")
+    if video_path is None or not Path(video_path).exists():
+        g.warnings.append("frame_diff gate skipped: no rendered video")
+        return g
+    try:
+        frames, w, h = _extract_gray_frames(Path(video_path), sample_fps)
+    except (subprocess.SubprocessError, OSError) as e:
+        g.warnings.append(f"frame_diff extraction failed: {e}")
+        return g
+    if len(frames) < 2:
+        g.warnings.append("frame_diff gate skipped: too few frames decoded")
+        return g
+    from engine.visuals.tween import frame_diff_ratios, static_windows
+    ratios = frame_diff_ratios(frames, w, h)
+    bad = static_windows(ratios, sample_fps, window_s,
+                         FRAME_DIFF_MOTION_FLOOR)
+    avg = sum(ratios) / len(ratios) if ratios else 1.0
+    g.metrics = {"avg_diff_ratio": round(avg, 5),
+                 "static_windows": bad}
+    if bad:
+        g.passed = False
+        g.errors.append(
+            f"{len(bad)} static window(s) >= {window_s}s with <"
+            f"{FRAME_DIFF_MOTION_FLOOR:.1%} pixel change: "
+            + ", ".join(f"{a:.1f}-{b:.1f}s" for a, b in bad[:5]))
+    elif avg < FRAME_DIFF_MOTION_FLOOR:
+        g.passed = False
+        g.errors.append(f"near-zero motion overall (avg diff {avg:.4f})")
+    return g
+
+
+# ── Gate 7c: Closure — hero survives to the last frame (review §4.3) ─
+def _hero_ids(visualspec: dict) -> list[str]:
+    meta = visualspec.get("metadata", {}) or {}
+    hero = meta.get("hero_mechanism") or {}
+    ids = [str(o) for o in hero.get("objects", []) if o]
+    if not ids:
+        tb = str(hero.get("target_beat", "") or "")
+        for b in visualspec.get("beats", []):
+            if b.get("beat_id") == tb:
+                ids = [str(o.get("id")) for o in b.get("objects", [])
+                       if isinstance(o, dict) and o.get("id")]
+                break
+    if not ids:
+        # fallback: the most persistent object id across beats
+        counts: dict[str, int] = {}
+        for b in visualspec.get("beats", []):
+            for o in b.get("objects", []):
+                oid = o.get("id") if isinstance(o, dict) else None
+                if oid:
+                    counts[oid] = counts.get(oid, 0) + 1
+        if counts:
+            ids = [max(counts, key=counts.get)]
+    return ids
+
+
+def gate_closure(visualspec: dict, final_window_s: float = CLOSURE_FINAL_WINDOW_S) -> GateResult:
+    """Wave-2 closure gate: the hero object must be present in the final
+    beat (last frame), no hard removal of persistent objects inside the
+    final N seconds, and no dangling leader/callout layers exiting at the
+    end (v3: horn+axis+label vanished at t≈39.5s -> near-empty last frame)."""
+    g = _gate("closure")
+    beats = visualspec.get("beats", [])
+    if not beats:
+        g.warnings.append("closure gate: no beats")
+        return g
+    final = beats[-1]
+    final_start = float(final.get("start", 0.0) or 0.0)
+    hero_ids = _hero_ids(visualspec)
+    final_ids = {o.get("id") for o in final.get("objects", [])
+                 if isinstance(o, dict) and o.get("id")}
+    if hero_ids and not (final_ids & set(hero_ids)):
+        # hero may be carried by the persistent SceneState rather than
+        # re-declared; check the final beat's composition remains/objects
+        remains = set((final.get("composition") or {}).get("remains", []) or [])
+        if not (remains & set(hero_ids)):
+            g.passed = False
+            g.errors.append(
+                f"hero {hero_ids[0]!r} absent from final beat "
+                f"{final.get('beat_id', '?')} — last frame loses the hero "
+                f"object (dangling-end failure class)")
+    # hard removals inside the final window
+    for b in beats:
+        b_start = float(b.get("start", 0.0) or 0.0)
+        if b_start < final_window_s and b is not final:
+            continue
+        if float(b.get("start", 0.0) or 0.0) < max(final_start, 0.0):
+            continue
+        exits = set((b.get("composition") or {}).get("exits", []) or [])
+        # exits declared on the FINAL beat are hard removals in the last
+        # seconds — dangling leader lines / vanished hero
+        if b is final and exits:
+            g.passed = False
+            g.errors.append(
+                f"final beat {b.get('beat_id', '?')} exits "
+                f"{sorted(exits)[:6]} — no hard removals in the final "
+                f"{final_window_s:.0f}s (empty-last-frame failure class)")
     return g
 
 
@@ -1254,6 +1387,7 @@ def run_all_v2(visualspec: dict, video_path: Optional[Path] = None,
     tg = gate_text_dominance(visualspec)
     cg = gate_composition(visualspec)
     hg = gate_hero_quality(visualspec)
+    cl = gate_closure(visualspec)
     report["gates"]["explanation"] = {"passed": eg.passed,
                                         "errors": eg.errors,
                                         "warnings": eg.warnings}
@@ -1266,6 +1400,9 @@ def run_all_v2(visualspec: dict, video_path: Optional[Path] = None,
     report["gates"]["hero_quality"] = {"passed": hg.passed,
                                          "errors": hg.errors,
                                          "warnings": hg.warnings}
+    report["gates"]["closure"] = {"passed": cl.passed,
+                                   "errors": cl.errors,
+                                   "warnings": cl.warnings}
     if video_path is not None:
         allow_black = bool((visualspec.get("metadata", {}) or {}).get(
             "allow_scripted_black", False))
@@ -1274,10 +1411,14 @@ def run_all_v2(visualspec: dict, video_path: Optional[Path] = None,
         report["gates"]["black_frames"] = {"passed": bf.passed,
                                              "errors": bf.errors,
                                              "warnings": bf.warnings}
+        fd = gate_frame_diff(Path(video_path))
+        report["gates"]["frame_diff"] = {
+            "passed": fd.passed, "errors": fd.errors,
+            "warnings": fd.warnings, "metrics": fd.metrics}
     # recompute perceptual with the semantic gates
     perc_keys = ["semantic", "layout", "motion", "continuity",
                  "explanation", "text_dominance", "composition",
-                 "hero_quality", "black_frames"]
+                 "hero_quality", "black_frames", "closure", "frame_diff"]
     perc = [report["gates"][k] for k in perc_keys if k in report["gates"]]
     perceptual = int(round(100.0 * sum(1 for g in perc if g["passed"])
                            / max(1, len(perc))))
@@ -1299,7 +1440,8 @@ def run_all_v2(visualspec: dict, video_path: Optional[Path] = None,
             "black_frames", {}).get("passed", True):
         report["passed"] = False
     bf_errors = report["gates"].get("black_frames", {}).get("errors", [])
-    for e in eg.errors + tg.errors + cg.errors + hg.errors + bf_errors:
+    for e in (eg.errors + tg.errors + cg.errors + hg.errors + bf_errors
+              + cl.errors + report["gates"].get("frame_diff", {}).get("errors", [])):
         if e not in report["errors"]:
             report["errors"].append(e)
     report["explanation_report"] = (visualspec.get("metadata", {}) or {}).get(
