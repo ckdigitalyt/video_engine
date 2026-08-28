@@ -130,7 +130,7 @@ def test_compiler_emits_tween_param():
     from engine.renderers.manim.world_compiler import emit_world_scene
     vs = _gabriel_spec_with_tween()
     src = emit_world_scene(vs, "TweenScene")
-    assert "tween_param(self, 'fill_level', 0.75" in src
+    assert "self.tween_param('fill_level', 0.75" in src
     assert "ValueTracker" in src
     assert "_apply_param" in src
 

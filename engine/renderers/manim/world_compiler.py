@@ -433,7 +433,7 @@ def _compile_beat(beat: dict, state: SceneState, future_ids: set[str],
     # counters) tween across the WHOLE beat budget instead of flipping
     # state — kills the static-hold slideshows the frame-diff gate fails.
     for p in tween_statements_for_beat(beat):
-        calls.append((f"tween_param(self, {p['param']!r}, {p['to']!r}, "
+        calls.append((f"self.tween_param({p['param']!r}, {p['to']!r}, "
                       f"duration=@D@)", max(dur - MARGIN, 0.5)))
 
     if not calls:
