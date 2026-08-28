@@ -813,14 +813,51 @@ def _plan_gabriel(topic: str, world: WorldState,
         [{"action": "compare", "target": h,
           "params": {"left_label": "V = π", "right_label": "A = ∞"}}],
         "reveal", {"type": "zoom_to", "target": h}, "high")
-    # payoff — numeric end card (real content, never a black frame)
+    # payoff — numeric end card (real content, never a black frame).
+    # Wave-2 closure: the horn STAYS on stage through the payoff and the
+    # question-bait close — the hero object must survive to the last
+    # frame (review v3 §4.3: horn/axis/label vanished at t≈39.5s).
     card_id = card.id if card else "payoff_card"
     nxt("payoff", script[-1]["narration"] if script else
         "Gabriel's Horn: volume π, surface infinite.",
-        _entity_objs(world, card_id),
+        _entity_objs(world, h, card_id),
         [{"action": "measure", "target": card_id,
           "params": {"value": payoff_value, "label": "payoff"}}],
         "payoff", {"type": "pull_out"}, "high", dur=3.0)
+    # close — end card: horn + "V = π, A = ∞" + question bait (comment
+    # driver, review §4.3) — no exits, hero retained
+    nxt("close", line("close", "But how can π paint cover an infinite "
+                            "area?"),
+        _entity_objs(world, h, pt, card_id),
+        [{"action": "fill", "target": h,
+          "params": {"label": "V = π, A = ∞"}},
+         {"action": "reveal", "target": card_id,
+          "params": {"value": "But how can π paint cover ∞ area?",
+                     "label": "you decide"}}],
+        "question", None, "high", dur=3.0)
+    # wave-2 motion: continuous scene params on the two display beats —
+    # the fill eases in as the payoff speaks and the counter ticks in
+    # the close; camera crawls down the tail while the paradox lands
+    for b in beats:
+        if b["role"] == "change_variable":
+            b["scene_params"] = [{"param": "fill_level", "to": 0.45,
+                                  "ease": "smooth"}]
+        elif b["role"] == "observe":
+            b["scene_params"] = [{"param": "fill_level", "to": 0.75,
+                                  "ease": "smooth"},
+                                 {"param": "counter_value", "to": 100.0,
+                                  "ease": "smooth"}]
+        elif b["role"] == "discover_principle":
+            b["scene_params"] = [{"param": "fill_level", "to": 1.0,
+                                  "ease": "smooth"}]
+        elif b["role"] in ("explain_principle", "payoff", "close"):
+            b["scene_params"] = ([{"param": "camera_x", "to": 1.2,
+                                   "ease": "smooth"},
+                                  {"param": "camera_zoom", "to": 0.85,
+                                   "ease": "smooth"}]
+                                 if b["role"] == "explain_principle" else
+                                 [{"param": "counter_value", "to": 1e6,
+                                   "ease": "linear"}])
     return beats
 
 

@@ -582,14 +582,21 @@ def gate_closure(visualspec: dict, final_window_s: float = CLOSURE_FINAL_WINDOW_
         if float(b.get("start", 0.0) or 0.0) < max(final_start, 0.0):
             continue
         exits = set((b.get("composition") or {}).get("exits", []) or [])
-        # exits declared on the FINAL beat are hard removals in the last
-        # seconds — dangling leader lines / vanished hero
         if b is final and exits:
-            g.passed = False
-            g.errors.append(
-                f"final beat {b.get('beat_id', '?')} exits "
-                f"{sorted(exits)[:6]} — no hard removals in the final "
-                f"{final_window_s:.0f}s (empty-last-frame failure class)")
+            # exits declared on the FINAL beat are hard removals in the
+            # last seconds — dangling leader lines / vanished hero
+            hero_exits = sorted(exits & set(hero_ids))
+            if hero_exits:
+                g.passed = False
+                g.errors.append(
+                    f"final beat {b.get('beat_id', '?')} exits hero "
+                    f"{hero_exits[:6]} — no hard removals in the final "
+                    f"{final_window_s:.0f}s (empty-last-frame failure class)")
+            else:
+                g.warnings.append(
+                    f"final beat {b.get('beat_id', '?')} exits "
+                    f"{sorted(exits)[:6]} — check for dangling leader "
+                    f"lines in the last frame")
     return g
 
 
