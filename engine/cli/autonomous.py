@@ -377,9 +377,28 @@ def run_autonomous(topic: str, out_root: str | Path,
             srt_path = generate_srt(entries, workdir / "narration.srt")
             print(f"[tts] narration {narration_audio.name} "
                   f"({len(words)} words, {entries[-1]['end']:.1f}s)")
+        # wave-2 soundtrack stage: local synth bed + beat-keyed SFX,
+        # pre-ducked ~18 LUFS under the VO (no paid APIs, no downloads)
+        soundtrack_path = None
+        if narration_audio:
+            try:
+                from engine.audio.soundtrack import (
+                    build_soundtrack, sfx_cues_from_beats)
+                cues = sfx_cues_from_beats(vs.get("beats", []))
+                soundtrack_path = build_soundtrack(
+                    narration_audio, cues,
+                    total_duration=narration_dur or sum(
+                        b.get("duration", 0.0) for b in vs.get("beats", [])),
+                    out_aac=workdir / "soundtrack.aac", workdir=workdir)
+                (out / "sfx_cues.json").write_text(json.dumps(
+                    {"cues": cues}, indent=2))
+            except Exception as e:  # noqa: BLE001 — packaging never blocks
+                print(f"[audio] soundtrack stage failed (non-fatal): {e}")
+                soundtrack_path = None
         compose_result = compose_final(
             [clip], narration=narration_audio, music=None,
-            subtitles=srt_path, out=final, resolution=resolution, fps=fps)
+            subtitles=srt_path, out=final, resolution=resolution, fps=fps,
+            soundtrack=soundtrack_path)
 
         # ── 7) QA (v2: proven gates + explanation + text dominance) ───
         try:

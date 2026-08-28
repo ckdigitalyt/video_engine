@@ -103,7 +103,8 @@ def compose_final(beat_clips: list[Path],
                   subtitles: Optional[Path],
                   out: Path,
                   resolution: tuple[int, int] = (1920, 1080),
-                  fps: int = 30) -> dict:
+                  fps: int = 30,
+                  soundtrack: Optional[Path] = None) -> dict:
     """Full composition: concat beats, mix audio (ducked music), master to
     target loudness, burn subs, mux.  Returns final QA audio metrics.
 
@@ -151,6 +152,14 @@ def compose_final(beat_clips: list[Path],
             "-t", str(dur), "-c:a", "aac", "-ar", str(AUDIO_SR), "-ac", str(AUDIO_CH),
             str(mastered),
         ], check=True, capture_output=True)
+
+    # 3.5) wave-2 soundtrack stage (AFTER mastering): pre-ducked bed+SFX
+    #      mix laid under the mastered voice — voice stays dominant
+    if mastered is not None and soundtrack and Path(soundtrack).exists():
+        from engine.audio.soundtrack import mix_soundtrack_under_voice
+        mixed = mix_soundtrack_under_voice(mastered, Path(soundtrack),
+                                           workdir / "_mix_soundtrack.aac")
+        mastered = mixed
 
     # 4) burn subtitles (if provided)
     if subtitles and subtitles.exists():
