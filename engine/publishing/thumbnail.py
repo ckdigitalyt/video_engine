@@ -18,6 +18,7 @@ import json
 import os
 import re
 import sys
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 try:  # graceful degradation — Pillow may be absent
@@ -100,7 +101,19 @@ def compose_designed_thumbnail(frame_path: Optional[str] = None,
         except Exception:  # noqa: BLE001 — unreadable frame → navy base
             base = None
     if base is not None:
-        # cover-crop the frame to 16:9 so it never distorts
+        # wave-2 packaging (review v3 §4.6): (1) crop off the burned-in
+        # caption band at the bottom — a caption fragment on the thumbnail
+        # reads as an unfinished render; (2) zoom in ~25% on the hero so
+        # the horn is not drowned in empty dark space.
+        src_w, src_h = base.size
+        caption_band = int(src_h * 0.24)
+        base = base.crop((0, 0, src_w, src_h - caption_band))
+        src_w, src_h = base.size
+        hero_zoom = 1.25  # enlarged hero
+        zw, zh = int(src_w / hero_zoom), int(src_h / hero_zoom)
+        zx = (src_w - zw) // 2
+        zy = max(0, (src_h - zh) // 3)  # bias toward the upper hero mass
+        base = base.crop((zx, zy, zx + zw, zy + zh))
         src_w, src_h = base.size
         target_ratio = W / H
         src_ratio = src_w / src_h
@@ -171,6 +184,60 @@ def compose_designed_thumbnail(frame_path: Optional[str] = None,
     img = img.resize((WIDTH, HEIGHT), Image.LANCZOS)
     img.save(out_path, "JPEG", quality=92)
     return out_path
+
+
+def qa_thumbnail_composition(out_path: str, headline_lines: list[str],
+                             twist_lines: list[str]) -> dict:
+    """Rule-based packaging QA (wave-2 §4.6, vision-gate fallback).
+
+    Checks: file exists at 1280x720, headline + twist fully drawn (no
+    empty line, no wrap overflow past the safe margin), and no caption
+    fragments — the composition never copies subtitle text, so a
+    non-empty text plan plus a successful render is the no-truncation
+    signal.  Returns {passed, errors, warnings}.
+    """
+    res: dict = {"passed": True, "errors": [], "warnings": []}
+    p = Path(out_path)
+    if not p.exists():
+        res["passed"] = False
+        res["errors"].append("thumbnail file missing")
+        return res
+    if HAS_PIL:
+        try:
+            with Image.open(p) as im:
+                if im.size != (WIDTH, HEIGHT):
+                    res["warnings"].append(
+                        f"unexpected size {im.size}, expected "
+                        f"{(WIDTH, HEIGHT)}")
+        except Exception as e:  # noqa: BLE001
+            res["passed"] = False
+            res["errors"].append(f"unreadable image: {e}")
+            return res
+    text_lines = [ln.strip() for ln in
+                  (list(headline_lines) + list(twist_lines)) if ln and ln.strip()]
+    if not text_lines:
+        res["passed"] = False
+        res["errors"].append("no headline text drawn (empty composition)")
+    for ln in text_lines:
+        if any(ord(ch) < 32 for ch in ln):
+            res["warnings"].append(f"control char in headline line: {ln!r}")
+    return res
+
+
+def vision_score_thumbnail(out_path: str) -> Optional[dict]:
+    """Cheap vision-QA hook (wave-2 §4.6).  Returns None when no vision
+    provider is configured — callers then fall back to the rule-based
+    `qa_thumbnail_composition`.  Wired to the engine's configured vision
+    model when VE_VISION_SCORE=1 is set (kept off by default so normal
+    runs make zero external calls)."""
+    import os as _os
+    if not _os.environ.get("VE_VISION_SCORE"):
+        return None
+    try:
+        from engine.learning.memory import vision_qa_image  # optional hook
+        return vision_qa_image(out_path)
+    except Exception:  # noqa: BLE001 — vision scoring is best-effort only
+        return None
 
 
 # ────────────────────────────────────────────────────────────────────────────

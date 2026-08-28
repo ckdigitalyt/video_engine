@@ -72,6 +72,18 @@ _SIMULATION_ACTIONS = {
 }
 
 
+def _join_script_narration(script: list[dict], fallback: str = "") -> str:
+    """Join script sentences into the TTS narration (wave-2 fix, review
+    v3 §4.7): sentences already end with '.', so the old '. '.join
+    produced literal '..' on screen.  Strip terminal periods, join with
+    '. ', re-add exactly one terminal period."""
+    parts = [str(s.get("narration", "")).strip().rstrip(".")
+             for s in script or [] if s.get("narration")]
+    if not parts:
+        return fallback
+    return ". ".join(parts) + "."
+
+
 def _time_beats(vs: dict, narration_sentences: list[str],
                 words: list[dict], narration_dur: float) -> dict:
     """Size each beat to its narration (temporal source of truth, §19/§20).
@@ -190,6 +202,16 @@ def emit_packaging(out_dir: str | Path, topic: str, beats: list[dict],
     made = False
     if video_path and Path(video_path).exists():
         ts = _hero_timestamp(beats, vs)
+        # wave-2 rule (§4.5d): never place the thumbnail frame inside a
+        # transition window — shift candidates out of fades first
+        try:
+            from engine.qa.fade import fade_windows_from_spec, safe_timestamp
+            ts = safe_timestamp(
+                ts, fade_windows_from_spec(vs or {}),
+                total_duration=float(vs.get("beats", [{}])[-1].get("end", 0.0)
+                                     or 0.0) or None)
+        except Exception:  # noqa: BLE001 — exclusion is best-effort
+            pass
         frame_path = out / "_hero_frame.png"
         proc = subprocess.run(
             ["ffmpeg", "-v", "error", "-y",
@@ -204,12 +226,19 @@ def emit_packaging(out_dir: str | Path, topic: str, beats: list[dict],
             try:
                 from engine.publishing.metadata import _key_narration_phrase
                 from engine.publishing.thumbnail import (
-                    compose_designed_thumbnail)
+                    compose_designed_thumbnail, qa_thumbnail_composition)
                 compose_designed_thumbnail(
                     frame_path=str(frame_path), topic=topic,
                     hook=_key_narration_phrase(beats),
                     out_path=str(thumb_path))
                 made = thumb_path.exists()
+                if made:
+                    qa = qa_thumbnail_composition(str(thumb_path),
+                                                  [topic], [])
+                    if not qa.get("passed", True):
+                        print(f"[packaging] thumbnail QA failed: "
+                              f"{qa['errors']}")
+                        made = False
             except Exception:  # noqa: BLE001 — packaging never blocks PASS
                 made = False
             if not made:
@@ -264,9 +293,7 @@ def run_autonomous(topic: str, out_root: str | Path,
 
     # ── 2) script + local TTS (temporal source of truth) ───────────────
     script = script_for(topic, plan.roles, world)
-    narration = ". ".join(s["narration"] for s in script if s["narration"])
-    if not narration:
-        narration = topic
+    narration = _join_script_narration(script, fallback=topic)
     narration_audio = None
     words: list[dict] = []
     narration_dur = 0.0

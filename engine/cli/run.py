@@ -232,21 +232,42 @@ def _caption_entries_sequential(words: list[dict], max_words: int = 4) -> list[d
     other.  We split the word list into runs of words that share a
     timestamp; each run's window is subdivided across its caption chunks so
     captions appear sequentially and never overlap.
+
+    Wave-2 (review v3 §4.7): chunk boundaries slide to phrase ends (a word
+    ending in , ; : —) so no standalone fragment like "π paint — but"
+    holds on screen for ~2s.
     """
     entries: list[dict] = []
     run: list[dict] = []
     run_key = None
 
+    _PHRASE_ENDS = (",", ";", ":", "—", "–")
+
+    def _split_phrases(ws: list[dict], limit: int) -> list[list[dict]]:
+        """Greedy max_words chunks with boundaries slid to phrase ends."""
+        chunks: list[list[dict]] = []
+        i = 0
+        while i < len(ws):
+            chunk = ws[i:i + limit]
+            if len(chunk) == limit and i + limit < len(ws):
+                lo = max(2, limit // 2)
+                for j in range(limit - 1, lo - 1, -1):
+                    if chunk[j - 1]["word"].rstrip(".!?…").endswith(_PHRASE_ENDS):
+                        chunk = ws[i:i + j]
+                        break
+            chunks.append(chunk)
+            i += len(chunk)
+        return chunks
+
     def flush(r: list[dict], key: tuple):
         if not r:
             return
         span = key[1] - key[0]
-        n = (len(r) + max_words - 1) // max_words or 1
-        for i in range(0, len(r), max_words):
-            chunk = r[i:i + max_words]
-            chunk_idx = i // max_words
-            a = key[0] + span * chunk_idx / n
-            b = key[0] + span * (chunk_idx + 1) / n
+        pieces = _split_phrases(r, max_words)
+        n = len(pieces)
+        for idx, chunk in enumerate(pieces):
+            a = key[0] + span * idx / n
+            b = key[0] + span * (idx + 1) / n
             entries.append({
                 "start": round(a, 3),
                 "end": round(max(b, a + 0.1), 3),
