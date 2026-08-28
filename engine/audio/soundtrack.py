@@ -251,11 +251,14 @@ def build_soundtrack(narration_path: Path, cues: list[dict],
 
 
 def mix_soundtrack_under_voice(voice_master: Path, soundtrack: Path,
-                               out_mix: Path) -> Path:
+                               out_mix: Path, target_lufs: float = -14.0) -> Path:
     """Final stage-after-mastering mux step: voice master + soundtrack.
 
     The soundtrack is pre-ducked by `build_soundtrack`; this is a plain
     linear mix (voice dominant, soundtrack at its calibrated level).
+    The SUM can still exceed the voice master's true peak (linear mix of
+    two signals), so the mix is re-normalized with loudnorm (TP=-1.5)
+    — same contract as `normalize_to_target` (Gate 8 passes post-mix).
     """
     out = Path(out_mix)
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -263,7 +266,8 @@ def mix_soundtrack_under_voice(voice_master: Path, soundtrack: Path,
         ffmpeg(), "-y", "-i", str(voice_master), "-i", str(soundtrack),
         "-filter_complex",
         "[0:a]anull[voice];[1:a]anull[tr];[voice][tr]amix=inputs=2:"
-        "duration=first:dropout_transition=2:normalize=0[aout]",
+        "duration=first:dropout_transition=2:normalize=0,"
+        f"loudnorm=I={target_lufs}:TP=-1.5:LRA=11[aout]",
         "-map", "[aout]",
         "-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-ac", "2",
         str(out),
