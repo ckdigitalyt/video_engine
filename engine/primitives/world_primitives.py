@@ -1372,7 +1372,11 @@ def materialize_entity(scene: Scene, scene_state: SceneState,
     if prim is None:
         raise ValueError(f"materialize_entity: no materializer for entity "
                          f"type {etype!r} (id {eid!r})")
-    label = str(_prop(props, "label", eid))
+    # NEVER render an entity id as on-screen text (wave-3, GLM review
+    # v4 blocker): the label falls back to '' — primitives guard empty
+    # labels, so an entity without an explicit display label renders no
+    # label at all instead of a garbled debug id like 'payoff_card'.
+    label = str(_prop(props, "label", ""))
     position = _pos(props, list(zone_offset(Zone.CENTER)))
     color = str(_prop(props, "color", _accent(0)))
     if prim == "CelestialBody":
@@ -1485,7 +1489,16 @@ def materialize_entity(scene: Scene, scene_state: SceneState,
     if prim in ("QuestionMark", "ExperimentBadge", "RevealText",
                 "PayoffText"):
         fn = globals()[prim]
-        text = str(_prop(props, "text", label))
+        # Text entities render ONLY an explicit text/value property —
+        # never the entity id (wave-3 rule).  With no explicit display
+        # text the entity materializes as a state-only record: nothing
+        # is drawn on screen.
+        text = str(_prop(props, "text", _prop(props, "value", "")))
+        if not text:
+            scene_state.enter(eid, etype, value="", zone=Zone.CENTER,
+                              persistent=False, mobject=None)
+            scene_state.record_enter(eid)
+            return None
         return fn(scene, scene_state, text=text, oid=eid, duration=duration)
     fn = WORLD_PRIMITIVES.get(prim)
     if fn is None:
@@ -1825,10 +1838,12 @@ def apply_action(scene: Scene, scene_state: SceneState,
             # measure ON an existing text entity (payoff/reveal/question
             # card): REPLACE its text in place.  A second layer here is
             # the text crossfade-overlap bug class — never stack.
-            _replace_text_layer(
-                scene, scene_state, oid=target,
-                text=value if value else f"{label}: {value}",
-                duration=duration)
+            # No explicit display value -> render nothing (the internal
+            # `label` is bookkeeping, never on-screen text).
+            if value:
+                _replace_text_layer(
+                    scene, scene_state, oid=target,
+                    text=value, duration=duration)
             return
         MeasureValue(scene, scene_state, oid=target or "measure",
                      value=value,
@@ -1856,8 +1871,23 @@ def apply_action(scene: Scene, scene_state: SceneState,
         HighlightTarget(scene, scene_state, target, duration=duration)
         return
     if name in ("reveal",):
-        RevealText(scene, scene_state,
-                   text=str(action.get("to", params.get("text", target))),
+        # Reveal renders ONLY an explicit display value/text — never the
+        # target entity id (wave-3: the old fallback to `target` drew
+        # 'payoff_card' as garbled on-screen text over the payoff) and
+        # never the internal params.label ('you decide').
+        text = str(action.get("to", params.get("text", params.get("value",
+                 ""))))
+        if not text:
+            return
+        tgt_obj = scene_state.get(target or "")
+        if (tgt_obj is not None and tgt_obj.exit_beat is None
+                and tgt_obj.obj_type in TEXT_ENTITY_TYPES):
+            # reveal ON an existing text card: swap IN PLACE — a second
+            # stacked text layer is the crossfade-overlap bug class.
+            _replace_text_layer(scene, scene_state, oid=target, text=text,
+                                duration=duration)
+            return
+        RevealText(scene, scene_state, text=text,
                    oid=target or "reveal", duration=duration)
         return
     if name in ("sort", "subtract", "morph", "transform"):
