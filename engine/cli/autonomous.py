@@ -501,16 +501,19 @@ def run_autonomous(topic: str, out_root: str | Path,
         report["integrated_lufs"] = audio_metrics.get("integrated_lufs")
         report["true_peak_db"] = audio_metrics.get("true_peak_db")
 
-        # ── 8b) packaging (P0-6): every PASS run emits publishing
-        # artifacts deterministically; never blocks the PASS video
-        if report.get("passed"):
-            try:
-                report["packaging"] = emit_packaging(
-                    out, topic, vs.get("beats", []), vs,
-                    video_path=final, qa_report=report)
-            except Exception as e:  # noqa: BLE001
-                print(f"[publish] packaging failed (non-fatal): {e}")
-                report["packaging"] = {"error": str(e)}
+        # ── 8b) packaging (P0-6): EVERY render run emits publishing
+        # artifacts deterministically.  Wave-3 fix: this was previously
+        # gated on full QA PASS, which silently dropped thumbnail.jpg on
+        # failed runs (gabriel_horn_wave2 had no thumbnail — QA failed
+        # the frame-diff gate and packaging never ran).  Packaging is
+        # deterministic and never blocks the video.
+        try:
+            report["packaging"] = emit_packaging(
+                out, topic, vs.get("beats", []), vs,
+                video_path=final, qa_report=report)
+        except Exception as e:  # noqa: BLE001
+            print(f"[publish] packaging failed (non-fatal): {e}")
+            report["packaging"] = {"error": str(e)}
 
     # ── 9) spec-§27 comparison fields ──────────────────────────────────
     expl = (vs.get("metadata", {}) or {}).get("explanation_report", {})
