@@ -860,9 +860,18 @@ def _plan_gabriel(topic: str, world: WorldState,
                                    "ease": "smooth"}]
                                  if b["role"] == "explain_principle" else
                                  [{"param": "camera_zoom",
+                                   # wave-3.1 clamp: the close must resolve
+                                   # back OUT to the default frame (zoom 1.0)
+                                   # — the old 0.82 push-in overshot and
+                                   # clipped the end-card glyphs; payoff
+                                   # formula + question bait must be fully
+                                   # visible in the last frames
                                    "to": 0.92 if b["role"] == "payoff"
-                                   else 0.82,
-                                   "ease": "smooth"}])
+                                   else 1.0,
+                                   "ease": "smooth"}]
+                                 + ([{"param": "camera_x", "to": 0.0,
+                                      "ease": "smooth"}]
+                                    if b["role"] == "close" else []))
     return beats
 
 
