@@ -487,7 +487,7 @@ _VE_SCENE_HELPERS = '''
             if mob is None or not str(oid).endswith("_fill"):
                 continue
             try:
-                for m in mob.family():
+                for m in mob.get_family():  # was mob.family() — AttributeError swallowed by except = silent no-op
                     fo = getattr(m, "fill_opacity", 0)
                     if isinstance(fo, (int, float)) and fo > 0:
                         m.set_fill(opacity=op)
@@ -498,14 +498,25 @@ _VE_SCENE_HELPERS = '''
         # Wave-2 motion: animate a numeric scene param CONTINUOUSLY over
         # the beat.  Camera params drive the frame in the same play;
         # fill_level has a visible opacity hook (see _apply_param).
+        # Wave-3 fix: the tracker MUST be added to the scene — manim only
+        # fires a mobject's updaters for mobjects in scene.mobjects, so
+        # the old orphan tracker made _apply_param a silent no-op and the
+        # fill tweens rendered as static holds (frame-diff ≈ 0.008).
         to_value = float(to_value)
         prev = self._param_value(param)
         tracker = self._param_trackers.get(param)
         if tracker is None:
             tracker = ValueTracker(prev)
             self._param_trackers[param] = tracker
-        tracker.add_updater(lambda tr, _p=param: self._apply_param(
-            _p, tr.get_value()))
+        if tracker not in self.mobjects:
+            self.add(tracker)  # ValueTracker renders nothing; updaters only
+
+        def _on_tween(tr, _p=param):
+            # single-arg updater (non-dt): a two-arg lambda would be
+            # treated as dt-based and receive dt where _p sits
+            self._apply_param(_p, tr.get_value())
+
+        tracker.add_updater(_on_tween)
         anims = [tracker.animate.set_value(to_value)]
         frame = getattr(self.camera, "frame", None)
         if frame is not None and prev != to_value:
@@ -514,6 +525,7 @@ _VE_SCENE_HELPERS = '''
             elif param == "camera_x":
                 anims.append(frame.animate.shift((to_value - prev, 0, 0)))
         self.play(*anims, run_time=max(duration, 0.1))
+        tracker.clear_updaters()  # no updater accumulation across tweens
         self._params[param] = to_value
 
     def _ve_mark(self, bid):
@@ -613,7 +625,7 @@ while _REPO and not os.path.isdir(os.path.join(_REPO, "engine")):
 if os.path.isdir(os.path.join(_REPO, "engine")) and _REPO not in sys.path:
     sys.path.insert(0, _REPO)
 
-from manim import Scene
+from manim import Scene, MovingCameraScene
 from manim import config as _manim_config
 from manim import ValueTracker
 
@@ -673,7 +685,7 @@ def camera_reset(scene, duration=0.9):
                run_time=duration)
 
 
-class {scene_name}(Scene):
+class {scene_name}(MovingCameraScene):
 {_VE_SCENE_HELPERS}
     def construct(self):
         # dark navy (not pure black): belt-and-braces — the module-level

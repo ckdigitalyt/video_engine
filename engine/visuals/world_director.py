@@ -835,9 +835,12 @@ def _plan_gabriel(topic: str, world: WorldState,
           "params": {"value": "But how can π paint cover ∞ area?",
                      "label": "you decide"}}],
         "question", None, "high", dur=3.0)
-    # wave-2 motion: continuous scene params on the two display beats —
-    # the fill eases in as the payoff speaks and the counter ticks in
-    # the close; camera crawls down the tail while the paradox lands
+    # wave-2 motion: continuous scene params on the display beats —
+    # wave-3 fix: ONLY params with a real on-screen hook (fill_level
+    # opacity hook, camera frame motion).  counter_value had NO visible
+    # mobject — its tweens rendered as static holds and the frame-diff
+    # gate measured ≈0.008; the close now crawls the camera instead so
+    # motion continues across the payoff → close beats.
     for b in beats:
         if b["role"] == "change_variable":
             b["scene_params"] = [{"param": "fill_level", "to": 0.45,
@@ -845,7 +848,7 @@ def _plan_gabriel(topic: str, world: WorldState,
         elif b["role"] == "observe":
             b["scene_params"] = [{"param": "fill_level", "to": 0.75,
                                   "ease": "smooth"},
-                                 {"param": "counter_value", "to": 100.0,
+                                 {"param": "camera_x", "to": 0.4,
                                   "ease": "smooth"}]
         elif b["role"] == "discover_principle":
             b["scene_params"] = [{"param": "fill_level", "to": 1.0,
@@ -856,8 +859,10 @@ def _plan_gabriel(topic: str, world: WorldState,
                                   {"param": "camera_zoom", "to": 0.85,
                                    "ease": "smooth"}]
                                  if b["role"] == "explain_principle" else
-                                 [{"param": "counter_value", "to": 1e6,
-                                   "ease": "linear"}])
+                                 [{"param": "camera_zoom",
+                                   "to": 0.92 if b["role"] == "payoff"
+                                   else 0.82,
+                                   "ease": "smooth"}])
     return beats
 
 
