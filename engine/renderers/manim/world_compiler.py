@@ -520,10 +520,27 @@ _VE_SCENE_HELPERS = '''
         anims = [tracker.animate.set_value(to_value)]
         frame = getattr(self.camera, "frame", None)
         if frame is not None and prev != to_value:
-            if param == "camera_zoom" and abs(prev) > 1e-6:
-                anims.append(frame.animate.scale(to_value / prev))
+            # wave-3.2: camera tweens derive their factor from the ACTUAL
+            # frame geometry, not the tracker — camera_focus/camera_reset
+            # scale the frame directly (without touching the tracker), so
+            # ratio-from-tracker compounded zoom errors across beats and
+            # the end card rendered giant clipped glyphs
+            base = getattr(self, "_cam_base", None)
+            if param == "camera_zoom":
+                if base and abs(float(base["w"])) > 1e-6:
+                    target_w = float(base["w"]) * to_value
+                    cur_w = float(frame.width)
+                    if abs(cur_w) > 1e-6:
+                        anims.append(frame.animate.scale(target_w / cur_w))
+                elif abs(prev) > 1e-6:
+                    anims.append(frame.animate.scale(to_value / prev))
             elif param == "camera_x":
-                anims.append(frame.animate.shift((to_value - prev, 0, 0)))
+                if base:
+                    target = list(base["c"])
+                    target[0] += to_value
+                    anims.append(frame.animate.move_to(target))
+                else:
+                    anims.append(frame.animate.shift((to_value - prev, 0, 0)))
         self.play(*anims, run_time=max(duration, 0.1))
         tracker.clear_updaters()  # no updater accumulation across tweens
         self._params[param] = to_value
@@ -662,8 +679,28 @@ def camera_focus(scene, target_mob, scale=0.72, duration=0.9):
     frame = getattr(scene.camera, "frame", None)
     if frame is None or target_mob is None:
         return
-    scene.play(frame.animate.scale(scale).move_to(target_mob.get_center()),
+    # wave-3.2: scale is ABSOLUTE vs the base frame (not a factor on the
+    # current width) — repeated zoom_to beats must not compound 0.72^n
+    base = getattr(scene, "_cam_base", None)
+    factor = 1.0
+    if base and abs(float(frame.width)) > 1e-6:
+        factor = (float(base["w"]) * float(scale)) / float(frame.width)
+    scene.play(frame.animate.scale(factor).move_to(target_mob.get_center()),
                run_time=duration)
+    _cam_sync(scene, camera_zoom=float(scale))
+
+
+def _cam_sync(scene, **vals):
+    """Keep the scene-param trackers honest after direct frame ops."""
+    params = getattr(scene, "_params", None)
+    if isinstance(params, dict):
+        params.update(vals)
+    trackers = getattr(scene, "_param_trackers", None)
+    if isinstance(trackers, dict):
+        for _p, _v in vals.items():
+            _tr = trackers.get(_p)
+            if _tr is not None:
+                _tr.set_value(float(_v))
 
 
 def camera_target(scene_state, oid):
@@ -681,8 +718,17 @@ def camera_reset(scene, duration=0.9):
     frame = getattr(scene.camera, "frame", None)
     if frame is None:
         return
-    scene.play(frame.animate.scale(1.0).move_to([0, 0, 0]),
+    # wave-3.2: scale(1.0) was a FACTOR no-op — the "reset" never
+    # restored the default frame width, so pull_out beats left the
+    # camera wherever earlier zooms had left it
+    base = getattr(scene, "_cam_base", None)
+    factor = 1.0
+    if base and abs(float(frame.width)) > 1e-6:
+        factor = float(base["w"]) / float(frame.width)
+    center = list(base["c"]) if base else [0, 0, 0]
+    scene.play(frame.animate.scale(factor).move_to(center),
                run_time=duration)
+    _cam_sync(scene, camera_zoom=1.0, camera_x=0.0)
 
 
 class {scene_name}(MovingCameraScene):
@@ -698,6 +744,10 @@ class {scene_name}(MovingCameraScene):
                         "camera_zoom": 1.0, "particle_drift": 0.0,
                         "counter_value": 0.0}}
         self._param_trackers = {{}}
+        _frame = getattr(self.camera, "frame", None)
+        self._cam_base = ({{"w": float(_frame.width),
+                           "c": list(_frame.get_center())}}
+                          if _frame is not None else None)
         self._ve_t0 = 0.0
         self._ve_beats: list = []
 {chr(10).join(body)}

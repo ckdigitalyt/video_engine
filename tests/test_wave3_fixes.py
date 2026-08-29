@@ -258,6 +258,39 @@ def test_camera_zoom_tween_moves_the_frame():
     assert width < _frame_width() - 1.0, width
 
 
+def test_camera_tweens_survive_camera_op_desync():
+    """Wave-3.2 regression: camera_focus/camera_reset scale the frame
+    directly (never touching the zoom tracker).  A later camera_zoom
+    tween must recover the ABSOLUTE target from the real frame geometry
+    — ratio-from-tracker compounded the desync and the end card rendered
+    giant clipped glyphs (zoom_to 0.72 focus, then close tween to 1.0
+    left the frame at 0.72x)."""
+    from engine.renderers.manim.world_compiler import emit_world_scene
+    vs = _one_beat_spec(params=[], actions=[],
+                        objects=[{"id": "horn", "type": "horn",
+                                  "properties": {}}])
+    focus_beat = dict(vs["beats"][0])
+    focus_beat.update(beat_id="b001", role="hook", camera={
+        "type": "zoom_to", "target": "horn"})
+    tween_beat = dict(vs["beats"][0])
+    tween_beat.update(beat_id="b002", role="close", camera={},
+                      scene_params=[{"param": "camera_zoom", "to": 1.0,
+                                     "ease": "smooth"}])
+    vs["beats"] = [focus_beat, tween_beat]
+    src = emit_world_scene(vs, "TScene")
+    import engine.renderers.manim.world_compiler as _wc
+    ns: dict = {"__file__": _wc.__file__}
+    exec(compile(src, "<generated>", "exec"), ns)  # noqa: S102
+    holder = {}
+    with tempconfig({"dry_run": True, "quality": "low_quality",
+                     "disable_caching": True}):
+        inst = ns["TScene"]()
+        holder["scene"] = inst
+        inst.render()
+    width = holder["scene"].camera.frame.width
+    assert width == pytest.approx(_frame_width(), rel=1e-3), width
+
+
 def test_gabriel_plan_tweens_only_visible_params():
     """The close/payoff beats crawl the camera; counter_value (no
     visible hook) no longer produces static-hold beats."""
