@@ -99,7 +99,8 @@ def _upscale_to(src: Path, dst: Path, width: int, height: int) -> None:
 
 def _zoompan_filter(plan: MotionPlan, width: int, height: int, fps: int,
                     duration: float, zoom_rate: float = 1.0,
-                    zoom_pulses: list[dict] | None = None) -> str:
+                    zoom_pulses: list[dict] | None = None,
+                    shake: list[dict] | None = None) -> str:
     frames = max(1, int(round(duration * fps)))
     z0, z1 = plan.zoom_start, min(plan.zoom_end * zoom_rate, 1.5)
     dz = (z1 - z0) / frames
@@ -113,10 +114,26 @@ def _zoompan_filter(plan: MotionPlan, width: int, height: int, fps: int,
         amp = float(pulse.get("amp", 0.05))
         w = max(1.0, float(pulse.get("width", 6)))
         zoom_expr += f"+{amp:.5f}*max(0\\,1-abs(on-{c:.1f})/{w:.1f})"
+    # V4 §16 camera.shake: decaying crop jitter from the motion toolkit.
+    shake_x = shake_y = ""
+    shake_rng = hashlib.sha256(
+        f"shake|{plan.direction}|{frames}".encode()).digest()
+    for s in (shake or []):
+        c = max(0.0, min(float(s.get("center", 0)), frames))
+        amp = float(s.get("amp", 0.02))
+        fr = max(2.0, float(s.get("frames", 6)))
+        j1 = int.from_bytes(shake_rng[0:2], "big") % 100 / 100
+        j2 = int.from_bytes(shake_rng[2:4], "big") % 100 / 100
+        shake_x += (f"+{amp:.5f}*iw*max(0\\,1-abs(on-{c:.1f})/{fr:.1f})"
+                    f"*sin(on*{9.3 + j1:.2f})")
+        shake_y += (f"+{amp * 0.8:.5f}*ih*max(0\\,1-abs(on-{c:.1f})/{fr:.1f})"
+                    f"*cos(on*{7.7 + j2:.2f})")
+    x_expr = f"iw/2-(iw/zoom/2)+{px}*iw*on/{frames}{shake_x}"
+    y_expr = f"ih/2-(ih/zoom/2)+{py}*ih*on/{frames}{shake_y}"
     return (
         f"zoompan=z='{zoom_expr}':"
-        f"x='iw/2-(iw/zoom/2)+{px}*iw*on/{frames}':"
-        f"y='ih/2-(ih/zoom/2)+{py}*ih*on/{frames}':"
+        f"x='{x_expr}':"
+        f"y='{y_expr}':"
         f"d={frames}:s={width}x{height}:fps={fps}"
     )
 
@@ -146,6 +163,7 @@ def render_kenburns(
     seed: int = 0,
     crf: int = 20,
     events: dict | None = None,
+    overlays: list[dict] | None = None,
 ) -> Path:
     """Encode a still into an H.264 silent mp4 with Ken Burns motion.
 
@@ -155,11 +173,17 @@ def render_kenburns(
     pulse adds life. Deterministic end to end.
 
     V4 §4/§15: *events* carries micro-event pulses —
-    ``{"zoom": [{center, amp, width}], "brightness": [...]}`` (see
-    ``engine.v4.microevents.events_to_kenburns_pulses``). Events are
-    implemented on top of the base plan: zoom bumps accelerate the camera,
-    signed brightness bumps implement lighting changes — a still becomes an
-    animated scene instead of a 7-second slide.
+    ``{"zoom": [{center, amp, width}], "brightness": [...],
+    "shake": [{center, amp, frames}]}`` (§16 toolkit camera primitives).
+    Events are implemented on top of the base plan: zoom bumps accelerate
+    the camera, signed brightness bumps implement lighting changes, shake
+    jitters the crop — a still becomes an animated scene instead of a
+    7-second slide.
+
+    *overlays* (V4 §16) lists toolkit layer files to composite after the
+    Ken Burns base: ``[{path, blend: screen|multiply, opacity, kind}]`` —
+    procedural subject/environment motion (flock, rain, dust, silhouettes)
+    rendered by engine.v4.motion_toolkit.render_overlay.
     """
     src = Path(still)
     if not src.exists():
@@ -183,6 +207,7 @@ def render_kenburns(
         frames = max(1, int(round(duration * fps)))
         zoom_pulses = (events or {}).get("zoom") or []
         bright_pulses = (events or {}).get("brightness") or []
+        shake = (events or {}).get("shake") or []
         bright_terms = _brightness_pulses(bright_pulses, frames)
         atmos = ""
         if plan.atmosphere or bright_terms:
@@ -194,7 +219,7 @@ def render_kenburns(
             # Parallax: background (base zoom) + foreground (faster zoom),
             # scaled slightly smaller over time → depth separation.
             bg_filt = _zoompan_filter(plan, width, height, fps, duration,
-                                      zoom_pulses=zoom_pulses)
+                                      zoom_pulses=zoom_pulses, shake=shake)
             fg_plan = MotionPlan(
                 direction=plan.direction, zoom_start=plan.zoom_start,
                 zoom_end=plan.zoom_end, pan_x=plan.pan_x * 1.6,
@@ -205,28 +230,48 @@ def render_kenburns(
             graph = (
                 f"[0:v]{bg_filt}[bg];"
                 f"[1:v]{fg_filt},format=rgba[fg];"
-                f"[bg][fg]overlay=0:0{atmos},format=yuv420p[v]"
+                f"[bg][fg]overlay=0:0{atmos}[base]"
             )
-            cmd = [
-                "ffmpeg", "-y",
-                "-i", str(bg),
-                "-i", str(fg_layer),
-                "-filter_complex", graph, "-map", "[v]",
-                "-r", str(fps), "-c:v", "libx264", "-crf", str(crf),
-                "-preset", "medium", "-pix_fmt", "yuv420p",
-                str(out),
-            ]
+            inputs = ["-i", str(bg), "-i", str(fg_layer)]
+            n_inputs = 2
         else:
             filt = (_zoompan_filter(plan, width, height, fps, duration,
-                                    zoom_pulses=zoom_pulses)
+                                    zoom_pulses=zoom_pulses, shake=shake)
                     + atmos)
-            cmd = [
-                "ffmpeg", "-y",
-                "-i", str(bg),
-                "-vf", filt + ",format=yuv420p",
-                "-r", str(fps), "-c:v", "libx264", "-crf", str(crf),
-                "-preset", "medium", str(out),
-            ]
+            graph = f"[0:v]{filt},format=yuv420p[base]"
+            inputs = ["-i", str(bg)]
+            n_inputs = 1
+
+        # V4 §16 toolkit overlay layers (screen/multiply composite).
+        # Overlays are looped (-stream_loop -1): an event layer is shorter
+        # than the shot and its final frame is blend-neutral (multiply 255 /
+        # screen 0), so after the event the base passes through untouched;
+        # shortest=1 then ends the graph exactly at the shot length.
+        cur = "base"
+        for i, ov in enumerate(overlays or []):
+            path = Path(ov.get("path", ""))
+            if not path.exists():
+                continue
+            blend = "screen" if ov.get("blend") == "screen" else "multiply"
+            opacity = float(ov.get("opacity", 0.8))
+            ov_idx = n_inputs
+            n_inputs += 1
+            inputs += ["-stream_loop", "-1", "-i", str(path)]
+            out_lbl = f"ovl{i}"
+            graph += (f";[{ov_idx}:v]scale={width}:{height}[ovs{i}];"
+                      f"[{cur}][ovs{i}]"
+                      f"blend=all_mode={blend}:all_opacity={opacity:.2f}"
+                      f":shortest=1"
+                      f"[{out_lbl}]")
+            cur = out_lbl
+        graph += f";[{cur}]format=yuv420p[v]"
+        cmd = [
+            "ffmpeg", "-y", *inputs,
+            "-filter_complex", graph, "-map", "[v]",
+            "-r", str(fps), "-c:v", "libx264", "-crf", str(crf),
+            "-preset", "medium", "-pix_fmt", "yuv420p",
+            str(out),
+        ]
         _run(cmd)
     finally:
         import shutil

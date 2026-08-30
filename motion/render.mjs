@@ -20,6 +20,7 @@ import { readFileSync, existsSync } from "node:fs";
 import { createCanvas, loadImage } from "canvas";
 import { TEMPLATES } from "./templates/index.mjs";
 import { resolvePalette, drawBackground } from "./lib/palette.mjs";
+import { cameraFor, drawEventOverlays, drawAmbientBreath } from "./lib/events.mjs";
 
 const require_ = createRequire(import.meta.url);
 
@@ -92,8 +93,25 @@ async function main() {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.globalAlpha = 1;
     drawBackground(ctx, W, H, palette);
+
+    // ── V4 §4/§16 event layer: cues may arrive as compiled ops
+    // (props.event_cues) or as raw template cues (props.micro_events);
+    // raw cues get a minimal deterministic mapping so every shot has
+    // discrete events regardless of adapter vintage.
+    const cues = props.event_cues ?? minimalCues(props.micro_events, totalFrames);
+    const cam = cameraFor(cues, frame, W, H);
+    ctx.save();
+    if (cam.scale !== 1 || cam.dx || cam.dy) {
+      ctx.translate(W / 2 + cam.dx, H / 2 + cam.dy);
+      ctx.scale(cam.scale, cam.scale);
+      ctx.translate(-W / 2, -H / 2);
+    }
     tpl(ctx, { W, H }, props, t, palette,
       await import("./lib/palette.mjs"));
+    ctx.restore();
+    drawEventOverlays(ctx, W, H, cues, frame, fps);
+    drawAmbientBreath(ctx, W, H, frame);
+
     const buf = canvas.toBuffer("raw");
     if (!ff.stdin.write(buf)) {
       await new Promise((res) => ff.stdin.once("drain", res));
@@ -109,6 +127,41 @@ async function main() {
     ok: true, out: outPath, template: templateName,
     frames: totalFrames, width: W, height: H, fps,
   }));
+}
+
+/** Fallback mapping: raw motion-canvas cues (anim names) → minimal event
+ * cues, so legacy adapters still get discrete events (§4). */
+function minimalCues(raw, totalFrames) {
+  const out = [];
+  for (const e of raw || []) {
+    const start = Math.max(0, Math.round(Number(e.t ?? 0) * totalFrames));
+    const span = Math.max(2, Math.round(Number(e.duration ?? 1) * totalFrames));
+    const amp = Math.max(0.35, Number(e.intensity ?? 0.5));
+    const anim = String(e.anim || "ambient");
+    if (anim === "bg_shift") {
+      const dark = String(e.text || "").toLowerCase().includes("dark");
+      out.push({ start, end: start + Math.min(span, 4),
+        type: dark ? "darken" : "flash", amp: 0.3 * amp });
+    } else if (anim === "shake_flash" || anim === "impact") {
+      out.push({ start, end: start + 2, type: "flash", amp: 0.5 });
+      out.push({ start, end: start + 5, type: "shake", amp: 0.02, seed: start });
+    } else if (anim === "hard_swap" || anim === "cut") {
+      out.push({ start, end: start + 3, type: "cut", amp: 0.4 });
+    } else if (anim === "zoom_pulse" || anim === "camera_accel") {
+      out.push({ start, end: start + Math.max(3, span), type: "zoom_kick",
+        amp: 0.06 * amp });
+    } else if (anim === "enter" || anim === "fly_in") {
+      out.push({ start, end: start + span, type: "overlay", kind: "flock",
+        seed: start + 3 });
+    } else if (anim === "move" || anim === "exit" || anim === "morph") {
+      out.push({ start, end: start + span, type: "overlay", kind: "run",
+        seed: start + 5 });
+    } else if (anim === "ambient") {
+      out.push({ start, end: start + span, type: "overlay", kind: "dust",
+        seed: start + 7 });
+    }
+  }
+  return out;
 }
 
 main().catch((e) => { console.error(e); process.exit(1); });

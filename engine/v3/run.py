@@ -330,7 +330,8 @@ def run(args: argparse.Namespace) -> int:
             master, shots, script_doc, research, style, reports, gate_path,
             use_vision=not args.no_vision, use_llm=not args.offline,
             require_audio=not args.silent,
-            expected_width=width, expected_height=height)
+            expected_width=width, expected_height=height,
+            records=records)
         log("gate", f"{gate['overall']} failed={gate['failed_gates']}")
 
         failed = gate["failed_gates"]

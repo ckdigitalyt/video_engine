@@ -1,8 +1,11 @@
 {
   "recent": [
-    "The Monty Hall problem: why switching doubles your odds"
+    "The Monty Hall problem: why switching doubles your odds",
+    "The Collatz conjecture: the simplest unsolved problem in math",
+    "Why is the sky blue?",
+    "Gabriel's Horn: the shape you can fill but never paint"
   ],
   "category_counts": {
-    "science": 2
+    "science": 12
   }
 }

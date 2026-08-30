@@ -27,6 +27,7 @@ import {
   drawParticles,
   drawAtmosphere,
 } from "./lib/scene.mjs";
+import { cameraFor, drawEventOverlays, drawAmbientBreath } from "./lib/events.mjs";
 
 const require = createRequire(import.meta.url);
 const { createCanvas } = require("canvas");
@@ -84,6 +85,10 @@ async function main() {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.globalAlpha = 1;
 
+    // ── V4 §4/§16 micro-event cues (compiled toolkit ops) ──
+    const cues = scene.event_cues ?? pixiCues(scene.events, totalFrames);
+    const evCam = cameraFor(cues, frame, W, H);
+
     // ── background ──
     const bg = scene.background;
     if (typeof bg === "string" && bg.startsWith("#")) {
@@ -95,6 +100,9 @@ async function main() {
     }
 
     const cam = cameraTransform(scene.camera, t, W, H);
+    cam.scale *= evCam.scale;
+    cam.dx += evCam.dx;
+    cam.dy += evCam.dy;
 
     // Parallax layers: deeper layers move/zoom less with the camera.
     const layers = scene.background?.parallax_layers ??
@@ -166,6 +174,10 @@ async function main() {
     if (particles.length) drawParticles(ctx, particles, t, W, H, scene.particles);
     drawAtmosphere(ctx, W, H, t, scene.atmosphere);
 
+    // ── V4 §4/§16 event overlays (flashes, cuts, silhouettes) + breath ──
+    drawEventOverlays(ctx, W, H, cues, frame, fps);
+    drawAmbientBreath(ctx, W, H, frame);
+
     const buf = canvas.toBuffer("raw");
     if (!ff.stdin.write(buf)) {
       await new Promise((res) => ff.stdin.once("drain", res));
@@ -184,3 +196,37 @@ async function main() {
 }
 
 main().catch((e) => { console.error(e); process.exit(1); });
+
+/** Fallback: scene-event descriptors (§7 types) → frame-timed cues. */
+function pixiCues(raw, totalFrames) {
+  const out = [];
+  for (const e of raw || []) {
+    const start = Math.max(0, Math.round(Number(e.t ?? 0) * totalFrames));
+    const span = Math.max(2, Math.round(Number(e.duration ?? 1) * totalFrames));
+    const amp = Math.max(0.35, Number(e.intensity ?? 0.5));
+    const type = String(e.type || "");
+    if (type === "atmosphere") {
+      out.push({ start, end: start + Math.min(span, 4),
+        type: e.atmosphere === "darkness" ? "darken" : "flash",
+        amp: 0.35 * amp });
+    } else if (type === "camera_shake") {
+      out.push({ start, end: start + 5, type: "shake", amp: 0.02, seed: start });
+    } else if (type === "camera_move") {
+      out.push({ start, end: start + Math.max(3, span), type: "zoom_kick",
+        amp: 0.06 * amp });
+    } else if (type === "background_swap") {
+      out.push({ start, end: start + 3, type: "cut", amp: 0.4 });
+    } else if (type === "fly_in_prop" || type === "fly_out_prop") {
+      out.push({ start, end: start + span, type: "overlay", kind: "flock",
+        seed: start + 3 });
+    } else if (type === "particles_burst") {
+      out.push({ start, end: start + span, type: "overlay", kind: "dust",
+        seed: start + 7 });
+    } else if (type === "character_action" || type === "unmask") {
+      out.push({ start, end: start + 3, type: "flash", amp: 0.3 * amp });
+      out.push({ start, end: start + Math.max(3, span), type: "zoom_kick",
+        amp: 0.05 * amp });
+    }
+  }
+  return out;
+}

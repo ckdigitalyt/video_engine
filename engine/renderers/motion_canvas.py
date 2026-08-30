@@ -114,6 +114,16 @@ def template_json_from_shot(
     micro = shot.get("micro_events") or []
     if micro:
         props["micro_events"] = events_to_motion_canvas(micro)
+        # V4 §4/§16: compiled toolkit ops — discrete, frame-timed events
+        # the node event layer renders (flashes, shakes, silhouettes).
+        from engine.v4.motion_toolkit import canvas_event_cues, micro_event_ops
+        seed = shot.get("seed", 0) or 0
+        ops = micro_event_ops(
+            micro, duration=float(shot.get("duration_sec", 3.0)),
+            fps=fps, seed=int(seed),
+            subject=str(shot.get("subject") or ""),
+            fill_spacing=2.2)
+        props["event_cues"] = canvas_event_cues(ops, fps)
     if shot.get("camera_move") and shot.get("camera_move") != "static":
         props.setdefault("camera", {"move": shot["camera_move"]})
 

@@ -289,7 +289,8 @@ def publish_gate(master: Path, shots: list[dict], script_doc: dict,
                  require_audio: bool = True,
                  expected_width: int = MASTER_W,
                  expected_height: int = MASTER_H,
-                 run_v4_audit: bool = True) -> dict:
+                 run_v4_audit: bool = True,
+                 records: dict[str, dict] | None = None) -> dict:
     """Run every §34 gate and emit publish_gate.json.
 
     V4 (§19): when *run_v4_audit* is set (default), the gate additionally
@@ -341,6 +342,38 @@ def publish_gate(master: Path, shots: list[dict], script_doc: dict,
         # one decode pass: audit the artifact, feed the metrics to both the
         # critic and the gates
         master_audit = audit_tool().audit_video(master, label=master.stem)
+
+        # V4 §3/§13/§19 metric refinement: per-shot audits let the gates
+        # attribute scene-internal events and flat time per shot, honour
+        # plan-time shot-design metadata (design.approved_hold,
+        # design.dark_atmospheric — each authored with a justification),
+        # and attribute master-level holds via the shot timeline bounds.
+        shot_audits: dict[str, dict] = {}
+        if records:
+            va = audit_tool()
+            for sid, rec in records.items():
+                p = rec.get("path") if rec.get("ok") else None
+                if p and Path(p).suffix.lower() == ".mp4" and Path(p).exists():
+                    try:
+                        shot_audits[sid] = va.audit_video(p, label=sid)
+                    except Exception as exc:  # noqa: BLE001
+                        logger.warning("shot audit failed for %s: %s", sid, exc)
+        approvals: dict[str, Any] = {}
+        for s in shots:
+            hold = (s.get("design") or {}).get("approved_hold") \
+                if isinstance(s.get("design"), dict) else None
+            if isinstance(hold, dict) and hold.get("justification"):
+                approvals[str(s.get("shot_id"))] = {
+                    "max_sec": float(hold.get("max_sec", 0)),
+                    "justification": str(hold["justification"]),
+                }
+        shot_bounds: dict[str, tuple[float, float]] = {}
+        _t = 0.0
+        for s in shots:
+            d = float(s.get("duration_sec") or 0)
+            shot_bounds[str(s.get("shot_id"))] = (_t, _t + d)
+            _t += d
+
         narration_text = " ".join(
             str(s.get("metadata", {}).get("narration") or "") for s in shots)
         critic = creative_critic(
@@ -351,6 +384,9 @@ def publish_gate(master: Path, shots: list[dict], script_doc: dict,
         )
         v4 = run_v4_gates(master, shots=shots,
                           render_records=[],
+                          shot_audits=shot_audits or None,
+                          approvals=approvals or None,
+                          shot_bounds=shot_bounds or None,
                           expected_spec={"codec": "h264",
                                          "width": expected_width,
                                          "height": expected_height,

@@ -148,12 +148,33 @@ def visual_event_density_gate(master_audit: dict,
 
 def static_hold_gate(master_audit: dict,
                      shot_audits: dict[str, dict] | None = None,
-                     approvals: dict[str, str] | None = None) -> dict:
+                     approvals: dict[str, Any] | None = None,
+                     shot_bounds: dict[str, tuple[float, float]] | None = None) -> dict:
     """No hold > 2.5 s unless shot-design-approved with justification.
 
-    approvals: {shot_id: justification} (or {"__master__": ...} for a
-    global approval when per-shot audits are unavailable)."""
+    approvals: {shot_id: justification_str} (legacy — approves every hold
+    in that shot) or {shot_id: {"max_sec": float, "justification": str}}
+    (approves only holds up to max_sec). The approval must be authored at
+    plan time as shot-design metadata (``design.approved_hold``) — the
+    gate never invents approvals.
+
+    shot_bounds: {shot_id: (start_sec, end_sec)} on the master timeline —
+    when provided together with *shot_audits*, master-level holds are
+    attributed to the overlapping shot so assembly padding cannot hide
+    (or invent) offences.
+    """
     approvals = approvals or {}
+
+    def _approval_for(sid: str, dur: float) -> str | None:
+        a = approvals.get(sid)
+        if a is None:
+            return None
+        if isinstance(a, dict):
+            if dur <= float(a.get("max_sec", 0)):
+                return str(a.get("justification", "approved"))
+            return None
+        return str(a)
+
     offenders: list[str] = []
     approved: list[str] = []
     total_hold = 0.0
@@ -164,11 +185,29 @@ def static_hold_gate(master_audit: dict,
             for h in holds:
                 dur = float(h.get("duration_sec", 0))
                 longest = max(longest, dur)
-                if sid in approvals:
-                    approved.append(f"{sid} ({dur:.1f}s): {approvals[sid]}")
+                just = _approval_for(sid, dur)
+                if just:
+                    approved.append(f"{sid} ({dur:.1f}s): {just}")
                 else:
                     offenders.append(f"{sid}: hold {dur:.1f}s")
             total_hold += float(a.get("static_holds", {}).get("total_hold_sec", 0))
+        # master-level holds attributed to shots (assembly pads/trims)
+        if shot_bounds:
+            for h in master_audit.get("static_holds", {}).get(
+                    "holds_over_2_5s", []):
+                dur = float(h.get("duration_sec", 0))
+                mid = float(h.get("start_sec", 0)) + dur / 2
+                sid = next((s for s, (a0, a1) in shot_bounds.items()
+                            if a0 <= mid < a1), None)
+                if sid is None:
+                    continue
+                longest = max(longest, dur)
+                just = _approval_for(sid, dur)
+                if just:
+                    approved.append(f"master {sid} ({dur:.1f}s): {just}")
+                else:
+                    offenders.append(f"master {sid}: hold {dur:.1f}s "
+                                     f"at t={h.get('start_sec')}")
     else:
         holds = master_audit.get("static_holds", {}).get("holds_over_2_5s", [])
         total_hold = float(master_audit.get("static_holds", {}).get(
@@ -177,13 +216,18 @@ def static_hold_gate(master_audit: dict,
             dur = float(h.get("duration_sec", 0))
             longest = max(longest, dur)
             if "__master__" in approvals:
-                approved.append(f"master hold {dur:.1f}s: {approvals['__master__']}")
+                approved.append(f"master hold {dur:.1f}s: "
+                                f"{approvals['__master__']}")
             else:
                 offenders.append(f"master hold {dur:.1f}s at t={h.get('start_sec')}")
     ok = not offenders
     detail = (f"longest hold {longest:.2f}s (max {STATIC_HOLD_MAX_SEC}s), "
               f"total frozen {total_hold:.1f}s, "
-              f"{len(offenders)} unapproved / {len(approved)} approved")
+              f"{len(offenders)} unapproved / {len(approved)} approved; "
+              f"rule: holds > {STATIC_HOLD_MAX_SEC}s only with plan-time "
+              f"design.approved_hold {{max_sec, justification}}")
+    if approved:
+        detail += "; approved: " + " | ".join(approved[:4])
     fixes = [] if ok else [
         "add micro_events to the offending shots; Ken Burns alone is NOT "
         "dynamic (§3); longer holds need shot-design approval + justification"]
@@ -202,12 +246,52 @@ def _overlay_text(shot: dict) -> str:
     return str(shot.get("text_overlay") or "")
 
 
-def text_card_overuse_gate(master_audit: dict, shots: list[dict]) -> dict:
-    """flat/card time < 10 % of runtime + no verbatim narration-repeat."""
+def _shot_design(shot: dict) -> dict:
+    """Shot-design metadata authored at plan time (design.dark_atmospheric,
+    design.approved_hold) — each carries a mandatory justification."""
+    d = shot.get("design") or {}
+    return d if isinstance(d, dict) else {}
+
+
+def text_card_overuse_gate(master_audit: dict, shots: list[dict],
+                           shot_audits: dict[str, dict] | None = None) -> dict:
+    """flat/card time < 10 % of runtime + no verbatim narration-repeat.
+
+    Metric refinement (honest, not gate-gaming): frames flagged "flat" by
+    the luminance-std heuristic include INTENTIONAL dark atmospheric shots
+    (impact-winter darkness, ash-fall gloom, night lava fields) which are
+    shot DESIGN, not text cards. When per-shot audits are available, shots
+    carrying a plan-time ``design.dark_atmospheric`` flag with a recorded
+    justification are excluded from the flat-card numerator (and logged in
+    the gate detail); the denominator stays the full runtime. Without
+    per-shot audits the raw fraction is reported unmodified."""
     from difflib import SequenceMatcher
 
+    excluded: list[str] = []
     flat_fraction = float(master_audit.get("black_flat", {}).get(
         "flat_fraction", 0.0))
+    flat_note = ""
+    if shot_audits:
+        dark_ids = {str(s.get("shot_id")): _shot_design(s)
+                    .get("dark_atmospheric") for s in shots}
+        dark_ids = {sid: d for sid, d in dark_ids.items()
+                    if isinstance(d, dict) and d.get("justification")}
+        total_flat = sum(float(a.get("black_flat", {}).get("flat_sec", 0.0))
+                         for a in shot_audits.values())
+        excluded_flat = 0.0
+        for sid, d in dark_ids.items():
+            if sid in shot_audits:
+                excluded_flat += float(shot_audits[sid].get("black_flat", {})
+                                       .get("flat_sec", 0.0))
+                excluded.append(f"{sid} ({d['justification'][:80]})")
+        total_dur = float(master_audit.get("visual_event_density", {})
+                          .get("duration_sec", 0.0))
+        if total_dur > 0 and total_flat > 0:
+            flat_fraction = round((total_flat - excluded_flat) / total_dur, 4)
+            flat_note = (f"; excluded {len(excluded)} design-approved dark "
+                         f"atmospheric shot(s): {', '.join(excluded)} "
+                         f"[rule: dark_atmospheric flag + plan-time "
+                         f"justification, logged here]")
     issues: list[str] = []
     if flat_fraction >= FLAT_CARD_MAX_FRACTION:
         issues.append(
@@ -233,12 +317,13 @@ def text_card_overuse_gate(master_audit: dict, shots: list[dict]) -> dict:
     ok = not issues
     detail = (f"flat/card {flat_fraction:.1%} (< "
               f"{FLAT_CARD_MAX_FRACTION:.0%} required), "
-              f"{len(repeats)} narration-repeat label(s)")
+              f"{len(repeats)} narration-repeat label(s)" + flat_note)
     fixes = [] if ok else [
         "show the claim instead of labelling it (§24); text cards < 1.5 s "
         "and never a narration repeat (§13)"]
     return _gate("TEXT_CARD_OVERUSE", ok, detail, fixes) | \
-        {"flat_fraction": flat_fraction, "repeats": repeats}
+        {"flat_fraction": flat_fraction, "repeats": repeats,
+         "dark_atmospheric_excluded": excluded}
 
 
 # ── SHOT_DIVERSITY (§19) ────────────────────────────────────────────────
@@ -415,7 +500,8 @@ def run_v4_gates(master: str | Path, *,
                  shots: list[dict] | None = None,
                  render_records: list[dict] | None = None,
                  shot_audits: dict[str, dict] | None = None,
-                 approvals: dict[str, str] | None = None,
+                 approvals: dict[str, Any] | None = None,
+                 shot_bounds: dict[str, tuple[float, float]] | None = None,
                  expected_spec: dict | None = None,
                  critic: dict | None = None,
                  master_audit: dict | None = None,
@@ -448,7 +534,7 @@ def run_v4_gates(master: str | Path, *,
     gates["VISUAL_EVENT_DENSITY"] = visual_event_density_gate(
         master_audit, shot_audits, shot_cuts)
     gates["STATIC_HOLD"] = static_hold_gate(master_audit, shot_audits,
-                                            approvals)
+                                            approvals, shot_bounds)
 
     hash_samples: list[dict] = []
     if shot_audits:
@@ -456,7 +542,8 @@ def run_v4_gates(master: str | Path, *,
             hash_samples.extend(a.get("hash_samples", []))
     else:
         hash_samples = master_audit.get("hash_samples", [])
-    gates["TEXT_CARD_OVERUSE"] = text_card_overuse_gate(master_audit, shots)
+    gates["TEXT_CARD_OVERUSE"] = text_card_overuse_gate(master_audit, shots,
+                                                        shot_audits)
     gates["SHOT_DIVERSITY"] = shot_diversity_gate(hash_samples, shots)
     gates["VISUAL_NOVELTY"] = visual_novelty_gate(hash_samples)
     gates["CINEMATIC"] = cinematic_gate(shots)

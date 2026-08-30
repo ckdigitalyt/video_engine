@@ -111,6 +111,15 @@ def scene_json_from_shot(
     micro = shot.get("micro_events") or []
     if micro and "events" not in scene:
         scene["events"] = events_to_pixijs(micro)
+        # V4 §4/§16: compiled toolkit ops — frame-timed discrete events
+        # (flashes, shakes, silhouettes) rendered by the node event layer.
+        from engine.v4.motion_toolkit import canvas_event_cues, micro_event_ops
+        ops = micro_event_ops(
+            micro, duration=float(shot.get("duration_sec", 3.0)),
+            fps=fps, seed=int(shot.get("seed", 0) or 0),
+            subject=str(shot.get("subject") or ""),
+            fill_spacing=2.2)
+        scene["event_cues"] = canvas_event_cues(ops, fps)
     if shot.get("lighting_change") and "atmosphere" not in scene:
         low = str(shot["lighting_change"]).lower()
         if any(w in low for w in ("dark", "fade", "dim")):

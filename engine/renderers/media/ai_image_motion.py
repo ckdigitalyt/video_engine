@@ -84,10 +84,8 @@ class AIImageMotionRenderer(Renderer):
             motion_plan,
             render_kenburns,
         )
-        from engine.v4.microevents import (
-            derive_micro_events,
-            events_to_kenburns_pulses,
-        )
+        from engine.v4.microevents import derive_micro_events
+        from engine.v4.motion_toolkit import kenburns_ops, micro_event_ops
 
         out_dir = Path(ctx.output_dir)
         shot_id = shot.get("shot_id", "shot")
@@ -141,17 +139,23 @@ class AIImageMotionRenderer(Renderer):
 
         plan = motion_plan(prompt, seed, duration, ctx.aspect,
                            parallax=want_parallax, atmosphere=want_atmos)
-        # V4 §4/§15: implement the shot's micro events as motion pulses
-        # (camera accel → zoom bumps; lighting change → brightness bumps;
-        # impact → both). Shots without declared events get a deterministic
-        # derived timeline so a still can never degrade to a 7s slide.
+        # V4 §4/§15/§16: implement the shot's micro events as REAL discrete
+        # perceptual events via the motion toolkit — exposure/grade steps,
+        # camera-accel zoom kicks, crop shakes and procedural overlay layers
+        # (flock/rain/dust/silhouettes) composited over the Ken Burns base.
+        # Shots without declared events get a deterministic derived timeline
+        # so a still can never degrade to a 7s slide.
         micro = shot.get("micro_events") or derive_micro_events(shot)
-        events = events_to_kenburns_pulses(micro, duration, ctx.fps)
+        ops = micro_event_ops(micro, duration=duration, fps=ctx.fps,
+                              seed=seed, subject=prompt,
+                              fill_spacing=3.0)
+        events = kenburns_ops(ops, duration=duration, fps=ctx.fps,
+                              work_dir=out_dir / f"{shot_id}_toolkit")
         out_path = out_dir / f"{shot_id}_aivimgmotion.mp4"
         render_kenburns(
             still, out_path, duration=duration, aspect=ctx.aspect, fps=ctx.fps,
             plan=plan, foreground=foreground, prompt=prompt, seed=seed,
-            events=events,
+            events=events, overlays=events.get("overlays") or [],
         )
 
         # QA frames: first / middle / last.
@@ -165,8 +169,12 @@ class AIImageMotionRenderer(Renderer):
                 "parallax": plan.parallax and foreground is not None,
                 "atmosphere": plan.atmosphere,
                 "micro_events": len(micro),
+                "event_ops": len(ops),
                 "zoom_pulses": len(events["zoom"]),
                 "brightness_pulses": len(events["brightness"]),
+                "shake_events": len(events["shake"]),
+                "overlay_layers": [o.get("kind") for o in
+                                   events.get("overlays") or []],
                 "duration_sec": duration,
             },
             qa_frames=[str(p) for p in qa_frames],
