@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Provider Registry v1",
+  "description": "AI media provider registry (directive §33 deliverable 6). The broker uses this for ordered failover per media kind; renderer selection is capability-driven, not provider-driven.",
+  "type": "object",
+  "required": ["version", "providers"],
+  "properties": {
+    "version": {"type": "string", "const": "v1"},
+    "providers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "kind", "enabled", "priority"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1, "description": "e.g. minimax_h3, wan22, ltx, hf_zerogpu__space_name, pexels, pixabay, siliconflow, nvidia_nim, deepseek"},
+          "kind": {
+            "type": "string",
+            "enum": ["image", "video", "image_to_video", "stock", "vision", "audio"]
+          },
+          "models": {"type": "array", "items": {"type": "string"}},
+          "endpoint": {"type": "string", "description": "API base URL or Gradio Space id"},
+          "env_keys": {"type": "array", "items": {"type": "string"}, "description": "Environment variables providing credentials; values NEVER logged"},
+          "enabled": {"type": "boolean"},
+          "priority": {"type": "integer", "minimum": 0, "description": "Lower = tried first within its kind"},
+          "cost_per_unit_hint": {"type": "number", "minimum": 0},
+          "notes": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "failover_policy": {
+      "type": "object",
+      "properties": {
+        "retry_transient": {"type": "boolean"},
+        "max_retries": {"type": "integer", "minimum": 0},
+        "failover_on_error": {"type": "boolean"},
+        "cache_first": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    },
+    "metadata": {"type": "object"}
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Visual Budget v1",
+  "description": "Target renderer mix declared before rendering (directive §16). Prevents drift into repetitive output; the visual director may change the numbers per topic.",
+  "type": "object",
+  "required": ["version", "topic", "budget"],
+  "properties": {
+    "version": {"type": "string", "const": "v1"},
+    "topic": {"type": "string", "minLength": 1},
+    "target_duration_sec": {"type": "number", "exclusiveMinimum": 0},
+    "budget": {
+      "type": "object",
+      "required": [
+        "hero_ai_video_shots",
+        "ai_image_motion_shots",
+        "stock_or_archival_shots",
+        "motion_canvas_shots",
+        "pixijs_shots",
+        "manim_shots",
+        "pattern_interrupts"
+      ],
+      "properties": {
+        "hero_ai_video_shots": {"type": "integer", "minimum": 0},
+        "ai_image_motion_shots": {"type": "integer", "minimum": 0},
+        "stock_or_archival_shots": {"type": "integer", "minimum": 0},
+        "motion_canvas_shots": {"type": "integer", "minimum": 0},
+        "pixijs_shots": {"type": "integer", "minimum": 0},
+        "manim_shots": {"type": "integer", "minimum": 0},
+        "pattern_interrupts": {"type": "integer", "minimum": 0},
+        "archival_shots": {"type": "integer", "minimum": 0},
+        "godot_shots": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "max_hero_cost_share": {"type": "number", "minimum": 0, "maximum": 1, "description": "Max fraction of total runtime allowed to be HERO-cost shots"},
+    "notes": {"type": "string"},
+    "metadata": {"type": "object"}
+  },
+  "additionalProperties": false
+}

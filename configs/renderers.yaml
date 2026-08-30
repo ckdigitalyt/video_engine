@@ -1,0 +1,242 @@
+# Renderer capability registry (v3 Wave 1) — consumed by engine/renderers/registry.py
+# Each record conforms to schemas/renderer_capability_v1.schema.json.
+# quality_dimensions: self-rated capability per router dimension in [0,1].
+# enabled: whether the registry instantiates it (stubs count as enabled-but-not-implemented).
+
+AI_VIDEO:
+  display_name: "AI-generated video"
+  strengths: [cinematic realism, complex physical motion, hero moments, atmospheric lighting]
+  input_kinds: [text_prompt, image]
+  output: video
+  cost_tier: HERO
+  availability: {enabled: true, offline_capable: false, requires_network: true, requires_remote_gpu: true}
+  quality_dimensions:
+    realism: 1.0
+    physical_motion: 1.0
+    math_precision: 0.05
+    character_interaction: 0.8
+    emotional_impact: 0.95
+    historical_authenticity: 0.7
+    diagrammatic: 0.1
+    camera_movement: 0.9
+    text_heavy: 0.05
+    stylization: 0.8
+  max_duration_sec: 10
+  notes: "Hero shots only (§2C). Providers: MiniMax H3, Wan 2.2, LTX (Wave 2)."
+
+AI_IMAGE_MOTION:
+  display_name: "AI still + procedural motion"
+  strengths: [photoreal stills, Ken Burns, parallax, atmosphere, cost-efficient impact]
+  input_kinds: [text_prompt]
+  output: video
+  cost_tier: MEDIUM
+  availability: {enabled: true, offline_capable: false, requires_network: true, requires_remote_gpu: true}
+  quality_dimensions:
+    realism: 0.85
+    physical_motion: 0.4
+    math_precision: 0.05
+    character_interaction: 0.5
+    emotional_impact: 0.8
+    historical_authenticity: 0.75
+    diagrammatic: 0.2
+    camera_movement: 0.5
+    text_heavy: 0.3
+    stylization: 0.85
+  max_duration_sec: 12
+  notes: "AI_IMAGE path (§12): image gen + procedural camera/parallax/particles."
+
+STOCK_VIDEO:
+  display_name: "Stock footage"
+  strengths: [authentic real footage, fast, cheap, licensing metadata tracked]
+  input_kinds: [stock_query]
+  output: video
+  cost_tier: LOW
+  availability: {enabled: true, offline_capable: false, requires_network: true, requires_remote_gpu: false}
+  quality_dimensions:
+    realism: 1.0
+    physical_motion: 0.8
+    math_precision: 0.0
+    character_interaction: 0.6
+    emotional_impact: 0.7
+    historical_authenticity: 0.6
+    diagrammatic: 0.05
+    camera_movement: 0.3
+    text_heavy: 0.0
+    stylization: 0.2
+  max_duration_sec: 20
+  notes: "Pexels/Pixabay via AI Media Broker; license metadata mandatory (§13)."
+
+ARCHIVAL:
+  display_name: "Archival / public-domain footage"
+  strengths: [historical authenticity, NASA imagery, public-domain sources]
+  input_kinds: [archival_query]
+  output: video
+  cost_tier: LOW
+  availability: {enabled: true, offline_capable: false, requires_network: true, requires_remote_gpu: false}
+  quality_dimensions:
+    realism: 1.0
+    physical_motion: 0.7
+    math_precision: 0.0
+    character_interaction: 0.5
+    emotional_impact: 0.8
+    historical_authenticity: 1.0
+    diagrammatic: 0.1
+    camera_movement: 0.2
+    text_heavy: 0.1
+    stylization: 0.3
+  max_duration_sec: 20
+  notes: "NASA, Wikimedia Commons, Internet Archive (§13)."
+
+MOTION_CANVAS:
+  display_name: "Motion Canvas animation"
+  strengths: [kinetic typography, infographic animation, timelines, maps, callouts, diagrams]
+  input_kinds: [json_scene]
+  output: video
+  cost_tier: LOW
+  availability: {enabled: true, offline_capable: true, requires_network: false, requires_remote_gpu: false}
+  quality_dimensions:
+    realism: 0.05
+    physical_motion: 0.2
+    math_precision: 0.4
+    character_interaction: 0.5
+    emotional_impact: 0.4
+    historical_authenticity: 0.05
+    diagrammatic: 1.0
+    camera_movement: 0.7
+    text_heavy: 1.0
+    stylization: 0.9
+  max_duration_sec: 30
+  notes: "TypeScript templates instantiated from structured JSON (§6). Wave 2."
+
+PIXIJS:
+  display_name: "PixiJS 2D/cartoon animation"
+  strengths: [sprites, parallax, particles, cutout characters, explosions, cartoon worlds]
+  input_kinds: [json_scene]
+  output: video
+  cost_tier: LOW
+  availability: {enabled: true, offline_capable: true, requires_network: false, requires_remote_gpu: false}
+  quality_dimensions:
+    realism: 0.3
+    physical_motion: 0.6
+    math_precision: 0.1
+    character_interaction: 1.0
+    emotional_impact: 0.6
+    historical_authenticity: 0.1
+    diagrammatic: 0.5
+    camera_movement: 0.8
+    text_heavy: 0.4
+    stylization: 1.0
+  max_duration_sec: 30
+  notes: "Reusable scene framework, JSON-described scenes (§7). Wave 2."
+
+MANIM:
+  display_name: "Manim math/science visualization"
+  strengths: [equations, geometry, graphs, precise quantitative explanation, scientific diagrams]
+  input_kinds: [visualspec]
+  output: scene_file
+  cost_tier: LOW
+  availability: {enabled: true, offline_capable: true, requires_network: false, requires_remote_gpu: false}
+  quality_dimensions:
+    realism: 0.05
+    physical_motion: 0.3
+    math_precision: 1.0
+    character_interaction: 0.1
+    emotional_impact: 0.15
+    historical_authenticity: 0.05
+    diagrammatic: 0.9
+    camera_movement: 0.4
+    text_heavy: 0.8
+    stylization: 0.6
+  max_duration_sec: 30
+  notes: "Specialist renderer (§2A/§8) — never the default for a whole video."
+
+GODOT:
+  display_name: "Godot 3D scene renderer"
+  strengths: [3D scenes, physics simulation, orbital mechanics]
+  input_kinds: [json_scene]
+  output: video
+  cost_tier: MEDIUM
+  availability: {enabled: false, offline_capable: true, requires_network: false, requires_remote_gpu: false}
+  quality_dimensions:
+    realism: 0.6
+    physical_motion: 0.9
+    math_precision: 0.6
+    character_interaction: 0.6
+    emotional_impact: 0.6
+    historical_authenticity: 0.1
+    diagrammatic: 0.4
+    camera_movement: 0.9
+    text_heavy: 0.2
+    stylization: 0.7
+  notes: "Optional specialist (§1); disabled until genuinely useful."
+
+OPEN_TOONZ:
+  display_name: "OpenToonz 2D animation"
+  strengths: [hand-drawn style animation]
+  input_kinds: [json_scene]
+  output: video
+  cost_tier: MEDIUM
+  availability: {enabled: false, offline_capable: true, requires_network: false, requires_remote_gpu: false}
+  quality_dimensions:
+    realism: 0.1
+    physical_motion: 0.5
+    math_precision: 0.0
+    character_interaction: 0.9
+    emotional_impact: 0.7
+    historical_authenticity: 0.0
+    diagrammatic: 0.2
+    camera_movement: 0.6
+    text_heavy: 0.3
+    stylization: 1.0
+  notes: "Optional specialist; disabled until needed."
+
+MEDIA:
+  display_name: "Media/footage compositor"
+  strengths: [Ken Burns on stills, clip assembly, FFmpeg motion]
+  input_kinds: [image, stock_query]
+  output: video
+  cost_tier: LOW
+  availability: {enabled: true, offline_capable: true, requires_network: false, requires_remote_gpu: false}
+  quality_dimensions:
+    realism: 0.8
+    physical_motion: 0.3
+    math_precision: 0.0
+    character_interaction: 0.2
+    emotional_impact: 0.5
+    historical_authenticity: 0.5
+    diagrammatic: 0.1
+    camera_movement: 0.4
+    text_heavy: 0.2
+    stylization: 0.4
+  notes: "Existing media pipeline behind adapter; body lands in Wave 2."
+
+VECTOR:
+  display_name: "Vector illustration animation"
+  strengths: [flat illustration, icon animation]
+  input_kinds: [json_scene]
+  output: animation
+  cost_tier: LOW
+  availability: {enabled: true, offline_capable: true, requires_network: false, requires_remote_gpu: false}
+  quality_dimensions:
+    realism: 0.05
+    physical_motion: 0.2
+    math_precision: 0.3
+    character_interaction: 0.4
+    emotional_impact: 0.3
+    historical_authenticity: 0.0
+    diagrammatic: 0.8
+    camera_movement: 0.5
+    text_heavy: 0.7
+    stylization: 0.9
+  notes: "Existing vector package behind adapter; body lands in Wave 2."
+
+# Canonical offline degradation chain (§24): AI_VIDEO → AI_IMAGE+MOTION →
+# STOCK_VIDEO → MOTION_CANVAS → PIXIJS → MANIM. ARCHIVAL is not part of the
+# canonical chain — the router splices it in for historical shots.
+fallback_chain:
+  - AI_VIDEO
+  - AI_IMAGE_MOTION
+  - STOCK_VIDEO
+  - MOTION_CANVAS
+  - PIXIJS
+  - MANIM

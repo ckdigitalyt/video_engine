@@ -1,0 +1,79 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Shot v3",
+  "description": "First-class Shot abstraction for the v3 multi-renderer pipeline (directive §4). The visual director authors Shot specs; renderers implement them deterministically.",
+  "type": "object",
+  "required": ["version", "shot_id", "duration_sec", "narrative_role", "visual_goal", "renderer"],
+  "properties": {
+    "version": {"type": "string", "const": "v3"},
+    "shot_id": {"type": "string", "pattern": "^S[0-9]{1,4}$"},
+    "duration_sec": {"type": "number", "exclusiveMinimum": 0, "maximum": 60},
+    "narration_start": {"type": "number", "minimum": 0},
+    "narration_end": {"type": "number", "minimum": 0},
+    "narrative_role": {
+      "type": "string",
+      "enum": ["hook", "context", "escalation", "reveal", "explanation", "climax", "payoff", "callback", "transition", "outro"]
+    },
+    "visual_goal": {"type": "string", "minLength": 1},
+    "renderer": {
+      "type": "string",
+      "enum": ["AI_VIDEO", "AI_IMAGE", "STOCK_VIDEO", "ARCHIVAL", "MOTION_CANVAS", "PIXIJS", "MANIM", "GODOT", "OPEN_TOONZ", "CUSTOM"]
+    },
+    "fallback_renderer": {
+      "type": "string",
+      "enum": ["AI_VIDEO", "AI_IMAGE", "STOCK_VIDEO", "ARCHIVAL", "MOTION_CANVAS", "PIXIJS", "MANIM", "GODOT", "OPEN_TOONZ", "CUSTOM"]
+    },
+    "style": {"type": "string", "description": "VideoStyleSpec style_name reference, e.g. cinematic_documentary"},
+    "subject": {"type": "string"},
+    "background": {"type": "string"},
+    "camera": {"type": "string"},
+    "motion": {"type": "string"},
+    "composition": {"type": "string"},
+    "text_overlay": {"type": ["string", "null"]},
+    "sfx": {"type": "array", "items": {"type": "string"}},
+    "music_state": {
+      "type": "string",
+      "enum": ["silence", "ambient", "build", "peak", "drop", "resolve", "sustain"]
+    },
+    "duck_music_db": {"type": "number", "minimum": -40, "maximum": 0},
+    "asset_requirements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "kind": {"type": "string", "enum": ["image", "video", "audio", "font", "svg", "icon"]},
+          "query": {"type": "string"},
+          "source_hint": {"type": "string"},
+          "license": {"type": "string"}
+        },
+        "required": ["kind", "query"],
+        "additionalProperties": false
+      }
+    },
+    "generation_priority": {
+      "type": "string",
+      "enum": ["low", "normal", "high", "hero"],
+      "default": "normal"
+    },
+    "qa_requirements": {"type": "array", "items": {"type": "string"}},
+    "visual_budget_ref": {"type": "string", "description": "Key into the video's visual_budget_v1 document this shot consumes budget from"},
+    "requirements": {
+      "type": "object",
+      "description": "Renderer-selection requirement flags consumed by the router (§5)",
+      "properties": {
+        "realism": {"type": "boolean"},
+        "physical_motion": {"type": "boolean"},
+        "math_precision": {"type": "boolean"},
+        "character_interaction": {"type": "boolean"},
+        "emotional_impact": {"type": "boolean"},
+        "historical_authenticity": {"type": "boolean"},
+        "diagrammatic": {"type": "boolean"},
+        "camera_movement": {"type": "boolean"},
+        "text_heavy": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    },
+    "metadata": {"type": "object"}
+  },
+  "additionalProperties": false
+}

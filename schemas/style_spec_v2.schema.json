@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "VideoStyleSpec v2",
+  "description": "Per-video style context (directive §17). Every renderer receives this as render context so output remains visually coherent across media.",
+  "type": "object",
+  "required": ["version", "style_name"],
+  "properties": {
+    "version": {"type": "string", "const": "v2"},
+    "style_name": {"type": "string", "minLength": 1, "description": "e.g. cinematic_documentary, kinetic_educational, cartoon_playful"},
+    "palette": {
+      "type": "object",
+      "properties": {
+        "primary": {"type": "string"},
+        "secondary": {"type": "string"},
+        "accent": {"type": "string"},
+        "background": {"type": "string"},
+        "text": {"type": "string"},
+        "mood": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "typography": {
+      "type": "object",
+      "properties": {
+        "title_font": {"type": "string"},
+        "body_font": {"type": "string"},
+        "caption_font": {"type": "string"},
+        "title_weight": {"type": "string"},
+        "scale_note": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "camera_language": {"type": ["string", "object"], "description": "e.g. slow push-ins, Ken Burns drift, handheld energy; object for structured moves"},
+    "lighting": {"type": ["string", "object"]},
+    "texture": {"type": ["string", "object"], "description": "grain, paper, film emulation, flat vector"},
+    "motion_language": {"type": ["string", "object"], "description": "easing personality, pacing, energy"},
+    "transition_language": {"type": ["string", "object"], "description": "cut, whip-pan, match-cut, light-leak patterns"},
+    "character_style": {"type": ["string", "object"], "description": "cutout, rigged cartoon, silhouette, none"},
+    "caption_style": {
+      "type": "object",
+      "properties": {
+        "position": {"type": "string", "enum": ["bottom", "lower_third", "center", "top"]},
+        "font": {"type": "string"},
+        "size_hint": {"type": "string"},
+        "kinetic": {"type": "boolean"}
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}

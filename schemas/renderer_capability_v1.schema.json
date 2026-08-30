@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Renderer Capability v1",
+  "description": "Per-renderer capability record (directive §33 deliverable 5). Consumed by engine/renderers/registry.py and the renderer router.",
+  "type": "object",
+  "required": ["id", "display_name", "strengths", "input_kinds", "output", "cost_tier", "availability", "quality_dimensions"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "enum": ["AI_VIDEO", "AI_IMAGE", "AI_IMAGE_MOTION", "STOCK_VIDEO", "ARCHIVAL", "MOTION_CANVAS", "PIXIJS", "MANIM", "GODOT", "OPEN_TOONZ", "CUSTOM", "MEDIA", "VECTOR"]
+    },
+    "display_name": {"type": "string"},
+    "strengths": {"type": "array", "items": {"type": "string"}},
+    "input_kinds": {
+      "type": "array",
+      "items": {"type": "string", "enum": ["text_prompt", "image", "json_scene", "visualspec", "stock_query", "archival_query"]}
+    },
+    "output": {"type": "string", "enum": ["video", "image", "animation", "scene_file"]},
+    "cost_tier": {"type": "string", "enum": ["LOW", "MEDIUM", "HIGH", "HERO"]},
+    "availability": {
+      "type": "object",
+      "required": ["enabled", "offline_capable"],
+      "properties": {
+        "enabled": {"type": "boolean"},
+        "offline_capable": {"type": "boolean", "description": "Can render with all remote services down (CPU-only server)"},
+        "requires_network": {"type": "boolean"},
+        "requires_remote_gpu": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    },
+    "quality_dimensions": {
+      "type": "object",
+      "description": "Self-rated capability per router dimension in [0,1]",
+      "required": [
+        "realism", "physical_motion", "math_precision", "character_interaction",
+        "emotional_impact", "historical_authenticity", "diagrammatic",
+        "camera_movement", "text_heavy", "stylization"
+      ],
+      "properties": {
+        "realism": {"type": "number", "minimum": 0, "maximum": 1},
+        "physical_motion": {"type": "number", "minimum": 0, "maximum": 1},
+        "math_precision": {"type": "number", "minimum": 0, "maximum": 1},
+        "character_interaction": {"type": "number", "minimum": 0, "maximum": 1},
+        "emotional_impact": {"type": "number", "minimum": 0, "maximum": 1},
+        "historical_authenticity": {"type": "number", "minimum": 0, "maximum": 1},
+        "diagrammatic": {"type": "number", "minimum": 0, "maximum": 1},
+        "camera_movement": {"type": "number", "minimum": 0, "maximum": 1},
+        "text_heavy": {"type": "number", "minimum": 0, "maximum": 1},
+        "stylization": {"type": "number", "minimum": 0, "maximum": 1}
+      },
+      "additionalProperties": false
+    },
+    "max_duration_sec": {"type": "number", "exclusiveMinimum": 0},
+    "notes": {"type": "string"}
+  },
+  "additionalProperties": false
+}
