@@ -45,11 +45,44 @@ internet_archive:
 fallback:
   always_allowed: true
 
-# ── Wave 2: AI video providers (directive §11) ──────────────────────────
+# ── Wave 2: AI video providers (directive §10/§11) ──────────────────────
 # Free path: HF ZeroGPU Gradio Spaces (auth: HF_TOKEN). Spaces verified live
-# 2026-08-30 via /gradio_api/info on <owner>-<name>.hf.space. Override the
-# I2V Space with env HF_VIDEO_SPACE (wan) / HF_LTX_SPACE (ltx).
+# 2026-08-30 via /gradio_api/info on <owner>-<name>.hf.space. The quota-aware
+# scheduler (engine/broker/zerogpu_scheduler.py) probes the candidate_spaces
+# list dynamically via /gradio_api/info — do NOT rely on a single hardcoded
+# Space. Override the I2V Space with env HF_VIDEO_SPACE (wan) / HF_LTX_SPACE (ltx).
 hf_video:
+  # Quota-aware scheduler candidate pool (§8). Probe order = priority.
+  # All verified RUNNING + endpoint names confirmed live 2026-08-30.
+  candidate_spaces:
+    - space_id: "Lightricks/ltx-video-distilled"
+      model: "LTX-Video-Distilled"
+      template: "ltx_distilled"
+      t2v_endpoint: "text_to_video"
+      i2v_endpoint: "image_to_video"
+      priority: 10
+    - space_id: "Lightricks/ltx-2-distilled"
+      model: "LTX-2-Distilled"
+      template: "ltx2_unified"
+      t2v_endpoint: "generate_video"
+      i2v_endpoint: "generate_video"
+      priority: 20
+    - space_id: "Saravutw/WAN2.2_I2V_LIGHTNING_4-8step_custom"
+      model: "Wan2.2-I2V-A14B-Lightning"
+      template: "wan_i2v_16p"
+      i2v_endpoint: "generate_video"
+      priority: 20
+    - space_id: "prithivMLmods/Wan2.2-Fast"
+      model: "Wan2.2-Fast"
+      template: "wan_fast_b64"
+      i2v_endpoint: "generate_video"
+      priority: 60
+  # Account-level ZeroGPU quota (~5 GPU-min/day free tier, §8): a definitive
+  # quota error trips the session ledger; null space errors on ≥2 distinct
+  # Spaces mark the account suspected-exhausted (dino_v1 failure signature).
+  scheduler:
+    null_error_stop_after: 2
+
   # Wan 2.2 I2V — community Lightning 4-8step Space (fast, low quota use).
   wan22_i2v:
     space_id: "Saravutw/WAN2.2_I2V_LIGHTNING_4-8step_custom"
@@ -64,8 +97,24 @@ hf_video:
     t2v_endpoint: "text_to_video"
     max_duration_sec: 10
     cost_tier: HIGH
-  # MiniMax H3 — paid-only API (no free tier/Space as of 2026-08-30);
+  # MiniMax H3 — official paid-only API (no free tier/Space as of 2026-08-30);
   # registered in the broker with enabled:false pending spend approval.
+  # Integration (verified from live docs 2026-08-30, platform.minimax.io):
+  #   Create : POST https://api.minimax.io/v2/video_generation  (Bearer
+  #            MINIMAX_API_KEY) {model, content[{type:text|image_url,
+  #            role:first_frame|last_frame}], duration 4–15 int seconds,
+  #            resolution 768P|2K, ratio required-for-T2V}
+  #   Poll   : GET /v2/query/video_generation/{task_id} → task.status
+  #            queued|in_progress|succeeded|failed|cancelled, task.content.url
+  #   Fetch  : GET task.content.url → mp4
+  # Models: MiniMax-H3 (768P/2K, 4–15s, T2V+I2V+first/last+reference),
+  # MiniMax-H3-Max (480P/768P, 5–15s, T2V+I2V, faster). COST:
+  # pay-as-you-go PER-SECOND video billing (see
+  # https://platform.minimax.io/docs/guides/pricing-paygo#video) — no free
+  # tier, so NOT live-tested this phase (§26 HERO-only spend gate).
   minimax_h3:
     enabled: false
     reason: "paid-only API (per-second billing); §26 cost gate — HERO shots only"
+    base_url: "https://api.minimax.io"
+    model: "MiniMax-H3"
+    default_resolution: "768P"

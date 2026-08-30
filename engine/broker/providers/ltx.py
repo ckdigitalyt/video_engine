@@ -1,4 +1,4 @@
-"""ltx.py — LTX video provider (directive §11).
+"""ltx.py — LTX video provider (directive §10/§11).
 
 Free path: the official Lightricks ZeroGPU Spaces. Default Space
 ``Lightricks/ltx-video-distilled`` verified LIVE 2026-08-30: RUNNING,
@@ -6,8 +6,19 @@ endpoints ``/text_to_video`` and ``/image_to_video`` (13 UI params incl.
 mode/duration_ui/seed_ui). A live image-to-video generation was completed
 during Wave 2 (4.0s 704x512 mp4 in ~12s queue-to-result).
 
+Parameter names/order taken from the Space's live ``/gradio_api/info``:
+  /text_to_video(prompt, negative_prompt, input_image_filepath:str,
+    input_video_filepath:str, height_ui, width_ui,
+    mode:'text-to-video', duration_ui, ui_frames_to_use, seed_ui,
+    randomize_seed, ui_guidance_scale, improve_texture_flag)
+  /image_to_video(prompt, negative_prompt, input_image_filepath:FileData,
+    input_video_filepath:str, height_ui, width_ui,
+    mode:'image-to-video', ...same tail)
+T2V passes ``""`` for the two str-typed file inputs.
+
 Note: ``Lightricks/ltx-2-distilled`` (newer UI) rejects API calls with a
-null error event — kept as a documented fallback candidate only.
+null error event — kept as a documented fallback candidate only (it is
+covered by the quota-aware scheduler, which retries on different Spaces).
 
 Alternative free path if ZeroGPU quota is exhausted: WavespeedAI/LTX-Video
 on fal.ai requires credits (paid) — NOT enabled.
@@ -35,7 +46,7 @@ DEFAULT_T2V_ENDPOINT = "text_to_video"
 
 
 class LTXVideoProvider(MediaProvider):
-    """LTX image-to-video via official Lightricks HF ZeroGPU Space."""
+    """LTX image-to-video + text-to-video via official Lightricks HF Space."""
 
     id = "ltx_video"
     kind = "image_to_video"
@@ -109,5 +120,42 @@ class LTXVideoProvider(MediaProvider):
         return BrokerResult(
             path=path, provider=self.id, kind="image_to_video",
             metadata={"space": self.space_id, "endpoint": self.endpoint_name,
+                      "model": "LTX-Video-Distilled", "seed": seed},
+        )
+
+    def generate_video(self, prompt: str, *, duration: float = 4.0,
+                       seed: int = 0, aspect: str = "16:9",
+                       **kw: Any) -> BrokerResult:
+        """T2V via /text_to_video (§10: model-appropriate structured prompt)."""
+        if not self._enabled_env:
+            raise ProviderError("ltx_video: HF_TOKEN not set")
+        result = self._client.generate(
+            [
+                prompt or "cinematic motion, high quality",
+                "blurry, low quality, deformed, distorted, watermark, "
+                "static, motionless",
+                "",                 # input_image_filepath (str, empty for T2V)
+                "",                 # input_video_filepath
+                512,                # height_ui (small = fast + low quota)
+                704,                # width_ui
+                "text-to-video",    # mode
+                float(duration),    # duration_ui (seconds)
+                float(duration) + 5.0,  # ui_frames_to_use
+                int(seed) if seed else 42,
+                False,              # randomize_seed → deterministic
+                3.0,                # ui_guidance_scale
+                False,              # improve_texture_flag (faster)
+            ],
+            endpoint_name="text_to_video",
+            timeout=600,
+        )
+        [data] = self._client.download_result(result)
+        key = broker_cache_key(prompt=prompt, model=self.space_id,
+                               duration=duration, seed=seed, aspect=aspect,
+                               op="generate_video", renderer_version="v4")
+        path = self.cache.store_bytes(key, data, ext="mp4")
+        return BrokerResult(
+            path=path, provider=self.id, kind="video",
+            metadata={"space": self.space_id, "endpoint": "text_to_video",
                       "model": "LTX-Video-Distilled", "seed": seed},
         )

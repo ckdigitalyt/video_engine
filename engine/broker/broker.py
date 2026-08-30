@@ -37,8 +37,14 @@ from engine.broker.providers.imageapi import (
     NvidiaNimImageProvider,
     SiliconFlowImageProvider,
 )
+from engine.broker.providers.minimax import MiniMaxH3Provider
 from engine.broker.providers.stock import PexelsStockProvider, PixabayStockProvider
 from engine.broker.providers.zai import ZaiVisionProvider
+from engine.broker.zerogpu_scheduler import (
+    ZeroGPUI2VProvider,
+    ZeroGPUScheduler,
+    ZeroGPUVideoProvider,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -51,12 +57,19 @@ PROVIDER_FACTORIES: dict[str, list[tuple[str, Callable[[], MediaProvider | None]
         ("nvidia_nim", lambda: _configured(NvidiaNimImageProvider)),
         ("hf_zerogpu", lambda: _hf_space_provider("image")),
     ],
+    # T2V chain (§7): paid MiniMax first when a key + spend approval exist,
+    # then the quota-aware multi-Space ZeroGPU scheduler (§8).
     "video": [
-        ("hf_zerogpu", lambda: _hf_space_provider("video")),
+        ("minimax_h3", lambda: _configured(MiniMaxH3Provider)),
+        ("zerogpu_t2v", lambda: None),  # built once below (shared scheduler)
     ],
+    # I2V chain (§7 HERO fallback): quota-aware scheduler (multi-Space,
+    # Wan+LTX) first — it classifies quota exhaustion account-wide — then the
+    # single-Space Wave-2 providers as belt-and-braces fallback.
     "image_to_video": [
         ("wan22_i2v", lambda: _configured_wan()),
         ("ltx_video", lambda: _configured_ltx()),
+        ("zerogpu_i2v", lambda: None),  # built once below (shared scheduler)
     ],
     "stock": [
         ("pexels", lambda: _configured(PexelsStockProvider)),
@@ -167,6 +180,14 @@ class MediaBroker:
     @staticmethod
     def _build_default_providers() -> dict[str, MediaProvider]:
         out: dict[str, MediaProvider] = {}
+        # One shared scheduler → one shared quota ledger across T2V and I2V
+        # (ZeroGPU quota is ACCOUNT-level, §8).
+        scheduler: ZeroGPUScheduler | None = None
+        if os.environ.get("HF_TOKEN"):
+            try:
+                scheduler = ZeroGPUScheduler()
+            except Exception:  # never let scheduler construction break broker
+                scheduler = None
         for factories in PROVIDER_FACTORIES.values():
             for name, factory in factories:
                 try:
@@ -175,7 +196,16 @@ class MediaBroker:
                     provider = None
                 if provider is not None and name not in out:
                     out[name] = provider
+        if scheduler is not None:
+            out["zerogpu_t2v"] = ZeroGPUVideoProvider(scheduler)
+            out["zerogpu_i2v"] = ZeroGPUI2VProvider(scheduler)
         return out
+
+    @property
+    def scheduler(self) -> ZeroGPUScheduler | None:
+        """The shared quota-aware ZeroGPU scheduler, if configured (§8)."""
+        provider = self._providers.get("zerogpu_t2v")
+        return provider.scheduler if isinstance(provider, ZeroGPUVideoProvider) else None
 
     # ── Introspection (§9) ───────────────────────────────────────────────
 
@@ -229,6 +259,12 @@ class MediaBroker:
             f"broker: no {kind} provider succeeded for {op_name}; "
             f"attempts: {'; '.join(errors) or 'none configured'}"
         )
+
+    @staticmethod
+    def _attempt_records(result: BrokerResult) -> dict[str, Any]:
+        """Pull the §7 per-attempt fields off a scheduler result, if any."""
+        attempts = result.metadata.get("attempts")
+        return {"attempts": attempts} if attempts else {}
 
     def generate_image(self, prompt: str, *, style: Any = None,
                        aspect: str = "16:9", seed: int = 0,
