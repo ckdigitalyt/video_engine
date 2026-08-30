@@ -1,7 +1,7 @@
 """
 conftest.py — Shared fixtures for the video_engine test suite.
 
-All external APIs (DeepSeek, Gemini, Pexels, Kokoro) are mocked here.
+All external APIs (ZAI GLM, Gemini, Pexels, Kokoro) are mocked here.
 Temp directories are provided for filesystem-backed tests.
 """
 
@@ -30,10 +30,10 @@ def tmp_project(tmp_path: Path) -> Generator[Path, None, None]:
 
     # Minimal config stub so load_config() returns something useful
     min_config = {
-        "models.yaml": "llm:\n  deepseek:\n    model: deepseek-chat\n    max_tokens: 1000\n    temperature: 0.7\n  gemini:\n    model: models/gemini-2.5-flash-lite\n",
+        "models.yaml": "llm:\n  zai:\n    model: glm-5.3-flash\n    max_tokens: 8192\n    temperature: 0.7\n  gemini:\n    model: models/gemini-2.5-flash-lite\n",
         "render.yaml": "render:\n  resolution:\n    width: 1920\n    height: 1080\n  fps: 30\n  codec: libx264\n  audio_codec: aac\n  threads: 4\n  preset: fast\nsubtitles:\n  enabled: true\n  font_size: 28\n  bottom_margin: 80\n  color: \"#FFFFFF\"\n  outline: \"#000000\"\n  shadow: \"#000000\"\n  max_words_per_line: 4\n  animation: fade\n  min_silence_ms: 200\n  silence_thresh: -40\neffects:\n  random_seed: 42\n  motion:\n    enabled: true\n    strength: 0.08\n    probability: 0.85\n  transitions:\n    enabled: true\n    default_transition: crossfade\n    transition_duration: 0.5\noutput:\n  default: final_output.mp4\n",
         "pipeline.yaml": "pipeline:\n  max_iterations: 3\n  cache:\n    video: cache/video\n    audio: cache/audio\n  fallback:\n    video: cache/video/none.mp4\n  output:\n    default: final_output.mp4\n  cache_db: cache/asset_cache.db\n  cache_max_size_mb: 500\n  memory:\n    db_path: cache/memory.db\n    retention_days: 90\n    max_execution_logs: 1000\n    cleanup_interval_runs: 10\n  critic:\n    frame_extraction_ss: \"00:00:02\"\n    eval_frame: cache/video/eval_frame.jpg\n",
-        "providers.yaml": "providers:\n  pexels:\n    base_url: https://api.pexels.com/videos/search\n    per_page: 5\n    orientation: landscape\n    reuse:\n      enabled: true\n      similarity_threshold: 0.45\n      max_candidates: 5\n  deepseek:\n    base_url: https://api.deepseek.com\n",
+        "providers.yaml": "providers:\n  pexels:\n    base_url: https://api.pexels.com/videos/search\n    per_page: 5\n    orientation: landscape\n    reuse:\n      enabled: true\n      similarity_threshold: 0.45\n      max_candidates: 5\n  zai:\n    base_url: https://api.z.ai/api/paas/v4\n",
         "voices.yaml": "voices:\n  kokoro:\n    model: kokoro-v0_19.onnx\n    voices_bin: voices.bin\n    default_voice: bm_george\n    speed: 1.0\n    language: en-gb\n  mixing:\n    ducking_db: -12\n    tail_ms: 2000\n    fade_in_ms: 3000\n    fade_out_ms: 3000\n    music_volume_db: 0.0\n    background_music: cache/music/cinematic.mp3\n",
         "logging.yaml": "logging:\n  level: INFO\n  file: logs/video_engine.log\n  format: \"%(asctime)s - %(name)s - %(levelname)s - %(message)s\"\n",
         "planner.yaml": "planner:\n  story_template: documentary\n  target_scene_count: 10\n  target_duration: 120\n  words_per_second: 3\n  narration_style: informative but conversational\n  search_query_style: descriptive, landscape stock footage terms\n  story_templates:\n    documentary:\n      roles:\n        - \"Hook — Open with a compelling question or startling fact\"\n        - \"Context — Provide background and set the stage\"\n        - \"Exploration — Dive deeper with evidence and examples\"\n        - \"Climax — Present the core revelation or key insight\"\n        - \"Conclusion — Summarise and leave the audience thinking\"\n      description: Classic documentary arc: hook to context to exploration to climax to conclusion.\n",
@@ -136,7 +136,7 @@ def mock_env_api_keys(monkeypatch: pytest.MonkeyPatch) -> None:
     This ensures tests never accidentally hit a live endpoint even if a
     credential is set in the real environment.
     """
-    monkeypatch.setenv("DEEPSEEK_API_KEY", "sk-test-deepseek-key")
+    monkeypatch.setenv("ZAI_API_KEY", "sk-test-zai-key")
     monkeypatch.setenv("GEMINI_API_KEY", "test-gemini-key")
     monkeypatch.setenv("PEXELS_API_KEY", "test-pexels-key")
     monkeypatch.setenv("PIXABAY_API_KEY", "test-pixabay-key")
@@ -216,8 +216,8 @@ def mock_pixabay_api(monkeypatch: pytest.MonkeyPatch) -> MagicMock:
 
 
 @pytest.fixture
-def mock_deepseek_llm() -> Generator[MagicMock, None, None]:
-    """Mock the DeepSeek LangChain call."""
+def mock_zai_llm() -> Generator[MagicMock, None, None]:
+    """Mock the ZAI GLM LangChain call."""
     with patch("src.providers.llm_provider.ChatOpenAI") as mock:
         instance = MagicMock()
         instance.invoke.return_value.content = '{"scenes": []}'

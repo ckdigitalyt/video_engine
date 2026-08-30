@@ -26,8 +26,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from dotenv import load_dotenv
 # v23.1: override=True — the OpenClaw runtime injects a placeholder
-# DEEPSEEK_API_KEY into the process env; without override the real
-# .env key never replaces it and DeepSeek (the cost-chain last resort)
+# placeholder API keys into the process env; without override the real
+# .env keys never replace them and the paid chain (last resort)
 # 401s, killing runs when Gemini/Groq are quota-limited (Venus v2 crash).
 load_dotenv(override=True)
 
@@ -1702,8 +1702,8 @@ def main():
     from src.utils.config import get_config
     provider_name = args.provider or get_config("pipeline.roles.default", "gemini")
     # v19 (ckdigital direction): cost chain — primary -> gemini/grok/mistral
-    # (keys present) -> deepseek LAST.  Gemini/Grok leveraged first;
-    # DeepSeek stays the paid last resort.  ChainLLMProvider falls through
+    # (keys present) -> zai glm LAST.  Gemini/Grok leveraged first;
+    # ZAI GLM stays the paid last resort.  ChainLLMProvider falls through
     # per-call on quota/errors so a Gemini 429 can't kill the run.
     llm = factory.get_cost_chain_llm_provider(provider_name)
     run_report["provider"] = provider_name
@@ -1828,7 +1828,7 @@ def main():
     try:
         from src.qa.claim_verifier import ClaimVerifier
         # v26 (ckdigital directive): claim verification is the high-confidence
-        # final gate — ALWAYS DeepSeek, never the experiment head (free/cheap
+        # final gate — ALWAYS ZAI GLM, never the experiment head (free/cheap
         # models false-negative on claims; audit bench 4/10).
         _verifier = ClaimVerifier(llm=factory.get_final_gate_llm(), research_pack=research)
         _claim_gate = _verifier.run(scenes_data, out_dir=out_dir)
@@ -2442,9 +2442,9 @@ def main():
     # The per-iteration review above is Gemini Flash only.  Oumuamua
     # feedback: "get the video reviewed by Gemini AND DeepSeek Pro".
     # Run the detailed dual review (Gemini vision on sampled frames +
-    # DeepSeek Pro on script + visual transcript) once on the FINAL
-    # video, save review_gemini.json / review_deepseek.json into out_dir,
-    # and surface DeepSeek's critical defects as degradations.
+    # ZAI GLM on script + visual transcript) once on the FINAL
+    # video, save review_gemini.json / review_zai.json into out_dir,
+    # and surface the LLM review's critical defects as degradations.
     dual_review = {}
     try:
         dual_review = M.stage_video_review_dual(
@@ -2454,9 +2454,9 @@ def main():
         )
         run_report["stages"]["review_dual"] = {
             "gemini_score": (dual_review.get("gemini") or {}).get("score"),
-            "deepseek_score": (dual_review.get("deepseek") or {}).get("score"),
+            "zai_score": (dual_review.get("zai") or {}).get("score"),
             "gemini_model": (dual_review.get("gemini") or {}).get("model"),
-            "deepseek_model": (dual_review.get("deepseek") or {}).get("model"),
+            "zai_model": (dual_review.get("zai") or {}).get("model"),
             "frames": dual_review.get("frames"),
             "error": dual_review.get("error"),
         }
@@ -2569,18 +2569,18 @@ def main():
             "detail": "music mix failed or no bed available",
         })
     # v27 (Oumuamua feedback req 4): surface the dual-model review outcome —
-    # DeepSeek Pro critical defects and low scores must not ship silently.
+    # LLM-review critical defects and low scores must not ship silently.
     _dual = run_report.get("stages", {}).get("review_dual", {}) or {}
     if _dual.get("error"):
         degradations.append({
             "stage": "dual_review", "severity": "warning",
             "detail": f"dual-model review incomplete: {_dual['error'][:120]}",
         })
-    _ds_score = _dual.get("deepseek_score")
+    _ds_score = _dual.get("zai_score")
     if _ds_score is not None and _ds_score < int(_thr or 70):
         degradations.append({
             "stage": "dual_review", "severity": "warning",
-            "detail": f"DeepSeek Pro score {_ds_score}/100 below "
+            "detail": f"ZAI GLM score {_ds_score}/100 below "
                       f"improve threshold {_thr} (Gemini "
                       f"{_dual.get('gemini_score')}/100)",
         })
@@ -2630,17 +2630,17 @@ def main():
             print(f"    {_who}: {', '.join(_c['changed'])} → {', '.join(_c['actions'])}")
     else:
         print("  [manifest] no changes vs previous run (full reuse)")
-    # ── DeepSeek usage + cost report (per-stage, whole run) ────────────
+    # ── ZAI GLM usage + cost report (per-stage, whole run) ─────────────
     try:
-        from src.providers.llm_provider import DeepSeekUsage
-        usage = DeepSeekUsage.summary()
-        run_report["llm_usage_deepseek"] = usage
+        from src.providers.llm_provider import ZaiUsage
+        usage = ZaiUsage.summary()
+        run_report["llm_usage_zai"] = usage
         # v26 experiment telemetry: per-provider metrics + JSONL evidence.
         from src.providers import llm_telemetry
         run_report["llm_experiment"] = llm_telemetry.summary()
         run_report["llm_telemetry_file"] = llm_telemetry.save()
         tot = usage["total"]
-        print("\n[DEEPSEEK USAGE — this run]")
+        print("\n[ZAI GLM USAGE — this run]")
         print(f"  calls: {tot['calls']} | input: {tot['input']:,} tok "
               f"(cached {tot['cached']:,}) | output: {tot['output']:,} tok")
         print(f"  estimated cost: ${tot['cost_usd']:.4f}")

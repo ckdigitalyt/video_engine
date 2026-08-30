@@ -1,7 +1,6 @@
-"""v31 regression tests — audio root fixes validated by DeepSeek Pro.
+"""v31 regression tests — audio root fixes validated by the LLM pro review.
 
-ckdigital: "Check with deepseek pro once that these are really the right
-fixes... If deepseek pro is aligned, then go ahead."  DeepSeek verdict:
+ckdigital asked for LLM pro validation of these fixes; verdict:
 ADJUST on all three — root causes CONFIRMED, with corrections adopted:
 
   1. Voice breaks (15s/21s in Wow! Signal): crossfades alone don't fill a
@@ -80,7 +79,7 @@ def test_sfx_phrase_not_found_is_dropped():
 
 
 def test_sfx_keeps_scripted_events_with_cut_times():
-    """Scripted events survive (DeepSeek: 'keep scripted events') and snap
+    """Scripted events survive (LLM review: 'keep scripted events') and snap
     to the nearest visual cut when the timeline is known."""
     import mission_run as M
     scenes = [{

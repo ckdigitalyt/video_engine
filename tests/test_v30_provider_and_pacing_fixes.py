@@ -263,7 +263,7 @@ def test_padder_handles_single_sentence_scene():
 
 
 # ── v33: review C-2 / M-2 / M-3 regression tests ────────────────────────
-# The 2026-08-13 deepseek pro review found (Critical) that unregistered
+# The 2026-08-13 LLM pro review found (Critical) that unregistered
 # topics produced subject-less AI prompts (" documentary scene, alternate
 # angle 2") and (Major) that the people-guard lost scene context.  These
 # tests lock the fixes in.

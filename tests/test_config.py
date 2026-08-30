@@ -77,13 +77,13 @@ class TestRequiredKeys:
     """Every critical configuration key must be present with a sensible value."""
 
     REQUIRED = {
-        "llm": ["deepseek", "gemini"],
-        "llm.deepseek": ["model", "max_tokens", "temperature"],
+        "llm": ["zai", "gemini"],
+        "llm.zai": ["model", "max_tokens", "temperature"],
         "llm.gemini": ["model"],
         "render": ["resolution", "fps", "codec", "audio_codec", "threads", "preset"],
         "output": ["default"],
         "pipeline": ["max_iterations", "cache", "fallback", "output"],
-        "providers": ["pexels", "deepseek"],
+        "providers": ["pexels", "zai"],
         "voices": ["kokoro"],
         "logging": ["level", "file", "format"],
     }

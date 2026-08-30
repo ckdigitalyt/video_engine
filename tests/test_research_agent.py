@@ -37,7 +37,7 @@ from src.research.research_agent import ResearchAgent, FactVerifier
 
 @pytest.fixture
 def mock_llm(monkeypatch):
-    """Mock DeepSeekProvider.generate_json to return controlled responses."""
+    """Mock ZaiProvider.generate_json to return controlled responses."""
     responses = {}
 
     def set_response(key: str, value: str):
@@ -54,7 +54,7 @@ def mock_llm(monkeypatch):
         return responses.get("__default__", '{"scenes": []}')
 
     import src.research.research_agent
-    monkeypatch.setattr(src.research.research_agent.DeepSeekProvider, "generate_json",
+    monkeypatch.setattr(src.research.research_agent.ZaiProvider, "generate_json",
                         mock_generate_json)
     return set_response
 

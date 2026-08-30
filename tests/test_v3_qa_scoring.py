@@ -40,7 +40,7 @@ SHOT = {"version": "v3", "shot_id": "S01", "duration_sec": 3.0,
 
 
 def test_technical_only_scoring_offline(tmp_path, tiny_mp4, monkeypatch):
-    # Force vision unavailable: no DeepSeek key path — patch provider.
+    # Force vision unavailable: no ZAI key path — patch provider.
     _patch_vision(monkeypatch, {"available": False, "score": 0,
                                 "issues": []})
     doc = qa_shot(SHOT, tiny_mp4, tmp_path / "qa", use_vision=True,

@@ -13,7 +13,7 @@ import pytest
 from abc import ABC, abstractmethod
 
 from src.providers.asset_provider import AssetProvider, PexelsProvider
-from src.providers.llm_provider import LLMProvider, DeepSeekProvider, GeminiProvider
+from src.providers.llm_provider import LLMProvider, ZaiProvider, GeminiProvider
 from src.providers.tts_provider import TTSProvider, KokoroProvider
 
 
@@ -23,7 +23,7 @@ from src.providers.tts_provider import TTSProvider, KokoroProvider
 class TestInterfaceCompliance:
     """Every concrete provider must implement every abstract method."""
 
-    @pytest.mark.parametrize("provider_cls", [DeepSeekProvider, GeminiProvider])
+    @pytest.mark.parametrize("provider_cls", [ZaiProvider, GeminiProvider])
     def test_llm_providers_have_all_methods(self, provider_cls: type) -> None:
         assert issubclass(provider_cls, LLMProvider)
         assert hasattr(provider_cls, "generate_text")
@@ -51,36 +51,36 @@ class TestInterfaceCompliance:
                 abc_cls()  # type: ignore
 
 
-# ── DeepSeekProvider ───────────────────────────────────────────────────────
+# ── ZaiProvider ────────────────────────────────────────────────────────────
 
 
-class TestDeepSeekProvider:
-    def test_generate_text_returns_string(self, mock_deepseek_llm: MagicMock) -> None:
-        provider = DeepSeekProvider()
+class TestZaiProvider:
+    def test_generate_text_returns_string(self, mock_zai_llm: MagicMock) -> None:
+        provider = ZaiProvider()
         result = provider.generate_text("Hello")
         assert isinstance(result, str)
 
-    def test_generate_text_calls_invoke(self, mock_deepseek_llm: MagicMock) -> None:
-        provider = DeepSeekProvider()
+    def test_generate_text_calls_invoke(self, mock_zai_llm: MagicMock) -> None:
+        provider = ZaiProvider()
         provider.generate_text("test prompt")
-        assert mock_deepseek_llm.return_value.invoke.called
+        assert mock_zai_llm.return_value.invoke.called
 
-    def test_generate_json_strips_fence(self, mock_deepseek_llm: MagicMock) -> None:
-        mock_deepseek_llm.return_value.invoke.return_value.content = (
+    def test_generate_json_strips_fence(self, mock_zai_llm: MagicMock) -> None:
+        mock_zai_llm.return_value.invoke.return_value.content = (
             "```json\n{\"key\": \"value\"}\n```"
         )
-        provider = DeepSeekProvider()
+        provider = ZaiProvider()
         result = provider.generate_json("json prompt")
         assert result == '{"key": "value"}'
 
-    def test_instantiation_without_env_key(self, monkeypatch: pytest.MonkeyPatch, mock_deepseek_llm: MagicMock) -> None:
+    def test_instantiation_without_env_key(self, monkeypatch: pytest.MonkeyPatch, mock_zai_llm: MagicMock) -> None:
         """Should not crash when env var is missing (LangChain handles None)."""
-        monkeypatch.delenv("DEEPSEEK_API_KEY", raising=False)
+        monkeypatch.delenv("ZAI_API_KEY", raising=False)
         try:
-            provider = DeepSeekProvider()
+            provider = ZaiProvider()
             assert provider is not None
         except Exception:
-            pytest.fail("DeepSeekProvider should not crash on missing env key")
+            pytest.fail("ZaiProvider should not crash on missing env key")
 
 
 # ── GeminiProvider ─────────────────────────────────────────────────────────

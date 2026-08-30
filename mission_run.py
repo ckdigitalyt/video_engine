@@ -34,7 +34,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from dotenv import load_dotenv
 load_dotenv(override=True)  # runtime injects masked/placeholder API keys; .env has the real ones
 
-from src.providers.llm_provider import set_usage_stage, DeepSeekUsage
+from src.providers.llm_provider import set_usage_stage, ZaiUsage
 from src.providers.tts_provider import strip_paralinguistic_tags
 from src.providers.tts_provider import CHATTERBOX_EMOTION_PARAMS  # noqa: E402 — module-level for _voice_params()
 
@@ -109,7 +109,7 @@ def _imports():
     from src.review.script_review import ScriptReviewer
     from src.review.improvement_pass import ImprovementPass
     from src.memory.postmortem import PostmortemRecorder
-    from src.providers.llm_provider import set_usage_stage, DeepSeekUsage
+    from src.providers.llm_provider import set_usage_stage, ZaiUsage
 
     return {
         "Scene": Scene, "SceneNarration": SceneNarration, "VisualPlan": VisualPlan,
@@ -2226,7 +2226,7 @@ def stage_video_review_dual(video_path: str, scenes: list[dict], out_dir: str,
 
     descs = []
     try:
-        print("  Gemini frame descriptions (visual transcript for DeepSeek)...")
+        print("  Gemini frame descriptions (visual transcript for ZAI GLM)...")
         dcontent = [_dvr.FRAME_DESC_PROMPT]
         for t, fp in frames:
             dcontent.append(f"FRAME t={t}s:")
@@ -2237,26 +2237,27 @@ def stage_video_review_dual(video_path: str, scenes: list[dict], out_dir: str,
         with open(os.path.join(out_dir, "frame_descriptions.json"), "w") as f:
             json.dump(descs, f, indent=2)
     except Exception as e:  # noqa: BLE001
-        print(f"  !! frame descriptions failed (DeepSeek review lacks visuals): {str(e)[:100]}")
+        print(f"  !! frame descriptions failed (ZAI GLM review lacks visuals): {str(e)[:100]}")
 
     try:
-        print("  DeepSeek Pro review...")
+        print("  ZAI GLM review...")
         vt = "\n".join(f"[{d.get('t')}s] {d.get('desc')}" for d in descs)
         prompt = _dvr.DETAILED_PROMPT.format(
             script=script_text[:14000], timeline=timeline_text[:8000], audio_diag="")
         prompt += "\n\nVISUAL TRANSCRIPT (frame descriptions):\n" + (vt or "(none)")
-        dtext = _dvr.deepseek_call(prompt)
+        dtext = _dvr.zai_call(prompt)
         ds = _dvr._parse_json(dtext)
-        ds["_meta"] = {"provider": "deepseek", "model": "deepseek-chat", **meta}
-        with open(os.path.join(out_dir, "review_deepseek.json"), "w") as f:
+        ds["_meta"] = {"provider": "zai", "model": os.environ.get("ZAI_MODEL", "glm-5.3-flash"), **meta}
+        with open(os.path.join(out_dir, "review_zai.json"), "w") as f:
             json.dump(ds, f, indent=2)
-        out["deepseek"] = {"score": ds.get("quality_score"),
-                           "confidence": ds.get("confidence"), "model": "deepseek-chat"}
+        out["zai"] = {"score": ds.get("quality_score"),
+                          "confidence": ds.get("confidence"),
+                          "model": os.environ.get("ZAI_MODEL", "glm-5.3-flash")}
         out["quality_score"] = ds.get("quality_score")
-        print(f"    DeepSeek Pro: {ds.get('quality_score')}/100")
+        print(f"    ZAI GLM: {ds.get('quality_score')}/100")
     except Exception as e:  # noqa: BLE001
-        print(f"  !! DeepSeek review failed: {str(e)[:120]}")
-        out["error"] = (out.get("error", "") + f"; deepseek: {e}").strip("; ")
+        print(f"  !! ZAI GLM review failed: {str(e)[:120]}")
+        out["error"] = (out.get("error", "") + f"; zai: {e}").strip("; ")
 
     out["elapsed_s"] = round(time.time() - t0, 1)
     return out
@@ -2391,7 +2392,7 @@ def main():
     ap = argparse.ArgumentParser(description="Jade Studio mission pipeline")
     ap.add_argument("--topic", default="Voyager 1: the farthest human-made object")
     ap.add_argument("--out", default=None, help="Output video path")
-    ap.add_argument("--provider", default=None, help="LLM provider (deepseek|gemini); default gemini (flash)")
+    ap.add_argument("--provider", default=None, help="LLM provider (zai|gemini); default gemini (flash)")
     ap.add_argument("--target-seconds", type=float, default=TARGET_DURATION_S,
                     help="Target narration runtime in seconds (scales scenes+words)")
     ap.add_argument("--max-render-iterations", type=int, default=2,
@@ -2425,8 +2426,8 @@ def main():
     from src.utils.config import get_config as _gc_prov
     provider_name = args.provider or _gc_prov("pipeline.roles.default", "mistral")
     # v19 (ckdigital direction): use the COST CHAIN — primary -> gemini/grok/
-    # mistral (keys present) -> deepseek LAST.  Gemini/Grok get leveraged as
-    # much as possible; DeepSeek stays the paid last resort.  ChainLLMProvider
+    # mistral (keys present) -> zai glm LAST.  Gemini/Grok get leveraged as
+    # much as possible; ZAI GLM stays the paid last resort.  ChainLLMProvider
     # falls through per-call on quota/errors, so a Gemini 429 can no longer
     # kill a run (the v13 failure mode).
     llm = factory.get_cost_chain_llm_provider(provider_name)
@@ -2518,7 +2519,7 @@ def main():
     # v40 (Gemini review 2026-08-16): script-level quality guards —
     # 1) no verbatim repetition across consecutive scenes (Scene 4
     # duplicated Scene 3's ozone/crops lines, scored 4/10 pacing),
-    # 2) hedge uncertain quantitative claims (DeepSeek review: "548
+    # 2) hedge uncertain quantitative claims (LLM review: "548
     # light-years" stated as fact; "shreds" too definitive).
     from script_guards import dedupe_scene_repetition, hedge_uncertain_claims
     scenes_data = dedupe_scene_repetition(scenes_data)
@@ -2896,17 +2897,17 @@ def main():
         "final_score": review.get("quality_score"),
         "duration_s": _probe_duration(final_video),
     }
-    # ── DeepSeek usage + cache-hit report (per-stage, whole run) ──────
+    # ── ZAI GLM usage + cache-hit report (per-stage, whole run) ───────
     try:
-        from src.providers.llm_provider import DeepSeekUsage
-        usage = DeepSeekUsage.summary()
-        run_report["llm_usage_deepseek"] = usage
+        from src.providers.llm_provider import ZaiUsage
+        usage = ZaiUsage.summary()
+        run_report["llm_usage_zai"] = usage
         # v26 experiment telemetry: per-provider metrics + JSONL evidence.
         from src.providers import llm_telemetry
         run_report["llm_experiment"] = llm_telemetry.summary()
         run_report["llm_telemetry_file"] = llm_telemetry.save()
         tot = usage["total"]
-        print("\n[DEEPSEEK USAGE — this run]")
+        print("\n[ZAI GLM USAGE — this run]")
         print(f"  calls: {tot['calls']} | input: {tot['input']:,} tok "
               f"(cached {tot['cached']:,} → hit {tot.get('hit_rate', 0):.0%}) | "
               f"output: {tot['output']:,} tok")
@@ -2929,7 +2930,7 @@ def main():
             f"Gemini Flash end-to-end review score {review.get('quality_score')}/100",
         ],
         techniques_failed=[
-            "web search in research agent (no API key — used DeepSeek knowledge base)",
+            "web search in research agent (no API key — used LLM knowledge base)",
             "NVIDIA NIM FLUX image-gen endpoint 404 (needs endpoint refresh)",
         ],
         prompt_improvements=[
