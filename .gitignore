@@ -26,3 +26,6 @@ results/
 concat_list.txt
 video_engine_consolidated.py
 rebuild_smoke.py
+
+# node
+node_modules/

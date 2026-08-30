@@ -1,0 +1,14 @@
+{
+  "name": "jade-motion",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "MOTION_CANVAS renderer template engine — JSON-instantiated 2D templates rendered headlessly with node-canvas, encoded by ffmpeg. (Motion Canvas proper has no headless CLI as of 2026-08; this engine executes the same template JSON so the renderer id and scene format survive a later MC migration. See docs/architecture/v3_multi_renderer_design.md §6.)",
+  "main": "render.mjs",
+  "scripts": {
+    "render": "node render.mjs"
+  },
+  "dependencies": {
+    "canvas": "^3.2.3"
+  }
+}

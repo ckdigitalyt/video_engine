@@ -270,4 +270,8 @@ def make_renderer(renderer_id: str, capability: RendererCapability) -> Renderer:
         from engine.renderers.media.stock_video import ArchivalRenderer
 
         return ArchivalRenderer(capability)
+    if renderer_id == "MOTION_CANVAS":
+        from engine.renderers.motion_canvas import MotionCanvasRenderer
+
+        return MotionCanvasRenderer(capability)
     return StubRenderer(renderer_id, capability)
