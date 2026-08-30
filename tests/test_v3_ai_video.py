@@ -76,6 +76,8 @@ class TestAIVideoRenderer:
             capture_output=True, timeout=60, check=True)
 
         class FakeBroker:
+            _providers = {"wan22_i2v": mock.Mock(kind="image_to_video")}
+
             def image_to_video(self, image, prompt, *, duration=4.0,
                                seed=0, aspect="16:9"):
                 out = tmp_path / "raw_i2v.mp4"

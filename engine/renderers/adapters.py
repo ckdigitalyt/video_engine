@@ -63,11 +63,14 @@ class ManimRenderer(Renderer):
         issues = _basic_shot_issues(shot, self.id)
         vs = shot.get("visualspec")
         if vs is None:
-            issues.append("MANIM requires a VisualSpec v2 document (shot['visualspec'])")
+            issues.append("MANIM requires a VisualSpec document (shot['visualspec'])")
         else:
+            # Wave-2 fix: validate against visualspec_v1 — the compiler
+            # (compile_to_file → validate_visualspec) enforces v1; the
+            # Wave-1 adapter wrongly checked v2 and rejected valid specs.
             from engine.validation.schema import validate as validate_schema
 
-            errors = validate_schema(vs, "visualspec_v2")
+            errors = validate_schema(vs, "visualspec_v1")
             issues.extend(f"visualspec: {e}" for e in errors)
         return issues
 

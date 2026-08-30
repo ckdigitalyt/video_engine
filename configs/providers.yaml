@@ -56,10 +56,12 @@ hf_video:
     endpoint: "generate_video"
     max_duration_sec: 8
     cost_tier: HIGH
-  # LTX — official Lightricks ZeroGPU Space (ltx-2-distilled).
+  # LTX — official Lightricks ZeroGPU Space (ltx-video-distilled),
+  # live-verified 2026-08-30 (i2v: 4s 704x512 mp4 in ~12s).
   ltx:
-    space_id: "Lightricks/ltx-2-distilled"
-    endpoint: "generate_video"
+    space_id: "Lightricks/ltx-video-distilled"
+    i2v_endpoint: "image_to_video"
+    t2v_endpoint: "text_to_video"
     max_duration_sec: 10
     cost_tier: HIGH
   # MiniMax H3 — paid-only API (no free tier/Space as of 2026-08-30);

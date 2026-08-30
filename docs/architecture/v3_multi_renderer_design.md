@@ -182,3 +182,66 @@ Layout: `cache/broker/<aa>/<key>.<ext>`. All broker operations consult the
 cache before any network call; stock downloads cache by source URL + license
 metadata sidecar. Rendered shots and QA results reuse the same pattern
 (Wave 2 hooks).
+
+## 11. Wave-2 implementation notes (2026-08-30)
+
+All canonical-chain renderers now have real bodies (offline-capable unless
+noted). Commit history carries the individual units.
+
+### §6 MOTION_CANVAS — headless tradeoff (IMPORTANT)
+
+Motion Canvas 3.x ships **no first-class headless CLI**: rendering requires
+driving a browser (vite editor / puppeteer). On this CPU-only arm64 box that
+harness is fragile, so the template library executes on a minimal
+**node-canvas 2D engine** (`motion/templates/*.mjs` + `motion/render.mjs`)
+with the SAME template JSON contract (`mc-json-v1`). All 11 §6 templates are
+implemented (kinetic_title, timeline, map_zoom, infographic, comparison,
+diagram, callout, number_counter, quote_card, before_after, reveal) plus
+sequence compositions for zoom_sequence / scientific_process /
+character_intro. A later migration to true Motion Canvas swaps only the node
+runner — the Python adapter and scene JSON are unchanged.
+
+### §7 PIXIJS — implementation tradeoff
+
+pixi.js-legacy v7 cannot run under node-canvas ("document is not defined";
+the @pixi/node shim targets the unmaintained v6 line). Verified experimentally
+2026-08-30. The scene framework therefore runs directly on node-canvas
+(`pixi/lib/scene.mjs`) with the §7 scene JSON contract: parallax layers,
+seeded particles (dust/embers/stars/asteroid_field), cutout characters with
+bob/run actions, camera push_in/pan/pull_out/shake, fly-in props. Ten
+locally-authored SVG assets live in `engine/assets/library/` (attribution in
+`engine/assets/library/ATTRIBUTION.md`). A puppeteer-based migration keeps
+the Python adapter unchanged.
+
+### §11/§12 AI_VIDEO + AI_IMAGE_MOTION
+
+- Broker image providers: siliconflow → nvidia_nim → hf space (failover).
+  SiliconFlow key returned 401 in this environment (2026-08-30) — failover
+  and the offline solid-still path cover it.
+- AI video providers: Wan 2.2 I2V + LTX via free HF ZeroGPU Spaces
+  (configs/providers.yaml `hf_video`). LIVE-VERIFIED: LTX image-to-video
+  (Lightricks/ltx-video-distilled, 4s 704x512 mp4 in ~12s). MiniMax H3 is
+  paid-only → registered `enabled:false` with cost note (§26).
+- hf_zerogpu client: Wave-2 live-routing fix — Gradio APIs are served on the
+  Space's direct `<owner>-<name>.hf.space` subdomain (huggingface.co does not
+  proxy /gradio_api/*); subdomain-first with cached working base + multipart
+  file upload.
+
+### §13 Archival licensing
+
+NASA images API, Wikimedia Commons (CC0/PD-only gate) and Internet Archive
+(publicdomain licenseurl gate) providers with license metadata sidecars and
+deterministic download cache. Assets whose license cannot be established are
+NEVER downloaded — candidates are skipped and the chain degrades.
+
+### §16 Budget reconciliation
+
+`engine/renderers/budget.py::reconcile_budget` — pure greedy post-pass after
+the router: demotes over-budget buckets down the §24 chain (hero shots
+protected, availability filtered), reports under-budget buckets as notes.
+
+### Manim adapter fix
+
+`ManimRenderer.validate` now validates against visualspec_v1 (the compiler's
+actual schema) instead of v2 — the Wave-1 adapter rejected every spec the
+compiler accepts.

@@ -99,16 +99,22 @@ class Wan22I2VProvider(MediaProvider):
         fd = HFZeroGPUClient.file_data(server_path)
         result = self._client.generate(
             [
-                fd,                    # input_image
-                fd,                    # last_image (same frame → free motion)
+                fd,                                # input_image
+                fd,                                # last_image (same → free motion)
                 prompt or "high quality, cinematic motion",
-                4,                     # steps (lightning 4-8)
+                4,                                 # steps (lightning 4-8)
                 "blurry, low quality, deformed, watermark",
-                float(duration),       # duration_seconds
-                1,                     # guidance_scale
-                1,                     # guidance_scale_2
+                float(duration),                   # duration_seconds
+                1,                                 # guidance_scale
+                1,                                 # guidance_scale_2
                 int(seed) if seed else 42,
-                False,                 # randomize_seed → deterministic
+                False,                             # randomize_seed
+                5,                                 # quality
+                "UniPCMultistep",                  # scheduler
+                3.0,                               # flow_shift
+                "16",                              # frame_multiplier
+                False,                             # safe_mode
+                True,                              # video_component
             ],
             timeout=600,
         )

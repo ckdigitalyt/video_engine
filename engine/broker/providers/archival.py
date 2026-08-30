@@ -143,10 +143,17 @@ class NasaImagesProvider(MediaProvider):
                                 "cannot be established, skipping")
         manifest = self._asset_manifest(nasa_id)
         items = manifest.get("collection", {}).get("items", [])
+        # Prefer a video (mp4) file, else the largest jpg. NASA hrefs often
+        # contain spaces — quote the path part before downloading.
+        import urllib.parse as _up
+
+        def _safe(href: str) -> str:
+            scheme, _, rest = href.partition("://")
+            return f"{scheme}://{_up.quote(rest, safe='/:@&=+$,;~*()!')}"
         # Prefer a video (mp4) file, else the largest jpg.
         video = next((i["href"] for i in items if i.get("href", "").endswith(".mp4")), "")
-        target = video or next(
-            (i["href"] for i in items if i.get("href", "").lower().endswith((".jpg", ".jpeg"))), "")
+        target = _safe(video or next(
+            (i["href"] for i in items if i.get("href", "").lower().endswith((".jpg", ".jpeg"))), ""))
         if not target:
             raise ProviderError(f"{self.id}: no usable asset file for {nasa_id}")
         return _cache_media(

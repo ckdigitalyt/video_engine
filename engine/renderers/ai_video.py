@@ -101,15 +101,23 @@ class AIVideoRenderer(Renderer):
                 logger.warning("AI_VIDEO %s: keyframe generation failed (%s)",
                                shot_id, exc)
 
-        # 2. Generation: i2v with keyframe when available, else t2v.
+        # 2. Generation: i2v with keyframe, else text-to-video if a
+        #    kind="video" provider exists; otherwise raise so the router
+        #    degrades down the §24 chain (AI_IMAGE+MOTION → ...).
+        has_video_provider = any(
+            p.kind == "video" for p in broker._providers.values())
         if keyframe is not None:
             result = broker.image_to_video(
                 keyframe, prompt, duration=min(duration, 6.0),
                 seed=seed, aspect=ctx.aspect)
-        else:
+        elif has_video_provider:
             result = broker.generate_video(
                 prompt, duration=min(duration, 6.0), aspect=ctx.aspect,
                 seed=seed, style=style)
+        else:
+            raise RuntimeError(
+                f"AI_VIDEO {shot_id}: no keyframe and no text-to-video "
+                f"provider available — falling back down the chain (§24)")
 
         # 3. Conform to exact shot specs (trim/extend to duration).
         out_path = out_dir / f"{shot_id}_aivideo.mp4"

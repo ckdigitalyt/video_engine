@@ -1,10 +1,13 @@
 """ltx.py — LTX video provider (directive §11).
 
 Free path: the official Lightricks ZeroGPU Spaces. Default Space
-``Lightricks/ltx-2-distilled`` verified live 2026-08-30: RUNNING, endpoint
-``/generate_video`` (input_image, prompt, duration, enhance_prompt, seed,
-randomize_seed, height, width). Fallback Space: ``Lightricks/ltx-video-distilled``
-(endpoint ``/image_to_video``, older LTX-Video distilled).
+``Lightricks/ltx-video-distilled`` verified LIVE 2026-08-30: RUNNING,
+endpoints ``/text_to_video`` and ``/image_to_video`` (13 UI params incl.
+mode/duration_ui/seed_ui). A live image-to-video generation was completed
+during Wave 2 (4.0s 704x512 mp4 in ~12s queue-to-result).
+
+Note: ``Lightricks/ltx-2-distilled`` (newer UI) rejects API calls with a
+null error event — kept as a documented fallback candidate only.
 
 Alternative free path if ZeroGPU quota is exhausted: WavespeedAI/LTX-Video
 on fal.ai requires credits (paid) — NOT enabled.
@@ -26,8 +29,9 @@ from engine.broker.providers.base import (
 from engine.broker.providers.hf_zerogpu import HFZeroGPUClient
 from engine.broker.providers.wan import _video_provider_config
 
-DEFAULT_SPACE = "Lightricks/ltx-2-distilled"
-DEFAULT_ENDPOINT = "generate_video"
+DEFAULT_SPACE = "Lightricks/ltx-video-distilled"
+DEFAULT_I2V_ENDPOINT = "image_to_video"
+DEFAULT_T2V_ENDPOINT = "text_to_video"
 
 
 class LTXVideoProvider(MediaProvider):
@@ -44,8 +48,8 @@ class LTXVideoProvider(MediaProvider):
         self.cache = cache or BrokerCache()
         self.space_id = (space_id or os.environ.get("HF_LTX_SPACE")
                          or cfg.get("space_id") or DEFAULT_SPACE)
-        self.endpoint_name = (endpoint or cfg.get("endpoint")
-                              or DEFAULT_ENDPOINT)
+        self.endpoint_name = (endpoint or cfg.get("i2v_endpoint")
+                              or DEFAULT_I2V_ENDPOINT)
         self._client = HFZeroGPUClient(self.space_id,
                                        endpoint_name=self.endpoint_name,
                                        token=token)
@@ -53,9 +57,10 @@ class LTXVideoProvider(MediaProvider):
 
     def capabilities(self) -> ProviderDescriptor:
         return ProviderDescriptor(
-            id=self.id, kind=self.kind, models=["LTX-2-distilled"],
+            id=self.id, kind=self.kind, models=["LTX-Video-Distilled"],
             enabled=self._enabled_env, priority=30,
-            notes=f"LTX via official ZeroGPU Space {self.space_id}",
+            notes=f"LTX via official ZeroGPU Space {self.space_id} "
+                  f"(live-verified 2026-08-30)",
         )
 
     def health_check(self) -> bool:
@@ -79,14 +84,19 @@ class LTXVideoProvider(MediaProvider):
         fd = HFZeroGPUClient.file_data(server_path)
         result = self._client.generate(
             [
-                fd,                # input_image
                 prompt or "cinematic motion, high quality",
-                float(duration),   # duration (seconds)
-                False,             # enhance_prompt (keep deterministic)
+                "blurry, low quality, deformed, watermark",
+                fd,                 # input_image_filepath
+                None,               # input_video_filepath
+                512,                # height_ui (small = fast + low quota)
+                704,                # width_ui (~16:9-ish for 512)
+                "image-to-video",   # mode
+                float(duration),    # duration_ui (seconds)
+                9.0,                # ui_frames_to_use
                 int(seed) if seed else 42,
-                False,             # randomize_seed
-                512,               # height (small = fast + low quota use)
-                896,               # width (~16:9)
+                False,              # randomize_seed → deterministic
+                3.0,                # ui_guidance_scale
+                False,              # improve_texture_flag (faster)
             ],
             timeout=600,
         )
@@ -99,5 +109,5 @@ class LTXVideoProvider(MediaProvider):
         return BrokerResult(
             path=path, provider=self.id, kind="image_to_video",
             metadata={"space": self.space_id, "endpoint": self.endpoint_name,
-                      "model": "LTX-2-distilled", "seed": seed},
+                      "model": "LTX-Video-Distilled", "seed": seed},
         )
