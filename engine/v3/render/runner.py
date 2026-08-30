@@ -83,8 +83,12 @@ def render_shot(shot: dict, style: dict, out_dir: str | Path, *,
             attempts.append({"renderer": rid, "ok": False,
                              "error": f"registry: {exc}"})
             continue
+        # Renderers validate shot.renderer against their own id — walk the
+        # chain with the attempt renderer recorded on the shot.
+        attempt_shot = dict(shot)
+        attempt_shot["renderer"] = rid
         try:
-            issues = renderer.validate(shot, style)
+            issues = renderer.validate(attempt_shot, style)
             if issues:
                 attempts.append({"renderer": rid, "ok": False,
                                  "error": f"validate: {'; '.join(issues[:3])}"})
@@ -92,7 +96,7 @@ def render_shot(shot: dict, style: dict, out_dir: str | Path, *,
             ctx = RenderContext(
                 output_dir=str(out_dir), fps=fps, resolution=resolution,
                 aspect=aspect, seed=seed, style=style)
-            result: ShotRenderResult = renderer.render(shot, style, ctx)
+            result: ShotRenderResult = renderer.render(attempt_shot, style, ctx)
             path = Path(result.path)
             # Scene-file artifacts (MANIM) are not mp4s — recorded but the
             # chain continues to a renderer that produces video.

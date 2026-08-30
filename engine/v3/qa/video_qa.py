@@ -49,7 +49,9 @@ def _gate(name: str, ok: bool, detail: str,
 
 # ── Individual gates ─────────────────────────────────────────────────────────
 
-def technical_gate(master: Path, expected_duration: float) -> dict:
+def technical_gate(master: Path, expected_duration: float, *,
+                   expected_width: int = MASTER_W,
+                   expected_height: int = MASTER_H) -> dict:
     issues: list[str] = []
     try:
         probe = ffprobe(master)
@@ -66,8 +68,8 @@ def technical_gate(master: Path, expected_duration: float) -> dict:
         fps = 0.0
     if codec != "h264":
         issues.append(f"codec={codec}")
-    if abs(h - MASTER_H) > 8 or abs(w - MASTER_W) > 8:
-        issues.append(f"resolution {w}x{h} != {MASTER_W}x{MASTER_H}")
+    if abs(h - expected_height) > 8 or abs(w - expected_width) > 8:
+        issues.append(f"resolution {w}x{h} != {expected_width}x{expected_height}")
     if abs(fps - MASTER_FPS) > 1:
         issues.append(f"fps={fps:.2f}")
     if abs(dur - expected_duration) > 1.0:
@@ -284,13 +286,17 @@ def publish_gate(master: Path, shots: list[dict], script_doc: dict,
                  research: dict, style: dict, shot_reports: dict[str, dict],
                  out_path: str | Path, *,
                  use_vision: bool = True, use_llm: bool = True,
-                 require_audio: bool = True) -> dict:
+                 require_audio: bool = True,
+                 expected_width: int = MASTER_W,
+                 expected_height: int = MASTER_H) -> dict:
     """Run every §34 gate and emit publish_gate.json."""
     master = Path(master)
     dur = ffprobe(master).get("duration") or 0.0
 
     gates = {
-        "TECHNICAL": technical_gate(master, dur),
+        "TECHNICAL": technical_gate(master, dur,
+                                    expected_width=expected_width,
+                                    expected_height=expected_height),
         "AUDIO": audio_gate(master, require_audio=require_audio),
         "FACTUAL": factual_gate(research, script_doc),
         "TEMPORAL": temporal_gate(shots, dur, shot_reports),

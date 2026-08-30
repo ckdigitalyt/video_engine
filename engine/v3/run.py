@@ -53,6 +53,11 @@ RESOLUTIONS = {"16:9": (1920, 1080), "9:16": (1080, 1920)}
 DEV_RESOLUTIONS = {"16:9": (960, 540), "9:16": (540, 960)}
 MAX_RECUT_ITERATIONS = 2
 
+# Renderers the v3 pipeline never plans as a primary choice (§3 target
+# set): legacy adapters and unimplemented specialists stay out of the
+# router's way while remaining registered.
+ALWAYS_OFF = ("MEDIA", "VECTOR", "GODOT", "OPEN_TOONZ")
+
 
 # ── Stage state (resumable) ──────────────────────────────────────────────────
 
@@ -139,6 +144,8 @@ def run(args: argparse.Namespace) -> int:
         mode,
         offline_renderers=args.offline_renderers.split(",") if
         args.offline_renderers else None)
+    for rid in ALWAYS_OFF:
+        availability[rid] = False
     log("plan", f"mode={mode} availability_off="
                 f"{sorted(k for k, v in availability.items() if not v)}")
 
@@ -164,7 +171,7 @@ def run(args: argparse.Namespace) -> int:
     qa_dir = out_dir / "qa" / "shots"
 
     def available_fn(rid: str) -> bool:
-        return availability.get(rid, True) and rid != "MANIM"
+        return availability.get(rid, True) and rid != "MANIM"  # no authored VisualSpec
 
     def do_render(shot: dict, vdir: Path, attempt: int = 0,
                   renderer_override: str | None = None,
@@ -227,38 +234,51 @@ def run(args: argparse.Namespace) -> int:
         log("shot_qa", f"avg score {avg:.0f}; "
                        f"{sum(1 for r in reports.values() if r.get('action') == 'regenerate')} flagged")
 
-        # ── Stage: selective regen ───────────────────────────────────────
-        if iteration == 0:
-            regen = selective_regen(
-                shots, records, reports, render_fn=do_render,
-                qa_dir=qa_dir, shots_root=shots_root, max_retries=1,
-                force_fail=force_fail, use_vision=not args.no_vision)
-            records, reports = regen["records"], regen["reports"]
-            (out_dir / "regen_log.json").write_text(
-                json.dumps(regen, indent=2, default=str), encoding="utf-8")
-            log("repair", f"regenerated={regen['regenerated']} "
-                          f"rerouted={regen['rerouted']}")
-            # Persist regen results into the v1 records.
-            records_path.write_text(
-                json.dumps(records, indent=2, default=str),
-                encoding="utf-8")
+        # ── Stage: selective regen (§22 — every iteration) ──────────
+        regen = selective_regen(
+            shots, records, reports, render_fn=do_render,
+            qa_dir=qa_dir, shots_root=shots_root, max_retries=1,
+            force_fail=force_fail if iteration == 0 else set(),
+            use_vision=not args.no_vision)
+        records, reports = regen["records"], regen["reports"]
+        (out_dir / f"regen_log_{version_tag}.json").write_text(
+            json.dumps(regen, indent=2, default=str), encoding="utf-8")
+        log("repair", f"regenerated={regen['regenerated']} "
+                      f"rerouted={regen['rerouted']}")
+        records_path.write_text(
+            json.dumps(records, indent=2, default=str), encoding="utf-8")
 
         # ── Stage: assemble ──────────────────────────────────────────────
         master_name = "master.mp4" if iteration == 0 else f"master_r{iteration}.mp4"
         master = out_dir / master_name
+        timing_adjustments = []
         if not (state.done(f"assemble_{version_tag}", master)):
             assembled = assemble_master(
                 plan.get("topic", args.topic), shots, script_doc, records,
                 out_dir, width=width, height=height, fps=30,
                 audio_master=not args.silent,
                 rerender_fn=rerender_for_timing)
+            timing_adjustments = assembled.get("timing_adjustments", [])
             # assemble_master writes out_dir/master.mp4 — rename for recuts.
             if iteration > 0:
                 (out_dir / "master.mp4").replace(master)
             state.mark(f"assemble_{version_tag}",
-                       duration=assembled.get("video_duration"))
+                       duration=assembled.get("video_duration"),
+                       timing=timing_adjustments)
+        else:
+            timing_adjustments = (state.state["stages"].get(
+                f"assemble_{version_tag}", {}).get("timing") or [])
         log("assemble", f"{master.name} "
                         f"({master.stat().st_size // 1024} KB)")
+
+        # Align the plan to the FINAL timeline (actual TTS durations) so
+        # the temporal/retention gates judge the real video, not word-count
+        # estimates.
+        final_durs = {a["shot_id"]: a["final"]
+                      for a in timing_adjustments if "shot_id" in a}
+        for s in shots:
+            if s["shot_id"] in final_durs:
+                s["duration_sec"] = final_durs[s["shot_id"]]
 
         # ── Stage: full-video QA / publish gate ──────────────────────────
         gate_path = out_dir / ("publish_gate.json" if iteration == 0
@@ -266,7 +286,8 @@ def run(args: argparse.Namespace) -> int:
         gate = publish_gate(
             master, shots, script_doc, research, style, reports, gate_path,
             use_vision=not args.no_vision, use_llm=not args.offline,
-            require_audio=not args.silent)
+            require_audio=not args.silent,
+            expected_width=width, expected_height=height)
         log("gate", f"{gate['overall']} failed={gate['failed_gates']}")
 
         failed = gate["failed_gates"]

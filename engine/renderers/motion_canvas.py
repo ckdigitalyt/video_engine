@@ -59,6 +59,10 @@ def template_json_from_shot(
     and available payload.
     """
     motion_cfg = shot.get("motion") or {}
+    if isinstance(motion_cfg, str):
+        # shot_v3 schema types motion as a string description; template
+        # selection then falls to the role-based default.
+        motion_cfg = {"description": motion_cfg}
     template = motion_cfg.get("template")
     props = dict(motion_cfg.get("props") or {})
 
@@ -144,7 +148,9 @@ class MotionCanvasRenderer(Renderer):
             issues.append("motion project missing render.mjs")
         elif not (self._motion_dir / "node_modules").exists():
             issues.append("motion node_modules missing (run: npm --prefix motion install)")
-        template = (shot.get("motion") or {}).get("template")
+        _m = shot.get("motion")
+        _m = {} if isinstance(_m, str) else (_m or {})
+        template = _m.get("template")
         if template and template not in _KNOWN_TEMPLATES:
             issues.append(f"unknown motion template: {template!r}")
         return issues

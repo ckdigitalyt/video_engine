@@ -60,45 +60,105 @@ def probe_audio_duration(path: Path) -> float:
 
 def tts_beat_narration(text: str, out_base: Path, *,
                        cache: bool = True) -> tuple[Path, str]:
-    """TTS one beat (cached by text hash). Returns (audio_path, provider)."""
+    """TTS one beat, cached by narration-text hash (deterministic reuse
+    across recut iterations and resumed runs)."""
     out_base.parent.mkdir(parents=True, exist_ok=True)
     import hashlib
 
     key = hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
-    cached = out_base.parent / f"{key}{out_base.suffix}"
-    if cache and cached.exists():
-        return cached, "cache"
-    path, _words = synthesize_narration(text, out_base)
+    for ext in (".wav", ".mp3"):
+        cached = out_base.parent / f"{key}{ext}"
+        if cache and cached.exists():
+            return cached, "cache"
+    path, _words = synthesize_narration(text, out_base.parent / f"{key}.wav")
     return path, "synth"
 
 
 def build_narration_master(beat_audio: list[tuple[float, Path]],
                            total_duration: float, out_wav: Path) -> Path:
-    """Place each beat's narration at its start time over silence."""
+    """Place each beat's narration at its start time (single amix pass —
+    segments never overlap, so summing = correct placement)."""
     out_wav.parent.mkdir(parents=True, exist_ok=True)
-    padded: list[Path] = []
-    tmp_dir = out_wav.parent / "padded"
-    tmp_dir.mkdir(exist_ok=True)
+    inputs: list[str] = []
+    chains: list[str] = []
     for i, (start, audio) in enumerate(beat_audio):
-        out = tmp_dir / f"beat_{i:02d}.wav"
+        inputs += ["-i", str(audio)]
         delay_ms = int(round(start * 1000))
-        proc = _run([
-            ffmpeg(), "-y", "-i", str(audio),
-            "-af", f"adelay={delay_ms}:all=1,"
-                   f"apad=whole_dur={total_duration:.3f}",
-            "-ar", "48000", "-ac", "2", str(out)])
-        if proc.returncode != 0:
-            raise RuntimeError(f"narration pad failed: {proc.stderr[-200:]}")
-        padded.append(out)
-    concat_list = out_wav.parent / "narration_concat.txt"
-    concat_list.write_text(
-        "".join(f"file '{p}'\n" for p in padded), encoding="utf-8")
+        chains.append(
+            f"[{i}:a]aresample=48000,aformat=channel_layouts=stereo,"
+            f"adelay={delay_ms}:all=1[n{i}]")
+    mix_in = "".join(f"[n{i}]" for i in range(len(beat_audio)))
+    chains.append(
+        f"{mix_in}amix=inputs={len(beat_audio)}:duration=longest:"
+        f"normalize=0,apad=whole_dur={total_duration:.3f}[aout]")
     proc = _run([
-        ffmpeg(), "-y", "-f", "concat", "-safe", "0", "-i",
-        str(concat_list), "-c", "copy", str(out_wav)])
+        ffmpeg(), "-y", *inputs,
+        "-filter_complex", ";".join(chains),
+        "-map", "[aout]", "-ar", "48000", "-ac", "2",
+        "-t", f"{total_duration:.3f}", str(out_wav)])
     if proc.returncode != 0:
-        raise RuntimeError(f"narration concat failed: {proc.stderr[-200:]}")
+        raise RuntimeError(f"narration mix failed: {proc.stderr[-300:]}")
     return out_wav
+
+
+def duck_numpy(narration: Path, music: Path, out_path: Path, *,
+               music_volume: float = 0.35, threshold: float = 0.04,
+               ratio: float = 8.0, attack_ms: float = 20.0,
+               release_ms: float = 300.0) -> Path:
+    """Deterministic sidechain duck in numpy: music gain follows the
+    narration envelope (threshold/ratio/attack/release). Output 48k stereo
+    WAV; final level is set by the loudness normalizer downstream."""
+    sr = 48000
+    nar = _read_wav_any(narration, sr)
+    mus = _read_wav_any(music, sr)
+    n = max(len(nar), len(mus))
+    if len(nar) < n:
+        nar = np.pad(nar, (0, n - len(nar)))
+    if len(mus) < n:
+        mus = np.pad(mus, (0, n - len(mus)))
+    env = np.abs(nar)
+    win = max(1, int(sr * 0.005))
+    env = np.convolve(env, np.ones(win) / win, mode="same")
+    # Gain: above threshold, compress toward (1/ratio); smooth a/r.
+    over = env > threshold
+    target = np.where(over, threshold + (env - threshold) / ratio, 1.0)
+    gain = np.where(env > 0, np.clip(target / np.maximum(env, 1e-6), 0.0, 1.0),
+                    1.0)
+    a = np.exp(-1.0 / (sr * attack_ms / 1000.0))
+    r = np.exp(-1.0 / (sr * release_ms / 1000.0))
+    smoothed = np.zeros_like(gain)
+    g = 1.0
+    for i, gi in enumerate(gain):
+        coef = a if gi < g else r
+        g = coef * g + (1 - coef) * gi
+        smoothed[i] = g
+    mixed = nar + mus * smoothed * music_volume
+    peak = float(np.max(np.abs(mixed))) or 1.0
+    if peak > 0.98:
+        mixed *= 0.98 / peak
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    data = (np.clip(mixed, -1.0, 1.0) * 32767).astype(np.int16)
+    with wave.open(str(out_path), "wb") as wf:
+        wf.setnchannels(2)
+        wf.setsampwidth(2)
+        wf.setframerate(sr)
+        wf.writeframes(data.tobytes())
+    return out_path
+
+
+def _read_wav_any(path: Path, target_sr: int = 48000) -> np.ndarray:
+    """Decode any audio file to float mono at target_sr (ffmpeg, binary)."""
+    proc = subprocess.run(
+        [ffmpeg(), "-v", "error", "-y", "-i", str(path),
+         "-ar", str(target_sr), "-ac", "2", "-f", "f32le", "-"],
+        capture_output=True, timeout=300)
+    if proc.returncode != 0:
+        raise RuntimeError(f"decode failed {path.name}: "
+                           f"{proc.stderr[-200:]}")
+    samples = np.frombuffer(proc.stdout, dtype=np.float32).astype(np.float64)
+    if not samples.size:
+        return np.zeros(target_sr)
+    return samples.reshape(-1, 2).mean(axis=1)
 
 
 def build_music_bed(shots: list[dict], total_duration: float,
@@ -209,7 +269,8 @@ def conform_clip(src: Path, dst: Path, duration: float, width: int,
 def concat_clips(clips: list[Path], out_path: Path) -> Path:
     out_path.parent.mkdir(parents=True, exist_ok=True)
     lst = out_path.parent / "concat_video.txt"
-    lst.write_text("".join(f"file '{c}'\n" for c in clips), encoding="utf-8")
+    lst.write_text("".join(f"file '{c.resolve()}'\n" for c in clips),
+                   encoding="utf-8")
     proc = _run([
         ffmpeg(), "-y", "-f", "concat", "-safe", "0", "-i", str(lst),
         "-c", "copy", str(out_path)])
@@ -342,10 +403,18 @@ def assemble_master(video_id: str, shots: list[dict], script_doc: dict,
     bed = build_music_bed(shots, video_total, work / "music_bed.wav",
                           work / "bed_segs")
 
-    # ── 6. Duck music under narration, loudness-normalize ────────────────
-    ducked = duck_music_under_narration(narration_master, bed,
-                                        work / "narration_music_mix.m4a",
-                                        music_volume=DUCK_BASE_VOLUME)
+    # ── 6. Duck music under narration + loudness-normalize ──────────────
+    # numpy duck (ffmpeg 6.1 sidechaincompress+amix graphs fail to init on
+    # this build — verified 2026-08-30 — so the duck is done deterministically
+    # in numpy instead of the legacy duck_music_under_narration filter).
+    bed_48k = work / "music_bed_48k.wav"
+    proc = _run([ffmpeg(), "-y", "-i", str(bed), "-ar", "48000", "-ac", "2",
+                 str(bed_48k)])
+    if proc.returncode != 0:
+        raise RuntimeError(f"bed resample failed: {proc.stderr[-200:]}")
+    bed = bed_48k
+    ducked = duck_numpy(narration_master, bed, work / "narration_music_mix.wav",
+                        music_volume=DUCK_BASE_VOLUME)
     final_audio = normalize_to_target(ducked, work / "audio_master.m4a",
                                       target_lufs=TARGET_LUFS)
 

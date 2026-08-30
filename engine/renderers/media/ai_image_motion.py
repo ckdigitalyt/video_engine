@@ -91,6 +91,8 @@ class AIImageMotionRenderer(Renderer):
         prompt = shot.get("subject") or shot.get("visual_goal") or ""
         seed = int(ctx.seed or shot.get("seed", 0) or 0)
         motion_cfg = shot.get("motion") or {}
+        if isinstance(motion_cfg, str):
+            motion_cfg = {}
         want_parallax = bool(motion_cfg.get("parallax"))
         want_atmos = bool(motion_cfg.get("atmosphere", True))
 

@@ -58,6 +58,8 @@ def scene_json_from_shot(
     a scene is built deterministically from subject/background/camera fields.
     """
     motion_cfg = shot.get("motion") or {}
+    if isinstance(motion_cfg, str):
+        motion_cfg = {"description": motion_cfg}
     scene = dict(motion_cfg.get("scene") or {})
 
     if "background" not in scene:
@@ -142,7 +144,9 @@ class PixiJsRenderer(Renderer):
             issues.append(f"pixi project missing: {self._pixi_dir}")
         elif not (self._pixi_dir / "node_modules").exists():
             issues.append("pixi node_modules missing (run: npm --prefix pixi install)")
-        camera = (shot.get("motion") or {}).get("scene", {}).get("camera", {})
+        _m = shot.get("motion")
+        _m = {} if isinstance(_m, str) else (_m or {})
+        camera = _m.get("scene", {}).get("camera", {})
         move = camera.get("move") if isinstance(camera, dict) else None
         if move and move not in _CAMERAS:
             issues.append(f"unknown camera move: {move!r}")

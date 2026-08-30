@@ -42,8 +42,10 @@ def write_script(structure: dict, research: dict, *,
     beats = structure.get("beats", [])
     narrations: dict[str, str] | None = None
     errors: list[str] = []
+    llm_used = False
     if use_llm:
         narrations = _llm_script(structure, research, errors)
+        llm_used = narrations is not None and not errors
     if narrations is None:
         narrations = _offline_script(structure, research)
 
@@ -68,8 +70,7 @@ def write_script(structure: dict, research: dict, *,
     total = round(sum(b["target_sec"] for b in out_beats), 2)
     return {"topic": structure.get("topic", ""),
             "beats": out_beats, "est_total_sec": total,
-            "provenance": "llm" if narrations is not None and not errors
-            else "offline_fallback"}
+            "provenance": "llm" if llm_used else "offline_fallback"}
 
 
 def _fold_beats(beats: list[dict], max_beats: int) -> list[dict]:
