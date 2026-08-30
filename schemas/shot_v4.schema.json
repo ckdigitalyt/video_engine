@@ -1,0 +1,133 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Shot v4",
+  "description": "V4 cinematography Shot schema (directive v4_cinematography_2026-08-30 §4/§6/§12). Backward-compatible extension of shot_v3: every v3 field keeps its meaning and consumers keep working; adds micro_events[] (§4), explicit cinematography fields (§6), shot classes (§12) and the text-card block (§13). Planning order is narrative → perception → cinematography → motion → renderer LAST (§5): the renderer fields are filled in stage B, after the director has decided what happens and how the camera experiences it.",
+  "type": "object",
+  "required": ["version", "shot_id", "duration_sec", "narrative_role", "visual_goal", "renderer"],
+  "properties": {
+    "version": {"type": "string", "const": "v4"},
+    "shot_id": {"type": "string", "pattern": "^S[0-9]{1,4}$"},
+    "duration_sec": {"type": "number", "exclusiveMinimum": 0, "maximum": 60},
+    "narration_start": {"type": "number", "minimum": 0},
+    "narration_end": {"type": "number", "minimum": 0},
+    "narrative_role": {
+      "type": "string",
+      "enum": ["hook", "promise", "context", "escalation", "reveal", "explanation", "climax", "payoff", "callback", "transition", "outro"]
+    },
+    "visual_goal": {"type": "string", "minLength": 1},
+    "renderer": {
+      "type": "string",
+      "enum": ["AI_VIDEO", "AI_IMAGE", "AI_IMAGE_MOTION", "STOCK_VIDEO", "ARCHIVAL", "MOTION_CANVAS", "PIXIJS", "MANIM", "GODOT", "OPEN_TOONZ", "CUSTOM"]
+    },
+    "fallback_renderer": {
+      "type": "string",
+      "enum": ["AI_VIDEO", "AI_IMAGE", "AI_IMAGE_MOTION", "STOCK_VIDEO", "ARCHIVAL", "MOTION_CANVAS", "PIXIJS", "MANIM", "GODOT", "OPEN_TOONZ", "CUSTOM"]
+    },
+    "style": {"type": "string"},
+    "subject": {"type": "string"},
+    "background": {"type": "string"},
+    "camera": {"type": "string"},
+    "motion": {"type": "string"},
+    "composition": {"type": "string"},
+    "text_overlay": {"type": ["string", "null"]},
+    "sfx": {"type": "array", "items": {"type": "string"}},
+    "music_state": {
+      "type": "string",
+      "enum": ["silence", "ambient", "build", "peak", "drop", "resolve", "sustain"]
+    },
+    "duck_music_db": {"type": "number", "minimum": -40, "maximum": 0},
+
+    "micro_events": {
+      "type": "array",
+      "description": "Directive §4: Shot → MicroEvents. Each event is a concrete perceptual beat the renderer MUST implement.",
+      "items": {
+        "type": "object",
+        "required": ["t", "duration", "event"],
+        "properties": {
+          "t": {"type": "number", "minimum": 0, "description": "start time inside the shot (seconds)"},
+          "duration": {"type": "number", "exclusiveMinimum": 0, "description": "event duration (seconds)"},
+          "event": {"type": "string", "minLength": 1, "description": "human-readable description, e.g. 'asteroid enters frame'"},
+          "kind": {
+            "type": "string",
+            "enum": ["object_enter", "object_exit", "camera_accel", "lighting_change", "transformation", "cut_to", "subject_action", "environment_change", "impact", "reveal"]
+          },
+          "intensity": {"type": "number", "minimum": 0, "maximum": 1}
+        },
+        "additionalProperties": false
+      }
+    },
+
+    "shot_scale": {"type": "string", "enum": ["wide", "medium", "close", "macro"]},
+    "camera_move": {"type": "string", "enum": ["static", "push_in", "pull_out", "pan", "tilt", "orbit", "tracking", "whip", "dolly", "handheld"]},
+    "subject_motion": {"type": "string", "description": "What physically moves in-frame (subject layer)"},
+    "environment_motion": {"type": "string", "description": "What physically moves in the environment layer (wind, dust, water, vegetation)"},
+    "lighting_change": {"type": "string", "description": "How light changes during the shot"},
+    "depth_change": {"type": "string", "description": "How depth/parallax changes during the shot"},
+    "visual_event": {"type": "string", "description": "The single most important thing that HAPPENS in this shot"},
+    "transition_in": {"type": "string"},
+    "transition_out": {"type": "string"},
+    "emotional_intent": {"type": "string"},
+    "viewer_attention_target": {"type": "string", "description": "Where the viewer's eye must be at the peak of the shot"},
+
+    "shot_class": {
+      "type": "string",
+      "enum": ["HERO", "EXPLANATORY", "BRIDGE"],
+      "description": "Directive §12. HERO = spectacle (AI video preferred); EXPLANATORY = diagrams/maps/infographics; BRIDGE = short transitions/motion graphics. Target mix 20-30 / 40-50 / 20-30 %."
+    },
+    "text_card": {
+      "type": ["object", "null"],
+      "description": "Directive §13: on-screen text cards. Cards longer than 1.5 s REQUIRE a dramatic-beat justification.",
+      "properties": {
+        "present": {"type": "boolean"},
+        "text": {"type": "string"},
+        "duration_sec": {"type": "number", "minimum": 0},
+        "justification": {"type": "string", "description": "Required when duration_sec > 1.5: which dramatic beat demands a full-screen text card"}
+      },
+      "required": ["present"],
+      "additionalProperties": false
+    },
+
+    "asset_requirements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "kind": {"type": "string", "enum": ["image", "video", "audio", "font", "svg", "icon"]},
+          "query": {"type": "string"},
+          "source_hint": {"type": "string"},
+          "license": {"type": "string"}
+        },
+        "required": ["kind", "query"],
+        "additionalProperties": false
+      }
+    },
+    "generation_priority": {
+      "type": "string",
+      "enum": ["low", "normal", "high", "hero"],
+      "default": "normal"
+    },
+    "qa_requirements": {"type": "array", "items": {"type": "string"}},
+    "visual_budget_ref": {"type": "string"},
+    "requirements": {
+      "type": "object",
+      "description": "Renderer-selection requirement flags consumed by the router (§5/§7/§18)",
+      "properties": {
+        "realism": {"type": "boolean"},
+        "physical_motion": {"type": "boolean"},
+        "spectacle": {"type": "boolean", "description": "§7: scale/destruction/awe — with realism+emotional_impact routes HERO shots to AI_VIDEO first"},
+        "cinematic": {"type": "boolean", "description": "§18: weight cinematic_value in router scoring"},
+        "math_precision": {"type": "boolean"},
+        "character_interaction": {"type": "boolean"},
+        "emotional_impact": {"type": "boolean"},
+        "historical_authenticity": {"type": "boolean"},
+        "diagrammatic": {"type": "boolean"},
+        "camera_movement": {"type": "boolean"},
+        "text_heavy": {"type": "boolean"},
+        "stylization": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    },
+    "metadata": {"type": "object"}
+  },
+  "additionalProperties": false
+}
