@@ -9,7 +9,7 @@ best matching asset.
 
 Usage::
 
-    planner = SearchPlanner(provider=deepseek)
+    planner = SearchPlanner(provider=zai)
     queries = planner.generate_queries(
         narration="Scientists still don't know why...",
         title="The Great Silence",
