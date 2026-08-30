@@ -136,8 +136,12 @@ def duck_numpy(narration: Path, music: Path, out_path: Path, *,
     peak = float(np.max(np.abs(mixed))) or 1.0
     if peak > 0.98:
         mixed *= 0.98 / peak
+    # Write as interleaved stereo so the loudness normaliser gets a proper
+    # 2-channel signal (downstream -ac 2 expects it; a 2-channel file
+    # with mono data is mis-interpreted and the master comes out half-length).
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    data = (np.clip(mixed, -1.0, 1.0) * 32767).astype(np.int16)
+    stereo = np.column_stack((mixed, mixed))
+    data = (np.clip(stereo, -1.0, 1.0) * 32767).astype(np.int16)
     with wave.open(str(out_path), "wb") as wf:
         wf.setnchannels(2)
         wf.setsampwidth(2)
