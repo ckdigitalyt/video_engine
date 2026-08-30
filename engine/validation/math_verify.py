@@ -1,8 +1,8 @@
 """Mathematical verification (Gate 3 — Mathematical).
 
-Deterministic Python verifier.  DeepSeek is NEVER the sole authority for
+Deterministic Python verifier.  GLM is NEVER the sole authority for
 math.  Every computed value (arithmetic, digit ops, sequences, equations,
-labels) is verified here.  If DeepSeek says 53955 is a 3-digit example,
+labels) is verified here.  If the LLM says 53955 is a 3-digit example,
 this verifier rejects it.  Deterministic validators ALWAYS override LLM
 judgment (directive §23, §36).
 """

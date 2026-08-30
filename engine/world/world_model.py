@@ -16,7 +16,7 @@ Design rules (spec §18, §19, §30):
   simplifications so the animation never silently implies a physically
   wrong causal model (spec §19).
 - Deterministic validation: entity references resolve, types are known,
-  relationships are not self-loops, facts are complete.  DeepSeek is never
+  relationships are not self-loops, facts are complete.  GLM is never
   the authority for physics/math (deterministic verifiers override).
 """
 

@@ -1,6 +1,6 @@
 """Centralized configuration — merges YAML configs and the StyleSpec v1.
 
-DeepSeek never invents its own visual aesthetic. Every stage merges against
+GLM never invents its own visual aesthetic. Every stage merges against
 this spec so all videos feel like one production system (directive §13).
 """
 

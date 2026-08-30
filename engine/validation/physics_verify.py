@@ -1,7 +1,7 @@
 """Deterministic physics/science verifiers (JADE_TO_DO v0.3 §16, §18, §19).
 
 Extends engine.validation.math_verify with generic physics verifiers used by
-the world model + compiler.  DeepSeek is NEVER the authority for physics:
+the world model + compiler.  GLM is NEVER the authority for physics:
 every quantitative claim in a WorldState fact or a beat transformation is
 re-verified here before rendering.
 

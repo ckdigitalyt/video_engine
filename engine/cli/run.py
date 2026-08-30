@@ -581,7 +581,7 @@ def main() -> None:
                     help="Output directory")
     ap.add_argument("--narration", default="", help="Exact narration text")
     ap.add_argument("--use-llm", action="store_true",
-                    help="Use DeepSeek for the Visual Director (default deterministic)")
+                    help="Use ZAI GLM for the Visual Director (default deterministic)")
     ap.add_argument("--dev", action="store_true",
                     help="Dev resolution 1280x720 (default); production is 1920x1080")
     args = ap.parse_args()

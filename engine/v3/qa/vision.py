@@ -1,12 +1,12 @@
 """vision.py — Vision QA over representative frames (directive §20).
 
 Samples frames per shot (first / mid / last + randoms), builds a contact
-sheet, and asks the DeepSeek vision model for a structured verdict
-{score, issues[], ok}. Offline fallback: the caller uses technical-only
-scoring (vision_qa returns available=False).
+sheet, and asks the ZAI GLM vision model (glm-5.3-flash) for a structured
+verdict {score, issues[], ok}. Offline fallback: the caller uses
+technical-only scoring (vision_qa returns available=False).
 
 Frame sampling mirrors tools/describe_frames.py conventions; the model call
-reuses the broker's DeepSeekVisionProvider (same base64 chat-completions
+reuses the broker's ZaiVisionProvider (same base64 chat-completions
 pattern, Wave-2 verified).
 """
 
@@ -116,12 +116,12 @@ def vision_qa_shot(sheet: Path, shot: dict) -> dict:
     — available=False means the caller falls back to technical-only QA.
     """
     try:
-        from engine.broker.providers.deepseek import DeepSeekVisionProvider
+        from engine.broker.providers.zai import ZaiVisionProvider
 
-        provider = DeepSeekVisionProvider()
+        provider = ZaiVisionProvider()
         if not provider.capabilities().enabled:
             return {"available": False, "score": 0, "issues": [],
-                    "raw": "deepseek key not configured"}
+                    "raw": "zai key not configured"}
         prompt = VISION_QA_PROMPT.format(
             visual_goal=str(shot.get("visual_goal", ""))[:200],
             subject=str(shot.get("subject", ""))[:200],

@@ -1,8 +1,8 @@
 """VisualSpec -> Manim compiler (directive §4, §5, §49 Phase 5).
 
-DeepSeek emits a strict JSON VisualSpec (WHAT/WHY/WHEN).  This deterministic
+GLM emits a strict JSON VisualSpec (WHAT/WHY/WHEN).  This deterministic
 compiler is the ONLY bridge to Manim — it maps each transformation to a
-trusted primitive.  DeepSeek never writes arbitrary Manim code as the
+trusted primitive.  GLM never writes arbitrary Manim code as the
 primary interface.
 
 The compiler:

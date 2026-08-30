@@ -1,6 +1,6 @@
 """Manim primitive library — the trusted rendering layer (directive §8).
 
-DeepSeek decides WHAT/WHY/WHEN; these primitives decide HOW.  They are
+GLM decides WHAT/WHY/WHEN; these primitives decide HOW.  They are
 deterministic, reusable, and independently testable.
 
 Object-continuity contract (the correctness fix):

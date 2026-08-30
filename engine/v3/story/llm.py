@@ -1,8 +1,10 @@
 """llm.py — Thin LLM client with an ordered fallback chain (Wave 3).
 
-Chain (directive: DeepSeek first, then Gemini → OpenRouter → Groq). Every
-caller must ALSO provide a deterministic offline fallback — this module
-raises :class:`LLMError` when every provider fails so callers can degrade.
+Chain (2026-08-30: ZAI GLM-5.3-flash first, then Gemini → OpenRouter →
+Groq → Mistral — GLM replaces DeepSeek in the head slot; the chain keeps
+its length). Every caller must ALSO provide a deterministic offline
+fallback — this module raises :class:`LLMError` when every provider fails
+so callers can degrade.
 
 Deliberately dependency-light (stdlib urllib): no langchain, no SDKs, so the
 v3 pipeline cannot break when a heavyweight dependency moves. Keys come from
@@ -65,18 +67,23 @@ def _post_json(url: str, headers: dict[str, str], payload: dict,
 # ── Provider adapters ────────────────────────────────────────────────────────
 # Each adapter: (name, enabled?, messages/prompt → text)
 
-def _deepseek(messages: list[dict], temperature: float, max_tokens: int) -> str:
+def _zai(messages: list[dict], temperature: float, max_tokens: int) -> str:
     _ensure_env()
-    key = os.environ.get("DEEPSEEK_API_KEY", "")
+    key = os.environ.get("ZAI_API_KEY", "")
     if not key:
-        raise LLMError("DEEPSEEK_API_KEY not set")
-    model = os.environ.get("DEEPSEEK_MODEL", "deepseek-chat")
+        raise LLMError("ZAI_API_KEY not set")
+    model = os.environ.get("ZAI_MODEL", "glm-5.3-flash")
+    base_url = os.environ.get("ZAI_BASE_URL",
+                              "https://api.z.ai/api/paas/v4").rstrip("/")
     out = _post_json(
-        "https://api.deepseek.com/chat/completions",
+        f"{base_url}/chat/completions",
         {"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
+        # NOTE: no "thinking" field — glm-5.3-flash always thinks and any
+        # thinking object is rejected with 400 code 1210.
         {"model": model, "messages": messages,
          "temperature": temperature, "max_tokens": max_tokens},
     )
+    # GLM replies carry reasoning_content alongside content; read content.
     return out["choices"][0]["message"]["content"]
 
 
@@ -154,14 +161,15 @@ def _groq(messages: list[dict], temperature: float, max_tokens: int) -> str:
     return out["choices"][0]["message"]["content"]
 
 
-# Ordered fallback chain (DeepSeek first per Wave-3 directive; Mistral
-# added 2026-08-30 when DeepSeek/OpenRouter balances ran dry mid-production).
+# Ordered fallback chain (ZAI GLM first, 2026-08-30; Mistral
+# added 2026-08-30 when balances ran dry mid-production). GLM-5.3-flash
+# replaces DeepSeek in the head slot — chain length preserved.
 CHAIN: list[tuple[str, Any]] = [
-    ("deepseek", _deepseek),
+    ("zai", _zai),
     ("gemini", _gemini),
-    ("mistral", _mistral),
     ("openrouter", _openrouter),
     ("groq", _groq),
+    ("mistral", _mistral),
 ]
 
 
@@ -257,7 +265,7 @@ def llm_available(chain: list[tuple[str, Any]] | None = None) -> bool:
     _ensure_env()
     for _name, fn in (chain or CHAIN):
         try:
-            if fn == _deepseek and os.environ.get("DEEPSEEK_API_KEY"):
+            if fn == _zai and os.environ.get("ZAI_API_KEY"):
                 return True
             if fn == _gemini and os.environ.get("GEMINI_API_KEY"):
                 return True

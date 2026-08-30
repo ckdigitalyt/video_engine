@@ -4,7 +4,7 @@ Receives: topic, research facts, verified facts, story structure, exact
 narration, style spec.
 Outputs: BeatSheet + ShotList (strict schemas).
 
-DeepSeek plays the Visual Director role via a structured JSON completion.
+ZAI GLM plays the Visual Director role via a structured JSON completion.
 The system prompt explicitly frames it as designing a *motion-graphics
 explanation, not slides*.  The output is schema-validated and math-verified
 before it can proceed.
@@ -61,29 +61,39 @@ Return ONLY the JSON.  No markdown fences, no prose.
 
 
 def _llm_json(prompt: str, max_retries: int = 2) -> dict:
-    """Call DeepSeek (V4 Flash) for a strict JSON completion.
+    """Call ZAI GLM (glm-5.3-flash) for a strict JSON completion.
 
     Reads the API key from env; if unavailable, this is a no-op stub that
     raises — the deterministic fallback directors handle the no-LLM case.
     """
-    key = os.environ.get("DEEPSEEK_API_KEY") or os.environ.get("OPENAI_API_KEY")
+    key = os.environ.get("ZAI_API_KEY") or os.environ.get("OPENAI_API_KEY")
     if not key:
         raise RuntimeError(
-            "No LLM API key set; Visual Director needs DeepSeek/OpenAI. "
-            "Provide DEEPSEEK_API_KEY or use the deterministic fallback."
+            "No LLM API key set; Visual Director needs ZAI/OpenAI. "
+            "Provide ZAI_API_KEY or use the deterministic fallback."
         )
 
     import urllib.request
 
-    url = os.environ.get("DEEPSEEK_URL", "https://api.deepseek.com/chat/completions")
+    url = os.environ.get(
+        "ZAI_URL",
+        os.environ.get("ZAI_BASE_URL", "https://api.z.ai/api/paas/v4").rstrip("/")
+        + "/chat/completions",
+    )
     body = json.dumps({
-        "model": os.environ.get("DEEPSEEK_MODEL", "deepseek-chat"),
+        # NOTE: no "thinking" field — glm-5.3-flash always thinks and any
+        # thinking object is rejected with 400 code 1210. Note also that
+        # OpenAI-style response_format json_object is not guaranteed on GLM;
+        # the JSON is extracted defensively below.
+        "model": os.environ.get("ZAI_MODEL", "glm-5.3-flash"),
         "messages": [
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": prompt},
         ],
         "temperature": 0.4,
-        "response_format": {"type": "json_object"},
+        # Generous max_tokens: glm-5.3-flash reasoning tokens count against
+        # the output budget, so the default would truncate the JSON.
+        "max_tokens": int(os.environ.get("ZAI_MAX_TOKENS", "16384")),
     }).encode("utf-8")
 
     req = urllib.request.Request(
@@ -95,7 +105,13 @@ def _llm_json(prompt: str, max_retries: int = 2) -> dict:
             with urllib.request.urlopen(req, timeout=90) as resp:
                 payload = json.loads(resp.read().decode("utf-8"))
             content = payload["choices"][0]["message"]["content"]
-            return json.loads(content)
+            try:
+                return json.loads(content)
+            except json.JSONDecodeError:
+                # GLM may wrap the JSON in prose/fences — extract defensively.
+                from engine.v3.story.llm import extract_json
+
+                return extract_json(content)
         except Exception as e:  # noqa: BLE001
             if attempt == max_retries - 1:
                 raise RuntimeError(f"LLM JSON completion failed: {e}") from e
