@@ -107,6 +107,10 @@ class TestLiveGeneration:
     """Real ZeroGPU generation — only with RUN_LIVE_TESTS=1."""
 
     def test_ltx_image_to_video_live(self, tmp_path):
+        import os
+
+        if os.environ.get("RUN_LIVE_TESTS") != "1":
+            pytest.skip("RUN_LIVE_TESTS not set")
         if not Path("/home/ubuntu/video_engine/.env").exists():
             pytest.skip("no .env")
         from engine.broker.providers.ltx import LTXVideoProvider
