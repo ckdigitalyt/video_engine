@@ -288,8 +288,17 @@ def publish_gate(master: Path, shots: list[dict], script_doc: dict,
                  use_vision: bool = True, use_llm: bool = True,
                  require_audio: bool = True,
                  expected_width: int = MASTER_W,
-                 expected_height: int = MASTER_H) -> dict:
-    """Run every §34 gate and emit publish_gate.json."""
+                 expected_height: int = MASTER_H,
+                 run_v4_audit: bool = True) -> dict:
+    """Run every §34 gate and emit publish_gate.json.
+
+    V4 (§19): when *run_v4_audit* is set (default), the gate additionally
+    measures THE ARTIFACT with the §19 gates (VISUAL_EVENT_DENSITY,
+    STATIC_HOLD, TEXT_CARD_OVERUSE, SHOT_DIVERSITY, VISUAL_NOVELTY,
+    CINEMATIC, AI_VIDEO_COVERAGE, CREATIVE) computed from decoded pixels
+    (tools/v4_audit.py), and the report references the exact artifact path
+    that was probed (``artifact.path``) — the video must NOT pass simply
+    because the technical gates pass."""
     master = Path(master)
     dur = ffprobe(master).get("duration") or 0.0
 
@@ -319,11 +328,48 @@ def publish_gate(master: Path, shots: list[dict], script_doc: dict,
     gates["VISUAL"]["timeline"] = {k: v for k, v in tl.items()
                                    if k != "issues"}
 
+    # ── V4 §19 artifact gates ── measured from decoded pixels on the exact
+    # file probed; failures here block publication even when the technical
+    # gates pass. The heuristic critic keeps CREATIVE deterministic unless
+    # the caller runs with use_llm (then the ZAI GLM critic runs).
+    artifact_doc: dict = {}
+    if run_v4_audit:
+        from engine.v4.critic import creative_critic
+        from engine.v4.gates import audit_tool, run_v4_gates
+
+        # one decode pass: audit the artifact, feed the metrics to both the
+        # critic and the gates
+        master_audit = audit_tool().audit_video(master, label=master.stem)
+        narration_text = " ".join(
+            str(s.get("metadata", {}).get("narration") or "") for s in shots)
+        critic = creative_critic(
+            shots, script_doc.get("topic", ""),
+            narration_text=narration_text,
+            audit=master_audit,
+            use_llm=use_llm,
+        )
+        v4 = run_v4_gates(master, shots=shots,
+                          render_records=[],
+                          expected_spec={"codec": "h264",
+                                         "width": expected_width,
+                                         "height": expected_height,
+                                         "fps": MASTER_FPS,
+                                         "duration_sec": round(dur, 2)},
+                          critic=critic,
+                          master_audit=master_audit)
+        for name, g in v4["gates"].items():
+            gates[name] = {k: g[k] for k in ("gate", "pass", "detail",
+                                             "fixes") if k in g}
+        artifact_doc = v4["artifact"]
+
     overall = "PASS" if all(g["pass"] for g in gates.values()) else "FAIL"
     doc = {
-        "version": 1,
+        "version": 2 if artifact_doc else 1,
         "overall": overall,
         "master": str(master),
+        "artifact": artifact_doc or {"path": str(master.resolve()),
+                                     "note": "v4 artifact audit disabled "
+                                             "(run_v4_audit=False)"},
         "duration_sec": round(dur, 2),
         "gates": gates,
         "failed_gates": [name for name, g in gates.items() if not g["pass"]],
