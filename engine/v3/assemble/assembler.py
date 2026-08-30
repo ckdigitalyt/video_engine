@@ -458,9 +458,13 @@ def reframe_916(master: Path, out_path: Path, *, width: int = 1080,
     (subjects sit above centre in documentary framing). Never touches the
     16:9 master; run only on request."""
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    crop_w = f"min(iw,ih*{width}/{height})"
-    crop_h = f"min(ih,iw*{height}/{width})"
-    vf = (f"crop={crop_w}:{crop_h},scale={width}:{height},"
+    crop_w = f"min(iw\\,ih*{width}/{height})"
+    crop_h = f"min(ih\\,iw*{height}/{width})"
+    # NOTE: commas inside min() MUST be escaped — a bare comma is the
+    # filtergraph separator, so the unescaped version fails with
+    # "No such filter: 'ih*1080/1920):min(ih'" (observed live 2026-08-30).
+    vf = (f"crop={crop_w}:{crop_h},"
+          f"scale={width}:{height},"
           f"setsar=1")
     proc = _run([
         ffmpeg(), "-y", "-i", str(master), "-vf", vf,
