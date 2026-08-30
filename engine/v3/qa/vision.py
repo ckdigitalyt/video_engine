@@ -92,6 +92,7 @@ def contact_sheet(frames: list[Path], out_path: Path) -> Path | None:
         if f not in seen:
             seen.append(f)
     exe = shutil.which("ffmpeg")
+    out_path.parent.mkdir(parents=True, exist_ok=True)
     inputs: list[str] = []
     for f in seen:
         inputs += ["-i", str(f)]

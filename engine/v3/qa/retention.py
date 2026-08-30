@@ -154,12 +154,14 @@ def _heuristic_critic(shots: list[dict], topic: str) -> dict:
         fixes.append("split long shots or add pattern interrupts")
     scores["q8_pacing"] = scores["q4_boring"]
 
-    # q5: variety keeps a reason to continue.
+    # q5: variety keeps a reason to continue (scale by video length).
     from engine.v3.plan.variety import analyze_variety
     report = analyze_variety(shots)
-    scores["q5_continue"] = 7 if report["distinct_renderers"] >= 3 else 4
-    if report["distinct_renderers"] < 3:
-        issues.append("fewer than 3 distinct renderers — monotone visuals")
+    need = 3 if n >= 8 else (2 if n >= 3 else 1)
+    scores["q5_continue"] = 7 if report["distinct_renderers"] >= need else 4
+    if report["distinct_renderers"] < need:
+        issues.append(f"only {report['distinct_renderers']} distinct "
+                      f"renderer(s) across {n} shots")
         fixes.append("re-route some shots to a different renderer")
 
     # q6: ending — payoff/callback beat exists near the end.

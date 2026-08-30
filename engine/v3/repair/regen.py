@@ -43,7 +43,8 @@ def selective_regen(
              "regenerated": [shot_id...], "history": [...]}.
     """
     force_fail = force_fail or set()
-    qa_kw = qa_kw or {}
+    merged_qa_kw: dict = {"use_vision": use_vision, **(qa_kw or {})}
+    qa_kw = merged_qa_kw
     versions: dict[str, list[dict]] = {}   # shot_id -> [{version, record, report}]
     history: list[dict] = []
 
@@ -51,6 +52,16 @@ def selective_regen(
         sid = shot["shot_id"]
         rec = records.get(sid) or {"ok": False, "attempts": [], "path": None}
         rep = reports.get(sid) or {"score": 0, "action": "regenerate"}
+        if sid in force_fail and rep.get("action") != "regenerate":
+            # --force-fail SXX (dev): inject a synthetic QA failure on the
+            # first attempt so the regen path is exercised deterministically.
+            rep = {"shot_id": sid, "score": 30, "action": "regenerate",
+                   "issues": ["forced failure (--force-fail dev flag)"],
+                   "technical_pass": False, "vision_available": False}
+            if sid not in reports:
+                reports = {**reports, sid: rep}
+            else:
+                reports[sid] = rep
         version = 1
         versions[sid] = [{"version": version, "record": rec, "report": rep}]
 
@@ -64,7 +75,7 @@ def selective_regen(
             rec = render_fn(shot, vdir, attempt=attempt)
             version = attempt + 1
             rep = qa_shot(shot, rec["path"] if rec.get("ok") else "-nonexistent",
-                          qa_dir, use_vision=use_vision,
+                          qa_dir,
                           force_fail=False if not rec.get("ok") else True,
                           **qa_kw) if rec.get("ok") else {
                 "shot_id": sid, "score": 0, "action": "regenerate",
@@ -98,7 +109,7 @@ def selective_regen(
                                  renderer_override=reroute)
                 if rec2.get("ok"):
                     rep2 = qa_shot(shot, rec2["path"], qa_dir,
-                                   use_vision=use_vision, **qa_kw)
+                                   **qa_kw)
                     versions[sid].append(
                         {"version": attempt + 1, "record": rec2,
                          "report": rep2, "rerouted_to": reroute})

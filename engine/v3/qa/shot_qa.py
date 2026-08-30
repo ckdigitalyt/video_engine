@@ -84,7 +84,7 @@ def qa_shot(shot: dict, path: str | Path, qa_dir: str | Path, *,
     tech_score = max(0, tech_score)
 
     vision: dict[str, Any] = {"available": False, "score": 0, "issues": []}
-    if use_vision and tech.get("gates", {}).get("probe", {}).get("duration"):
+    if use_vision and tech.get("probe", {}).get("duration"):
         try:
             frames = sample_frames(p, qdir / "frames" / shot.get(
                 "shot_id", "shot"), seed=sample_seed)

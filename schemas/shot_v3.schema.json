@@ -12,16 +12,16 @@
     "narration_end": {"type": "number", "minimum": 0},
     "narrative_role": {
       "type": "string",
-      "enum": ["hook", "context", "escalation", "reveal", "explanation", "climax", "payoff", "callback", "transition", "outro"]
+      "enum": ["hook", "promise", "context", "escalation", "reveal", "explanation", "climax", "payoff", "callback", "transition", "outro"]
     },
     "visual_goal": {"type": "string", "minLength": 1},
     "renderer": {
       "type": "string",
-      "enum": ["AI_VIDEO", "AI_IMAGE", "STOCK_VIDEO", "ARCHIVAL", "MOTION_CANVAS", "PIXIJS", "MANIM", "GODOT", "OPEN_TOONZ", "CUSTOM"]
+      "enum": ["AI_VIDEO", "AI_IMAGE", "AI_IMAGE_MOTION", "STOCK_VIDEO", "ARCHIVAL", "MOTION_CANVAS", "PIXIJS", "MANIM", "GODOT", "OPEN_TOONZ", "CUSTOM"]
     },
     "fallback_renderer": {
       "type": "string",
-      "enum": ["AI_VIDEO", "AI_IMAGE", "STOCK_VIDEO", "ARCHIVAL", "MOTION_CANVAS", "PIXIJS", "MANIM", "GODOT", "OPEN_TOONZ", "CUSTOM"]
+      "enum": ["AI_VIDEO", "AI_IMAGE", "AI_IMAGE_MOTION", "STOCK_VIDEO", "ARCHIVAL", "MOTION_CANVAS", "PIXIJS", "MANIM", "GODOT", "OPEN_TOONZ", "CUSTOM"]
     },
     "style": {"type": "string", "description": "VideoStyleSpec style_name reference, e.g. cinematic_documentary"},
     "subject": {"type": "string"},
