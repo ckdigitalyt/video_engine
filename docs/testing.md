@@ -3,7 +3,7 @@
 ## Overview
 
 The test suite lives under `tests/` and uses **pytest** as the test runner.  
-All external APIs (DeepSeek, Gemini, Pexels, Kokoro) are mocked so tests run
+All external APIs (ZAI GLM, Gemini, Pexels, Kokoro) are mocked so tests run
 offline, quickly, and without API credentials.
 
 ## Running the Suite
@@ -43,7 +43,7 @@ pytest -W default
 | `test_timeline_builder.py` | TimelineBuilder: clock-advance, monotonic timestamps, overlap detection, multi-scene, validation |
 | `test_asset_cache.py` | AssetCache: SQLite schema, CRUD, LRU cleanup, integrity, edge cases |
 | `test_memory_manager.py` | MemoryManager: all 6 tables, CRUD, indexes, cleanup policy, timestamps |
-| `test_provider_interfaces.py` | Provider ABC compliance, mocked DeepSeek/Gemini/Pexels/Kokoro, error propagation |
+| `test_provider_interfaces.py` | Provider ABC compliance, mocked ZAI GLM/Gemini/Pexels/Kokoro, error propagation |
 | `test_renderer.py` | Timeline parsing, compatibility shim, render dispatch, invalid input detection |
 
 ## What Is Mocked
@@ -52,7 +52,7 @@ All 7 test files avoid calling real services:
 
 | Service | Mock Strategy |
 |---------|---------------|
-| **DeepSeek** (ChatOpenAI) | `mock_deepseek_llm` fixture patches `langchain_openai.ChatOpenAI` |
+| **ZAI GLM** (ChatOpenAI) | `mock_zai_llm` fixture patches `langchain_openai.ChatOpenAI` |
 | **Gemini** (google.genai.Client) | `mock_gemini_llm` fixture patches `google.genai.Client` |
 | **Pexels** (requests.get) | `mock_pexels_api` fixture patches `requests.get` with canned JSON |
 | **Kokoro** (ONNX infer) | `mock_kokoro_tts` fixture patches `kokoro_onnx.Kokoro` + `soundfile.write` |
@@ -69,9 +69,9 @@ Shared fixtures available to every test:
 | `tmp_db` | Path to a temp SQLite database |
 | `small_wav` | Creates a 0.5s silent WAV file for audio I/O tests |
 | `short_video` | Creates a 1s black MP4 via ffmpeg for video I/O tests |
-| `mock_env_api_keys` | Sets fake `DEEPSEEK_API_KEY`, `GEMINI_API_KEY`, `PEXELS_API_KEY` |
+| `mock_env_api_keys` | Sets fake `ZAI_API_KEY`, `GEMINI_API_KEY`, `PEXELS_API_KEY` |
 | `mock_pexels_api` | Patches `requests.get` for Pexels search responses |
-| `mock_deepseek_llm` | Patches `ChatOpenAI` for DeepSeek text responses |
+| `mock_zai_llm` | Patches `ChatOpenAI` for ZAI GLM text responses |
 | `mock_gemini_llm` | Patches `genai.Client` for Gemini critic responses |
 | `mock_kokoro_tts` | Patches `Kokoro` + `sf.write` for TTS generation |
 

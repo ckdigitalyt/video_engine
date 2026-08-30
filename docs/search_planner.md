@@ -152,7 +152,7 @@ The SearchPlanner is instantiated in the orchestrator's `execution_node`
 and called once per scene before the asset search loop:
 
 ```python
-search_planner = SearchPlanner(provider=deepseek)
+search_planner = SearchPlanner(provider=zai)
 
 for scene_data in scenes_data:
     queries = search_planner.generate_queries(

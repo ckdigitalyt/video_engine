@@ -3,9 +3,9 @@
 comprehensive_code_review.py — Root-cause review of the video_engine programs.
 
 Sends the core pipeline source + evidence of 5 recurring defects to
-Gemini Pro and DeepSeek Pro (parallel), asks each for a root-cause
+Gemini Pro and ZAI GLM (parallel), asks each for a root-cause
 analysis + prioritized code-level recommendations, and saves the
-reports to logs/code_review_{gemini,deepseek}.md
+reports to logs/code_review_{gemini,zai}.md
 
 Evidence bundled:
   - The 5 recurring blockers (repeated_assets, motion_continuity,
@@ -152,15 +152,16 @@ def gemini_review(bundle):
     raise RuntimeError(f"Gemini review failed: {last_err}")
 
 
-def deepseek_review(bundle):
+def zai_review(bundle):
     import requests
-    url = "https://api.deepseek.com/chat/completions"
+    url = os.environ.get("ZAI_BASE_URL", "https://api.z.ai/api/paas/v4").rstrip("/") + "/chat/completions"
     headers = {
-        "Authorization": f"Bearer {os.environ['DEEPSEEK_API_KEY']}",
+        "Authorization": f"Bearer {os.environ['ZAI_API_KEY']}",
         "Content-Type": "application/json",
     }
     payload = {
-        "model": "deepseek-chat",
+        # glm-5.3-flash always thinks: no "thinking" field; generous max_tokens.
+        "model": os.environ.get("ZAI_MODEL", "glm-5.3-flash"),
         "messages": [
             {"role": "system", "content":
                 "You are a principal software engineer performing a rigorous "
@@ -175,16 +176,16 @@ def deepseek_review(bundle):
     }
     for attempt in range(1, 4):
         try:
-            print(f"[deepseek] attempt {attempt}/3...")
+            print(f"[zai] attempt {attempt}/3...")
             r = requests.post(url, headers=headers, json=payload, timeout=600)
             r.raise_for_status()
             data = r.json()
-            return "deepseek-chat", data["choices"][0]["message"]["content"]
+            return os.environ.get("ZAI_MODEL", "glm-5.3-flash"), data["choices"][0]["message"]["content"]
         except Exception as e:
             last_err = str(e)[:200]
-            print(f"[deepseek] attempt {attempt} failed: {last_err}")
+            print(f"[zai] attempt {attempt} failed: {last_err}")
             time.sleep(10)
-    raise RuntimeError(f"DeepSeek review failed: {last_err}")
+    raise RuntimeError(f"ZAI GLM review failed: {last_err}")
 
 
 def main():
@@ -201,7 +202,7 @@ def main():
 
     # Run both reviews sequentially in this process (parallel via background procs if desired)
     results = {}
-    for name, fn in (("gemini", gemini_review), ("deepseek", deepseek_review)):
+    for name, fn in (("gemini", gemini_review), ("zai", zai_review)):
         try:
             model, text = fn(bundle)
             out = os.path.join(LOGS, f"code_review_{name}.md")

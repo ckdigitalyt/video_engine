@@ -24,7 +24,7 @@ Search queries → retrieve candidates → technical scoring
 → semantic validation → final asset
 ```
 
-**LLM-based scoring:** Uses the `DeepSeekProvider` to evaluate whether
+**LLM-based scoring:** Uses the `ZaiProvider` to evaluate whether
 the asset matches the narration's subject, context, and mood.
 
 **Fallback scoring:** When no LLM is available, a deterministic

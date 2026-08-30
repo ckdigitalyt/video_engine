@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# llm_experiment_driver.sh — controlled Groq vs Nemotron vs DeepSeek A/B.
+# llm_experiment_driver.sh — controlled Groq vs Nemotron vs ZAI GLM A/B.
 # Runs 3 complete stills-first video generations on the SAME topic:
 #   1. control  (production chain, no env override)
-#   2. groq     (LLM_ROUTING_EXPERIMENT=groq → [Groq, DeepSeek])
-#   3. nemotron (LLM_ROUTING_EXPERIMENT=nemotron → [Nemotron, DeepSeek])
+#   2. groq     (LLM_ROUTING_EXPERIMENT=groq → [Groq, ZAI GLM])
+#   3. nemotron (LLM_ROUTING_EXPERIMENT=nemotron → [Nemotron, ZAI GLM])
 # Results dir is moved aside after each run so evidence is preserved.
 set -euo pipefail
 cd "$(dirname "$0")/.."

@@ -126,12 +126,16 @@ class MediaBroker:
 - `providers/base.py` — `MediaProvider` ABC (`id`, `kind`, `capabilities`,
   `health_check`, `quota`, and generation ops that default to
   `ProviderError("not supported")`).
-- `providers/deepseek.py` — DeepSeek API provider. Note: the DeepSeek API has
-  **no image-generation endpoint**; its multimodal model
-  (`deepseek-v4-flash-vision-exp`) does image *understanding*. This provider
-  therefore implements vision analysis (`analyze_image`) used by shot QA, plus
-  `health_check`/`capabilities`; `generate_image` fails over to image-capable
-  providers (SiliconFlow FLUX / NVIDIA NIM, mirroring `src/providers/image_gen.py`).
+- `providers/zai.py` — Z.AI (Zhipu GLM) API provider (2026-08-30: replaced
+  the retired DeepSeek provider in the same registry slot; chain length
+  unchanged). The Z.AI API has **no image-generation endpoint**; its
+  multimodal model (`glm-5.3-flash`) does image *understanding* (and text).
+  This provider therefore implements vision analysis (`analyze_image`) used by
+  shot QA, plus `health_check`/`capabilities`; `generate_image` fails over to
+  image-capable providers (NVIDIA NIM / pollinations, mirroring
+  `src/providers/image_gen.py`). glm-5.3-flash always thinks — never send a
+  `thinking` field (HTTP 400 code 1210); read `content`, not
+  `reasoning_content`; set `max_tokens` generously.
 - `providers/stock.py` — Pexels + Pixabay stock providers (keys in `.env`,
   wrapping the proven `src/providers/asset_provider.py` search/download logic)
   with license metadata + deterministic cache.

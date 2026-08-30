@@ -39,7 +39,7 @@ pacing, reduced repetition, and search queries optimised for stock footage.
 ### Provider Independence
 
 The `StoryPlanner` depends only on the `LLMProvider` interface (not
-DeepSeek or Gemini directly). Any provider implementing `generate_json()`
+ZAI GLM or Gemini directly). Any provider implementing `generate_json()`
 works.
 
 ---
@@ -147,7 +147,7 @@ raw prompt:
 ```python
 def planner_node(state: AgentState):
     iteration = state.get("iteration", 0) + 1
-    planner = StoryPlanner(provider=deepseek)
+    planner = StoryPlanner(provider=zai)
     content = planner.generate_plan(state["topic"])
     return {"plan_json": content, "iteration": iteration}
 ```

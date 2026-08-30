@@ -11,9 +11,9 @@ modules load their settings through the `src.utils.config` loader (see
 
 | Key | Default | Description |
 |-----|---------|-------------|
-| `llm.deepseek.model` | `"deepseek-chat"` | DeepSeek Chat model identifier |
-| `llm.deepseek.max_tokens` | `1000` | Maximum tokens per LLM call |
-| `llm.deepseek.temperature` | `0.7` | Generation temperature |
+| `llm.zai.model` | `"glm-5.3-flash"` | ZAI GLM model identifier |
+| `llm.zai.max_tokens` | `8192` | Maximum tokens per LLM call (GLM reasoning tokens count) |
+| `llm.zai.temperature` | `0.7` | Generation temperature |
 | `llm.gemini.model` | `"models/gemini-2.5-flash-lite"` | Gemini model identifier for the critic |
 
 ---
@@ -52,7 +52,7 @@ modules load their settings through the `src.utils.config` loader (see
 
 | Key | Default | Description |
 |-----|---------|-------------|
-| `providers.deepseek.base_url` | `"https://api.deepseek.com"` | DeepSeek API base URL |
+| `providers.zai.base_url` | `"https://api.z.ai/api/paas/v4"` | ZAI API base URL |
 | `providers.pexels.base_url` | `"https://api.pexels.com/videos/search"` | Pexels video search endpoint |
 | `providers.pexels.per_page` | `5` | Results per Pexels search request |
 | `providers.pexels.orientation` | `"landscape"` | Pexels orientation filter |
@@ -101,7 +101,7 @@ Retrieve a value using dot-separated key notation.
 from src.utils.config import get_config
 
 fps = get_config("render.fps", 30)
-model = get_config("llm.deepseek.model")
+model = get_config("llm.zai.model")
 ```
 
 Returns the configured value, or the provided default if the key does not exist.

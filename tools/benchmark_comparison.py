@@ -14,7 +14,7 @@ Metrics (directive §42):
 - Beats count, avg beat duration
 - Static periods (>4s), dead air count
 - Motion meaningful state changes/min
-- DeepSeek calls (if any)
+- ZAI GLM calls (if any)
 - CPU/RAM peak (if available)
 - Cache hits
 - Qualitative: story/visual/typography/audio/continuity/math/overall

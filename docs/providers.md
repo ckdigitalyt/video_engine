@@ -12,7 +12,7 @@ mock during testing, or add new backends.
 
 | Interface | Methods | Concrete |
 |-----------|---------|----------|
-| `LLMProvider` | `generate_text()`, `generate_json()` | `DeepSeekProvider`, `GeminiProvider` |
+| `LLMProvider` | `generate_text()`, `generate_json()` | `ZaiProvider`, `GeminiProvider` |
 | `AssetProvider` | `search()`, `download()` | `PexelsProvider` (wrapped by `AssetLibrary`) |
 | `TTSProvider` | `generate_voice()` | `KokoroProvider` |
 
@@ -35,18 +35,28 @@ class LLMProvider(ABC):
 - `generate_text` — sends a text prompt (optionally with an image for multimodal backends) and returns the model's response.
 - `generate_json` — convenience wrapper that calls `generate_text` and strips JSON fence markers (` ```json ` / ` ``` `).
 
-### DeepSeekProvider
+### ZaiProvider
 
-Wraps `langchain_openai.ChatOpenAI` pointed at the DeepSeek API. Used in the
-Planner node for script generation.
+> 2026-08-30: DeepSeek was retired across the whole repo (user directive:
+> "Don't use deepseek at all anywhere") and replaced by ZAI GLM
+> (`glm-5.3-flash`) in every chain. Chain lengths are unchanged — GLM took
+> DeepSeek's slot in each fallback/cost chain.
+
+Wraps `langchain_openai.ChatOpenAI` pointed at the Z.AI API
+(OpenAI-compatible). Used in the Planner node for script generation.
+
+Note: `glm-5.3-flash` always engages in thinking — never send a
+`thinking` field (rejected with HTTP 400 code 1210) and set `max_tokens`
+generously (reasoning tokens count). Responses carry `reasoning_content`
+alongside `content`; only `content` is used.
 
 | Config key | Default |
 |------------|---------|
-| `llm.deepseek.model` | `"deepseek-chat"` |
-| `llm.deepseek.max_tokens` | `1000` |
-| `providers.deepseek.base_url` | `"https://api.deepseek.com"` |
+| `llm.zai.model` | `"glm-5.3-flash"` |
+| `llm.zai.max_tokens` | `8192` |
+| `providers.zai.base_url` | `"https://api.z.ai/api/paas/v4"` |
 
-**Environment:** `DEEPSEEK_API_KEY`
+**Environment:** `ZAI_API_KEY` (optional overrides: `ZAI_BASE_URL`, `ZAI_MODEL`)
 
 ### GeminiProvider
 
@@ -138,7 +148,7 @@ does not block on model loading.
 All provider classes are re-exported from `src/providers/__init__.py`:
 
 ```python
-from .llm_provider import LLMProvider, DeepSeekProvider, GeminiProvider
+from .llm_provider import LLMProvider, ZaiProvider, GeminiProvider
 from .asset_provider import AssetProvider, PexelsProvider
 from .tts_provider import TTSProvider, KokoroProvider
 ```
@@ -146,5 +156,5 @@ from .tts_provider import TTSProvider, KokoroProvider
 Consumer code should import from the package:
 
 ```python
-from src.providers import DeepSeekProvider, KokoroProvider
+from src.providers import ZaiProvider, KokoroProvider
 ```

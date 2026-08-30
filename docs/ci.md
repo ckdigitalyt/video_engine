@@ -35,7 +35,7 @@ The workflow fails if any test fails.
 ## API Keys
 
 All external APIs are mocked in the test suite via `conftest.py`.  
-The workflow provides fallback dummy values for `DEEPSEEK_API_KEY`,
+The workflow provides fallback dummy values for `ZAI_API_KEY`,
 `GEMINI_API_KEY`, and `PEXELS_API_KEY` so provider imports do not fail.
 Real API keys should be stored as [GitHub repository secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions)
 and are used only by end-to-end pipeline runs, not CI.

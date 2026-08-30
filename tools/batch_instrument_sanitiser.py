@@ -324,7 +324,7 @@ def main():
     from src.planner import ScenePlanner
 
     factory = ProviderFactory()
-    # Use the planner LLM (DeepSeek)
+    # Use the planner LLM (ZAI GLM)
     try:
         planning_provider = factory.get_llm_provider_for_role("planner")
     except Exception as e:

@@ -4,9 +4,9 @@
 Gemini (vision): reviews the ACTUAL video (sampled frames) + script +
 audio diagnostics across: script, voice/delivery, audio engineering,
 pacing, visualization, storyline, factual accuracy, music, transitions.
-Also produces per-frame visual descriptions (transcript for DeepSeek).
+Also produces per-frame visual descriptions (visual transcript).
 
-DeepSeek Pro (text-only): reviews script + visual transcript + timeline +
+ZAI GLM (text-only): reviews script + visual transcript + timeline +
 audio diagnostics with the same detailed rubric, independently.
 
 Usage:
@@ -17,7 +17,7 @@ Usage:
         --audio-diag tmp/.../audio_diag_results.json \
         --frames tmp/.../frames \
         --out logs/detailed_review_venus_v3 \
-        --providers gemini,deepseek
+        --providers gemini,zai
 """
 import argparse, base64, json, os, subprocess, sys, time
 
@@ -174,11 +174,12 @@ def gemini_call(contents_parts, model_chain, max_retries=3):
     raise RuntimeError(f"all gemini models failed: {str(last)[:120]}")
 
 
-def deepseek_call(prompt, max_tokens=5000):
+def zai_call(prompt, max_tokens=5000):
     import urllib.request
-    key = os.environ.get("DEEPSEEK_API_KEY")
+    key = os.environ.get("ZAI_API_KEY")
     body = {
-        "model": "deepseek-chat",
+        # glm-5.3-flash always thinks: no "thinking" field, generous max_tokens.
+        "model": os.environ.get("ZAI_MODEL", "glm-5.3-flash"),
         "messages": [
             {"role": "system", "content": "You are a rigorous documentary executive producer. Respond only in strict JSON."},
             {"role": "user", "content": prompt},
@@ -188,7 +189,7 @@ def deepseek_call(prompt, max_tokens=5000):
         "response_format": {"type": "json_object"},
     }
     req = urllib.request.Request(
-        "https://api.deepseek.com/chat/completions",
+        os.environ.get("ZAI_BASE_URL", "https://api.z.ai/api/paas/v4").rstrip("/") + "/chat/completions",
         data=json.dumps(body).encode(),
         headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
     )
@@ -198,9 +199,9 @@ def deepseek_call(prompt, max_tokens=5000):
                 data = json.loads(resp.read().decode())
             return data["choices"][0]["message"]["content"]
         except Exception as e:  # noqa: BLE001
-            print(f"  !! deepseek attempt {attempt+1}: {str(e)[:120]}")
+            print(f"  !! zai attempt {attempt+1}: {str(e)[:120]}")
             time.sleep(20 * (attempt + 1))
-    raise RuntimeError("deepseek failed")
+    raise RuntimeError("zai failed")
 
 
 def main():
@@ -211,7 +212,7 @@ def main():
     ap.add_argument("--audio-diag", default=None)
     ap.add_argument("--frames", required=True)
     ap.add_argument("--out", required=True)
-    ap.add_argument("--providers", default="gemini,deepseek")
+    ap.add_argument("--providers", default="gemini,zai")
     ap.add_argument("--gemini-models", default="gemini-2.5-flash,gemini-3.5-flash,gemini-3-flash-preview")
     args = ap.parse_args()
 
@@ -245,7 +246,7 @@ def main():
         reports["gemini"] = review
         print(f"  score {review.get('quality_score')}/100 ({model})")
 
-        # frame descriptions for DeepSeek
+        # frame descriptions for ZAI GLM
         print("=== GEMINI FRAME DESCRIPTIONS ===")
         dcontent = [FRAME_DESC_PROMPT]
         for t, fp in frames:
@@ -260,8 +261,8 @@ def main():
             json.dump(descs, f, indent=2)
         print(f"  {len(descs)} frame descriptions")
 
-    if "deepseek" in args.providers:
-        print("=== DEEPSEEK PRO DETAILED REVIEW ===")
+    if "zai" in args.providers:
+        print("=== ZAI GLM DETAILED REVIEW ===")
         desc_path = os.path.join(args.out, "frame_descriptions.json")
         descs = []
         if os.path.exists(desc_path):
@@ -270,12 +271,12 @@ def main():
         vt = "\n".join(f"[{d.get('t')}s] {d.get('desc')}" for d in descs)
         prompt = DETAILED_PROMPT.format(script=script_text[:14000], timeline=timeline_text[:8000], audio_diag=audio_diag)
         prompt += "\n\nVISUAL TRANSCRIPT (frame descriptions):\n" + (vt or "(none)")
-        out = deepseek_call(prompt)
+        out = zai_call(prompt)
         review = _parse_json(out)
-        review["_meta"] = {"provider": "deepseek", "model": "deepseek-chat", **meta}
-        with open(os.path.join(args.out, "review_deepseek.json"), "w") as f:
+        review["_meta"] = {"provider": "zai", "model": os.environ.get("ZAI_MODEL", "glm-5.3-flash"), **meta}
+        with open(os.path.join(args.out, "review_zai.json"), "w") as f:
             json.dump(review, f, indent=2)
-        reports["deepseek"] = review
+        reports["zai"] = review
         print(f"  score {review.get('quality_score')}/100")
 
     print("\n=== SUMMARY ===")

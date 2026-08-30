@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""AMD Token Factory canary — head-to-head vs paid DeepSeek.
+"""AMD Token Factory canary — head-to-head vs paid ZAI GLM.
 
-Replays the SAME representative workload prompts sent to paid DeepSeek
+Replays the SAME representative workload prompts sent to paid ZAI GLM
 (research JSON, fact-check JSON array, script build, script_review,
 claim extract/verify, JSON extraction, tool decision, reasoning, coding)
-against AMD Token Factory (DeepSeek-V4-Flash) and the paid DeepSeek API.
+against AMD Token Factory and the paid ZAI GLM API (glm-5.3-flash).
 
 Measures per provider:
   - availability: 429 / 5xx / timeout / 401 / connection / other
@@ -16,14 +16,14 @@ Measures per provider:
   - output consistency (repeat 3 prompts 3x; pairwise agreement)
 
 Usage:
-  AMD_API_BASE=https://<base>/v1 AMD_API_KEY=<key> AMD_MODEL=DeepSeek-V4-Flash \
+  AMD_API_BASE=https://<base>/v1 AMD_API_KEY=<key> AMD_MODEL=<amd-model> \
       ./venv/bin/python tools/amd_canary.py [--requests 30] [--out logs/amd_canary]
 
 Env:
   AMD_API_BASE   required — OpenAI-compatible base URL from the AMD portal
   AMD_API_KEY    required — key from the AMD Token Factory portal
-  AMD_MODEL      optional (default DeepSeek-V4-Flash)
-  DEEPSEEK_API_KEY — loaded from .env (control leg)
+  AMD_MODEL      optional
+  ZAI_API_KEY — loaded from .env (control leg)
 
 Safety: never prints keys; never writes production config; only appends to
 the canary output dir. Production routing is untouched (user directive).
@@ -174,14 +174,14 @@ def main():
 
     amd_base = os.environ.get("AMD_API_BASE", "").strip()
     amd_key = os.environ.get("AMD_API_KEY", "").strip()
-    amd_model = os.environ.get("AMD_MODEL", "DeepSeek-V4-Flash").strip()
-    ds_key = os.environ.get("DEEPSEEK_API_KEY", "").strip()
+    amd_model = os.environ.get("AMD_MODEL", "").strip()
+    ds_key = os.environ.get("ZAI_API_KEY", "").strip()
     if not (amd_base and amd_key):
         print("BLOCKED: AMD_API_BASE and AMD_API_KEY are required (from the AMD Token Factory portal).")
         print("No AMD credentials found on this machine; canary cannot run live requests yet.")
         sys.exit(2)
     if not ds_key:
-        print("BLOCKED: DEEPSEEK_API_KEY missing (control leg).")
+        print("BLOCKED: ZAI_API_KEY missing (control leg).")
         sys.exit(2)
 
     os.makedirs(args.out, exist_ok=True)
@@ -244,21 +244,21 @@ def main():
     for label, prompt, expected in FACT_PROBES:
         corpus.append((f"fact_{label}", prompt, False))
 
-    print(f"=== AMD ({amd_model}) vs DeepSeek (deepseek-chat) canary — {n_req} AMD reqs ===", flush=True)
-    ds_base = "https://api.deepseek.com"
-    # Pass 1: interleave AMD + DeepSeek on the fixed corpus (10-12 prompts)
+    print(f"=== AMD ({amd_model}) vs ZAI GLM (glm-5.3-flash) canary — {n_req} AMD reqs ===", flush=True)
+    ds_base = os.environ.get("ZAI_BASE_URL", "https://api.z.ai/api/paas/v4").rstrip("/")
+    # Pass 1: interleave AMD + ZAI GLM on the fixed corpus (10-12 prompts)
     n = 0
     for tag, prompt, jm in corpus:
         for prov, base, key, model in (("amd", amd_base, amd_key, amd_model),
-                                       ("deepseek", ds_base, ds_key, "deepseek-chat")):
+                                       ("zai", ds_base, ds_key, "glm-5.3-flash")):
             run(f"{tag}", prov, base, key, model, prompt, jm)
             n += 1
-    # Pass 2: consistency — repeat 3 prompts 3x on AMD and DeepSeek
+    # Pass 2: consistency — repeat 3 prompts 3x on AMD and ZAI GLM
     for tag, prompt, jm in corpus[:3]:
         for i in range(3):
             run(f"{tag}_rep{i}", "amd", amd_base, amd_key, amd_model, prompt, jm)
             n += 1
-            run(f"{tag}_rep{i}", "deepseek", ds_base, ds_key, "deepseek-chat", prompt, jm)
+            run(f"{tag}_rep{i}", "zai", ds_base, ds_key, "glm-5.3-flash", prompt, jm)
             n += 1
     # Pass 3: top up to n_req AMD requests with research/script variants
     while n < n_req:
@@ -267,7 +267,7 @@ def main():
                 break
             run(f"{tag}_x", "amd", amd_base, amd_key, amd_model, prompt, jm)
             n += 1
-            run(f"{tag}_x", "deepseek", ds_base, ds_key, "deepseek-chat", prompt, jm)
+            run(f"{tag}_x", "zai", ds_base, ds_key, "glm-5.3-flash", prompt, jm)
             n += 1
 
     # ---- summary ----
@@ -292,12 +292,12 @@ def main():
             "usage_out": sum(r["usage_out"] or 0 for r in ok),
         }
 
-    a, d = agg("amd"), agg("deepseek")
+    a, d = agg("amd"), agg("zai")
     report = {
         "ts": ts, "topic": TOPIC, "amd_model": amd_model,
         "requests_target": n_req, "requests_actual": len([r for r in recs if r["provider"] == "amd"]),
-        "amd": a, "deepseek": d,
-        "note": "Production routing untouched. AMD = free tier, DeepSeek = paid control.",
+        "amd": a, "zai": d,
+        "note": "Production routing untouched. AMD = free tier, ZAI GLM = paid control.",
     }
     rep_path = os.path.join(args.out, f"amd_canary_summary_{ts}.json")
     with open(rep_path, "w") as f:

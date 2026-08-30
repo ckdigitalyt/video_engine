@@ -266,7 +266,7 @@ First required autonomous run: Test E (sky blue).
 ## 13. Constraints
 
 - Local/free tooling only (kokoro/fish-free/edge; no paid TTS).
-- DeepSeek V4 Flash via existing LLM path (deterministic fallbacks for every
+- ZAI GLM glm-5.3-flash via existing LLM path (deterministic fallbacks for every
   stage; LLM is never authority for math/physics).
 - 4 CPU / 24 GB Oracle compatibility; deterministic seeds; YAML config;
   strict schemas; no global package installs (repo venv).
