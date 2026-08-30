@@ -27,7 +27,13 @@
     "subject": {"type": "string"},
     "background": {"type": "string"},
     "camera": {"type": "string"},
-    "motion": {"type": "string"},
+    "motion": {
+      "description": "v3: free-text motion description; v4: structured dict — {parallax, atmosphere} for AI_IMAGE_MOTION, {template, props} for Motion Canvas, {scene: {...}} for PixiJS. Renderers accept both (string is treated as {description}).",
+      "oneOf": [
+        {"type": "string"},
+        {"type": "object"}
+      ]
+    },
     "composition": {"type": "string"},
     "text_overlay": {"type": ["string", "null"]},
     "sfx": {"type": "array", "items": {"type": "string"}},
@@ -88,18 +94,24 @@
     },
 
     "asset_requirements": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "kind": {"type": "string", "enum": ["image", "video", "audio", "font", "svg", "icon"]},
-          "query": {"type": "string"},
-          "source_hint": {"type": "string"},
-          "license": {"type": "string"}
+      "description": "v3: array of {kind, query} asset requests; v4: free-form dict consumed by renderers (e.g. {still_path} pre-generated keyframe for the AI_IMAGE_MOTION §15 path).",
+      "oneOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {"type": "string", "enum": ["image", "video", "audio", "font", "svg", "icon"]},
+              "query": {"type": "string"},
+              "source_hint": {"type": "string"},
+              "license": {"type": "string"}
+            },
+            "required": ["kind", "query"],
+            "additionalProperties": false
+          }
         },
-        "required": ["kind", "query"],
-        "additionalProperties": false
-      }
+        {"type": "object"}
+      ]
     },
     "generation_priority": {
       "type": "string",
