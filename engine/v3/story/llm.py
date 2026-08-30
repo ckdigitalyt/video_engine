@@ -124,6 +124,21 @@ def _openrouter(messages: list[dict], temperature: float, max_tokens: int) -> st
     return out["choices"][0]["message"]["content"]
 
 
+def _mistral(messages: list[dict], temperature: float, max_tokens: int) -> str:
+    _ensure_env()
+    key = os.environ.get("MISTRAL_API_KEY", "")
+    if not key:
+        raise LLMError("MISTRAL_API_KEY not set")
+    model = os.environ.get("MISTRAL_MODEL", "mistral-small-latest")
+    out = _post_json(
+        "https://api.mistral.ai/v1/chat/completions",
+        {"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
+        {"model": model, "messages": messages,
+         "temperature": temperature, "max_tokens": max_tokens},
+    )
+    return out["choices"][0]["message"]["content"]
+
+
 def _groq(messages: list[dict], temperature: float, max_tokens: int) -> str:
     _ensure_env()
     key = os.environ.get("GROQ_API_KEY", "")
@@ -139,10 +154,12 @@ def _groq(messages: list[dict], temperature: float, max_tokens: int) -> str:
     return out["choices"][0]["message"]["content"]
 
 
-# Ordered fallback chain (DeepSeek first per Wave-3 directive).
+# Ordered fallback chain (DeepSeek first per Wave-3 directive; Mistral
+# added 2026-08-30 when DeepSeek/OpenRouter balances ran dry mid-production).
 CHAIN: list[tuple[str, Any]] = [
     ("deepseek", _deepseek),
     ("gemini", _gemini),
+    ("mistral", _mistral),
     ("openrouter", _openrouter),
     ("groq", _groq),
 ]
@@ -243,6 +260,8 @@ def llm_available(chain: list[tuple[str, Any]] | None = None) -> bool:
             if fn == _deepseek and os.environ.get("DEEPSEEK_API_KEY"):
                 return True
             if fn == _gemini and os.environ.get("GEMINI_API_KEY"):
+                return True
+            if fn == _mistral and os.environ.get("MISTRAL_API_KEY"):
                 return True
             if fn == _openrouter and os.environ.get("OPENROUTER_API_KEY"):
                 return True
