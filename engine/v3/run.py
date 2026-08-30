@@ -5,9 +5,19 @@
         [--budget-file budget.json] [--research research.json] \
         [--shots N-procedural] [--no-vision] [--recap]
 
-topic → research → script → shot plan → per-shot render → shot QA →
-selective regen → assembly → audio master → full-video QA → publish gate
-→ (retention/variety recut loop, max 2 iterations).
+topic → research → script → shot plan (v4 two-stage §5 hierarchy by
+    default: narrative → perception → cinematography → motion → renderer
+    LAST, with class-mix reconciliation, pattern interrupts,
+    show-don't-label and micro-event timelines; --planner v3 for legacy)
+    → per-shot render → shot QA → selective regen → assembly → audio master
+    → full-video QA → §19 publish gate (artifact-measured v4 gates) →
+    (§21 re-edit / retention/variety recut loop, max 2 iterations).
+
+Analysis mode (no rendering, no LLM):
+    venv/bin/python -m engine.v3.run --analyze results/<id>
+    runs the §19 publish gate against the existing master, measuring the
+    actual artifact via tools/v4_audit.py; writes
+    publish_gate_v4_analysis.json next to it (exit 1 on FAIL).
 
 Deterministic caching at every stage boundary (research.json, script.json,
 shotlist.json, shots/, qa/, master.mp4, publish_gate.json); a resumed run
@@ -31,6 +41,8 @@ from engine.v3.assemble.assembler import (  # noqa: E402
     reframe_916,
 )
 from engine.v3.plan.planner import plan_shots  # noqa: E402
+from engine.v4.planner import plan_shots_v4  # noqa: E402
+from engine.v4.reedit import apply_reedit, plan_reedit  # noqa: E402
 from engine.v3.plan.style import author_style  # noqa: E402
 from engine.v3.qa.shot_qa import qa_shotlist  # noqa: E402
 from engine.v3.qa.video_qa import publish_gate  # noqa: E402
@@ -93,6 +105,10 @@ def run(args: argparse.Namespace) -> int:
 
     load_dotenv(PROJECT_ROOT / ".env", override=True)
 
+    # §19 analysis mode: gate an EXISTING artifact, render nothing.
+    if args.analyze:
+        return analyze_artifact(args)
+
     out_dir = Path(args.out)
     out_dir.mkdir(parents=True, exist_ok=True)
     state = StageState(out_dir)
@@ -150,10 +166,21 @@ def run(args: argparse.Namespace) -> int:
                 f"{sorted(k for k, v in availability.items() if not v)}")
 
     def build_plan() -> dict:
-        plan = plan_shots(script_doc, style, budget=budget,
-                          availability=availability,
-                          use_llm=not args.offline,
-                          max_shots=args.max_shots)
+        if args.planner == "v4":
+            # V4 two-stage §5 hierarchy: narrative → perception →
+            # cinematography → motion → renderer LAST, then class-mix
+            # reconciliation (§12), pattern interrupts (§14),
+            # show-don't-label post-check (§13/§24) and micro-event
+            # timelines (§4) — all inside plan_shots_v4.
+            plan = plan_shots_v4(script_doc, style, budget=budget or None,
+                                 availability=availability,
+                                 use_llm=not args.offline,
+                                 max_shots=args.max_shots)
+        else:
+            plan = plan_shots(script_doc, style, budget=budget,
+                              availability=availability,
+                              use_llm=not args.offline,
+                              max_shots=args.max_shots)
         plan_path.write_text(json.dumps(plan, indent=2), encoding="utf-8")
         return plan
 
@@ -164,7 +191,14 @@ def run(args: argparse.Namespace) -> int:
         state.mark("plan")
     shots = plan["shots"]
     mix = plan["variety_report"]["renderer_histogram"]
-    log("plan", f"{len(shots)} shots, mix={mix}")
+    planner_src = ((plan.get("planning_hierarchy") or {}).get("stage_a") or {}
+                   ).get("source", "v3")
+    log("plan", f"{len(shots)} shots, planner={args.planner} "
+                f"stage_a={planner_src}, mix={mix}")
+    label_issues = (plan.get("label_check") or {}).get("issues") or []
+    if label_issues:
+        log("plan", f"show-don't-label: {len(label_issues)} residual "
+                    f"issue(s): {label_issues[:3]}")
 
     # ── Render/QA/repair loop (recut iterations share this machinery) ────
     force_fail = set(args.force_fail or [])
@@ -292,21 +326,66 @@ def run(args: argparse.Namespace) -> int:
 
         failed = gate["failed_gates"]
         retention_or_variety = {"RETENTION", "VARIETY"} & set(failed)
-        if not retention_or_variety or iteration >= MAX_RECUT_ITERATIONS:
+
+        # ── §21 re-edit-first repair: the creative critic's
+        # recommended_cuts become re-edit operations (trim → shorten →
+        # rearrange → replace) on the shotlist/timeline BEFORE any
+        # regeneration is considered. apply_reedit mechanically demotes
+        # regenerate requests to trim/replace on static/slideshow shots.
+        critic = gate.get("critic") or {}
+        reedit_ops = plan_reedit(critic, shots) \
+            if critic.get("recommended_cuts") else []
+
+        if iteration >= MAX_RECUT_ITERATIONS or \
+                (not retention_or_variety and not reedit_ops):
             break
 
-        # ── Recut loop: revise the shot PLAN only (§22), rebuild affected
+        # ── Recut loop: revise the shot PLAN (§21/§22), rebuild affected
         # shots, reassemble. Max 2 iterations.
         iteration += 1
-        log("recut", f"iteration {iteration}: revising shot plan "
-                     f"(retention/variety failed)")
-        fixes = []
-        for g in ("RETENTION", "VARIETY"):
-            if not gate["gates"][g]["pass"]:
-                fixes += gate["gates"][g].get("fixes", [])
-        plan = _recut_plan(plan, fixes, availability)
-        shots = plan["shots"]
+        log("recut", f"iteration {iteration}: "
+                     + "; ".join(filter(None, [
+                         f"retention/variety failed" if retention_or_variety
+                         else "",
+                         f"{len(reedit_ops)} §21 re-edit op(s)" if reedit_ops
+                         else ""])))
+
+        reedit_log = None
+        if reedit_ops:
+            # The heuristic critic emits one cut per measured hold and
+            # master-level cuts collapse onto the same longest shot — apply
+            # the strongest op per (shot, action) once per iteration.
+            seen: set[tuple[str, str]] = set()
+            unique: list[dict] = []
+            for op in reedit_ops:
+                key = (str(op.get("shot_id")), str(op.get("action")))
+                if key not in seen:
+                    seen.add(key)
+                    unique.append(op)
+            reedit_ops = unique
+            shots, applied, skipped = apply_reedit(shots, reedit_ops)
+            if applied:
+                reedit_log = {"ops": reedit_ops, "applied": applied,
+                              "skipped": skipped}
+                log("reedit", f"{len(applied)} op(s) applied, "
+                              f"{len(skipped)} skipped: "
+                              + ", ".join(f"{a['shot_id']}:{a['action']}"
+                                          for a in applied[:6]))
+            plan["shots"] = shots
+
+        if retention_or_variety:
+            fixes = []
+            for g in ("RETENTION", "VARIETY"):
+                if not gate["gates"][g]["pass"]:
+                    fixes += gate["gates"][g].get("fixes", [])
+            plan = _recut_plan(plan, fixes, availability)
+            shots = plan["shots"]
+
+        if reedit_log:
+            plan["reedit"] = reedit_log
         plan_path.write_text(json.dumps(plan, indent=2), encoding="utf-8")
+        if not reedit_log and not retention_or_variety:
+            break  # every re-edit op was a no-op — don't loop forever
 
     # ── Optional 9:16 reframe (16:9 master is always untouched) ──────────
     if args.aspect == "16:9" and not args.no_reframe and master and \
@@ -339,6 +418,102 @@ def _load_budget(path: str | None) -> dict:
     return json.loads(Path(path).read_text(encoding="utf-8"))
 
 
+# ── §19 analysis mode ────────────────────────────────────────────────────────
+
+def analyze_artifact(args: argparse.Namespace) -> int:
+    """Run the §19 publish gate in analysis mode against an existing video
+    directory (no rendering, no LLM).
+
+    The gates measure THE ARTIFACT — the exact file probed via ffprobe and
+    decoded pixels (tools/v4_audit.py) is recorded in the report under
+    ``artifact.path``. Writes publish_gate_v4_analysis.json next to the
+    master and prints per-gate verdicts. Exit code 1 on FAIL (CI-usable).
+    """
+    from engine.v4.gates import run_v4_gates
+
+    art = Path(args.analyze)
+    if art.is_dir():
+        out_dir = art
+        master = art / "master.mp4"
+        if not master.exists():
+            candidates = sorted(p for p in art.glob("*.mp4"))
+            if not candidates:
+                logger.error("--analyze: no master.mp4 (or any *.mp4) in %s",
+                             art)
+                return 2
+            master = candidates[0]
+    else:
+        master = art
+        out_dir = art.parent
+    if not master.exists():
+        logger.error("--analyze: artifact not found: %s", master)
+        return 2
+
+    # Best-effort context: the plan the artifact was built from (its
+    # renderer mix / cinematography fields feed SHOT_DIVERSITY and
+    # CINEMATIC) and the render records (AI_VIDEO_COVERAGE chain evidence).
+    shots: list[dict] = []
+    shotlist_path = out_dir / "shotlist.json"
+    if shotlist_path.exists():
+        try:
+            shots = json.loads(shotlist_path.read_text(
+                encoding="utf-8")).get("shots", []) or []
+        except json.JSONDecodeError:
+            logger.warning("--analyze: unparseable shotlist.json — "
+                           "plan-derived gates run planless")
+
+    render_records: list[dict] = []
+    for name in ("render_records_v1.json", "render_records.json"):
+        rp = out_dir / name
+        if rp.exists():
+            try:
+                raw = json.loads(rp.read_text(encoding="utf-8"))
+                by_id = {s.get("shot_id"): s for s in shots}
+                for r in raw.values():
+                    planned = (by_id.get(r.get("shot_id")) or {}).get(
+                        "renderer")
+                    render_records.append({**r,
+                                           "renderer": r.get("renderer_used"),
+                                           "planned_renderer": planned})
+                break
+            except json.JSONDecodeError:
+                pass
+
+    # Declared spec: assembled duration from state.json when present,
+    # otherwise the gate ffprobes the file and judges metadata consistency
+    # against the pipeline defaults.
+    expected = {"codec": "h264", "width": 1920, "height": 1080, "fps": 30}
+    state_path = out_dir / "state.json"
+    if state_path.exists():
+        try:
+            st = json.loads(state_path.read_text(encoding="utf-8"))
+            dur = (st.get("stages", {}).get("assemble_v1", {})
+                   or {}).get("duration")
+            if dur:
+                expected["duration_sec"] = round(float(dur), 2)
+        except (json.JSONDecodeError, ValueError):
+            pass
+
+    doc = run_v4_gates(master, shots=shots, render_records=render_records,
+                       expected_spec=expected, analysis_mode=True)
+
+    out_path = out_dir / "publish_gate_v4_analysis.json"
+    out_path.write_text(json.dumps(doc, indent=2, default=str),
+                        encoding="utf-8")
+
+    logger.info("=== §19 publish gate (analysis mode) — %s ===",
+                doc["artifact"]["path"])
+    for name, g in doc["gates"].items():
+        logger.info("  %-9s %-20s %s", "PASS" if g["pass"] else "FAIL",
+                    name, g["detail"])
+        for fix in g.get("fixes", [])[:3]:
+            logger.info("            ↳ %s", fix)
+    logger.info("OVERALL: %s (failed: %s) — report: %s",
+                doc["overall"], ", ".join(doc["failed_gates"]) or "none",
+                out_path)
+    return 0 if doc["overall"] == "PASS" else 1
+
+
 def _recut_plan(plan: dict, fixes: list[str],
                 availability: dict[str, bool]) -> dict:
     """Revise the shot plan (not the script) after a RETENTION/VARIETY
@@ -365,8 +540,15 @@ def _recut_plan(plan: dict, fixes: list[str],
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="engine.v3.run",
                                 description="Jade v3 full pipeline runner")
-    p.add_argument("--topic", required=True)
-    p.add_argument("--out", required=True, help="results/<video_id>")
+    p.add_argument("--topic", default=None)
+    p.add_argument("--out", default=None, help="results/<video_id>")
+    p.add_argument("--analyze", default=None, metavar="ARTIFACT",
+                   help="§19 analysis mode: gate an existing video file or "
+                        "results directory (no rendering); writes "
+                        "publish_gate_v4_analysis.json")
+    p.add_argument("--planner", default="v4", choices=["v4", "v3"],
+                   help="shot planner: v4 = two-stage §5 hierarchy "
+                        "(default), v3 = legacy planner")
     p.add_argument("--dev", action="store_true",
                    help="offline providers only, tiny render")
     p.add_argument("--offline", action="store_true",
@@ -389,6 +571,9 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--no-reframe", action="store_true",
                    help="skip the optional 9:16 reframe pass")
     args = p.parse_args(argv)
+    if not args.analyze:
+        if not args.topic or not args.out:
+            p.error("--topic and --out are required unless --analyze is used")
     return run(args)
 
 

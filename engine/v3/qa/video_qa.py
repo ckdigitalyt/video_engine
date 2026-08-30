@@ -333,6 +333,7 @@ def publish_gate(master: Path, shots: list[dict], script_doc: dict,
     # gates pass. The heuristic critic keeps CREATIVE deterministic unless
     # the caller runs with use_llm (then the ZAI GLM critic runs).
     artifact_doc: dict = {}
+    critic: dict | None = None
     if run_v4_audit:
         from engine.v4.critic import creative_critic
         from engine.v4.gates import audit_tool, run_v4_gates
@@ -370,6 +371,9 @@ def publish_gate(master: Path, shots: list[dict], script_doc: dict,
         "artifact": artifact_doc or {"path": str(master.resolve()),
                                      "note": "v4 artifact audit disabled "
                                              "(run_v4_audit=False)"},
+        # §20/§21: the critic verdict travels with the gate so the runner's
+        # recut loop can execute recommended_cuts as re-edit operations.
+        "critic": critic if artifact_doc else None,
         "duration_sec": round(dur, 2),
         "gates": gates,
         "failed_gates": [name for name, g in gates.items() if not g["pass"]],
