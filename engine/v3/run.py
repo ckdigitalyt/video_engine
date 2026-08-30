@@ -131,6 +131,9 @@ def run(args: argparse.Namespace) -> int:
             args.topic, research_path, use_llm=not args.offline)
         log("research", f"{len(research['claims'])} claims "
                         f"({research.get('provenance')})")
+    if args.stop_after == "research":
+        log("stop", "--stop-after research: halting before script stage")
+        return 0
 
     # ── Stage: script ────────────────────────────────────────────────────
     script_path = out_dir / "script.json"
@@ -147,6 +150,9 @@ def run(args: argparse.Namespace) -> int:
     log("script", f"{len(script_doc['beats'])} beats, "
                   f"~{script_doc['est_total_sec']}s "
                   f"({script_doc.get('provenance')})")
+    if args.stop_after == "script":
+        log("stop", "--stop-after script: halting before plan stage")
+        return 0
 
     # ── Stage: style ─────────────────────────────────────────────────────
     style_path = out_dir / "style.json"
@@ -199,6 +205,9 @@ def run(args: argparse.Namespace) -> int:
     if label_issues:
         log("plan", f"show-don't-label: {len(label_issues)} residual "
                     f"issue(s): {label_issues[:3]}")
+    if args.stop_after == "plan":
+        log("stop", "--stop-after plan: halting before render stage")
+        return 0
 
     # ── Render/QA/repair loop (recut iterations share this machinery) ────
     force_fail = set(args.force_fail or [])
@@ -546,6 +555,10 @@ def main(argv: list[str] | None = None) -> int:
                    help="§19 analysis mode: gate an existing video file or "
                         "results directory (no rendering); writes "
                         "publish_gate_v4_analysis.json")
+    p.add_argument("--stop-after", default=None,
+                   choices=["research", "script", "plan"],
+                   help="run the pipeline only up to the named stage and "
+                        "exit 0 (resumable — later invocations continue)")
     p.add_argument("--planner", default="v4", choices=["v4", "v3"],
                    help="shot planner: v4 = two-stage §5 hierarchy "
                         "(default), v3 = legacy planner")
