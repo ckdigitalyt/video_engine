@@ -84,6 +84,10 @@ class AIImageMotionRenderer(Renderer):
             motion_plan,
             render_kenburns,
         )
+        from engine.v4.microevents import (
+            derive_micro_events,
+            events_to_kenburns_pulses,
+        )
 
         out_dir = Path(ctx.output_dir)
         shot_id = shot.get("shot_id", "shot")
@@ -137,10 +141,17 @@ class AIImageMotionRenderer(Renderer):
 
         plan = motion_plan(prompt, seed, duration, ctx.aspect,
                            parallax=want_parallax, atmosphere=want_atmos)
+        # V4 §4/§15: implement the shot's micro events as motion pulses
+        # (camera accel → zoom bumps; lighting change → brightness bumps;
+        # impact → both). Shots without declared events get a deterministic
+        # derived timeline so a still can never degrade to a 7s slide.
+        micro = shot.get("micro_events") or derive_micro_events(shot)
+        events = events_to_kenburns_pulses(micro, duration, ctx.fps)
         out_path = out_dir / f"{shot_id}_aivimgmotion.mp4"
         render_kenburns(
             still, out_path, duration=duration, aspect=ctx.aspect, fps=ctx.fps,
             plan=plan, foreground=foreground, prompt=prompt, seed=seed,
+            events=events,
         )
 
         # QA frames: first / middle / last.
@@ -153,6 +164,9 @@ class AIImageMotionRenderer(Renderer):
                 "motion": plan.direction,
                 "parallax": plan.parallax and foreground is not None,
                 "atmosphere": plan.atmosphere,
+                "micro_events": len(micro),
+                "zoom_pulses": len(events["zoom"]),
+                "brightness_pulses": len(events["brightness"]),
                 "duration_sec": duration,
             },
             qa_frames=[str(p) for p in qa_frames],

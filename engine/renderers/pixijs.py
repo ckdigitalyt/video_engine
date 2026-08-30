@@ -28,6 +28,7 @@ from engine.renderers.base import (
     RendererCapability,
     ShotRenderResult,
 )
+from engine.v4.microevents import events_to_pixijs
 
 logger = logging.getLogger(__name__)
 
@@ -102,6 +103,18 @@ def scene_json_from_shot(
         scene["particles"] = motion_cfg.get("particles")
     if "atmosphere" not in scene:
         scene["atmosphere"] = motion_cfg.get("atmosphere")
+
+    # ── V4 §4: micro events → scene events (renderer MUST implement them) ──
+    # scene["events"] is a timeline of concrete perceptual beats: fly-in
+    # props, camera move changes, atmosphere flashes, character actions,
+    # background swaps — “scene animation”, not “asset motion” (§17).
+    micro = shot.get("micro_events") or []
+    if micro and "events" not in scene:
+        scene["events"] = events_to_pixijs(micro)
+    if shot.get("lighting_change") and "atmosphere" not in scene:
+        low = str(shot["lighting_change"]).lower()
+        if any(w in low for w in ("dark", "fade", "dim")):
+            scene["atmosphere"] = "darkness"
 
     scene.update({
         "version": "pixi-scene-v1",
@@ -196,6 +209,7 @@ class PixiJsRenderer(Renderer):
                 "characters": [c.get("type") for c in scene.get("characters", [])],
                 "particles": scene.get("particles"),
                 "atmosphere": scene.get("atmosphere"),
+                "micro_events": len(scene.get("events") or []),
                 "scene_json": str(scene_path),
                 "duration_sec": scene["duration_sec"],
             },

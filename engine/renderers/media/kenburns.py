@@ -98,18 +98,39 @@ def _upscale_to(src: Path, dst: Path, width: int, height: int) -> None:
 
 
 def _zoompan_filter(plan: MotionPlan, width: int, height: int, fps: int,
-                    duration: float, zoom_rate: float = 1.0) -> str:
+                    duration: float, zoom_rate: float = 1.0,
+                    zoom_pulses: list[dict] | None = None) -> str:
     frames = max(1, int(round(duration * fps)))
     z0, z1 = plan.zoom_start, min(plan.zoom_end * zoom_rate, 1.5)
     dz = (z1 - z0) / frames
     # Center anchor with slight drift; x/y in input pixels via on-the-fly expr.
     px, py = plan.pan_x, plan.pan_y
+    zoom_expr = f"{z0}+{dz:.8f}*on"
+    # V4 §4/§15: micro-event zoom pulses (camera accel, impact, ambient
+    # beats) — triangular bumps keep the frame alive between events.
+    for pulse in (zoom_pulses or []):
+        c = max(0.0, min(float(pulse.get("center", 0)), frames))
+        amp = float(pulse.get("amp", 0.05))
+        w = max(1.0, float(pulse.get("width", 6)))
+        zoom_expr += f"+{amp:.5f}*max(0\\,1-abs(on-{c:.1f})/{w:.1f})"
     return (
-        f"zoompan=z='{z0}+{dz:.8f}*on':"
+        f"zoompan=z='{zoom_expr}':"
         f"x='iw/2-(iw/zoom/2)+{px}*iw*on/{frames}':"
         f"y='ih/2-(ih/zoom/2)+{py}*ih*on/{frames}':"
         f"d={frames}:s={width}x{height}:fps={fps}"
     )
+
+
+def _brightness_pulses(pulses: list[dict], frames: int) -> str:
+    """Signed brightness bump terms for the eq filter (lighting_change and
+    impact micro events, directive §4)."""
+    terms = ""
+    for pulse in (pulses or []):
+        c = max(0.0, min(float(pulse.get("center", 0)), frames))
+        amp = float(pulse.get("amp", 0.03))
+        w = max(1.0, float(pulse.get("width", 6)))
+        terms += f"+{amp:.5f}*max(0\\,1-abs(n-{c:.1f})/{w:.1f})"
+    return terms
 
 
 def render_kenburns(
@@ -124,6 +145,7 @@ def render_kenburns(
     prompt: str = "",
     seed: int = 0,
     crf: int = 20,
+    events: dict | None = None,
 ) -> Path:
     """Encode a still into an H.264 silent mp4 with Ken Burns motion.
 
@@ -131,6 +153,13 @@ def render_kenburns(
     at base rate, foreground layer (PNG with alpha) zooms ~1.35x faster,
     composited via overlay. With ``plan.atmosphere`` a subtle brightness
     pulse adds life. Deterministic end to end.
+
+    V4 §4/§15: *events* carries micro-event pulses —
+    ``{"zoom": [{center, amp, width}], "brightness": [...]}`` (see
+    ``engine.v4.microevents.events_to_kenburns_pulses``). Events are
+    implemented on top of the base plan: zoom bumps accelerate the camera,
+    signed brightness bumps implement lighting changes — a still becomes an
+    animated scene instead of a 7-second slide.
     """
     src = Path(still)
     if not src.exists():
@@ -152,16 +181,20 @@ def render_kenburns(
             _upscale_to(Path(foreground), fg_layer, width, height)
 
         frames = max(1, int(round(duration * fps)))
-        atmos = (
-            f",eq=brightness='0.015*sin(2*PI*n/{max(frames, 1)})':eval=frame"
-            if plan.atmosphere
-            else ""
-        )
+        zoom_pulses = (events or {}).get("zoom") or []
+        bright_pulses = (events or {}).get("brightness") or []
+        bright_terms = _brightness_pulses(bright_pulses, frames)
+        atmos = ""
+        if plan.atmosphere or bright_terms:
+            base = "0.015*sin(2*PI*n/" + str(max(frames, 1)) + ")" \
+                if plan.atmosphere else "0"
+            atmos = (f",eq=brightness='{base}{bright_terms}':eval=frame")
 
         if fg_layer is not None:
             # Parallax: background (base zoom) + foreground (faster zoom),
             # scaled slightly smaller over time → depth separation.
-            bg_filt = _zoompan_filter(plan, width, height, fps, duration)
+            bg_filt = _zoompan_filter(plan, width, height, fps, duration,
+                                      zoom_pulses=zoom_pulses)
             fg_plan = MotionPlan(
                 direction=plan.direction, zoom_start=plan.zoom_start,
                 zoom_end=plan.zoom_end, pan_x=plan.pan_x * 1.6,
@@ -184,7 +217,9 @@ def render_kenburns(
                 str(out),
             ]
         else:
-            filt = _zoompan_filter(plan, width, height, fps, duration) + atmos
+            filt = (_zoompan_filter(plan, width, height, fps, duration,
+                                    zoom_pulses=zoom_pulses)
+                    + atmos)
             cmd = [
                 "ffmpeg", "-y",
                 "-i", str(bg),

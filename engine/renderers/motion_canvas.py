@@ -27,6 +27,7 @@ from engine.renderers.base import (
     RendererCapability,
     ShotRenderResult,
 )
+from engine.v4.microevents import events_to_motion_canvas, shot_index_of
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +39,28 @@ _TEMPLATE_ALIASES = {
     # shot field → template prop
     "text_overlay": "title",
 }
+
+# ── De-templating (V4 §14 audit finding: six Motion Canvas infographics
+# were dhash-identical — one visual template repeated six times). Every
+# shot now receives a deterministic per-shot VARIANT: palette accent,
+# layout, and motif rotate with the shot index, so two Motion Canvas shots
+# can never render the same composition again.
+_VARIANT_LAYOUTS = ("left", "right", "center", "bottom_bar")
+_VARIANT_MOTIFS = ("underline", "dots", "frame", "sweep", "corner")
+_VARIANT_ACCENTS = ("#e0533d", "#3da5e0", "#e0a53d", "#5b3de0", "#3de08a",
+                    "#e03d9c", "#8ae03d", "#3dc9e0")
+
+
+def variant_for_index(index: int, palette: dict | None = None) -> dict:
+    """Deterministic per-shot variation block (palette/layout/motif)."""
+    accent = _VARIANT_ACCENTS[index % len(_VARIANT_ACCENTS)]
+    base = (palette or {}).get("accent") or (palette or {}).get("primary")
+    return {
+        "index": index,
+        "layout": _VARIANT_LAYOUTS[index % len(_VARIANT_LAYOUTS)],
+        "motif": _VARIANT_MOTIFS[index % len(_VARIANT_MOTIFS)],
+        "accent": str(base) if (index % 3 == 0 and base) else accent,
+    }
 
 
 class MotionCanvasError(RuntimeError):
@@ -52,11 +75,16 @@ def template_json_from_shot(
     height: int = 1080,
     fps: int = 30,
 ) -> dict:
-    """Derive mc-json-v1 scene JSON from a Shot v3 payload.
+    """Derive mc-json-v1 scene JSON from a Shot v3/v4 payload.
 
     The shot may specify ``motion.template`` (+ ``motion.props``). When
     absent, a template is chosen deterministically from the narrative role
     and available payload.
+
+    V4 additions (directive §4/§14):
+      * ``props["variant"]`` — per-shot palette/layout/motif variation so
+        repeated templates are never dhash-identical (SHOT_DIVERSITY);
+      * ``props["micro_events"]`` — renderer-visible micro-event cues.
     """
     motion_cfg = shot.get("motion") or {}
     if isinstance(motion_cfg, str):
@@ -80,6 +108,15 @@ def template_json_from_shot(
     if shot.get("subject") and template in ("map_zoom",):
         props.setdefault("label", props.get("label", shot["subject"]))
 
+    # ── V4: de-templating variant + micro events ──
+    style_palette = (style or {}).get("palette") or {}
+    props["variant"] = variant_for_index(shot_index_of(shot), style_palette)
+    micro = shot.get("micro_events") or []
+    if micro:
+        props["micro_events"] = events_to_motion_canvas(micro)
+    if shot.get("camera_move") and shot.get("camera_move") != "static":
+        props.setdefault("camera", {"move": shot["camera_move"]})
+
     return {
         "version": "mc-json-v1",
         "template": template,
@@ -89,7 +126,7 @@ def template_json_from_shot(
         "height": height,
         "fps": fps,
         "style": {
-            "palette": (style or {}).get("palette", {}),
+            "palette": style_palette,
             "typography": (style or {}).get("typography", {}),
         },
     }
@@ -117,6 +154,44 @@ def _default_template(shot: dict) -> tuple[str, dict]:
     if role in ("explanation", "context"):
         return "callout", {"keyword": shot.get("subject", "KEY")}
     return "kinetic_title", {"mode": "scale"}
+
+
+# ── SHOT_DIVERSITY self-check hook (V4 §19) ───────────────────────────────
+
+def diversity_signature(scene_json: dict) -> str:
+    """Stable identity of what a Motion Canvas scene will *look like*.
+
+    Two scenes with the same signature render the same imagery (template +
+    variant + content) — the dino_v1 failure where six infographics shared
+    one visual template. Deliberately excludes duration/width/fps."""
+    import hashlib
+
+    props = scene_json.get("props") or {}
+    identity = {
+        "template": scene_json.get("template"),
+        "variant": props.get("variant"),
+        "title": props.get("title"),
+        "label": props.get("label"),
+        "keyword": props.get("keyword"),
+        "micro_events": [
+            (e.get("anim"), round(float(e.get("t", 0)), 1))
+            for e in (props.get("micro_events") or [])
+        ],
+    }
+    blob = json.dumps(identity, sort_keys=True, default=str)
+    return hashlib.sha1(blob.encode("utf-8")).hexdigest()[:16]
+
+
+def self_check_diversity(signatures: dict[str, str]) -> list[dict]:
+    """Flag shots whose scenes would look identical (SHOT_DIVERSITY hook).
+
+    ``signatures``: {shot_id: diversity_signature}. Returns duplicate
+    groups [{signature, shot_ids}] with >= 2 members (empty = diverse)."""
+    groups: dict[str, list[str]] = {}
+    for sid, sig in (signatures or {}).items():
+        groups.setdefault(sig, []).append(sid)
+    return [{"signature": sig, "shot_ids": sorted(ids)}
+            for sig, ids in sorted(groups.items()) if len(ids) >= 2]
 
 
 class MotionCanvasRenderer(Renderer):
@@ -198,6 +273,9 @@ class MotionCanvasRenderer(Renderer):
             metadata={
                 "renderer": self.id,
                 "template": scene["template"],
+                "variant": scene["props"].get("variant"),
+                "diversity_signature": diversity_signature(scene),
+                "micro_events": len(scene["props"].get("micro_events") or []),
                 "scene_json": str(scene_path),
                 "duration_sec": scene["duration_sec"],
             },
