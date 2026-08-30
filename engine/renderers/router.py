@@ -25,7 +25,9 @@ from typing import Any
 from engine.renderers.base import QUALITY_DIMENSIONS
 from engine.renderers.registry import all_capabilities, fallback_chain
 
-# Shot requirement flag -> quality dimension (same names, §5 list).
+# Shot requirement flag -> quality dimension (§5 list, plus stylization:
+# the signal that separates cartoon/stylized renderers like PIXIJS from
+# realism-oriented ones).
 REQUIREMENT_FLAGS: tuple[str, ...] = (
     "realism",
     "physical_motion",
@@ -36,6 +38,7 @@ REQUIREMENT_FLAGS: tuple[str, ...] = (
     "diagrammatic",
     "camera_movement",
     "text_heavy",
+    "stylization",
 )
 
 _BASELINE_WEIGHT = 0.15

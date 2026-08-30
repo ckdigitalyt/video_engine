@@ -69,7 +69,8 @@
         "historical_authenticity": {"type": "boolean"},
         "diagrammatic": {"type": "boolean"},
         "camera_movement": {"type": "boolean"},
-        "text_heavy": {"type": "boolean"}
+        "text_heavy": {"type": "boolean"},
+        "stylization": {"type": "boolean"}
       },
       "additionalProperties": false
     },
