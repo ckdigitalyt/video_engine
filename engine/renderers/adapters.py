@@ -262,4 +262,12 @@ def make_renderer(renderer_id: str, capability: RendererCapability) -> Renderer:
         from engine.renderers.media.ai_image_motion import AIImageMotionRenderer
 
         return AIImageMotionRenderer(capability)
+    if renderer_id == "STOCK_VIDEO":
+        from engine.renderers.media.stock_video import StockVideoRenderer
+
+        return StockVideoRenderer(capability)
+    if renderer_id == "ARCHIVAL":
+        from engine.renderers.media.stock_video import ArchivalRenderer
+
+        return ArchivalRenderer(capability)
     return StubRenderer(renderer_id, capability)

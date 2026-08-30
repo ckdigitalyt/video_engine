@@ -27,6 +27,12 @@ from engine.broker.providers.base import (
     ProviderError,
 )
 from engine.broker.providers.deepseek import DeepSeekVisionProvider
+from engine.broker.providers.archival import (
+    ARCHIVAL_PROVIDERS,
+    InternetArchiveProvider,
+    NasaImagesProvider,
+    WikimediaCommonsProvider,
+)
 from engine.broker.providers.hf_zerogpu import HFZeroGPUClient
 from engine.broker.providers.imageapi import (
     NvidiaNimImageProvider,
@@ -51,6 +57,11 @@ PROVIDER_FACTORIES: dict[str, list[tuple[str, Callable[[], MediaProvider | None]
     "stock": [
         ("pexels", lambda: _configured(PexelsStockProvider)),
         ("pixabay", lambda: _configured(PixabayStockProvider)),
+    ],
+    "archival": [
+        ("nasa_images", lambda: _configured(NasaImagesProvider)),
+        ("wikimedia_commons", lambda: _configured(WikimediaCommonsProvider)),
+        ("internet_archive", lambda: _configured(InternetArchiveProvider)),
     ],
     "vision": [
         ("deepseek", lambda: _configured(DeepSeekVisionProvider)),
@@ -253,21 +264,24 @@ class MediaBroker:
 
     # ── Stock (§13) ──────────────────────────────────────────────────────
 
-    def search_stock(self, query: str, *, per_page: int = 5) -> list[dict[str, Any]]:
-        """Search stock providers in priority order; returns raw results with
-        the source provider stamped on each entry."""
+    def search_stock(self, query: str, *, per_page: int = 5,
+                     kind: str = "stock") -> list[dict[str, Any]]:
+        """Search stock/archival providers in priority order; returns raw
+        results with the source provider stamped on each entry."""
         results: list[dict[str, Any]] = []
         for provider in self._providers.values():
-            if provider.kind != "stock":
+            if provider.kind != kind:
                 continue
             try:
                 for asset in provider.search(query, per_page=per_page):
                     asset["_broker_provider"] = provider.id
                     results.append(asset)
             except ProviderError as exc:
-                logger.warning("stock search failed on %s: %s", provider.id, exc)
+                logger.warning("%s search failed on %s: %s", kind,
+                               provider.id, exc)
         if not results:
-            raise ProviderError(f"broker: no stock provider succeeded for {query!r}")
+            raise ProviderError(
+                f"broker: no {kind} provider succeeded for {query!r}")
         return results
 
     def download_stock(self, asset: dict[str, Any]) -> BrokerResult:
@@ -276,6 +290,15 @@ class MediaBroker:
         if provider is None:
             raise ProviderError(f"broker: unknown stock provider {pid!r}")
         return provider.download(asset)
+
+    # Archival sources are stock semantics with a stricter license gate;
+    # dedicated accessors keep the §13 gate visible at call sites.
+
+    def search_archival(self, query: str, *, per_page: int = 5) -> list[dict[str, Any]]:
+        return self.search_stock(query, per_page=per_page, kind="archival")
+
+    def download_archival(self, asset: dict[str, Any]) -> BrokerResult:
+        return self.download_stock(asset)
 
     # ── Hero shots (§2C, §9, §26) ────────────────────────────────────────
 
