@@ -5,7 +5,7 @@ Single entry point for ALL external AI media. The pipeline asks for
 are tried in priority order per media kind with cache-first semantics and
 ordered failover.
 
-Wave-1 working clients: DeepSeek (vision QA), Pexels/Pixabay (stock).
+Wave-1 working clients: ZAI GLM (vision QA), Pexels/Pixabay (stock).
 Wave-2 clients: SiliconFlow/NVIDIA NIM (image), MiniMax H3 / Wan 2.2 / LTX /
 HF ZeroGPU Spaces (video) — registered here already so failover order is
 final; unimplemented providers raise ProviderError internally and are skipped.
@@ -26,7 +26,6 @@ from engine.broker.providers.base import (
     ProviderDescriptor,
     ProviderError,
 )
-from engine.broker.providers.deepseek import DeepSeekVisionProvider
 from engine.broker.providers.archival import (
     ARCHIVAL_PROVIDERS,
     InternetArchiveProvider,
@@ -39,6 +38,7 @@ from engine.broker.providers.imageapi import (
     SiliconFlowImageProvider,
 )
 from engine.broker.providers.stock import PexelsStockProvider, PixabayStockProvider
+from engine.broker.providers.zai import ZaiVisionProvider
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +68,7 @@ PROVIDER_FACTORIES: dict[str, list[tuple[str, Callable[[], MediaProvider | None]
         ("internet_archive", lambda: _configured(InternetArchiveProvider)),
     ],
     "vision": [
-        ("deepseek", lambda: _configured(DeepSeekVisionProvider)),
+        ("zai", lambda: _configured(ZaiVisionProvider)),
     ],
 }
 
