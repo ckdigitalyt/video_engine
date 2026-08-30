@@ -176,7 +176,9 @@ class TestRendererConformance:
         from engine.renderers.base import RenderContext
 
         ctx = RenderContext(output_dir="/tmp/v3-test")
-        for rid in ("AI_VIDEO", "AI_IMAGE_MOTION", "STOCK_VIDEO", "ARCHIVAL",
+        # Wave 2 filled AI_IMAGE_MOTION's body (offline-capable render);
+        # remaining stubs must keep raising until their bodies land.
+        for rid in ("AI_VIDEO", "STOCK_VIDEO", "ARCHIVAL",
                     "MOTION_CANVAS", "PIXIJS"):
             with pytest.raises(RendererNotImplemented):
                 get_renderer(rid).render(
