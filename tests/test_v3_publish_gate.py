@@ -164,6 +164,14 @@ def test_publish_gate_end_to_end(tmp_path, tiny_master):
                         use_vision=False, use_llm=False)
     doc = json.loads((tmp_path / "publish_gate.json").read_text())
     assert doc["overall"] in ("PASS", "FAIL")
-    assert set(doc["gates"]) == {"TECHNICAL", "AUDIO", "FACTUAL",
-                                 "TEMPORAL", "STYLE", "VARIETY", "VISUAL",
-                                 "RETENTION"}
+    # §19 (V4): the publish gate now also measures the artifact — the v3
+    # gates must all still be present, plus the v4 artifact gates.
+    assert {"TECHNICAL", "AUDIO", "FACTUAL", "TEMPORAL", "STYLE",
+            "VARIETY", "VISUAL", "RETENTION"} <= set(doc["gates"])
+    assert {"ARTIFACT_METADATA", "VISUAL_EVENT_DENSITY", "STATIC_HOLD",
+            "TEXT_CARD_OVERUSE", "SHOT_DIVERSITY", "VISUAL_NOVELTY",
+            "CINEMATIC", "AI_VIDEO_COVERAGE", "CREATIVE"} <= set(
+        doc["gates"])
+    # the report must reference the exact artifact it probed (§1)
+    assert doc["artifact"]["path"].endswith("master.mp4")
+    assert doc["artifact"]["probe"]["width"] == 1920

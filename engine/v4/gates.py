@@ -293,10 +293,10 @@ def visual_novelty_gate(hash_samples: list[dict],
     if len(hash_samples) < 2:
         return _gate("VISUAL_NOVELTY", False,
                      "not enough sampled frames for a novelty score")
+    va = audit_tool()
     labels = {s.get("label") for s in hash_samples}
     repeated = 0
     if len(labels) >= 2:
-        va = audit_tool()
         clusters = va.find_duplicates(hash_samples, max_hamming)
         clustered = {m["label"] for c in clusters for m in c["members"]}
         # count every *sample* inside a cross-shot cluster
