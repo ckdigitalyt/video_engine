@@ -307,6 +307,26 @@ def _direct_shots(skeleton: list[dict], script_doc: dict, *,
 
 
 def _llm_direct(skeleton: list[dict], script_doc: dict) -> list[dict]:
+    """Batched LLM direction: shots are directed in chunks of 8 per call.
+    A single call over a full ~25-shot list lands near the output-token
+    ceiling and truncates mid-JSON (observed live 2026-08-30: 5842/6000
+    completion tokens, borderline) — chunking keeps every call well clear
+    and merges results by shot_id."""
+    if not skeleton:
+        return []
+    CHUNK = 8
+    merged: dict[str, dict] = {}
+    for i in range(0, len(skeleton), CHUNK):
+        chunk = skeleton[i:i + CHUNK]
+        for shot_id, fields in _llm_direct_chunk(chunk, script_doc).items():
+            merged[shot_id] = fields
+    out = [dict(merged.get(sk["shot_id"], {})) for sk in skeleton]
+    if not any(out):
+        raise LLMError("visual director returned no usable shots")
+    return out
+
+
+def _llm_direct_chunk(skeleton: list[dict], script_doc: dict) -> dict[str, dict]:
     sk_lines = []
     for sk in skeleton:
         sk_lines.append(
@@ -347,16 +367,9 @@ Rules:
   composition and camera; add pattern interrupts every few shots.
 - subject phrasing must be self-contained (a text-to-image prompt without
   the topic context should still produce the right picture)."""
-    doc = ask_json(DIRECTOR_SYSTEM, prompt, temperature=0.6, max_tokens=6000)
-    by_id = {str(d.get("shot_id")): d for d in doc.get("shots", [])
-             if isinstance(d, dict) and d.get("shot_id")}
-    out = []
-    for sk in skeleton:
-        d = dict(by_id.get(sk["shot_id"], {}))
-        out.append(d)
-    if not any(out):
-        raise LLMError("visual director returned no usable shots")
-    return out
+    doc = ask_json(DIRECTOR_SYSTEM, prompt, temperature=0.6, max_tokens=4000)
+    return {str(d.get("shot_id")): d for d in doc.get("shots", [])
+            if isinstance(d, dict) and d.get("shot_id")}
 
 
 def _heuristic_direct(sk: dict, index: int) -> dict:
