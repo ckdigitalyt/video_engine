@@ -179,7 +179,25 @@ class PixabayStockProvider(_StockProviderBase):
         return {}  # pixabay auth is via query param
 
     def _parse_results(self, payload: dict[str, Any]) -> list[dict[str, Any]]:
-        return list(payload.get("hits", []))
+        hits = list(payload.get("hits", []))
+        # Pixabay exposes per-quality video dicts ("videos": {"large": {...}}),
+        # not Pexels' "video_files" list. Normalize to the common shape so
+        # _pick_best_variant_link works (previously every candidate raised
+        # "asset has no downloadable link" — observed live 2026-08-30).
+        for hit in hits:
+            if hit.get("video_files"):
+                continue
+            files = []
+            for quality, v in (hit.get("videos") or {}).items():
+                if isinstance(v, dict) and v.get("url"):
+                    files.append({
+                        "link": v.get("url"),
+                        "width": v.get("width"),
+                        "height": v.get("height"),
+                        "quality": quality,
+                    })
+            hit["video_files"] = files
+        return hits
 
     def _license_note(self) -> str:
-        return "Pixabay Content License: free to use, no attribution required."
+        return "Pixabay Content License: free to use, no attribution required."  # noqa: ARG002 — normalized _parse_results converts pixabay "videos" → video_files
