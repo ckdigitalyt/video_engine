@@ -91,6 +91,33 @@ def _hero_bonus(shot: dict, renderer_cost_tier: str) -> float:
     return 0.0
 
 
+def _wants_ai_video_first(shot: dict) -> bool:
+    """Directive §7 semantics: realistic physical motion, spectacle, scale,
+    destruction, natural phenomena, cinematic action, emotional reaction →
+    AI_VIDEO is the preferred renderer for HERO events."""
+    if shot.get("shot_class") != "HERO" and \
+            shot.get("generation_priority") not in ("hero", "high"):
+        return False
+    req = shot.get("requirements") or {}
+    spectacle = bool(req.get("realism") or req.get("physical_motion")
+                     or req.get("spectacle"))
+    return spectacle and bool(req.get("emotional_impact"))
+
+
+def _cinematic_bonus(shot: dict, renderer_id: str, quality: dict) -> float:
+    """Directive §18: cinematic_value + visual_event_density in scoring.
+
+    Weighted ONLY when the director flags cinematic intent (shot_class HERO
+    or the 'cinematic' requirement flag) — a renderer that can technically
+    depict something but not compellingly scores poorly for HERO shots.
+    Unflagged legacy (v3) shots score exactly as before."""
+    req = shot.get("requirements") or {}
+    if not (shot.get("shot_class") == "HERO" or req.get("cinematic")):
+        return 0.0
+    return float(quality.get("cinematic_value", 0.0)) \
+        + 0.5 * float(quality.get("visual_event_density", 0.0))
+
+
 def _quota_penalty(quota: dict[str, float] | None, renderer_id: str, cap) -> float:
     """Quota fraction (0..1) per *provider-ish* key; a renderer is penalised
     when any matching quota entry is low. Keys may be renderer ids (AI_VIDEO)
@@ -152,11 +179,17 @@ def select_renderer(
         cost_pen = _cost_penalty(shot, cap.cost_tier)
         hero_bon = _hero_bonus(shot, cap.cost_tier)
         quota_pen = _quota_penalty(quota, renderer_id, cap)
-        score += hero_bon - cost_pen - quota_pen
+        cin_bon = _cinematic_bonus(shot, renderer_id, q)
+        score += hero_bon + cin_bon - cost_pen - quota_pen
 
         if shot.get("requirements", {}).get("historical_authenticity") and renderer_id == "ARCHIVAL":
             score += 0.2
             reasons.append("historical_authenticity: ARCHIVAL bonus")
+        if renderer_id == "AI_VIDEO" and _wants_ai_video_first(shot):
+            score += 0.6
+            reasons.append("§7 AI_VIDEO-first HERO routing "
+                           "(realism+spectacle+emotional_impact; downgrade "
+                           "only after retries are recorded)")
         if hero_bon:
             reasons.append(f"{renderer_id}: hero-priority bonus")
         if cost_pen:

@@ -23,7 +23,10 @@ class RendererUnavailable(RuntimeError):
     """Raised when a renderer cannot run in the current environment."""
 
 
-# Quality dimensions scored by the router (directive §5).
+# Quality dimensions scored by the router (directive §5, plus the V4 §18
+# cinematic pair: cinematic_value and visual_event_density are only weighted
+# when the director flags cinematic intent (shot_class HERO or the
+# 'cinematic' requirement flag) so legacy v3 rankings are unchanged).
 QUALITY_DIMENSIONS: tuple[str, ...] = (
     "realism",
     "physical_motion",
@@ -35,6 +38,8 @@ QUALITY_DIMENSIONS: tuple[str, ...] = (
     "camera_movement",
     "text_heavy",
     "stylization",
+    "cinematic_value",
+    "visual_event_density",
 )
 
 COST_TIERS: tuple[str, ...] = ("LOW", "MEDIUM", "HIGH", "HERO")

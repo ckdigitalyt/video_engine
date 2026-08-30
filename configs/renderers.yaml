@@ -21,6 +21,8 @@ AI_VIDEO:
     camera_movement: 0.9
     text_heavy: 0.05
     stylization: 0.8
+    cinematic_value: 1.0
+    visual_event_density: 1.0
   max_duration_sec: 10
   notes: "Hero shots only (§2C). Providers: MiniMax H3, Wan 2.2, LTX (Wave 2)."
 
@@ -42,6 +44,8 @@ AI_IMAGE_MOTION:
     camera_movement: 0.5
     text_heavy: 0.3
     stylization: 0.85
+    cinematic_value: 0.7
+    visual_event_density: 0.45
   max_duration_sec: 12
   notes: "AI_IMAGE path (§12): image gen + procedural camera/parallax/particles."
 
@@ -63,6 +67,8 @@ STOCK_VIDEO:
     camera_movement: 0.3
     text_heavy: 0.0
     stylization: 0.2
+    cinematic_value: 0.7
+    visual_event_density: 0.8
   max_duration_sec: 20
   notes: "Pexels/Pixabay via AI Media Broker; license metadata mandatory (§13)."
 
@@ -84,6 +90,8 @@ ARCHIVAL:
     camera_movement: 0.2
     text_heavy: 0.1
     stylization: 0.3
+    cinematic_value: 0.6
+    visual_event_density: 0.6
   max_duration_sec: 20
   notes: "NASA, Wikimedia Commons, Internet Archive (§13)."
 
@@ -105,6 +113,8 @@ MOTION_CANVAS:
     camera_movement: 0.7
     text_heavy: 1.0
     stylization: 0.9
+    cinematic_value: 0.5
+    visual_event_density: 0.7
   max_duration_sec: 30
   notes: "TypeScript templates instantiated from structured JSON (§6). Wave 2."
 
@@ -126,6 +136,8 @@ PIXIJS:
     camera_movement: 0.8
     text_heavy: 0.4
     stylization: 1.0
+    cinematic_value: 0.6
+    visual_event_density: 0.8
   max_duration_sec: 30
   notes: "Reusable scene framework, JSON-described scenes (§7). Wave 2."
 
@@ -147,6 +159,8 @@ MANIM:
     camera_movement: 0.4
     text_heavy: 0.8
     stylization: 0.6
+    cinematic_value: 0.4
+    visual_event_density: 0.6
   max_duration_sec: 30
   notes: "Specialist renderer (§2A/§8) — never the default for a whole video."
 
@@ -168,6 +182,8 @@ GODOT:
     camera_movement: 0.9
     text_heavy: 0.2
     stylization: 0.7
+    cinematic_value: 0.8
+    visual_event_density: 0.8
   notes: "Optional specialist (§1); disabled until genuinely useful."
 
 OPEN_TOONZ:
@@ -188,6 +204,8 @@ OPEN_TOONZ:
     camera_movement: 0.6
     text_heavy: 0.3
     stylization: 1.0
+    cinematic_value: 0.6
+    visual_event_density: 0.8
   notes: "Optional specialist; disabled until needed."
 
 MEDIA:
@@ -208,6 +226,8 @@ MEDIA:
     camera_movement: 0.4
     text_heavy: 0.2
     stylization: 0.4
+    cinematic_value: 0.4
+    visual_event_density: 0.3
   notes: "Existing media pipeline behind adapter; body lands in Wave 2."
 
 VECTOR:
@@ -228,6 +248,8 @@ VECTOR:
     camera_movement: 0.5
     text_heavy: 0.7
     stylization: 0.9
+    cinematic_value: 0.3
+    visual_event_density: 0.5
   notes: "Existing vector package behind adapter; body lands in Wave 2."
 
 # Canonical offline degradation chain (§24): AI_VIDEO → AI_IMAGE+MOTION →

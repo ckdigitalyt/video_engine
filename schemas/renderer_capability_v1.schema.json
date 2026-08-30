@@ -46,7 +46,9 @@
         "diagrammatic": {"type": "number", "minimum": 0, "maximum": 1},
         "camera_movement": {"type": "number", "minimum": 0, "maximum": 1},
         "text_heavy": {"type": "number", "minimum": 0, "maximum": 1},
-        "stylization": {"type": "number", "minimum": 0, "maximum": 1}
+        "stylization": {"type": "number", "minimum": 0, "maximum": 1},
+        "cinematic_value": {"type": "number", "minimum": 0, "maximum": 1},
+        "visual_event_density": {"type": "number", "minimum": 0, "maximum": 1}
       },
       "additionalProperties": false
     },
