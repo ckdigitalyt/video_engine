@@ -61,3 +61,42 @@ llm:
     script_model: "google/gemma-4-26b-a4b-it:free"
     max_tokens: 2000
     temperature: 0.7
+
+# ai_video — model registry for the AI-video broker path (directive §8-§10).
+# Informational registry: the broker picks providers by kind + failover order
+# (configs/providers.yaml + PROVIDER_FACTORIES); this table names the model
+# behind each provider id so render records can carry a stable model label.
+ai_video:
+  text_to_video:
+    hf_router_t2v:
+      model: "Wan2.2-T2V-A14B"
+      host: "hf_router (fal-ai)"
+      billing: "monthly included credits"
+      enabled_by: "HF_TOKEN"
+    minimax_h3:
+      model: "MiniMax-H3"
+      host: "api.minimax.io"
+      billing: "paid per-second, no free tier"
+      enabled: false          # needs MINIMAX_API_KEY + §26 spend approval
+    zerogpu_t2v:
+      model: "LTX-Video-Distilled / LTX-2-Distilled"
+      host: "hf ZeroGPU Spaces"
+      billing: "daily GPU-min quota (~5 min/day free tier)"
+  image_to_video:
+    hf_router_i2v:
+      model: "Wan2.2-I2V-A14B"
+      host: "hf_router (fal-ai)"
+      billing: "monthly included credits"
+      enabled_by: "HF_TOKEN"
+    wan22_i2v:
+      model: "Wan2.2-I2V-A14B-Lightning"
+      host: "hf ZeroGPU Space (Saravutw)"
+      billing: "daily GPU-min quota"
+    ltx_video:
+      model: "LTX-Video-Distilled"
+      host: "hf ZeroGPU Space (Lightricks)"
+      billing: "daily GPU-min quota"
+    zerogpu_i2v:
+      model: "multi-Space scheduler pool"
+      host: "hf ZeroGPU Spaces"
+      billing: "daily GPU-min quota, account-wide ledger"

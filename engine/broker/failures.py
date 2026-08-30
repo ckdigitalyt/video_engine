@@ -40,6 +40,8 @@ _QUOTA_PATTERNS = (
     "insufficient quota",
     "used up their quota",
     "quota exhausted",
+    "depleted your monthly included credits",
+    "depleted",
 )
 
 # Queue/wait failures — another Space (or later) may succeed.

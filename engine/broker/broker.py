@@ -32,6 +32,10 @@ from engine.broker.providers.archival import (
     NasaImagesProvider,
     WikimediaCommonsProvider,
 )
+from engine.broker.providers.hf_router import (
+    HFRouterI2VProvider,
+    HFRouterT2VProvider,
+)
 from engine.broker.providers.hf_zerogpu import HFZeroGPUClient
 from engine.broker.providers.imageapi import (
     NvidiaNimImageProvider,
@@ -57,16 +61,19 @@ PROVIDER_FACTORIES: dict[str, list[tuple[str, Callable[[], MediaProvider | None]
         ("nvidia_nim", lambda: _configured(NvidiaNimImageProvider)),
         ("hf_zerogpu", lambda: _hf_space_provider("image")),
     ],
-    # T2V chain (§7): paid MiniMax first when a key + spend approval exist,
-    # then the quota-aware multi-Space ZeroGPU scheduler (§8).
+    # T2V chain (§7): working free-credit path (HF router/fal-ai) first,
+    # paid MiniMax when a key + spend approval exist, then the quota-aware
+    # multi-Space ZeroGPU scheduler (§8).
     "video": [
+        ("hf_router_t2v", lambda: _configured(HFRouterT2VProvider)),
         ("minimax_h3", lambda: _configured(MiniMaxH3Provider)),
         ("zerogpu_t2v", lambda: None),  # built once below (shared scheduler)
     ],
-    # I2V chain (§7 HERO fallback): quota-aware scheduler (multi-Space,
-    # Wan+LTX) first — it classifies quota exhaustion account-wide — then the
-    # single-Space Wave-2 providers as belt-and-braces fallback.
+    # I2V chain (§7 HERO fallback): working free-credit path first, then the
+    # single-Space Wave-2 providers, then the quota-aware scheduler (it
+    # classifies quota exhaustion account-wide and stops the burn).
     "image_to_video": [
+        ("hf_router_i2v", lambda: _configured(HFRouterI2VProvider)),
         ("wan22_i2v", lambda: _configured_wan()),
         ("ltx_video", lambda: _configured_ltx()),
         ("zerogpu_i2v", lambda: None),  # built once below (shared scheduler)

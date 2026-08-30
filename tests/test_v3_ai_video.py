@@ -53,10 +53,25 @@ class TestProviderRegistration:
         broker = MediaBroker()
         i2v = [p for p in broker._providers.values()
                if p.kind == "image_to_video"]
-        ids = {p.id for p in i2v}
+        ids = [p.id for p in i2v]
         # HF_TOKEN absent in CI → providers disabled → empty chain is valid
-        if ids:
-            assert ids == {"wan22_i2v", "ltx_video"}
+        if not ids:
+            return
+        # §7 chain (2026-08-30 contract): free-credit HF router first, then
+        # the single-Space Wave-2 providers in failover order, with the
+        # quota-aware multi-Space scheduler (account-wide ledger) last.
+        assert ids[0] == "hf_router_i2v"
+        core = [i for i in ids if i != "zerogpu_i2v"]
+        assert core == ["hf_router_i2v", "wan22_i2v", "ltx_video"]
+        # Scheduler is registered last when the shared ledger constructed.
+        if "zerogpu_i2v" in ids:
+            assert ids[-1] == "zerogpu_i2v"
+
+    def test_broker_t2v_chain_order(self):
+        from engine.broker.broker import PROVIDER_FACTORIES
+
+        t2v = [name for name, _ in PROVIDER_FACTORIES["video"]]
+        assert t2v == ["hf_router_t2v", "minimax_h3", "zerogpu_t2v"]
 
 
 class TestAIVideoRenderer:

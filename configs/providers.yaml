@@ -118,3 +118,30 @@ hf_video:
     base_url: "https://api.minimax.io"
     model: "MiniMax-H3"
     default_resolution: "768P"
+
+# ── HF Inference Providers router (directive §8/§10, added 2026-08-30) ───
+# router.huggingface.co fronts third-party inference providers (fal-ai,
+# wavespeed, novita, replicare…) and bills the account's MONTHLY included
+# credits — a separate wallet from the ZeroGPU daily quota, so the two paths
+# fail over into each other cleanly. Live-verified 2026-08-30: Wan2.2 T2V +
+# I2V both returned 200 via the fal-ai route. HTTP 402 ("depleted your
+# monthly included credits") classifies QUOTA_EXHAUSTED (§7) → broker
+# failover; credits renew monthly so this path self-recovers.
+# Endpoint mapping for alternative providers (swap `provider` + endpoints):
+#   fal-ai:    fal-ai/wan/v2.2-a14b/{text-to-video,image-to-video}
+#   wavespeed: wan/v2.2-a14b/… (check router provider page for exact path)
+#   replicare: ltx-video/…     (LTX-2 fast route, cheaper per-credit)
+hf_router:
+  provider: fal-ai
+  t2v:
+    model_id: "Wan2.2-T2V-A14B"
+    endpoint: "fal-ai/wan/v2.2-a14b/text-to-video"
+    defaults:
+      resolution: "480p"            # cheapest tier — conserve monthly credits
+      enable_prompt_expansion: false
+  i2v:
+    model_id: "Wan2.2-I2V-A14B"
+    endpoint: "fal-ai/wan/v2.2-a14b/image-to-video"
+    defaults:
+      resolution: "480p"
+      enable_prompt_expansion: false
