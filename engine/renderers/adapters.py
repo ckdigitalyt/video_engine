@@ -92,7 +92,13 @@ class ManimRenderer(Renderer):
 
 
 class MediaRenderer(Renderer):
-    """Adapter for the media/footage pipeline (Ken Burns, clip assembly)."""
+    """Adapter for the media/footage pipeline (Ken Burns, clip assembly).
+
+    Wave-2 body: renders provided stills (``asset_requirements.still_path``
+    or ``ctx.extra["stills"]``) into Ken Burns motion clips — fully offline
+    and deterministic. Multiple stills become concatenated segments trimmed
+    to the shot duration.
+    """
 
     id = "MEDIA"
 
@@ -111,8 +117,77 @@ class MediaRenderer(Renderer):
         return issues
 
     def render(self, shot: dict, style: dict | None, ctx: RenderContext) -> ShotRenderResult:
-        raise RendererNotImplemented(
-            "MEDIA render body lands in Wave 2 (adapter registered in Wave 1)"
+        issues = self.validate(shot, style)
+        if issues:
+            raise ValueError(f"MEDIA validate failed: {'; '.join(issues)}")
+
+        from engine.renderers.media.kenburns import render_kenburns
+
+        out_dir = Path(ctx.output_dir)
+        shot_id = shot.get("shot_id", "shot")
+        duration = float(shot.get("duration_sec", 4.0))
+
+        stills: list[Path] = []
+        req = shot.get("asset_requirements")
+        if isinstance(req, dict) and req.get("still_path"):
+            stills.append(Path(req["still_path"]))
+        elif isinstance(req, list):
+            stills.extend(Path(p) for p in req if isinstance(p, (str, Path)) and Path(p).exists())
+        for p in (ctx.extra.get("stills") or []):
+            if Path(p).exists() and Path(p) not in stills:
+                stills.append(Path(p))
+        if not stills:
+            raise ValueError(
+                "MEDIA render needs at least one existing still "
+                "(asset_requirements.still_path or ctx.extra['stills'])"
+            )
+
+        out_path = out_dir / f"{shot_id}_media.mp4"
+        if len(stills) == 1:
+            render_kenburns(
+                stills[0], out_path, duration=duration, aspect=ctx.aspect,
+                fps=ctx.fps, prompt=shot.get("visual_goal", ""),
+                seed=int(ctx.seed),
+            )
+        else:
+            # One segment per still, trimmed/concatenated to the duration.
+            seg_dur = duration / len(stills)
+            segments: list[Path] = []
+            for i, still in enumerate(stills):
+                seg = out_dir / f"{shot_id}_media_seg{i}.mp4"
+                render_kenburns(
+                    still, seg, duration=seg_dur, aspect=ctx.aspect,
+                    fps=ctx.fps, prompt=f"{shot.get('visual_goal', '')}:{i}",
+                    seed=int(ctx.seed) + i,
+                )
+                segments.append(seg)
+            import subprocess
+
+            list_file = out_dir / f"{shot_id}_media_concat.txt"
+            list_file.write_text(
+                "".join(f"file '{p.resolve()}'\n" for p in segments),
+                encoding="utf-8",
+            )
+            proc = subprocess.run(
+                ["ffmpeg", "-y", "-f", "concat", "-safe", "0",
+                 "-i", str(list_file), "-c", "copy", str(out_path)],
+                capture_output=True, timeout=300,
+            )
+            if proc.returncode != 0:
+                raise RuntimeError(
+                    f"MEDIA concat failed: {proc.stderr.decode()[-500:]}")
+            for seg in segments:
+                seg.unlink(missing_ok=True)
+            list_file.unlink(missing_ok=True)
+
+        return ShotRenderResult(
+            path=str(out_path),
+            metadata={
+                "renderer": self.id,
+                "stills_used": len(stills),
+                "duration_sec": duration,
+            },
+            qa_frames=[],
         )
 
 
@@ -183,4 +258,8 @@ def make_renderer(renderer_id: str, capability: RendererCapability) -> Renderer:
         return MediaRenderer(capability)
     if renderer_id == "VECTOR":
         return VectorRenderer(capability)
+    if renderer_id == "AI_IMAGE_MOTION":
+        from engine.renderers.media.ai_image_motion import AIImageMotionRenderer
+
+        return AIImageMotionRenderer(capability)
     return StubRenderer(renderer_id, capability)

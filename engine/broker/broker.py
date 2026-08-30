@@ -28,6 +28,10 @@ from engine.broker.providers.base import (
 )
 from engine.broker.providers.deepseek import DeepSeekVisionProvider
 from engine.broker.providers.hf_zerogpu import HFZeroGPUClient
+from engine.broker.providers.imageapi import (
+    NvidiaNimImageProvider,
+    SiliconFlowImageProvider,
+)
 from engine.broker.providers.stock import PexelsStockProvider, PixabayStockProvider
 
 logger = logging.getLogger(__name__)
@@ -37,6 +41,8 @@ logger = logging.getLogger(__name__)
 # Wave-2 providers are listed where they will slot in (registration ≠ body).
 PROVIDER_FACTORIES: dict[str, list[tuple[str, Callable[[], MediaProvider | None]]]] = {
     "image": [
+        ("siliconflow", lambda: _configured(SiliconFlowImageProvider)),
+        ("nvidia_nim", lambda: _configured(NvidiaNimImageProvider)),
         ("hf_zerogpu", lambda: _hf_space_provider("image")),
     ],
     "video": [

@@ -18,6 +18,7 @@ _ignore_placeholder.txt
 # Run artifacts
 logs/
 media/
+!engine/renderers/media/
 tmp/
 results/
 *.bak

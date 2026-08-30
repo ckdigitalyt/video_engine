@@ -1,5 +1,7 @@
 """test_v3_renderer_adapters.py — Adapter wiring around existing renderers."""
 
+from pathlib import Path
+
 import pytest
 
 from engine.renderers.adapters import (
@@ -78,10 +80,15 @@ class TestMediaVectorAdapters:
         assert isinstance(
             renderer.validate(dict(MINIMAL_SHOT, renderer=renderer_id)), list)
 
-    def test_media_render_is_wave2(self, ctx):
-        with pytest.raises(RendererNotImplemented, match="Wave 2"):
-            get_renderer("MEDIA").render(
-                dict(MINIMAL_SHOT, renderer="MEDIA"), None, ctx)
+    def test_media_renders_offline(self, ctx, tmp_path):
+        """Wave 2: MEDIA now renders provided stills (offline Ken Burns)."""
+        from engine.renderers.media.ai_image_motion import make_solid_still
+
+        still = make_solid_still(tmp_path / "s.png")
+        shot = dict(MINIMAL_SHOT, renderer="MEDIA",
+                    asset_requirements={"still_path": str(still)})
+        res = get_renderer("MEDIA").render(shot, None, ctx)
+        assert Path(res.path).exists()
 
 
 class TestStubRenderer:
