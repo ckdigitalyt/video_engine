@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 
 LOUDNESS_TARGET = -14.0
 LOUDNESS_TOL = 1.5
-TP_MAX = -1.2
+TP_MAX = -1.0  # platform ceiling; loudnorm targets -1.5 with overshoot
 MAX_SILENCE_GAP = 3.0
 VISUAL_SCORE_MIN = 65
 MASTER_H = 1080

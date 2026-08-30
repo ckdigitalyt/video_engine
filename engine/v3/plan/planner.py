@@ -174,34 +174,77 @@ def default_budget() -> dict:
 
 def _skeleton_shots(script_doc: dict,
                     max_shots: int | None = None) -> list[dict]:
-    """Split each beat's narration into ~3-6s shots (word counts)."""
+    """Split each beat's narration into ~3-6s shots (word counts).
+
+    When *max_shots* is given, shot counts are allocated per beat
+    proportionally to beat duration (every beat keeps ≥1 shot — merged
+    shots must never span beats, or narration placement breaks).
+    """
+    beats = [b for b in script_doc.get("beats", [])
+             if str(b.get("narration", "")).strip()]
+    alloc = [1] * len(beats)
+    if max_shots and len(beats) <= max_shots:
+        targets = [max(float(b.get("target_sec", 4.0)), 1e-6)
+                   for b in beats]
+        total = sum(targets)
+        alloc = [max(1, round(max_shots * t / total)) for t in targets]
+        while sum(alloc) > max_shots:
+            # Trim the beat whose shots are densest (shortest per shot).
+            i = min((i for i in range(len(alloc)) if alloc[i] > 1),
+                    key=lambda i: (targets[i] / alloc[i], i),
+                    default=None)
+            if i is None:
+                break
+            alloc[i] -= 1
     shots: list[dict] = []
     t = 0.0
-    lo, hi = WORDS_PER_SHOT
-    for beat in script_doc.get("beats", []):
-        words = str(beat.get("narration", "")).split()
-        if not words:
-            continue
-        chunks = _chunk_words(words, lo, hi)
+    for beat, n in zip(beats, alloc):
+        words = str(beat["narration"]).split()
+        chunks = [words] if n <= 1 else _split_n_chunks(words, n)
         for ci, chunk in enumerate(chunks):
             text = " ".join(chunk)
             dur = round(max(len(chunk) / 2.6, 2.0), 2)
+            role = beat["role"] if ci == 0 else (
+                "escalation" if beat["role"] in ("hook", "reveal")
+                else beat["role"])
             shots.append({
                 "shot_id": f"S{len(shots) + 1:02d}",
                 "beat_id": beat["beat_id"],
-                "role": beat["role"] if ci == 0 else (
-                    "escalation" if beat["role"] in ("hook", "reveal")
-                    else beat["role"]),
+                "role": role,
                 "narration": text,
                 "narration_start": round(t, 2),
                 "narration_end": round(t + dur, 2),
                 "duration_sec": dur,
             })
             t += dur
-    if max_shots and len(shots) > max_shots:
-        # Merge tail shots into their predecessor (keeps narration text).
-        shots = _merge_tail(shots, max_shots)
     return shots
+
+
+def _split_n_chunks(words: list[str], n: int) -> list[list[str]]:
+    """Split words into n chunks of near-equal length, preferring
+    punctuation boundaries."""
+    if n <= 1:
+        return [words]
+    size = max(1, len(words) // n)
+    chunks: list[list[str]] = []
+    remaining = list(words)
+    while len(chunks) < n - 1 and len(remaining) > size:
+        # Take `size` words, extend to the next sentence boundary (max +4).
+        take = remaining[:size]
+        extra = 0
+        while take and extra < 4 and \
+                not take[-1].rstrip('.,;!?…"').endswith(("!", "?", ".", ";")) \
+                and len(remaining) > len(take):
+            take.append(remaining[len(take)])
+            extra += 1
+        chunks.append(take)
+        remaining = remaining[len(take):]
+    if remaining:
+        if chunks and len(remaining) <= max(2, size // 3):
+            chunks[-1].extend(remaining)
+        else:
+            chunks.append(remaining)
+    return chunks
 
 
 def _chunk_words(words: list[str], lo: int, hi: int) -> list[list[str]]:
@@ -223,13 +266,27 @@ def _chunk_words(words: list[str], lo: int, hi: int) -> list[list[str]]:
 
 
 def _merge_tail(shots: list[dict], max_shots: int) -> list[dict]:
+    """Safety fallback: merge the smallest adjacent same-beat pair until
+    the count fits (merging across beats would break narration placement,
+    so a cross-beat surplus is left as-is and reported by the caller)."""
     shots = [dict(s) for s in shots]
     while len(shots) > max_shots:
-        a, b = shots[-2], shots[-1]
+        best_i = None
+        for i in range(len(shots) - 1):
+            if shots[i].get("beat_id") != shots[i + 1].get("beat_id"):
+                continue
+            combined = shots[i]["duration_sec"] + shots[i + 1]["duration_sec"]
+            if best_i is None or combined < \
+                    shots[best_i]["duration_sec"] + \
+                    shots[best_i + 1]["duration_sec"]:
+                best_i = i
+        if best_i is None:
+            break  # cannot merge without crossing beats — leave as-is
+        a, b = shots[best_i], shots[best_i + 1]
         a["narration"] = (a["narration"] + " " + b["narration"]).strip()
         a["duration_sec"] = round(a["duration_sec"] + b["duration_sec"], 2)
         a["narration_end"] = b["narration_end"]
-        shots.pop()
+        shots.pop(best_i + 1)
     for i, s in enumerate(shots):
         s["shot_id"] = f"S{i + 1:02d}"
     return shots
