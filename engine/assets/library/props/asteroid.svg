@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- Locally authored prop: asteroid (rocky irregular body, lit from upper left) -->
+  <defs>
+    <radialGradient id="rock" cx="0.35" cy="0.3" r="1">
+      <stop offset="0" stop-color="#9a8f82"/><stop offset="0.6" stop-color="#6e6459"/><stop offset="1" stop-color="#3f3831"/>
+    </radialGradient>
+  </defs>
+  <path d="M256 40 L360 70 L448 150 L470 260 L420 380 L300 462 L180 452 L74 360 L42 240 L90 120 L180 56 Z" fill="url(#rock)"/>
+  <g fill="#55493f" opacity="0.8">
+    <ellipse cx="200" cy="180" rx="42" ry="30" transform="rotate(-18 200 180)"/>
+    <ellipse cx="320" cy="300" rx="55" ry="36" transform="rotate(12 320 300)"/>
+    <ellipse cx="180" cy="330" rx="26" ry="18"/>
+  </g>
+  <g fill="#b8ab9c" opacity="0.7">
+    <ellipse cx="240" cy="130" rx="30" ry="14" transform="rotate(-24 240 130)"/>
+    <ellipse cx="140" cy="250" rx="18" ry="10" transform="rotate(30 140 250)"/>
+  </g>
+  <!-- motion streaks -->
+  <g stroke="#e8e4d8" stroke-linecap="round" opacity="0.5">
+    <line x1="470" y1="90" x2="360" y2="140" stroke-width="6"/>
+    <line x1="490" y1="160" x2="400" y2="190" stroke-width="4"/>
+    <line x1="430" y1="50" x2="330" y2="90" stroke-width="3"/>
+  </g>
+</svg>

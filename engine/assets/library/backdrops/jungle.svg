@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <!-- Locally authored backdrop: prehistoric jungle (layered parallax-ready) -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2b3a67"/><stop offset="0.55" stop-color="#3e5c76"/><stop offset="1" stop-color="#7d8ca3"/>
+    </linearGradient>
+    <linearGradient id="haze" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9db4c0" stop-opacity="0"/><stop offset="1" stop-color="#9db4c0" stop-opacity="0.5"/>
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#sky)"/>
+  <circle cx="1500" cy="220" r="90" fill="#e8e4d8" opacity="0.85"/>
+  <!-- far ridge -->
+  <path d="M0 640 Q300 520 620 600 Q980 690 1300 590 Q1620 520 1920 610 L1920 1080 L0 1080 Z" fill="#41556b"/>
+  <!-- mid trees -->
+  <g fill="#37543c">
+    <path d="M120 760 L200 470 L280 760 Z"/><path d="M240 780 L310 560 L380 780 Z"/>
+    <path d="M1560 750 L1640 460 L1720 750 Z"/><path d="M1700 780 L1770 560 L1840 780 Z"/>
+    <rect x="188" y="740" width="24" height="70"/><rect x="1648" y="730" width="24" height="70"/>
+  </g>
+  <rect y="700" width="1920" height="380" fill="url(#haze)"/>
+  <!-- near trees (framing) -->
+  <g fill="#243c28">
+    <path d="M-40 1080 L60 300 L180 1080 Z"/><path d="M90 1080 L190 420 L300 1080 Z"/>
+    <path d="M1740 1080 L1840 320 L1960 1080 Z"/><path d="M1630 1080 L1730 440 L1830 1080 Z"/>
+    <!-- ferns -->
+    <path d="M420 1080 q40 -180 130 -240 q-60 130 -60 240 z"/>
+    <path d="M500 1080 q60 -140 150 -180 q-80 110 -70 180 z"/>
+    <path d="M1420 1080 q-40 -180 -130 -240 q60 130 60 240 z"/>
+    <path d="M1360 1080 q-60 -140 -150 -180 q80 110 70 180 z"/>
+  </g>
+  <!-- ground -->
+  <rect y="980" width="1920" height="100" fill="#2c3a2a"/>
+</svg>

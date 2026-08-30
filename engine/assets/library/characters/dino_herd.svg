@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="360" viewBox="0 0 900 360">
+  <!-- Locally authored cutout: grazing dino herd (3 silhouettes, receding sizes) -->
+  <g fill="#5d7d52">
+    <!-- far dino -->
+    <g transform="translate(690,90) scale(0.55)" opacity="0.85">
+      <ellipse cx="120" cy="180" rx="110" ry="60" />
+      <path d="M200 150 Q240 110 270 90 L330 76 Q350 74 354 90 L342 118 Q310 134 280 142 Q250 152 226 170 Z"/>
+      <path d="M40 200 Q-40 170 -80 190 Q-30 200 40 226 Z"/>
+      <rect x="80" y="228" width="22" height="70" rx="8"/>
+      <rect x="150" y="230" width="22" height="68" rx="8"/>
+      <circle cx="318" cy="96" r="6" fill="#1a1a1a"/>
+    </g>
+    <!-- mid dino -->
+    <g transform="translate(360,40) scale(0.8)">
+      <ellipse cx="120" cy="180" rx="110" ry="60" fill="#6f9161"/>
+      <path d="M200 150 Q240 110 270 90 L330 76 Q350 74 354 90 L342 118 Q310 134 280 142 Q250 152 226 170 Z" fill="#6f9161"/>
+      <path d="M40 200 Q-40 170 -80 190 Q-30 200 40 226 Z" fill="#6f9161"/>
+      <rect x="80" y="228" width="24" height="74" rx="9" fill="#547050"/>
+      <rect x="152" y="230" width="24" height="72" rx="9" fill="#547050"/>
+      <circle cx="318" cy="96" r="7" fill="#1a1a1a"/>
+    </g>
+    <!-- near dino -->
+    <g transform="translate(0,0)">
+      <ellipse cx="140" cy="190" rx="120" ry="64" fill="#7da06c"/>
+      <path d="M230 158 Q272 116 304 94 L368 80 Q390 78 394 96 L380 126 Q346 142 314 152 Q282 162 256 180 Z" fill="#7da06c"/>
+      <path d="M50 212 Q-40 180 -90 202 Q-34 212 50 240 Z" fill="#7da06c"/>
+      <rect x="88" y="240" width="26" height="80" rx="10" fill="#5d7d52"/>
+      <rect x="166" y="242" width="26" height="78" rx="10" fill="#5d7d52"/>
+      <circle cx="352" cy="106" r="8" fill="#1a1a1a"/>
+      <circle cx="355" cy="103" r="2.6" fill="#fff"/>
+    </g>
+  </g>
+</svg>

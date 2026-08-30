@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="480" viewBox="0 0 640 480">
+  <!-- Locally authored cutout: T-Rex silhouette with simple shading (Jade Studio asset library) -->
+  <g transform="translate(20,20)">
+    <!-- tail -->
+    <path d="M40 300 Q140 250 240 268 L236 300 Q140 292 52 330 Z" fill="#4a6741"/>
+    <!-- body -->
+    <ellipse cx="300" cy="270" rx="130" ry="82" fill="#5d7d52"/>
+    <ellipse cx="320" cy="250" rx="100" ry="55" fill="#6f9161"/>
+    <!-- neck + head -->
+    <path d="M380 220 Q420 170 450 140 L540 118 Q570 114 576 136 L560 176 Q520 200 470 210 Q430 226 400 248 Z" fill="#5d7d52"/>
+    <!-- jaw -->
+    <path d="M470 196 L560 178 L548 202 Q510 210 470 212 Z" fill="#49613f"/>
+    <!-- eye -->
+    <circle cx="520" cy="140" r="7" fill="#1a1a1a"/>
+    <circle cx="522" cy="138" r="2.4" fill="#fff"/>
+    <!-- teeth -->
+    <g fill="#f2efe4">
+      <path d="M482 200 l6 12 6 -11 z"/><path d="M500 197 l6 12 6 -11 z"/><path d="M518 194 l6 12 6 -11 z"/><path d="M536 190 l6 12 6 -11 z"/>
+    </g>
+    <!-- legs -->
+    <path d="M250 330 L242 420 L280 420 L286 340 Z" fill="#49613f"/>
+    <path d="M330 332 L338 424 L376 424 L372 340 Z" fill="#547050"/>
+    <path d="M236 418 L292 418 L288 434 L226 434 Z" fill="#3d5236"/>
+    <path d="M330 422 L388 422 L392 438 L324 438 Z" fill="#3d5236"/>
+    <!-- tiny arms -->
+    <path d="M380 268 Q410 262 424 280 L414 294 Q398 280 376 288 Z" fill="#49613f"/>
+    <!-- back ridge -->
+    <path d="M190 240 q14 -16 26 0 q14 -16 26 0 q14 -16 26 0" stroke="#3d5236" stroke-width="6" fill="none" stroke-linecap="round"/>
+  </g>
+</svg>

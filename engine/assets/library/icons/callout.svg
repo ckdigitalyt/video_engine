@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="200" viewBox="0 0 320 200">
+  <!-- Locally authored icon: callout bubble -->
+  <rect x="10" y="10" width="300" height="140" rx="24" fill="#0b0e1a" stroke="#5ac8fa" stroke-width="6"/>
+  <path d="M80 150 L60 190 L120 150 Z" fill="#0b0e1a" stroke="#5ac8fa" stroke-width="6" stroke-linejoin="round"/>
+</svg>

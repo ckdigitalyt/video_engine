@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="640" viewBox="0 0 640 640">
+  <!-- Locally authored prop: Earth (blue marble, simplified continents) -->
+  <defs>
+    <radialGradient id="ocean" cx="0.38" cy="0.32" r="1">
+      <stop offset="0" stop-color="#7ec8e3"/><stop offset="0.55" stop-color="#3a7bd5"/><stop offset="1" stop-color="#1a3a6b"/>
+    </radialGradient>
+  </defs>
+  <circle cx="320" cy="320" r="280" fill="url(#ocean)"/>
+  <g fill="#4d7c3f">
+    <path d="M180 180 q60 -50 130 -30 q40 14 20 50 q-30 44 -90 40 q-70 -6 -60 -60z"/>
+    <path d="M330 300 q70 -20 110 20 q30 40 -10 70 q-50 30 -100 -6 q-40 -40 0 -84z"/>
+    <path d="M150 360 q50 -10 70 30 q14 36 -20 54 q-46 20 -80 -14 q-26 -40 30 -70z"/>
+    <path d="M400 170 q44 -18 70 8 q20 26 -6 46 q-40 26 -74 0 q-24 -28 10 -54z"/>
+  </g>
+  <g fill="#ffffff" opacity="0.75">
+    <ellipse cx="240" cy="120" rx="70" ry="16" transform="rotate(-12 240 120)"/>
+    <ellipse cx="430" cy="260" rx="60" ry="14" transform="rotate(18 430 260)"/>
+    <ellipse cx="200" cy="440" rx="66" ry="15" transform="rotate(-8 200 440)"/>
+  </g>
+  <circle cx="320" cy="320" r="280" fill="none" stroke="#9fd4f0" stroke-width="4" opacity="0.5"/>
+</svg>

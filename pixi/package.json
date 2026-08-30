@@ -1,0 +1,14 @@
+{
+  "name": "jade-pixi",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "PIXIJS renderer scene framework — headless 2D scene renderer (node-canvas) implementing the §7 scene JSON: parallax layers, particles, cutout characters with bob/run actions, camera push_in/pan. (pixi.js-legacy v7 requires a DOM even with node-canvas — verified 2026-08-30, 'document is not defined' — so the scene framework runs directly on node-canvas with the same JSON contract. See design doc §7.)",
+  "main": "render.mjs",
+  "scripts": {
+    "render": "node render.mjs"
+  },
+  "dependencies": {
+    "canvas": "^3.2.3"
+  }
+}

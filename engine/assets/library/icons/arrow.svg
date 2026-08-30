@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="80" viewBox="0 0 240 80">
+  <!-- Locally authored icon: arrow -->
+  <line x1="10" y1="40" x2="200" y2="40" stroke="#e8eaf2" stroke-width="10" stroke-linecap="round"/>
+  <path d="M190 14 L230 40 L190 66 Z" fill="#e8eaf2"/>
+</svg>
