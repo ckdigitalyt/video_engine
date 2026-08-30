@@ -217,6 +217,14 @@ class MediaBroker:
             except ProviderError as exc:
                 errors.append(f"{provider.id}: {exc}")
                 logger.warning("broker failover after %s: %s", provider.id, exc)
+            except Exception as exc:  # noqa: BLE001 — §24: failover never collapses
+                # Providers raise raw transport errors (urllib HTTPError etc.),
+                # not just ProviderError. Before this fix a SiliconFlow 401
+                # propagated and pre-empted failover to working providers
+                # (observed live 2026-08-30). HTTPError ⊂ URLError ⊂ OSError.
+                errors.append(f"{provider.id}: {type(exc).__name__}: {exc}")
+                logger.warning("broker failover after %s: %s: %s",
+                               provider.id, type(exc).__name__, exc)
         raise ProviderError(
             f"broker: no {kind} provider succeeded for {op_name}; "
             f"attempts: {'; '.join(errors) or 'none configured'}"
