@@ -5,14 +5,14 @@ Every LLM invocation (chain attempts, direct gate calls) records a row:
 provider, pipeline stage, latency, success/failure, error class
 (403 / 429 / timeout / other), JSON validity, chain position, and
 whether the call was answered by the experiment head or fell through
-to DeepSeek.
+to ZAI GLM.
 
 The records are aggregated into a per-provider summary (for run_report)
 and appended to a JSONL file under logs/llm_metrics/ for offline
-head-to-head analysis (Groq vs Nemotron vs DeepSeek).
+head-to-head analysis (Groq vs Nemotron vs ZAI GLM).
 
 Design rules:
-- Class-level registry shared across the process (like DeepSeekUsage).
+- Class-level registry shared across the process (like ZaiUsage).
 - Stage attribution reuses the existing `_usage_stage` ContextVar set by
   the runners around each pipeline stage.
 - Telemetry must NEVER break generation — every hook is try/except.
@@ -116,7 +116,7 @@ def summary() -> dict:
         a = agg.setdefault(p, {
             "calls": 0, "ok": 0, "fail": 0,
             "errors": {}, "latency_s": [], "json_ok": 0, "json_tried": 0,
-            "deepseek_gate": 0,
+            "zai_gate": 0,
         })
         a["calls"] += 1
         if r["ok"]:
@@ -132,7 +132,7 @@ def summary() -> dict:
             if r["json_ok"]:
                 a["json_ok"] += 1
         if not r.get("via_chain", True):
-            a["deepseek_gate"] += 1
+            a["zai_gate"] += 1
 
     out = {}
     for p, a in agg.items():
@@ -148,7 +148,7 @@ def summary() -> dict:
             "p50_latency_s": round(lat[n // 2], 2) if n else None,
             "p95_latency_s": round(lat[min(n - 1, int(0.95 * n))], 2) if n else None,
             "json_valid_rate": round(a["json_ok"] / max(1, a["json_tried"]), 4) if a["json_tried"] else None,
-            "direct_gate_calls": a["deepseek_gate"],
+            "direct_gate_calls": a["zai_gate"],
         }
     return out
 
@@ -183,7 +183,7 @@ def reset() -> None:
 class TelemetryWrappedProvider(LLMProvider):
     """Records every call on a DIRECT (non-chain) provider.
 
-    Used for the DeepSeek final gate (claim verification + final
+    Used for the ZAI GLM final gate (claim verification + final
     script-review pass) so those calls are visible in the telemetry
     even though they bypass ChainLLMProvider.
     """

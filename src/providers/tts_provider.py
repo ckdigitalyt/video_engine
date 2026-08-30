@@ -718,7 +718,7 @@ class FishAudioProvider(TTSProvider):
             raise RuntimeError(
                 f"Fish model '{self._model}' is not a known S2.1 model "
                 f"({_known}) — refusing to risk billing a wrong tier.")
-        # v31 (DeepSeek-validated): log the ACTIVE narrator identity + the
+        # v31 (LLM-validated): log the ACTIVE narrator identity + the
         # free-tier quality cap ONCE so run logs never imply "chatterbox"
         # is the narrator (it is only the FALLBACK when Fish fails).
         if self._model == "s2.1-pro-free":

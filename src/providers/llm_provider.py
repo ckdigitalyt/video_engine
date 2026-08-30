@@ -2,7 +2,7 @@
 llm_provider.py — Abstract LLM provider and concrete implementations.
 
 Defines the LLMProvider interface, then implements:
-- DeepSeekProvider (planning / script generation)
+- ZaiProvider (planning / script generation)
 - GeminiProvider (multimodal critic evaluation)
 """
 
@@ -22,15 +22,12 @@ import PIL.Image
 from src.utils.config import get_config
 
 
-# ── DeepSeek prefix caching (cost optimisation) ─────────────────────────────
-# DeepSeek bills cache hits at 1/50th of the miss rate (disk prefix cache,
-# TTL hours→days) and matches on EXACT input-prefix equality. The single
-# biggest cost lever is therefore a STABLE leading system message: every call
-# that starts with the same bytes reuses the cached prefix, so call N+1 in a
-# run (and calls on later runs within the TTL) pay the hit rate instead of
-# the miss rate for the whole static body. Keep this constant byte-identical
-# — no timestamps, no topic, no dynamic content.
-DEEPSEEK_SYSTEM_PROMPT = (
+# ── ZAI GLM stable leading prompt (cost/prompt hygiene) ─────────────────────
+# GLM-5.3-flash replaces DeepSeek (2026-08-30, user directive). A stable
+# leading system message keeps the input prefix byte-identical across calls
+# and runs — keep this constant byte-identical: no timestamps, no topic, no
+# dynamic content.
+ZAI_SYSTEM_PROMPT = (
     "You are the production engine for ckdigital's documentary video pipeline. "
     "You produce factual, precise, verifiable content for short documentaries. "
     "Hard rules: never invent numbers, sources, or dates; only use facts given "
@@ -39,26 +36,26 @@ DEEPSEEK_SYSTEM_PROMPT = (
     "the JSON payload."
 )
 
-# ── Usage accounting (per-run DeepSeek token/cost measurement) ─────────────
+# ── Usage accounting (per-run ZAI GLM token/cost measurement) ──────────────
 # Class-level so every provider instance (pipeline + reviewer factories)
 # accumulates into one registry per process.
-# Pricing (deepseek-chat → deepseek-v4-flash, 2026):
-#   input cache miss $0.14 / 1M, cache hit $0.0028 / 1M, output $0.28 / 1M
-DEEPSEEK_PRICE_INPUT_MISS = 0.14 / 1_000_000
-DEEPSEEK_PRICE_INPUT_HIT = 0.0028 / 1_000_000
-DEEPSEEK_PRICE_OUTPUT = 0.28 / 1_000_000
+# glm-5.3-flash per-token pricing not yet tracked (2026-08-30) — recorded
+# at $0.00 until verified; token counts remain authoritative.
+ZAI_PRICE_INPUT_MISS = 0.0
+ZAI_PRICE_INPUT_HIT = 0.0
+ZAI_PRICE_OUTPUT = 0.0
 
 # Current pipeline stage, set by the runner around each stage call so usage
 # can be attributed ("research", "script_review", "spec_build", ...).
-_usage_stage: ContextVar[str] = ContextVar("deepseek_usage_stage", default="")
+_usage_stage: ContextVar[str] = ContextVar("zai_usage_stage", default="")
 
 
 def set_usage_stage(stage: str) -> None:
     _usage_stage.set(stage)
 
 
-class DeepSeekUsage:
-    """Per-stage DeepSeek usage registry (class-level, shared)."""
+class ZaiUsage:
+    """Per-stage ZAI GLM usage registry (class-level, shared)."""
 
     _stages: dict = {}
     _calls: int = 0
@@ -83,9 +80,9 @@ class DeepSeekUsage:
             r = dict(row)
             billed_input = r["input"] - r["cached"]
             r["cost_usd"] = round(
-                billed_input * DEEPSEEK_PRICE_INPUT_MISS
-                + r["cached"] * DEEPSEEK_PRICE_INPUT_HIT
-                + r["output"] * DEEPSEEK_PRICE_OUTPUT, 6)
+                billed_input * ZAI_PRICE_INPUT_MISS
+                + r["cached"] * ZAI_PRICE_INPUT_HIT
+                + r["output"] * ZAI_PRICE_OUTPUT, 6)
             r["hit_rate"] = round(r["cached"] / max(1, r["input"]), 4)
             stages[stage] = r
             for k in ("calls", "input", "output", "cached"):
@@ -125,41 +122,49 @@ class LLMProvider(ABC):
         return raw.replace("```json", "").replace("```", "").strip()
 
 
-# ── DeepSeek ───────────────────────────────────────────────────────────────
+# ── ZAI GLM ────────────────────────────────────────────────────────────────
 
-class DeepSeekProvider(LLMProvider):
-    """LLM provider backed by DeepSeek Chat via LangChain's ChatOpenAI."""
+class ZaiProvider(LLMProvider):
+    """LLM provider backed by Z.AI GLM via LangChain's ChatOpenAI.
+
+    glm-5.3-flash always engages in thinking — the ``thinking`` field must
+    NOT be sent (any thinking object is rejected with 400 code 1210), and
+    max_tokens is set generously because reasoning tokens count against it.
+    Responses carry ``reasoning_content`` alongside ``content``; langchain
+    surfaces the final answer in ``response.content``.
+    """
 
     def __init__(self, **kwargs):
         self._llm = ChatOpenAI(
-            api_key=os.environ.get("DEEPSEEK_API_KEY"),
-            base_url=get_config("providers.deepseek.base_url", "https://api.deepseek.com"),
-            model=get_config("llm.deepseek.model", "deepseek-chat"),
-            max_tokens=get_config("llm.deepseek.max_tokens", 1000),
+            api_key=os.environ.get("ZAI_API_KEY"),
+            base_url=get_config("providers.zai.base_url",
+                                "https://api.z.ai/api/paas/v4"),
+            model=get_config("llm.zai.model", "glm-5.3-flash"),
+            max_tokens=get_config("llm.zai.max_tokens", 8192),
         )
 
     def generate_text(self, prompt: str, image_path: Optional[str] = None, **kwargs) -> str:
-        # Stable system prefix first → DeepSeek prefix-cache hits on every call
-        # after the first (and across runs within the cache TTL).
+        # Stable system prefix first → byte-identical input prefix on every
+        # call after the first (and across runs).
         response = self._llm.invoke([
-            SystemMessage(content=DEEPSEEK_SYSTEM_PROMPT),
+            SystemMessage(content=ZAI_SYSTEM_PROMPT),
             HumanMessage(content=prompt),
         ])
-        # ── Usage accounting (DeepSeek token/cost measurement) ──────────
+        # ── Usage accounting (ZAI token/cost measurement) ────────────────
         try:
             um = getattr(response, "usage_metadata", None) or {}
             inp = int(um.get("input_tokens", 0) or 0)
             out = int(um.get("output_tokens", 0) or 0)
             cached = 0
-            # OpenAI-compatible cached-token detail (DeepSeek returns it on
-            # cache hits; absent => assume full cache miss)
+            # OpenAI-compatible cached-token detail (returned on cache hits;
+            # absent => assume full cache miss)
             det = um.get("input_token_details") or um.get("prompt_tokens_details") or {}
             if isinstance(det, dict):
-                # langchain surfaces DeepSeek's prompt_cache_hit_tokens as
+                # langchain surfaces prompt_cache_hit_tokens as
                 # input_token_details.cache_read (snake_case); some providers
                 # use cached_tokens. Accept both.
                 cached = int(det.get("cache_read") or det.get("cached_tokens") or 0)
-            DeepSeekUsage.record(inp, out, cached)
+            ZaiUsage.record(inp, out, cached)
         except Exception:
             pass  # accounting must never break generation
         return response.content
@@ -169,7 +174,7 @@ class MistralProvider(LLMProvider):
     """LLM provider backed by Mistral's OpenAI-compatible API (free tier).
 
     Backup #2 in the v12.6 priority chain (after Gemini flash, before
-    DeepSeek). Text-only — used for script review/planning fallbacks and
+    ZAI GLM). Text-only — used for script review/planning fallbacks and
     script-only video review fallback.
     """
 
@@ -222,8 +227,8 @@ class GrokProvider(LLMProvider):
     """LLM provider backed by xAI Grok (OpenAI-compatible endpoint).
 
     Activated by XAI_API_KEY in .env.  Joins the cost chain ahead of
-    DeepSeek (ckdigital direction: leverage Gemini + Grok as much as
-    possible, DeepSeek as last resort).
+    ZAI GLM (ckdigital direction: leverage Gemini + Grok as much as
+    possible, paid chain as last resort).
     """
 
     def __init__(self, **kwargs):
@@ -248,7 +253,7 @@ class GroqProvider(LLMProvider):
     """LLM provider backed by Groq (LPU inference, free tier).
 
     Activated by GROQ_API_KEY in .env.  Joins the cost chain ahead of
-    DeepSeek (ckdigital direction: leverage free/cheap providers first).
+    ZAI GLM (ckdigital direction: leverage free/cheap providers first).
     """
 
     def __init__(self, **kwargs):
@@ -332,7 +337,7 @@ class ChainLLMProvider(LLMProvider):
     """Tries providers in order; first success wins.
 
     Lets the pipeline use free/cheap providers (Gemini, Grok, Mistral)
-    as much as possible and only falls through to paid DeepSeek when
+    as much as possible and only falls through to paid ZAI GLM when
     everything else fails (or is missing a key / quota-limited).
     """
 

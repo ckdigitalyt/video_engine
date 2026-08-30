@@ -9,7 +9,7 @@ Phase 2 (Scenes):   Uses the outline as context to produce a complete set
                     execution node in ``orchestrator.py``.
 
 The planner is provider-independent — it works with any ``LLMProvider``
-implementation (DeepSeek, Gemini, etc.).
+implementation (ZAI GLM, Gemini, etc.).
 """
 
 from __future__ import annotations

@@ -23,7 +23,7 @@ class ProviderFactory:
 
     # Mapping from config provider names to actual class names
     _LLM_CLASS_MAP = {
-        "deepseek": "DeepSeekProvider",
+        "zai": "ZaiProvider",
         "gemini": "GeminiProvider",
         "gemini37": "GeminiProvider",
         "grok": "GrokProvider",
@@ -35,7 +35,7 @@ class ProviderFactory:
 
     def get_llm_provider(self, name: str) -> LLMProvider:
         """
-        Get an instance of an LLM provider by name (e.g., "deepseek", "gemini").
+        Get an instance of an LLM provider by name (e.g., "zai", "gemini").
         """
         if name not in self._providers:
             class_name = self._LLM_CLASS_MAP.get(name)
@@ -70,29 +70,30 @@ class ProviderFactory:
 
     def get_cost_chain_llm_provider(self, primary: str) -> LLMProvider:
         """Build a runtime fallback chain: primary -> gemini/grok/mistral
-        (whichever have keys) -> deepseek last.  Lets the pipeline use
-        Gemini/Grok as much as possible so DeepSeek cost stays minimal.
+        (whichever have keys) -> zai glm last.  Lets the pipeline use
+        Gemini/Grok as much as possible so paid-chain cost stays minimal.
         Chain order (configured): primary first, then roles.chain, with
-        deepseek always last.
+        zai always last. (2026-08-30: the final link was deepseek, now
+        zai glm-5.3-flash — chain length unchanged by the swap.)
         """
         from src.providers.llm_provider import ChainLLMProvider
 
         # v26 experiment (ckdigital directive, controlled): when
         # LLM_ROUTING_EXPERIMENT=groq|nemotron is set, swap the chain head
-        # to the experiment provider with DeepSeek as the LAST safety net.
+        # to the experiment provider with ZAI GLM as the LAST safety net.
         # Unset (production / daily cron) → today's exact chain behavior.
         _exp = os.environ.get("LLM_ROUTING_EXPERIMENT", "").strip().lower()
         if _exp in ("groq", "nemotron"):
-            chain_names = [_exp, "deepseek"]
+            chain_names = [_exp, "zai"]
             print(f"    [routing-experiment] head={_exp} chain={chain_names} "
-                  f"(DeepSeek stays final safety gate)", flush=True)
+                  f"(ZAI GLM stays final safety gate)", flush=True)
         else:
             chain_names = [primary]
             for name in get_config("pipeline.roles.chain", ["gemini", "grok", "mistral"]):
                 if name not in chain_names:
                     chain_names.append(name)
-            if "deepseek" not in chain_names:
-                chain_names.append("deepseek")
+            if "zai" not in chain_names:
+                chain_names.append("zai")
 
         providers = []
         for name in chain_names:
@@ -108,24 +109,24 @@ class ProviderFactory:
         return ChainLLMProvider(providers)
 
     def get_final_gate_llm(self) -> LLMProvider:
-        """DeepSeek-only final gate (claim verification, final review pass).
+        """ZAI-GLM-only final gate (claim verification, final review pass).
 
-        ckdigital directive: DeepSeek stays the high-confidence final
+        ckdigital directive: the paid high-confidence gate stays the final
         claim-verification / final-quality gate regardless of the
         experiment routing — free/cheap heads false-negative on claims
         (gemini-3.5-flash 4/10, gpt-oss-120b 4/10 in the audit bench).
         Wrapped in telemetry so gate calls appear in the experiment report.
         """
         from src.providers.llm_telemetry import TelemetryWrappedProvider
-        ds = self.get_llm_provider("deepseek")
-        return TelemetryWrappedProvider(ds, label="deepseek_gate", stage="final_gate")
+        zai = self.get_llm_provider("zai")
+        return TelemetryWrappedProvider(zai, label="zai_gate", stage="final_gate")
 
     def get_fallback_llm_provider(self) -> LLMProvider:
         """
         Get the fallback LLM provider from YAML config.
-        Defaults to 'deepseek' if not configured.
+        Defaults to 'zai' if not configured.
         """
-        provider_name = get_config("pipeline.roles.fallback", "deepseek")
+        provider_name = get_config("pipeline.roles.fallback", "zai")
         return self.get_llm_provider(provider_name)
 
     def _get_class(self, class_path: str) -> Type:

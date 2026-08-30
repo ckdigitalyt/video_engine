@@ -38,7 +38,7 @@ The gate writes ``claim_report.json`` into the run dir and its result feeds
 the run-level PUBLISH_READY / REVISION_REQUIRED state machine
 (src/qa/publish_status.py).
 
-Runtime: uses the pipeline's LLM provider chain (mistral → deepseek, flash
+Runtime: uses the pipeline's LLM provider chain (mistral → zai glm, flash
 models only per v12.5 cost guardrails) — never Gemini Pro.
 """
 
@@ -403,7 +403,7 @@ class ClaimVerifier:
                     if _is_nickname_pair(a, b):
                         continue
                     if sev == "critical":
-                        # v22 (DeepSeek root-cause review): corroboration is
+                        # v22 (root-cause review): corroboration is
                         # now within TWO sentences, not one.  The expert's
                         # documented failure mode (Bloop vs 52-Hz whale)
                         # transfers attributes across ADJACENT sentences;
@@ -504,7 +504,7 @@ class ClaimVerifier:
             v = c.value
             u = (c.unit or "").strip()
             hit = None
-            # v22 (DeepSeek root-cause review): the old matcher accepted a
+            # v22 (root-cause review): the old matcher accepted a
             # number appearing ANYWHERE in a fact text ("52" matched
             # "52-Hz whale"), which produced false "verified" status for
             # claims that merely shared a digit.  Now the unit must appear

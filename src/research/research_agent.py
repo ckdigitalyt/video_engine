@@ -3,7 +3,7 @@ research_agent.py — Structured web research for documentary video production.
 
 ResearchAgent performs the following steps:
   1. Classify topic (via TopicClassifier from V1 assets)
-  2. Generate search queries from topic (DeepSeek LLM)
+  2. Generate search queries from topic (ZAI GLM LLM)
   3. Execute web searches in parallel
   4. Fetch page content in parallel
   5. Extract structured facts via LLM (parallel)
@@ -34,7 +34,7 @@ from src.models.v2_types import (
     Source,
     TopicCategory,
 )
-from src.providers.llm_provider import DeepSeekProvider
+from src.providers.llm_provider import ZaiProvider
 from src.utils.config import get_config
 
 logger = logging.getLogger(__name__)
@@ -165,10 +165,10 @@ class ResearchAgent:
 
     def __init__(
         self,
-        llm: Optional[DeepSeekProvider] = None,
+        llm: Optional[ZaiProvider] = None,
         config: Optional[dict] = None,
     ):
-        self._llm = llm or DeepSeekProvider()
+        self._llm = llm or ZaiProvider()
         self._config = config or {}
         self._max_sources = self._config.get(
             "max_sources",

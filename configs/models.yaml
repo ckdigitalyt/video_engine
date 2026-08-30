@@ -5,16 +5,16 @@
 #   1. Explicit argument to constructor (highest priority)
 #   2. pipeline.roles.{role} in pipeline.yaml (e.g. planner, critic)
 #   3. pipeline.roles.default in pipeline.yaml (default: gemini flash)
-#   4. Runtime fallback chains (v12.6): mistral free -> deepseek v4 flash
+#   4. Runtime fallback chains (v12.6): mistral free -> zai glm-5.3-flash
 #
-# No module should hardcode DeepSeekProvider() or GeminiProvider().
+# No module should hardcode ZaiProvider() or GeminiProvider().
 # Always use ProviderFactory or pass an LLMProvider instance.
 
 llm:
-  deepseek:
-    model: "deepseek-v4-pro"
-    script_model: "deepseek-v4-pro"
-    max_tokens: 2000
+  zai:
+    model: "glm-5.3-flash"
+    script_model: "glm-5.3-flash"
+    max_tokens: 8192
     temperature: 0.7
 
   gemini:
@@ -23,8 +23,8 @@ llm:
 
   # v37 (ckdigital 2026-08-13): gemini-3.7-flash verified live (model listed +
   # completion OK, intermittent 503 high-demand).  Used as pipeline PRIMARY so
-  # paid DeepSeek only runs when the free chain (3.7 -> 2.5 -> groq/openrouter)
-  # all fail.
+  # the paid chain only runs when the free chain (3.7 -> 2.5 -> groq/openrouter)
+  # all fail. (2026-08-30: paid DeepSeek retired; ZAI glm-5.3-flash replaced it.)
   gemini37:
     model: "models/gemini-3.7-flash"
     script_model: "models/gemini-3.7-flash"

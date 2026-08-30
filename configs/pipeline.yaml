@@ -79,22 +79,23 @@ pipeline:
     # v13.1: text stages on Mistral free tier (Gemini 2.5-flash free quota is
     # only 20 req/day and burns out mid-run); Gemini stays for vision-only.
     # v19 (ckdigital direction): default is GEMINI — the runner wraps every
-    # provider in a cost chain (primary -> gemini/grok/mistral -> deepseek
-    # LAST), falling through per-call on quota/errors.  So Gemini/Grok are
-    # leveraged first and DeepSeek cost stays minimal; the old "Gemini 429
+    # provider in a cost chain (primary -> gemini/grok/mistral -> zai glm LAST),
+    # falling through per-call on quota/errors.  So Gemini/Grok are
+    # leveraged first and paid-chain cost stays minimal; the old "Gemini 429
     # kills the run" failure mode is gone because ChainLLMProvider retries
     # the next provider in the chain on each call.
     # v37 (ckdigital direction 2026-08-13): default is GEMINI37 (gemini-3.7-flash, free).
     # 3.7 verified live (model listed + completion OK; intermittent 503 high-demand).
-    # DeepSeek was the paid default (v36) and burned cost on every script call —
-    # now the free chain (3.7 -> 2.5 -> groq/openrouter) is tried FIRST and
-    # deepseek-v4-pro is auto-appended LAST by the factory (paid last resort).
+    # ZAI glm-5.3-flash replaced paid DeepSeek (2026-08-30, user directive:
+    # "Don't use deepseek at all anywhere") — the free chain (3.7 -> 2.5 ->
+    # groq/openrouter) is tried FIRST and zai glm is appended LAST by the
+    # factory (paid last resort). Chain length unchanged by the swap.
     default: "gemini37"
-    # Fallback provider when the default is unavailable (deepseek last resort)
-    fallback: "deepseek"
+    # Fallback provider when the default is unavailable (zai last resort)
+    fallback: "zai"
     # Cost-chain preference order (primary is always tried first).
     # v37: gemini37 first (newer/free), then 2.5, groq, openrouter;
-    # DeepSeek auto-appended LAST by the factory.
+    # ZAI GLM auto-appended LAST by the factory.
     chain: ["gemini", "groq", "openrouter"]
     # Role-specific provider overrides
     # v19g.1 (ckdigital directive): planner was still "mistral" — a leftover.

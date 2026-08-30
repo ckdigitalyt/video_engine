@@ -126,7 +126,7 @@ GATE = {
 }
 
 # ── Deterministic factual-hedging check (v19n) ──────────────────────────
-# DeepSeek pro 88 review (MEDIUM): Scene 3 stated the Sun's fate as an
+# LLM pro 88 review (MEDIUM): Scene 3 stated the Sun's fate as an
 # absolute certainty ("will simply be flung into a new, more distant
 # region").  Astronomical futures are probabilistic — a future outcome
 # that depends on chaotic N-body dynamics must be hedged ("likely",
@@ -205,14 +205,14 @@ class ScriptReviewer:
         self._provider_name = provider_name or get_config("pipeline.roles.default", "gemini")
         # v19g (ckdigital direction): script review uses the SAME cost chain
         # as the rest of the pipeline — Gemini -> Groq -> OpenRouter ->
-        # DeepSeek LAST.  Mistral is deliberately EXCLUDED (small model,
+        # ZAI GLM LAST.  Mistral is deliberately EXCLUDED (small model,
         # not good enough for script work).  ChainLLMProvider falls through
         # per-call and logs which provider answered.
         self._provider = factory.get_cost_chain_llm_provider(self._provider_name)
         # v26 experiment (ckdigital directive): ladder the script review —
         # early passes run on the experiment head (Groq/Nemotron when
         # LLM_ROUTING_EXPERIMENT is set), the FINAL pass always runs on
-        # the DeepSeek final-quality gate.
+        # the ZAI GLM final-quality gate.
         import os as _os
         self._experiment_routing = _os.environ.get("LLM_ROUTING_EXPERIMENT", "").strip().lower()
         self._final_provider = None
@@ -245,11 +245,11 @@ class ScriptReviewer:
         current = scenes[:]
 
         for pass_no in range(1, self._max_passes + 1):
-            # v26 ladder: final pass on DeepSeek final gate (no revise runs
+            # v26 ladder: final pass on ZAI GLM final gate (no revise runs
             # after it, so swapping self._provider here is safe).
             if self._final_provider is not None and pass_no == self._max_passes:
                 self._provider = self._final_provider
-                self._log("  Final pass on DeepSeek final-quality gate "
+                self._log("  Final pass on ZAI GLM final-quality gate "
                           f"(experiment routing={self._experiment_routing})")
             self._log(f"\n── Script Review pass {pass_no}/{self._max_passes} ──")
             scores: dict[str, PersonaScore] = {}
@@ -266,7 +266,7 @@ class ScriptReviewer:
                     f"issues={len(issues)} ({self._sev_counts(issues)})"
                 )
 
-            # v19n (DeepSeek 88 MEDIUM): deterministic factual-hedging net —
+            # v19n (LLM 88 MEDIUM): deterministic factual-hedging net —
             # flag absolute predictions of uncertain future outcomes and feed
             # them into the revision prompt (no LLM cost, runs every pass).
             hedge = self._hedge_issues(current)
@@ -308,7 +308,7 @@ class ScriptReviewer:
     def _hedge_issues(self, scenes: list[str]) -> list[ReviewIssue]:
         """Flag absolute predictions of uncertain future outcomes.
 
-        DeepSeek pro 88 review (MEDIUM): Scene 3 asserted the Sun's fate
+        LLM pro 88 review (MEDIUM): Scene 3 asserted the Sun's fate
         as certain ("will simply be flung...").  Probabilistic astronomical
         outcomes must be hedged.  Pure regex — no LLM call — so it runs on
         every pass for free and feeds the revision prompt.
@@ -333,7 +333,7 @@ class ScriptReviewer:
         try:
             raw = self._provider.generate_json(prompt)
         except Exception as e:
-            # v12.6: Gemini flash first, then Mistral free, then DeepSeek v4 flash.
+            # v12.6: Gemini flash first, then Mistral free, then ZAI GLM flash.
             raw = None
             last_err = e
             for fb in self._fallbacks:
@@ -415,7 +415,7 @@ one per line, numbered "SCENE N: <narration>".
         except Exception as e:  # noqa: BLE001
             last_err = e
         # v13.1: primary provider may be quota-limited (Gemini free tier is 20
-        # req/day) — fall back to Mistral free, then DeepSeek, for TEXT stages
+        # req/day) — fall back to Mistral free, then ZAI GLM, for TEXT stages
         # only (vision review remains Gemini-locked in review_video.py).
         if not raw:
             for fb in self._fallbacks:

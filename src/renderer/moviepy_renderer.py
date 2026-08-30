@@ -284,7 +284,7 @@ class MoviePyRenderer(Renderer):
                 print(f"  -> Skipping missing audio file: {track.file!r}")
                 continue
             clip = AudioFileClip(track.file).set_start(track.start_time)
-            # v31 (DeepSeek-validated): hard voice seams read as "voice
+            # v31 (LLM-validated): hard voice seams read as "voice
             # abruptly broke" (Wow! Signal 15s break at the scene_1→scene_2
             # boundary).  Overlap contiguous narration tracks with a short
             # crossfade so the envelope never dips at the seam.

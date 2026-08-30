@@ -9,7 +9,7 @@ Usage:
     from src.utils.config import load_config
 
     cfg = load_config()
-    model_name = cfg["llm"]["deepseek"]["model"]
+    model_name = cfg["llm"]["zai"]["model"]
     fps = cfg["render"]["fps"]
 """
 
@@ -68,7 +68,7 @@ def get_config(key: str, default=None):
 
     Example:
         fps = get_config("render.fps", 30)
-        model = get_config("llm.deepseek.model")
+        model = get_config("llm.zai.model")
     """
     cfg = load_config()
     parts = key.split(".")

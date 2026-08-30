@@ -141,7 +141,7 @@ def get_animation_clips(
     The renderer is responsible for converting these into actual visual
     clips using its own framework (e.g. MoviePy ``TextClip``).
 
-    v19n (DeepSeek 88 review, MEDIUM): words are grouped into PHRASE clips
+    v19n (LLM 88 review, MEDIUM): words are grouped into PHRASE clips
     (up to ``max_words_per_line`` per clip, respecting line boundaries) so
     the burned-in captions read as coherent phrases instead of fragmented
     single words ("stone's" / "the" / "stars" flashing one word at a

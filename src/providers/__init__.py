@@ -3,7 +3,7 @@ providers — Abstract provider interfaces and concrete implementations.
 
 Exported symbols:
 - LLMProvider (ABC)
-- DeepSeekProvider
+- ZaiProvider
 - GeminiProvider
 - AssetProvider (ABC)
 - PexelsProvider
@@ -15,7 +15,7 @@ Exported symbols:
 - WikimediaCommonsProvider
 """
 
-from .llm_provider import LLMProvider, DeepSeekProvider, GeminiProvider
+from .llm_provider import LLMProvider, ZaiProvider, GeminiProvider
 from .asset_provider import AssetProvider, PexelsProvider, PixabayProvider
 from .tts_provider import TTSProvider, KokoroProvider
 from .asset_provider import AssetProvider, PexelsProvider, PixabayProvider, NasaMediaProvider, WikimediaCommonsProvider
@@ -26,7 +26,7 @@ StubAssetProvider = AssetProvider
 
 __all__ = [
     "LLMProvider",
-    "DeepSeekProvider",
+    "ZaiProvider",
     "GeminiProvider",
     "AssetProvider",
     "PexelsProvider",

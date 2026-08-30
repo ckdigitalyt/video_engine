@@ -45,7 +45,7 @@ SEAM_FACTOR = 6.0
 SEAM_MAX_NEIGHBOR_CORR = 0.90
 SAMPLE_FRAMES = 6           # how many frames to probe (evenly spaced)
 
-# ── v32 corrected mirror-band detector (DeepSeek-validated 2026-08-12) ──
+# ── v32 corrected mirror-band detector (LLM-validated 2026-08-12) ──
 # The v13 metric (border_row_deltas p90) false-positived on smooth/structured
 # content: for the innermost border rows, inner[n-1-i] collapses to the row
 # ADJACENT to the border, so the "flip delta" became an adjacency correlation
