@@ -176,16 +176,19 @@ class TestRendererConformance:
         from engine.renderers.base import RenderContext
 
         ctx = RenderContext(output_dir="/tmp/v3-test")
-        # Wave 2 filled AI_IMAGE_MOTION, STOCK_VIDEO, ARCHIVAL,
-        # MOTION_CANVAS and PIXIJS bodies (offline-capable renders);
-        # only AI_VIDEO remains a stub until Wave 2 provider registration.
-        for rid in ("AI_VIDEO",):
-            with pytest.raises(RendererNotImplemented):
-                get_renderer(rid).render(
-                    {"shot_id": "S01", "duration_sec": 3.0, "visual_goal": "x",
-                     "renderer": rid},
-                    None, ctx,
-                )
+    def test_stub_renderers_raise_not_implemented(self):
+        """Wave 2 filled all canonical-chain bodies. Only disabled optional
+        specialists (GODOT, OPEN_TOONZ) remain stubs — they are excluded
+        from the registry, so nothing routable raises anymore."""
+        from engine.renderers.registry import all_renderers
+
+        bodies = {rid: type(r).__name__ for rid, r in all_renderers().items()}
+        assert bodies["AI_VIDEO"] == "AIVideoRenderer"
+        assert bodies["AI_IMAGE_MOTION"] == "AIImageMotionRenderer"
+        assert bodies["STOCK_VIDEO"] == "StockVideoRenderer"
+        assert bodies["ARCHIVAL"] == "ArchivalRenderer"
+        assert bodies["MOTION_CANVAS"] == "MotionCanvasRenderer"
+        assert bodies["PIXIJS"] == "PixiJsRenderer"
 
     def test_stub_validate_checks_duration_cap(self):
         issues = get_renderer("AI_VIDEO").validate(

@@ -54,6 +54,10 @@ PROVIDER_FACTORIES: dict[str, list[tuple[str, Callable[[], MediaProvider | None]
     "video": [
         ("hf_zerogpu", lambda: _hf_space_provider("video")),
     ],
+    "image_to_video": [
+        ("wan22_i2v", lambda: _configured_wan()),
+        ("ltx_video", lambda: _configured_ltx()),
+    ],
     "stock": [
         ("pexels", lambda: _configured(PexelsStockProvider)),
         ("pixabay", lambda: _configured(PixabayStockProvider)),
@@ -76,6 +80,18 @@ def _configured(cls: type[MediaProvider], *args: Any, **kw: Any) -> MediaProvide
         logger.debug("provider %s failed to construct", cls.__name__)
         return None
     return provider if provider.capabilities().enabled else None
+
+
+def _configured_wan() -> MediaProvider | None:
+    from engine.broker.providers.wan import Wan22I2VProvider
+
+    return _configured(Wan22I2VProvider)
+
+
+def _configured_ltx() -> MediaProvider | None:
+    from engine.broker.providers.ltx import LTXVideoProvider
+
+    return _configured(LTXVideoProvider)
 
 
 def _hf_space_provider(kind: str) -> MediaProvider | None:

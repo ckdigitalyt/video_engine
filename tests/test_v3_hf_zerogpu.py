@@ -135,7 +135,9 @@ class TestDiscover:
 
 class TestCallFlow:
     def _routes(self, sse_bytes=b""):
-        submit_url = f"https://huggingface.co/spaces/{SPACE}/gradio_api/call/infer"
+        # Wave 2: client submits to the Space's direct hf.space subdomain
+        # first (huggingface.co does not proxy /gradio_api/* live).
+        submit_url = f"https://acme-labs-wan-video.hf.space/gradio_api/call/infer"
         poll_url = f"{submit_url}/evt-123"
         return {
             submit_url: lambda u, r: json.dumps({"event_id": "evt-123"}).encode(),
@@ -174,7 +176,7 @@ class TestCallFlow:
 
     def test_submit_without_event_id_raises(self, monkeypatch):
         routes, _ = self._routes()
-        routes[f"https://huggingface.co/spaces/{SPACE}/gradio_api/call/infer"] = (
+        routes[f"https://acme-labs-wan-video.hf.space/gradio_api/call/infer"] = (
             lambda u, r: json.dumps({"error": "nope"}).encode())
         monkeypatch.setattr("urllib.request.urlopen", FakeURLOpen(routes))
         with pytest.raises(ProviderError, match="event_id"):

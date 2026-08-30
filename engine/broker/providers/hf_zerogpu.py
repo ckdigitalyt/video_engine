@@ -92,12 +92,29 @@ class HFZeroGPUClient:
         self.endpoint_name = endpoint_name
         self.poll_timeout = poll_timeout
         self._token = token if token is not None else os.environ.get("HF_TOKEN", "")
+        self._working_base: str | None = None
 
     # ── HTTP plumbing (mocked in tests) ──────────────────────────────────
 
+    def _base_urls(self) -> list[str]:
+        """Candidate bases in priority order: direct subdomain first.
+
+        Live-routing note (Wave 2): Gradio APIs are served on the Space's
+        direct ``<owner>-<name>.hf.space`` subdomain; the
+        ``huggingface.co/spaces/<id>`` prefix does NOT proxy
+        ``/gradio_api/*`` (404). The first working base is cached.
+        """
+        owner, _, name = self.space_id.partition("/")
+        slug = f"{owner}-{name}".replace(".", "-").replace("_", "-")
+        subdomain = f"https://{slug}.hf.space"
+        legacy = f"{HF_BASE}/spaces/{self.space_id}"
+        if self._working_base:
+            return [self._working_base] + [b for b in (subdomain, legacy)
+                                           if b != self._working_base]
+        return [subdomain, legacy]
+
     def _base_url(self) -> str:
-        sid = urllib.parse.quote(self.space_id, safe="/-_.")
-        return f"{HF_BASE}/spaces/{sid}"
+        return self._base_urls()[0]
 
     def _headers(self) -> dict[str, str]:
         headers = {"Content-Type": "application/json"}
@@ -108,33 +125,50 @@ class HFZeroGPUClient:
     def _http(self, method: str, url: str, payload: dict | None = None,
               timeout: float = _REQUEST_TIMEOUT, stream: bool = False) -> Any:
         data = json.dumps(payload).encode("utf-8") if payload is not None else None
-        req = urllib.request.Request(url, data=data, headers=self._headers(), method=method)
-        try:
-            return urllib.request.urlopen(req, timeout=timeout)
-        except urllib.error.HTTPError as exc:
-            detail = ""
+        last_exc: Exception | None = None
+        # *url* is either a full URL (download/poll) or an absolute path
+        # (discover/submit) — paths are tried against every candidate base.
+        targets = self._base_urls() if url.startswith("/") else [url]
+        for base in targets:
+            target = base + url if url.startswith("/") else url
             try:
-                detail = exc.read(512).decode("utf-8", errors="replace")
-            except Exception:
-                pass
-            if exc.code == 401 or exc.code == 403:
-                raise ProviderError(
-                    f"hf_zerogpu: auth failed (HTTP {exc.code}) — check HF_TOKEN"
-                ) from None
-            raise ProviderError(
-                f"hf_zerogpu: HTTP {exc.code} on {url}: {detail[:200]}"
-            ) from None
-        except urllib.error.URLError as exc:
-            raise ProviderError(f"hf_zerogpu: connection error ({exc.reason})") from None
+                req = urllib.request.Request(
+                    target, data=data, headers=self._headers(), method=method)
+                resp = urllib.request.urlopen(req, timeout=timeout)
+                if url.startswith("/"):
+                    self._working_base = base
+                return resp
+            except urllib.error.HTTPError as exc:
+                detail = ""
+                try:
+                    detail = exc.read(512).decode("utf-8", errors="replace")
+                except Exception:
+                    pass
+                if exc.code == 401 or exc.code == 403:
+                    raise ProviderError(
+                        f"hf_zerogpu: auth failed (HTTP {exc.code}) — check HF_TOKEN"
+                    ) from None
+                last_exc = ProviderError(
+                    f"hf_zerogpu: HTTP {exc.code} on {target}: {detail[:200]}")
+                if exc.code != 404:
+                    raise last_exc from None
+                # 404 → try the next candidate base (subdomain vs legacy).
+            except urllib.error.URLError as exc:
+                last_exc = ProviderError(
+                    f"hf_zerogpu: connection error ({exc.reason})")
+            except Exception as exc:  # noqa: BLE001 — candidate base unusable
+                last_exc = ProviderError(
+                    f"hf_zerogpu: request failed on {base} ({exc})")
+        raise last_exc or ProviderError("hf_zerogpu: no candidate base URL")
 
     # ── 1–3: discover / inspect / endpoints ─────────────────────────────
 
     def _fetch_info(self) -> dict[str, Any]:
-        resp = self._http("GET", f"{self._base_url()}/gradio_api/info")
+        resp = self._http("GET", "/gradio_api/info")
         return json.loads(resp.read().decode("utf-8"))
 
     def _fetch_config(self) -> dict[str, Any]:
-        resp = self._http("GET", f"{self._base_url()}/config")
+        resp = self._http("GET", "/config")
         return json.loads(resp.read().decode("utf-8"))
 
     def discover(self, verbose: bool = True) -> SpaceInfo:
@@ -210,8 +244,7 @@ class HFZeroGPUClient:
             raise ProviderError("hf_zerogpu: no endpoint name given or configured")
         limit = timeout if timeout is not None else self.poll_timeout
 
-        submit_url = f"{self._base_url()}/gradio_api/call/{ep}"
-        resp = self._http("POST", submit_url, {"data": data})
+        resp = self._http("POST", f"/gradio_api/call/{ep}", {"data": data})
         body = json.loads(resp.read().decode("utf-8"))
         event_id = body.get("event_id")
         if not event_id:
@@ -220,19 +253,9 @@ class HFZeroGPUClient:
         return self._poll(ep, event_id, limit)
 
     def _poll(self, endpoint: str, event_id: str, timeout: float) -> dict[str, Any]:
-        url = f"{self._base_url()}/gradio_api/call/{endpoint}/{event_id}"
+        url = f"/gradio_api/call/{endpoint}/{event_id}"
         deadline = time.monotonic() + timeout
-        req = urllib.request.Request(url, headers=self._headers())
-        try:
-            resp = urllib.request.urlopen(req, timeout=_REQUEST_TIMEOUT)
-        except urllib.error.HTTPError as exc:
-            raise ProviderError(f"hf_zerogpu: poll HTTP {exc.code}") from None
-        except urllib.error.URLError as exc:
-            raise ProviderError(f"hf_zerogpu: poll connection error ({exc.reason})") from None
-        except TimeoutError as exc:
-            raise ProviderError(
-                f"hf_zerogpu: poll stream stalled past request timeout"
-            ) from None
+        resp = self._http("GET", url, timeout=_REQUEST_TIMEOUT)
 
         event, data_lines = None, []
         with resp:
@@ -261,6 +284,54 @@ class HFZeroGPUClient:
                             return {"output": payload}
                     event, data_lines = None, []
         raise ProviderError("hf_zerogpu: stream ended without a complete event")
+
+    # ── file upload (Wave 2: image-to-video endpoints need FileData) ────
+
+    def upload_files(self, file_paths: list[str | Path]) -> list[str]:
+        """Multipart upload to ``/gradio_api/upload``; returns server paths."""
+        boundary = "----jadebroker7d1a2c"
+        parts: list[bytes] = []
+        for fp in file_paths:
+            path = Path(fp)
+            if not path.exists():
+                raise ProviderError(f"hf_zerogpu: upload file missing: {path}")
+            parts.append(
+                f"--{boundary}\r\n"
+                f'Content-Disposition: form-data; name="files"; '
+                f'filename="{path.name}"\r\n'
+                f"Content-Type: application/octet-stream\r\n\r\n".encode()
+                + path.read_bytes() + b"\r\n"
+            )
+        parts.append(f"--{boundary}--\r\n".encode())
+        body = b"".join(parts)
+        targets = self._base_urls()
+        last_exc: Exception | None = None
+        for base in targets:
+            try:
+                req = urllib.request.Request(
+                    f"{base}/gradio_api/upload", data=body, method="POST",
+                    headers={
+                        "Authorization": f"Bearer {self._token}",
+                        "Content-Type": f"multipart/form-data; boundary={boundary}",
+                    })
+                with urllib.request.urlopen(req, timeout=120) as resp:
+                    paths = json.loads(resp.read().decode("utf-8"))
+                self._working_base = base
+                return list(paths)
+            except urllib.error.HTTPError as exc:
+                if exc.code in (401, 403):
+                    raise ProviderError(
+                        f"hf_zerogpu: upload auth failed (HTTP {exc.code})") from None
+                last_exc = ProviderError(f"hf_zerogpu: upload HTTP {exc.code}")
+            except urllib.error.URLError as exc:
+                last_exc = ProviderError(
+                    f"hf_zerogpu: upload connection error ({exc.reason})")
+        raise last_exc or ProviderError("hf_zerogpu: upload failed")
+
+    @staticmethod
+    def file_data(server_path: str) -> dict[str, Any]:
+        """Gradio FileData dict referencing an uploaded server path."""
+        return {"path": server_path, "meta": {"_type": "gradio.FileData"}}
 
     # ── 8–9: download + validate ─────────────────────────────────────────
 

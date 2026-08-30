@@ -278,4 +278,8 @@ def make_renderer(renderer_id: str, capability: RendererCapability) -> Renderer:
         from engine.renderers.pixijs import PixiJsRenderer
 
         return PixiJsRenderer(capability)
+    if renderer_id == "AI_VIDEO":
+        from engine.renderers.ai_video import AIVideoRenderer
+
+        return AIVideoRenderer(capability)
     return StubRenderer(renderer_id, capability)

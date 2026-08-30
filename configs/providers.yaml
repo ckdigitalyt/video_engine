@@ -44,3 +44,26 @@ internet_archive:
 
 fallback:
   always_allowed: true
+
+# ── Wave 2: AI video providers (directive §11) ──────────────────────────
+# Free path: HF ZeroGPU Gradio Spaces (auth: HF_TOKEN). Spaces verified live
+# 2026-08-30 via /gradio_api/info on <owner>-<name>.hf.space. Override the
+# I2V Space with env HF_VIDEO_SPACE (wan) / HF_LTX_SPACE (ltx).
+hf_video:
+  # Wan 2.2 I2V — community Lightning 4-8step Space (fast, low quota use).
+  wan22_i2v:
+    space_id: "Saravutw/WAN2.2_I2V_LIGHTNING_4-8step_custom"
+    endpoint: "generate_video"
+    max_duration_sec: 8
+    cost_tier: HIGH
+  # LTX — official Lightricks ZeroGPU Space (ltx-2-distilled).
+  ltx:
+    space_id: "Lightricks/ltx-2-distilled"
+    endpoint: "generate_video"
+    max_duration_sec: 10
+    cost_tier: HIGH
+  # MiniMax H3 — paid-only API (no free tier/Space as of 2026-08-30);
+  # registered in the broker with enabled:false pending spend approval.
+  minimax_h3:
+    enabled: false
+    reason: "paid-only API (per-second billing); §26 cost gate — HERO shots only"
