@@ -40,6 +40,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
 REMOVE_SHOTS = ("S02", "S10")
 
 NARRATION_TRIMS: dict[str, tuple[str, str]] = {
@@ -110,6 +112,35 @@ REROUTE_RENDERER: dict[str, tuple[str, str]] = {
     "S14": ("AI_IMAGE_MOTION",
             "pixi scene references never-generated PLATE_S14 — §22 reroute "
             "to AI_IMAGE_MOTION (same routing as r1/r2)"),
+    "S04": ("MOTION_CANVAS",
+            "both broker-cached AI stills for the rock-numbers chart are "
+            "garbled-text failures (QA 45/49); the plan already carries a "
+            "comparison template with the real figures — §22 reroute to "
+            "MOTION_CANVAS (typed text, no hallucinated glyphs)"),
+}
+
+# r3.2: broker image generation is offline (siliconflow 401, no
+# NVIDIA_API_KEY), so any cache miss falls back to a solid-color still
+# (S14 rendered GREEN). Wire the proven r2-era broker-cached stills
+# directly — same asset family, QA-verified in r2 (S14 88; S04 69 vs 45
+# on the r3 cache image).
+STILL_OVERRIDES: dict[str, str] = {
+    "S14": "cache/broker/ef/ef051a29dbdf0633c6a81e922dff499dd9d27a5889"
+           "be48ef4308e20513d71026.png",
+    "S04": "cache/broker/25/25b9a98abd3140286ce86b55c7f233e113bed60a113d"
+           "5ab2689e51f674b3bf7c.png",
+    "S08": "cache/broker/b1/b1655780164391a0c827e45c59cf8fba20558fba6ace0"
+           "9cb17ed623d4e198508.png",
+}
+
+# S15: the before_after template drew flat color panels with no subjects
+# (r3 QA 46: "no giants depicted — just a flat green plate"). Add the
+# size-comparison figures the claim is about (§24: show the claim).
+S15_FIGURES: dict[str, dict] = {
+    "before": {"kind": "sauropod", "height_frac": 0.62, "x": 0.42,
+               "color": "rgba(18,14,10,0.72)"},
+    "after": {"kind": "mammal", "height_frac": 0.16, "x": 0.5,
+              "color": "rgba(18,14,10,0.72)"},
 }
 
 # S20: keep PIXIJS (it carries the §17 scene-animation mandate) but point
@@ -119,7 +150,8 @@ REROUTE_RENDERER: dict[str, tuple[str, str]] = {
 S20_SCENE_OVERRIDE: dict = {
     "background": {"asset": "jungle", "depth": 1.0, "scale": 1.15},
     "characters": [{"type": "t_rex", "position": [0.5, 0.88],
-                    "action": "idle", "scale": 0.9}],
+                    "action": "transform", "scale": 0.9,
+                    "end_scale": 0.12}],
     "camera": {"move": "pull_out", "duration": 3.5},
     "particles": {"kind": "dust", "count": 40},
     "atmosphere": None,
@@ -204,6 +236,45 @@ def apply_edits(script_doc: dict, shots: list[dict]) -> tuple[dict, list[dict], 
                  "why": "scene pointed at never-generated PLATE_S20; "
                         "rewritten to real library assets (jungle + "
                         "t_rex + pull_out camera)"}]
+        if sid in STILL_OVERRIDES:
+            p = PROJECT_ROOT / STILL_OVERRIDES[sid]
+            if p.exists():
+                s.setdefault("asset_requirements", {})["still_path"] = \
+                    str(p)
+                log["still_overrides"] = log.get("still_overrides", []) + [
+                    {"shot_id": sid, "still": str(p)}]
+        if sid == "S19":
+            mprops = s.setdefault("motion", {}).setdefault("props", {})
+            # row layout turned the fork into a chain (r3 QA: "no branch
+            # structure"); tree layout + fate styling shows the split:
+            # non-avian branches fade (dead), ground birds carry through.
+            mprops["layout"] = "tree"
+            mprops["fate"] = {"1": "dead", "2": "surviving"}
+            log["scene_fix"] = log.get("scene_fix", []) + [
+                {"shot_id": sid,
+                 "why": "diagram row layout hid the branch fork; switched "
+                        "to tree layout with dead/surviving fate styling"}]
+        if sid == "S15":
+            mprops = s.setdefault("motion", {}).setdefault("props", {})
+            # brighter split panels: the dark originals sat dhash-close to
+            # the other dark MC plates (SHOT_DIVERSITY cluster) and read as
+            # empty plates; mid-tone panels + dark silhouettes separate the
+            # shot's coarse luminance map from every other MC stage.
+            mprops["before_color"] = "#6f9668"
+            mprops["after_color"] = "#7d6247"
+            # stage_override: variant 18 puts the glow top-centre on the
+            # brightest dust field — maximally far from S07's stage so the
+            # two dark plates stop dhash-clustering (SHOT_DIVERSITY).
+            mprops.setdefault("variant", {})["stage_override"] = 18
+            mprops.setdefault("before", {})["figure"] = \
+                dict(S15_FIGURES["before"])
+            mprops.setdefault("after", {})["figure"] = \
+                dict(S15_FIGURES["after"])
+            log["scene_fix"] = log.get("scene_fix", []) + [
+                {"shot_id": sid,
+                 "why": "before_after panels were flat color plates with "
+                        "no subjects; added size-comparison figures "
+                        "(sauropod vs small mammal)"}]
 
     # avoid identical consecutive compositions after removals (VARIETY)
     _dedupe_compositions(working, log)

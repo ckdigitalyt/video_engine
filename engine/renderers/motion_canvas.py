@@ -111,6 +111,11 @@ def template_json_from_shot(
     # ── V4: de-templating variant + micro events ──
     style_palette = (style or {}).get("palette") or {}
     props["variant"] = variant_for_index(shot_index_of(shot), style_palette)
+    # plan-time stage override (repair passes): keep the deterministic
+    # variant but allow the edit layer to pin a different stage mix.
+    _ovr = (motion_cfg.get("props") or {}).get("variant")
+    if isinstance(_ovr, dict) and isinstance(_ovr.get("stage_override"), int):
+        props["variant"]["stage_override"] = _ovr["stage_override"]
     micro = shot.get("micro_events") or []
     if micro:
         props["micro_events"] = events_to_motion_canvas(micro)

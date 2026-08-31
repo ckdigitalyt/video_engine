@@ -329,16 +329,34 @@ def hamming(a: int, b: int) -> int:
     return bin(a ^ b).count("1")
 
 
-def sample_hashes(frames: np.ndarray, n: int = 5) -> list[int]:
+def sample_hashes(frames: np.ndarray, n: int = 5) -> list[dict]:
+    """Sampled perceptual hashes + coarse luminance structure per frame.
+
+    The hash alone phantom-clusters flat fields: two unrelated near-uniform
+    plates (a dark template stage vs a bright split-screen panel) both hash
+    to near-zero gradient signs, so dino_v2 r3.1's dark impact map and its
+    bright BEFORE panel matched at hamming 4. find_duplicates therefore
+    also requires agreement on mean luma and spatial std — two flat fields
+    of different brightness are not repeated imagery."""
     idx = np.unique(np.linspace(0, len(frames) - 1, num=min(n, len(frames)), dtype=int))
-    return [dhash(frames[i]) for i in idx]
+    out: list[dict] = []
+    for i in idx:
+        fr = frames[i].astype(np.float32)
+        out.append({"hash": dhash(frames[i]),
+                    "mean": round(float(fr.mean()), 1),
+                    "std": round(float(fr.std()), 1)})
+    return out
 
 
 def find_duplicates(hash_samples: list[dict], max_hamming: int = 6) -> list[dict]:
     """Cross-shot near-duplicate clusters.
 
-    hash_samples: [{"label": str, "t": float, "hash": int}, ...]
+    hash_samples: [{"label": str, "t": float, "hash": int
+                    [, "mean": float, "std": float]}, ...]
     Returns clusters of visually identical frames that come from >= 2 labels.
+    A pair joins a cluster only when the hashes agree AND the coarse
+    luminance structure agrees (mean within 12, std within 10, when the
+    fields are present) — see sample_hashes for why.
     """
     parent = list(range(len(hash_samples)))
 
@@ -348,9 +366,20 @@ def find_duplicates(hash_samples: list[dict], max_hamming: int = 6) -> list[dict
             x = parent[x]
         return x
 
+    def same_structure(a: dict, b: dict) -> bool:
+        if "mean" not in a or "mean" not in b:
+            return True
+        if abs(float(a["mean"]) - float(b["mean"])) > 12.0:
+            return False
+        if "std" in a and "std" in b \
+                and abs(float(a["std"]) - float(b["std"])) > 10.0:
+            return False
+        return True
+
     for i in range(len(hash_samples)):
         for j in range(i + 1, len(hash_samples)):
-            if hamming(hash_samples[i]["hash"], hash_samples[j]["hash"]) <= max_hamming:
+            if hamming(hash_samples[i]["hash"], hash_samples[j]["hash"]) <= max_hamming \
+                    and same_structure(hash_samples[i], hash_samples[j]):
                 parent[find(i)] = find(j)
     clusters: dict[int, list[int]] = {}
     for i in range(len(hash_samples)):
@@ -402,7 +431,7 @@ def audit_video(path: str | Path, label: str | None = None,
         "motion_class": classify_motion(deltas, fps, dur, holds, motion,
                                         static_threshold),
         "hash_samples": [
-            {"label": label, "t": round(i / fps, 3), "hash": h}
+            {"label": label, "t": round(i / fps, 3), **h}
             for i, h in zip(
                 np.unique(np.linspace(0, max(len(frames) - 1, 0),
                                       num=min(5, len(frames)), dtype=int)),

@@ -4,32 +4,76 @@ export function render(ctx, { W, H }, props, t, P, h) {
   const edges = Array.isArray(props.edges) ? props.edges : [];
   const pos = new Map();
 
+  // tree layout: roots left, descendants spread by depth (branching reads
+  // as branching — the r3 "row" layout turned a fork into a chain).
+  const depth = new Map();
+  const kids = new Map();
+  if (edges.length && String(props.layout ?? "") === "tree") {
+    nodes.forEach((_, i) => depth.set(i, 0));
+    edges.forEach(([f, t]) => {
+      if (!kids.has(f)) kids.set(f, []);
+      kids.get(f).push(t);
+    });
+    let changed = true;
+    let guard = 0;
+    while (changed && guard++ < 8) {
+      changed = false;
+      edges.forEach(([f, t]) => {
+        if ((depth.get(t) ?? 0) < (depth.get(f) ?? 0) + 1) {
+          depth.set(t, (depth.get(f) ?? 0) + 1);
+          changed = true;
+        }
+      });
+    }
+  }
+  const byDepth = new Map();
+  nodes.forEach((_, i) => {
+    const d = depth.get(i) ?? 0;
+    if (!byDepth.has(d)) byDepth.set(d, []);
+    byDepth.get(d).push(i);
+  });
+  const posFor = (i, n) => {
+    if (String(props.layout ?? "row") === "tree" && edges.length) {
+      const d = depth.get(i) ?? 0;
+      const col = byDepth.get(d) ?? [i];
+      const k = col.indexOf(i);
+      return {
+        x: W * 0.2 + d * W * 0.3,
+        y: H * (0.5 + (col.length > 1
+          ? (k - (col.length - 1) / 2) * 0.32 : 0)),
+      };
+    }
+    if (String(props.layout ?? "row") === "row") {
+      return { x: (W * (i + 1)) / (n + 1), y: H / 2 };
+    }
+    return { x: W / 2, y: (H * (i + 1)) / (n + 1) };
+  };
+
   nodes.forEach((node, i) => {
     const n = Math.max(nodes.length, 1);
     const appear = h.easeOutCubic(h.window01(t, (0.7 * i) / n, (0.7 * i) / n + 0.22));
     if (appear <= 0) return;
     const layout = String(props.layout ?? "row");
-    let x, y;
-    if (layout === "row") {
-      x = (W * (i + 1)) / (n + 1);
-      y = H / 2;
-    } else { // column
-      x = W / 2;
-      y = (H * (i + 1)) / (n + 1);
-    }
+    const { x, y } = posFor(i, n);
     pos.set(i, { x, y, appear });
     const bw = Number(props.box_w ?? 300), bh = Number(props.box_h ?? 120);
+    // §19 branch-fate styling: a node marked "dead" in props.fate fades
+    // out (the extinction edge), "surviving" carries the highlight.
+    const fate = (props.fate ?? {})[String(i)];
     ctx.save();
-    ctx.globalAlpha = appear;
+    ctx.globalAlpha = appear * (fate === "dead" ? 0.45 : 1);
     ctx.translate(x, y);
     ctx.scale(0.8 + 0.2 * appear, 0.8 + 0.2 * appear);
     ctx.fillStyle = P.background;
-    ctx.strokeStyle = i === 0 ? P.accent : P.secondary;
-    ctx.lineWidth = 3;
+    ctx.strokeStyle = fate === "surviving" ? P.highlight
+      : (fate === "dead" ? P.secondary : (i === 0 ? P.accent : P.secondary));
+    ctx.lineWidth = fate === "surviving" ? 5 : 3;
+    if (fate === "dead") ctx.setLineDash([10, 8]);
     ctx.beginPath();
     ctx.roundRect(-bw / 2, -bh / 2, bw, bh, 16);
     ctx.fill();
     ctx.stroke();
+    ctx.setLineDash([]);
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.font = h.font(30, 600);

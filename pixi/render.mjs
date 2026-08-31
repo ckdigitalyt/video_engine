@@ -157,7 +157,18 @@ async function main() {
         x = (px + (ch.path[0] - px) * eased) * W;
       }
       const bob = characterOffset(ch.action, t, frame);
-      const scale = Number(ch.scale ?? 1.0) * (1 + (cam.scale - 1) * 0.5);
+      // §17 "transform" story action: the giant contracts toward bird
+      // scale across the shot (r3 QA: "no scale change ever visible" —
+      // a pull_out camera alone only shifts 18%).
+      let storyScale = 1;
+      if (ch.action === "transform") {
+        const s0 = Number(ch.scale ?? 0.9);
+        const s1 = Number(ch.end_scale ?? 0.12);
+        const e = t < 0.35 ? 0 : Math.min((t - 0.35) / 0.5, 1);
+        storyScale = (s0 + (s1 - s0) * (e * e * (3 - 2 * e))) / s0;
+      }
+      const scale = Number(ch.scale ?? 1.0) * storyScale
+        * (1 + (cam.scale - 1) * 0.5);
       const w = img.width * scale, h = img.height * scale;
       ctx.save();
       // ground anchor: position is the character's feet
