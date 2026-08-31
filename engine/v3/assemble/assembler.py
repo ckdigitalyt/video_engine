@@ -250,13 +250,20 @@ def _write_raw_wav(path: Path, samples: np.ndarray) -> None:
 
 
 def conform_clip(src: Path, dst: Path, duration: float, width: int,
-                 height: int, fps: int) -> Path:
-    """One clip → exact resolution/fps/duration (trim or clone-pad tail)."""
+                 height: int, fps: int, *, stretch: float = 1.0) -> Path:
+    """One clip → exact resolution/fps/duration (trim or clone-pad tail).
+
+    stretch > 1 slows the clip (setpts before fps → smooth frame
+    duplication) to cover part of a duration shortfall, so the clone-pad
+    tail only has to cover what stretching could not.
+    """
     dst.parent.mkdir(parents=True, exist_ok=True)
     dur = max(duration, 0.2)
+    stretch = max(0.5, min(float(stretch or 1.0), 4.0))
+    slow = "" if abs(stretch - 1.0) < 1e-3 else f"setpts=PTS*{stretch:.5f},"
     vf = (f"scale={width}:{height}:force_original_aspect_ratio=decrease,"
           f"pad={width}:{height}:(ow-iw)/2:(oh-ih)/2,"
-          f"fps={fps},format=yuv420p,"
+          f"{slow}fps={fps},format=yuv420p,"
           f"tpad=stop_mode=clone:stop_duration={dur + 1:.3f}")
     proc = _run([
         ffmpeg(), "-y", "-i", str(src),
@@ -319,6 +326,7 @@ def assemble_master(video_id: str, shots: list[dict], script_doc: dict,
     # duration; record timing adjustments; optionally re-render cheap
     # procedural shots whose timing shifted >20%.
     adjustments: list[dict] = []
+    fit_meta: dict[str, dict] = {}
     shot_durations: dict[str, float] = {}
     for shot in shots:
         shot_durations[shot["shot_id"]] = float(shot.get("duration_sec", 4.0))
@@ -351,6 +359,34 @@ def assemble_master(video_id: str, shots: list[dict], script_doc: dict,
                 "shot_id": s["shot_id"], "reason": "timing",
                 "planned": s["duration_sec"], "final": new_dur,
                 "rerendered": False})
+        # ── v4.1 no-freeze fit: cover narration-driven targets without
+        # frozen clone-pad holds — redistribute shortfall to clips with
+        # headroom, stretch the rest, pad only a bounded visible residual.
+        beat_shot_ids = [s["shot_id"] for s in shots
+                         if s.get("metadata", {}).get("beat_id") == bid]
+        clip_durs: dict[str, float] = {}
+        for sid in beat_shot_ids:
+            p = (records.get(sid) or {}).get("path")
+            d = probe_media_duration(p) if p else 0.0
+            if d > 0:
+                clip_durs[sid] = d
+        if beat_shot_ids and clip_durs:
+            targets = {sid: shot_durations[sid] for sid in beat_shot_ids}
+            fitted, fit_info = fit_beat_durations(targets, clip_durs)
+            for sid, fi in fit_info.items():
+                fit_meta[sid] = fi
+                if fi.get("freeze_pad", 0) > 0:
+                    logger.warning(
+                        "beat %s: %s retains %.2fs clone-pad after "
+                        "redistribute+stretch (clip %.2fs, target %.2fs)",
+                        bid, sid, fi["freeze_pad"], fi["clip"], targets[sid])
+            for sid, d in fitted.items():
+                if abs(d - shot_durations[sid]) > 1e-6:
+                    adjustments.append({
+                        "shot_id": sid, "reason": "no_freeze_fit",
+                        "planned": shot_durations[sid], "final": d,
+                        "rerendered": False})
+                    shot_durations[sid] = d
         # Distribute rounding error onto the beat's last shot so beats
         # butt-joint exactly at the narration boundary.
         _fix_beat_rounding(shots, bid, shot_durations, actual)
@@ -381,7 +417,9 @@ def assemble_master(video_id: str, shots: list[dict], script_doc: dict,
                 f"cannot assemble (attempts: {rec.get('attempts')})")
         dst = clips_dir / f"{shot['shot_id']}.mp4"
         conform_clip(Path(rec["path"]), dst, shot_durations[shot["shot_id"]],
-                     width, height, fps)
+                     width, height, fps,
+                     stretch=fit_meta.get(shot["shot_id"], {}).get(
+                         "stretch", 1.0))
         clips.append(dst)
     video_silent = work / "video_silent.mp4"
     concat_clips(clips, video_silent)
@@ -437,6 +475,75 @@ def assemble_master(video_id: str, shots: list[dict], script_doc: dict,
                    "narration_master": str(narration_master),
                    "music_bed": str(bed)})
     return result
+
+
+MAX_CONFORM_STRETCH = 1.15  # max slow-down (setpts) to cover a shortfall
+
+
+def probe_media_duration(path: str | Path) -> float:
+    """Duration (s) of any ffprobe-readable media file; 0.0 on failure."""
+    try:
+        return float(probe_audio_duration(Path(path)) or 0.0)
+    except Exception:  # noqa: BLE001 — a probe must never block assembly
+        return 0.0
+
+
+def fit_beat_durations(targets: dict[str, float],
+                       clip_durs: dict[str, float], *,
+                       max_stretch: float = MAX_CONFORM_STRETCH,
+                       ) -> tuple[dict[str, float], dict[str, dict]]:
+    """No-freeze duration fit for one beat's shots.
+
+    Narration TTS fixes the beat's total duration, and a shot whose clip is
+    shorter than its assigned target used to be clone-padded — producing
+    frozen holds (the r4 4.9s static-hold bug). This fit keeps the beat
+    total constant while removing that padding wherever possible:
+
+      1. shortfall time moves from deficit shots (target > clip) to sibling
+         clips with headroom (clip > target) — nobody pads, nobody stretches;
+      2. remaining deficit shots are slowed (setpts) by up to `max_stretch`
+         — smooth slow-motion instead of a freeze;
+      3. whatever is left becomes a clone-pad residual, reported in the fit
+         info (and warned on by the caller) instead of applied silently.
+
+    Shots with unknown clip durations are left untouched. Returns
+    (final_durations, fit_info); fit_info[shot_id] = {"clip", "stretch",
+    "freeze_pad"} for every shot that needs a non-plain conform.
+    """
+    final = dict(targets)
+    info: dict[str, dict] = {}
+    known = {sid: float(c) for sid, c in clip_durs.items() if c and c > 0}
+    if not final or not known:
+        return final, info
+
+    # 1. redistribute shortfall to clips with headroom (sum is conserved).
+    headroom = {sid: known[sid] - final[sid] for sid in known
+                if known[sid] > final[sid] + 1e-3}
+    deficit = {sid: final[sid] - known[sid] for sid in known
+               if final[sid] > known[sid] + 1e-3}
+    for sid in sorted(deficit, key=lambda s: -deficit[s]):
+        donors = [s for s in headroom if headroom[s] > 1e-3 and s != sid]
+        if not donors:
+            break
+        take = min(deficit[sid], sum(headroom[s] for s in donors))
+        total_h = sum(headroom[s] for s in donors)
+        for s in donors:
+            give = take * headroom[s] / total_h
+            final[s] += give
+            headroom[s] -= give
+        final[sid] -= take
+        deficit[sid] -= take
+
+    # 2+3. stretch what still overshoots its clip; report the residual pad.
+    for sid in sorted(deficit):
+        if deficit[sid] <= 1e-3:
+            continue
+        clip = known[sid]
+        stretch = min(final[sid] / clip, max_stretch)
+        freeze_pad = max(0.0, final[sid] - clip * stretch)
+        info[sid] = {"clip": round(clip, 3), "stretch": round(stretch, 4),
+                     "freeze_pad": round(freeze_pad, 3)}
+    return final, info
 
 
 def _fix_beat_rounding(shots: list[dict], beat_id: str,

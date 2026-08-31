@@ -197,6 +197,19 @@ def ask_text(system: str, prompt: str, *, temperature: float = 0.7,
 
 
 _FENCE_RE = re.compile(r"```(?:json)?\s*(.*?)\s*```", re.DOTALL)
+_TRAILING_COMMA_RE = re.compile(r",\s*([}\]])")
+_PY_LIT_RE = re.compile(r"\b(True|False|None)\b")
+_PY_LIT_MAP = {"True": "true", "False": "false", "None": "null"}
+
+
+def _sanitize_json_text(t: str) -> str:
+    """Fix common LLM JSON pathologies: smart quotes, trailing commas,
+    Python literals. Applied only after strict parsing fails — a reply
+    that parses strictly is never touched."""
+    t = (t.replace("\u201c", '"').replace("\u201d", '"')
+          .replace("\u2018", "'").replace("\u2019", "'"))
+    t = _TRAILING_COMMA_RE.sub(r"\1", t)
+    return _PY_LIT_RE.sub(lambda m: _PY_LIT_MAP[m.group(1)], t)
 
 
 def extract_json(text: str) -> Any:
@@ -205,36 +218,46 @@ def extract_json(text: str) -> Any:
     m = _FENCE_RE.search(text)
     if m:
         text = m.group(1).strip()
-    try:
-        return json.loads(text)
-    except json.JSONDecodeError:
-        pass
-    # Balanced-brace scan for the first JSON object/array.
-    for open_ch, close_ch in (("{", "}"), ("[", "]")):
-        start = text.find(open_ch)
-        if start == -1:
+    candidates = [text]
+    sanitized = _sanitize_json_text(text)
+    if sanitized != text:
+        candidates.append(sanitized)
+    for cand in candidates:
+        try:
+            return json.loads(cand)
+        except json.JSONDecodeError:
             continue
-        depth = 0
-        in_str = False
-        esc = False
-        for i in range(start, len(text)):
-            ch = text[i]
-            if in_str:
-                if esc:
-                    esc = False
-                elif ch == "\\":
-                    esc = True
-                elif ch == '"':
-                    in_str = False
+    # Balanced-brace scan for the first JSON object/array (prose-wrapped
+    # replies), over raw and sanitized candidates.
+    for cand in candidates:
+        for open_ch, close_ch in (("{", "}"), ("[", "]")):
+            start = cand.find(open_ch)
+            if start == -1:
                 continue
-            if ch == '"':
-                in_str = True
-            elif ch == open_ch:
-                depth += 1
-            elif ch == close_ch:
-                depth -= 1
-                if depth == 0:
-                    return json.loads(text[start:i + 1])
+            depth = 0
+            in_str = False
+            esc = False
+            for i in range(start, len(cand)):
+                ch = cand[i]
+                if in_str:
+                    if esc:
+                        esc = False
+                    elif ch == "\\":
+                        esc = True
+                    elif ch == '"':
+                        in_str = False
+                    continue
+                if ch == '"':
+                    in_str = True
+                elif ch == open_ch:
+                    depth += 1
+                elif ch == close_ch:
+                    depth -= 1
+                    if depth == 0:
+                        try:
+                            return json.loads(cand[start:i + 1])
+                        except json.JSONDecodeError:
+                            break  # garbled object — try other candidates
     raise LLMError("no parseable JSON in reply")
 
 

@@ -36,6 +36,9 @@ LOUDNESS_TOL = 1.5
 TP_MAX = -1.0  # platform ceiling; loudnorm targets -1.5 with overshoot
 MAX_SILENCE_GAP = 3.0
 VISUAL_SCORE_MIN = 65
+# Any single shot below this floor fails VISUAL regardless of the average —
+# r5 shipped shots at 35/100 (near-black renders) hidden inside an avg of 80.
+SHOT_SCORE_FLOOR = 45
 MASTER_H = 1080
 MASTER_W = 1920
 MASTER_FPS = 30
@@ -201,6 +204,13 @@ def visual_gate(shot_reports: dict[str, dict]) -> dict:
     issues: list[str] = []
     if avg < VISUAL_SCORE_MIN:
         issues.append(f"average shot score {avg:.0f} < {VISUAL_SCORE_MIN}")
+    low = sorted(
+        (sid, r.get("score")) for sid, r in shot_reports.items()
+        if r.get("score") is not None and r.get("score") < SHOT_SCORE_FLOOR)
+    if low:
+        issues.append(
+            f"{len(low)} shot(s) below per-shot floor {SHOT_SCORE_FLOOR}: "
+            + ", ".join(f"{sid}={s:.0f}" for sid, s in low[:6]))
     if failing:
         issues.append(f"shots still failing QA: {failing}")
     return _gate("VISUAL", not issues,

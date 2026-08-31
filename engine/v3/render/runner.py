@@ -32,6 +32,49 @@ OFFLINE_AVAILABILITY: dict[str, bool] = {
 DEV_MODE = "dev"
 FULL_MODE = "full"
 
+# v4.1 algorithmic hardening: bump when render-side behavior changes so
+# drivers can detect and re-render stale records instead of reusing them.
+RENDER_ENGINE_REV = "v4.1"
+# A clip that badly undershoots its planned duration is a broken render
+# (frozen/black tail), not a conformable one — rejected at render time.
+DURATION_MIN_RATIO = 0.6
+
+
+def probe_video_duration(path: str | Path) -> float:
+    """Media duration (s) via ffprobe; -1.0 when unavailable."""
+    import subprocess
+
+    try:
+        out = subprocess.run(
+            ["ffprobe", "-v", "error", "-show_entries", "format=duration",
+             "-of", "csv=p=0", str(path)],
+            capture_output=True, text=True, timeout=30)
+        return float(out.stdout.strip())
+    except Exception:  # noqa: BLE001 — a probe must never break a render
+        return -1.0
+
+
+def record_is_stale(record: dict, shot: dict) -> str | None:
+    """Reason a render record must not be reused, or None when fresh.
+
+    Checks: missing artifact, engine-revision mismatch, and duration
+    undershoot vs the shot's planned duration (broken-render signature —
+    r5 shipped clips at 25% of plan).
+    """
+    path = record.get("path")
+    if not record.get("ok") or not path or not Path(path).exists():
+        return "no rendered artifact"
+    rev = (record.get("metadata") or {}).get("engine_rev")
+    if rev != RENDER_ENGINE_REV:
+        return f"engine_rev {rev!r} != {RENDER_ENGINE_REV!r}"
+    expected = float(shot.get("duration_sec") or 0)
+    if expected > 0:
+        actual = probe_video_duration(path)
+        if 0 < actual < expected * DURATION_MIN_RATIO:
+            return (f"clip {actual:.2f}s < "
+                    f"{DURATION_MIN_RATIO:.0%} of planned {expected:.2f}s")
+    return None
+
 
 def full_chain(shot: dict) -> list[str]:
     """§24 walk order for a shot: assigned renderer → fallback_renderer →
@@ -102,9 +145,23 @@ def render_shot(shot: dict, style: dict, out_dir: str | Path, *,
             # chain continues to a renderer that produces video.
             if path.exists() and path.suffix.lower() == ".mp4" \
                     and path.stat().st_size > 0:
+                # v4.1: a clip far shorter than planned is a broken render
+                # (S17 shipped at 1.4s vs 5.7s planned) — reject the attempt
+                # and keep walking the fallback chain.
+                expected = float(shot.get("duration_sec") or 0)
+                if expected > 0:
+                    actual = probe_video_duration(path)
+                    if 0 < actual < expected * DURATION_MIN_RATIO:
+                        attempts.append({
+                            "renderer": rid, "ok": False,
+                            "error": f"broken render: clip {actual:.2f}s < "
+                                     f"{DURATION_MIN_RATIO:.0%} of planned "
+                                     f"{expected:.2f}s"})
+                        continue
                 metadata = dict(result.metadata or {})
                 if extra_metadata:
                     metadata.update(extra_metadata)
+                metadata["engine_rev"] = RENDER_ENGINE_REV
                 return {
                     "shot_id": shot.get("shot_id", "?"), "ok": True,
                     "path": str(path), "renderer_used": rid,
