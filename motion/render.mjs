@@ -92,7 +92,7 @@ async function main() {
     const t = frame / totalFrames;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.globalAlpha = 1;
-    drawBackground(ctx, W, H, palette);
+    drawBackground(ctx, W, H, palette, frame);
 
     // ── V4 §4/§16 event layer: cues may arrive as compiled ops
     // (props.event_cues) or as raw template cues (props.micro_events);

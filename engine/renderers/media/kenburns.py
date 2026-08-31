@@ -258,8 +258,13 @@ def render_kenburns(
             n_inputs += 1
             inputs += ["-stream_loop", "-1", "-i", str(path)]
             out_lbl = f"ovl{i}"
-            graph += (f";[{ov_idx}:v]scale={width}:{height}[ovs{i}];"
-                      f"[{cur}][ovs{i}]"
+            # blend MUST run in RGB: in YUV the screen/multiply formula also
+            # hits the neutral chroma planes (128 → 192) and hue-rotates the
+            # whole frame (the r3.0 magenta/green wash regression).
+            graph += (f";[{cur}]format=rgb24[cur{i}];"
+                      f"[{ov_idx}:v]scale={width}:{height},format=rgb24"
+                      f"[ovs{i}];"
+                      f"[cur{i}][ovs{i}]"
                       f"blend=all_mode={blend}:all_opacity={opacity:.2f}"
                       f":shortest=1"
                       f"[{out_lbl}]")

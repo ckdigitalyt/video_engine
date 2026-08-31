@@ -272,26 +272,32 @@ def text_card_overuse_gate(master_audit: dict, shots: list[dict],
         "flat_fraction", 0.0))
     flat_note = ""
     if shot_audits:
-        dark_ids = {str(s.get("shot_id")): _shot_design(s)
-                    .get("dark_atmospheric") for s in shots}
-        dark_ids = {sid: d for sid, d in dark_ids.items()
-                    if isinstance(d, dict) and d.get("justification")}
+        def _excluded_design(s):
+            d = _shot_design(s)
+            for key in ("dark_atmospheric", "designed_graphic"):
+                v = d.get(key)
+                if isinstance(v, dict) and v.get("justification"):
+                    return key, v["justification"]
+            return None
+        dark_ids = {str(s.get("shot_id")): _excluded_design(s)
+                    for s in shots}
+        dark_ids = {sid: kv for sid, kv in dark_ids.items() if kv}
         total_flat = sum(float(a.get("black_flat", {}).get("flat_sec", 0.0))
                          for a in shot_audits.values())
         excluded_flat = 0.0
-        for sid, d in dark_ids.items():
+        for sid, (key, just) in dark_ids.items():
             if sid in shot_audits:
                 excluded_flat += float(shot_audits[sid].get("black_flat", {})
                                        .get("flat_sec", 0.0))
-                excluded.append(f"{sid} ({d['justification'][:80]})")
+                excluded.append(f"{sid} [{key}] ({just[:70]})")
         total_dur = float(master_audit.get("visual_event_density", {})
                           .get("duration_sec", 0.0))
         if total_dur > 0 and total_flat > 0:
             flat_fraction = round((total_flat - excluded_flat) / total_dur, 4)
-            flat_note = (f"; excluded {len(excluded)} design-approved dark "
-                         f"atmospheric shot(s): {', '.join(excluded)} "
-                         f"[rule: dark_atmospheric flag + plan-time "
-                         f"justification, logged here]")
+            flat_note = (f"; excluded {len(excluded)} design-approved shot(s): "
+                         f"{', '.join(excluded)} [rule: dark_atmospheric / "
+                         f"designed_graphic flag + plan-time justification, "
+                         f"logged here]")
     issues: list[str] = []
     if flat_fraction >= FLAT_CARD_MAX_FRACTION:
         issues.append(

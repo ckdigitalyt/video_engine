@@ -86,6 +86,46 @@ DARK_ATMOSPHERIC: dict[str, str] = {
            "volcanic grade, shot design not a text card",
 }
 
+# Motion Canvas EXPLANATORY graphics: data-driven plates (timeline events,
+# stat bars, lineage diagram) whose dark template aesthetic registers as
+# "flat" at analysis resolution. Not narration-repeat text cards (§13):
+# each carries real shot data and no verbatim narration overlay.
+DESIGNED_GRAPHIC: dict[str, str] = {
+    "S07": "impact-marker map plate — data-driven Motion Canvas "
+           "explanatory graphic, not a narration-repeat label",
+    "S12": "cascading-collapse timeline — data-driven Motion Canvas "
+           "explanatory graphic, not a narration-repeat label",
+    "S15": "giants-vs-survivors split-screen — data-driven comparison "
+           "graphic, not a narration-repeat label",
+    "S17": "forest-state stat bars — data-driven Motion Canvas "
+           "explanatory graphic, not a narration-repeat label",
+    "S19": "lineage diagram — data-driven Motion Canvas explanatory "
+           "graphic, not a narration-repeat label",
+}
+
+# §22 selective-regen precedent (r1/r2 render_records): S14's pixi scene
+# references a PLATE asset that was never generated, so the pixi render is
+# an empty near-black frame; every prior iteration rerouted it.
+REROUTE_RENDERER: dict[str, tuple[str, str]] = {
+    "S14": ("AI_IMAGE_MOTION",
+            "pixi scene references never-generated PLATE_S14 — §22 reroute "
+            "to AI_IMAGE_MOTION (same routing as r1/r2)"),
+}
+
+# S20: keep PIXIJS (it carries the §17 scene-animation mandate) but point
+# the scene at REAL library assets — pull-out camera on a t_rex character
+# over the jungle backdrop tells the shrinking-scale story (§5: what should
+# the viewer SEE before renderer choice).
+S20_SCENE_OVERRIDE: dict = {
+    "background": {"asset": "jungle", "depth": 1.0, "scale": 1.15},
+    "characters": [{"type": "t_rex", "position": [0.5, 0.88],
+                    "action": "idle", "scale": 0.9}],
+    "camera": {"move": "pull_out", "duration": 3.5},
+    "particles": {"kind": "dust", "count": 40},
+    "atmosphere": None,
+    "props_objects": [],
+}
+
 
 def apply_edits(script_doc: dict, shots: list[dict]) -> tuple[dict, list[dict], dict]:
     """Return (edited_script, edited_shots, edit_log). Pure; no mutation."""
@@ -96,11 +136,28 @@ def apply_edits(script_doc: dict, shots: list[dict]) -> tuple[dict, list[dict], 
 
     by_id = {str(s.get("shot_id")): s for s in working}
 
-    # R1/R2: remove shots (with their beat sentences per R6)
+    # R1/R2: remove shots (with their beat sentences per R6); redistribute
+    # the removed shot's planned duration to its beat siblings so the beat's
+    # planned total stays ≈ its narration duration — otherwise assembly
+    # clone-pads the remaining clip's tail (frozen frames → static hold).
     for sid in REMOVE_SHOTS:
-        if sid in by_id:
-            working.remove(by_id[sid])
-            log["removed_shots"].append(sid)
+        shot = by_id.get(sid)
+        if shot is None:
+            continue
+        bid = (shot.get("metadata") or {}).get("beat_id")
+        siblings = [s for s in working
+                    if (s.get("metadata") or {}).get("beat_id") == bid
+                    and s is not shot]
+        removed = float(shot.get("duration_sec") or 0)
+        pool = sum(float(s.get("duration_sec") or 0) for s in siblings)
+        for s in siblings:
+            share = float(s.get("duration_sec") or 0) / pool if pool else 0
+            s["duration_sec"] = round(
+                float(s.get("duration_sec") or 0) + removed * share, 2)
+        working.remove(shot)
+        log["removed_shots"].append(
+            {"shot_id": sid, "duration_redistributed_sec": removed,
+             "to": [s["shot_id"] for s in siblings]})
 
     # R3–R7: narration trims
     for beat in script_doc.get("beats", []):
@@ -123,10 +180,65 @@ def apply_edits(script_doc: dict, shots: list[dict]) -> tuple[dict, list[dict], 
             s.setdefault("design", {})["dark_atmospheric"] = {
                 "justification": DARK_ATMOSPHERIC[sid]}
             log["design_metadata"][sid] = "dark_atmospheric"
+        if sid in DESIGNED_GRAPHIC:
+            s.setdefault("design", {})["designed_graphic"] = {
+                "justification": DESIGNED_GRAPHIC[sid]}
+            log["design_metadata"][sid] = "designed_graphic"
         # design.approved_hold: deliberately none — holds are fixed
         # renderer-side via the §16 motion toolkit event layer.
 
+    # §22 renderer reroutes (S14) — logged, fallback preserved
+    for s in working:
+        sid = str(s.get("shot_id"))
+        if sid in REROUTE_RENDERER:
+            new_rid, why = REROUTE_RENDERER[sid]
+            s["fallback_renderer"] = s.get("renderer")
+            s["renderer"] = new_rid
+            s.setdefault("metadata", {})["reroute_rationale"] = why
+            log["rerouted"] = log.get("rerouted", []) + [
+                {"shot_id": sid, "to": new_rid, "why": why}]
+        if sid == "S20":
+            s.setdefault("motion", {})["scene"] = dict(S20_SCENE_OVERRIDE)
+            log["scene_fix"] = log.get("scene_fix", []) + [
+                {"shot_id": sid,
+                 "why": "scene pointed at never-generated PLATE_S20; "
+                        "rewritten to real library assets (jungle + "
+                        "t_rex + pull_out camera)"}]
+
+    # avoid identical consecutive compositions after removals (VARIETY)
+    _dedupe_compositions(working, log)
     return script_doc, working, log
+
+
+def _composition_class(shot: dict) -> str:
+    comp = str(shot.get("composition") or "").lower()
+    for marker in ("wide", "close", "overhead", "profile", "macro",
+                   "aerial", "diagram", "typography"):
+        if marker in comp:
+            return marker
+    return "default"
+
+
+def _dedupe_compositions(shots: list[dict], log: dict) -> None:
+    alternates = ["wide establishing", "close-up detail",
+                  "overhead graphic", "medium shot", "silhouette wide"]
+    fixed: list[dict] = []
+    prev_cls: str | None = None
+    idx = 0
+    for s in shots:
+        cls = _composition_class(s)
+        if prev_cls is not None and cls == prev_cls:
+            for alt in alternates:
+                if _composition_class({"composition": alt}) != prev_cls:
+                    fixed.append({"shot_id": s["shot_id"],
+                                  "from": s.get("composition"), "to": alt})
+                    s["composition"] = alt
+                    cls = _composition_class(s)
+                    break
+        prev_cls = cls
+        idx += 1
+    if fixed:
+        log["composition_fixes"] = fixed
 
 
 def summary(shots: list[dict]) -> float:
