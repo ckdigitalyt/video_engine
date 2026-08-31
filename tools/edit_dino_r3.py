@@ -43,6 +43,10 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 REMOVE_SHOTS = ("S02", "S10")
+# r3.2 recut EXPERIMENT: CREATIVE top cut (remove S04, narration duplicates
+# S03) was executed once per the max-1-recut rule and REGRESSED the artifact
+# (VARIETY/SHOT_DIVERSITY maxrun 3, CREATIVE 4.5→4.2, timeline vision 25→12).
+# Reverted; the redundancy complaint is recorded as a blocked editorial item.
 
 NARRATION_TRIMS: dict[str, tuple[str, str]] = {
     # beat_id: (old, new) — applied verbatim; no-op if old not found
@@ -131,6 +135,8 @@ STILL_OVERRIDES: dict[str, str] = {
            "5ab2689e51f674b3bf7c.png",
     "S08": "cache/broker/b1/b1655780164391a0c827e45c59cf8fba20558fba6ace0"
            "9cb17ed623d4e198508.png",
+    "S22": "cache/broker/5c/5c1fd3b143bf2147e3a8645919c826e0e85ae9b3ecaf6"
+           "fee96646398368c1790.png",
 }
 
 # S15: the before_after template drew flat color panels with no subjects
