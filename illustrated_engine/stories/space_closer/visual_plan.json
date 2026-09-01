@@ -1,0 +1,570 @@
+{
+  "story_id": "space_closer",
+  "version": 2,
+  "aligned_to_reference": "2026-09-01 tmp/ReferenceVideo.MP4 \u2014 vintage scientific plates, navy title band + artwork panel + phrase captions",
+  "format": "9:16",
+  "render": {
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "panel": {
+      "x": 0,
+      "y": 460,
+      "w": 1080,
+      "h": 780
+    },
+    "title_band": {
+      "y": 120,
+      "h": 320,
+      "color": "#1B2A4A",
+      "title": "SPACE IS / CLOSER THAN / YOU THINK"
+    },
+    "caption_zone": {
+      "y": 1240,
+      "h": 340
+    }
+  },
+  "style_seed": "vintage 1950s aerospace scientific plate, aged parchment cream paper #E9DFC8, ink and sepia line-and-wash illustration, faded handwritten annotations and dimension lines, muted rust accent #B4552D, slate #6E7F91 secondary lines, deep navy ink wash #1B2A4A, soft vignette, matte, no photorealism, no readable modern text",
+  "duration_target_s": 60,
+  "note": "Durations are pre-TTS estimates; edit_plan.json (built from measured narration audio) is authoritative for render. All camera coords are normalized to the plate asset; compositor maps motion into the panel window (y 460-1240).",
+  "assets_planned": [
+    {
+      "asset_id": "A1_earth_limb_plate",
+      "type": "ai_illustration",
+      "resolution": "1536x1024",
+      "concept": "vintage scientific plate: Earth's curved horizon seen from low orbit at the day-night terminator, thin atmosphere band rendered as ink-and-wash glow along the limb, small hand-drawn stars, faded handwritten annotations with dimension lines marking the atmosphere layer, parchment ground with aged mottling",
+      "key_regions": [
+        "atmosphere band (center band of plate)",
+        "full limb composition",
+        "dark space upper third"
+      ],
+      "used_by": [
+        "S01",
+        "S02"
+      ]
+    },
+    {
+      "asset_id": "A2_karman_engineer_plate",
+      "type": "ai_illustration",
+      "resolution": "1536x1024",
+      "concept": "vintage engineering folio plate: silhouette of a 1940s engineer at a drafting table under a lamp, chalk equations and a thin-wing aircraft profile sketch on a board behind him, ink and sepia wash, faded annotations, rust lamp-glow accent, parchment ground",
+      "key_regions": [
+        "figure (left two-thirds)",
+        "board sketch with wing profile (right third)",
+        "equations (upper right)"
+      ],
+      "used_by": [
+        "S03",
+        "S04"
+      ]
+    },
+    {
+      "asset_id": "A3_altitude_ladder",
+      "type": "programmatic_diagram",
+      "resolution": "1536x1024 (Pillow, vintage chart style)",
+      "concept": "vintage altitude chart on parchment: vertical scale 0-500 km in ink, tick marks every 100 km, landmark dots with faded labels \u2014 jet 10 km, meteor 80 km, Karman line 100 km (rust dashed horizontal line), aurora 150 km, ISS 400 km; ink leader lines, plate margins, aged paper texture",
+      "key_regions": [
+        "full ladder",
+        "10 km marker region",
+        "100 km dashed line"
+      ],
+      "used_by": [
+        "S06"
+      ]
+    },
+    {
+      "asset_id": "A4_meteor_aurora_plate",
+      "type": "ai_illustration",
+      "resolution": "1536x1024",
+      "concept": "vintage scientific plate: night sky over a dark mountain ridge silhouette rendered in ink wash, one bright meteor streak with long fading trail mid-frame, green-slate aurora curtain in the upper third drawn as layered ink strokes, faded handwritten labels, parchment ground",
+      "key_regions": [
+        "meteor streak (center)",
+        "aurora curtain (upper third)",
+        "ridge (bottom)"
+      ],
+      "used_by": [
+        "S07",
+        "S08"
+      ]
+    },
+    {
+      "asset_id": "A5_station_plate",
+      "type": "ai_illustration",
+      "resolution": "1536x1024",
+      "concept": "vintage technical illustration of a modular space station silhouetted against Earth's limb from orbit: thin atmosphere line hugging the curve in slate-and-rust ink, deep navy space wash, dimension lines and handwritten measurements around the station, parchment ground",
+      "key_regions": [
+        "station (upper-center)",
+        "atmosphere line (lower third)",
+        "dimension annotations (right)"
+      ],
+      "used_by": [
+        "S09",
+        "S10"
+      ]
+    },
+    {
+      "asset_id": "A6_jet_climb_plate",
+      "type": "ai_illustration",
+      "resolution": "1536x1024",
+      "concept": "vintage aviation plate: small passenger jet climbing a steep diagonal through layered sky bands drawn as ink washes from warm low haze to deep navy, thin cloud streaks, altitude hatch marks along the climb path, faded labels, parchment ground",
+      "key_regions": [
+        "jet (lower-center diagonal)",
+        "upper sky layers",
+        "hatch marks"
+      ],
+      "used_by": [
+        "S05"
+      ]
+    },
+    {
+      "asset_id": "A7_payoff_arc_plate",
+      "type": "ai_illustration",
+      "resolution": "1536x1024",
+      "concept": "vintage narrative sequence plate: curved dashed trajectory arc rising from a tiny road with a car, past a climbing jet, to a small rocket breaking through a rust-dashed line marked with a handwritten label reading '100 KM' at the arc apex, figures progressing left to right in ink and sepia, parchment ground",
+      "key_regions": [
+        "full arc (left-to-right)",
+        "apex rust line (upper right)",
+        "road start (lower left)"
+      ],
+      "used_by": [
+        "S11",
+        "S12"
+      ]
+    }
+  ],
+  "beats": [
+    {
+      "beat_id": "B1",
+      "narration_ref": "hook",
+      "duration_est": 6.839,
+      "shots": [
+        {
+          "shot_id": "S01",
+          "asset": "A1_earth_limb_plate",
+          "camera": {
+            "primitive": "ZOOM_IN",
+            "from": {
+              "w": 1.0,
+              "cx": 0.5,
+              "cy": 0.5
+            },
+            "to": {
+              "w": 0.78,
+              "cx": 0.5,
+              "cy": 0.48
+            }
+          },
+          "duration_est": 5.0,
+          "overlays": [],
+          "typography": [
+            {
+              "kind": "NUMBER_POP",
+              "text": "100 KM",
+              "at": 0.6,
+              "pos": "panel-lower-third",
+              "font": "display",
+              "color": "rust"
+            }
+          ],
+          "captions": "phrase",
+          "transition_in": "FADE",
+          "emphasis": "atmosphere band"
+        },
+        {
+          "shot_id": "S02",
+          "asset": "A1_earth_limb_plate",
+          "camera": {
+            "primitive": "PUSH_IN",
+            "from": {
+              "w": 0.78,
+              "cx": 0.5,
+              "cy": 0.48
+            },
+            "to": {
+              "w": 0.58,
+              "cx": 0.5,
+              "cy": 0.5
+            }
+          },
+          "duration_est": 4.0,
+          "overlays": [
+            {
+              "kind": "HIGHLIGHT",
+              "target": "atmosphere_band",
+              "at": 0.35,
+              "style": "rust_circle"
+            }
+          ],
+          "typography": [],
+          "captions": "phrase",
+          "transition_in": "CUT",
+          "emphasis": "atmosphere band detail"
+        }
+      ]
+    },
+    {
+      "beat_id": "B2",
+      "narration_ref": "karman_line",
+      "duration_est": 6.29,
+      "shots": [
+        {
+          "shot_id": "S03",
+          "asset": "A2_karman_engineer_plate",
+          "camera": {
+            "primitive": "DIAGONAL_PAN",
+            "from": {
+              "w": 0.95,
+              "cx": 0.42,
+              "cy": 0.45
+            },
+            "to": {
+              "w": 0.8,
+              "cx": 0.52,
+              "cy": 0.5
+            }
+          },
+          "duration_est": 5.0,
+          "overlays": [],
+          "typography": [],
+          "captions": "phrase",
+          "transition_in": "CUT",
+          "emphasis": "figure at drafting table"
+        },
+        {
+          "shot_id": "S04",
+          "asset": "A2_karman_engineer_plate",
+          "camera": {
+            "primitive": "PUSH_IN",
+            "from": {
+              "w": 0.8,
+              "cx": 0.52,
+              "cy": 0.5
+            },
+            "to": {
+              "w": 0.6,
+              "cx": 0.72,
+              "cy": 0.42
+            }
+          },
+          "duration_est": 4.5,
+          "overlays": [
+            {
+              "kind": "ARROW_DRAW",
+              "from": "lower-left",
+              "to": "board_sketch",
+              "at": 0.4,
+              "style": "ink"
+            },
+            {
+              "kind": "CALLOUT",
+              "text": "where wings stop working",
+              "at": 0.55,
+              "anchor": "board_sketch",
+              "style": "ink_hand"
+            }
+          ],
+          "typography": [],
+          "captions": "phrase",
+          "transition_in": "CUT",
+          "emphasis": "wing profile sketch"
+        }
+      ]
+    },
+    {
+      "beat_id": "B3",
+      "narration_ref": "scale_jet",
+      "duration_est": 8.145,
+      "shots": [
+        {
+          "shot_id": "S05",
+          "asset": "A6_jet_climb_plate",
+          "camera": {
+            "primitive": "PAN_UP",
+            "from": {
+              "w": 1.0,
+              "cx": 0.5,
+              "cy": 0.68
+            },
+            "to": {
+              "w": 0.9,
+              "cx": 0.5,
+              "cy": 0.38
+            }
+          },
+          "duration_est": 4.5,
+          "overlays": [],
+          "typography": [
+            {
+              "kind": "NUMBER_POP",
+              "text": "10 KM",
+              "at": 0.5,
+              "pos": "near-jet",
+              "font": "display",
+              "color": "ink"
+            }
+          ],
+          "captions": "phrase",
+          "transition_in": "CUT",
+          "emphasis": "jet on climb path"
+        },
+        {
+          "shot_id": "S06",
+          "asset": "A3_altitude_ladder",
+          "camera": {
+            "primitive": "CROP_REVEAL",
+            "from": {
+              "w": 1.0,
+              "cx": 0.5,
+              "cy": 0.8
+            },
+            "to": {
+              "w": 0.95,
+              "cx": 0.5,
+              "cy": 0.3
+            }
+          },
+          "duration_est": 5.0,
+          "overlays": [
+            {
+              "kind": "HIGHLIGHT",
+              "target": "marker_10km",
+              "at": 0.45,
+              "style": "rust_circle"
+            }
+          ],
+          "typography": [
+            {
+              "kind": "CALLOUT",
+              "text": "a rounding error",
+              "at": 0.6,
+              "anchor": "marker_10km",
+              "style": "ink_hand"
+            }
+          ],
+          "captions": "phrase",
+          "transition_in": "CROSSFADE",
+          "emphasis": "10 km vs 100 km gap"
+        }
+      ]
+    },
+    {
+      "beat_id": "B4",
+      "narration_ref": "sky_misbehaves",
+      "duration_est": 8.589,
+      "shots": [
+        {
+          "shot_id": "S07",
+          "asset": "A4_meteor_aurora_plate",
+          "camera": {
+            "primitive": "PAN_UP",
+            "from": {
+              "w": 0.95,
+              "cx": 0.5,
+              "cy": 0.6
+            },
+            "to": {
+              "w": 0.85,
+              "cx": 0.5,
+              "cy": 0.35
+            }
+          },
+          "duration_est": 5.5,
+          "overlays": [
+            {
+              "kind": "CALLOUT",
+              "text": "75-100 KM",
+              "at": 0.4,
+              "anchor": "meteor",
+              "style": "ink_hand"
+            }
+          ],
+          "typography": [],
+          "captions": "phrase",
+          "transition_in": "CUT",
+          "emphasis": "meteor streak"
+        },
+        {
+          "shot_id": "S08",
+          "asset": "A4_meteor_aurora_plate",
+          "camera": {
+            "primitive": "ZOOM_IN",
+            "from": {
+              "w": 0.85,
+              "cx": 0.5,
+              "cy": 0.35
+            },
+            "to": {
+              "w": 0.62,
+              "cx": 0.5,
+              "cy": 0.18
+            }
+          },
+          "duration_est": 4.5,
+          "overlays": [],
+          "typography": [
+            {
+              "kind": "NUMBER_POP",
+              "text": "150 KM",
+              "at": 0.45,
+              "pos": "panel-upper",
+              "font": "display",
+              "color": "ink"
+            }
+          ],
+          "captions": "phrase",
+          "transition_in": "CUT",
+          "emphasis": "aurora curtain"
+        }
+      ]
+    },
+    {
+      "beat_id": "B5",
+      "narration_ref": "astronauts",
+      "duration_est": 10.653,
+      "shots": [
+        {
+          "shot_id": "S09",
+          "asset": "A5_station_plate",
+          "camera": {
+            "primitive": "PUSH_IN",
+            "from": {
+              "w": 1.0,
+              "cx": 0.5,
+              "cy": 0.45
+            },
+            "to": {
+              "w": 0.62,
+              "cx": 0.5,
+              "cy": 0.35
+            }
+          },
+          "duration_est": 5.0,
+          "overlays": [],
+          "typography": [
+            {
+              "kind": "NUMBER_POP",
+              "text": "400 KM",
+              "at": 0.55,
+              "pos": "near-station",
+              "font": "display",
+              "color": "rust"
+            }
+          ],
+          "captions": "phrase",
+          "transition_in": "CUT",
+          "emphasis": "station"
+        },
+        {
+          "shot_id": "S10",
+          "asset": "A5_station_plate",
+          "camera": {
+            "primitive": "PULL_OUT",
+            "from": {
+              "w": 0.62,
+              "cx": 0.5,
+              "cy": 0.35
+            },
+            "to": {
+              "w": 0.95,
+              "cx": 0.5,
+              "cy": 0.5
+            }
+          },
+          "duration_est": 5.0,
+          "overlays": [
+            {
+              "kind": "HIGHLIGHT",
+              "target": "atmosphere_line",
+              "at": 0.4,
+              "style": "rust_circle"
+            },
+            {
+              "kind": "CALLOUT",
+              "text": "still inside the atmosphere",
+              "at": 0.6,
+              "anchor": "atmosphere_line",
+              "style": "ink_hand"
+            }
+          ],
+          "typography": [],
+          "captions": "phrase",
+          "transition_in": "CUT",
+          "emphasis": "thin atmosphere line"
+        }
+      ]
+    },
+    {
+      "beat_id": "B6",
+      "narration_ref": "payoff",
+      "duration_est": 6.499,
+      "shots": [
+        {
+          "shot_id": "S11",
+          "asset": "A7_payoff_arc_plate",
+          "camera": {
+            "primitive": "DIAGONAL_PAN",
+            "from": {
+              "w": 0.95,
+              "cx": 0.28,
+              "cy": 0.62
+            },
+            "to": {
+              "w": 0.75,
+              "cx": 0.62,
+              "cy": 0.38
+            }
+          },
+          "duration_est": 4.5,
+          "overlays": [],
+          "typography": [],
+          "captions": "phrase",
+          "transition_in": "CROSSFADE",
+          "emphasis": "arc road-to-space"
+        },
+        {
+          "shot_id": "S12",
+          "asset": "A7_payoff_arc_plate",
+          "camera": {
+            "primitive": "PUSH_IN",
+            "from": {
+              "w": 0.75,
+              "cx": 0.62,
+              "cy": 0.38
+            },
+            "to": {
+              "w": 0.6,
+              "cx": 0.72,
+              "cy": 0.25
+            }
+          },
+          "duration_est": 4.0,
+          "overlays": [
+            {
+              "kind": "HIGHLIGHT",
+              "target": "apex_100km",
+              "at": 0.4,
+              "style": "rust_circle"
+            }
+          ],
+          "typography": [
+            {
+              "kind": "TEXT_REVEAL",
+              "text": "RIGHT ABOVE THE CLOUDS",
+              "at": 0.35,
+              "pos": "caption_zone",
+              "font": "display",
+              "color": "offwhite",
+              "mode": "word"
+            }
+          ],
+          "captions": "none_final_card",
+          "transition_in": "CUT",
+          "end_card": "SPACE IS CLOSER THAN YOU THINK",
+          "emphasis": "apex rust line"
+        }
+      ]
+    }
+  ],
+  "video_generation": false,
+  "external_footage": false
+}

@@ -1,0 +1,72 @@
+{
+  "story_id": "space_closer",
+  "title": "Space Is Closer Than You Think",
+  "premise": "The official boundary of space — the Kármán line — is only 100 km up, a scale almost nobody feels intuitively. Laddering up through the atmosphere makes that number visceral.",
+  "target_audience": "Curious general audience, science/tech Shorts viewers, 9:16 vertical",
+  "hook": "Space is closer than you think — just one hundred kilometers straight up. You could drive there in an hour.",
+  "emotional_purpose": "Awe through scale; reframe 'space' as near, not far",
+  "curiosity_mechanism": "Number shock + escalating altitude ladder; each beat reveals a higher, stranger landmark",
+  "payoff": "Space isn't far away. It's right above the clouds — the doorway is just very, very high.",
+  "language": "en",
+  "beats": [
+    {
+      "beat_id": "B1",
+      "label": "Hook — 100 km",
+      "narration": "Space is closer than you think — just one hundred kilometers straight up. You could drive there in an hour.",
+      "why_continue": "Number shock + absurd comparison (drivable distance) demands justification",
+      "emotional_purpose": "Surprise"
+    },
+    {
+      "beat_id": "B2",
+      "label": "The Kármán line",
+      "narration": "It's called the Kármán line — the altitude where the air gets too thin for wings to matter.",
+      "why_continue": "Names the mystery; origin story of the boundary",
+      "emotional_purpose": "Recognition / intrigue"
+    },
+    {
+      "beat_id": "B3",
+      "label": "Scale — the jet",
+      "narration": "Because here's the thing: a passenger jet cruises at ten kilometers. From the edge of space, that's a rounding error.",
+      "why_continue": "Scale punchline; familiar reference (jet) humbled",
+      "emotional_purpose": "Delight at scale"
+    },
+    {
+      "beat_id": "B4",
+      "label": "The sky misbehaves",
+      "narration": "Keep climbing and the sky stops behaving. Meteors burn out around eighty kilometers. Auroras ripple a hundred and fifty up.",
+      "why_continue": "Visual spectacle + two new altitude landmarks",
+      "emotional_purpose": "Wonder"
+    },
+    {
+      "beat_id": "B5",
+      "label": "Astronauts barely made it",
+      "narration": "And the International Space Station? Four hundred kilometers. Astronauts float there — but they're barely past the doorway, still skimming the top of the atmosphere.",
+      "why_continue": "Reframe of a famous fact; 'barely past the doorway' twist",
+      "emotional_purpose": "Reassessment"
+    },
+    {
+      "beat_id": "B6",
+      "label": "Payoff",
+      "narration": "Space isn't far away. It's right above the clouds — the doorway is just very, very high.",
+      "why_continue": "Payoff line + end card; loopable closer",
+      "emotional_purpose": "Satisfaction / awe"
+    }
+  ],
+  "factual_claims": [
+    {"claim": "The FAI recognizes 100 km above sea level as the boundary of space (Kármán line).", "source": "FAI Sporting Code, Section 8 — Astronautics (fai.org)", "verified": "canonical, widely documented"},
+    {"claim": "Passenger jets cruise around 10–12 km (~35,000–40,000 ft).", "source": "FAA / NOAA JetStream", "verified": "canonical"},
+    {"claim": "Meteors become visible ~75–120 km and mostly disintegrate below ~95 km.", "source": "Wikipedia 'Meteor'; American Meteor Society", "verified": "2026-09-01 web search"},
+    {"claim": "Green auroras typically occur 100–150 km up; during strong storms activity can extend beyond 300 km.", "source": "NOAA SWPC (spaceweather.gov aurora tutorial); UCAR SciEd; DLR", "verified": "2026-09-01 web search"},
+    {"claim": "The ISS orbits at roughly 400 km altitude.", "source": "NASA ISS Facts", "verified": "canonical"},
+    {"claim": "The Kármán line marks roughly the altitude where the air is too thin for aerodynamic lift to sustain flight at orbital speeds.", "source": "FAI rationale", "verified": "canonical, simplified for narration"}
+  ],
+  "sources": [
+    "https://www.fai.org/Fai/official-records/sporting-code (FAI Sporting Code Sec. 8)",
+    "https://www.noaa.gov/jetstream/atmosphere/layers-of-atmosphere",
+    "https://www.spaceweather.gov/content/aurora-tutorial",
+    "https://scied.ucar.edu/learning-zone/sun-space-weather/aurora",
+    "https://en.wikipedia.org/wiki/Meteor",
+    "https://www.nasa.gov/faq/ (ISS facts)"
+  ],
+  "style_note": "No generic intro. Hook lands within 2 seconds. Numbers are the stars — typography carries them."
+}

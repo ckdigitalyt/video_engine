@@ -1,0 +1,62 @@
+{
+  "palette": {
+    "offwhite": "#F5F1E8",
+    "ink": "#2A2118",
+    "navy": "#1B2A4A",
+    "rust": "#B4552D",
+    "slate": "#6E7F91",
+    "parchment": "#E9DFC8",
+    "amber": "#B4552D",
+    "cyan": "#6E7F91",
+    "indigo": "#1B2A4A",
+    "white": "#FFFFFF",
+    "black": "#000000",
+    "number_default_color": "rust"
+  },
+  "fonts": {
+    "caption": {
+      "path": "assets/fonts/Inter-Variable.ttf",
+      "family": "Inter",
+      "fallback_family": "DejaVu Sans",
+      "fallback_bold": false
+    },
+    "number": {
+      "path": "assets/fonts/BebasNeue-Regular.ttf",
+      "family": "Bebas Neue",
+      "fallback_family": "DejaVu Sans",
+      "fallback_bold": true
+    },
+    "endcard": {
+      "path": "assets/fonts/ArchivoBlack-Regular.ttf",
+      "family": "Archivo Black",
+      "fallback_family": "DejaVu Sans",
+      "fallback_bold": false
+    }
+  },
+  "sizes": {
+    "caption": 58,
+    "number": 150,
+    "endcard": 64
+  },
+  "safe": {
+    "x0": 40,
+    "x1": 40,
+    "margin_v": 340,
+    "caption_wrap_w": 980
+  },
+  "outline": {
+    "caption": 4,
+    "number": 3,
+    "endcard": 3
+  },
+  "title_band": {
+    "y": 120,
+    "h": 320,
+    "color": "navy",
+    "text_color": "offwhite",
+    "font_size": 78,
+    "line_step": 94,
+    "lines": ["SPACE IS", "CLOSER THAN", "YOU THINK"]
+  },
+  "panel": {"x": 0, "y": 460, "w": 1080, "h": 780}
+}
