@@ -11,7 +11,10 @@ Covers the four systemic failure classes found in the r4/r5 dino_v2 passes:
 
 import pytest
 
+import subprocess
+
 from engine.v3.assemble.assembler import MAX_CONFORM_STRETCH, fit_beat_durations
+from engine.v3.qa.technical import chroma_stats
 from engine.v3.qa.video_qa import SHOT_SCORE_FLOOR, VISUAL_SCORE_MIN, visual_gate
 from engine.v3.render.runner import RENDER_ENGINE_REV, record_is_stale
 from engine.v3.story.llm import LLMError, extract_json
@@ -145,3 +148,23 @@ class TestExtractJson:
     def test_garbage_raises_llm_error(self):
         with pytest.raises(LLMError):
             extract_json("no json here at all")
+
+
+class TestChromaStats:
+    """r5 S23/S24 shipped uniform green monochrome stills unnoticed."""
+
+    def test_uniform_green_flagged(self, tmp_path):
+        png = tmp_path / "green.png"
+        subprocess.run(
+            ["ffmpeg", "-y", "-f", "lavfi", "-i", "color=c=0x00AA00:s=64x64",
+             "-frames:v", "1", str(png)], capture_output=True, check=True)
+        stats = chroma_stats(png)
+        assert stats["available"] and stats["cast"]
+
+    def test_neutral_gray_passes(self, tmp_path):
+        png = tmp_path / "gray.png"
+        subprocess.run(
+            ["ffmpeg", "-y", "-f", "lavfi", "-i", "color=c=gray:s=64x64",
+             "-frames:v", "1", str(png)], capture_output=True, check=True)
+        stats = chroma_stats(png)
+        assert stats["available"] and not stats["cast"]

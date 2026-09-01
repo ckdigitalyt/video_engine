@@ -20,6 +20,9 @@ FPS_TARGET = 30.0
 FPS_TOLERANCE = 1.0
 BLACK_FRACTION_MAX = 0.5
 SILENCE_FRACTION_MAX = 0.9
+# Mean-chroma deviation from neutral (128) that counts as a uniform cast —
+# r5 shipped S23/S24 at U≈75/V≈78 (green monochrome) unnoticed.
+CHROMA_CAST_LIMIT = 25.0
 
 
 class FFProbeError(RuntimeError):
@@ -117,6 +120,44 @@ def silence_stats(path: str | Path, duration: float | None = None) -> dict:
             "fraction": round(frac, 4)}
 
 
+def chroma_stats(path: str | Path) -> dict:
+    """Mean chroma (U/V) over a clip/still — detects uniform color casts.
+
+    Neutral chroma is 128; a whole-frame green cast (the r5 S23/S24
+    green-screen-bleed class) shows both channels depressed together.
+    """
+    exe = shutil.which("ffprobe") or "ffprobe"
+    src = Path(path).resolve()
+    try:
+        proc = subprocess.run(
+            [exe, "-v", "error", "-f", "lavfi",
+             "-i", f"movie={src},signalstats",
+             "-show_entries",
+             "frame_tags=lavfi.signalstats.UAVG,lavfi.signalstats.VAVG",
+             "-of", "csv=p=0"],
+            capture_output=True, text=True, timeout=120)
+        us: list[float] = []
+        vs: list[float] = []
+        for line in proc.stdout.splitlines():
+            parts = line.split(",")
+            if len(parts) >= 2:
+                try:
+                    us.append(float(parts[0]))
+                    vs.append(float(parts[1]))
+                except ValueError:
+                    continue
+        if not us:
+            return {"available": False}
+        u = sum(us) / len(us)
+        v = sum(vs) / len(vs)
+        return {"available": True, "u": round(u, 1), "v": round(v, 1),
+                "frames": len(us),
+                "cast": max(abs(u - 128.0), abs(v - 128.0))
+                > CHROMA_CAST_LIMIT}
+    except Exception:  # noqa: BLE001 — a probe must never break QA
+        return {"available": False}
+
+
 def decode_errors(path: str | Path) -> int:
     """Count decode errors (file integrity)."""
     exe = shutil.which("ffmpeg")
@@ -185,6 +226,13 @@ def technical_qa(path: str | Path, expected_duration: float, *,
     gate("black_frames", blacks["fraction"] <= BLACK_FRACTION_MAX,
          f"black {blacks['fraction'] * 100:.1f}% "
          f"(longest {blacks['longest_run']}s)")
+
+    # Uniform color cast (r5 S23/S24 green-bleed class).
+    chroma = chroma_stats(p)
+    if chroma.get("available"):
+        gate("color_cast", not chroma["cast"],
+             f"mean chroma U={chroma['u']} V={chroma['v']} "
+             f"(cast limit ±{CHROMA_CAST_LIMIT})")
 
     # Silence (audio-bearing shots only — v3 shots are silent by design).
     if expect_audio:

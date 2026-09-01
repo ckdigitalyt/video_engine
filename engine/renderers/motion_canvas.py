@@ -103,7 +103,12 @@ def template_json_from_shot(
         title = title.get("text") or title.get("title")
     if title and "title" not in props:
         props["title"] = title
-    if shot.get("visual_goal") and "label" not in props and "title" not in props:
+    # v4.1.1: templates that own their titles (before_after's BEFORE/AFTER
+    # pair) must not also inherit a generic visual_goal label — the r5
+    # timeline audit caught duplicated text on the S15 wipe card.
+    if (shot.get("visual_goal") and "label" not in props
+            and "title" not in props and "before" not in props
+            and "after" not in props):
         props.setdefault("label", shot["visual_goal"])
     if shot.get("subject") and template in ("map_zoom",):
         props.setdefault("label", props.get("label", shot["subject"]))

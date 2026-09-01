@@ -84,6 +84,7 @@ class AIImageMotionRenderer(Renderer):
             motion_plan,
             render_kenburns,
         )
+        from engine.v3.qa.technical import chroma_stats
         from engine.v4.microevents import derive_micro_events
         from engine.v4.motion_toolkit import kenburns_ops, micro_event_ops
 
@@ -91,6 +92,15 @@ class AIImageMotionRenderer(Renderer):
         shot_id = shot.get("shot_id", "shot")
         duration = float(shot.get("duration_sec", 4.0))
         prompt = shot.get("subject") or shot.get("visual_goal") or ""
+        # v4.1.1 anachronism guard: Cretaceous-period shots must not
+        # generate modern human artifacts (the S14 houses-in-burrow class).
+        # Modern-coda shots (narrative_role callback) intentionally show
+        # the present day and are exempt.
+        if (str(shot.get("style") or "").lower().startswith("cretaceous")
+                and str(shot.get("narrative_role") or "") != "callback"
+                and "no humans" not in prompt):
+            prompt = (f"{prompt}, prehistoric wilderness only — no humans, "
+                      f"no buildings, no modern structures, no text")
         seed = int(ctx.seed or shot.get("seed", 0) or 0)
         motion_cfg = shot.get("motion") or {}
         if isinstance(motion_cfg, str):
@@ -115,6 +125,24 @@ class AIImageMotionRenderer(Renderer):
                 )
                 still = Path(result.path)
                 provider_note = result.provider
+                # v4.1.1 cast guard: a generated still with a uniform color
+                # cast (the r5 S23/S24 green-bleed class) is rejected and
+                # re-generated once with a corrected prompt — the broker is
+                # cache-first on (prompt, provider), so the suffix both
+                # corrects the bias and busts the stale cache entry.
+                cast = chroma_stats(still)
+                if cast.get("cast"):
+                    logger.warning(
+                        "AI_IMAGE_MOTION %s: still has uniform color cast "
+                        "(U=%s V=%s) — regenerating with neutral-color "
+                        "prompt", shot_id, cast.get("u"), cast.get("v"))
+                    result = self._broker_instance().generate_image(
+                        f"{prompt}, accurate natural colors, neutral color "
+                        f"grading",
+                        style=style, aspect=ctx.aspect, seed=seed + 101,
+                        renderer_version="w2_ai_image_motion")
+                    still = Path(result.path)
+                    provider_note = f"{provider_note}+cast_regen"
             except Exception as exc:  # broker down → offline fallback still
                 logger.warning("AI_IMAGE_MOTION: broker image failed (%s); "
                                "using offline solid still", exc)

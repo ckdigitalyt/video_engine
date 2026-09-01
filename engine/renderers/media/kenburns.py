@@ -258,11 +258,14 @@ def render_kenburns(
             n_inputs += 1
             inputs += ["-stream_loop", "-1", "-i", str(path)]
             out_lbl = f"ovl{i}"
-            # blend MUST run in RGB: in YUV the screen/multiply formula also
-            # hits the neutral chroma planes (128 → 192) and hue-rotates the
-            # whole frame (the r3.0 magenta/green wash regression).
-            graph += (f";[{cur}]format=rgb24[cur{i}];"
-                      f"[{ov_idx}:v]scale={width}:{height},format=rgb24"
+            # blend MUST run in PLANAR RGB (gbrp): ffmpeg 6.1's blend applies
+            # the screen/multiply formula to every plane, and with packed
+            # rgb24 inputs it still lands in YUV-plane math — multiply halves
+            # neutral chroma 128 → 64 (green wash), screen pushes it to 192
+            # (magenta wash). The r3.1 rgb24 "fix" never actually took.
+            # Verified on 6.1.1: rgb24 blend → U=V=64 cast, gbrp → U=V=128.
+            graph += (f";[{cur}]format=gbrp[cur{i}];"
+                      f"[{ov_idx}:v]scale={width}:{height},format=gbrp"
                       f"[ovs{i}];"
                       f"[cur{i}][ovs{i}]"
                       f"blend=all_mode={blend}:all_opacity={opacity:.2f}"

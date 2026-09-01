@@ -22,17 +22,24 @@ export function render(ctx, { W, H }, props, t, P, h) {
     ctx.fillStyle = color;
     ctx.beginPath();
     if (kind === "sauropod") {
-      // body + long neck + tail + legs, facing left
-      ctx.moveTo(cx - 0.55 * s, baseY);            // tail tip (low)
-      ctx.quadraticCurveTo(cx - 0.75 * s, baseY - 0.35 * s, cx - 0.35 * s, baseY - 0.42 * s);
-      ctx.quadraticCurveTo(cx - 0.1 * s, baseY - 0.5 * s, cx + 0.02 * s, baseY - 0.62 * s); // back→neck
-      ctx.quadraticCurveTo(cx + 0.16 * s, baseY - 0.95 * s, cx + 0.24 * s, baseY - 1.0 * s); // neck up
-      ctx.quadraticCurveTo(cx + 0.3 * s, baseY - 1.02 * s, cx + 0.3 * s, baseY - 0.94 * s);  // head
-      ctx.quadraticCurveTo(cx + 0.22 * s, baseY - 0.72 * s, cx + 0.12 * s, baseY - 0.5 * s); // neck front
-      ctx.quadraticCurveTo(cx + 0.28 * s, baseY - 0.42 * s, cx + 0.42 * s, baseY - 0.3 * s); // chest→hindleg
-      ctx.quadraticCurveTo(cx + 0.5 * s, baseY - 0.2 * s, cx + 0.52 * s, baseY);             // rear
-      ctx.lineTo(cx + 0.34 * s, baseY);
-      ctx.quadraticCurveTo(cx + 0.1 * s, baseY - 0.12 * s, cx - 0.2 * s, baseY);
+      // body + long THIN neck + small head + tail + column legs, facing left
+      // (r5 audit misread the thick-necked mound as a whale silhouette)
+      ctx.moveTo(cx - 0.72 * s, baseY);            // tail tip (low)
+      ctx.quadraticCurveTo(cx - 0.5 * s, baseY - 0.2 * s, cx - 0.3 * s, baseY - 0.32 * s);  // tail→back
+      ctx.quadraticCurveTo(cx - 0.1 * s, baseY - 0.44 * s, cx + 0.08 * s, baseY - 0.46 * s); // back
+      ctx.quadraticCurveTo(cx + 0.18 * s, baseY - 0.56 * s, cx + 0.24 * s, baseY - 0.8 * s);  // neck back edge
+      ctx.quadraticCurveTo(cx + 0.27 * s, baseY - 0.98 * s, cx + 0.31 * s, baseY - 1.0 * s);  // head top
+      ctx.quadraticCurveTo(cx + 0.37 * s, baseY - 0.98 * s, cx + 0.35 * s, baseY - 0.9 * s);  // snout
+      ctx.quadraticCurveTo(cx + 0.29 * s, baseY - 0.72 * s, cx + 0.25 * s, baseY - 0.54 * s); // neck front (thin)
+      ctx.quadraticCurveTo(cx + 0.22 * s, baseY - 0.42 * s, cx + 0.32 * s, baseY - 0.3 * s);  // chest
+      ctx.lineTo(cx + 0.32 * s, baseY);                // front leg (front edge)
+      ctx.lineTo(cx + 0.18 * s, baseY);                // front leg (back edge)
+      ctx.lineTo(cx + 0.16 * s, baseY - 0.22 * s);     // belly arch
+      ctx.lineTo(cx - 0.02 * s, baseY - 0.24 * s);
+      ctx.lineTo(cx - 0.04 * s, baseY);                // hind leg (front edge)
+      ctx.lineTo(cx - 0.2 * s, baseY);                 // hind leg (back edge)
+      ctx.lineTo(cx - 0.22 * s, baseY - 0.18 * s);     // under-tail
+      ctx.quadraticCurveTo(cx - 0.45 * s, baseY - 0.14 * s, cx - 0.72 * s, baseY); // tail underside
       ctx.closePath();
       ctx.fill();
     } else {
@@ -97,10 +104,18 @@ export function render(ctx, { W, H }, props, t, P, h) {
   ctx.textAlign = "left";
   ctx.fillStyle = P.secondary;
   ctx.globalAlpha = 0.9;
-  ctx.fillText(String(props.before_label ?? "BEFORE"), 24, 48);
+  // v4.1.1: the corner tag is redundant when it duplicates the side's own
+  // title (r5 audit: "BEFORE appears twice" on the S15 wipe card).
+  const beforeTag = String(props.before_label ?? "BEFORE");
+  if (beforeTag.toLowerCase() !== String(before.title ?? "").toLowerCase()) {
+    ctx.fillText(beforeTag, 24, 48);
+  }
   if (revealP > 0.15) {
-    ctx.textAlign = "right";
-    ctx.fillText(String(props.after_label ?? "AFTER"), W - 24, 48);
+    const afterTag = String(props.after_label ?? "AFTER");
+    if (afterTag.toLowerCase() !== String(after.title ?? "").toLowerCase()) {
+      ctx.textAlign = "right";
+      ctx.fillText(afterTag, W - 24, 48);
+    }
   }
   ctx.restore();
 }

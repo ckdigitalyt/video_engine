@@ -33,7 +33,7 @@ def _qa_key(path: Path, shot: dict, expect_audio: bool,
     basis = json.dumps({
         "file_sha": _file_sha(path), "shot": _shot_fingerprint(shot),
         "expect_audio": expect_audio, "use_vision": use_vision,
-        "qa_version": 1,
+        "qa_version": 2,
     }, sort_keys=True)
     return hashlib.sha256(basis.encode("utf-8")).hexdigest()[:24]
 
