@@ -32,13 +32,16 @@ export function render(ctx, { W, H }, props, t, P, h) {
       ctx.quadraticCurveTo(cx + 0.37 * s, baseY - 0.98 * s, cx + 0.35 * s, baseY - 0.9 * s);  // snout
       ctx.quadraticCurveTo(cx + 0.29 * s, baseY - 0.72 * s, cx + 0.25 * s, baseY - 0.54 * s); // neck front (thin)
       ctx.quadraticCurveTo(cx + 0.22 * s, baseY - 0.42 * s, cx + 0.32 * s, baseY - 0.3 * s);  // chest
-      ctx.lineTo(cx + 0.32 * s, baseY);                // front leg (front edge)
-      ctx.lineTo(cx + 0.18 * s, baseY);                // front leg (back edge)
-      ctx.lineTo(cx + 0.16 * s, baseY - 0.22 * s);     // belly arch
-      ctx.lineTo(cx - 0.02 * s, baseY - 0.24 * s);
-      ctx.lineTo(cx - 0.04 * s, baseY);                // hind leg (front edge)
-      ctx.lineTo(cx - 0.2 * s, baseY);                 // hind leg (back edge)
-      ctx.lineTo(cx - 0.22 * s, baseY - 0.18 * s);     // under-tail
+      // front leg: gentle inward taper — straight-edged rectangles read as
+      // a rectangular notch cut into the underside (r6.1 audit)
+      ctx.quadraticCurveTo(cx + 0.31 * s, baseY - 0.14 * s, cx + 0.29 * s, baseY);
+      ctx.lineTo(cx + 0.2 * s, baseY);
+      // belly: one smooth arch between the leg pairs (no vertical cliffs)
+      ctx.quadraticCurveTo(cx + 0.12 * s, baseY - 0.2 * s, cx - 0.02 * s, baseY - 0.22 * s);
+      ctx.quadraticCurveTo(cx - 0.1 * s, baseY - 0.19 * s, cx - 0.13 * s, baseY);
+      ctx.lineTo(cx - 0.23 * s, baseY);
+      // hind leg merges into the tail underside as a tapered wedge
+      ctx.quadraticCurveTo(cx - 0.24 * s, baseY - 0.1 * s, cx - 0.3 * s, baseY - 0.16 * s);
       ctx.quadraticCurveTo(cx - 0.45 * s, baseY - 0.14 * s, cx - 0.72 * s, baseY); // tail underside
       ctx.closePath();
       ctx.fill();

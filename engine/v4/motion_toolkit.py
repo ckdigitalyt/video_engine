@@ -291,29 +291,47 @@ def _draw_rain(movie, spec, rng):
             x0 = int(x[i]) % w
             y0 = int(yy[i])
             y1 = min(h - 1, y0 + length)
-            movie[f, max(0, y0):y1 + 1, x0] = 190
+            # r6.1: bright 190/140 dashes read as white artifact streaks on
+            # 1080p upscale — rain must be dimmer than any subject highlight.
+            movie[f, max(0, y0):y1 + 1, x0] = 128
             xs = int(x0 + slant)
             if 0 <= xs < w and y0 >= 0:
-                movie[f, max(0, y0):y1 + 1, xs] = 140
+                movie[f, max(0, y0):y1 + 1, xs] = 92
 
 
 def _draw_motes(movie, spec, rng, rise=False):
     frames, h, w = movie.shape
     n = int(spec["motes"])
     drift = float(spec["drift"]) * w
-    size = int(spec.get("size", 2))
+    size = max(1, int(spec.get("size", 2)) - 1)
     x = rng.uniform(0, w, n)
     y = rng.uniform(0, h, n)
     vx = rng.uniform(0.2, 1.0, n) * drift / frames
     vy = (rng.uniform(0.2, 1.0, n) * drift / frames) * (-1 if rise else 0.4)
     ph = rng.uniform(0, 2 * np.pi, n)
+    # Fixed per-mote brightness — the old per-frame rng.uniform(90, 200) made
+    # every mote flicker, and the hard size-2 squares read as corrupted white
+    # cells once the overlay is upscaled 4x to 1080p (r6.1 timeline audit:
+    # "dozens of small white square/cell artifacts"). Soft dim radial disks.
+    bright = rng.uniform(45, 115, n)
+    r = size
+    yy, xx = np.mgrid[-r:r + 1, -r:r + 1]
+    disk = np.clip(1.0 - np.sqrt(xx ** 2 + yy ** 2) / (r + 0.5), 0.0, 1.0)
+    offs = [(dy, dx, float(disk[dy + r, dx + r]))
+            for dy in range(-r, r + 1) for dx in range(-r, r + 1)
+            if disk[dy + r, dx + r] > 0.0]
     for f in range(frames):
         xs = (x + vx * f + 0.004 * w * np.sin(ph + f / 9.0)) % w
         ys = (y + vy * f) % h
         for i in range(n):
             xi, yi = int(xs[i]), int(ys[i])
-            movie[f, max(0, yi - size):yi + size + 1,
-                  max(0, xi - size):xi + size + 1] = rng.uniform(90, 200)
+            v = bright[i]
+            for dy, dx, a in offs:
+                y0, x0 = yi + dy, xi + dx
+                if 0 <= y0 < h and 0 <= x0 < w:
+                    val = v * (0.4 + 0.6 * a)
+                    if val > movie[f, y0, x0]:
+                        movie[f, y0, x0] = val
 
 
 def _draw_puffs(movie, spec, rng, soft=False):

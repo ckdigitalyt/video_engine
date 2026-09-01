@@ -168,7 +168,7 @@ def creative_critic(shots: list[dict], topic: str, *,
                 audit_summary=_audit_summary(audit, shot_audits),
                 narration=(narration_text or "")[:2000])
             doc = ask_json(CRITIC_SYSTEM, prompt, temperature=0.4,
-                           max_tokens=1600)
+                           max_tokens=4000)  # 1600 truncated mid-JSON (r6.1: reply cut at "originality": — parse fail → heuristic)
             result = _normalize(doc, available=True)
             if len(result["scores"]) >= 4:
                 return result

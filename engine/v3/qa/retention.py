@@ -96,7 +96,7 @@ def _llm_critic(shots: list[dict], topic: str, narration_text: str,
         (f"\n\nFull narration transcript:\n{narration_text[:2000]}"
          if narration_text else "")
     doc = ask_json(RETENTION_SYSTEM, prompt, temperature=0.4,
-                   max_tokens=1200)
+                   max_tokens=3000)  # 1200 truncated mid-JSON (same class as the r6.1 creative-critic failure)
     scores = {k: v for k, v in (doc.get("scores") or {}).items()
               if isinstance(v, (int, float))}
     if len(scores) < 4:
