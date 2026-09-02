@@ -101,6 +101,41 @@ def cmd_tts(args):
     print("wired at TTS stage")
 
 
+def cmd_diagrams2(args):
+    from engine import bible as B, composev2
+    paths = _paths()
+    bible = B.load_bible(Path(paths.stories) / args.story)
+    scores = composev2.prep_diagrams(paths, bible, args.story)
+    print(json.dumps(scores, indent=1))
+
+
+def cmd_plan2(args):
+    from engine import planv2
+    paths = _paths()
+    plan, rep = planv2.make_edit_plan_v2(paths, args.story)
+    for w in rep["warnings"]:
+        print("warn:", w)
+    total = sum(s["duration_s"] for s in plan["shots"])
+    print(f"edit_plan v2 -> build/edit_plan.json ({len(plan['shots'])} shots, {total:.1f}s)")
+
+
+def cmd_render2(args):
+    from engine import composev2
+    paths = _paths()
+    out = composev2.render_video_v2(paths, args.story, force=args.force)
+    print(f"proto2 -> {out}")
+
+
+def cmd_qa2(args):
+    from engine import qa2
+    paths = _paths()
+    target = Path(args.path) if args.path else paths.output / "proto2.mp4"
+    rep = qa2.qa_video_v2(target, paths, args.story)
+    for c in rep["checks"]:
+        print(("PASS " if c["ok"] else "FAIL ") + c["check"] + ": " + c["detail"])
+    print("QA2 " + ("PASS" if rep["pass"] else "FAIL") + f" -> {paths.qa / 'qa2.json'}")
+
+
 def cmd_smoke(args):
     raise SystemExit(_smoke())
 
@@ -216,6 +251,20 @@ def main():
     sm.set_defaults(fn=cmd_smoke)
     tt = sub.add_parser("tts", help="wired at TTS stage")
     tt.set_defaults(fn=cmd_tts)
+    d2 = sub.add_parser("diagrams2", help="render programmatic v2 diagram assets")
+    d2.add_argument("--story", default="tallest_mountain")
+    d2.set_defaults(fn=cmd_diagrams2)
+    p2 = sub.add_parser("plan2", help="build v2 edit plan (narration-first)")
+    p2.add_argument("--story", default="tallest_mountain")
+    p2.set_defaults(fn=cmd_plan2)
+    r2 = sub.add_parser("render2", help="render v2 shots + concat -> output/proto2.mp4")
+    r2.add_argument("--story", default="tallest_mountain")
+    r2.add_argument("--force", action="store_true")
+    r2.set_defaults(fn=cmd_render2)
+    q2 = sub.add_parser("qa2", help="QA v2 video (default output/proto2.mp4)")
+    q2.add_argument("path", nargs="?", default=None)
+    q2.add_argument("--story", default="tallest_mountain")
+    q2.set_defaults(fn=cmd_qa2)
     args = ap.parse_args()
     args.fn(args)
 

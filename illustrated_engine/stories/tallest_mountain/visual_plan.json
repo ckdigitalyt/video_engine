@@ -1,0 +1,109 @@
+{
+  "story_id": "tallest_mountain",
+  "engine": "v2",
+  "fps": 30,
+  "size": [1080, 1920],
+  "regions": {
+    "everest_peak": [0.30, 0.06, 0.40, 0.22],
+    "ocean_horizon": [0.10, 0.26, 0.80, 0.14],
+    "mauna_bar": [0.55, 0.05, 0.40, 0.58],
+    "timeline_today": [0.66, 0.42, 0.30, 0.34],
+    "below_label": [0.03, 0.52, 0.55, 0.14],
+    "summit_dom": [0.22, 0.18, 0.56, 0.36]
+  },
+  "beats": [
+    {
+      "beat_id": "B1", "duration_est": 8.0,
+      "shots": [
+        {
+          "shot_id": "S01", "shot_type": "ESTABLISH", "asset": "B1_everest_plate",
+          "captions": "phrase", "transition_in": "FADE",
+          "opening": true, "title": "The Tallest Mountain on Earth Is Hiding",
+          "tag": "Plate I", "crop_bias_y": 0.28, "duration_est": 8.0,
+          "typography": [
+            {"kind": "NUMBER_POP", "text": "8,849 m", "at": 0.5, "region": "everest_peak"}
+          ],
+          "overlays": []
+        }
+      ]
+    },
+    {
+      "beat_id": "B2", "duration_est": 8.0,
+      "shots": [
+        {
+          "shot_id": "S02", "shot_type": "REVEAL", "asset": "B2_ocean_section_plate",
+          "captions": "phrase", "transition_in": "CUT",
+          "tag": "Plate II", "crop_bias_y": 0.55, "duration_est": 8.0,
+          "overlays": [
+            {"kind": "HIGHLIGHT", "target": "ocean_horizon", "style": "rect", "at": 0.45}
+          ],
+          "typography": []
+        }
+      ]
+    },
+    {
+      "beat_id": "B3", "duration_est": 9.0,
+      "shots": [
+        {
+          "shot_id": "S03", "shot_type": "DIAGRAM", "asset": "D1_scale_compare",
+          "captions": "phrase", "transition_in": "CUT",
+          "tag": "Scale comparison", "duration_est": 9.0,
+          "overlays": [
+            {"kind": "HIGHLIGHT", "target": "mauna_bar", "style": "rect", "at": 0.45}
+          ],
+          "typography": []
+        }
+      ]
+    },
+    {
+      "beat_id": "B4", "duration_est": 9.0,
+      "shots": [
+        {
+          "shot_id": "S04", "shot_type": "TIMELINE", "asset": "D2_timeline",
+          "captions": "phrase", "transition_in": "CUT",
+          "tag": "Hotspot timeline", "duration_est": 9.0,
+          "overlays": [
+            {"kind": "HIGHLIGHT", "target": "timeline_today", "style": "circle", "at": 0.55}
+          ],
+          "typography": []
+        }
+      ]
+    },
+    {
+      "beat_id": "B5", "duration_est": 9.0,
+      "shots": [
+        {
+          "shot_id": "S05", "shot_type": "COMPARE", "asset": "D3_split_compare",
+          "captions": "phrase", "transition_in": "CUT",
+          "tag": "Above / below", "duration_est": 9.0,
+          "overlays": [
+            {"kind": "HIGHLIGHT", "target": "below_label", "style": "rect", "at": 0.5}
+          ],
+          "typography": []
+        }
+      ]
+    },
+    {
+      "beat_id": "B6", "duration_est": 12.0,
+      "shots": [
+        {
+          "shot_id": "S06", "shot_type": "DETAIL", "asset": "B4_summit_plate",
+          "captions": "phrase", "transition_in": "CUT",
+          "tag": "Plate III", "crop_bias_y": 0.45, "duration_est": 5.4,
+          "overlays": [
+            {"kind": "HIGHLIGHT", "target": "summit_dom", "style": "circle", "at": 0.45}
+          ],
+          "typography": []
+        },
+        {
+          "shot_id": "S07", "shot_type": "PAYOFF", "asset": "D4_payoff",
+          "captions": "phrase", "transition_in": "CUT",
+          "tag": "Plate IV", "duration_est": 6.6,
+          "overlays": [],
+          "typography": [],
+          "end_card": "ABOVE THE CLOUDS"
+        }
+      ]
+    }
+  ]
+}

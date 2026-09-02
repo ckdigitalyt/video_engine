@@ -1,0 +1,37 @@
+{
+  "story_id": "tallest_mountain",
+  "title": "The Tallest Mountain on Earth Is Hiding",
+  "brand": "ABOVE THE CLOUDS",
+  "beats": [
+    {
+      "beat_id": "B1",
+      "narration": "Mount Everest stands 8,849 metres above sea level — the highest point on Earth.",
+      "sources": ["China–Nepal joint survey, 2020 (8,848.86 m)"]
+    },
+    {
+      "beat_id": "B2",
+      "narration": "But height depends on where you start measuring. And Everest doesn't start from the bottom.",
+      "sources": ["Measurement convention: elevation above sea level (NOAA)"]
+    },
+    {
+      "beat_id": "B3",
+      "narration": "Measured from its base on the Pacific floor, Mauna Kea rises 10,210 metres — more than a kilometre taller than Everest.",
+      "sources": ["USGS: Mauna Kea base-to-peak 10,210 m; summit 4,207 m"]
+    },
+    {
+      "beat_id": "B4",
+      "narration": "It was built by a hotspot: eruptions stacked lava, layer upon layer, for around a million years.",
+      "sources": ["USGS Hawaiian Volcano Observatory: Mauna Kea shield stage ~1 Ma"]
+    },
+    {
+      "beat_id": "B5",
+      "narration": "Most of the mountain hides underwater. Only 4,207 metres breaks the surface — about 41 percent.",
+      "sources": ["USGS/NOAA: 4,207 m above sea level; 6,003 m below (59%)"]
+    },
+    {
+      "beat_id": "B6",
+      "narration": "So Everest is the highest mountain. Mauna Kea is the tallest — and it spends most of its life in the dark.",
+      "sources": ["Highest (elevation) vs tallest (base-to-peak) distinction, USGS"]
+    }
+  ]
+}
