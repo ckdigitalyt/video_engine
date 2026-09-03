@@ -7,7 +7,7 @@
       "beat_id": "B1",
       "start": 0.0,
       "end": 6.5,
-      "narration": "High in California's White Mountains grows the oldest living tree on Earth — and it almost looks dead."
+      "narration": "High in California's White Mountains grows the oldest confirmed living tree on Earth — and it almost looks dead."
     },
     {
       "beat_id": "B2",
@@ -37,13 +37,13 @@
       "beat_id": "B6",
       "start": 36.0,
       "end": 43.5,
-      "narration": "In 1964, a researcher cut down another bristlecone — then counted nearly five thousand rings. The oldest tree ever found, destroyed in minutes."
+      "narration": "In 1964, a researcher cut down another bristlecone — then counted nearly five thousand rings. The oldest tree then known, destroyed in minutes."
     },
     {
       "beat_id": "B7",
       "start": 43.5,
       "end": 52.0,
-      "narration": "Methuselah still stands. Its exact location stays secret. The oldest tree on Earth survives because it stays hidden."
+      "narration": "Methuselah still stands. Its exact location stays secret. The oldest confirmed living tree on Earth survives because it stays hidden."
     }
   ]
 }

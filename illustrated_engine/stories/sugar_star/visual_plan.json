@@ -1,0 +1,250 @@
+{
+  "story_id": "sugar_star",
+  "regions": {
+    "cube": [0.32, 0.28, 0.36, 0.10],
+    "core": [0.30, 0.34, 0.40, 0.12],
+    "impact": [0.28, 0.56, 0.44, 0.14],
+    "signal": [0.30, 0.30, 0.40, 0.10]
+  },
+  "beats": [
+    {
+      "beat_id": "B1",
+      "shots": [
+        {
+          "shot_id": "S01",
+          "shot_type": "HOOK",
+          "asset": "B1_sugar_cube",
+          "duration_est": 7.0,
+          "crop_bias_y": 0.45,
+          "opening": true,
+          "title": "A SUGAR CUBE THAT WEIGHS A BILLION TONS",
+          "tag": "",
+          "captions": "phrase",
+          "role": "HERO",
+          "chrome": "none",
+          "purpose": "Anchor an impossible number to the most ordinary object a viewer can picture",
+          "claim": "a sugar-cube-sized piece of neutron-star material weighs about 1 billion tons",
+          "evidence": "macro plate of a single sugar cube + 1,000,000,000 TONS number pop",
+          "motion_reason": "slow push-in on the cube: stillness first so the number pop lands as the contradiction",
+          "transition_reason": "hard cut from kitchen scale to stellar scale — the cut is the joke",
+          "typography": [
+            {
+              "kind": "NUMBER_POP",
+              "text": "1,000,000,000 TONS",
+              "at": 0.55,
+              "region": [0.3, 0.26, 0.4, 0.09]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "beat_id": "B2",
+      "shots": [
+        {
+          "shot_id": "S02",
+          "shot_type": "EXPLAIN",
+          "asset": "B2_giant_star",
+          "duration_est": 4.6,
+          "crop_bias_y": 0.4,
+          "captions": "phrase",
+          "role": "EVIDENCE",
+          "chrome": "none",
+          "purpose": "Show the star dying before explaining the mechanism",
+          "claim": "when the fuel ends, a giant star's core collapses in seconds",
+          "evidence": "dying-star plate + circle highlight on the collapsing core",
+          "motion_reason": "lateral drift outward: the star is losing itself",
+          "transition_reason": "cut to diagram as narration switches from scene to mechanism",
+          "overlays": [
+            {
+              "kind": "HIGHLIGHT",
+              "target": "core",
+              "style": "circle",
+              "at": 0.5
+            }
+          ]
+        },
+        {
+          "shot_id": "S03",
+          "shot_type": "CONSTRUCT",
+          "asset": "B2_giant_star",
+          "duration_est": 4.6,
+          "captions": "phrase",
+          "role": "DIAGRAM",
+          "chrome": "section",
+          "tag": "ABOVE THE CLOUDS",
+          "purpose": "Build the collapse mechanism step by step, baseline first",
+          "claim": "protons and electrons crush into neutrons; collapse takes seconds",
+          "evidence": "D1_collapse stages s0-s1: giant star, then shrinking core with arrows",
+          "motion_reason": "static hold; the staged diagram build is the motion",
+          "transition_reason": "cut inside the same diagram — s2 continues the argument",
+          "progressive": {
+            "stages": [
+              { "asset": "D1_collapse_s0", "at": 0.05 },
+              { "asset": "D1_collapse_s1", "at": 0.55 }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "beat_id": "B3",
+      "shots": [
+        {
+          "shot_id": "S04",
+          "shot_type": "CONSTRUCT",
+          "asset": "B2_giant_star",
+          "duration_est": 9.0,
+          "captions": "phrase",
+          "role": "DIAGRAM",
+          "chrome": "none",
+          "purpose": "Land the reveal: more than the Sun's mass inside a 20 km sphere",
+          "claim": "1.4 Suns of mass pressed into a sphere about 20 km wide",
+          "evidence": "D1_collapse stages s2-s3: 20 km city-scale ring, then mass annotation",
+          "motion_reason": "static hold; stage s3 is the reveal — no camera move to dilute it",
+          "transition_reason": "cut to the scale diagram: from what it is to how much it weighs",
+          "progressive": {
+            "stages": [
+              { "asset": "D1_collapse_s2", "at": 0.1 },
+              { "asset": "D1_collapse_s3", "at": 0.55 }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "beat_id": "B4",
+      "shots": [
+        {
+          "shot_id": "S05",
+          "shot_type": "COMPARE",
+          "asset": "B4_cube_macro",
+          "duration_est": 6.5,
+          "captions": "phrase",
+          "role": "COMPARISON",
+          "chrome": "section",
+          "tag": "ABOVE THE CLOUDS",
+          "purpose": "Turn an abstract tonnage into visible architecture: 170 pyramids per cube",
+          "claim": "1 billion tons is about 170 Great Pyramids of Giza",
+          "evidence": "D2_pyramid stages s0-s2: the cube, pyramid stack x170, key number",
+          "motion_reason": "near-static hold; the three-stage build carries the escalation",
+          "transition_reason": "cut back to macro texture so the number returns to the object",
+          "progressive": {
+            "stages": [
+              { "asset": "D2_pyramid_s0", "at": 0.05 },
+              { "asset": "D2_pyramid_s1", "at": 0.4 },
+              { "asset": "D2_pyramid_s2", "at": 0.75 }
+            ]
+          }
+        },
+        {
+          "shot_id": "S06",
+          "shot_type": "DETAIL",
+          "asset": "B4_cube_macro",
+          "duration_est": 4.5,
+          "crop_bias_y": 0.5,
+          "captions": "phrase",
+          "role": "DETAIL",
+          "chrome": "none",
+          "purpose": "Rest the scale on the object itself: balanced on your fingertips",
+          "claim": "170 pyramids of mass per sugar cube",
+          "evidence": "macro cube facets + 170 PYRAMIDS number pop",
+          "motion_reason": "tight punch-in on crystal facets — physical intimacy after abstraction",
+          "transition_reason": "hard cut to ground level for the drop-it thought experiment",
+          "typography": [
+            {
+              "kind": "NUMBER_POP",
+              "text": "170 PYRAMIDS",
+              "at": 0.5,
+              "region": [0.3, 0.3, 0.4, 0.09]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "beat_id": "B5",
+      "shots": [
+        {
+          "shot_id": "S07",
+          "shot_type": "DETAIL",
+          "asset": "B5_impact",
+          "duration_est": 8.0,
+          "crop_bias_y": 0.55,
+          "captions": "phrase",
+          "role": "EVIDENCE",
+          "chrome": "none",
+          "purpose": "Make the consequence physical: the ground cannot stop it",
+          "claim": "dropped on Earth, the fragment punches straight through the crust",
+          "evidence": "impact plate: clean circular hole through cracked ground + circle highlight",
+          "motion_reason": "punch-in on the hole — the motion echoes the action",
+          "transition_reason": "hard cut to 1967 archive-style plate for the history twist",
+          "overlays": [
+            {
+              "kind": "HIGHLIGHT",
+              "target": "impact",
+              "style": "circle",
+              "at": 0.5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "beat_id": "B6",
+      "shots": [
+        {
+          "shot_id": "S08",
+          "shot_type": "TYPO",
+          "asset": "B6_telescope",
+          "duration_est": 7.5,
+          "crop_bias_y": 0.4,
+          "captions": "phrase",
+          "role": "HISTORICAL",
+          "chrome": "chapter",
+          "chapter_title": "1967 — LGM-1",
+          "purpose": "Deliver the twist: humanity met neutron stars by accident, thinking the signal was aliens",
+          "claim": "first detection 1967: a signal flashing every 1.3 seconds, nicknamed LGM-1",
+          "evidence": "radio-telescope plate + EVERY 1.3 SECONDS number pop under chapter chrome",
+          "motion_reason": "slow drift across the dish line — archive-footage patience",
+          "transition_reason": "cut to night sky: from human history back to the object",
+          "typography": [
+            {
+              "kind": "NUMBER_POP",
+              "text": "EVERY 1.3 SECONDS",
+              "at": 0.55,
+              "region": [0.3, 0.28, 0.4, 0.09]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "beat_id": "B7",
+      "shots": [
+        {
+          "shot_id": "S09",
+          "shot_type": "PAYOFF",
+          "asset": "B7_night_sky",
+          "duration_est": 6.5,
+          "crop_bias_y": 0.35,
+          "captions": "phrase",
+          "role": "PAYOFF",
+          "chrome": "none",
+          "end_card": "BETTER LEFT WHERE THEY ARE",
+          "purpose": "Land the payoff: the closest one is still impossibly far — relief as the ending",
+          "claim": "nearest known neutron star is about 400 light-years away; Voyager would need about 7 million years",
+          "evidence": "night-sky plate + star-marker annotation, then 400 LIGHT-YEARS key-number overlay",
+          "motion_reason": "pull-back: the frame lets go of the viewer, matching the closing line",
+          "transition_reason": "final shot; end card closes without a call to action",
+          "progressive": {
+            "stages": [
+              { "asset": "D3_distance_s0", "at": 0.15 },
+              { "asset": "D3_distance_s1", "at": 0.5 }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

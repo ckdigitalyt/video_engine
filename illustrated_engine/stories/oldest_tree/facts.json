@@ -1,0 +1,90 @@
+{
+  "claims": [
+    {
+      "id": "methuselah_oldest_confirmed",
+      "beats": ["B1", "B7"],
+      "claim": "Methuselah is the oldest confirmed living tree on Earth",
+      "definition": "Oldest CONFIRMED LIVING, NON-CLONAL tree (a single individual verified by dendrochronological ring count). Excludes clonal colonies (e.g. Pando) and unverified or model-based age estimates.",
+      "current_record_holder": "Methuselah (Pinus longaeva), White Mountains, California - exact location undisclosed by the U.S. Forest Service",
+      "measured_value": "4,856 years old as of 2025 (ring count)",
+      "date_verified": "2026-09",
+      "authoritative_source": "Guinness World Records; USDA Forest Service",
+      "source_url": "https://www.guinnessworldrecords.com/world-records/oldest-tree",
+      "historically_changed": true,
+      "notes": "Two contenders could displace it: an unnamed bristlecone crossdated to 5,074 years in 2009 (core collected 1957; liveness not re-confirmed) and Gran Abuelo (alerce, Chile) claimed ~5,484 years in 2022 (model-based, not yet accepted). Proto3 as rendered said 'the oldest living tree on Earth' without the confirmation qualifier - corrected to 'oldest confirmed living tree'."
+    },
+    {
+      "id": "methuselah_age",
+      "beats": ["B2"],
+      "claim": "The tree is about 4,850 years old",
+      "definition": "Age by dendrochronological ring count of the living individual",
+      "current_record_holder": "n/a",
+      "measured_value": "4,856 years (as of 2025); germination est. 2832 BC",
+      "date_verified": "2026-09",
+      "authoritative_source": "Guinness World Records; USDA Forest Service",
+      "source_url": "https://www.guinnessworldrecords.com/world-records/oldest-tree",
+      "historically_changed": false
+    },
+    {
+      "id": "methuselah_germination",
+      "beats": ["B3"],
+      "claim": "It sprouted around 2832 BC",
+      "definition": "Crossdated germination estimate derived from core ring counts anchored to a continuous tree-ring chronology",
+      "current_record_holder": "n/a",
+      "measured_value": "2832 BC (dendrochronological estimate)",
+      "date_verified": "2026-09",
+      "authoritative_source": "Schulman 1958 / Harlan crossdating, cited by Guinness World Records and the U.S. Forest Service",
+      "source_url": "https://www.guinnessworldrecords.com/world-records/oldest-tree",
+      "historically_changed": false
+    },
+    {
+      "id": "pyramid_arithmetic",
+      "beats": ["B4"],
+      "claim": "Methuselah was already about 270 years old when the Great Pyramid was built",
+      "definition": "Computed: germination 2832 BC minus Great Pyramid completion ~2560 BC gives ~272 years, rounded to 270",
+      "current_record_holder": "n/a",
+      "measured_value": "~270 years (computed)",
+      "date_verified": "2026-09",
+      "authoritative_source": "Computed from methuselah_germination plus Great Pyramid dating (~2560 BC, academic consensus)",
+      "source_url": "https://en.wikipedia.org/wiki/Great_Pyramid_of_Giza",
+      "historically_changed": false
+    },
+    {
+      "id": "prometheus_1964",
+      "beats": ["B6"],
+      "claim": "In 1964 a bristlecone pine (WPN-114, 'Prometheus') was cut down under a research permit and ring-counted at ~4,862-4,867 years - the oldest tree THEN KNOWN",
+      "definition": "Oldest known at the time of felling (1964) - NOT 'the oldest tree ever found', which is no longer true today",
+      "current_record_holder": "n/a (tree destroyed); today's confirmed oldest living is Methuselah",
+      "measured_value": "4,862 rings (initial count, Curry 1964); 4,867 (Harlan re-count)",
+      "date_verified": "2026-09",
+      "authoritative_source": "Donald R. Curry 1964 felling, Snake Valley, Nevada; Tom Harlan re-count - documented in the Rocky Mountain Tree-Ring Research database",
+      "source_url": "https://en.wikipedia.org/wiki/Prometheus_(tree)",
+      "historically_changed": true,
+      "notes": "Proto3 narration said 'The oldest tree ever found, destroyed in minutes.' This is no longer strictly true: the Harlan tree crossdated to 5,074 years (announced 2009, core collected 1957) exceeds Prometheus, and Gran Abuelo's ~5,484-year model estimate exceeds it further. Corrected to 'The oldest tree then known'."
+    },
+    {
+      "id": "methuselah_location_secret",
+      "beats": ["B7"],
+      "claim": "Methuselah's exact location stays secret",
+      "definition": "The U.S. Forest Service deliberately does not disclose the tree's exact location to protect it from damage",
+      "current_record_holder": "n/a",
+      "measured_value": "n/a (agency policy)",
+      "date_verified": "2026-09",
+      "authoritative_source": "USDA Forest Service / Inyo National Forest",
+      "source_url": "https://www.fs.usda.gov/detail/inyo/specialplaces/",
+      "historically_changed": false
+    },
+    {
+      "id": "bristlecone_strip_bark",
+      "beats": ["B5"],
+      "claim": "Most of the tree is already dead - one thin strip of living bark keeps it alive",
+      "definition": "Strip-bark growth in ancient bristlecone pines: living cambium persists only along a narrow vertical strip; the rest of the trunk is dead wood. The scanner flags 'most' (a quantifier, not a record) - recorded here as a verified biology claim per V4 discipline.",
+      "current_record_holder": "n/a",
+      "measured_value": "qualitative - strip-bark form documented by the U.S. Forest Service and dendrochronology literature",
+      "date_verified": "2026-09",
+      "authoritative_source": "USDA Forest Service - Ancient Bristlecone Pine Forest, Inyo National Forest",
+      "source_url": "https://www.fs.usda.gov/detail/inyo/specialplaces/",
+      "historically_changed": false
+    }
+  ]
+}

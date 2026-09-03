@@ -49,9 +49,9 @@ def _fonts(bible):
 def caption_png(cue: dict, bible: dict, out: Path, bg_img=None, v3: bool = False) -> dict:
     """Full-frame transparent RGBA with one caption block baked. -> layout."""
     img = Image.new("RGBA", (CANVAS_W, CANVAS_H), (0, 0, 0, 0))
-    lay = subs.layout_caption(cue["text"], bible)
+    lay = subs.layout_caption(cue["text"], bible, level=int(cue.get("level", 1)))
     if not lay.get("ok"):
-        lay = subs.layout_caption(cue["text"], bible)  # retry (idempotent)
+        lay = subs.layout_caption(cue["text"], bible, level=int(cue.get("level", 1)))  # retry (idempotent)
     if not lay.get("ok"):
         img.save(out, "PNG")
         return lay
@@ -160,6 +160,25 @@ def base_frame(shot: dict, bible: dict) -> Image.Image:
         f = _font(typ.get("display", "BebasNeue-Regular.ttf"), 44)
         tw = d.textlength(mark, font=f)
         d.text(((CANVAS_W - tw) / 2, by + (bh - 44) / 2 - 4), mark, font=f, fill=text_col)
+    elif shot.get("chrome") == "none":
+        pass  # V4 §8: clean frame — identity comes from the design system,
+        #      not constant chrome. Normal shots carry no persistent header.
+    elif shot.get("chrome") == "section":
+        marker = str(shot.get("tag") or bible.get("brand", "")).upper()
+        f = _font(typ.get("body", "Inter-Variable.ttf"), 22)
+        d.text((64, by + (bh - 22) / 2), marker, font=f, fill=muted)
+    elif shot.get("chrome") == "chapter":
+        kicker = str(shot.get("chapter_title") or shot.get("tag") or "").upper()
+        if kicker:
+            size, max_w = 40, CANVAS_W - 2 * 64
+            f = _font(typ.get("display", "BebasNeue-Regular.ttf"), size)
+            tw = d.textlength(kicker, font=f)
+            while tw > max_w and size > 28:
+                size -= 4
+                f = _font(typ.get("display", "BebasNeue-Regular.ttf"), size)
+                tw = d.textlength(kicker, font=f)
+            d.text(((CANVAS_W - tw) / 2, by + (bh - size) / 2 - 4), kicker,
+                   font=f, fill=text_col)
     else:
         marker = str(bible.get("brand", "")).upper()
         f = _font(typ.get("body", "Inter-Variable.ttf"), 26)
@@ -339,7 +358,7 @@ def render_video_v2(paths, story_id: str = "tallest_mountain", force: bool = Fal
     shots = plan.get("shots") or []
     if not shots:
         raise ValueError("edit_plan.json has no shots")
-    v3 = str(plan.get("engine", "")) == "v3"
+    v3 = str(plan.get("engine", "")) in ("v3", "v4")
     shots_subdir = "shots3" if v3 else "shots2"
     for s in shots:
         render_shot_v2(s, paths, bible, force=force, v3=v3, shots_subdir=shots_subdir)
@@ -354,7 +373,9 @@ def render_video_v2(paths, story_id: str = "tallest_mountain", force: bool = Fal
            "-f", "concat", "-safe", "0", "-i", str(lst),
            "-i", str(master),
            "-map", "0:v", "-c:v", "copy",
-           "-map", "1:a", "-af", "loudnorm=I=-14:TP=-1.5:LRA=11",
+           "-map", "1:a",
+           "-af",
+           "loudnorm=I=-14:TP=-1.5:LRA=11,alimiter=limit=0.84:attack=5:release=80:level=disabled",
            "-c:a", "aac", "-b:a", "192k", "-shortest",
            "-flags:a", "+bitexact", "-map_metadata", "-1", "-fflags", "+bitexact",
            "-movflags", "+faststart", str(out)]

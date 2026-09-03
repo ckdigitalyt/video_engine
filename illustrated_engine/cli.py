@@ -136,6 +136,89 @@ def cmd_qa2(args):
     print("QA2 " + ("PASS" if rep["pass"] else "FAIL") + f" -> {paths.qa / 'qa2.json'}")
 
 
+def cmd_facts(args):
+    import json as _json
+    from engine import facts
+    rep = facts.verify_story(Path(args.story_dir))
+    print(_json.dumps(rep, indent=1))
+    raise SystemExit(0 if rep["ok"] else 1)
+
+
+def cmd_diag4(args):
+    from engine import bible as B, diagrams_v4
+    paths = _paths()
+    bible = B.load_bible(Path(paths.stories) / args.story)
+    manifest = diagrams_v4.write_stages(paths, bible, args.story)
+    import json as _json
+    print(_json.dumps({k: len(v) for k, v in manifest.items()}, indent=1))
+
+
+def cmd_plan4(args):
+    from engine import planv4, editorial
+    paths = _paths()
+    plan, rep = planv4.make_edit_plan_v4(paths, args.story)
+    for w in rep["warnings"]:
+        print("warn:", w)
+    for e in rep["errors"]:
+        print("error:", e)
+    total = sum(s["duration_s"] for s in plan["shots"])
+    print(f"edit_plan v4 -> build/edit_plan.json ({len(plan['shots'])} shots, {total:.1f}s)")
+    # dump shot-purpose map (pre-render deliverable §17)
+    story = json.loads((Path(paths.stories) / args.story / "story.json").read_text())
+    vp = json.loads((Path(paths.stories) / args.story / "visual_plan.json").read_text())
+    pm = editorial.shot_purpose_map(story, vp)
+    (Path(paths.build) / "purpose_map.json").write_text(json.dumps(pm, indent=2))
+
+
+def cmd_render4(args):
+    from engine import composev2
+    paths = _paths()
+    out = composev2.render_video_v2(paths, args.story, force=args.force, out_name="proto4.mp4")
+    print(f"proto4 -> {out}")
+
+
+def cmd_qa4(args):
+    import json as _json
+    from engine import bible as B, phone_qa, qa2, qa3, qa4, style_continuity
+    paths = _paths()
+    video = Path(args.path) if args.path else paths.output / "proto4.mp4"
+    bible = B.load_bible(Path(paths.stories) / args.story)
+    rep = qa2.qa_video_v2(video, paths, args.story)
+    for c in rep["checks"]:
+        print(("PASS " if c["ok"] else "FAIL ") + c["check"] + ": " + c["detail"])
+    sty = style_continuity.video_style_score(video, bible, samples=8)
+    (Path(paths.build) / "style_continuity.json").write_text(_json.dumps(sty, indent=2))
+    print(f"style continuity: mean={sty['mean']} min={sty['min']} max={sty['max']}")
+    phone_qa.phone_render(video, Path(paths.build) / "phone_preview.mp4")
+    plan4 = _json.loads((Path(paths.build) / "edit_plan.json").read_text())
+    man4 = Path(paths.build) / "diag_stages" / "manifest_v4.json"
+    stage_pngs = []
+    if man4.exists():
+        man = _json.loads(man4.read_text())
+        assets_dir = Path(paths.assets)
+        for stages in man.values():
+            stage_pngs += [str(Path(paths.build) / "diag_stages" / f"{st['asset']}_full.png")
+                           for st in stages]
+    leg = phone_qa.phone_legibility(video, plan_shots=plan4.get("shots"),
+                                    stage_pngs=stage_pngs)
+    (Path(paths.build) / "phone_qa.json").write_text(_json.dumps(leg, indent=2))
+    print(f"phone QA: readable={leg['readable']} pop_px={leg['key_number_px']} "
+          f"diag_px={leg['diagram_key_number_px']} probes={leg['probes']}")
+    ras = qa3.raster_text_qa(video, Path(paths.stories) / args.story, plan4)
+    (Path(paths.build) / "raster_text_qa.json").write_text(_json.dumps(ras, indent=2))
+    print(f"raster text QA: regenerated against current video "
+          f"({sum(len(v) for v in ras.values()) if isinstance(ras, dict) else 'ok'})")
+    res = qa4.run_qa4(video, Path(paths.stories) / args.story, build_dir=paths.build)
+    print("groups:", _json.dumps({g: res["groups"][g]["score"] for g in res["groups"]}))
+    print("metrics:", _json.dumps({k: round(v["score"], 1) for k, v in res["metrics"].items()}))
+    print("p0:", _json.dumps(res["p0_defects"]))
+    print("CAN_PUBLISH:", res["CAN_PUBLISH"])
+    print("TOP 3 HUMAN-EDITOR CONCERNS:")
+    for c in res["top_3_human_editor_concerns"]:
+        print("  -", c)
+    print("QA4 ->", Path(paths.build) / "qa" / "qa4.json")
+
+
 def cmd_diag3(args):
     from engine import bible as B, diagrams_v3
     paths = _paths()
@@ -331,6 +414,23 @@ def main():
     q3.add_argument("path", nargs="?", default=None)
     q3.add_argument("--story", default="oldest_tree")
     q3.set_defaults(fn=cmd_qa3)
+    f4 = sub.add_parser("facts", help="factual-integrity verification (V4 P0)")
+    f4.add_argument("story_dir")
+    f4.set_defaults(fn=cmd_facts)
+    g4 = sub.add_parser("diag4", help="render v4 progressive diagram stages")
+    g4.add_argument("--story", default="sugar_star")
+    g4.set_defaults(fn=cmd_diag4)
+    p4 = sub.add_parser("plan4", help="build v4 edit plan (chrome/roles/levels)")
+    p4.add_argument("--story", default="sugar_star")
+    p4.set_defaults(fn=cmd_plan4)
+    r4 = sub.add_parser("render4", help="render v4 shots + concat -> output/proto4.mp4")
+    r4.add_argument("--story", default="sugar_star")
+    r4.add_argument("--force", action="store_true")
+    r4.set_defaults(fn=cmd_render4)
+    q4p = sub.add_parser("qa4", help="V4 three-axis + editorial QA (default output/proto4.mp4)")
+    q4p.add_argument("path", nargs="?", default=None)
+    q4p.add_argument("--story", default="sugar_star")
+    q4p.set_defaults(fn=cmd_qa4)
     args = ap.parse_args()
     args.fn(args)
 

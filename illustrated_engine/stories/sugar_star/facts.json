@@ -1,0 +1,94 @@
+{
+  "claims": [
+    {
+      "id": "ns_sugar_cube_billion_tons",
+      "beats": ["B1", "B4"],
+      "claim": "A sugar-cube-sized amount of neutron-star material would weigh about 1 billion tons (about 10^12 kg) on Earth",
+      "definition": "NASA's standard public analogy: neutron-star interior density (~10^17-10^18 kg/m3) applied to a ~1 cm3 cube",
+      "current_record_holder": "n/a",
+      "measured_value": "~1 billion tons per sugar cube (~10^12 kg)",
+      "date_verified": "2026-09",
+      "authoritative_source": "NASA Science - Neutron Stars; NASA Imagine the Universe!",
+      "source_url": "https://science.nasa.gov/universe/neutron-stars/",
+      "historically_changed": false,
+      "notes": "The popular 'weighs as much as Mount Everest' variant fails arithmetic: Everest is ~10^14-10^15 kg, i.e. 100-1000x heavier. This story uses the computed pyramid comparison instead (see pyramids_170_computed)."
+    },
+    {
+      "id": "ns_core_collapse_mechanism",
+      "beats": ["B2"],
+      "claim": "When a giant star's fuel ends, the core collapses in seconds; protons and electrons are crushed together into neutrons",
+      "definition": "Core collapse of a massive star (at least ~8 solar masses); neutronization via electron capture during the collapse",
+      "current_record_holder": "n/a",
+      "measured_value": "collapse timescale: seconds",
+      "date_verified": "2026-09",
+      "authoritative_source": "NASA Science - Neutron Stars; NASA/ESA supernova pages",
+      "source_url": "https://science.nasa.gov/universe/neutron-stars/",
+      "historically_changed": false
+    },
+    {
+      "id": "ns_mass_and_size",
+      "beats": ["B3"],
+      "claim": "A neutron star packs roughly 1.4 times the Sun's mass into a sphere about 20 kilometers wide",
+      "definition": "Canonical neutron-star parameters: mass ~1.4 solar masses (the Chandrasekhar-forming core), diameter ~20 km",
+      "current_record_holder": "n/a",
+      "measured_value": "~1.4 solar masses; diameter ~20 km",
+      "date_verified": "2026-09",
+      "authoritative_source": "NASA Science - Neutron Stars; NASA Imagine the Universe!",
+      "source_url": "https://science.nasa.gov/universe/neutron-stars/",
+      "historically_changed": false,
+      "notes": "Known population spans ~1.17-2.35 solar masses; 1.4 is the canonical textbook value. Narration uses the exact figure."
+    },
+    {
+      "id": "pyramids_170_computed",
+      "beats": ["B4"],
+      "claim": "1 billion tons is roughly the combined mass of 170 Great Pyramids of Giza",
+      "definition": "Computed comparison: Great Pyramid mass ~5.9 million tonnes; 10^9 t / 5.9x10^6 t = 169.5, rounded to 170",
+      "current_record_holder": "n/a",
+      "measured_value": "~170 pyramids (computed)",
+      "date_verified": "2026-09",
+      "authoritative_source": "Computed from Great Pyramid mass estimates (~5.9 Mt) plus the NASA sugar-cube figure",
+      "source_url": "https://en.wikipedia.org/wiki/Great_Pyramid_of_Giza",
+      "historically_changed": false,
+      "notes": "Explicitly a computed comparison, not a measured record. Chosen over the popular Everest analogy, which fails arithmetic by 2-3 orders of magnitude."
+    },
+    {
+      "id": "ns_piece_through_earth",
+      "beats": ["B5"],
+      "claim": "A fragment dropped on Earth would punch straight through the ground",
+      "definition": "Physics illustration: density ~10^17 kg/m3 vs crust ~3x10^3 kg/m3 - no known material offers meaningful resistance; the fragment falls through the planet",
+      "current_record_holder": "n/a",
+      "measured_value": "density ratio ~10^14:1 (computed illustration)",
+      "date_verified": "2026-09",
+      "authoritative_source": "Physics estimate from NASA density figures (standard back-of-envelope published widely in popular science)",
+      "source_url": "https://science.nasa.gov/universe/neutron-stars/",
+      "historically_changed": false,
+      "notes": "Illustrative physics statement, marked as such. The narration phrase 'like the crust was paper' is simile, not a measured claim."
+    },
+    {
+      "id": "pulsar_first_detection_1967",
+      "beats": ["B6"],
+      "claim": "Neutron stars were first detected in 1967: a radio telescope caught a pulsar flashing every 1.3 seconds, initially nicknamed LGM-1 (Little Green Men)",
+      "definition": "'only found' in the narration means first observational detection: PSR B1919+21 (CP 1919), discovered by Jocelyn Bell Burnell under Antony Hewish, period 1.3373 s, briefly nicknamed LGM-1",
+      "current_record_holder": "n/a",
+      "measured_value": "discovery 1967; period 1.3373 s",
+      "date_verified": "2026-09",
+      "authoritative_source": "Hewish, Bell et al., Nature 217, 709-713 (1968); NASA/JPL pulsar history",
+      "source_url": "https://www.nature.com/articles/217709a0",
+      "historically_changed": false,
+      "notes": "Narration 'every 1.3 seconds' rounds 1.3373 s. The nickname LGM-1 ('Little Green Men') is historical fact."
+    },
+    {
+      "id": "nearest_ns_400ly_voyager",
+      "beats": ["B7"],
+      "claim": "The nearest known neutron star is about 400 light-years away; Voyager 1 would need about 7 million years to cover that distance",
+      "definition": "RX J1856.5-3754, closest known isolated neutron star, distance ~120 pc ~ 400 ly (HST parallax); Voyager 1 speed ~17 km/s ~ 3.6 AU/yr, so 400 ly ~ 25.3 million AU ~ 7 million years",
+      "current_record_holder": "RX J1856.5-3754 (closest known; nearer unconfirmed candidates may exist)",
+      "measured_value": "~400 ly (~120 pc); ~7 million years at Voyager 1 speed (computed)",
+      "date_verified": "2026-09",
+      "authoritative_source": "HST parallax (Walter & Lattimer 2002, ApJ 576, L145); Voyager 1 mission status (NASA)",
+      "source_url": "https://en.wikipedia.org/wiki/RX_J1856.5-3754",
+      "historically_changed": false,
+      "notes": "'nearest known' is the defensible form: unconfirmed candidates may exist. The Voyager travel time is a computed illustration."
+    }
+  ]
+}

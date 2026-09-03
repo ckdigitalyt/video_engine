@@ -38,7 +38,7 @@ def make_edit_plan_v2(paths, story_id: str = "tallest_mountain"):
         audio_dur = float((timing.get(bid) or {}).get("duration", 0.0))
         est_sum = sum(float(s.get("duration_est", 4.0)) for s in vshots) or 1.0
         if audio_dur > 0:
-            beat_target = audio_dur + PAD
+            beat_target = audio_dur + float(story.get('pad_s', PAD))
         else:
             beat_target = float(vb.get("duration_est", est_sum))
             rep["warnings"].append(f"{bid}: no TTS timing, falling back to duration_est")
