@@ -23,6 +23,22 @@ BOTTOM_SAFE = CAPTION_RECT[1] + CAPTION_RECT[3] - int(CANVAS_H * 0.033)  # ~1792
 FONT_SIZES = (54, 48, 42)
 LINE_SPACING = 1.22
 
+# V4 §9 subtitle hierarchy: 1 normal narration, 2 important fact,
+# 3 revelation (larger editorial text — no per-word kinetic motion)
+LEVEL_SIZES = {1: (54, 48, 42), 2: (58, 52, 46), 3: (66, 58, 50)}
+
+
+def _balance(lines: list) -> list:
+    """V4 §9 polish: no orphan single-word last line (when avoidable),
+    no line starting with a punctuation mark."""
+    if len(lines) == 2:
+        punct = ".,;:!?)\u00bb"
+        if len(lines[1]) == 1 and len(lines[0]) >= 3:
+            lines = [lines[0][:-1], [lines[0][-1]] + lines[1]]
+        elif lines[1] and lines[1][0][:1] in punct and len(lines[0]) >= 2:
+            lines = [lines[0][:-1], [lines[0][-1]] + lines[1]]
+    return lines
+
 _UNIT = r"(?:\s?(?:m|km|metres|meters|feet|ft|%|km/h|mph|kg|tonnes|years|million|billion|°C))?"
 _NUM = re.compile(r"\d[\d,\.]*" + _UNIT)
 _MARK = re.compile(r"\*([^*]+)\*")
@@ -106,19 +122,20 @@ def wrap_tokens(text: str, font, max_w: float) -> list:
     return lines
 
 
-def layout_caption(text: str, bible: dict, zone_y: int = None):
+def layout_caption(text: str, bible: dict, zone_y: int = None, level: int = 1):
     """Measure + fit a caption. Returns layout dict or ok=False with reasons.
 
-    Steps font sizes 54->48->42 until the block fits: <=2 lines, width within
-    X margins, bottom above BOTTOM_SAFE.
+    Steps the level's font ladder (V4: 1: 54->48->42, 2: 58->52->46,
+    3: 66->58->50) until the block fits: <=2 lines, width within X margins,
+    bottom above BOTTOM_SAFE.
     """
     from engine import bible as B
     zone_y = zone_y if zone_y is not None else CAPTION_RECT[1]
     body = bible.get("typography", {}).get("body", "Inter-Variable.ttf")
     emph = emphasis_words(text)
-    for size in FONT_SIZES:
+    for size in LEVEL_SIZES.get(int(level), FONT_SIZES):
         f = _font(body, size)
-        lines = wrap_tokens(text, f, MAX_TEXT_W)
+        lines = _balance(wrap_tokens(text, f, MAX_TEXT_W))
         if not lines or len(lines) > 2:
             continue
         line_h = int(size * LINE_SPACING)
