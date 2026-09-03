@@ -108,3 +108,15 @@ def _contrast_target(bible: dict) -> float:
     if "low" in c:
         return 0.35
     return 0.55
+
+
+# ------------------------------------------------------------------ v3 -----
+
+BIBLE_V3_FIELDS = ("illustration_medium", "framing", "graphic_language")
+
+
+def validate_bible_v3(bible: dict) -> list:
+    """Missing V3 fields (brief §2: the Bible controls more than colour —
+    medium, framing and graphic language drive style continuity and grammar).
+    V2 stories remain valid; V3 stories must carry all three."""
+    return [f for f in BIBLE_V3_FIELDS if f not in bible]

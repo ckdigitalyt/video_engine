@@ -1,0 +1,135 @@
+{
+  "story_id": "oldest_tree",
+  "engine": "v3",
+  "fps": 30,
+  "size": [1080, 1920],
+  "regions": {
+    "center": [0.30, 0.40, 0.40, 0.16],
+    "bark_strip": [0.33, 0.46, 0.34, 0.20]
+  },
+  "beats": [
+    {
+      "beat_id": "B1",
+      "shots": [
+        {
+          "shot_id": "S01",
+          "shot_type": "HOOK",
+          "asset": "B1_ridge_dawn",
+          "duration_est": 6.5,
+          "crop_bias_y": 0.35,
+          "opening": true,
+          "title": "THE OLDEST TREE ON EARTH IS HIDING",
+          "tag": "",
+          "captions": "phrase"
+        }
+      ]
+    },
+    {
+      "beat_id": "B2",
+      "shots": [
+        {
+          "shot_id": "S02",
+          "shot_type": "REVEAL",
+          "asset": "B2_trunk_detail",
+          "duration_est": 7.5,
+          "crop_bias_y": 0.42,
+          "typography": [
+            { "kind": "NUMBER_POP", "at": 0.55, "text": "4,850 YEARS", "region": "center" }
+          ],
+          "captions": "phrase"
+        }
+      ]
+    },
+    {
+      "beat_id": "B3",
+      "shots": [
+        {
+          "shot_id": "S03",
+          "shot_type": "CONSTRUCT",
+          "asset": "D1_timeline_s0",
+          "duration_est": 7.5,
+          "crop_bias_y": 0.42,
+          "progressive": {
+            "stages": [
+              { "asset": "D1_timeline_s1", "at": 0.30 },
+              { "asset": "D1_timeline_s2", "at": 0.65 }
+            ]
+          },
+          "captions": "phrase"
+        }
+      ]
+    },
+    {
+      "beat_id": "B4",
+      "shots": [
+        {
+          "shot_id": "S04",
+          "shot_type": "COMPARE",
+          "asset": "D1_timeline_s2",
+          "duration_est": 7.0,
+          "crop_bias_y": 0.42,
+          "progressive": {
+            "stages": [
+              { "asset": "D1_timeline_s3", "at": 0.15 },
+              { "asset": "D1_timeline_s4", "at": 0.55 },
+              { "asset": "D1_timeline_s5", "at": 0.82 }
+            ]
+          },
+          "captions": "phrase"
+        }
+      ]
+    },
+    {
+      "beat_id": "B5",
+      "shots": [
+        {
+          "shot_id": "S05",
+          "shot_type": "DETAIL",
+          "asset": "B3_bark_strip",
+          "duration_est": 7.5,
+          "crop_bias_y": 0.50,
+          "overlays": [
+            { "kind": "HIGHLIGHT", "at": 0.50, "target": "bark_strip", "style": "circle" }
+          ],
+          "captions": "phrase"
+        }
+      ]
+    },
+    {
+      "beat_id": "B6",
+      "shots": [
+        {
+          "shot_id": "S06",
+          "shot_type": "TYPO",
+          "asset": "B4_stump_rings",
+          "duration_est": 7.5,
+          "crop_bias_y": 0.45,
+          "typography": [
+            { "kind": "NUMBER_POP", "at": 0.45, "text": "1964", "region": "center" }
+          ],
+          "captions": "phrase"
+        }
+      ]
+    },
+    {
+      "beat_id": "B7",
+      "shots": [
+        {
+          "shot_id": "S07",
+          "shot_type": "PAYOFF",
+          "asset": "D4_map_s0",
+          "duration_est": 8.5,
+          "crop_bias_y": 0.42,
+          "progressive": {
+            "stages": [
+              { "asset": "D4_map_s1", "at": 0.30 },
+              { "asset": "D4_map_s2", "at": 0.62 }
+            ]
+          },
+          "end_card": "THE OLDEST TREE ON EARTH IS HIDING",
+          "captions": "phrase"
+        }
+      ]
+    }
+  ]
+}

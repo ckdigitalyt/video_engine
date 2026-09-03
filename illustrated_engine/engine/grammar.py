@@ -20,6 +20,11 @@ SHOT_TYPES = {
     "TIMELINE":  {"cam": (1.06, 1.06, ("x", 0.25, 0.72)), "desc": "travel the timeline"},
     "TRANSITION":{"cam": (1.00, 1.00, None), "desc": "brief breath, fade"},
     "PAYOFF":    {"cam": (1.16, 1.00, None), "desc": "pull back, land the scale"},
+    # ---- V3 motion families (§9): camera movement is not the only motion —
+    # diagram construction / typography events carry narrative motion.
+    "HOOK":      {"cam": (1.02, 1.12, None), "desc": "cinematic push on the hook line"},
+    "CONSTRUCT": {"cam": (1.00, 1.00, None), "desc": "static hold; staged reveals build the diagram"},
+    "TYPO":      {"cam": (1.06, 1.06, ("x", 0.35, 0.55)), "desc": "slow drift under a typography event"},
 }
 
 KNOWN_TYPES = set(SHOT_TYPES)

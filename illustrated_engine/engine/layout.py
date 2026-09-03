@@ -22,6 +22,10 @@ BRAND_RECT = (0, 64, 1080, 120)      # x, y, w, h
 VISUAL_RECT = (0, 176, 1080, 1328)   # 1080x1328
 CAPTION_RECT = (0, 1536, 1080, 320)
 
+# V3: full-bleed visual — captions overlay the image with dynamic backing
+# (no permanently reserved caption box; §3 of the V3 brief)
+VISUAL_RECT_V3 = (0, 176, 1080, 1744)  # 1080x1744, visual runs to canvas bottom
+
 FONT_DIR = Path(__file__).resolve().parent.parent / "assets" / "fonts"
 
 

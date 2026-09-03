@@ -136,6 +136,58 @@ def cmd_qa2(args):
     print("QA2 " + ("PASS" if rep["pass"] else "FAIL") + f" -> {paths.qa / 'qa2.json'}")
 
 
+def cmd_diag3(args):
+    from engine import bible as B, diagrams_v3
+    paths = _paths()
+    bible = B.load_bible(Path(paths.stories) / args.story)
+    manifest = diagrams_v3.write_stages(paths, bible, args.story)
+    print(json.dumps({k: len(v) for k, v in manifest.items()}, indent=1))
+
+
+def cmd_plan3(args):
+    from engine import planv3
+    paths = _paths()
+    plan, rep = planv3.make_edit_plan_v3(paths, args.story)
+    for w in rep["warnings"]:
+        print("warn:", w)
+    for e in rep["errors"]:
+        print("error:", e)
+    total = sum(s["duration_s"] for s in plan["shots"])
+    print(f"edit_plan v3 -> build/edit_plan.json ({len(plan['shots'])} shots, {total:.1f}s)")
+
+
+def cmd_render3(args):
+    from engine import composev2
+    paths = _paths()
+    out = composev2.render_video_v2(paths, args.story, force=args.force,
+                                    out_name="proto3.mp4")
+    print(f"proto3 -> {out}")
+
+
+def cmd_qa3(args):
+    from engine import bible as B, phone_qa, qa2, qa3, style_continuity
+    paths = _paths()
+    video = Path(args.path) if args.path else paths.output / "proto3.mp4"
+    bible = B.load_bible(Path(paths.stories) / args.story)
+    rep = qa2.qa_video_v2(video, paths, args.story)
+    for c in rep["checks"]:
+        print(("PASS " if c["ok"] else "FAIL ") + c["check"] + ": " + c["detail"])
+    sty = style_continuity.video_style_score(video, bible, samples=8)
+    (Path(paths.build) / "style_continuity.json").write_text(json.dumps(sty, indent=2))
+    print(f"style continuity: mean={sty['mean']} min={sty['min']} max={sty['max']}")
+    phone_qa.phone_render(video, Path(paths.build) / "phone_preview.mp4")
+    leg = phone_qa.phone_legibility(video)
+    (Path(paths.build) / "phone_qa.json").write_text(json.dumps(leg, indent=2))
+    print(f"phone QA: readable={leg['readable']} key_number_px={leg['key_number_px']}")
+    res = qa3.run_qa3(video, Path(paths.stories) / args.story, build_dir=paths.build)
+    print("scores:", json.dumps({g: res["groups"][g]["score"] for g in res["groups"]}))
+    print("p0_defects:", json.dumps(res["p0_defects"]))
+    print("can_publish:", res["can_publish"])
+    for w in res["weaknesses"]:
+        print(f"weakness: [{w['group']}] {w['check']} = {w['score']}")
+    print("QA3 ->", Path(paths.build) / "qa" / "qa3.json")
+
+
 def cmd_smoke(args):
     raise SystemExit(_smoke())
 
@@ -265,6 +317,20 @@ def main():
     q2.add_argument("path", nargs="?", default=None)
     q2.add_argument("--story", default="tallest_mountain")
     q2.set_defaults(fn=cmd_qa2)
+    g3 = sub.add_parser("diag3", help="render v3 progressive diagram stages")
+    g3.add_argument("--story", default="oldest_tree")
+    g3.set_defaults(fn=cmd_diag3)
+    p3 = sub.add_parser("plan3", help="build v3 edit plan (progressive reveals)")
+    p3.add_argument("--story", default="oldest_tree")
+    p3.set_defaults(fn=cmd_plan3)
+    r3 = sub.add_parser("render3", help="render v3 shots + concat -> output/proto3.mp4")
+    r3.add_argument("--story", default="oldest_tree")
+    r3.add_argument("--force", action="store_true")
+    r3.set_defaults(fn=cmd_render3)
+    q3 = sub.add_parser("qa3", help="v3 three-axis QA (default output/proto3.mp4)")
+    q3.add_argument("path", nargs="?", default=None)
+    q3.add_argument("--story", default="oldest_tree")
+    q3.set_defaults(fn=cmd_qa3)
     args = ap.parse_args()
     args.fn(args)
 

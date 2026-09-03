@@ -80,7 +80,9 @@ def qa_video_v2(target: Path, paths, story_id: str = "tallest_mountain") -> dict
     plan_p = Path(paths.build) / "edit_plan.json"
     plan = json.loads(plan_p.read_text()) if plan_p.exists() else {}
     shots = plan.get("shots", [])
-    rendered = len(list((Path(paths.build) / "shots2").glob("*.mp4"))) if (Path(paths.build) / "shots2").exists() else 0
+    _sdir = "shots3" if str(json.loads((Path(paths.build) / "edit_plan.json").read_text()).get("engine", "")) == "v3" else "shots2"
+    _sd = Path(paths.build) / _sdir
+    rendered = len(list(_sd.glob("*.mp4"))) if _sd.exists() else 0
     add("shot_count", rendered == len(shots) and len(shots) > 0,
         f"{rendered} rendered / {len(shots)} planned")
 

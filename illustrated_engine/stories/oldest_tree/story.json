@@ -1,0 +1,49 @@
+{
+  "story_id": "oldest_tree",
+  "brand": "ABOVE THE CLOUDS",
+  "title": "The Oldest Tree on Earth Is Hiding",
+  "beats": [
+    {
+      "beat_id": "B1",
+      "start": 0.0,
+      "end": 6.5,
+      "narration": "High in California's White Mountains grows the oldest living tree on Earth — and it almost looks dead."
+    },
+    {
+      "beat_id": "B2",
+      "start": 6.5,
+      "end": 14.0,
+      "narration": "It's a Great Basin bristlecone pine — about 4,850 years old. Its name is Methuselah."
+    },
+    {
+      "beat_id": "B3",
+      "start": 14.0,
+      "end": 21.5,
+      "narration": "It sprouted around 2832 BC — a seedling centuries before the Great Pyramid was built."
+    },
+    {
+      "beat_id": "B4",
+      "start": 21.5,
+      "end": 28.5,
+      "narration": "When the Egyptians raised that pyramid, Methuselah was already 270 years old."
+    },
+    {
+      "beat_id": "B5",
+      "start": 28.5,
+      "end": 36.0,
+      "narration": "It survives on a single strip of living bark. Most of the tree is already dead — one thin line keeps it alive."
+    },
+    {
+      "beat_id": "B6",
+      "start": 36.0,
+      "end": 43.5,
+      "narration": "In 1964, a researcher cut down another bristlecone — then counted nearly five thousand rings. The oldest tree ever found, destroyed in minutes."
+    },
+    {
+      "beat_id": "B7",
+      "start": 43.5,
+      "end": 52.0,
+      "narration": "Methuselah still stands. Its exact location stays secret. The oldest tree on Earth survives because it stays hidden."
+    }
+  ]
+}

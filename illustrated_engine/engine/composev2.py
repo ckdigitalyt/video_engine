@@ -46,7 +46,7 @@ def _fonts(bible):
 
 # ------------------------------------------------------------- overlays -----
 
-def caption_png(cue: dict, bible: dict, out: Path) -> dict:
+def caption_png(cue: dict, bible: dict, out: Path, bg_img=None, v3: bool = False) -> dict:
     """Full-frame transparent RGBA with one caption block baked. -> layout."""
     img = Image.new("RGBA", (CANVAS_W, CANVAS_H), (0, 0, 0, 0))
     lay = subs.layout_caption(cue["text"], bible)
@@ -59,6 +59,18 @@ def caption_png(cue: dict, bible: dict, out: Path) -> dict:
     from engine import bible as B
     text_col = B.rgb255(bible, "text") + (255,)
     accent = B.rgb255(bible, "accent") + (255,)
+    if v3 and bg_img is not None and lay.get("bbox"):
+        from engine import contrast as C
+        pad = 30
+        bb = (lay["bbox"][0] - pad, lay["bbox"][1] - pad,
+              lay["bbox"][2] + pad, lay["bbox"][3] + pad)
+        dec = C.needs_backing(B.rgb255(bible, "text"), C.bbox_pixels(bg_img, bb))
+        lay["backing"] = dec.as_dict()
+        if dec.level == "gradient":
+            gw = int(lay["bbox"][2] - lay["bbox"][0]) + 200
+            gh = int(lay["block_h"]) + 170
+            strip = C.gradient_strip(gw, gh, alpha_max=150)
+            img.paste(strip, (int(lay["bbox"][0]) - 100, int(lay["bbox"][1]) - 100), strip)
     shadow = (0, 0, 0, 120)
     f = lay["font"]
     y = lay["y0"]
@@ -160,11 +172,13 @@ def base_frame(shot: dict, bible: dict) -> Image.Image:
     return frame
 
 
-def camera_canvas(shot: dict, paths, bible: dict):
+def camera_canvas(shot: dict, paths, bible: dict, visual_rect=None):
     """Cover-crop the plate at max camera scale. -> (png path, smax)."""
+    from engine.layout import VISUAL_RECT as _VR
+    vr = visual_rect if visual_rect is not None else _VR
     cam = shot["camera"]
     smax = max(float(cam["from_scale"]), float(cam["to_scale"]))
-    W_c, H_c = int(round(VW * smax)), int(round(VH * smax))
+    W_c, H_c = int(round(vr[2] * smax)), int(round(vr[3] * smax))
     plate = Path(paths.assets) / f"{shot['asset']}.png"
     img = layout.smart_crop(Image.open(plate), W_c, H_c,
                             bias_y=float(shot.get("crop_bias_y", 0.42)))
@@ -174,7 +188,8 @@ def camera_canvas(shot: dict, paths, bible: dict):
     return out, smax, W_c, H_c
 
 
-def zoompan_filter(shot: dict, smax: float, W_c: int, H_c: int) -> str:
+def zoompan_filter(shot: dict, smax: float, W_c: int, H_c: int,
+                   out_w: int = None, out_h: int = None) -> str:
     """Grammar camera -> zoompan expression (piecewise for one retarget)."""
     cam = shot["camera"]
     dur = float(shot["duration_s"])
@@ -202,13 +217,16 @@ def zoompan_filter(shot: dict, smax: float, W_c: int, H_c: int) -> str:
     else:
         x = "(iw-iw/zoom)/2"
         y = "(ih-ih/zoom)/2"
-    return f"zoompan=z='{z}':x='{x}':y='{y}':d=1:s={VW}x{VH}:fps=30"
+    return f"zoompan=z='{z}':x='{x}':y='{y}':d=1:s={(out_w or VW)}x{(out_h or VH)}:fps=30"
 
 
 # ------------------------------------------------------------ shot render ---
 
-def render_shot_v2(shot: dict, paths, bible: dict, force: bool = False) -> Path:
-    out = Path(paths.build) / "shots2" / f"{shot['shot_id']}.mp4"
+def render_shot_v2(shot: dict, paths, bible: dict, force: bool = False,
+                   v3: bool = False, shots_subdir: str = "shots2") -> Path:
+    from engine.layout import VISUAL_RECT, VISUAL_RECT_V3
+    vr = VISUAL_RECT_V3 if v3 else VISUAL_RECT
+    out = Path(paths.build) / shots_subdir / f"{shot['shot_id']}.mp4"
     out.parent.mkdir(parents=True, exist_ok=True)
     if out.exists() and not force:
         return out
@@ -216,7 +234,7 @@ def render_shot_v2(shot: dict, paths, bible: dict, force: bool = False) -> Path:
     work = Path(paths.build) / "ov2" / shot["shot_id"]
     work.mkdir(parents=True, exist_ok=True)
 
-    canvas, smax, W_c, H_c = camera_canvas(shot, paths, bible)
+    canvas, smax, W_c, H_c = camera_canvas(shot, paths, bible, visual_rect=vr)
     base = base_frame(shot, bible)
     base_png = work / "base.png"
     base.save(base_png, "PNG")
@@ -224,16 +242,19 @@ def render_shot_v2(shot: dict, paths, bible: dict, force: bool = False) -> Path:
     cmd = ["ffmpeg", "-nostdin", "-hide_banner", "-loglevel", "error", "-y",
            "-loop", "1", "-framerate", "30", "-t", f"{dur:.3f}", "-i", str(canvas),
            "-loop", "1", "-framerate", "30", "-t", f"{dur:.3f}", "-i", str(base_png)]
-    graph = [f"[0:v]{zoompan_filter(shot, smax, W_c, H_c)}[cam]",
-             f"[1:v][cam]overlay=0:{VY}[b]"]
+    graph = [f"[0:v]{zoompan_filter(shot, smax, W_c, H_c, out_w=vr[2], out_h=vr[3])}[cam]",
+             f"[1:v][cam]overlay=0:{vr[1]}[b]"]
     last = "b"
     idx = 2
 
-    # captions (RGBA, alpha ramp, enable windows)
+    # captions (RGBA, alpha ramp, enable windows); v3: dynamic contrast backing
+    bg_canvas = None
+    if v3:
+        bg_canvas = Image.open(canvas).convert("RGB")
     cap_layouts = []
     for i, cue in enumerate(shot.get("captions", []) or []):
         png = work / f"cap{i}.png"
-        lay = caption_png(cue, bible, png)
+        lay = caption_png(cue, bible, png, bg_img=bg_canvas, v3=v3)
         cap_layouts.append(lay)
         if not lay.get("ok") or not lay.get("png"):
             continue
@@ -261,6 +282,9 @@ def render_shot_v2(shot: dict, paths, bible: dict, force: bool = False) -> Path:
             yy = (active[0]["bbox"][3] + 16) if active and active[0].get("bbox") else None
             rule_png(bible, png, yy)
             hold = min(1.4, dur - t0)
+        elif kind == "stage_overlay" and spec.get("png"):
+            png = Path(spec["png"])   # pre-rendered full-frame stage card
+            hold = dur - t0
         else:
             continue
         t1 = min(dur, t0 + hold)
@@ -307,21 +331,24 @@ def make_audio_master(paths, story_dir: Path, pad: float = 0.7) -> Path:
     return master
 
 
-def render_video_v2(paths, story_id: str = "tallest_mountain", force: bool = False):
+def render_video_v2(paths, story_id: str = "tallest_mountain", force: bool = False,
+                    out_name: str = "proto2.mp4"):
     from engine import bible as B
     plan = json.loads((Path(paths.build) / "edit_plan.json").read_text())
     bible = B.load_bible(Path(paths.stories) / story_id)
     shots = plan.get("shots") or []
     if not shots:
         raise ValueError("edit_plan.json has no shots")
+    v3 = str(plan.get("engine", "")) == "v3"
+    shots_subdir = "shots3" if v3 else "shots2"
     for s in shots:
-        render_shot_v2(s, paths, bible, force=force)
+        render_shot_v2(s, paths, bible, force=force, v3=v3, shots_subdir=shots_subdir)
 
-    lst = Path(paths.build) / "shots2.txt"
-    lst.write_text("\n".join(f"file '{Path(paths.build) / 'shots2' / s['shot_id']}.mp4'" for s in shots) + "\n")
+    lst = Path(paths.build) / f"{shots_subdir}.txt"
+    lst.write_text("\n".join(f"file '{Path(paths.build) / shots_subdir / s['shot_id']}.mp4'" for s in shots) + "\n")
     master = make_audio_master(paths, Path(paths.stories) / story_id)
 
-    out = Path(paths.output) / "proto2.mp4"
+    out = Path(paths.output) / out_name
     out.parent.mkdir(parents=True, exist_ok=True)
     cmd = ["ffmpeg", "-nostdin", "-hide_banner", "-loglevel", "error", "-y",
            "-f", "concat", "-safe", "0", "-i", str(lst),
