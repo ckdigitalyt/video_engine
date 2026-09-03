@@ -126,7 +126,7 @@ def distance_stages(bible) -> list:
     # s0 - mark the star
     img = Image.new("RGBA", (VW3, VH3), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
-    sx, sy = int(VW3 * 0.60), int(VH3 * 0.34)
+    sx, sy = int(VW3 * 0.50), int(VH3 * 0.34)
     d.ellipse([sx - 9, sy - 9, sx + 9, sy + 9], fill=accent)
     d.ellipse([sx - 20, sy - 20, sx + 20, sy + 20],
               outline=(*accent[:3], 170), width=4)
