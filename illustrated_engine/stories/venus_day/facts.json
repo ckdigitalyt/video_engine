@@ -1,0 +1,92 @@
+{
+ "claims": [
+  {
+   "id": "venus_day_longer_than_year",
+   "beats": ["B1", "B2"],
+   "claim": "A sidereal day on Venus — one full rotation, 243.025 Earth days — is longer than its year, the 224.70 Earth days it takes to orbit the Sun",
+   "definition": "Sidereal rotation period vs orbital period of Venus; the standard NASA planetary data comparison",
+   "current_record_holder": "n/a",
+   "measured_value": "rotation 243.025 Earth days (retrograde); orbital period 224.70 Earth days",
+   "date_verified": "2026-09",
+   "authoritative_source": "NASA Planetary Fact Sheet (NSSDC); NASA Science - Venus Facts; NASA Space Place",
+   "source_url": "https://nssdc.gsfc.nasa.gov/planetary/factsheet/venusfact.html",
+   "historically_changed": false,
+   "notes": "Narration rounds to 243 and 225. Solar day (sunrise to sunrise) is a different quantity - see venus_solar_day_117."
+  },
+  {
+   "id": "venus_lap_before_turn",
+   "beats": ["B3"],
+   "claim": "Venus completes a full orbit of the Sun before it completes a single rotation",
+   "definition": "Computed comparison: orbital period 224.70 d < sidereal rotation 243.025 d; 243.025/224.70 = 1.08 orbits per sidereal day",
+   "current_record_holder": "n/a",
+   "measured_value": "1.08 orbits per rotation (computed)",
+   "date_verified": "2026-09",
+   "authoritative_source": "Computed from NASA Planetary Fact Sheet periods",
+   "source_url": "https://nssdc.gsfc.nasa.gov/planetary/factsheet/venusfact.html",
+   "historically_changed": false,
+   "notes": "Explicitly computed, not a measured record."
+  },
+  {
+   "id": "venus_retrograde",
+   "beats": ["B5"],
+   "claim": "Venus rotates retrograde — backwards relative to its orbital direction and the spin of most planets",
+   "definition": "Retrograde rotation; Venus's axial spin is opposite its orbital motion",
+   "current_record_holder": "n/a",
+   "measured_value": "rotation direction: retrograde",
+   "date_verified": "2026-09",
+   "authoritative_source": "NASA Planetary Fact Sheet; NASA Space Place - All About Venus",
+   "source_url": "https://spaceplace.nasa.gov/all-about-venus/en/",
+   "historically_changed": false
+  },
+  {
+   "id": "venus_sun_rises_west",
+   "beats": ["B5"],
+   "claim": "On Venus the Sun rises in the west and sets in the east",
+   "definition": "Direct consequence of retrograde rotation viewed from the surface",
+   "current_record_holder": "n/a",
+   "measured_value": "apparent solar path across the sky is reversed vs Earth",
+   "date_verified": "2026-09",
+   "authoritative_source": "NASA Space Place - All About Venus; NASA Science - Venus Facts",
+   "source_url": "https://spaceplace.nasa.gov/all-about-venus/en/",
+   "historically_changed": false
+  },
+  {
+   "id": "venus_solar_day_117",
+   "beats": ["B6"],
+   "claim": "A solar day on Venus, sunrise to sunrise, is about 117 Earth days",
+   "definition": "Solar day combines retrograde rotation with orbital motion; measured 116.75 Earth days",
+   "current_record_holder": "n/a",
+   "measured_value": "116.75 Earth days (solar day)",
+   "date_verified": "2026-09",
+   "authoritative_source": "NASA Space Place; UCLA radar-speckle rotation study published in Science (2021)",
+   "source_url": "https://spaceplace.nasa.gov/all-about-venus/en/",
+   "historically_changed": false,
+   "notes": "Distinct from the 243.025-day sidereal rotation. Narration uses the standard ~117 figure."
+  },
+  {
+   "id": "venus_year_between_two_dawns",
+   "beats": ["B6"],
+   "claim": "A Venus year passes between barely two sunrises",
+   "definition": "Computed: 224.70 d year / 116.75 d solar day = 1.92 solar days per year",
+   "current_record_holder": "n/a",
+   "measured_value": "1.92 sunrises per Venus year (computed)",
+   "date_verified": "2026-09",
+   "authoritative_source": "Computed from NASA periods (orbital 224.70 d, solar day 116.75 d)",
+   "source_url": "https://nssdc.gsfc.nasa.gov/planetary/factsheet/venusfact.html",
+   "historically_changed": false
+  },
+  {
+   "id": "venus_slow_cause_hypothesis",
+   "beats": ["B7"],
+   "claim": "The cause of Venus's slow retrograde spin is not settled; leading hypotheses include an ancient giant impact and atmospheric tidal drag",
+   "definition": "Open scientific question; narration stays hedged ('may have') and presents no mechanism as fact",
+   "current_record_holder": "n/a",
+   "measured_value": "no consensus; competing hypotheses",
+   "date_verified": "2026-09",
+   "authoritative_source": "NASA Science - Venus; JPL public materials on Venus rotation",
+   "source_url": "https://science.nasa.gov/venus/venus-facts/",
+   "historically_changed": false,
+   "notes": "Deliberately hedged beat - the payoff keeps the mystery open rather than asserting a mechanism."
+  }
+ ]
+}

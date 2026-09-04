@@ -1,0 +1,301 @@
+{
+  "story_id": "venus_day",
+  "regions": {
+    "west_horizon": [
+      0.56,
+      0.12,
+      0.4,
+      0.2
+    ],
+    "dawn_sun": [
+      0.3,
+      0.28,
+      0.4,
+      0.12
+    ],
+    "venus_dot": [
+      0.38,
+      0.3,
+      0.24,
+      0.1
+    ]
+  },
+  "beats": [
+    {
+      "beat_id": "B1",
+      "shots": [
+        {
+          "shot_id": "S01",
+          "shot_type": "HOOK",
+          "asset": "B1_venus_planet",
+          "duration_est": 4.19,
+          "crop_bias_y": 0.45,
+          "opening": true,
+          "title": "THE DAY THAT OUTLASTS THE YEAR",
+          "tag": "",
+          "captions": "phrase",
+          "role": "HERO",
+          "chrome": "none",
+          "purpose": "Anchor the paradox on the planet itself before any numbers arrive",
+          "claim": "on Venus a single day lasts longer than the entire year",
+          "evidence": "hero plate of Venus in deep space + title card",
+          "motion_reason": "slow push-in: stillness first so the paradox lands clean",
+          "transition_reason": "cut to space-scale as narration gives the two numbers",
+          "typography": [],
+          "stage_chips": [
+            {
+              "asset": "chip_s01",
+              "at": 0.34
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "beat_id": "B2",
+      "shots": [
+        {
+          "shot_id": "S02",
+          "shot_type": "REVEAL",
+          "asset": "B2_venus_space",
+          "duration_est": 7.52,
+          "crop_bias_y": 0.4,
+          "captions": "phrase",
+          "role": "EVIDENCE",
+          "chrome": "none",
+          "purpose": "Give both numbers at planetary scale before the diagram race",
+          "claim": "rotation 243 Earth days vs orbit 224.7 days",
+          "evidence": "Sun-vs-Venus scale plate + 243-days number pop",
+          "motion_reason": "lateral drift: slow progress matches the slow spin",
+          "transition_reason": "cut to diagram as narration says watch the race",
+          "typography": [
+            {
+              "kind": "NUMBER_POP",
+              "text": "1 SPIN = 243 EARTH DAYS",
+              "at": 0.55,
+              "region": [
+                0.26,
+                0.26,
+                0.48,
+                0.09
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "beat_id": "B3",
+      "shots": [
+        {
+          "shot_id": "S03",
+          "shot_type": "CONSTRUCT",
+          "asset": "B2_venus_space",
+          "duration_est": 5.94,
+          "captions": "phrase",
+          "role": "DIAGRAM",
+          "chrome": "section",
+          "tag": "ABOVE THE CLOUDS",
+          "purpose": "Build the race step by step: lap first, turn second, verdict last",
+          "claim": "the 224.7-day orbit completes before the 243-day rotation",
+          "evidence": "D1_race stages: orbit baseline, then sweep + lagging spin arrow, then verdict",
+          "motion_reason": "static hold; the staged diagram build is the motion",
+          "transition_reason": "cut to the same diagram family for the Earth contrast",
+          "progressive": {
+            "stages": [
+              {
+                "asset": "D1_race_s0",
+                "at": 0.05
+              },
+              {
+                "asset": "D1_race_s1",
+                "at": 0.45
+              },
+              {
+                "asset": "D1_race_s2",
+                "at": 0.8
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "beat_id": "B4",
+      "shots": [
+        {
+          "shot_id": "S04",
+          "shot_type": "COMPARE",
+          "asset": "B2_venus_space",
+          "duration_est": 6.62,
+          "captions": "phrase",
+          "role": "DIAGRAM",
+          "chrome": "section",
+          "tag": "ABOVE THE CLOUDS",
+          "purpose": "Contrast with Earth on one honest scale so the Venus bars need no words",
+          "claim": "Earth: 1-day spin vs 365-day orbit; Venus bars invert the ratio",
+          "evidence": "D2_compare stages: Earth baseline bars, then Venus bars with day longer than year",
+          "motion_reason": "static hold; bar growth carries the argument",
+          "transition_reason": "cut back to the planet for the backwards-spin detail",
+          "progressive": {
+            "stages": [
+              {
+                "asset": "D2_compare_s0",
+                "at": 0.05
+              },
+              {
+                "asset": "D2_compare_s1",
+                "at": 0.55
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "beat_id": "B5",
+      "shots": [
+        {
+          "shot_id": "S05",
+          "shot_type": "DETAIL",
+          "asset": "B3_venus_surface",
+          "duration_est": 5.84,
+          "crop_bias_y": 0.4,
+          "captions": "phrase",
+          "role": "EVIDENCE",
+          "chrome": "none",
+          "purpose": "Show the consequence, not just the fact: a sun rising from the wrong side",
+          "claim": "Venus rotates retrograde; the Sun rises in the west and sets in the east",
+          "evidence": "surface plate + circle highlight on the western horizon",
+          "motion_reason": "punch-in on the horizon as the sun is named",
+          "transition_reason": "cut to the dawn plate for the sunrise-to-sunrise count",
+          "overlays": [
+            {
+              "kind": "HIGHLIGHT",
+              "target": "west_horizon",
+              "style": "circle",
+              "at": 0.5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "beat_id": "B6",
+      "shots": [
+        {
+          "shot_id": "S06",
+          "shot_type": "TYPO",
+          "asset": "B4_venus_dawn",
+          "duration_est": 5.32,
+          "crop_bias_y": 0.35,
+          "captions": "phrase",
+          "role": "EVIDENCE",
+          "chrome": "chapter",
+          "chapter_title": "SUNRISE TO SUNRISE",
+          "purpose": "Give the practical day length people can feel",
+          "claim": "solar day on Venus is about 117 Earth days",
+          "evidence": "dawn plate + 117-days number pop under chapter chrome",
+          "motion_reason": "slow drift along the cloud tops \u2014 a day passing",
+          "transition_reason": "cut to the dawn-count diagram for the year conclusion",
+          "typography": [
+            {
+              "kind": "NUMBER_POP",
+              "text": "117 EARTH DAYS",
+              "at": 0.55,
+              "region": [
+                0.28,
+                0.26,
+                0.44,
+                0.09
+              ]
+            }
+          ],
+          "stage_chips": [
+            {
+              "asset": "chip_s06",
+              "at": 0.36
+            }
+          ]
+        },
+        {
+          "shot_id": "S07",
+          "shot_type": "CONSTRUCT",
+          "asset": "B4_venus_dawn",
+          "duration_est": 4.1,
+          "captions": "phrase",
+          "role": "DIAGRAM",
+          "chrome": "section",
+          "tag": "ABOVE THE CLOUDS",
+          "purpose": "Turn 117 days into the year-dawn conclusion",
+          "claim": "224.7 / 116.75 = 1.92 sunrises per Venus year",
+          "evidence": "D3_dawncount stages: sunrise-to-sunrise bar, then 1.92 dawns conclusion",
+          "motion_reason": "static hold; annotation builds over the plate",
+          "transition_reason": "cut to the collision plate for the open question",
+          "progressive": {
+            "stages": [
+              {
+                "asset": "D3_dawncount_s0",
+                "at": 0.1
+              },
+              {
+                "asset": "D3_dawncount_s1",
+                "at": 0.6
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "beat_id": "B7",
+      "shots": [
+        {
+          "shot_id": "S08",
+          "shot_type": "TYPO",
+          "asset": "B5_collision",
+          "duration_est": 5.5,
+          "crop_bias_y": 0.45,
+          "captions": "phrase",
+          "role": "HISTORICAL",
+          "chrome": "chapter",
+          "chapter_title": "WHY SO SLOW?",
+          "purpose": "Present the open question honestly: impact hypothesis, tidal drag, no consensus",
+          "claim": "cause of the slow retrograde spin is unsettled; leading hypotheses include an ancient impact and atmospheric tidal drag",
+          "evidence": "primordial-impact plate under chapter chrome",
+          "motion_reason": "slow drift through debris arcs \u2014 unsettled history",
+          "transition_reason": "cut to the quiet payoff plate for the closing line",
+          "typography": []
+        }
+      ]
+    },
+    {
+      "beat_id": "B8",
+      "shots": [
+        {
+          "shot_id": "S09",
+          "shot_type": "PAYOFF",
+          "asset": "B6_payoff",
+          "duration_est": 5.99,
+          "crop_bias_y": 0.35,
+          "captions": "phrase",
+          "role": "PAYOFF",
+          "chrome": "none",
+          "end_card": "ON VENUS, THE YEAR ALWAYS WINS",
+          "purpose": "Land the paradox as the ending: the year finishes before the day does",
+          "claim": "the year always wins the race",
+          "evidence": "dusk-crescent plate + end card, no call to action",
+          "motion_reason": "pull-back: the frame lets go of the viewer",
+          "transition_reason": "final shot; end card closes",
+          "typography": [],
+          "stage_chips": [
+            {
+              "asset": "chip_s09",
+              "at": 0.35
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -182,3 +182,130 @@ def write_stages(paths, bible, story_id: str = None) -> dict:
                                    "kind": kind})
     (build / "diag_stages" / "manifest_v4.json").write_text(json.dumps(manifest, indent=2))
     return manifest
+
+
+# --------------------------------------------------------------- venus ----
+
+def race_stages(bible) -> list:
+    """V4 D1_race — lap vs turn: s0 baseline orbit, s1 lap done + spin
+    dial 27 deg short, s2 verdict."""
+    out = []
+    img, d, ink, navy, accent = _card3(bible)
+    disp, body = _fonts(bible)
+    d.text((80, 96), "THE RACE", font=disp(58), fill=navy + (255,))
+    d.text((80, 168), "ONE LAP OF THE SUN VS ONE SPIN", font=body(24),
+           fill=navy + (210,))
+    cx = VW3 // 2
+    cy = int(VH3 * 0.38)
+    R = 300
+    box = [cx - R, cy - R, cx + R, cy + R]
+    # s0 baseline: sun + dashed orbit + Venus dot on the start line
+    d.ellipse([cx - 50, cy - 50, cx + 50, cy + 50], fill=accent + (255,))
+    for deg in range(0, 360, 18):
+        d.arc(box, deg, deg + 11, fill=navy + (200,), width=5)
+    d.ellipse([cx - 16, cy - R - 16, cx + 16, cy - R + 16], fill=navy + (255,))
+    d.text((cx + 44, cy - R - 12), "START", font=body(22), fill=navy + (200,))
+    d.text((80, cy + R + 54), "ONE LAP = 225 EARTH DAYS", font=body(26),
+           fill=navy + (235,))
+    out.append(_copy(img))                                     # s0 baseline
+    # s1: lap complete (accent ring + flag), spin dial 27 deg short
+    d.arc(box, 0, 360, fill=accent + (255,), width=9)
+    d.line([(cx, cy - R - 34), (cx, cy - R - 86)], fill=accent + (255,), width=7)
+    d.polygon([(cx - 60, cy - R - 86), (cx + 4, cy - R - 86), (cx - 28, cy - R - 60)],
+              fill=accent + (255,))
+    dy = cy + R + 130
+    for dcx, frac, col, lab in ((VW3 * 0.32, 1.0, accent, "LAP — DONE"),
+                                (VW3 * 0.68, 0.925, navy, "TURN — 27 DEG SHORT")):
+        dr = 74
+        d.ellipse([dcx - dr, dy - dr, dcx + dr, dy + dr], outline=navy + (120,), width=4)
+        d.arc([dcx - dr, dy - dr, dcx + dr, dy + dr], -90, -90 + int(360 * frac),
+              fill=col + (255,), width=10)
+        d.text((dcx - 110, dy + dr + 18), lab, font=body(24), fill=navy + (235,))
+    out.append(_copy(img))                                     # s1 race state
+    # s2: verdict
+    d.text((80, int(VH3 * 0.78)), "THE YEAR WINS", font=disp(60),
+           fill=accent + (255,))
+    d.line([(80, int(VH3 * 0.78) + 90), (80 + 560, int(VH3 * 0.78) + 90)],
+           fill=accent + (220,), width=5)
+    d.text((80, int(VH3 * 0.78) + 116), "1.08 LAPS EVERY SINGLE TURN",
+           font=body(30), fill=navy + (240,))
+    out.append(_copy(img))                                     # s2 verdict
+    return out
+
+
+def compare_stages(bible) -> list:
+    """V4 D2_compare — Earth baseline bars vs Venus bars, one scale."""
+    out = []
+    img, d, ink, navy, accent = _card3(bible)
+    disp, body = _fonts(bible)
+    d.text((80, 96), "TWO CLOCKS", font=disp(58), fill=navy + (255,))
+    d.text((80, 168), "EARTH VS VENUS — ONE HONEST SCALE", font=body(24),
+           fill=navy + (210,))
+    x0, W = 80, 900
+    k = W / 365.0
+    y = int(VH3 * 0.32)
+    # s0 Earth baseline
+    d.text((80, y - 46), "EARTH", font=body(30), fill=navy + (255,))
+    d.rectangle([x0, y, x0 + 12, y + 46], fill=accent + (255,))
+    d.text((x0 + 28, y + 6), "DAY = 24 HOURS", font=body(26), fill=navy + (235,))
+    y2 = y + 100
+    d.rectangle([x0, y2, x0 + W, y2 + 46], fill=navy + (190,))
+    d.text((x0 + 28, y2 + 6), "YEAR = 365 DAYS", font=body(26),
+           fill=(233, 223, 200, 255))
+    out.append(_copy(img))                                     # s0 Earth
+    # s1 Venus bars — the day bar overtakes the year bar
+    y3 = y2 + 150
+    d.text((80, y3 - 46), "VENUS", font=body(30), fill=accent + (255,))
+    d.rectangle([x0, y3, x0 + int(243 * k), y3 + 46], fill=accent + (255,))
+    d.text((x0 + 28, y3 + 6), "DAY = 243 EARTH DAYS", font=body(26),
+           fill=(233, 223, 200, 255))
+    y4 = y3 + 100
+    d.rectangle([x0, y4, x0 + int(225 * k), y4 + 46], fill=navy + (230,))
+    d.text((x0 + 28, y4 + 6), "YEAR = 225 EARTH DAYS", font=body(26),
+           fill=(233, 223, 200, 255))
+    d.text((80, int(VH3 * 0.74)), "A DAY LONGER THAN ITS YEAR",
+           font=disp(46), fill=accent + (255,))
+    d.line([(80, int(VH3 * 0.74) + 76), (80 + 700, int(VH3 * 0.74) + 76)],
+           fill=accent + (210,), width=5)
+    out.append(_copy(img))                                     # s1 Venus
+    return out
+
+
+def dawncount_stages(bible) -> list:
+    """V4 D3_dawncount — sunrise-to-sunrise timeline + dawns-per-year
+    conclusion. Transparent annotation over the dawn plate."""
+    disp, body = _fonts(bible)
+    pal = bible.get("palette", {}) if isinstance(bible, dict) else {}
+    txt = _hexrgb(pal.get("text", "#EFE6D4"))
+    accent = _hexrgb(pal.get("accent", "#C25B33"))
+    shadow = (0, 0, 0, 200)
+
+    def shadow_text(xy, s2, font, fill):
+        d.text((xy[0] + 3, xy[1] + 3), s2, font=font, fill=shadow)
+        d.text(xy, s2, font=font, fill=fill)
+
+    out = []
+    img = Image.new("RGBA", (VW3, VH3), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    y = int(VH3 * 0.60)
+    # s0 - sunrise-to-sunrise dashed timeline
+    shadow_text((120, y - 116), "SUNRISE TO SUNRISE", body(30), txt)
+    d.ellipse([120, y - 34, 188, y + 34], outline=accent, width=6)
+    d.ellipse([892, y - 34, 960, y + 34], outline=accent, width=6)
+    for xseg in range(214, 880, 40):
+        d.line([(xseg, y), (xseg + 22, y)], fill=(*txt[:3], 235), width=5)
+    shadow_text((120, y + 58), "117 EARTH DAYS", disp(56), accent)
+    out.append(_copy(img))                                     # s0 timeline
+    # s1 - the year conclusion
+    y2 = int(VH3 * 0.76)
+    shadow_text((120, y2), "BARELY TWO SUNRISES PER YEAR", disp(46), accent)
+    shadow_text((120, y2 + 82), "1.92 DAWNS EVERY VENUS YEAR", body(28), txt)
+    out.append(_copy(img))                                     # s1 conclusion
+    return out
+
+
+DIAGRAMS_V4_KINDS.update({
+    "D1_race": (race_stages, "diagram"),
+    "D2_compare": (compare_stages, "diagram"),
+    "D3_dawncount": (dawncount_stages, "annotation"),
+})

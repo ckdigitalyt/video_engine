@@ -1,0 +1,64 @@
+{
+  "story_id": "venus_day",
+  "brand": "ABOVE THE CLOUDS",
+  "title": "The Day That Outlasts the Year",
+  "beats": [
+    {
+      "beat_id": "B1",
+      "start": 0.0,
+      "end": 4.19,
+      "function": "HOOK",
+      "narration": "On Venus, a single day lasts longer than the entire year."
+    },
+    {
+      "beat_id": "B2",
+      "start": 4.19,
+      "end": 11.71,
+      "function": "REVEAL",
+      "narration": "Venus takes 243 Earth days to spin once \u2014 but only 225 to circle the Sun."
+    },
+    {
+      "beat_id": "B3",
+      "start": 11.71,
+      "end": 17.65,
+      "function": "EXPLANATION",
+      "narration": "Watch the race. Venus finishes a full lap of the Sun before it completes a single turn."
+    },
+    {
+      "beat_id": "B4",
+      "start": 17.65,
+      "end": 24.27,
+      "function": "ESCALATION",
+      "narration": "On Earth the math is friendly: one spin, one day. One orbit, one year."
+    },
+    {
+      "beat_id": "B5",
+      "start": 24.27,
+      "end": 30.11,
+      "function": "ESCALATION",
+      "narration": "Venus also spins backwards \u2014 so its sun climbs out of the west and sets in the east."
+    },
+    {
+      "beat_id": "B6",
+      "start": 30.11,
+      "end": 39.53,
+      "function": "TWIST",
+      "narration": "Count sunrise to sunrise, and a Venus day stretches to 117 Earth days. A whole year passes between barely two dawns."
+    },
+    {
+      "beat_id": "B7",
+      "start": 39.53,
+      "end": 51.02,
+      "function": "CURIOSITY",
+      "narration": "Why so slow? Nobody knows for sure. An ancient collision may have flipped it \u2014 or its own crushing atmosphere dragged it to a crawl."
+    },
+    {
+      "beat_id": "B8",
+      "start": 39.53,
+      "end": 51.02,
+      "function": "PAYOFF",
+      "narration": "On Venus, the year always wins."
+    }
+  ],
+  "pad_s": 0.25
+}

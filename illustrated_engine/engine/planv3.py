@@ -36,6 +36,20 @@ def make_edit_plan_v3(paths, story_id: str):
                     "spec": {"png": str(full), "asset": st["asset"]},
                 })
             shot["events"].sort(key=lambda e: e["t"])
+        if svp.get("stage_chips"):
+            shot.setdefault("events", [])
+            cdur = float(shot["duration_s"])
+            for ch in svp["stage_chips"]:
+                png = Path(paths.build) / "diag_stages" / f"{ch['asset']}_full.png"
+                if not png.exists():
+                    rep["errors"].append(f"{shot['shot_id']}: missing chip {ch['asset']}")
+                    continue
+                shot["events"].append({
+                    "t": round(float(ch["at"]) * cdur, 3),
+                    "kind": "stage_overlay",
+                    "spec": {"png": str(png), "asset": ch["asset"]},
+                })
+            shot["events"].sort(key=lambda e: e["t"])
         if svp.get("end_card"):
             shot["end_card"] = svp["end_card"]
 
