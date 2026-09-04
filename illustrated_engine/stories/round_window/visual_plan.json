@@ -1,0 +1,359 @@
+{
+  "story_id": "round_window",
+  "regions": {
+    "visual_rect": [
+      0,
+      176,
+      1080,
+      1744
+    ]
+  },
+  "beats": [
+    {
+      "beat_id": "B1",
+      "shots": [
+        {
+          "shot_id": "S01",
+          "shot_type": "HOOK",
+          "asset": "B1_round_window",
+          "duration_est": 5.5,
+          "crop_bias_y": 0.45,
+          "opening": true,
+          "title": "WHY AIRPLANE WINDOWS ARE ROUND",
+          "tag": "",
+          "captions": "phrase",
+          "role": "HERO",
+          "chrome": "none",
+          "visual_mode": "CINEMATIC",
+          "evidence_type": "DIRECT_EVIDENCE",
+          "motion_type": "CAMERA_MOTION",
+          "purpose": "Put the round window itself on trial before any history arrives",
+          "claim": "airplane windows are round by engineering necessity, not aesthetics",
+          "evidence": "full-bleed cabin window plate; the round shape is the subject",
+          "motion_reason": "slow push-in: stillness first so the question lands clean",
+          "transition_reason": "hard cut to the archive-era aircraft when the history starts",
+          "subject_contract": {
+            "expected_subject": "round airplane passenger window seen from inside the cabin",
+            "required": [
+              "round window opening",
+              "cabin interior wall around it",
+              "sky visible through the glass"
+            ],
+            "forbidden": [
+              "square or rectangular window opening",
+              "train, bus or ship interior",
+              "multiple windows dominating"
+            ],
+            "role": "HERO"
+          },
+          "one_second": {
+            "relationship": "the round window itself is the subject"
+          },
+          "typography": [],
+          "stage_chips": [
+            {
+              "asset": "chip_s01",
+              "at": 0.4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "beat_id": "B2",
+      "shots": [
+        {
+          "shot_id": "S02",
+          "shot_type": "REVEAL",
+          "asset": "B2_comet_jet",
+          "duration_est": 9.5,
+          "crop_bias_y": 0.4,
+          "captions": "phrase",
+          "role": "EVIDENCE",
+          "chrome": "chapter",
+          "chapter_title": "THE COMET",
+          "tag": "",
+          "visual_mode": "EVIDENCE",
+          "evidence_type": "EXPLANATORY_DIAGRAM",
+          "motion_type": "TYPOGRAPHIC_MOTION",
+          "purpose": "Land the contradiction: the proudest jet of its age broke apart twice",
+          "claim": "the world's first commercial jet airliner broke apart twice in flight in 1954",
+          "evidence": "early jet airliner plate + 1954 stamp under chapter chrome",
+          "motion_reason": "slow drift, then the year stamp does the informational work",
+          "transition_reason": "cut to the pressure diagram when narration explains corners",
+          "subject_contract": {
+            "expected_subject": "period technical reconstruction drawing of the de Havilland DH-106 Comet jet airliner, side profile, ink-line style",
+            "required": [
+              "jet airliner with no propellers",
+              "engines buried at the wing root",
+              "fuselage with passenger window row"
+            ],
+            "forbidden": [
+              "propeller aircraft",
+              "modern twin-engine airliner livery",
+              "crashed or burning state"
+            ],
+            "role": "EVIDENCE"
+          },
+          "one_second": {
+            "relationship": "the first jet airliner, and the year it started falling"
+          },
+          "typography": [
+            {
+              "kind": "NUMBER_POP",
+              "text": "1954",
+              "at": 0.55,
+              "region": [
+                0.3,
+                0.24,
+                0.4,
+                0.1
+              ]
+            }
+          ],
+          "asset_origin": "deterministic_reconstruction_card"
+        }
+      ]
+    },
+    {
+      "beat_id": "B3",
+      "shots": [
+        {
+          "shot_id": "S03",
+          "shot_type": "CONSTRUCT",
+          "asset": "B2_comet_jet",
+          "duration_est": 12.0,
+          "captions": "phrase",
+          "role": "DIAGRAM",
+          "chrome": "section",
+          "tag": "PRESSURE",
+          "visual_mode": "COMPARISON",
+          "evidence_type": "EXPLANATORY_DIAGRAM",
+          "motion_type": "INFORMATION_MOTION",
+          "purpose": "One relationship, three stages: balloon cabin, corners gather, curves spread",
+          "claim": "cabin pressure gathers at sharp corners and spreads evenly around curves",
+          "evidence": "D1_stress stages: pressurized cabin, square corner stress peak, round rim even",
+          "motion_reason": "static hold; the staged diagram build is the motion (§13 INFORMATION_MOTION)",
+          "transition_reason": "cut to the cycle timeline when fatigue starts",
+          "one_second": {
+            "relationship": "corners gather stress, curves spread it",
+            "labels": [
+              "SQUARE",
+              "ROUND"
+            ],
+            "number_claim": false
+          },
+          "progressive": {
+            "stages": [
+              {
+                "asset": "D1_stress_s0",
+                "at": 0.05
+              },
+              {
+                "asset": "D1_stress_s1",
+                "at": 0.45
+              },
+              {
+                "asset": "D1_stress_s2",
+                "at": 0.8
+              }
+            ]
+          },
+          "typography": [],
+          "asset_origin": "deterministic_reconstruction_card",
+          "subject_contract": {
+            "expected_subject": "period technical reconstruction drawing of the de Havilland DH-106 Comet jet airliner, side profile, ink-line style",
+            "required": [
+              "jet airliner with no propellers",
+              "engines buried at the wing root",
+              "fuselage with passenger window row"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "beat_id": "B4",
+      "shots": [
+        {
+          "shot_id": "S04",
+          "shot_type": "TIMELINE",
+          "asset": "B1_round_window",
+          "duration_est": 10.0,
+          "captions": "phrase",
+          "role": "DIAGRAM",
+          "chrome": "section",
+          "tag": "FATIGUE TEST",
+          "visual_mode": "TIMELINE",
+          "evidence_type": "EXPLANATORY_DIAGRAM",
+          "motion_type": "TRANSFORMATION",
+          "purpose": "The counter is the story: flexes accumulate until the hull bursts early",
+          "claim": "repeated pressurization cycles grow fatigue cracks until the hull fails far short of its design life",
+          "evidence": "D2_cycles stages: one flex per flight, counter climbing, 3,057 burst vs 10,000 design",
+          "motion_reason": "transformation: the crack and the counter grow together (§13)",
+          "transition_reason": "cut to the wreckage detail when the crack is found",
+          "one_second": {
+            "relationship": "thousands of flexes grow the crack far before design life",
+            "labels": [
+              "FLIGHTS",
+              "BURST",
+              "DESIGN 10,000"
+            ],
+            "number_claim": true,
+            "big_number": "3,057"
+          },
+          "progressive": {
+            "stages": [
+              {
+                "asset": "D2_cycles_s0",
+                "at": 0.05
+              },
+              {
+                "asset": "D2_cycles_s1",
+                "at": 0.42
+              },
+              {
+                "asset": "D2_cycles_s2",
+                "at": 0.78
+              }
+            ]
+          },
+          "typography": []
+        }
+      ]
+    },
+    {
+      "beat_id": "B5",
+      "shots": [
+        {
+          "shot_id": "S05",
+          "shot_type": "DETAIL",
+          "asset": "B3_crack_skin",
+          "duration_est": 7.0,
+          "crop_bias_y": 0.5,
+          "captions": "phrase",
+          "role": "EVIDENCE",
+          "chrome": "none",
+          "visual_mode": "DETAIL",
+          "evidence_type": "EXPLANATORY_DIAGRAM",
+          "motion_type": "CAMERA_MOTION",
+          "purpose": "Show the crack at cutout scale and pin the verified origin",
+          "claim": "the fatal crack began at a square-cornered antenna window cutout, not the passenger windows",
+          "evidence": "riveted skin macro with fatigue crack + origin chip",
+          "motion_reason": "slow push into the crack path",
+          "transition_reason": "cut to typography verdict when the fix lands",
+          "subject_contract": {
+            "expected_subject": "riveted aluminum aircraft fuselage skin with a fatigue crack from a cutout corner",
+            "required": [
+              "metal skin with rivets",
+              "a visible crack",
+              "cutout or window corner origin"
+            ],
+            "forbidden": [
+              "abstract noise without structure",
+              "aircraft in flight",
+              "cartoon styling"
+            ],
+            "role": "DETAIL"
+          },
+          "one_second": {
+            "relationship": "the crack starts at the cutout corner"
+          },
+          "stage_chips": [
+            {
+              "asset": "chip_s05",
+              "at": 0.4
+            }
+          ],
+          "typography": [],
+          "asset_origin": "deterministic_reconstruction_card"
+        }
+      ]
+    },
+    {
+      "beat_id": "B6",
+      "shots": [
+        {
+          "shot_id": "S06",
+          "shot_type": "TYPO",
+          "asset": "B3_crack_skin",
+          "duration_est": 4.0,
+          "captions": "phrase",
+          "role": "DIAGRAM",
+          "chrome": "none",
+          "visual_mode": "TYPOGRAPHY",
+          "evidence_type": "EXPLANATORY_DIAGRAM",
+          "evidence_justification": "the typographic statement IS the explanatory visual (§6: large type can become the visual)",
+          "motion_type": "TYPOGRAPHIC_MOTION",
+          "purpose": "The verdict in two words — geometry, not strength",
+          "claim": "the fix was geometry: rounding every pressurized opening",
+          "evidence": "full-frame typography card: ROUND EVERYTHING",
+          "motion_reason": "type reveal is the motion (§13 TYPOGRAPHIC_MOTION)",
+          "transition_reason": "cut to the payoff window at altitude",
+          "one_second": {
+            "relationship": "the fix is geometry: round everything"
+          },
+          "progressive": {
+            "stages": [
+              {
+                "asset": "typo_round",
+                "at": 0.1
+              }
+            ]
+          },
+          "typography": [],
+          "asset_origin": "deterministic_reconstruction_card"
+        }
+      ]
+    },
+    {
+      "beat_id": "B7",
+      "shots": [
+        {
+          "shot_id": "S07",
+          "shot_type": "PAYOFF",
+          "asset": "B4_payoff_window",
+          "duration_est": 8.5,
+          "crop_bias_y": 0.4,
+          "captions": "phrase",
+          "role": "PAYOFF",
+          "chrome": "none",
+          "end_card": "ROUND BY NECESSITY",
+          "visual_mode": "PAYOFF",
+          "evidence_type": "EXPLANATORY_DIAGRAM",
+          "motion_type": "CAMERA_MOTION",
+          "purpose": "Loop back to the opening window, now carrying its history",
+          "claim": "the round window is a survival feature, inherited from 1954",
+          "evidence": "window-at-altitude payoff plate + survival chip",
+          "motion_reason": "slow drift to rest — the strongest composition holds still (§17)",
+          "transition_reason": "end",
+          "subject_contract": {
+            "expected_subject": "passenger view through a round airplane window at high-altitude dawn, wing beyond",
+            "required": [
+              "round window opening",
+              "aircraft wing visible",
+              "dawn or sunrise sky"
+            ],
+            "forbidden": [
+              "square window opening",
+              "ground-level scene",
+              "cluttered cabin"
+            ],
+            "role": "PAYOFF"
+          },
+          "one_second": {
+            "relationship": "the round window at altitude — still holding"
+          },
+          "stage_chips": [
+            {
+              "asset": "chip_s07",
+              "at": 0.35
+            }
+          ],
+          "typography": [],
+          "asset_origin": "deterministic_reconstruction_card"
+        }
+      ]
+    }
+  ]
+}

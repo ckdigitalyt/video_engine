@@ -1,0 +1,95 @@
+{
+  "claims": [
+    {
+      "id": "first_jet_airliner_1952",
+      "beats": ["B2"],
+      "claim": "The de Havilland Comet was the world's first commercial jet airliner, entering BOAC scheduled service in May 1952.",
+      "definition": "first jet-powered aircraft to enter scheduled commercial passenger service",
+      "current_record_holder": "n/a",
+      "measured_value": "1952-05 (BOAC scheduled service)",
+      "date_verified": "2026-09",
+      "authoritative_source": "RAF Museum \u2014 'Comet: the world's first jet airliner'",
+      "source_url": "https://www.rafmuseum.org.uk/research/archive-exhibitions/comet-the-worlds-first-jet-airliner/comet-failure/",
+      "historically_changed": false,
+      "notes": "status stable; historical fact, not a living record"
+    },
+    {
+      "id": "comet_1954_breakups",
+      "beats": ["B2"],
+      "claim": "In 1954, Comets G-ALYP (10 January, BOAC Flight 781) and G-ALYY (8 April, SAA Flight 201) broke apart in flight at cruise altitude; the fleet was grounded.",
+      "definition": "in-flight structural breakups of intact, serviced aircraft, attributed by the inquiry to pressurization-cycle metal fatigue",
+      "current_record_holder": "n/a",
+      "measured_value": "2 in-flight breakups, 1954",
+      "date_verified": "2026-09",
+      "authoritative_source": "Wikipedia \u2014 BOAC Flight 781; De Havilland Comet",
+      "source_url": "https://en.wikipedia.org/wiki/BOAC_Flight_781",
+      "historically_changed": false,
+      "notes": "both accidents in the Mediterranean; no survivors"
+    },
+    {
+      "id": "cabin_delta_p_825",
+      "beats": ["B3"],
+      "claim": "The Comet cruised near 40,000 ft with a cabin pressure differential of about 8.25 psi \u2014 the fuselage works like a pumped balloon every flight.",
+      "definition": "pressure differential between cabin and ambient air at cruise altitude",
+      "current_record_holder": "n/a",
+      "measured_value": "8.25 psi at ~40,000 ft cruise",
+      "date_verified": "2026-09",
+      "authoritative_source": "dh-aircraft.co.uk \u2014 Comet 1 inquiry archive",
+      "source_url": "https://www.dh-aircraft.co.uk/aircraft/dh106/comet1/inquiry/",
+      "historically_changed": false,
+      "notes": "modern airliners run similar differentials at similar altitudes"
+    },
+    {
+      "id": "kirsch_circular_3x",
+      "beats": ["B3"],
+      "claim": "A circular opening in pressurized skin carries about 3x the far-field stress at its rim (the Kirsch factor); sharp corners concentrate stress well beyond that.",
+      "definition": "Kirsch (1898) solution: stress concentration factor K = 3.0 at the rim of a circular hole in an infinite plate under uniform tension; square corners with small radii exceed it substantially",
+      "current_record_holder": "n/a",
+      "measured_value": "K = 3.0 (circular hole)",
+      "date_verified": "2026-09",
+      "authoritative_source": "standard elasticity texts (Kirsch solution)",
+      "source_url": "n/a",
+      "historically_changed": false,
+      "notes": "textbook result; the qualitative corner comparison is what the diagram shows"
+    },
+    {
+      "id": "tank_test_3057",
+      "beats": ["B4"],
+      "claim": "In the RAE water-tank fatigue test, Comet fuselage G-ALYU burst after 3,057 pressurization cycles (1,221 real + 1,836 simulated flights), against a 10,000-cycle design life.",
+      "definition": "one pressurization cycle = one cabin pressurize/depressurize sequence; the test hull failed at under a third of its specified life",
+      "current_record_holder": "n/a",
+      "measured_value": "3,057 cycles vs 10,000 design life",
+      "date_verified": "2026-09",
+      "authoritative_source": "historicalrfa.uk \u2014 crash of BOAC Comet Yoke Peter; dh-aircraft.co.uk inquiry archive",
+      "source_url": "https://historicalrfa.uk/the-crash-of-boac-comet-yoke-peter-and-rfa-sea-salvor/",
+      "historically_changed": false,
+      "notes": "the tank test reproduced the fatigue failure under controlled cycling"
+    },
+    {
+      "id": "crack_adf_cutout",
+      "beats": ["B5"],
+      "claim": "The fatal crack in G-ALYP was traced to a rivet hole at the rear ADF antenna window cutout \u2014 a square-cornered opening in the fuselage roof \u2014 not to the passenger windows.",
+      "definition": "per the official inquiry: fatigue crack initiation at the ADF antenna 'window' cutout, aggravated by punch riveting instead of the intended glued (Redux) joints",
+      "current_record_holder": "n/a",
+      "measured_value": "crack origin: ADF antenna window cutout, fuselage roof",
+      "date_verified": "2026-09",
+      "authoritative_source": "historicalrfa.uk; dh-aircraft.co.uk inquiry archive",
+      "source_url": "https://historicalrfa.uk/the-crash-of-boac-comet-yoke-peter-and-rfa-sea-salvor/",
+      "historically_changed": false,
+      "notes": "V5 \u00a718 honesty note: the popular 'square passenger windows' story is a simplification; the verified origin is the antenna cutout + rivet holes. The video keeps this precise."
+    },
+    {
+      "id": "fix_rounded_openings",
+      "beats": ["B6", "B7"],
+      "claim": "The Comet redesign rounded every pressurized opening and thickened the skin; the Comet 4 entered service in 1958, and rounding every cutout became standard practice for pressurized aircraft.",
+      "definition": "post-inquiry design changes: generous radii on all openings (windows, doors, hatches, cutouts) to cut stress peaks; still standard on every pressurized airliner today",
+      "current_record_holder": "n/a",
+      "measured_value": "rounded openings + thicker skin; Comet 4 in service 1958",
+      "date_verified": "2026-09",
+      "authoritative_source": "RAF Museum; Wikipedia \u2014 De Havilland Comet",
+      "source_url": "https://www.rafmuseum.org.uk/research/archive-exhibitions/comet-the-worlds-first-jet-airliner/comet-failure/",
+      "historically_changed": false,
+      "notes": "engineering practice, not a record claim"
+    }
+  ]
+}

@@ -1,0 +1,98 @@
+{
+  "story_id": "round_window",
+  "brand": "ABOVE THE CLOUDS",
+  "title": "Why Airplane Windows Are Round",
+  "beats": [
+    {
+      "beat_id": "B1",
+      "function": "HOOK",
+      "narration": "Every airplane window is round. Not for looks \u2014 a seventy-year-old disaster decided that.",
+      "claim": "airplane windows are round by engineering necessity, not aesthetics",
+      "visual_question": "why is this window round?",
+      "visual_answer": "a full-bleed round window holding a pressurized cabin \u2014 the shape itself is the subject",
+      "fact_ids": [],
+      "start": 0.0,
+      "end": 5.9
+    },
+    {
+      "beat_id": "B2",
+      "function": "REVEAL",
+      "narration": "In 1952 the Comet was the world's first jet airliner. In 1954, two of them tore apart in clear sky \u2014 no warning.",
+      "claim": "the world's first commercial jet airliner broke apart twice in flight in 1954",
+      "visual_question": "what happens when a pressurized cabin fails at cruise?",
+      "visual_answer": "the Comet in flight \u2014 the era's pride \u2014 with the year of the breakups stamped on screen",
+      "fact_ids": [
+        "first_jet_airliner_1952",
+        "comet_1954_breakups"
+      ],
+      "start": 5.9,
+      "end": 15.31
+    },
+    {
+      "beat_id": "B3",
+      "function": "EXPLANATION",
+      "narration": "At cruise, the cabin is pumped tight like a balloon. Pressure always finds the sharpest corner. A round opening spreads the load. A square corner gathers it.",
+      "claim": "cabin pressure gathers at sharp corners and spreads evenly around curves",
+      "visual_question": "where does the pressure load actually go?",
+      "visual_answer": "same pressure, two fates: square window corners glow with gathered stress, round rim stays even",
+      "fact_ids": [
+        "cabin_delta_p_825",
+        "kirsch_circular_3x"
+      ],
+      "start": 15.31,
+      "end": 24.97
+    },
+    {
+      "beat_id": "B4",
+      "function": "ESCALATION",
+      "narration": "Every flight flexes the fuselage once. In the test tank, a Comet hull burst after 3,057 flexes \u2014 against a design life of ten thousand.",
+      "claim": "repeated pressurization cycles grow fatigue cracks until the hull fails far short of its design life",
+      "visual_question": "how long until the metal fails?",
+      "visual_answer": "a cycle counter climbing flight by flight until 3,057 \u2014 BURST \u2014 far short of 10,000",
+      "fact_ids": [
+        "tank_test_3057"
+      ],
+      "start": 24.97,
+      "end": 35.47
+    },
+    {
+      "beat_id": "B5",
+      "function": "EVIDENCE",
+      "narration": "The wreckage told the truth: the crack began at a square-cornered antenna window in the roof.",
+      "claim": "the fatal crack began at a square-cornered antenna window cutout, not the passenger windows",
+      "visual_question": "where exactly did the crack start?",
+      "visual_answer": "a fatigue crack radiating from a cutout corner in riveted skin \u2014 the origin pinned on screen",
+      "fact_ids": [
+        "crack_adf_cutout"
+      ],
+      "start": 35.47,
+      "end": 40.93
+    },
+    {
+      "beat_id": "B6",
+      "function": "TWIST",
+      "narration": "The fix wasn't stronger metal. It was geometry. Round everything.",
+      "claim": "the fix was geometry \u2014 rounding every pressurized opening",
+      "visual_question": "what was the fix?",
+      "visual_answer": "two words as the visual: ROUND EVERYTHING",
+      "fact_ids": [
+        "fix_rounded_openings"
+      ],
+      "start": 40.93,
+      "end": 46.0
+    },
+    {
+      "beat_id": "B7",
+      "function": "PAYOFF",
+      "narration": "So when you lean on that round glass at forty thousand feet \u2014 it's round because it has to be.",
+      "claim": "the round window is a survival feature, inherited from 1954",
+      "visual_question": "what are you actually looking at?",
+      "visual_answer": "a round window at 40,000 ft dawn \u2014 a lesson written in wreckage, still holding",
+      "fact_ids": [
+        "fix_rounded_openings"
+      ],
+      "start": 46.0,
+      "end": 51.59
+    }
+  ]
+}

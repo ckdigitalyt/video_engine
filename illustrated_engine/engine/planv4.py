@@ -8,7 +8,10 @@ import re
 from pathlib import Path
 
 _PASS_THROUGH = ("chrome", "role", "purpose", "claim", "evidence",
-                 "motion_reason", "transition_reason", "chapter_title")
+                 "motion_reason", "transition_reason", "chapter_title",
+                 # V5 creative-director fields (§1/§5/§8/§12/§13)
+                 "visual_mode", "evidence_type", "evidence_justification",
+                 "motion_type", "subject_contract", "one_second")
 
 _MARK = re.compile(r"\*([^*]+)\*")
 

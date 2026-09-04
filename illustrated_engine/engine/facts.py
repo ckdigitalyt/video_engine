@@ -30,7 +30,8 @@ from pathlib import Path
 
 SUPERLATIVE_RE = re.compile(
     r"\b(oldest|youngest|largest|smallest|highest|deepest|fastest|first|"
-    r"only|record|most|longest|shortest|densest|heaviest|biggest)\b", re.I)
+    r"only|record|most|longest|shortest|densest|heaviest|biggest|"
+    r"nearest|farthest)\b", re.I)
 
 FACTS_REQUIRED = ("id", "beats", "claim", "definition", "measured_value",
                   "date_verified", "authoritative_source", "source_url",
@@ -75,9 +76,13 @@ def verify_story(story_dir: Path) -> dict:
         if h["beat_id"] not in covered_beats:
             uncovered.append(h)
 
+    # V5 §18: unstable-record claims flagged for re-verification before reuse
+    recheck = [{"id": c.get("id", "?"), "note": c.get("recheck_note", "")}
+               for c in facts.get("claims", []) if c.get("recheck_required")]
     return {
         "ok": not uncovered and not bad_entries,
         "uncovered": uncovered,
         "bad_entries": bad_entries,
         "facts_count": len(facts.get("claims", [])),
+        "recheck_required": recheck,
     }

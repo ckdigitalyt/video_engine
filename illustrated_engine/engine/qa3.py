@@ -204,8 +204,11 @@ def raster_text_qa(video_path: Path, story_dir: Path, plan: dict) -> dict:
         if cols.size:
             if cols.min() < EDGE or cols.max() > W - 1 - EDGE:
                 clipped.append({"frame": i, "zone": "brand", "min": int(cols.min()), "max": int(cols.max())})
-        # caption block
-        cap = arr[1536:1856, :, :]
+        # caption block — calibrated to the composer's real caption band:
+        # glyphs render at y~1650..1810 (measured across frames); rows above
+        # 1620 are plate artwork in full-bleed compositions (e.g. the S07
+        # window rim) and must not be misread as caption text
+        cap = arr[1620:1860, :, :]
         # if the frame is dark there (backing drawn), text is white; detect light pixels
         light = (cap[..., 0] > 220) & (cap[..., 1] > 220) & (cap[..., 2] > 220)
         ccols = np.where(light.any(axis=0))[0]

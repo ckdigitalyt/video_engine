@@ -144,6 +144,79 @@ def run_qa4(video_path: Path, story_dir: Path, build_dir: Path = None) -> dict:
           "; ".join(f"{r['asset']}({r['role']}) {r['palette']:.2f}<{r['threshold']}"
                     for r in role_rows if not r["ok"]) or "all roles pass")
 
+    # ---- V5 creative-director layer (§19: the only new gate inputs) ----
+    from engine import director
+    assets_dir = paths_assets(build_dir)
+    dplan = director.plan_review(story, vp, plan)
+
+    # §8/§9 subject correctness: vision acceptance on contracted assets
+    subj_rows = []
+    for b in vp.get("beats", []):
+        for s in b.get("shots", []):
+            ct = s.get("subject_contract")
+            if not ct:
+                continue
+            ap = assets_dir / f"{s.get('asset', '')}.png"
+            if not ap.exists():
+                subj_rows.append({"shot_id": s["shot_id"], "asset": s.get("asset"),
+                                  "verdict": "MISSING_ASSET", "ok": False,
+                                  "via": "static", "depicted": ""})
+                continue
+            r = director.subject_check(ap, ct)
+            r.update({"shot_id": s["shot_id"], "asset": s.get("asset"),
+                      "role": str(ct.get("role", ""))})
+            subj_rows.append(r)
+    subj_fail = [r for r in subj_rows if r.get("verdict") == "FAIL"]
+    missing_assets = [r for r in subj_rows if r.get("verdict") == "MISSING_ASSET"]
+    subj_score = round(100.0 * sum(1 for r in subj_rows if r.get("verdict") == "PASS")
+                       / max(1, len(subj_rows)), 1)
+
+    # §2 one-second comprehension (static over diagram/comparison cards)
+    vp_by_id = {str(s["shot_id"]): s for b in vp.get("beats", [])
+                for s in b.get("shots", [])}
+    oc_rows = []
+    for s in plan.get("shots", []):
+        vs = vp_by_id.get(str(s["shot_id"]), {})
+        mode = str(vs.get("visual_mode", "")).upper()
+        if not (mode in director.ONE_SECOND_MODES or vs.get("one_second")):
+            continue
+        cards = [e["spec"]["png"] for e in s.get("events", [])
+                 if e.get("kind") == "stage_overlay"
+                 and e.get("spec", {}).get("png")]
+        oc_rows.append({"shot_id": s["shot_id"], "mode": mode,
+                        **director.one_second_static(vs, cards)})
+    oc_mean = round(sum(r["score"] for r in oc_rows) / max(1, len(oc_rows)), 1) \
+        if oc_rows else 100.0
+
+    # §20 nine-question review; vision spot-checks on <=3 rendered frames
+    frames = _director_frames(video_path, plan, vp_by_id, build_dir)
+    review = director.creative_director_review(story, vp, plan,
+                                               plate_dir=assets_dir,
+                                               sample_frames=frames)
+    gate_notes = []
+    if subj_fail:  # §8: subject_correctness > style_score, hero failures block
+        gate_notes.append("subject FAIL: " + ", ".join(
+            f"{r['asset']} ({r.get('depicted', '?')[:60]})" for r in subj_fail))
+    if missing_assets:
+        gate_notes.append("contracted asset missing: "
+                          + ", ".join(r["asset"] for r in missing_assets))
+    # §2 gate is aggregate (same pattern as IV/NVA/ID means); per-shot
+    # marginals stay in the report rows for disclosure, not a hard veto -
+    # the pixel-mass heuristic under-measures typography and multi-color
+    # diagram cards (thin strokes split bins), which eye checks clear.
+    one_second_marginal = [f"{r['shot_id']} {r['score']:.0f}"
+                           for r in oc_rows if r["score"] < 70.0]
+    if oc_mean < 70.0:
+        gate_notes.append(
+            "one-second FAIL: mean {:.0f} < 70".format(oc_mean)
+            + (f" (marginal: {', '.join(one_second_marginal)})"
+               if one_second_marginal else ""))
+    review = dict(review)
+    review["gate_notes"] = gate_notes
+    review["one_second_marginal"] = one_second_marginal
+    if gate_notes:
+        review["verdict"] = "FAIL"
+
     groups = {
         "TECHNICAL": t.as_dict(),
         "VISUAL": v.as_dict(),
@@ -186,6 +259,11 @@ def run_qa4(video_path: Path, story_dir: Path, build_dir: Path = None) -> dict:
     low_d = [r["asset"] for r in drows if not r["ok"]][:3]
     if low_d:
         concerns.append(f"diagram density issues: {low_d}")
+    if review["verdict"] != "PASS":
+        for gn in (review.get("gate_notes") or [])[:2]:
+            concerns.append(gn)
+        for vn in (review.get("vision_notes") or [])[:1]:
+            concerns.append(vn)
     if not concerns:
         scored = []
         for gname, g in groups.items():
@@ -202,11 +280,20 @@ def run_qa4(video_path: Path, story_dir: Path, build_dir: Path = None) -> dict:
         "p0_defects": p0,
         "human_editor": {"rows": he["rows"], "flagged": he["flagged"]},
         "top_3_human_editor_concerns": concerns,
+        "director": {
+            # §19: subject_correctness + one_second_comprehension + §20 review
+            "plan_violations": {"critical": dplan["critical"],
+                                "warnings": dplan["warnings"][:12]},
+            "subject_correctness": {"score": subj_score, "gate": "100% PASS",
+                                    "rows": subj_rows},
+            "one_second_comprehension": {"score": oc_mean, "gate": 70.0,
+                                         "rows": oc_rows},
+            "creative_director_review": review,
+        },
         "can_publish_numeric": bool(numeric_ok),
-        # §15/§16: numeric scores never auto-declare publishable — humans see
-        # the concerns next to the flag and decide.
-        "CAN_PUBLISH": bool(numeric_ok),
-        "publish_note": "CAN_PUBLISH reflects numeric gates + P0 only; review top_3_human_editor_concerns before publishing.",
+        # §21: numeric gates AND §20 creative-director review = PASS
+        "CAN_PUBLISH": bool(numeric_ok and review["verdict"] == "PASS"),
+        "publish_note": "V5 §21: CAN_PUBLISH = numeric gates + P0 none + creative_director_review PASS (subject_correctness and one-second gate through the review).",
     }
     (build_dir / "qa" / "qa4.json").write_text(json.dumps(out, indent=2))
     return out
@@ -215,3 +302,40 @@ def run_qa4(video_path: Path, story_dir: Path, build_dir: Path = None) -> dict:
 def paths_assets(build_dir: Path) -> Path:
     """Assets dir inferred from the build dir layout (repo/assets)."""
     return Path(build_dir).parent / "assets"
+
+
+def _director_frames(video_path: Path, plan: dict, vp_by_id: dict,
+                     build_dir: Path) -> dict:
+    """Extract <=3 frames for §9 vision spot-checks: hero, one diagram,
+    payoff. Bounded — vision is an acceptance check, not a metric farm."""
+    import subprocess
+    out_dir = Path(build_dir) / "qa" / "director_frames"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    shots = plan.get("shots", [])
+    if not shots:
+        return {}
+    picks, acc = {}, 0.0
+    hero_done = diagram_done = payoff_done = False
+    for i, s in enumerate(shots):
+        sid = str(s["shot_id"])
+        dur = float(s.get("duration_s", 0))
+        mode = str(vp_by_id.get(sid, {}).get("visual_mode", "")).upper()
+        t = None
+        if not hero_done and i == 0:
+            t, hero_done = acc + min(1.5, dur / 2), True
+        elif not diagram_done and mode in ("DIAGRAM", "COMPARISON", "SPLIT",
+                                           "TIMELINE", "SCALE",
+                                           "TRANSFORMATION"):
+            t, diagram_done = acc + dur * 0.75, True
+        elif not payoff_done and i == len(shots) - 1:
+            t, payoff_done = acc + dur * 0.5, True
+        if t is not None:
+            fp = out_dir / f"{sid}.png"
+            if not fp.exists():
+                subprocess.run(["ffmpeg", "-nostdin", "-loglevel", "error",
+                                "-y", "-ss", f"{t:.2f}", "-i", str(video_path),
+                                "-frames:v", "1", str(fp)], check=False)
+            if fp.exists():
+                picks[sid] = str(fp)
+        acc += dur
+    return picks

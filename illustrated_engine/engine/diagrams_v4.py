@@ -309,3 +309,153 @@ DIAGRAMS_V4_KINDS.update({
     "D2_compare": (compare_stages, "diagram"),
     "D3_dawncount": (dawncount_stages, "annotation"),
 })
+
+
+# ------------------------------------------------------- round_window ----
+
+def _arrow(d, x0, y0, x1, y1, col, w=7):
+    """Line + simple V arrowhead pointing at (x1, y1)."""
+    import math as _m
+    d.line([(x0, y0), (x1, y1)], fill=col + (255,), width=w)
+    ang = _m.atan2(y1 - y0, x1 - x0)
+    for da in (2.55, -2.55):
+        d.line([(x1, y1),
+                (x1 + 24 * _m.cos(ang + da), y1 + 24 * _m.sin(ang + da))],
+               fill=col + (255,), width=w)
+
+
+def stress_stages(bible) -> list:
+    """V5 D1_stress — ONE relationship in three meanings (§2/§4):
+    s0 the cabin is pumped tight, s1 corners gather stress,
+    s2 curves spread it. Same pressure, two shapes."""
+    out = []
+    img, d, ink, navy, accent = _card3(bible)
+    disp, body = _fonts(bible)
+    d.text((80, 96), "WHERE THE LOAD GOES", font=disp(58), fill=navy + (255,))
+    d.text((80, 168), "SAME PRESSURE, TWO SHAPES", font=body(24),
+           fill=navy + (210,))
+    bx0, bx1, by0, by1 = 110, 970, 520, 880
+
+    def band():
+        d.rounded_rectangle([bx0, by0, bx1, by1], radius=36,
+                            outline=navy + (210,), width=9)
+
+    # s0: the balloon — pressure squeezing from every side
+    band()
+    for (ax, ay, tx, ty) in ((40, 700, 150, 700), (1040, 700, 930, 700),
+                             (540, 380, 540, 480), (540, 1020, 540, 920),
+                             (200, 360, 260, 440), (880, 360, 820, 440),
+                             (200, 1040, 260, 960), (880, 1040, 820, 960)):
+        _arrow(d, ax, ay, tx, ty, accent)
+    d.text((80, 1120), "PUMPED TIGHT", font=disp(64), fill=navy + (255,))
+    d.text((80, 1210), "8.25 PSI AT 40,000 FT — EVERY FLIGHT", font=body(26),
+           fill=navy + (235,))
+    out.append(_copy(img))                                     # s0 balloon
+
+    # s1: the square corner gathers it
+    band()
+    sq = 170
+    scx, scy = (bx0 + bx1) // 2, (by0 + by1) // 2
+    sx0, sy0 = scx - sq // 2, scy - sq // 2
+    d.rectangle([sx0, sy0, sx0 + sq, sy0 + sq], outline=navy + (255,), width=6)
+    L = 52
+    for (cx2, cy2, dx, dy) in ((sx0, sy0, 1, 1), (sx0 + sq, sy0, -1, 1),
+                               (sx0, sy0 + sq, 1, -1),
+                               (sx0 + sq, sy0 + sq, -1, -1)):
+        d.line([(cx2, cy2), (cx2 + L * dx, cy2)], fill=accent + (255,), width=13)
+        d.line([(cx2, cy2), (cx2, cy2 + L * dy)], fill=accent + (255,), width=13)
+    _arrow(d, scx - 300, scy - 300, sx0 + 8, sy0 + 8, accent, w=9)
+    d.text((80, 1120), "CORNERS GATHER", font=disp(60), fill=accent + (255,))
+    d.text((80, 1210), "STRESS PEAKS AT THE SHARP CORNER", font=body(26),
+           fill=navy + (235,))
+    out.append(_copy(img))                                     # s1 square
+
+    # s2: the comparison — curves spread, corners gather
+    band()
+    d.rectangle([sx0 - 120, sy0, sx0 - 120 + sq, sy0 + sq],
+                outline=navy + (120,), width=5)
+    for (cx2, cy2, dx, dy) in ((sx0 - 120, sy0, 1, 1),
+                               (sx0 - 120 + sq, sy0, -1, 1),
+                               (sx0 - 120, sy0 + sq, 1, -1),
+                               (sx0 - 120 + sq, sy0 + sq, -1, -1)):
+        d.line([(cx2, cy2), (cx2 + 34 * dx, cy2)], fill=accent + (170,), width=9)
+        d.line([(cx2, cy2), (cx2, cy2 + 34 * dy)], fill=accent + (170,), width=9)
+    rcx, r = scx + 190, 96
+    d.ellipse([rcx - r, scy - r, rcx + r, scy + r], outline=accent + (255,)
+              , width=11)
+    d.text((sx0 - 150, sy0 + sq + 26), "SQUARE", font=body(26),
+           fill=navy + (235,))
+    d.text((rcx - 70, scy + r + 26), "ROUND", font=body(26),
+           fill=accent + (255,))
+    d.text((80, 1120), "CURVES SPREAD", font=disp(60), fill=accent + (255,))
+    d.text((80, 1210), "RIM LOAD EVEN — K = 3x AT A CIRCLE", font=body(26),
+           fill=navy + (235,))
+    out.append(_copy(img))                                     # s2 comparison
+    return out
+
+
+def cycles_stages(bible) -> list:
+    """V5 D2_cycles — flexes accumulate: s0 one flight one flex,
+    s1 the counter climbs and the crack grows, s2 burst far short of
+    design life. Each stage is a new understanding (§4)."""
+    out = []
+    img, d, ink, navy, accent = _card3(bible)
+    disp, body = _fonts(bible)
+    d.text((80, 96), "THE FATIGUE TEST", font=disp(58), fill=navy + (255,))
+    d.text((80, 168), "A REAL COMET HULL, PUMPED IN A WATER TANK",
+           font=body(24), fill=navy + (210,))
+    cx = VW3 // 2
+
+    def big(s2, y, size, col):
+        f = disp(size)
+        tw = d.textlength(s2, font=f)
+        d.text(((VW3 - tw) / 2, y), s2, font=f, fill=col + (255,))
+
+    def mid(s2, y, size=28, col=None):
+        f = body(size)
+        tw = d.textlength(s2, font=f)
+        d.text(((VW3 - tw) / 2, y), s2, font=f,
+               fill=(col or navy) + (235,))
+
+    # s0: the unit — one flight, one flex
+    big("1", 430, 190, navy)
+    d.arc([cx - 130, 720, cx + 130, 950], 180, 360, fill=accent + (255,)
+          , width=10)
+    d.arc([cx - 130, 790, cx + 130, 1020], 0, 180, fill=navy + (200,)
+          , width=10)
+    mid("ONE FLIGHT = ONE FLEX", 660, 32)
+    mid("PRESSURIZE, DEPRESSURIZE — EVERY TIME", 1080, 24)
+    out.append(_copy(img))                                     # s0 unit
+
+    # s1: accumulation + crack growth
+    big("1,000", 430, 150, navy)
+    mid("FLEXES AND COUNTING", 640, 30)
+    pts = [(180, 900)]
+    for i in range(1, 9):
+        pts.append((180 + i * 90, 900 + (-1 if i % 2 else 1) * (14 + 6 * i)))
+    d.line(pts, fill=accent + (255,), width=9)
+    for p in pts[1:-1]:
+        d.ellipse([p[0] - 5, p[1] - 5, p[0] + 5, p[1] + 5],
+                  fill=accent + (255,))
+    mid("THE CRACK GROWS A LITTLE EVERY FLEX", 1080, 24)
+    out.append(_copy(img))                                     # s1 climb
+
+    # s2: burst — far short of design life
+    big("3,057", 400, 170, accent)
+    mid("CYCLES — BURST", 620, 34, accent)
+    bx0, bx1, by = 110, 970, 800
+    d.rounded_rectangle([bx0, by, bx1, by + 56], radius=8,
+                        outline=navy + (190,), width=6)
+    fill_w = int((bx1 - bx0) * 3057 / 10000)
+    d.rectangle([bx0 + 4, by + 4, bx0 + fill_w, by + 52], fill=accent + (255,))
+    d.text((bx0, by + 76), "BURST", font=body(26), fill=accent + (255,))
+    d.text((bx1 - 300, by + 76), "DESIGN LIFE 10,000", font=body(26),
+           fill=navy + (200,))
+    out.append(_copy(img))                                     # s2 burst
+    return out
+
+
+DIAGRAMS_V4_KINDS.update({
+    "D1_stress": (stress_stages, "diagram"),
+    "D2_cycles": (cycles_stages, "diagram"),
+})

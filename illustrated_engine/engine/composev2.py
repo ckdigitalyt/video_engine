@@ -180,14 +180,11 @@ def base_frame(shot: dict, bible: dict) -> Image.Image:
             d.text(((CANVAS_W - tw) / 2, by + (bh - size) / 2 - 4), kicker,
                    font=f, fill=text_col)
     else:
-        marker = str(bible.get("brand", "")).upper()
-        f = _font(typ.get("body", "Inter-Variable.ttf"), 26)
-        d.text((64, by + (bh - 26) / 2 - 4), marker, font=f, fill=muted)
-        tag = str(shot.get("tag", ""))
-        if tag:
-            ft = _font(typ.get("body", "Inter-Variable.ttf"), 22)
-            ttw = d.textlength(tag.upper(), font=ft)
-            d.text((CANVAS_W - 64 - ttw, by + (bh - 22) / 2), tag.upper(), font=ft, fill=muted)
+        # V5 §7: no persistent header on normal shots — identity comes from
+        # typography/palette/graphic language, not identical layouts.
+        # Markers are explicit choices: chrome="section" (diagrams) /
+        # "chapter" (major transitions) / "none" (cinematic).
+        pass
     return frame
 
 
@@ -360,6 +357,10 @@ def render_video_v2(paths, story_id: str = "tallest_mountain", force: bool = Fal
         raise ValueError("edit_plan.json has no shots")
     v3 = str(plan.get("engine", "")) in ("v3", "v4")
     shots_subdir = "shots3" if v3 else "shots2"
+    sdir = Path(paths.build) / shots_subdir
+    if sdir.exists():
+        for stale in sorted(sdir.glob("*.mp4")):
+            stale.unlink()
     for s in shots:
         render_shot_v2(s, paths, bible, force=force, v3=v3, shots_subdir=shots_subdir)
 
