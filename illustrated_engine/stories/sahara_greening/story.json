@@ -1,0 +1,142 @@
+{
+ "story_id": "sahara_greening",
+ "brand": "GREENING",
+ "title": "WHY THE SAHARA IS GETTING GREENER",
+ "subject": "geology",
+ "story_type": "geography",
+ "pad_s": 0.4,
+ "v7": {
+  "title_overlay": true
+ },
+ "concepts": [
+  {
+   "id": "sahara",
+   "beats": [
+    "B1",
+    "B2",
+    "B4",
+    "B5",
+    "B6"
+   ],
+   "verb": "state_change"
+  },
+  {
+   "id": "vegetation",
+   "beats": [
+    "B1",
+    "B3",
+    "B4",
+    "B5",
+    "B6"
+   ],
+   "verb": "grow"
+  },
+  {
+   "id": "rainfall",
+   "beats": [
+    "B3",
+    "B4",
+    "B5"
+   ],
+   "verb": "present"
+  },
+  {
+   "id": "sahel",
+   "beats": [
+    "B1",
+    "B3",
+    "B4",
+    "B5",
+    "B6"
+   ],
+   "verb": "zoom"
+  }
+ ],
+ "beats": [
+  {
+   "beat_id": "B1",
+   "function": "HOOK",
+   "narration": "The world's largest hot desert is quietly turning greener, from its edges inward. Most of the year, you would never notice.",
+   "claim": "the Sahara is gaining vegetation along its edges in recent decades",
+   "visual_question": "where is the greening happening?",
+   "visual_answer": "the southern rim of the Sahara, the Sahel",
+   "fact_ids": [
+    "f_greening"
+   ],
+   "start": 0.0,
+   "end": 7.5
+  },
+  {
+   "beat_id": "B2",
+   "function": "MAP",
+   "narration": "The Sahara covers about nine point two million square kilometers, mostly sand, rock and gravel. The green thread is thin, but it runs along the southern half.",
+   "claim": "the Sahara covers roughly nine point two million square kilometers, and the greening is concentrated in the southern half",
+   "visual_question": "how big is the Sahara, really?",
+   "visual_answer": "a map of the Sahara, the green thread along its southern rim",
+   "fact_ids": [
+    "f_size"
+   ],
+   "start": 7.5,
+   "end": 15.0
+  },
+  {
+   "beat_id": "B3",
+   "function": "TRANSFORMATION",
+   "narration": "Since the nineteen eighties, satellites have watched the greening spread across the Sahel, the band of semi-arid land south of the desert.",
+   "claim": "satellite data since the nineteen eighties shows vegetation increasing across the Sahel",
+   "visual_question": "when did the greening start?",
+   "visual_answer": "a time series of Sahel vegetation from the 1980s onward",
+   "fact_ids": [
+    "f_satellite"
+   ],
+   "start": 15.0,
+   "end": 23.0
+  },
+  {
+   "beat_id": "B4",
+   "function": "ESCALATION",
+   "narration": "Two drivers push it. Rains have come back to the Sahel after the long droughts of the nineteen seventies and eighties. And rising carbon dioxide feeds photosynthesis, so plants grow more with the same water. But every gain stops where the rain stops.",
+   "claim": "the Sahel greening is linked to a recovery of rainfall after the nineteen seventies and eighties droughts and to carbon dioxide fertilization",
+   "visual_question": "what is actually making the desert greener?",
+   "visual_answer": "two arrows: rainfall returning, and carbon dioxide feeding plants",
+   "fact_ids": [
+    "f_drivers"
+   ],
+   "start": 23.0,
+   "end": 32.0
+  },
+  {
+   "beat_id": "B5",
+   "function": "COMPARISON",
+   "narration": "The deep desert heart, where it barely rains, is still a desert. The green gains are real, but they are the rim, not the core.",
+   "claim": "the deep Sahara core remains unchanged; the greening is limited to the Sahel rim",
+   "visual_question": "is the whole desert turning green?",
+   "visual_answer": "a side-by-side: a green rim, an unchanged core",
+   "fact_ids": [
+    "f_unchanged"
+   ],
+   "start": 32.0,
+   "end": 40.0
+  },
+  {
+   "beat_id": "B6",
+   "function": "PAYOFF",
+   "narration": "So the Sahara is not flipping to forest. It is shifting at the edges, where the climate is shifting. The desert is still the desert, just with a brighter fringe.",
+   "claim": "the Sahara is greening only at its edges, not transforming wholesale",
+   "visual_question": "so what is really happening to the desert?",
+   "visual_answer": "the map reprise: the rim brighter, the core unchanged",
+   "fact_ids": [
+    "f_greening"
+   ],
+   "start": 40.0,
+   "end": 48.0,
+   "key_number": "+11% NDVI",
+   "key_number_rect": [
+    0.6,
+    0.2,
+    0.34,
+    0.1
+   ]
+  }
+ ]
+}

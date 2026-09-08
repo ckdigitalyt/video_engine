@@ -1,0 +1,33 @@
+{
+ "version": "4.0",
+ "brand": "GREENING",
+ "palette": {
+  "primary": "#22304E",
+  "secondary": "#7A6A52",
+  "accent": "#C25B33",
+  "background": "#171310",
+  "text": "#EFE6D4",
+  "muted": "#8A7B63",
+  "highlight": "#E9DFC8"
+ },
+ "illustration_style": "vintage 1950s aeronautical engineering illustration, ink and sepia wash on aged parchment, engraving linework, matte finish",
+ "illustration_medium": "vintage ink-and-sepia-wash aeronautical illustration with blueprint and cutaway grammar (not photoreal, not flat vector)",
+ "lighting": "soft directional low-key with warm highlights",
+ "contrast": "medium-high, rich shadows",
+ "saturation": 0.72,
+ "texture": {
+  "grain": 0.012,
+  "vignette": 0.25
+ },
+ "typography": {
+  "display": "BebasNeue-Regular.ttf",
+  "body": "Inter-Variable.ttf"
+ },
+ "framing": "vertical 9:16, edge-on airfoil slices and blueprint wides with breathing room, horizon-low aircraft wides and tight structural macro details",
+ "graphic_language": "thin navy linework on parchment blueprint grids, restrained rust annotation arrows, measured typography, streamlines as long confident curves, no heavy drop shadows on graphic elements",
+ "transition_style": "hard cut; per-shot fade-in from background colour",
+ "prompt_fragments": {
+  "prefix": "Vintage 1950s aeronautical engineering illustration, ink and sepia watercolor wash on aged parchment, engraving linework, blueprint grammar, muted deep-navy and rust palette, soft directional light, soft vignette, matte finish",
+  "suffix": "No readable text, no watermarks, no modern objects, no logos"
+ }
+}
