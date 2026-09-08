@@ -1,0 +1,74 @@
+{
+  "bed_files": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+  ],
+  "sfx": [
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/titanic_mistake/audio/sfx_whoosh.wav",
+      "at": 0.766,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/titanic_mistake/audio/sfx_tick.wav",
+      "at": 1.686,
+      "kind": "tick"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/titanic_mistake/audio/sfx_whoosh.wav",
+      "at": 8.561,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/titanic_mistake/audio/sfx_tick.wav",
+      "at": 11.709,
+      "kind": "tick"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/titanic_mistake/audio/sfx_pulse.wav",
+      "at": 14.677,
+      "kind": "pulse"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/titanic_mistake/audio/sfx_whoosh.wav",
+      "at": 17.417,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/titanic_mistake/audio/sfx_whoosh.wav",
+      "at": 25.189,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/titanic_mistake/audio/sfx_pulse.wav",
+      "at": 31.465,
+      "kind": "pulse"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/titanic_mistake/audio/sfx_whoosh.wav",
+      "at": 34.279,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/titanic_mistake/audio/sfx_whoosh.wav",
+      "at": 42.106,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/titanic_mistake/audio/sfx_whoosh.wav",
+      "at": 49.904,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/titanic_mistake/audio/sfx_pulse.wav",
+      "at": 56.038,
+      "kind": "pulse"
+    }
+  ],
+  "bed_crossfade_ms": 600
+}

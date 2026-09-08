@@ -1,120 +1,78 @@
 {
- "bed_files": [
-  null,
-  null,
-  null,
-  null,
-  null,
-  null
- ],
- "sfx": [
-  {
-   "file": "/home/ubuntu/video_engine/illustrated_engine/stories/sahara_greening/audio/sfx_whoosh.wav",
-   "at": 0.8,
-   "kind": "whoosh"
-  },
-  {
-   "file": "/home/ubuntu/video_engine/illustrated_engine/stories/sahara_greening/audio/sfx_whoosh.wav",
-   "at": 2.881,
-   "kind": "whoosh"
-  },
-  {
-   "file": "/home/ubuntu/video_engine/illustrated_engine/stories/sahara_greening/audio/sfx_pulse.wav",
-   "at": 6.242,
-   "kind": "pulse"
-  },
-  {
-   "file": "/home/ubuntu/video_engine/illustrated_engine/stories/sahara_greening/audio/sfx_tick.wav",
-   "at": 11.343,
-   "kind": "tick"
-  },
-  {
-   "file": "/home/ubuntu/video_engine/illustrated_engine/stories/sahara_greening/audio/sfx_whoosh.wav",
-   "at": 12.811,
-   "kind": "whoosh"
-  },
-  {
-   "file": "/home/ubuntu/video_engine/illustrated_engine/stories/sahara_greening/audio/sfx_pulse.wav",
-   "at": 14.461,
-   "kind": "pulse"
-  },
-  {
-   "file": "/home/ubuntu/video_engine/illustrated_engine/stories/sahara_greening/audio/sfx_pulse.wav",
-   "at": 16.688,
-   "kind": "pulse"
-  },
-  {
-   "file": "/home/ubuntu/video_engine/illustrated_engine/stories/sahara_greening/audio/sfx_tick.wav",
-   "at": 21.719,
-   "kind": "tick"
-  },
-  {
-   "file": "/home/ubuntu/video_engine/illustrated_engine/stories/sahara_greening/audio/sfx_whoosh.wav",
-   "at": 23.035,
-   "kind": "whoosh"
-  },
-  {
-   "file": "/home/ubuntu/video_engine/illustrated_engine/stories/sahara_greening/audio/sfx_pulse.wav",
-   "at": 25.848,
-   "kind": "pulse"
-  },
-  {
-   "file": "/home/ubuntu/video_engine/illustrated_engine/stories/sahara_greening/audio/sfx_whoosh.wav",
-   "at": 29.078,
-   "kind": "whoosh"
-  },
-  {
-   "file": "/home/ubuntu/video_engine/illustrated_engine/stories/sahara_greening/audio/sfx_whoosh.wav",
-   "at": 32.558,
-   "kind": "whoosh"
-  },
-  {
-   "file": "/home/ubuntu/video_engine/illustrated_engine/stories/sahara_greening/audio/sfx_pulse.wav",
-   "at": 38.179,
-   "kind": "pulse"
-  },
-  {
-   "file": "/home/ubuntu/video_engine/illustrated_engine/stories/sahara_greening/audio/sfx_tick.wav",
-   "at": 43.806,
-   "kind": "tick"
-  },
-  {
-   "file": "/home/ubuntu/video_engine/illustrated_engine/stories/sahara_greening/audio/sfx_whoosh.wav",
-   "at": 45.142,
-   "kind": "whoosh"
-  },
-  {
-   "file": "/home/ubuntu/video_engine/illustrated_engine/stories/sahara_greening/audio/sfx_pulse.wav",
-   "at": 48.098,
-   "kind": "pulse"
-  },
-  {
-   "file": "/home/ubuntu/video_engine/illustrated_engine/stories/sahara_greening/audio/sfx_tick.wav",
-   "at": 53.257,
-   "kind": "tick"
-  },
-  {
-   "file": "/home/ubuntu/video_engine/illustrated_engine/stories/sahara_greening/audio/sfx_whoosh.wav",
-   "at": 54.695,
-   "kind": "whoosh"
-  },
-  {
-   "file": "/home/ubuntu/video_engine/illustrated_engine/stories/sahara_greening/audio/sfx_pulse.wav",
-   "at": 56.236,
-   "kind": "pulse"
-  },
-  {
-   "file": "/home/ubuntu/video_engine/illustrated_engine/stories/sahara_greening/audio/sfx_pulse.wav",
-   "at": 58.364,
-   "kind": "pulse"
-  },
-  {
-   "file": "/home/ubuntu/video_engine/illustrated_engine/stories/sahara_greening/audio/sfx_tick.wav",
-   "at": 59.215,
-   "kind": "tick"
-  }
- ],
- "bed_crossfade_ms": 600,
- "mode": "event_synced_v8",
- "narration_dominant": true
+  "bed_files": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+  ],
+  "sfx": [
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/sahara_greening/audio/sfx_whoosh.wav",
+      "at": 0.8,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/sahara_greening/audio/sfx_pulse.wav",
+      "at": 6.242,
+      "kind": "pulse"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/sahara_greening/audio/sfx_whoosh.wav",
+      "at": 9.116,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/sahara_greening/audio/sfx_pulse.wav",
+      "at": 16.688,
+      "kind": "pulse"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/sahara_greening/audio/sfx_whoosh.wav",
+      "at": 19.998,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/sahara_greening/audio/sfx_pulse.wav",
+      "at": 25.848,
+      "kind": "pulse"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/sahara_greening/audio/sfx_whoosh.wav",
+      "at": 29.347,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/sahara_greening/audio/sfx_pulse.wav",
+      "at": 40.277,
+      "kind": "pulse"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/sahara_greening/audio/sfx_whoosh.wav",
+      "at": 44.707,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/sahara_greening/audio/sfx_pulse.wav",
+      "at": 50.788,
+      "kind": "pulse"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/sahara_greening/audio/sfx_whoosh.wav",
+      "at": 53.819,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/sahara_greening/audio/sfx_tick.wav",
+      "at": 54.955,
+      "kind": "tick"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/sahara_greening/audio/sfx_pulse.wav",
+      "at": 61.054,
+      "kind": "pulse"
+    }
+  ],
+  "bed_crossfade_ms": 600
 }
