@@ -130,6 +130,10 @@ def _states_for_shot(s: dict, beat: dict, els: list, pack: dict,
 
     def emit(name: str, t: float, spec: dict):
         t = t_free(t)
+        # V9 compounding: every living-event spec carries its beat's
+        # intensity tier so living.py scales magnitude (radius, glow,
+        # particle density) instead of using static parameters.
+        spec = {**spec, "intensity": round(float(_val), 3)}
         events.append({"kind": spec["kind"].lower(), "t": t, "spec": spec,
                        "auto": True, "state": name})
         busy.append((t, t + 1.6))
