@@ -1,0 +1,143 @@
+{
+  "story_id": "panama_locks",
+  "brand": "ELEVATION",
+  "title": "WHY THE PANAMA CANAL NEEDS WATER LOCKS",
+  "subject": "geography",
+  "story_type": "geography_process",
+  "pad_s": 0.4,
+  "v7": {
+    "title_overlay": true
+  },
+  "concepts": [
+    {
+      "id": "ship",
+      "beats": [
+        "B1",
+        "B3",
+        "B6"
+      ],
+      "verb": "flow"
+    },
+    {
+      "id": "locks",
+      "beats": [
+        "B1",
+        "B3"
+      ],
+      "verb": "state_change"
+    },
+    {
+      "id": "gatun",
+      "beats": [
+        "B2",
+        "B4",
+        "B5"
+      ],
+      "verb": "grow"
+    },
+    {
+      "id": "water",
+      "beats": [
+        "B3",
+        "B4",
+        "B5",
+        "B6"
+      ],
+      "verb": "flow"
+    }
+  ],
+  "beats": [
+    {
+      "beat_id": "B1",
+      "function": "HOOK",
+      "narration": "A ship crossing Panama does not cut through the continent. It climbs over it: twenty-six meters up a staircase made of water.",
+      "claim": "the canal lifts ships about 26 meters above sea level to cross the terrain",
+      "visual_question": "why does a ship need stairs?",
+      "visual_answer": "a map of Panama with the canal stepping up over the ridge",
+      "fact_ids": [
+        "f_26m"
+      ],
+      "start": 0.0,
+      "end": 7.5,
+      "key_number": "26 M",
+      "key_number_rect": [
+        0.08,
+        0.58,
+        0.3,
+        0.12
+      ]
+    },
+    {
+      "beat_id": "B2",
+      "function": "EXPLANATION",
+      "narration": "Panama's spine is hard rock, and the Pacific tide swings meters twice a day. A sea-level ditch was impossible, so the canal climbs over the ridge instead.",
+      "claim": "terrain and tide made a sea-level canal impractical",
+      "visual_question": "why not just dig straight through?",
+      "visual_answer": "a rock ridge and a swinging tide blocking a flat channel",
+      "fact_ids": [
+        "f_terrain"
+      ],
+      "start": 7.5,
+      "end": 16.0
+    },
+    {
+      "beat_id": "B3",
+      "function": "EXPLANATION",
+      "narration": "Each lock is a concrete chamber that fills by gravity alone. Lake Gatun pours downhill through the valves, lifting the ship. There are no pumps.",
+      "claim": "locks fill by gravity from Lake Gatun with no pumping",
+      "visual_question": "what lifts forty thousand tonnes of ship?",
+      "visual_answer": "gravity-fed water pouring from the lake into the chamber",
+      "fact_ids": [
+        "f_gravity"
+      ],
+      "start": 16.0,
+      "end": 24.5
+    },
+    {
+      "beat_id": "B4",
+      "function": "ESCALATION",
+      "narration": "But every transit pays a water toll. Each lockage dumps millions of liters of fresh water out to sea, and only rain can refill the lake.",
+      "claim": "each ship transit discharges huge volumes of freshwater to the ocean",
+      "visual_question": "what does each transit cost the lake?",
+      "visual_answer": "fresh water draining lock by lock toward both oceans",
+      "fact_ids": [
+        "f_water_toll"
+      ],
+      "start": 24.5,
+      "end": 33.0
+    },
+    {
+      "beat_id": "B5",
+      "function": "ESCALATION",
+      "narration": "When drought shrinks the lake, the canal must cut drafts and daily transits. A queue of world shipping now waits on rainfall.",
+      "claim": "drought lowers Gatun and forces transit restrictions",
+      "visual_question": "what happens when the staircase runs low?",
+      "visual_answer": "a falling lake level and a shrinking draft line",
+      "fact_ids": [
+        "f_drought"
+      ],
+      "start": 33.0,
+      "end": 41.0
+    },
+    {
+      "beat_id": "B6",
+      "function": "PAYOFF",
+      "narration": "That is why the new locks recycle about sixty percent of every drop. Gravity does the lifting, and every saved liter keeps the ships climbing.",
+      "claim": "the expanded locks recycle roughly 60 percent of lockage water",
+      "visual_question": "how does the staircase keep running?",
+      "visual_answer": "water-saving basins returning about sixty percent of each fill",
+      "fact_ids": [
+        "f_60pct"
+      ],
+      "start": 41.0,
+      "end": 49.0,
+      "key_number": "60%",
+      "key_number_rect": [
+        0.6,
+        0.2,
+        0.28,
+        0.12
+      ]
+    }
+  ]
+}

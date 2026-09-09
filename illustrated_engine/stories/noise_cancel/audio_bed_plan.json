@@ -1,0 +1,73 @@
+{
+  "bed_files": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+  ],
+  "sfx": [
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/noise_cancel/audio/sfx_whoosh.wav",
+      "at": 0.766,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/noise_cancel/audio/sfx_whoosh.wav",
+      "at": 8.781,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/noise_cancel/audio/sfx_tick.wav",
+      "at": 9.862,
+      "kind": "tick"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/noise_cancel/audio/sfx_pulse.wav",
+      "at": 16.389,
+      "kind": "pulse"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/noise_cancel/audio/sfx_whoosh.wav",
+      "at": 19.75,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/noise_cancel/audio/sfx_pulse.wav",
+      "at": 25.866,
+      "kind": "pulse"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/noise_cancel/audio/sfx_whoosh.wav",
+      "at": 28.948,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/noise_cancel/audio/sfx_pulse.wav",
+      "at": 36.45,
+      "kind": "pulse"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/noise_cancel/audio/sfx_whoosh.wav",
+      "at": 40.093,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/noise_cancel/audio/sfx_pulse.wav",
+      "at": 48.358,
+      "kind": "pulse"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/noise_cancel/audio/sfx_whoosh.wav",
+      "at": 51.743,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/noise_cancel/audio/sfx_tick.wav",
+      "at": 52.597,
+      "kind": "tick"
+    }
+  ],
+  "bed_crossfade_ms": 600
+}

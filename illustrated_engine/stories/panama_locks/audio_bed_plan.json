@@ -1,0 +1,83 @@
+{
+  "bed_files": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+  ],
+  "sfx": [
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/panama_locks/audio/sfx_whoosh.wav",
+      "at": 0.834,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/panama_locks/audio/sfx_tick.wav",
+      "at": 1.835,
+      "kind": "tick"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/panama_locks/audio/sfx_pulse.wav",
+      "at": 6.506,
+      "kind": "pulse"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/panama_locks/audio/sfx_whoosh.wav",
+      "at": 9.421,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/panama_locks/audio/sfx_pulse.wav",
+      "at": 16.763,
+      "kind": "pulse"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/panama_locks/audio/sfx_whoosh.wav",
+      "at": 20.173,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/panama_locks/audio/sfx_pulse.wav",
+      "at": 27.213,
+      "kind": "pulse"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/panama_locks/audio/sfx_whoosh.wav",
+      "at": 30.448,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/panama_locks/audio/sfx_pulse.wav",
+      "at": 36.955,
+      "kind": "pulse"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/panama_locks/audio/sfx_whoosh.wav",
+      "at": 39.881,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/panama_locks/audio/sfx_pulse.wav",
+      "at": 45.465,
+      "kind": "pulse"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/panama_locks/audio/sfx_whoosh.wav",
+      "at": 48.194,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/panama_locks/audio/sfx_tick.wav",
+      "at": 49.301,
+      "kind": "tick"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/panama_locks/audio/sfx_pulse.wav",
+      "at": 54.47,
+      "kind": "pulse"
+    }
+  ],
+  "bed_crossfade_ms": 600
+}

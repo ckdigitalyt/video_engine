@@ -1,0 +1,142 @@
+{
+  "story_id": "noise_cancel",
+  "brand": "SIGNAL",
+  "title": "HOW NOISE-CANCELING HEADPHONES SILENCE SOUND",
+  "subject": "technology",
+  "story_type": "engineering_failure",
+  "pad_s": 0.4,
+  "v7": {
+    "title_overlay": true
+  },
+  "concepts": [
+    {
+      "id": "noise",
+      "beats": [
+        "B1",
+        "B3",
+        "B4"
+      ],
+      "verb": "flow"
+    },
+    {
+      "id": "anti_noise",
+      "beats": [
+        "B2",
+        "B3",
+        "B6"
+      ],
+      "verb": "mirror"
+    },
+    {
+      "id": "mic",
+      "beats": [
+        "B2",
+        "B5"
+      ],
+      "verb": "sense"
+    },
+    {
+      "id": "silence",
+      "beats": [
+        "B1",
+        "B4",
+        "B6"
+      ],
+      "verb": "grow"
+    }
+  ],
+  "beats": [
+    {
+      "beat_id": "B1",
+      "function": "HOOK",
+      "narration": "Noise-canceling headphones do not block sound. They listen to it first, then answer with a wave built to erase it.",
+      "claim": "active noise cancellation erases noise by playing its inverse, not by blocking it",
+      "visual_question": "how does a cup of plastic erase sound?",
+      "visual_answer": "a headphone cross-section where anti-noise meets incoming noise",
+      "fact_ids": [
+        "f_anc_principle"
+      ],
+      "start": 0.0,
+      "end": 7.0
+    },
+    {
+      "beat_id": "B2",
+      "function": "EXPLANATION",
+      "narration": "A microphone outside the earcup samples the incoming noise, and a chip computes its mirror image: every crest flipped into a trough, one hundred eighty degrees out of phase.",
+      "claim": "the control system inverts the noise waveform 180 degrees",
+      "visual_question": "what does the chip actually build?",
+      "visual_answer": "the noise wave flipped upside down, crest to trough",
+      "fact_ids": [
+        "f_phase"
+      ],
+      "start": 7.0,
+      "end": 15.5,
+      "key_number": "180°",
+      "key_number_rect": [
+        0.62,
+        0.2,
+        0.3,
+        0.12
+      ]
+    },
+    {
+      "beat_id": "B3",
+      "function": "EXPLANATION",
+      "narration": "The driver plays that anti-noise at the same moment the real noise arrives. Crest meets trough, and the two waves cancel to still air.",
+      "claim": "superposition of a wave and its inverse cancels the pressure wave",
+      "visual_question": "what happens when the two waves meet?",
+      "visual_answer": "overlapping waves summing flat: destructive interference",
+      "fact_ids": [
+        "f_interference"
+      ],
+      "start": 15.5,
+      "end": 23.5
+    },
+    {
+      "beat_id": "B4",
+      "function": "ESCALATION",
+      "narration": "But cancellation is strongest where noise is simplest. Low rumbles are long and predictable, and they die easily. High hiss is short and scattered, and it gets through.",
+      "claim": "ANC attenuation is strongest at low frequencies and weakens as frequency rises",
+      "visual_question": "what survives the eraser?",
+      "visual_answer": "a frequency band where cancellation fades with rising pitch",
+      "fact_ids": [
+        "f_freq"
+      ],
+      "start": 23.5,
+      "end": 31.5
+    },
+    {
+      "beat_id": "B5",
+      "function": "ESCALATION",
+      "narration": "And the noise never sits still. Wind, engines, your own footsteps. So a second microphone inside the cup re-checks what is left, and the correction runs without pause.",
+      "claim": "closed-loop feedback continuously re-corrects residual noise",
+      "visual_question": "what keeps the eraser honest?",
+      "visual_answer": "an inner mic feeding the residual back into the chip",
+      "fact_ids": [
+        "f_feedback"
+      ],
+      "start": 31.5,
+      "end": 39.5
+    },
+    {
+      "beat_id": "B6",
+      "function": "PAYOFF",
+      "narration": "Two waves, one silence. Noise minus noise: engine drone drops by 30 decibels.",
+      "claim": "ANC reduces low-frequency noise on the order of 30 decibels",
+      "visual_question": "so what did the two waves buy?",
+      "visual_answer": "roughly thirty decibels of quiet, made of inverted sound",
+      "fact_ids": [
+        "f_30db"
+      ],
+      "start": 39.5,
+      "end": 47.0,
+      "key_number": "30 dB",
+      "key_number_rect": [
+        0.35,
+        0.55,
+        0.3,
+        0.12
+      ]
+    }
+  ]
+}
