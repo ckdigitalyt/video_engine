@@ -1,5 +1,7 @@
 """V5 renderer — V4 composev2 + V6 motion (Bézier/cubic + 2x stage) +
 V6 3-layer audio (continuous bed + SFX + narration ducking)
++ V10 native 9:16 pass (flags.py V10 header): portrait card on the Shorts
+focal band, kinetic captions, depth parallax/glow, punct stems.
 + V6.2 algorithmic update (Jade_todo):
 
   §1 Timeline & Audio Sync Guard:
@@ -35,6 +37,7 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
 
 from engine import grammar, layout, subs
+from engine import flags as _flags
 from engine.layout import CANVAS_W, CANVAS_H, VISUAL_RECT, CAPTION_RECT, _font
 from engine import motion_v6 as motion
 from engine import audio_mix
@@ -44,6 +47,9 @@ from engine.planv5 import (CARD_W, CARD_H, CARD_Y0, HEADER_Y, FOOTER_Y,
 SAFE_CAPTION_TOP, SAFE_CAPTION_BOT = 1350, 1520
 AUDIO_TAIL_S = 0.8
 KINETIC_FPS = 15
+# V10_KINETIC caption band (Y 0.70-0.76 of the 1080x1920 canvas, flags.py
+# V10 header). The legacy safe band above is restored with V10_KINETIC=0.
+KIN_BAND_TOP, KIN_BAND_BOT = 1344, 1459
 
 VX, VY, VW, VH = VISUAL_RECT
 BG_HEX = None
@@ -264,19 +270,22 @@ def rule_png(bible, out: Path, y=None):
 
 # --- captions (V6.2 §3 safe band) -------------------------------------------
 
-def _layout_caption_v5(cue, bible):
-    """Caption layout with the anchor clamped into [1350, 1520]."""
+def _layout_caption_v5(cue, bible, cap_top: float = SAFE_CAPTION_TOP,
+                       cap_bot: float = SAFE_CAPTION_BOT):
+    """Caption layout with the anchor clamped into [cap_top, cap_bot].
+    Defaults are the legacy V6.2 safe band; V10_VERTICAL passes a band
+    pushed below the taller portrait card."""
     lay = subs.layout_caption(cue["text"], bible,
-                              zone_y=SAFE_CAPTION_TOP,
+                              zone_y=cap_top,
                               level=int(cue.get("level", 1)))
     if not lay.get("ok"):
         return lay
     bbox = lay.get("bbox")
     block_h = float(lay.get("block_h") or
                     ((bbox[3] - bbox[1]) if bbox else 120.0))
-    y0 = float(lay.get("y0") or SAFE_CAPTION_TOP)
-    new_y0 = min(max(y0, SAFE_CAPTION_TOP), SAFE_CAPTION_BOT - block_h)
-    new_y0 = max(new_y0, SAFE_CAPTION_TOP)
+    y0 = float(lay.get("y0") or cap_top)
+    new_y0 = min(max(y0, cap_top), cap_bot - block_h)
+    new_y0 = max(new_y0, cap_top)
     if bbox and abs(new_y0 - y0) > 0.5:
         dy = new_y0 - y0
         lay["bbox"] = (bbox[0], bbox[1] + dy, bbox[2], bbox[3] + dy)
@@ -284,13 +293,15 @@ def _layout_caption_v5(cue, bible):
     return lay
 
 
-def caption_png_v5(cue, bible, out: Path, bg_img=None, v3: bool = False):
+def caption_png_v5(cue, bible, out: Path, bg_img=None, v3: bool = False,
+                   cap_top: float = SAFE_CAPTION_TOP,
+                   cap_bot: float = SAFE_CAPTION_BOT):
     """Full-frame transparent RGBA with one caption block baked, anchored
-    inside the V6.2 safe band."""
+    inside the V6.2 safe band (or the V10 band via cap_top/cap_bot)."""
     from engine import bible as B
     from engine import contrast as C
     img = Image.new("RGBA", (CANVAS_W, CANVAS_H), (0, 0, 0, 0))
-    lay = _layout_caption_v5(cue, bible)
+    lay = _layout_caption_v5(cue, bible, cap_top=cap_top, cap_bot=cap_bot)
     if not lay.get("ok"):
         img.save(out, "PNG")
         return lay
@@ -401,7 +412,10 @@ def render_shot_v5(shot: dict, paths, bible: dict, force: bool = False,
     from engine import visual_grammar as vg
     from engine import flags as _flags
     vr = VISUAL_RECT_V3 if v3 else VISUAL_RECT
-    card_y0 = vr[1]
+    # V10 §1 — the portrait card fills the Shorts focal band (Y 0.15-0.75
+    # of 1080x1920 = 288..1440). planv5.CARD_Y0 carries the active geometry
+    # (rollback: V10_VERTICAL=0 restores the VISUAL_RECT anchor).
+    card_y0 = CARD_Y0 if _flags.vertical10() else vr[1]
     out = Path(paths.build) / shots_subdir / (artifact or f"{shot['shot_id']}.mp4")
     out.parent.mkdir(parents=True, exist_ok=True)
     tmp_out = out.with_suffix(".tmp.mp4")
@@ -437,14 +451,16 @@ def render_shot_v5(shot: dict, paths, bible: dict, force: bool = False,
         # (bright-pass -> masked screen). Source frames stay untouched so the
         # post-process is deterministic and CAS-safe.
         kin_use = kin_dir
-        if _flags.bloom_enabled():
+        if _flags.bloom_enabled() or _flags.depth10():
+            # ENABLE_BLOOM forced it before; V10_DEPTH makes bloom on the
+            # luminous kinetic shots default-on (flags.py V10 header).
             from engine import effects
             kin_use = effects.bloom_dir(kin_dir, work / "kin_bloom")
         cmd = ["ffmpeg", "-nostdin", "-hide_banner", "-loglevel", "error", "-y",
                "-framerate", str(KINETIC_FPS), "-i", str(kin_use / "f%05d.png"),
                "-loop", "1", "-framerate", str(fps), "-t", f"{dur:.3f}", "-i", str(base_png)]
         graph = [f"[0:v]scale={motion.PANEL_W}:{motion.PANEL_H}:flags=lanczos,setsar=1[cam]",
-                 f"[1:v][cam]overlay=0:{vr[1]}[b]"]
+                 f"[1:v][cam]overlay=0:{card_y0}[b]"]
     else:
         cmd = ["ffmpeg", "-nostdin", "-hide_banner", "-loglevel", "error", "-y",
                "-loop", "1", "-framerate", str(fps), "-t", f"{dur:.3f}", "-i", str(canvas),
@@ -460,27 +476,52 @@ def render_shot_v5(shot: dict, paths, bible: dict, force: bool = False,
                 shot.get("camera") or {}, dur, fps=fps)
             graph = [f"[1:v]{amb_filter}[amb]",
                      f"[0:v]{cam_filter}[cam]",
-                     f"[amb][cam]overlay=0:{vr[1]}[b]"]
+                     f"[amb][cam]overlay=0:{card_y0}[b]"]
         else:
             graph = [f"[0:v]{cam_filter}[cam]",
-                     f"[1:v][cam]overlay=0:{vr[1]}[b]"]
+                     f"[1:v][cam]overlay=0:{card_y0}[b]"]
     last = "b"
     idx = 2
 
-    # captions (V6.2 §3 safe band)
+    # captions (V6.2 §3 safe band) — V10_KINETIC: word-level chunks with an
+    # active-word highlight replace the clause blocks; the legacy clause path
+    # stays intact when the flag is off (V10_KINETIC=0).
     bg_canvas = base.convert("RGB") if v3 else None
     cap_layouts = []
-    for i, cue in enumerate(shot.get("captions", []) or []):
-        png = work / f"cap{i}.png"
-        lay = caption_png_v5(cue, bible, png, bg_img=bg_canvas, v3=v3)
-        cap_layouts.append(lay)
-        if not lay.get("ok") or not lay.get("png"):
-            continue
-        cmd += ["-loop", "1", "-framerate", str(fps), "-t", f"{dur:.3f}", "-i", png]
-        graph.append(f"[{idx}:v]format=rgba,fade=t=in:st=0:d=0.12:alpha=1[c{i}]")
-        graph.append(f"[{last}][c{i}]overlay=0:0:enable='between(t,{cue['t0']:.3f},{cue['t1']:.3f})'[bc{i}]")
-        last = f"bc{i}"
-        idx += 1
+    if _flags.kinetic10() and shot.get("captions"):
+        from engine import captions as _caps
+        kin_inputs, cue_bboxes = _caps.build_shot_captions(shot, bible, work)
+        for i, kc in enumerate(kin_inputs):
+            png = Path(kc["png"])
+            cmd += ["-loop", "1", "-framerate", str(fps), "-t", f"{dur:.3f}", "-i", png]
+            graph.append(f"[{idx}:v]format=rgba[c{i}]")
+            graph.append(f"[{last}][c{i}]overlay=0:{int(kc['top'])}:"
+                         f"enable='between(t,{kc['t0']:.3f},{min(kc['t1'], dur):.3f})'[bc{i}]")
+            last = f"bc{i}"
+            idx += 1
+        # cue-aligned layout stubs so text_emphasis rules anchor under the
+        # kinetic band exactly as they did under the legacy clause blocks
+        cap_layouts = [{"ok": bb is not None, "bbox": bb} for bb in cue_bboxes]
+    else:
+        # legacy band; under V10_VERTICAL the card bottom (CARD_Y0+CARD_H)
+        # overlaps the historical 1350..1520 band, so the band is pushed
+        # below the card — legacy geometry keeps 1350..1520 unchanged.
+        _ct, _cb = SAFE_CAPTION_TOP, SAFE_CAPTION_BOT
+        if _flags.vertical10():
+            _ct = max(SAFE_CAPTION_TOP, CARD_Y0 + CARD_H + 24)
+            _cb = _ct + (SAFE_CAPTION_BOT - SAFE_CAPTION_TOP)
+        for i, cue in enumerate(shot.get("captions", []) or []):
+            png = work / f"cap{i}.png"
+            lay = caption_png_v5(cue, bible, png, bg_img=bg_canvas, v3=v3,
+                                 cap_top=_ct, cap_bot=_cb)
+            cap_layouts.append(lay)
+            if not lay.get("ok") or not lay.get("png"):
+                continue
+            cmd += ["-loop", "1", "-framerate", str(fps), "-t", f"{dur:.3f}", "-i", png]
+            graph.append(f"[{idx}:v]format=rgba,fade=t=in:st=0:d=0.12:alpha=1[c{i}]")
+            graph.append(f"[{last}][c{i}]overlay=0:0:enable='between(t,{cue['t0']:.3f},{cue['t1']:.3f})'[bc{i}]")
+            last = f"bc{i}"
+            idx += 1
 
     # events: number pops / pulses, highlights, emphasis rules, stage overlays
     for i, ev in enumerate(shot.get("events", []) or []):
@@ -530,6 +571,11 @@ def render_shot_v5(shot: dict, paths, bible: dict, force: bool = False,
             seq_fps = living.EVENT_FPS
             if persist:
                 hold = dur - t0  # end-state holds to shot end
+            if _flags.depth10() and kind == "flow":
+                # V10_DEPTH — additive emissive halo on the flow particles:
+                # bright-pass glow re-composited under the strokes, alpha
+                # preserved, source frames untouched (CAS-safe, like bloom).
+                seq = _glow_frames(seq, work / f"liv{i}_glow")
         else:
             continue
         t1 = min(dur, t0 + hold)
@@ -641,6 +687,114 @@ def _build_overlay_report(shots: list, bible: dict, audio_info: dict) -> dict:
 
 # --- video render ------------------------------------------------------------
 
+# --- V10_DEPTH — RGBA-preserving additive glow ------------------------------
+
+def _glow_frames(src_dir: Path, dst_dir: Path, strength: float = 0.6,
+                 radius: int = 9) -> Path:
+    """Additive emissive halo for living-event frame sequences (V10_DEPTH).
+
+    effects.bloom is tuned for opaque luminous frames — its confined
+    composite rounds to zero delta on thin transparent strokes — so the
+    halo is built directly: blurred stroke chroma + blurred alpha form a
+    soft emissive field composited UNDER the crisp strokes (original
+    alpha preserved, sources untouched -> CAS-safe). Returns dst_dir."""
+    from PIL import ImageFilter
+    src_dir, dst_dir = Path(src_dir), Path(dst_dir)
+    dst_dir.mkdir(parents=True, exist_ok=True)
+    for f in sorted(src_dir.glob("f*.png")):
+        img = Image.open(f).convert("RGBA")
+        halo_a = img.getchannel("A").filter(
+            ImageFilter.GaussianBlur(radius)).point(
+            lambda v: int(v * strength))
+        halo = img.convert("RGB").filter(
+            ImageFilter.GaussianBlur(radius)).convert("RGBA")
+        halo.putalpha(halo_a)
+        Image.alpha_composite(halo, img).save(dst_dir / f.name, "PNG")
+    return dst_dir
+
+
+# --- V10_PUNCT — cinematic punctuation stems --------------------------------
+
+def _punct_stems(shots: list, shot_durs: list, build_dir: Path) -> list:
+    """Deterministic sub-bass punctuation SFX (V10_PUNCT, flags.py header):
+    1.5s risers ENDING at each ESCALATION/REVEAL shot start, 40-80Hz
+    sub-drops at PAYOFF starts. numpy-generated, wave-written, cached by
+    path; entries use audio_mix._concat_sfx absolute-timeline `at`."""
+    import wave
+    SR = 44100
+    adir = Path(build_dir) / "punct"
+    adir.mkdir(parents=True, exist_ok=True)
+
+    def _wav(name, data):
+        p = adir / name
+        if not p.exists():
+            pcm = (np.clip(data, -1.0, 1.0) * 32767).astype("<i2")
+            with wave.open(str(p), "wb") as w:
+                w.setnchannels(2)
+                w.setsampwidth(2)
+                w.setframerate(SR)
+                w.writeframes(pcm.tobytes())
+        return p
+
+    def _riser(dur=1.5):
+        n = int(dur * SR)
+        t = np.arange(n) / SR
+        f = 36.0 * (84.0 / 36.0) ** (t / dur)          # 36->84 Hz sweep
+        phase = 2 * np.pi * np.cumsum(f) / SR
+        amp = 0.08 + 0.44 * (t / dur) ** 2
+        x = np.sin(phase) * amp + 0.05 * (t / dur) ** 2 * np.sin(2 * np.pi * 55 * t)
+        s = np.stack([x, x], axis=1)
+        return _wav("riser.wav", s)  # hard cut: the shot start IS the hit
+
+    def _subdrop(dur=1.1):
+        n = int(dur * SR)
+        t = np.arange(n) / SR
+        f = 78.0 * (38.0 / 78.0) ** (t / dur)          # 78->38 Hz fall
+        phase = 2 * np.pi * np.cumsum(f) / SR
+        env = np.exp(-2.6 * t / dur)
+        x = np.sin(phase) * 0.55 * env + np.sin(2 * np.pi * 42 * t) * 0.18 * env
+        s = np.stack([x, x], axis=1)
+        return _wav("subdrop.wav", s)
+
+    sfx, t0 = [], 0.0
+    for s, d in zip(shots, shot_durs):
+        stype = str(s.get("shot_type", "")).upper()
+        bfn = str(s.get("beat_function", "")).upper()
+        if stype == "REVEAL" or bfn == "ESCALATION":
+            sfx.append({"file": str(_riser()), "at": max(0.0, t0 - 1.5),
+                        "dur": 1.5, "kind": "punct_riser"})
+        if stype == "PAYOFF" or bfn == "PAYOFF":
+            sfx.append({"file": str(_subdrop()), "at": t0,
+                        "dur": 1.1, "kind": "punct_subdrop"})
+        t0 += float(d)
+    return sfx
+
+
+def _notch_beds(bed_files: list, build_dir: Path) -> list:
+    """1-3kHz wide notch (two -7 dB bands at 1.4/2.4 kHz) on each unique
+    music-bed stem (V10_PUNCT): the bed yields the voice presence band;
+    the V9 sidechain duck still handles level under narration."""
+    out_dir = Path(build_dir) / "punct" / "beds"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out = []
+    for b in bed_files:
+        if not b:
+            out.append(b)
+            continue
+        src = Path(b)
+        dst = out_dir / f"{src.stem}_notched.wav"
+        if not dst.exists():
+            subprocess.run(
+                ["ffmpeg", "-nostdin", "-hide_banner", "-loglevel", "error", "-y",
+                 "-i", str(src),
+                 "-af", "equalizer=f=1400:t=q:w=1.6:g=-7,"
+                        "equalizer=f=2400:t=q:w=1.6:g=-7",
+                 "-ar", "44100", "-ac", "2", str(dst)],
+                check=True)
+        out.append(str(dst))
+    return out
+
+
 def render_video_v5(paths, story_id: str = "tallest_mountain", force: bool = False,
                     out_name: str = "proto5.mp4", fps: int = 30) -> Path:
     from engine import bible as B
@@ -708,6 +862,11 @@ def render_video_v5(paths, story_id: str = "tallest_mountain", force: bool = Fal
     sfx = bed_plan.get("sfx") or []
     shot_durs = [float(s.get("duration_s", 0)) for s in shots]
     total = sum(shot_durs)
+    if _flags.punct10():
+        # V10_PUNCT — risers/sub-drops + 1-3kHz bed notch (rollback:
+        # V10_PUNCT=0 restores the pre-punct stems byte-for-byte).
+        sfx = list(sfx) + _punct_stems(shots, shot_durs, Path(paths.build))
+        bed_files = _notch_beds(bed_files, Path(paths.build))
     audio_out = Path(paths.build) / "v5_audio_master.wav"
     # V9 texture: post-composite subtle radial vignette + 1.5% fine film
     # grain — kills the raw vector/SVG aesthetic (flag: V9_TEXTURE).

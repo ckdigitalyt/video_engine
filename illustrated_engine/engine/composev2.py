@@ -91,15 +91,20 @@ def caption_png(cue: dict, bible: dict, out: Path, bg_img=None, v3: bool = False
 
 
 def number_png(text: str, rect_norm, bible: dict, out: Path) -> None:
-    """Number pop: display font, accent colour, at the region anchor."""
+    """Number pop: display font, accent colour, sized to fit its rect."""
     from engine import bible as B
     img = Image.new("RGBA", (CANVAS_W, CANVAS_H), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
     ax, ay, aw, ah = _abs_rect(rect_norm)
-    f = _font(bible["typography"].get("display", "BebasNeue-Regular.ttf"), 96)
+    size = 96
+    f = _font(bible["typography"].get("display", "BebasNeue-Regular.ttf"), size)
+    while d.textlength(text, font=f) > aw * 0.94 and size > 40:
+        size -= 6
+        f = _font(bible["typography"].get("display", "BebasNeue-Regular.ttf"),
+                  size)
     tw = d.textlength(text, font=f)
     x = ax + (aw - tw) / 2
-    y = ay + 8
+    y = ay + max(8, (ah - size) // 2)
     d.text((x + 3, y + 5), text, font=f, fill=(0, 0, 0, 150))
     d.text((x, y), text, font=f, fill=B.rgb255(bible, "accent") + (255,))
     img.save(out, "PNG")

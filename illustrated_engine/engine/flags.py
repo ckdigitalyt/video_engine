@@ -48,11 +48,15 @@ def bloom_enabled() -> bool:
 
 def parallax_damp() -> float:
     """Ambient-layer motion rate as a fraction of the card camera rate."""
-    try:
-        v = float(os.environ.get("PARALLAX_DAMP", "0.85"))
-    except ValueError:
-        return 0.85
-    return min(max(v, 0.5), 0.95)
+    v = os.environ.get("PARALLAX_DAMP", "").strip()
+    if v:
+        try:
+            return min(max(float(v), 0.5), 0.95)
+        except ValueError:
+            return 0.85
+    # V10_DEPTH: multi-plane parallax — the background plane drifts at 0.3x
+    # of the foreground card (Jade_todo V10 §3).
+    return 0.30 if depth10() else 0.85
 
 
 def token() -> str:
@@ -74,6 +78,14 @@ def token() -> str:
         parts.append("v9tx")
     if compound9():
         parts.append("v9cp")
+    if vertical10():
+        parts.append("v10v")
+    if kinetic10():
+        parts.append("v10k")
+    if depth10():
+        parts.append("v10d")
+    if punct10():
+        parts.append("v10p")
     return "-".join(parts)
 
 
@@ -117,4 +129,41 @@ def describe() -> dict:
         "v9_texture": texture9(),
         "v9_compound": compound9(),
         "v9_audio": audio9(),
+        "v10_vertical": vertical10(),
+        "v10_kinetic": kinetic10(),
+        "v10_depth": depth10(),
+        "v10_punct": punct10(),
     }
+
+
+# --- V10 engine upgrades (2026-09-09) ---------------------------------------
+# Native 9:16 short-form pass (Jade_todo V10). All default ON; set the env
+# var to 0/false/no/off for instant rollback without a code revert. Each
+# flag maps to one upgrade area:
+#   V10_VERTICAL - native 9:16 layout: portrait panel + card fills the
+#                  Shorts focal band (Y 0.15-0.75), camera windows re-scaled
+#                  so wide assets cover height and track-pan across width
+#                  (60-75%), diagonal stage stacking for horizontal chains
+#   V10_KINETIC  - word-level kinetic subtitles (engine/captions.py):
+#                  2-4 word chunks, active-word highlight, Y 0.70-0.76
+#   V10_DEPTH    - multi-plane parallax (ambient 0.3x) + emissive halo on
+#                  flow particles + bloom on kinetic (luminous) shots
+#   V10_PUNCT    - cinematic audio: 1.5s sub-bass risers into
+#                  ESCALATION/REVEAL shots, 40-80Hz sub-drop on PAYOFF,
+#                  1-3kHz notch of the music bed under voiceover
+
+
+def vertical10() -> bool:
+    return os.environ.get("V10_VERTICAL", "").strip().lower() not in _FALSE
+
+
+def kinetic10() -> bool:
+    return os.environ.get("V10_KINETIC", "").strip().lower() not in _FALSE
+
+
+def depth10() -> bool:
+    return os.environ.get("V10_DEPTH", "").strip().lower() not in _FALSE
+
+
+def punct10() -> bool:
+    return os.environ.get("V10_PUNCT", "").strip().lower() not in _FALSE
