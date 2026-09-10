@@ -165,7 +165,11 @@ def _frame_isolate(img, draw, spec, p, geo):
     W, H = img.size
     for box in [(0, 0, W, ay), (0, ay + ah, W, H),
                 (0, ay, ax, ay + ah), (ax + aw, ay, W, ay + ah)]:
-        draw.rectangle(box, fill=(6, 8, 12, a))
+        b = (max(0, int(box[0])), max(0, int(box[1])),
+             min(W, int(box[2])), min(H, int(box[3])))
+        if b[2] <= b[0] or b[3] <= b[1]:
+            continue  # degenerate strip (rect outside canvas) — skip
+        draw.rectangle(b, fill=(6, 8, 12, a))
     draw.rectangle((ax, ay, ax + aw, ay + ah),
                    outline=STROKE[:3] + (int(220 * _E(p)),), width=3)
 

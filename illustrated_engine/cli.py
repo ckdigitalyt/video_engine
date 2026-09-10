@@ -274,6 +274,7 @@ def cmd_qa3(args):
 
 def cmd_plan5(args):
     from engine import planv5
+    import shutil as _shutil
     paths = _paths()
     plan, rep = planv5.make_edit_plan_v5(paths, args.story)
     for w in rep["warnings"]:
@@ -305,6 +306,16 @@ def cmd_render5(args):
     if snap.exists():
         shutil.copyfile(snap, paths.build / "edit_plan.json")
         print(f"plan: restored {snap.name} -> edit_plan.json (per-story guard)")
+    # Stage-2 V10 fix: the audio bed plan is per-story state too. build/ holds
+    # the LAST story's plan (sfx timeline + bed files); without a guard, a
+    # render mixes another story's SFX into this one. Restore from the
+    # per-story snapshot if present, else the authored story-dir plan.
+    bed_snap = paths.build / f"audio_bed_plan_{args.story}.json"
+    bed_src = bed_snap if bed_snap.exists() else (
+        Path(paths.stories) / args.story / "audio_bed_plan.json")
+    if bed_src.exists() and bed_src != paths.build / "audio_bed_plan.json":
+        shutil.copyfile(bed_src, paths.build / "audio_bed_plan.json")
+        print(f"audio: restored {bed_src.name} -> audio_bed_plan.json (per-story guard)")
     _print_flags()
     out = composev5.render_video_v5(paths, args.story, force=args.force,
                                     out_name=f"{args.story}.mp4")
@@ -408,6 +419,10 @@ def cmd_qa5full(args):
             print(f"sfx {e['file']} at {t0:.2f}s")
         bp["sfx"] = sfx
         bp_path.write_text(_json.dumps(bp, indent=2))
+        # keep a per-story snapshot so render5's bed-plan guard restores the
+        # right sfx timeline (build/ copy is clobbered by the next story)
+        _shutil.copyfile(bp_path,
+                         paths.build / f"audio_bed_plan_{args.story}.json")
 
     # 1) the standard V4-era pre-QA chain (same order as cmd_qa4)
     rep = qa2.qa_video_v2(video, paths, args.story)

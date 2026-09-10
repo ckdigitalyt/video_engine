@@ -567,7 +567,8 @@ def render_shot_v5(shot: dict, paths, bible: dict, force: bool = False,
             living.render_frames(kind, spec, seq,
                                  max(3, int(round(hold * living.EVENT_FPS))),
                                  card_w=CARD_W, card_h=CARD_H,
-                                 card_y0=card_y0, persist=persist)
+                                 card_y0=card_y0, persist=persist,
+                                 canvas_w=CANVAS_W, canvas_h=CANVAS_H)
             seq_fps = living.EVENT_FPS
             if persist:
                 hold = dur - t0  # end-state holds to shot end
