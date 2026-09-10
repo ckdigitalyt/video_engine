@@ -174,25 +174,84 @@ def _camera_filter(shot, fps: int = 30):
     return motion.camera_filter(v6_cam, float(shot["duration_s"]), fps)
 
 
+def _caption_band() -> tuple:
+    """Active caption safe band (top, bot) for the current flag set.
+
+    V11_CAPTION/V10_VERTICAL anchor the band below the card (card bottom
+    + 24) — plate content cannot reach it. Legacy geometry keeps
+    1350..1520 unchanged. Used by BOTH the render path and the overlay
+    report so downstream QA (caption_safe_zone, caption_qa) follows the
+    active geometry automatically.
+    """
+    if _flags.vertical10():
+        ct = max(SAFE_CAPTION_TOP, CARD_Y0 + CARD_H + 24)
+        return ct, ct + (SAFE_CAPTION_BOT - SAFE_CAPTION_TOP)
+    return SAFE_CAPTION_TOP, SAFE_CAPTION_BOT
+
+
 def _ambient_base(shot, bible, plate_path: Path):
-    """V6.2 §3 — ambient background: 25px Gaussian blur of the current
-    graphic card, cover-scaled to the canvas, darkened with a vertical
-    gradient toward the Bible background. No raw black/flat void."""
+    """V6.2 §3 — ambient background. Two eras:
+
+    V11_FULLBLEED (default): true 9:16 — the card band keeps the plate art
+    and the top/bottom bands are a crafted CONTINUATION of the same art
+    (adjacent card rows mirrored, tone-graded toward the bible background,
+    stronger toward the frame extremes). No gaussian blur anywhere: the
+    canvas reads as one composed piece, not a horizontal card dropped onto
+    a blurred backdrop.
+    Rollback (V11_FULLBLEED=0): the V6.2/V10 path — 25px gaussian blur of
+    the plate cover-scaled to the canvas, darkened 0.55/0.45 toward the
+    bible background with a vertical gradient.
+    """
     from engine import bible as B
     frame = layout.base_frame(bible)
-    try:
-        plate = Image.open(plate_path).convert("RGB")
-        cover = layout.smart_crop(plate, CANVAS_W, CANVAS_H, bias_y=0.5)
-        cover = cover.filter(ImageFilter.GaussianBlur(25))
-        arr = np.asarray(cover).astype(np.float32)
-        bg = np.array(B.rgb255(bible, "background"), dtype=np.float32)
-        arr = arr * 0.55 + bg * 0.45
-        grad = np.linspace(1.06, 0.80, CANVAS_H, dtype=np.float32)[:, None, None]
-        arr = arr * grad
-        amb = Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8), "RGB")
-        frame.paste(amb, (0, 0))
-    except Exception:
-        pass  # flat bible bg fallback
+    if _flags.fullbleed11():
+        try:
+            plate = Image.open(plate_path).convert("RGB")
+            cover = layout.smart_crop(plate, CANVAS_W, CANVAS_H, bias_y=0.5)
+            arr = np.asarray(cover).astype(np.float32)
+            bg = np.array(B.rgb255(bible, "background"), dtype=np.float32)
+            bot_h = CANVAS_H - (CARD_Y0 + CARD_H)
+            # Continuation = SMOOTH TONE EXTENSION. The outermost 64 rows of
+            # the CARD (card-aspect cover crop of the same plate, so tones
+            # match the card edge) are stretched (LANCZOS) to fill each band.
+            # Mirroring full card rows duplicated baked plate text into the
+            # bands (evidence 2026-09-10: "WATER SKIN" legible upside-down in
+            # the bottom band); a stretch keeps the art's edge tones without
+            # ever duplicating glyphs, and no gaussian blur anywhere.
+            card_cover = layout.smart_crop(plate, CANVAS_W, CARD_H, bias_y=0.5)
+            carr = np.asarray(card_cover, dtype=np.float32)
+            cont = np.empty_like(arr)
+            strip_t = carr[:64].clip(0, 255).astype(np.uint8)
+            cont[:CARD_Y0] = np.asarray(
+                Image.fromarray(strip_t).resize((CANVAS_W, CARD_Y0), Image.LANCZOS),
+                dtype=np.float32)
+            strip_b = carr[-64:].clip(0, 255).astype(np.uint8)
+            cont[CARD_Y0 + CARD_H:] = np.asarray(
+                Image.fromarray(strip_b).resize((CANVAS_W, bot_h), Image.LANCZOS),
+                dtype=np.float32)
+            cont[CARD_Y0:CARD_Y0 + CARD_H] = arr[CARD_Y0:CARD_Y0 + CARD_H]
+            yy = np.arange(CANVAS_H, dtype=np.float32) / float(CANVAS_H)
+            edge = np.clip(np.minimum(yy, 1.0 - yy) / 0.25, 0.0, 1.0)
+            mix = 0.10 + 0.28 * edge
+            arr2 = cont * (1.0 - mix[:, None, None]) + bg * mix[:, None, None]
+            amb = Image.fromarray(np.clip(arr2, 0, 255).astype(np.uint8), "RGB")
+            frame.paste(amb, (0, 0))
+        except Exception:
+            pass  # flat bible bg fallback
+    else:
+        try:
+            plate = Image.open(plate_path).convert("RGB")
+            cover = layout.smart_crop(plate, CANVAS_W, CANVAS_H, bias_y=0.5)
+            cover = cover.filter(ImageFilter.GaussianBlur(25))
+            arr = np.asarray(cover).astype(np.float32)
+            bg = np.array(B.rgb255(bible, "background"), dtype=np.float32)
+            arr = arr * 0.55 + bg * 0.45
+            grad = np.linspace(1.06, 0.80, CANVAS_H, dtype=np.float32)[:, None, None]
+            arr = arr * grad
+            amb = Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8), "RGB")
+            frame.paste(amb, (0, 0))
+        except Exception:
+            pass  # flat bible bg fallback
     frame = layout.brand_block(frame, bible, shot)
     if shot.get("end_card"):
         d = ImageDraw.Draw(frame, "RGBA")
@@ -467,11 +526,15 @@ def render_shot_v5(shot: dict, paths, bible: dict, force: bool = False,
                "-loop", "1", "-framerate", str(fps), "-t", f"{dur:.3f}", "-i", str(base_png)]
         cam_filter, n, prim, notes = _camera_filter(shot, fps=fps)
         if (_flags.parallax_enabled() and prim != "HOLD"
-                and not shot.get("end_card") and not shot.get("opening")):
+                and not shot.get("end_card") and not shot.get("opening")
+                and not _flags.fullbleed11()):
             # ENABLE_PARALLAX: ambient field moves at damp x camera rate.
             # The card plate keeps the authored camera — text never distorts.
             # Opening/end-card shots keep a fully static base (their baked-in
             # display title / end mark must not drift).
+            # V11_FULLBLEED skips the drift: the backdrop is a mirror
+            # continuation seam-locked to the card edges — drifting it would
+            # tear the seam. Card camera motion is untouched.
             amb_filter, _an, _ap = motion.ambient_parallax_filter(
                 shot.get("camera") or {}, dur, fps=fps)
             graph = [f"[1:v]{amb_filter}[amb]",
@@ -486,11 +549,18 @@ def render_shot_v5(shot: dict, paths, bible: dict, force: bool = False,
     # captions (V6.2 §3 safe band) — V10_KINETIC: word-level chunks with an
     # active-word highlight replace the clause blocks; the legacy clause path
     # stays intact when the flag is off (V10_KINETIC=0).
+    # V11_CAPTION: cues pass through the caption state machine
+    # (captions.normalize_cues) — one ACTIVE_CAPTION state, off-window
+    # between states, repairs recorded for caption_qa.
     bg_canvas = base.convert("RGB") if v3 else None
     cap_layouts = []
+    _cap_cues = list(shot.get("captions", []) or [])
+    _cap_repairs: list = []
+    _ct, _cb = _caption_band()
     if _flags.kinetic10() and shot.get("captions"):
         from engine import captions as _caps
-        kin_inputs, cue_bboxes = _caps.build_shot_captions(shot, bible, work)
+        kin_inputs, cue_bboxes, _cap_cues, _cap_repairs = _caps.build_shot_captions(
+            shot, bible, work, dur=dur)
         for i, kc in enumerate(kin_inputs):
             png = Path(kc["png"])
             cmd += ["-loop", "1", "-framerate", str(fps), "-t", f"{dur:.3f}", "-i", png]
@@ -506,10 +576,6 @@ def render_shot_v5(shot: dict, paths, bible: dict, force: bool = False,
         # legacy band; under V10_VERTICAL the card bottom (CARD_Y0+CARD_H)
         # overlaps the historical 1350..1520 band, so the band is pushed
         # below the card — legacy geometry keeps 1350..1520 unchanged.
-        _ct, _cb = SAFE_CAPTION_TOP, SAFE_CAPTION_BOT
-        if _flags.vertical10():
-            _ct = max(SAFE_CAPTION_TOP, CARD_Y0 + CARD_H + 24)
-            _cb = _ct + (SAFE_CAPTION_BOT - SAFE_CAPTION_TOP)
         for i, cue in enumerate(shot.get("captions", []) or []):
             png = work / f"cap{i}.png"
             lay = caption_png_v5(cue, bible, png, bg_img=bg_canvas, v3=v3,
@@ -549,11 +615,15 @@ def render_shot_v5(shot: dict, paths, bible: dict, force: bool = False,
                 _highlight_png_card(rect_c, spec.get("style", "rect"), bible, png, card_y0)
             hold = min(2.8, dur - t0)
         elif kind == "text_emphasis":
-            active = [l for l, c in zip(cap_layouts, shot.get("captions", []) or [])
+            active = [(l, c) for l, c in zip(cap_layouts, _cap_cues)
                       if l.get("ok") and c["t0"] - 0.01 <= t0 <= c["t1"]]
-            yy = (active[0]["bbox"][3] + 16) if active and active[0].get("bbox") else None
+            yy = (active[0][0]["bbox"][3] + 16) if active and active[0][0].get("bbox") else None
             rule_png(bible, png, yy)
             hold = min(1.4, dur - t0)
+            # V11 caption state machine: emphasis modifies the ACTIVE caption
+            # only — the rule may never outlive its cue into the next state.
+            if active:
+                hold = min(hold, max(0.2, float(active[0][1]["t1"]) - t0))
         elif kind == "stage_overlay" and spec.get("png"):
             png = Path(spec["png"])
             hold = dur - t0
@@ -616,6 +686,16 @@ def render_shot_v5(shot: dict, paths, bible: dict, force: bool = False,
     if p.returncode != 0:
         tmp_out.unlink(missing_ok=True)
         raise RuntimeError(f"render_shot_v5 {shot['shot_id']} failed:\n{p.stderr[-1500:]}")
+    # V11 caption state record — what the state machine actually rendered
+    # (normalized states + authoring repairs) for engine/caption_qa.py.
+    (work / "cap_state.json").write_text(json.dumps({
+        "shot_id": shot.get("shot_id"), "dur": dur,
+        "band": list(_caption_band()),
+        "normalized_cues": [{"text": str(c.get("text", "")),
+                             "t0": float(c["t0"]), "t1": float(c["t1"])}
+                            for c in _cap_cues],
+        "repairs": _cap_repairs,
+    }, indent=1) + "\n")
     # CAS integrity: verify stream duration, publish atomically — a killed
     # render must never leave a truncated artifact at the CAS path.
     got = _probe_dur(tmp_out)
@@ -660,15 +740,16 @@ def _build_overlay_report(shots: list, bible: dict, audio_info: dict) -> dict:
                         "rect_abs": [round(ax, 1), round(ay, 1),
                                      round(aw, 1), round(ah, 1)]})
         caps = []
+        _rb_top, _rb_bot = _caption_band()
         for cue in s.get("captions", []) or []:
-            lay = _layout_caption_v5(cue, bible)
+            lay = _layout_caption_v5(cue, bible, cap_top=_rb_top, cap_bot=_rb_bot)
             if not lay.get("ok") or not lay.get("bbox"):
                 continue
             bb = lay["bbox"]
             caps.append({"text": cue.get("text", "")[:60],
                          "bbox": [round(float(bb[0]), 1), round(float(bb[1]), 1),
                                   round(float(bb[2]), 1), round(float(bb[3]), 1)]})
-            if bb[1] < SAFE_CAPTION_TOP - 10 or bb[3] > SAFE_CAPTION_BOT + 10:
+            if bb[1] < _rb_top - 10 or bb[3] > _rb_bot + 10:
                 violations.append({"shot": sid, "kind": "caption",
                                    "rect_abs": list(caps[-1]["bbox"]),
                                    "reason": "safe band"})
@@ -678,7 +759,7 @@ def _build_overlay_report(shots: list, bible: dict, audio_info: dict) -> dict:
     return {
         "card": {"x": 0, "y": CARD_Y0, "w": CARD_W, "h": CARD_H},
         "zones": {"header_y": HEADER_Y, "footer_y": FOOTER_Y},
-        "safe_caption_band": [SAFE_CAPTION_TOP, SAFE_CAPTION_BOT],
+        "safe_caption_band": list(_caption_band()),
         "shots": shots_rep,
         "totals": totals,
         "violations": violations,

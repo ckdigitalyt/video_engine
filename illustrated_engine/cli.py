@@ -682,11 +682,13 @@ def cmd_qa8full(args):
     story = _json.loads((paths.stories / story_id / "story.json").read_text())
     qa7_res = editorial7.evaluate(plan, story, save_sig=False)
     v6_ok = None
+    qa5 = {}
     if getattr(args, "v6", False):
         cmd_qa5full(args)
         q5p = Path("build/qa") / f"qa5_{story_id}.json"
         v6_ok = bool(_json.loads(q5p.read_text()).get("CAN_PUBLISH")) \
             if q5p.exists() else None
+        qa5 = _json.loads(q5p.read_text()) if q5p.exists() else {}
     res8 = editorial8.evaluate8(plan, story, qa7_res)
     sem = semantic_qa.verify(paths.stories / story_id)
     res8["semantic_factual"] = {
@@ -701,6 +703,56 @@ def cmd_qa8full(args):
     print(f"  V8 editorial: {'PASS' if res8['V8_EDITORIAL_PASS'] else 'FAIL'} | "
           f"documentary_vs_slideshow: {res8['documentary_vs_slideshow']} | "
           f"semantic: {res8['semantic_factual']['SEMANTIC_PASS']}")
+    # ---- V11 publish gate (Jade_todo_v11 P0) --------------------------------
+    # Eight named components; any false forces CAN_PUBLISH=false regardless
+    # of numeric scores. V11_GATES=0 rolls back to the pre-V11 qa8full.
+    from engine import flags as _flags
+    if _flags.gates11():
+        from engine import (caption_qa, leak_scan, motion_class, occupancy_qa,
+                            publish_gate)
+        from engine import bible as B
+        bible = B.load_bible(paths.stories / story_id)
+        video = Path(args.path) if getattr(args, "path", None) \
+            else paths.output / f"{story_id}.mp4"
+        cap_res = caption_qa.run(plan, video, Path("build"), bible)
+        leak_res = leak_scan.run(plan, story, bible,
+                                 video if video.exists() else None, Path("build"))
+        occ_res = occupancy_qa.run(plan,
+                                   video if video.exists() else None, Path("build"))
+        mot_res = motion_class.run(plan)
+        gate = publish_gate.run(qa5, qa7_res, res8, sem, cap_res, leak_res,
+                                occ_res, mot_res)
+        caption_qa.write_report(cap_res, Path("build/qa"), story_id)
+        leak_scan.write_report(leak_res, Path("build/qa"), story_id)
+        occupancy_qa.write_report(occ_res, Path("build/qa"), story_id)
+        motion_class.write_report(mot_res, Path("build/qa"), story_id)
+        publish_gate.write_report(gate, Path("build/qa"), story_id)
+        res8["v11"] = {
+            "caption": {"CAPTION_PASS": cap_res["CAPTION_PASS"],
+                        "findings": cap_res["findings"][:10]},
+            "debug_free": {"DEBUG_FREE": leak_res["DEBUG_FREE"],
+                           "hits": leak_res["findings"][:10]},
+            "occupancy": {k: occ_res[k] for k in (
+                "occupancy_pass", "mean_meaningful_major",
+                "mean_meaningful_all", "below_target_undeclared",
+                "continuation_verification")},
+            "motion_ratio": {k: mot_res[k] for k in (
+                "EXPLANATORY_MOTION_RATIO", "shares", "motion_pass",
+                "advisory_strict_CBA")},
+        }
+        res8["CAN_PUBLISH"] = gate["CAN_PUBLISH"]
+        res8["publish_gate"] = gate
+        editorial8.write_report(res8, Path("build/qa"))
+        print("  ---- V11 publish gate ----")
+        for c in publish_gate.COMPONENTS:
+            print(f"  {'PASS' if gate['components'][c] else 'FAIL'}  {c}")
+        for d in gate["p0_defects"][:8]:
+            print(f"  P0: {d}")
+        print(f"  occupancy: meaningful(major)={occ_res['mean_meaningful_major']:.3f} "
+              f"(target {occ_res['target']}) | motion C-share="
+              f"{mot_res['shares']['C']:.2f} A={mot_res['shares']['A']:.2f} "
+              f"B={mot_res['shares']['B']:.2f}")
+        print(f"  CAN_PUBLISH: {gate['CAN_PUBLISH']}")
 
 
 def cmd_qa7full(args):

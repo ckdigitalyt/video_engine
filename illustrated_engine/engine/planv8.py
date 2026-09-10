@@ -412,6 +412,16 @@ def make_edit_plan_v8(paths, story_id: str, out_name: str = "edit_plan.json"):
     plan["v8"] = {k: v8[k] for k in ("story_type", "grammar_key", "state_machine",
                                      "escalation", "curiosity", "hero_recognizability",
                                      "duration_policy", "grammar_findings")}
+    # V11 EXPLANATORY_MOTION_RATIO — re-tag AFTER v8 stamps the living
+    # events (reveal/isolate/flow/fill_state/consequence): the plan5 tags
+    # predate the state machine and would misclassify C-shots as A/B.
+    from engine.planv5 import _motion_class as _mc
+    mc = {}
+    for s in plan.get("shots", []):
+        if not s.get("motion_class_authored"):
+            s["motion_class"] = _mc(s)
+        mc[str(s.get("shot_id"))] = str(s.get("motion_class"))
+    plan["motion_classes"] = mc
     out = Path(paths.build) / out_name
     out.write_text(json.dumps(plan, indent=1) + "\n")
     v8["actions"] = actions

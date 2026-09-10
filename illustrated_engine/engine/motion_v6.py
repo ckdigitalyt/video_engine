@@ -51,6 +51,10 @@ FPS = 30
 # 1080x780 horizontal-monitor panel. Every downstream stage/canvas constant
 # derives from these two, so the camera window aspect follows automatically.
 PANEL_W, PANEL_H = (1080, 1152) if _flags.vertical10() else (1080, 780)
+# V11_FULLBLEED — panel follows the V11 card (planv5 CARD_H=1248). Same flag
+# predicate as planv5 so the two never disagree.
+if _flags.fullbleed11():
+    PANEL_W, PANEL_H = 1080, 1248
 PANEL_Y = 460
 FRAME_W, FRAME_H = 1080, 1920
 PLATE_W, PLATE_H = 1536, 1024

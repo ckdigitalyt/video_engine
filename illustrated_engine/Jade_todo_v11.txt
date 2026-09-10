@@ -1,0 +1,489 @@
+Jade — V10 is NOT frozen yet.
+
+I reviewed the actual latest ice_slippery.mp4 frame-by-frame. The V10 direction is correct and materially better than V7, but the current 95.91 editorial score overstates the human visual quality.
+
+Do NOT patch ice_slippery individually.
+
+Upgrade the ALGORITHM globally.
+
+Call this V10.1 / V11 depending on your existing versioning, but keep the existing V10 foundations intact.
+
+==================================================
+P0 — FIX THE QA PROXY PROBLEM
+==================================================
+
+The current editorial score is too easily gamed.
+
+A high score must NOT override obvious human defects.
+
+CAN_PUBLISH must require:
+
+TECHNICAL
+FACTUAL
+CAPTION
+DEBUG_FREE
+VISUAL_EVIDENCE
+VIEWER_SIMULATION
+ANTI_TEMPLATE
+AUDIO
+
+A P0 defect always forces CAN_PUBLISH=false.
+
+==================================================
+P0 — CAPTION COMPOSITING REGRESSION
+==================================================
+
+The latest video visibly contains previous caption states behind the current caption.
+
+Examples observed:
+- earlier phrase remains visible underneath the current phrase
+- kinetic emphasis creates overlapping caption states
+- caption transitions look like stacked subtitles
+
+Implement a strict caption state machine:
+
+ACTIVE_CAPTION = exactly one semantic caption state.
+
+Previous caption must be removed/faded before the next becomes active unless an explicit multi-line composition is declared.
+
+Punctuation emphasis must modify the ACTIVE caption only.
+
+No ghost captions.
+No stale caption layers.
+No overlapping semantic states.
+
+Add automated QA:
+- OCR/visual occupancy collision check
+- caption-state uniqueness
+- stale-caption detection
+- max 2 lines
+- safe-zone collision
+- subtitle persistence after beat end
+
+Any stale/overlapping caption = P0.
+
+==================================================
+P0 — DEBUG / DEVELOPMENT TEXT LEAK
+==================================================
+
+The latest video visibly contains "SIGNAL" near the top around the final section.
+
+Implement DEBUG_LEAK_SCAN across rendered frames.
+
+Search for:
+DEBUG
+TEST
+SIGNAL
+PLACEHOLDER
+TODO
+internal IDs
+shot IDs
+asset IDs
+filenames
+model names
+development metadata
+
+Any detected development artifact = CAN_PUBLISH=false.
+
+This must be an engine-level gate.
+
+==================================================
+P0 — TRUE 9:16 COMPOSITION
+==================================================
+
+Current V10 often places the main visual inside a central panel with large blurred extension above/below.
+
+This makes the video feel like a horizontal presentation inserted into a vertical canvas.
+
+Change the default:
+
+The visual should own the entire 9:16 canvas.
+
+Blurred extension is OPTIONAL, not default.
+
+Add CANVAS_OCCUPANCY metric:
+
+- meaningful visual occupancy
+- evidence occupancy
+- empty area
+- blurred extension area
+- subject bounding box
+
+Repeated under-utilization should fail.
+
+Target roughly >=75–80% meaningful occupancy on major explanatory shots, but allow deliberate exceptions.
+
+==================================================
+P0 — VISUAL INFORMATION, NOT JUST MOTION
+==================================================
+
+Maintain the distinction:
+
+A = decorative motion
+B = structural motion
+C = explanatory motion
+
+Target:
+
+C > B > A.
+
+Camera movement does not count as information.
+
+Add EXPLANATORY_MOTION_RATIO.
+
+Meaningful events include:
+- revealing a causal relationship
+- changing a physical state
+- exposing a hidden layer
+- showing a comparison
+- showing scale
+- showing a process
+- showing consequence
+- transforming a diagram
+
+Do not animate purely to satisfy the metric.
+
+==================================================
+P1 — VISUAL CONTRADICTION ENGINE
+==================================================
+
+For suitable stories, planner must explicitly generate:
+
+WHAT THE VIEWER THINKS IS HAPPENING
+vs
+WHAT IS ACTUALLY HAPPENING
+
+Use this as a potential hook/reveal mechanism.
+
+Examples:
+ice:
+"you think you're skating on solid ice"
+→ microscopic surface/interface reveal
+
+black hole:
+"you think the clock stops"
+→ local vs distant observer split
+
+phone:
+"you think the battery simply gets hot"
+→ energy-flow decomposition
+
+This should be a reusable story primitive.
+
+==================================================
+P1 — VISUAL SURPRISE SCORE
+==================================================
+
+Add a metric for whether the story contains at least one genuine visual revelation.
+
+Valid:
+- microscopic zoom
+- hidden cross-section
+- impossible scale transition
+- spatial reveal
+- before/after
+- causal chain suddenly revealed
+- unexpected transformation
+
+Invalid:
+- zoom
+- pan
+- number pop
+- decorative particle
+- generic transition
+
+Require at least one strong visual surprise for stories where the subject permits it.
+
+==================================================
+P1 — REMOVE UNIVERSAL VISUAL FINGERPRINTS
+==================================================
+
+The orange circle / navy strip / cream panel combination is becoming a V10 visual fingerprint.
+
+Do NOT remove the brand palette.
+
+Instead decouple BRAND from VISUAL VOCABULARY.
+
+Brand:
+- typography
+- restrained palette
+- compositing quality
+- motion quality
+
+Topic-specific visual grammar:
+- science = cutaway / fields / particles / molecular layers
+- history = maps / timelines / reconstruction
+- geography = real geographic silhouettes / terrain / regional overlays
+- engineering = cross-sections / forces / component chains
+- biology = cellular / microscopic / structural views
+- astronomy = spatial scale / orbits / spacetime / light cones
+
+Do not use the same orange geometric motif across unrelated topics unless semantically justified.
+
+==================================================
+P1 — DEPTH MUST BE REAL INFORMATIONAL DEPTH
+==================================================
+
+Do not count blurred background extension as meaningful depth.
+
+Support real 2.5D:
+foreground
+midground
+background
+parallax
+camera movement through layers
+scale transitions
+
+Prefer depth transitions that reveal information.
+
+Example:
+skate blade
+→ ice surface
+→ quasi-liquid interface
+→ molecular scale
+→ return to macroscopic skate
+
+==================================================
+P1 — ADAPTIVE CAPTION PLACEMENT
+==================================================
+
+Do not permanently reserve one subtitle coordinate.
+
+Detect:
+- diagram labels
+- important evidence
+- arrows
+- lower-third information
+- visual focal points
+
+Place captions in the cleanest available safe zone.
+
+Captions must never obscure key evidence.
+
+==================================================
+P1 — SCIENTIFIC NUANCE QA
+==================================================
+
+Upgrade semantic factual QA.
+
+For scientific claims classify:
+
+ESTABLISHED
+STRONG_CONSENSUS
+SUPPORTED_BUT_COMPLEX
+ACTIVE_DEBATE
+MODEL_DEPENDENT
+UNCERTAIN
+
+Do not present contested mechanisms as settled facts.
+
+Example: ice slipperiness is not adequately explained by a simplistic "skate melts ice" story. Current research emphasizes surface premelting/molecular mobility and complex dependence on temperature, pressure and speed, with newer work proposing additional self-lubrication mechanisms.
+
+The system should automatically qualify wording when the science requires it.
+
+Source existence is insufficient.
+
+==================================================
+P1 — VIEWER VALUE DENSITY
+==================================================
+
+For every ~5-second interval answer:
+
+"What does the viewer now know/understand/feel that they did not before?"
+
+Penalize:
+- decorative motion
+- repeated information
+- generic hero plates
+- filler narration
+- repeated diagrams
+- redundant labels
+- generic transitions
+
+This should become a core editorial metric.
+
+==================================================
+P1 — SCROLL STOP TEST
+==================================================
+
+Add automated/editorial simulation:
+
+0.5 sec:
+What am I seeing?
+
+2 sec:
+Why should I continue?
+
+5 sec:
+What question am I waiting to have answered?
+
+10 sec:
+Have I learned something concrete?
+
+20 sec:
+Has the story escalated?
+
+30 sec:
+Has my mental model changed?
+
+Final 3 sec:
+Did the video pay off the opening promise?
+
+A major failure here should prevent publication.
+
+==================================================
+P1 — AUDIO
+==================================================
+
+The latest audio is around -14.1 LUFS integrated and -1.4 dBFS true peak, which is technically reasonable.
+
+However, the continuous tonal/ambient bed should NOT be the default.
+
+Default:
+
+NARRATION > intentional SFX > subtle ambience/music
+
+Use silence deliberately.
+
+Add QA for:
+- speech-to-bed ratio
+- low-frequency tonal noise
+- continuous-bed duration
+- unnecessary ambience
+- SFX/narration masking
+- dynamic range
+
+Do not continuously fill silence.
+
+==================================================
+P1 — TTS BENCHMARK
+==================================================
+
+Do not replace the current voice blindly.
+
+Create an isolated A/B benchmark using the same 30–45 sec narration:
+
+A. current Chatterbox Turbo
+B. Chatterbox Nano
+C. Qwen3-TTS 0.6B
+
+Optional:
+D. Kokoro 82M
+
+Evaluate:
+naturalness
+authority
+prosody
+emotional range
+clarity
+numbers/names
+CPU generation cost
+voice consistency
+
+Do not change production TTS until the benchmark is completed.
+
+==================================================
+P1 — PERFORMANCE PLAN
+==================================================
+
+Every narration beat should carry:
+
+pace
+energy
+emphasis
+pause
+delivery arc
+
+Example:
+
+HOOK:
+immediate / curious
+
+EXPLANATION:
+controlled
+
+SURPRISE:
+pause + emphasis
+
+REVEAL:
+slower
+
+PAYOFF:
+confident
+
+Do not make every sentence sound identical.
+
+==================================================
+P1 — STORY-LEVEL ESCALATION
+==================================================
+
+Keep:
+
+HOOK
+→ ORIENTATION
+→ DISCOVERY
+→ ESCALATION
+→ REVEAL
+→ PAYOFF
+
+But ensure visual intensity and information density increase toward the reveal.
+
+==================================================
+P2 — BRAND / ANTI-TEMPLATE
+==================================================
+
+Continue measuring structural fingerprint.
+
+Do not randomize layouts.
+
+Variation must emerge from:
+story
+subject
+mechanism
+visual grammar
+information structure.
+
+The viewer should recognize the channel, but not predict the next shot.
+
+==================================================
+FINAL ACCEPTANCE TEST
+==================================================
+
+Do NOT create another individual-video patch.
+
+After implementing the above, create THREE fresh unrelated stories specifically designed to stress-test the new algorithm:
+
+A. science/process
+B. history/event
+C. geography/natural phenomenon
+
+All must be generated end-to-end with the same production pipeline.
+
+Then report:
+
+1. Human visual quality
+2. Visual information gain
+3. Explanatory motion ratio
+4. Canvas occupancy
+5. Caption integrity
+6. Debug leakage
+7. Visual surprise
+8. Viewer value density
+9. Scroll-stop test
+10. Scientific nuance
+11. Anti-template score
+12. Audio quality
+13. TTS benchmark
+14. Factual QA
+15. Technical QA
+16. CAN_PUBLISH
+
+Most importantly:
+
+Do not optimize the numeric scores.
+
+The final question is:
+
+"Would a human viewer mistake this for a deliberately produced premium YouTube documentary, or does it still feel like an automated presentation?"
+
+Only freeze the algorithm when the answer consistently moves toward the first.

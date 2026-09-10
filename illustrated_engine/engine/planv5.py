@@ -38,6 +38,12 @@ if _flags.vertical10():
     CARD_W, CARD_H, CARD_Y0 = 1080, 1152, 288
 else:
     CARD_W, CARD_H, CARD_Y0 = 1080, 780, 176
+# V11_FULLBLEED (Jade_todo_v11 P0 true 9:16): the card grows to own 65% of
+# the canvas (y 192..1440) and the freed top band keeps the brand block off
+# the art. Card bottom stays at 1440 so the caption band below the card is
+# identical in both geometries. Requires V10_VERTICAL (checked in fullbleed11).
+if _flags.fullbleed11():
+    CARD_W, CARD_H, CARD_Y0 = 1080, 1248, 192
 HEADER_Y = 0.18    # card-relative exclusion zone: card header / title bar
 FOOTER_Y = 0.85    # card-relative exclusion zone: card footer band
 LEGACY_VIS_H = 1328.0   # pre-V6.2 rects were normalized to VISUAL_RECT height
@@ -348,6 +354,32 @@ def _overlay_compiler(eplan: dict, story_dir: Path) -> dict:
     return stats
 
 
+def _motion_class(s: dict) -> str:
+    """A/B/C motion-information tag for a plan shot (see make_edit_plan_v5).
+
+    C beats B beats priority: any explanatory living event wins; then
+    structural events; explanatory kinetic types count as C, other kinetic
+    as B; a shot with only camera motion (or none) is A — camera movement
+    does not count as information (Jade_todo_v11 P0).
+    """
+    kinds = {str((e or {}).get("kind", "")) for e in (s.get("events") or [])}
+    if kinds & {"reveal", "isolate", "flow", "fill_state", "consequence"}:
+        return "C"
+    if kinds & {"number_pop", "highlight", "text_emphasis", "stage_overlay"}:
+        return "B"
+    k = s.get("kinetic")
+    if k:
+        kt = str(k.get("type", "") if isinstance(k, dict) else k).lower()
+        # C: the animation shows a process/field/transformation (causal);
+        # B: the animation restyles emphasis without causal content
+        # (pulse/countup/drift/particles). Camera movement is never info.
+        if kt in {"streamlines", "clock_sweep", "clocks", "orbit", "morph",
+                  "heatmap", "flow"}:
+            return "C"
+        return "B"
+    return "A"
+
+
 def make_edit_plan_v5(paths, story_id: str):
     from engine import planv4, visual_grammar
     eplan, rep = planv4.make_edit_plan_v4(paths, story_id)
@@ -391,6 +423,25 @@ def make_edit_plan_v5(paths, story_id: str):
 
     # V6.2 §2/§4: overlay compiler + kinetic stamping (mutates eplan shots)
     stats = _overlay_compiler(eplan, Path(paths.stories) / story_id)
+
+    # V11 EXPLANATORY_MOTION_RATIO (Jade_todo_v11 P0): provisional A/B/C tag
+    # per shot — plan5's event set predates planv8's living-event stamping,
+    # so planv8 RE-TAGS inferred shots after stamping (authored overrides,
+    # marked motion_class_authored, always win). QA consumes the plan8 tags.
+    # C = explanatory, B = structural, A = decorative (camera-only/static;
+    # camera movement is NOT information) — engine/motion_class.py consumes.
+    mc = {}
+    for s in eplan.get("shots", []):
+        authored = str(s.get("motion_class") or "").upper()
+        if authored in {"A", "B", "C"}:
+            s["motion_class_authored"] = True
+        else:
+            s.pop("motion_class", None)
+            authored = ""
+        cls = authored or _motion_class(s)
+        s["motion_class"] = cls
+        mc[str(s.get("shot_id"))] = cls
+    eplan["motion_classes"] = mc
 
     eplan["engine"] = "v6.2"
     eplan["visual_grammar_plan"] = {

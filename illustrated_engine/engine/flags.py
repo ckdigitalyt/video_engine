@@ -86,6 +86,10 @@ def token() -> str:
         parts.append("v10d")
     if punct10():
         parts.append("v10p")
+    if caption11():
+        parts.append("v11c")
+    if fullbleed11():
+        parts.append("v11f")
     return "-".join(parts)
 
 
@@ -133,6 +137,9 @@ def describe() -> dict:
         "v10_kinetic": kinetic10(),
         "v10_depth": depth10(),
         "v10_punct": punct10(),
+        "v11_caption": caption11(),
+        "v11_fullbleed": fullbleed11(),
+        "v11_gates": gates11(),
     }
 
 
@@ -167,3 +174,31 @@ def depth10() -> bool:
 
 def punct10() -> bool:
     return os.environ.get("V10_PUNCT", "").strip().lower() not in _FALSE
+
+
+# --- V11 engine upgrades (2026-09-10, Jade_todo_v11 P0) ---------------------
+# All default ON; set the env var to 0/false/no/off for instant rollback.
+#   V11_CAPTION   caption state machine: one ACTIVE caption semantic state,
+#                 kinetic band re-anchored BELOW the card (frame y = card
+#                 bottom + 24) so plate-baked footer text can never collide
+#                 with the caption band (V10 ghost-caption root cause).
+#                 Rollback restores the V10 in-card band (1344..1459).
+#   V11_FULLBLEED true 9:16 composition: the plate card owns y 192..1440
+#                 (1080x1248, 65% of canvas) and the remaining bands are a
+#                 crafted mirror continuation of the plate art — NOT a blur
+#                 panel. Blurred extension becomes the rollback path.
+#                 Requires V10_VERTICAL (legacy geometry wins if that is off).
+#   V11_GATES     engine-level QA gates (caption_qa, leak_scan, occupancy,
+#                 motion ratio, publish_gate) integrated into qa8full.
+#                 Rollback restores the pre-V11 qa8full behavior exactly.
+
+def caption11() -> bool:
+    return vertical10() and os.environ.get("V11_CAPTION", "").strip().lower() not in _FALSE
+
+
+def fullbleed11() -> bool:
+    return vertical10() and os.environ.get("V11_FULLBLEED", "").strip().lower() not in _FALSE
+
+
+def gates11() -> bool:
+    return os.environ.get("V11_GATES", "").strip().lower() not in _FALSE

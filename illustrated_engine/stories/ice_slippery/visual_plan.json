@@ -134,7 +134,7 @@
       "shot_id": "S07", "shot_type": "PAYOFF", "asset": "B7_wet_payoff",
       "duration_est": 8.5, "crop_bias_y": 0.45, "captions": "phrase",
       "role": "PAYOFF", "chrome": "none", "tag": "",
-      "visual_mode": "PAYOFF", "evidence_type": "DIRECT_EVIDENCE", "motion_type": "CAMERA_MOTION", "end_card": "SIGNAL", "opening": false,
+      "visual_mode": "PAYOFF", "evidence_type": "DIRECT_EVIDENCE", "motion_type": "CAMERA_MOTION", "end_card": "ALREADY WET", "opening": false,
       "purpose": "Land the argument on the opening blade at dusk: ice is already wet, and every glide renews the water",
       "claim": "ice's slipperiness comes from the ever-present near-surface water film, renewed by pressure, friction and cold-dependent thickness",
       "evidence": "dusk reprise of the hero plate: blade at rest on ice, one calm glossy water line through the contact",
