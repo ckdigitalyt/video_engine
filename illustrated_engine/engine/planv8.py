@@ -149,6 +149,7 @@ def _states_for_shot(s: dict, beat: dict, els: list, pack: dict,
           "style": "stagger"})
     key = _pick_key(pairs, beat, s.get("concepts") or [])
     second = None
+    far = None
     if key:
         krect = key[1]
         # FOCUS — isolate the component the beat is about

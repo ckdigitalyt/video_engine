@@ -1,0 +1,168 @@
+{
+  "story_id": "ice_slippery",
+  "brand": "SIGNAL",
+  "title": "WHY ICE IS SLIPPERY",
+  "subject": "physics",
+  "story_type": "science_process",
+  "pad_s": 0.4,
+  "v7": {
+    "title_overlay": true
+  },
+  "concepts": [
+    {
+      "id": "blade",
+      "beats": [
+        "B1",
+        "B2",
+        "B3",
+        "B5",
+        "B7"
+      ],
+      "verb": "press"
+    },
+    {
+      "id": "pressure",
+      "beats": [
+        "B2",
+        "B3"
+      ],
+      "verb": "melt"
+    },
+    {
+      "id": "water_film",
+      "beats": [
+        "B1",
+        "B4",
+        "B5",
+        "B6",
+        "B7"
+      ],
+      "verb": "thin"
+    },
+    {
+      "id": "friction",
+      "beats": [
+        "B5",
+        "B7"
+      ],
+      "verb": "warm"
+    },
+    {
+      "id": "cold",
+      "beats": [
+        "B4",
+        "B6",
+        "B7"
+      ],
+      "verb": "cool"
+    }
+  ],
+  "beats": [
+    {
+      "beat_id": "B1",
+      "function": "HOOK",
+      "narration": "You can stand on a frozen lake, yet glide across it like glass. Why is ice slippery?",
+      "claim": "ice is slippery because of a thin near-surface water layer, not standing water",
+      "visual_question": "why is ice slippery at all?",
+      "visual_answer": "a skate blade resting on bare ice, the slipperiness not yet explained",
+      "fact_ids": [
+        "f_slippery_principle"
+      ],
+      "start": 0.0,
+      "end": 6.4
+    },
+    {
+      "beat_id": "B2",
+      "function": "CURIOSITY",
+      "narration": "The classic answer blames pressure: the skate presses down, and the ice beneath it melts.",
+      "claim": "the textbook explanation attributes ice slipperiness to pressure melting under the blade",
+      "visual_question": "does a skate really melt the ice by pressing on it?",
+      "visual_answer": "a heavy downward pressure arrow squeezing meltwater out of the ice",
+      "fact_ids": [
+        "f_pressure_myth"
+      ],
+      "start": 6.4,
+      "end": 12.6
+    },
+    {
+      "beat_id": "B3",
+      "function": "REVEAL",
+      "narration": "Run the physics and pressure barely matters. A skater's weight lowers the melting point by only a fraction of a degree.",
+      "claim": "a skater's pressure lowers ice's melting point by only a fraction of a degree, far too little to make the water film",
+      "visual_question": "how much melting can that pressure actually buy?",
+      "visual_answer": "pressure lowers the melting point only a fraction of a degree: far too little",
+      "fact_ids": [
+        "f_pressure_myth"
+      ],
+      "key_number": "0\u00b0C",
+      "key_number_rect": [
+        0.36,
+        0.24,
+        0.3,
+        0.11
+      ],
+      "start": 12.6,
+      "end": 20.3
+    },
+    {
+      "beat_id": "B4",
+      "function": "EXPLANATION",
+      "narration": "The real story starts at the surface. Even below freezing, ice wears a thin skin of water: a quasi-liquid layer.",
+      "claim": "a quasi-liquid layer exists on the ice surface even below the melting point",
+      "visual_question": "where does the water come from if no one is pressing?",
+      "visual_answer": "the bare ice surface carries its own quasi-liquid layer of water below freezing",
+      "fact_ids": [
+        "f_quasi_liquid"
+      ],
+      "start": 20.3,
+      "end": 29.1
+    },
+    {
+      "beat_id": "B5",
+      "function": "ESCALATION",
+      "narration": "Then glide adds heat. Friction between blade and ice warms that skin, feeding the water film faster than it can refreeze.",
+      "claim": "frictional heating during glide feeds the near-surface water film",
+      "visual_question": "what keeps the film flowing while the blade moves?",
+      "visual_answer": "friction heat from the gliding blade feeds the water film as it flows",
+      "fact_ids": [
+        "f_friction_heat"
+      ],
+      "start": 29.1,
+      "end": 37.7
+    },
+    {
+      "beat_id": "B6",
+      "function": "ESCALATION",
+      "narration": "But the film thins as it gets colder. A blade that glides at minus five bites hard at minus thirty.",
+      "claim": "the quasi-liquid film thins as temperature falls, so blade behavior changes with cold",
+      "visual_question": "why does the same blade behave differently in deep cold?",
+      "visual_answer": "in deep cold the water film thins and the blade bites instead of gliding",
+      "fact_ids": [
+        "f_film_temperature"
+      ],
+      "key_number": "\u221230\u00b0",
+      "key_number_rect": [
+        0.58,
+        0.26,
+        0.28,
+        0.11
+      ],
+      "start": 37.7,
+      "end": 45.1
+    },
+    {
+      "beat_id": "B7",
+      "function": "PAYOFF",
+      "narration": "Ice is slippery because it is already wet: a whisper of water, born at the surface, renewed under every glide.",
+      "claim": "ice's slipperiness comes from the ever-present near-surface water film, renewed by pressure, friction and cold-dependent thickness",
+      "visual_question": "so what is ice, really?",
+      "visual_answer": "ice is already wet: a whisper of surface water, renewed under every glide",
+      "fact_ids": [
+        "f_slippery_principle",
+        "f_quasi_liquid"
+      ],
+      "start": 45.1,
+      "end": 53.1
+    }
+  ]
+}

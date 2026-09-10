@@ -73,7 +73,41 @@ def _accent_span(img, rect=None, target=(360, 640)) -> int:
     if not mask.any():
         return 0
     ys = np.where(mask.any(axis=1))[0]
-    return int(ys.max() - ys.min() + 1)
+    # Longest contiguous run (gap <= 3 rows): first-to-last extent bridges
+    # incidental accent-colored plate art and overstates real text height
+    # (evidence 2026-09-04: green_sahara S03 "49px" was text sliver + art).
+    runs = []
+    start = prev = int(ys[0])
+    for y in ys[1:]:
+        y = int(y)
+        if y - prev > 3:
+            runs.append(prev - start + 1)
+            start = y
+        prev = y
+    runs.append(prev - start + 1)
+    return int(max(runs))
+
+
+def _zone_rect(rect):
+    """Plan rects are visual-zone relative (layout.VISUAL_RECT = y 176-1504 of
+    the 1920 frame) — same transform composev2._abs_rect applies when drawing.
+    Evidence 2026-09-04: raw-fraction probes sat ~20 phone-px below the real
+    glyphs (green_sahara pops measured at phone-y 262-293) -> false P0.
+    V10 — under the native 9:16 pass the plan card is the portrait panel
+    (planv5 CARD_Y0=288, CARD_H=1152), not the legacy visual zone; map card
+    fractions through the active geometry (evidence 2026-09-10: ice_slippery
+    S06 pop drawn at frame-y 587-714 = 288+0.26*1152, legacy mapping probed
+    y 520-666 -> key_number_px=0 false P0)."""
+    from engine import flags as _flags
+    x, y, w, h = rect
+    if _flags.vertical10():
+        from engine.planv5 import CARD_H, CARD_Y0
+        return (x, (CARD_Y0 + y * CARD_H) / 1920.0,
+                w, (h * CARD_H) / 1920.0)
+    from engine.layout import VISUAL_RECT
+    vx, vy, vw, vh = VISUAL_RECT
+    return ((vx + x * vw) / 1080.0, (vy + y * vh) / 1920.0,
+            (w * vw) / 1080.0, (h * vh) / 1920.0)
 
 
 def phone_legibility(video_path: Path, caption_y_range=(1500, 1860),
@@ -103,7 +137,8 @@ def phone_legibility(video_path: Path, caption_y_range=(1500, 1860),
                 if str(e.get("kind", "")).lower() == "number_pop":
                     rect = (e.get("spec") or {}).get("rect")
                     if rect:
-                        probes.append((acc + float(e.get("t", 0.0)) + 0.5, rect))
+                        probes.append((acc + float(e.get("t", 0.0)) + 0.5,
+                                       _zone_rect(rect)))
             acc += dur
     if probes:
         frames = _frames_at(Path(video_path), [t for t, _ in probes])

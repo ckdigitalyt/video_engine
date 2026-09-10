@@ -438,12 +438,17 @@ def cmd_qa5full(args):
     # a transformed copy so pop probes land on the rendered numbers.
     if str(plan4.get("engine", "")) == "v6.2":
         import copy as _cp
+        from engine import flags as _fl
         _k = 780.0 / 1328.0
         plan4 = _cp.deepcopy(plan4)
         for _s in plan4.get("shots", []):
             for _e in _s.get("events", []) or []:
                 _r = (_e.get("spec") or {}).get("rect")
-                if _r:
+                if _r and not _fl.vertical10():
+                    # legacy card (780-tall at y=176) -> visual-zone fractions.
+                    # V10_VERTICAL: the plan card is already the active portrait
+                    # panel (1080x1152 at y=288) — phone_qa._zone_rect maps it
+                    # with the live geometry, so no legacy rescale here.
                     _e["spec"]["rect"] = [_r[0], _r[1] * _k, _r[2], _r[3] * _k]
     man4 = Path(paths.build) / "diag_stages" / "manifest_v4.json"
     stage_pngs = []

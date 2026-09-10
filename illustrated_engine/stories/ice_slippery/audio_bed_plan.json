@@ -1,0 +1,74 @@
+{
+  "bed_files": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+  ],
+  "sfx": [
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/ice_slippery/audio/sfx_whoosh.wav",
+      "at": 0.638,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/ice_slippery/audio/sfx_whoosh.wav",
+      "at": 7.007,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/ice_slippery/audio/sfx_whoosh.wav",
+      "at": 13.404,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/ice_slippery/audio/sfx_tick.wav",
+      "at": 14.33,
+      "kind": "tick"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/ice_slippery/audio/sfx_whoosh.wav",
+      "at": 21.226,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/ice_slippery/audio/sfx_pulse.wav",
+      "at": 27.199,
+      "kind": "pulse"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/ice_slippery/audio/sfx_whoosh.wav",
+      "at": 29.987,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/ice_slippery/audio/sfx_pulse.wav",
+      "at": 35.801,
+      "kind": "pulse"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/ice_slippery/audio/sfx_whoosh.wav",
+      "at": 38.425,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/ice_slippery/audio/sfx_tick.wav",
+      "at": 39.316,
+      "kind": "tick"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/ice_slippery/audio/sfx_whoosh.wav",
+      "at": 45.909,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/ice_slippery/audio/sfx_pulse.wav",
+      "at": 51.351,
+      "kind": "pulse"
+    }
+  ],
+  "bed_crossfade_ms": 600
+}
