@@ -825,9 +825,11 @@ def _glow_frames(src_dir: Path, dst_dir: Path, strength: float = 0.6,
 
 def _punct_stems(shots: list, shot_durs: list, build_dir: Path,
                  narration_spans: list | None = None) -> list:
-    """Deterministic sub-bass punctuation SFX (V10_PUNCT, flags.py header):
-    1.5s risers ENDING at each ESCALATION/REVEAL shot start, 40-80Hz
-    sub-drops at PAYOFF starts. numpy-generated, wave-written, cached by
+    """Deterministic punctuation SFX (V10_PUNCT, flags.py header):
+    1.5s risers ENDING at each ESCALATION/REVEAL shot start, descending
+    tonal drops (165->110 Hz) at PAYOFF starts — band-safe by design:
+    accent tonal energy never enters the 30-80 Hz sub-bass band
+    (V11 P1b-fix). numpy-generated, wave-written, cached by
     path; entries use audio_mix._concat_sfx absolute-timeline `at`.
 
     V11 P1 §9 — silence is deliberate: a riser may occupy only the
@@ -861,13 +863,21 @@ def _punct_stems(shots: list, shot_durs: list, build_dir: Path,
         s = np.stack([x, x], axis=1)
         return _wav(f"riser_{int(dur * 1000)}ms.wav", s)  # hard cut: the shot start IS the hit
 
-    def _subdrop(dur=1.1):
+    def _subdrop(dur=0.8):
         n = int(dur * SR)
         t = np.arange(n) / SR
-        f = 78.0 * (38.0 / 78.0) ** (t / dur)          # 78->38 Hz fall
+        # V11 P1b-fix — the drop gesture moved an octave up: 165->110 Hz
+        # (E3->A2, landing on the underscore's pad root). A sweep through
+        # 30-80 Hz is a tonal sub-bass ring that lands in the band the
+        # hierarchy QA measures whenever the onset meets a narration
+        # pause; accents keep their tonal energy out of that band.
+        f = 165.0 * (110.0 / 165.0) ** (t / dur)
         phase = 2 * np.pi * np.cumsum(f) / SR
-        env = np.exp(-2.6 * t / dur)
-        x = np.sin(phase) * 0.55 * env + np.sin(2 * np.pi * 42 * t) * 0.18 * env
+        # V11 P1b-fix — tail shortened (was 1.1 s / decay 2.6): the tonal
+        # ring must decay before the shot-tail narration pause,
+        # not ring into it. Accent rule: no tonal energy in speech gaps.
+        env = np.exp(-4.5 * t / dur)
+        x = np.sin(phase) * 0.55 * env + np.sin(2 * np.pi * 220 * t) * 0.18 * env
         s = np.stack([x, x], axis=1)
         return _wav("subdrop.wav", s)
 
@@ -894,7 +904,7 @@ def _punct_stems(shots: list, shot_durs: list, build_dir: Path,
                         "dur": riser_dur, "kind": "punct_riser"})
         if stype == "PAYOFF" or bfn == "PAYOFF":
             sfx.append({"file": str(_subdrop()), "at": t0,
-                        "dur": 1.1, "kind": "punct_subdrop"})
+                        "dur": 0.8, "kind": "punct_subdrop"})
         t0 += float(d)
     return sfx
 

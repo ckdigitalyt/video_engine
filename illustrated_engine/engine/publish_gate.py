@@ -42,6 +42,15 @@ def run(qa5: dict, qa7: dict, res8: dict, sem: dict, caption_qa: dict,
     audio = (qa5 or {}).get("audio_continuity") or {}
     v62 = (qa5 or {}).get("v62_checks") or {}
     subj = (qa5 or {}).get("subject_recheck") or {}
+    # V11 P1b-fix — subject rows that were never verified (vision judge
+    # unreachable from the first call => every row UNVERIFIED) must not
+    # pass VISUAL_EVIDENCE: the recheck only re-judges FAIL rows, so an
+    # all-UNVERIFIED column leaves still_fail empty and slipped through.
+    # Rule: subject evidence exists only if at least one row is PASS.
+    _sc_rows = (((qa5 or {}).get("director") or {}).get(
+        "subject_correctness") or {}).get("rows") or []
+    _no_subject_evidence = bool(_sc_rows) and not any(
+        str(r.get("verdict", "")).upper() == "PASS" for r in _sc_rows)
     q7g = (qa7 or {}).get("gates") or {}
     g8 = (res8 or {}).get("gates") or {}
 
@@ -59,6 +68,7 @@ def run(qa5: dict, qa7: dict, res8: dict, sem: dict, caption_qa: dict,
         "VISUAL_EVIDENCE": bool(
             q7g.get("evidence_cinematic_80", False)
             and not subj.get("still_fail")
+            and not _no_subject_evidence
             and (occupancy or {}).get("occupancy_pass", False)
             and (motion_ratio or {}).get("motion_pass", False)
         ),
@@ -105,6 +115,13 @@ def run(qa5: dict, qa7: dict, res8: dict, sem: dict, caption_qa: dict,
     if not components["VISUAL_EVIDENCE"]:
         if subj.get("still_fail"):
             p0_defects.append(f"subject:{subj['still_fail']}")
+        if _no_subject_evidence:
+            _n_unv = sum(1 for r in _sc_rows
+                         if str(r.get("verdict", "")).upper() == "UNVERIFIED")
+            p0_defects.append(
+                f"subject:no verified subject rows "
+                f"({_n_unv}/{len(_sc_rows)} UNVERIFIED — vision judge "
+                f"unavailable at QA time; gate not hand-waved)")
         if not (occupancy or {}).get("occupancy_pass", False):
             p0_defects.append("occupancy:" + ",".join(
                 (occupancy or {}).get("below_target_undeclared", [])[:6]))

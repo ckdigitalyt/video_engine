@@ -291,8 +291,17 @@ def mix(narration_beats: list, bed_files: list, sfx: list,
             voice = None
             if nar_path:
                 voice = work / "v9_voice.wav"
+                # V11 P1b-fix — narration is high-passed at 80 Hz (4x 2-pole,
+                # 48 dB/oct): speech below ~85 Hz carries no intelligibility,
+                # but a deep narrator's F0/creak tails reach 58-76 Hz and are
+                # measured by the hierarchy QA as tonal sub-bass in the
+                # quietest windows (24 dB/oct left a deep take's opening at
+                # 0.041 share). General rule: the voice stem never places
+                # tonal energy in the 30-80 Hz band.
                 _run(["ffmpeg", "-nostdin", "-y", "-i", str(nar_path),
-                      "-af", "loudnorm=I=-14:TP=-1.5:LRA=11",
+                      "-af", "highpass=f=80:poles=2,highpass=f=80:poles=2,"
+                             "highpass=f=80:poles=2,highpass=f=80:poles=2,"
+                             "loudnorm=I=-14:TP=-1.5:LRA=11",
                       "-ar", "44100", "-ac", "2", "-c:a", "pcm_s16le",
                       str(voice)])
             und = work / "v9_underscore.wav"
@@ -342,6 +351,7 @@ def mix(narration_beats: list, bed_files: list, sfx: list,
                 "sfx_ducked": bool(voice and sfx and sfx_path),
                 "v9_stems": {
                     "voice": str(voice) if voice else None,
+                    "voice_hpf_hz": 80 if voice else None,
                     "underscore": str(undd),
                     "ambience": str(amb),
                     "grammar": _gkey(story_type or ""),

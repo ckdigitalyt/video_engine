@@ -114,7 +114,12 @@ def underscore(dur: float, intensities: list, shot_durs: list) -> np.ndarray:
         if i0 + seg > n:
             break
         tt = np.arange(seg) / SR
-        thump = np.sin(2 * np.pi * 55.0 * tt * (1 + 0.6 * np.exp(-tt * 18)))
+        # V11 P1b-fix — the thump sits an octave up (110 Hz = the pad root,
+        # A2): a 55 Hz fundamental is a tonal sub-bass ring that lands in
+        # the 30-80 Hz band the hierarchy QA measures, exactly where the
+        # narration pauses are supposed to stay silent. Accent rule: the
+        # underscore never places tonal energy in the sub-bass band.
+        thump = np.sin(2 * np.pi * 110.0 * tt * (1 + 0.6 * np.exp(-tt * 18)))
         pulse[i0:i0 + seg] += 0.9 * thump * np.exp(-tt * 16)
         if k % 2 == 1:  # faint offbeat air tick
             i1 = i0 + int(0.5 * beat * SR)

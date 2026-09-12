@@ -491,3 +491,48 @@ authoring/sound-design decision, surfaced not forced. (2) The vision
 subject judge was unreachable at QA time (UNVERIFIED) — can_publish
 stays False until a healthy judge run confirms; no threshold was moved.
 (3) B6/B7 narration hedges await TTS regeneration (separate stage).
+
+### §5 addendum — P1b-fix run (2026-09-12, post-validation)
+
+Both §4b defects resolved or escalated honestly. Chain: TTS regen (B6,
+B7, hedged text) → plan5 → plan7 → plan8 → render5 ×2 → qa8full --v6 ×2.
+Frames: build/qa/frames_p1bfix/ (t=2.4/25/46/52).
+
+**AUDIO — fixed at root cause; the §4b attribution was partially wrong.**
+Stem-level FFT decomposition of the failing windows (t=8/49/51s) showed
+the 55Hz pulse and sub-drop contribute ≤0.005 share; the dominant source
+was the narration itself — the deep narrator's F0/creak tails reach
+58–76 Hz, inside the QA's 30–80 Hz band, during the softest speech
+(the "quietest windows" are soft-speech, not silence). Fixes, all
+general (any story):
+- `audio_mix.py` — the V9 voice chain high-passes narration at 80 Hz,
+  48 dB/oct (4×2-pole). 24 dB/oct was attempt 1; the fresh B7 take's
+  opening still read 0.041 at 66 Hz, so attempt 2 doubled the slope.
+- `procedural_audio.py` — underscore pulse thump 55 → 110 Hz (the pad
+  root, A2): accent tonal energy never enters the 30–80 Hz band.
+- `composev5.py` — punct sub-drop: sweep 78→38 Hz → 165→110 Hz (lands
+  on the pad root), 42 Hz drone → 220 Hz, tail 1.1 s/decay 2.6 →
+  0.8 s/decay 4.5 (decays before the shot-tail pause).
+Result: quiet-window peaks [0.0022, 0.0015, 0.0007, 0.0008, 0.0009, 0.0],
+max **0.0022 vs 0.02 limit** (was 0.0641); all 6 hierarchy checks PASS;
+gate AUDIO PASS. Simulated all-window max 0.0043 pre-render.
+
+**VISUAL_EVIDENCE — infra blocker confirmed, gate not hand-waved.**
+Judge reruns (one-shot-per-call, 2 formal attempts on S02/S06/S07)
+returned raw=None every time. Root cause: DEEPSEEK_API_KEY → HTTP 401
+(dead key) and GEMINI_API_KEY fallback → HTTP 429 (free-tier quota
+exhausted). Also fixed a gate blind spot this exposed
+(`publish_gate.py`): the subject recheck only re-judges FAIL rows, so a
+judge-down run leaves every row UNVERIFIED, still_fail empty, and the
+gate passed VISUAL_EVIDENCE with zero verified subject evidence. Now:
+subject evidence requires ≥1 PASS row, else the component fails with a
+P0 naming the unverified count. Final gate: VISUAL_EVIDENCE FAIL —
+"no verified subject rows (7/7 UNVERIFIED — vision judge unavailable at
+QA time)" → **CAN_PUBLISH False** until a healthy judge run confirms;
+manual frame inspection (subjframe_S02/S06/S07 + frames_p1bfix) remains
+consistent with the contracts but does not substitute for the judge.
+
+**TTS** — B6/B7 regenerated through the normal Fish free-tier stage
+(voices.yaml / src/providers untouched): B6 7.027→7.314 s, B7
+7.602→8.986 s ("tends to thin" / "The current picture:" now in the
+audio); timing.json + plan rebuilt (S07 8.00→9.39 s, total 54.78 s).
