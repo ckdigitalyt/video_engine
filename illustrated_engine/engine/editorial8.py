@@ -174,6 +174,12 @@ def evaluate8(plan: dict, story: dict, qa7: dict | None = None) -> dict:
     cards = narration_card_share(plan)
     vsim = viewer_simulation(plan, story, info, payoff, hero)
     durp = v8p.get("duration_policy") or {}
+    # V11 P1 §7/§8/§10 — value density, scroll-stop, performance plan
+    from engine import scroll_stop as _sstop
+    from engine import value_density as _vdensity
+    vd = _vdensity.value_density(plan, story)
+    sstop = _sstop.run(plan, story, payoff)
+    pperf = v8p.get("performance_plan") or {}
     gates = {
         "info_gain_60": info["verdict"] == "pass",
         "payoff_semantic": payoff["verdict"] == "pass",
@@ -183,10 +189,14 @@ def evaluate8(plan: dict, story: dict, qa7: dict | None = None) -> dict:
         "escalation_curve": (v8p.get("escalation") or {}).get("verdict") == "pass",
         "no_filler": not durp.get("filler_candidates"),
         "viewer_simulation": vsim["verdict"] == "pass",
+        "value_density": bool(vd.get("gate")),
+        "scroll_stop": bool(sstop.get("scroll_stop_pass")),
+        "performance_plan": bool(pperf.get("complete") and pperf.get("varied")),
     }
     return {
         "info_gain": info, "payoff_semantic": payoff,
         "narration_cards": cards, "viewer_simulation": vsim,
+        "value_density": vd, "scroll_stop": sstop,
         "duration_policy": durp, "gates": gates,
         "V8_EDITORIAL_PASS": all(gates.values()),
         "documentary_vs_slideshow": ("documentary" if all(gates.values())

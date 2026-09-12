@@ -66,6 +66,11 @@ def run(qa5: dict, qa7: dict, res8: dict, sem: dict, caption_qa: dict,
             and g8.get("escalation_curve", False)
             and g8.get("curiosity_ladder", False)
             and g8.get("info_gain_60", False)
+            # V11 P1 §7/§8 — core editorial metrics join the gate:
+            # value density + scroll-stop (a MAJOR scroll-stop failure
+            # prevents publication, P0 semantics).
+            and g8.get("value_density", False)
+            and g8.get("scroll_stop", False)
         ),
         "ANTI_TEMPLATE": bool(q7g.get("anti_template", False)),
         "AUDIO": bool(audio.get("ok", False)
@@ -103,6 +108,14 @@ def run(qa5: dict, qa7: dict, res8: dict, sem: dict, caption_qa: dict,
     for name in ("FACTUAL", "VIEWER_SIMULATION", "ANTI_TEMPLATE", "AUDIO"):
         if not components[name]:
             p0_defects.append(name.lower())
+    # V11 P1 §8 — scroll-stop MAJOR failures are P0 defects, named
+    sstop = (res8 or {}).get("scroll_stop") or {}
+    for k in sstop.get("major_failures", []) or []:
+        p0_defects.append(f"scroll_stop:{k}")
+    # V11 P1 §7 — thin value density is named too
+    if not (res8 or {}).get("gates", {}).get("value_density", True):
+        p0_defects.append("value_density:" + json.dumps(
+            (res8.get("value_density") or {}).get("weak_intervals", []))[:80])
 
     can_publish = all(components[c] for c in COMPONENTS)
     return {

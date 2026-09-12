@@ -28,6 +28,7 @@ from engine.planv5 import (_clamp_card_rect, _plate_el_to_card,
 # beat function → (phase, intensity). Matching is substring, case-insensitive.
 PHASE_MAP = [
     (("HOOK", "TEASER", "COLD_OPEN"), ("hook", 0.90)),
+    (("SURPRISE", "TWIST"), ("surprise", 0.85)),
     (("ESTABLISH", "MAP", "TIME", "SETUP", "CONTEXT", "ORIENT", "SCENE", "WORLD"),
      ("orientation", 0.50)),
     (("CAUSAL", "MECHANISM", "DRIVERS", "DISCOVERY", "EXPLAIN", "CAUSE", "HOW",
@@ -42,6 +43,21 @@ PHASE_MAP = [
 ARC_BY_PHASE = {"hook": "immediate", "orientation": "controlled",
                 "discovery": "building", "escalation": "urgent",
                 "reveal": "slower", "payoff": "confident"}
+
+# V11 P1 §10 — performance plan: every narration beat carries pace, energy,
+# emphasis, pause and a delivery arc BY BEAT FUNCTION (directive: HOOK
+# immediate/curious, EXPLANATION controlled, SURPRISE pause+emphasis,
+# REVEAL slower, PAYOFF confident — never every sentence identical).
+# (delivery, tone) per phase; TTS wiring stays at the TTS stage.
+DELIVERY_BY_PHASE = {
+    "hook": ("immediate", "curious"),
+    "orientation": ("steady", "neutral"),
+    "discovery": ("controlled", "informative"),
+    "escalation": ("building", "tense"),
+    "surprise": ("pause+emphasis", "startled"),
+    "reveal": ("slower", "weighty"),
+    "payoff": ("confident", "resolved"),
+}
 _SUPERLAT = re.compile(r"\b(most|least|fastest|slowest|largest|smallest|only|"
                        r"never|always|first|last|worst|best|huge|massive|tiny)\b",
                        re.I)
@@ -212,27 +228,34 @@ def _performance(beat: dict, s: dict, phase: str, intensity: float) -> dict:
     dur = max(float(s.get("duration_s") or 0), 0.1)
     wps = len(words) / dur
     pace = "slow" if wps < 2.1 else ("brisk" if wps > 2.9 else "measured")
+    # SURPRISE: pause + emphasis — more emphasis words, longer holds
+    max_emp = 5 if phase == "surprise" else 3
     emphasis = []
     for w in words:
         clean = w.strip(".,;:!?\"'—").lower()
         if len(clean) > 2 and (clean.isdigit() or _SUPERLAT.search(clean)
                                or len(clean) >= 9):
             emphasis.append(w.strip(".,;:!?\"'"))
-        if len(emphasis) >= 3:
+        if len(emphasis) >= max_emp:
             break
+    pause_s = 0.5 if phase == "surprise" else 0.35
     pauses = []
     pos = 0
     for w in words:
         pos += len(w) + 1
         if w.rstrip('"\'').endswith((".", "!", "?")) and pos < len(text) - 2:
-            pauses.append({"after_word_pos": pos, "pause_s": 0.35})
+            pauses.append({"after_word_pos": pos, "pause_s": pause_s})
     for w in emphasis:
         idx = text.find(w)
         if idx > 0:
-            pauses.append({"before_char": idx, "pause_s": 0.2})
+            pauses.append({"before_char": idx,
+                           "pause_s": round(pause_s * 0.6, 2)})
+    delivery, tone = DELIVERY_BY_PHASE.get(phase, ("controlled", "neutral"))
     return {"pace": pace, "words_per_s": round(wps, 2), "energy": intensity,
-            "emphasis": emphasis, "pauses": pauses[:6],
+            "emphasis": emphasis, "pauses": pauses[:8],
+            "pause_s": pause_s,
             "arc": ARC_BY_PHASE.get(phase, "controlled"),
+            "delivery": delivery, "tone": tone,
             "intensity": intensity}
 
 
@@ -454,6 +477,34 @@ def make_edit_plan_v8(paths, story_id: str, out_name: str = "edit_plan.json"):
                                      "escalation", "curiosity", "contradictions",
                                      "surprise", "depth", "hero_recognizability",
                                      "duration_policy", "grammar_findings")}
+    # V11 P1 §10 — plan-level performance report: per-beat delivery plan
+    # (pace/energy/emphasis/pause/arc/delivery/tone) + the directive's
+    # variation requirement — not every sentence may sound identical.
+    perf_rows = []
+    for s in shots:
+        p_ = (s.get("v8") or {}).get("performance") or {}
+        if not p_:
+            continue
+        perf_rows.append({"shot_id": s.get("shot_id"),
+                          "beat_id": s.get("beat_id"),
+                          "phase": (s.get("v8") or {}).get("phase"),
+                          "pace": p_.get("pace"), "energy": p_.get("energy"),
+                          "pause_s": p_.get("pause_s"),
+                          "n_emphasis": len(p_.get("emphasis") or []),
+                          "n_pauses": len(p_.get("pauses") or []),
+                          "arc": p_.get("arc"),
+                          "delivery": p_.get("delivery"),
+                          "tone": p_.get("tone")})
+    sigs = {(r["pace"], r["energy"], r["delivery"], r["arc"])
+            for r in perf_rows}
+    perf_report = {"beats": perf_rows,
+                   "distinct_signatures": len(sigs),
+                   "varied": len(perf_rows) > 1 and len(sigs) > 1,
+                   "complete": all(r["pace"] and r["energy"] is not None
+                                   and r["arc"] and r["delivery"]
+                                   for r in perf_rows)}
+    v8["performance_plan"] = perf_report
+    plan["v8"]["performance_plan"] = perf_report
     # V11 EXPLANATORY_MOTION_RATIO — re-tag AFTER v8 stamps the living
     # events (reveal/isolate/flow/fill_state/consequence): the plan5 tags
     # predate the state machine and would misclassify C-shots as A/B.
