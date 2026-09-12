@@ -382,12 +382,21 @@ def _motion_class(s: dict) -> str:
 
 def make_edit_plan_v5(paths, story_id: str):
     from engine import planv4, visual_grammar
+    from engine import depth as _depth
     eplan, rep = planv4.make_edit_plan_v4(paths, story_id)
     story = json.loads((Path(paths.stories) / story_id / "story.json").read_text())
     vp = json.loads((Path(paths.stories) / story_id / "visual_plan.json").read_text())
 
     subject = visual_grammar.detect_subject(story, vp)
-    grammar = visual_grammar.grammar_for(subject, "")
+    # V11 P1 §3 — brand ≠ visual vocabulary: the bible may declare an
+    # explicit topic grammar for THIS story (author's chosen vocabulary);
+    # it overrides the inferred SUBJECT_GRAMMAR and is reported in the
+    # visual_grammar_plan so plate authoring and QA see the same choice.
+    from engine import bible as _bible
+    bible = _bible.load_bible(Path(paths.stories) / story_id)
+    topic_grammar = bible.get("topic_grammar") if isinstance(
+        bible.get("topic_grammar"), (list, tuple)) else None
+    grammar = visual_grammar.grammar_for(subject, "", topic_grammar=topic_grammar)
     # Per-shot recommended mode
     fns = {b.get("beat_id"): str(b.get("function", "")).upper()
            for b in story.get("beats", [])}
@@ -410,6 +419,10 @@ def make_edit_plan_v5(paths, story_id: str):
                 "recommended_mode": rec,
                 "is_explanatory": visual_grammar.is_explanatory_mode(rec),
             }
+            # V11 P1 §4 — real 2.5D depth: planner layer tagging per shot
+            # (authored visual_plan `depth.layers` wins; deterministic
+            # mode grammar otherwise — never randomization).
+            entry["depth_layers"] = list(_depth.layer_for(s, rec))
             grammar_plan.append(entry)
             # Annotate the shot in eplan (read-only field for the renderer)
             svp_match = next(
@@ -419,6 +432,13 @@ def make_edit_plan_v5(paths, story_id: str):
                 svp_match.setdefault("visual_grammar", {})
                 svp_match["visual_grammar"]["subject"] = subject
                 svp_match["visual_grammar"]["recommended_mode"] = rec
+                svp_match["depth_layers"] = entry["depth_layers"]
+                # V11 P1 §2/§4 — authored surprise/depth declarations ride
+                # through to the edit plan (planv4 rebuilds shots with a
+                # field whitelist; planv8's checks read these).
+                for _k in ("surprise", "depth"):
+                    if isinstance(s.get(_k), dict):
+                        svp_match[_k] = s[_k]
                 svp_match["beat_id"] = b.get("beat_id")
 
     # V6.2 §2/§4: overlay compiler + kinetic stamping (mutates eplan shots)
@@ -447,6 +467,7 @@ def make_edit_plan_v5(paths, story_id: str):
     eplan["visual_grammar_plan"] = {
         "subject": subject,
         "default_grammar": list(grammar),
+        "topic_grammar_declared": list(topic_grammar) if topic_grammar else None,
         "per_shot": grammar_plan,
     }
 

@@ -1,5 +1,6 @@
 {
  "version": "4.0",
+ "topic_grammar": ["CUTAWAY", "MACRO_DETAIL", "MOLECULAR_PROCESS", "SCALE"],
  "brand": "SURFACE",
  "palette": {
   "primary": "#22304E",

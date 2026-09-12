@@ -330,16 +330,54 @@ def make_edit_plan_v8(paths, story_id: str, out_name: str = "edit_plan.json"):
             warnings.append(f"{s.get('shot_id')}: no positioned elements on "
                             "plate — needs_state_plate (honest flag, not faked)")
 
-    # escalation curve (brief §8)
+    # V11 P1 §1 — visual contradiction engine: declared WHAT THE VIEWER
+    # THINKS vs WHAT IS ACTUALLY HAPPENING, honored-visual check (stamps
+    # v8["contradiction"] on the hook/reveal shots).
+    from engine import contradiction as _contradiction
+    contradictions = _contradiction.run(plan, story)
+
+    # V11 P1 §2 — visual surprise: authored declarations win, conservative
+    # inference otherwise; camera/decoration classes are never surprise.
+    from engine import surprise as _surprise
+    surprise = _surprise.run(plan)
+
+    # V11 P1 §4 — real 2.5D depth: per-shot layer stacks + information-
+    # revealing transition check. Run AFTER the motion re-tag below (an
+    # A-class camera move earns no transition credit; blurred extension
+    # never counts — occupancy_qa excludes it at render QA).
+    from engine import depth as _depth
+
+    # escalation curve (brief §8) + V11 P1 §11 information-density ramp:
+    # visual intensity AND information density (living events per shot)
+    # must increase toward the reveal. PHASE_MAP stays as-is (no TWIST
+    # phase — stories signal the ramp via ESCALATION beats).
     mean_i = sum(intensities) / max(len(intensities), 1)
     rng = max(intensities) - min(intensities) if intensities else 0.0
     var = sum((v - mean_i) ** 2 for v in intensities) / max(len(intensities), 1)
     std = var ** 0.5
     last_pre = intensities[-2] if len(intensities) > 1 else 0.0
     esc_ok = rng >= 0.25 and std >= 0.10 and last_pre >= 0.50 + 0.15
+    # information density: living events per shot; ramp = the reveal
+    # phase's density >= mean density of all pre-reveal shots
+    _info = {"reveal", "isolate", "flow", "fill_state", "consequence"}
+    densities = [sum(1 for e in (s.get("events") or [])
+                     if str((e or {}).get("kind") or "").lower() in _info)
+                 for s in shots]
+    rev_idx = [i for i, r in enumerate(ladder_rows) if r["phase"] == "reveal"]
+    if rev_idx and len(densities) > 1:
+        pre = [d for i, d in enumerate(densities) if i < rev_idx[0]]
+        at_rev = max(densities[i] for i in rev_idx)
+        pre_mean = sum(pre) / len(pre) if pre else 0.0
+        density_ok = at_rev >= pre_mean
+    else:
+        pre_mean, at_rev, density_ok = 0.0, 0.0, True
     escalation = {"values": intensities, "mean": round(mean_i, 3),
                   "range": round(rng, 3), "std": round(std, 3),
                   "phases": [r["phase"] for r in ladder_rows],
+                  "density": densities,
+                  "density_pre_reveal_mean": round(pre_mean, 2),
+                  "density_at_reveal": at_rev,
+                  "density_verdict": "ramps" if density_ok else "flat",
                   "verdict": "pass" if esc_ok else "flat"}
 
     # curiosity gates (brief §9)
@@ -403,6 +441,9 @@ def make_edit_plan_v8(paths, story_id: str, out_name: str = "edit_plan.json"):
                                                 in enumerate(shot_v8s) if x["needs_state_plate"]]},
         "escalation": escalation,
         "curiosity": curiosity,
+        "contradictions": contradictions,
+        "surprise": surprise,
+        "depth": {},
         "hero_recognizability": hero_check,
         "duration_policy": duration_policy,
         "grammar_findings": gfindings,
@@ -410,7 +451,8 @@ def make_edit_plan_v8(paths, story_id: str, out_name: str = "edit_plan.json"):
         "warnings": warnings,
     }
     plan["v8"] = {k: v8[k] for k in ("story_type", "grammar_key", "state_machine",
-                                     "escalation", "curiosity", "hero_recognizability",
+                                     "escalation", "curiosity", "contradictions",
+                                     "surprise", "depth", "hero_recognizability",
                                      "duration_policy", "grammar_findings")}
     # V11 EXPLANATORY_MOTION_RATIO — re-tag AFTER v8 stamps the living
     # events (reveal/isolate/flow/fill_state/consequence): the plan5 tags
@@ -422,6 +464,9 @@ def make_edit_plan_v8(paths, story_id: str, out_name: str = "edit_plan.json"):
             s["motion_class"] = _mc(s)
         mc[str(s.get("shot_id"))] = str(s.get("motion_class"))
     plan["motion_classes"] = mc
+    depth = _depth.run(plan)
+    v8["depth"] = depth
+    plan["v8"]["depth"] = depth
     out = Path(paths.build) / out_name
     out.write_text(json.dumps(plan, indent=1) + "\n")
     v8["actions"] = actions

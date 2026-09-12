@@ -61,6 +61,11 @@
     {
       "beat_id": "B1",
       "function": "HOOK",
+      "contradiction": {
+        "viewer_thinks": "you are skating on solid ice",
+        "actually": "you glide on a microscopic quasi-liquid water film on the ice surface",
+        "reveal_beat": "B4"
+      },
       "narration": "You can stand on a frozen lake, yet glide across it like glass. Why is ice slippery?",
       "claim": "ice is slippery because of a thin near-surface water layer, not standing water",
       "visual_question": "why is ice slippery at all?",

@@ -244,3 +244,114 @@ t=23.45 (caption boundary), t=31.0 (escalation living overlay), t=50.0
 
 Rollback: `V11_CAPTION=0`, `V11_FULLBLEED=0`, `V11_GATES=0` (each
 independent; V10 flags unchanged).
+
+## 4a. V11 P1a — planner/visual grammar (2026-09-12)
+
+Resumed a partial run (prior worker died on a provider billing error
+~10 min in). Scope: Jade_todo_v11 P1 items 1, 2, 3, 4, 11 + P2. No
+re-render (the follow-up QA run owns render validation).
+
+### Per-item changes
+
+**1. Visual contradiction engine — `engine/contradiction.py` (new,
+reused as-authored) + `engine/planv8.py` hook.**
+Story-level primitive declared on a beat:
+`"contradiction": {viewer_thinks, actually, reveal_beat}`. `run(plan,
+story)` checks the declaration is VISUALLY honored: the viewer-thinks
+state must be shown on the declaring beat's shot (content-token overlap
+≥1) and the actual state must be revealed on the reveal beat's shot
+(overlap ≥2 AND a living explanatory event — reveal/isolate/flow/
+fill_state/consequence; narration alone is not a reveal). Stamps
+`s["v8"]["contradiction"]` on hook/reveal shots; report at
+`v8["contradictions"]` with verdicts honored / declared_only /
+missing_show / unresolved; malformed declarations surface as errors,
+never silently dropped. ice_slippery: B1 "you are skating on solid ice"
+→ B4 quasi-liquid reveal → **pass (honored)**.
+
+**2. Visual surprise — `engine/surprise.py` (new, reused as-authored)
++ planv8 hook.**
+Valid classes: MICROSCOPIC_ZOOM, HIDDEN_CROSS_SECTION,
+IMPOSSIBLE_SCALE_TRANSITION, SPATIAL_REVEAL, BEFORE_AFTER,
+CAUSAL_CHAIN_REVEAL, UNEXPECTED_TRANSFORMATION. Invalid (never count):
+zoom, pan, number pop, decorative particle, generic transition.
+Authored shot-level `"surprise": {class, evidence}` wins; undeclared
+shots get one conservative inference (visual_mode map, then living
+event + text lexicon) marked `inferred: true`. Report
+`v8["surprise"]`: surprise_present (≥1 authored valid) / weak (only
+inferred) / none. ice_slippery: authored MICROSCOPIC_ZOOM on S04 →
+**surprise_present**.
+
+**3. Brand ≠ visual vocabulary — `engine/visual_grammar.py` (extended)
++ `engine/planv5.py` topic_grammar path.**
+`grammar_for(subject, beat_function, topic_grammar=...)`: a story
+bible's declared `"topic_grammar"` list overrides the inferred
+SUBJECT_GRAMMAR and is reported as
+`visual_grammar_plan.topic_grammar_declared`. Added geography +
+astronomy entries to SUBJECT_GRAMMAR/SUBJECT_HINTS per the directive
+vocabulary table. Cross-topic motif reuse (P2, below) makes the
+orange-circle/navy-strip/cream-panel recurrence visible. ice_slippery
+bible declares `["CUTAWAY","MACRO_DETAIL","MOLECULAR_PROCESS","SCALE"]`
+→ **declared and flowed to plan5**.
+
+**4. Real 2.5D depth — `engine/depth.py` (new) + planv5 planner
+tagging + planv8 hook.**
+Every shot gets `depth_layers` (foreground/midground/background):
+authored visual_plan `"depth": {layers}` wins, else a deterministic
+mode→layers grammar (no randomization). planv8 classifies consecutive
+shot-pair transitions: `revealing` (layer-set change + incoming shot
+has a living explanatory event and is not decorative camera-only) vs
+`decorative`. Blurred/stretched extension earns no credit — it is
+already excluded by occupancy_qa at render QA, and A-class shots earn
+no transition credit here. Stamps `s["v8"]["depth"]`; report
+`v8["depth"]` verdict layered/flat. ice_slippery: authored microscopic
+stack on S04, **layered, 5 revealing / 0 decorative transitions**.
+
+**5. Story escalation (P1 §11) — `engine/planv8.py` escalation block
+extended.**
+Visual intensity ramp (existing V8 curve, verdict pass) is now joined
+by an information-density ramp: living events per shot; density at the
+reveal phase must be ≥ the pre-reveal mean (`density_verdict: ramps`).
+PHASE_MAP unchanged (no TWIST phase exists; ice_slippery signals the
+ramp with ESCALATION beats — 0.78). ice_slippery: density [2,2,3,4,4,3,4],
+pre-reveal mean 2.0 → reveal 3 → **ramps**.
+
+**6. P2 anti-template / cross-topic motif reuse —
+`engine/antitemplate.py` (motif section added in-window) wired through
+`engine/planv7.py` + `engine/editorial7.py`.**
+Motif fingerprint = primitive-family × palette-role counts from plate
+authoring (AST scan of make_cards.py: ellipse/rectangle/
+rounded_rectangle/polygon + fill colour role) and plan-drawn primitives
+(overlay/living event kinds → families). `compare_motifs` skips
+same-subject signatures; a close motif mix (cosine ≥ 0.65) on a
+DIFFERENT subject is `motif_recurrence` unless the story declares a
+semantic `motif_justification`. No layout randomization — variation
+comes from story/subject/mechanism/grammar/information structure.
+ice_slippery: `no_comparable_history` (recent signatures predate motif
+data).
+
+### §4a-notes — reused vs rewritten vs fixed
+
+- **Reused as-authored:** `contradiction.py`, `surprise.py`,
+  `visual_grammar.py` topic_grammar changes, planv5/planv8 hooks from
+  the partial run — verified by import + unit run + full pipeline, then
+  kept.
+- **Fixed (broken partial work):** `engine/planv7.py`
+  `_anti_template_adapt` referenced an undefined `story` after the
+  in-window motif wiring — NameError killed plan7/plan8. Fixed by
+  loading story.json inside the guard.
+- **Rewritten/added this session:** planv5 authored `surprise`/`depth`
+  passthrough (planv4 rebuilds shots with a field whitelist and was
+  silently dropping the authored surprise dict); depth.run moved after
+  planv8's motion re-tag (provisional A-tags misclassified C-shot
+  transitions as decorative); escalation density ramp (item 5 was not
+  started); ice_slippery example fields; this report section.
+- planv7.py and editorial7.py carry the motif wiring but remain
+  untracked like the rest of the V7-era stack (planv8 already imported
+  untracked planv7 at HEAD); `antitemplate.py` IS committed as the P2
+  deliverable. Commit scope: contradiction/surprise/depth/
+  visual_grammar/antitemplate + planv5/planv8 + ice_slippery example +
+  this report.
+- Verification: plan5 → plan7 → plan8 run clean on ice_slippery; all 61
+  engine modules import (incl. caption_qa, leak_scan, occupancy_qa,
+  motion_class, publish_gate). Pipeline verification only — no re-render
+  (follow-up QA run owns render validation).
