@@ -34,7 +34,8 @@ COMPONENTS = ("TECHNICAL", "FACTUAL", "CAPTION", "DEBUG_FREE",
 
 
 def run(qa5: dict, qa7: dict, res8: dict, sem: dict, caption_qa: dict,
-        leak: dict, occupancy: dict, motion_ratio: dict) -> dict:
+        leak: dict, occupancy: dict, motion_ratio: dict,
+        audio_hier: dict | None = None) -> dict:
     tech = ((qa5 or {}).get("groups") or {}).get("TECHNICAL") or {}
     tech_gate = ((qa5 or {}).get("gates") or {}).get("TECHNICAL", 95.0)
     motion = (qa5 or {}).get("motion") or {}
@@ -73,8 +74,12 @@ def run(qa5: dict, qa7: dict, res8: dict, sem: dict, caption_qa: dict,
             and g8.get("scroll_stop", False)
         ),
         "ANTI_TEMPLATE": bool(q7g.get("anti_template", False)),
+        # V11 P1 §9 — the AUDIO component adds the hierarchy QA (bed-free
+        # silence default honored, no masking, sane dynamic range) on top of
+        # continuity + completion.
         "AUDIO": bool(audio.get("ok", False)
-                      and (v62.get("audio_completion") or {}).get("ok", False)),
+                      and (v62.get("audio_completion") or {}).get("ok", False)
+                      and ((audio_hier or {}).get("AUDIO_HIERARCHY_PASS", True))),
     }
     reported_diagnostics = {
         "human_editor_gates": q7g.get("human_editor_gates"),
@@ -108,6 +113,10 @@ def run(qa5: dict, qa7: dict, res8: dict, sem: dict, caption_qa: dict,
     for name in ("FACTUAL", "VIEWER_SIMULATION", "ANTI_TEMPLATE", "AUDIO"):
         if not components[name]:
             p0_defects.append(name.lower())
+    if audio_hier is not None and not audio_hier.get("AUDIO_HIERARCHY_PASS", True):
+        p0_defects.append("audio_hierarchy:" + ",".join(
+            sorted({f.get("rule", "?") for f in audio_hier.get("findings", [])
+                    if f.get("severity") == "P0"}))[:60])
     # V11 P1 §8 — scroll-stop MAJOR failures are P0 defects, named
     sstop = (res8 or {}).get("scroll_stop") or {}
     for k in sstop.get("major_failures", []) or []:

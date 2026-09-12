@@ -294,7 +294,10 @@ def underscore_accent(dur: float, intensities: list, shot_durs: list,
              for i in (intensities or [])]
     if not gains or not any(gains):
         return sig * 0.0
-    return sig * _env_per_shot(gains, shot_durs, dur)
+    env = _env_per_shot(gains, shot_durs, dur)
+    if sig.ndim == 2:  # underscore() returns stereo (n, 2)
+        env = env[:, None]
+    return sig * env
 
 
 def write_underscore_accent(total_s: float, intensities: list, shot_durs: list,
