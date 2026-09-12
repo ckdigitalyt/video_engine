@@ -39,6 +39,10 @@ BED_CROSSFADE_MS = 600
 #   makeup     - 0dB (bed natural level after duck)
 DUCK_THRESHOLD = "-18dB"
 DUCK_RATIO = "6"
+# V11 P1 §9 — gentler ducking for intentional SFX: yields under speech,
+# keeps its punch in pauses.
+SFX_DUCK_THRESHOLD = "-30dB"
+SFX_DUCK_RATIO = "2"
 DUCK_ATTACK_MS = 20
 DUCK_RELEASE_MS = 800
 DUCK_MAKEUP = "0dB"
@@ -297,11 +301,20 @@ def mix(narration_beats: list, bed_files: list, sfx: list,
             proc.duck_under(voice, und, undd)
             amb = work / "v9_ambience.wav"
             proc.write_ambience(total_s, _gkey(story_type or ""), amb)
+            # V11 P1 §9 — the SFX stem ducks under narration too
+            sfx_stem = None
+            if sfx and sfx_path:
+                if voice:
+                    sfxd = work / "v9_sfx_ducked.wav"
+                    proc.duck_under(voice, sfx_path, sfxd)
+                    sfx_stem = sfxd
+                else:
+                    sfx_stem = sfx_path
             pre = work / "v9_premaster.wav"
             proc.sum_stems([(voice, 1.0) if voice else None,
                             (undd, 1.0),
                             (amb, 1.0),
-                            (sfx_path, 1.0) if (sfx and sfx_path) else None],
+                            (sfx_stem, 1.0) if sfx_stem else None],
                            total_s, pre)
             _run(["ffmpeg", "-nostdin", "-y", "-i", str(pre),
                   "-af", f"loudnorm={LOUDNORM},"
@@ -314,6 +327,7 @@ def mix(narration_beats: list, bed_files: list, sfx: list,
                 "bed": None,
                 "sfx": str(sfx_path) if sfx and sfx_path else None,
                 "mixed": str(out_wav),
+                "sfx_ducked": bool(voice and sfx and sfx_path),
                 "v9_stems": {
                     "voice": str(voice) if voice else None,
                     "underscore": str(undd),
@@ -361,6 +375,10 @@ def mix(narration_beats: list, bed_files: list, sfx: list,
 
     # Build the filter graph
     parts = []
+    sfx_ducked = False
+    # V11 P1 §9 — audio hierarchy: NARRATION > intentional SFX. The SFX
+    # stem sidechain-ducks under narration (gentler than the bed: 2:1),
+    # so transients still punctuate pauses but never mask speech.
     if bed_path and nar_path is not None:
         # Sidechain: bed ducks when narration is loud.
         # sidechaincompress consumes [main][sidechain] and produces a new
@@ -370,16 +388,21 @@ def mix(narration_beats: list, bed_files: list, sfx: list,
         # underscore-stream-specifier parser quirk some ffmpeg builds have.
         if sfx_idx is not None:
             graph = (
-                f"[{nar_idx}:a]aresample=44100,asplit=2[0xa1][0xa2];"
+                f"[{nar_idx}:a]aresample=44100,asplit=3[0xa1][0xa2][0xa3];"
                 f"[{bed_idx}:a]aresample=44100[0xb1];"
                 f"[{sfx_idx}:a]aresample=44100[0xc1];"
                 f"[0xb1][0xa2]sidechaincompress="
                 f"threshold={DUCK_THRESHOLD}:ratio={DUCK_RATIO}:"
                 f"attack={DUCK_ATTACK_MS}:release={DUCK_RELEASE_MS}:"
                 f"makeup={DUCK_MAKEUP}[0xd1];"
-                f"[0xd1][0xa1][0xc1]amix=inputs=3:duration=first:"
+                f"[0xc1][0xa3]sidechaincompress="
+                f"threshold={SFX_DUCK_THRESHOLD}:ratio={SFX_DUCK_RATIO}:"
+                f"attack={DUCK_ATTACK_MS}:release={DUCK_RELEASE_MS}:"
+                f"makeup={DUCK_MAKEUP}[0xd2];"
+                f"[0xd1][0xd2][0xa1]amix=inputs=3:duration=first:"
                 f"dropout_transition=0[0xe1]"
             )
+            sfx_ducked = True
         else:
             graph = (
                 f"[{nar_idx}:a]aresample=44100,asplit=2[0xa1][0xa2];"
@@ -391,6 +414,22 @@ def mix(narration_beats: list, bed_files: list, sfx: list,
                 f"[0xd1][0xa1]amix=inputs=2:duration=first:"
                 f"dropout_transition=0[0xe1]"
             )
+            sfx_ducked = False
+    elif nar_path is not None and sfx and sfx_path:
+        # V11 P1 §9 default case: narration + intentional SFX, bed-free —
+        # the SFX stem still ducks under the narration (hierarchy:
+        # NARRATION > intentional SFX > silence).
+        graph = (
+            f"[{nar_idx}:a]aresample=44100,asplit=2[0xa1][0xa2];"
+            f"[{sfx_idx}:a]aresample=44100[0xc1];"
+            f"[0xc1][0xa2]sidechaincompress="
+            f"threshold={SFX_DUCK_THRESHOLD}:ratio={SFX_DUCK_RATIO}:"
+            f"attack={DUCK_ATTACK_MS}:release={DUCK_RELEASE_MS}:"
+            f"makeup={DUCK_MAKEUP}[0xd2];"
+            f"[0xd2][0xa1]amix=inputs=2:duration=first:"
+            f"dropout_transition=0[0xe1]"
+        )
+        sfx_ducked = True
     else:
         # No narration: just mix bed + sfx
         labels = []
@@ -407,7 +446,7 @@ def mix(narration_beats: list, bed_files: list, sfx: list,
     graph += (
         f";[0xe1]loudnorm={LOUDNORM}:print_format=summary,"
         f"alimiter=limit=0.95:attack=5:release=80:level=disabled[0xff]"
-    ) if bed_path and nar_path is not None else (
+    ) if nar_path is not None else (
         f";[0xee]loudnorm={LOUDNORM}:print_format=summary,"
         f"alimiter=limit=0.95:attack=5:release=80:level=disabled[0xff]"
     )
@@ -421,6 +460,7 @@ def mix(narration_beats: list, bed_files: list, sfx: list,
         "sfx": str(sfx_path) if sfx and sfx_path else None,
         "mixed": str(out_wav),
         "bed_crossfade_ms": BED_CROSSFADE_MS,
+        "sfx_ducked": bool(sfx_ducked) if nar_path is not None else False,
         "duck": {
             "threshold": DUCK_THRESHOLD, "ratio": DUCK_RATIO,
             "attack_ms": DUCK_ATTACK_MS, "release_ms": DUCK_RELEASE_MS,

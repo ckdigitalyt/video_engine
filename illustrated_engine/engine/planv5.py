@@ -476,20 +476,25 @@ def make_edit_plan_v5(paths, story_id: str):
     (Path(paths.build) / "overlay_plan.json").write_text(
         json.dumps(eplan["overlay_compiler"], indent=2) + "\n")
 
-    # Default bed plan: a single ambient bed for the whole video
+    # V11 P1 §9 — audio hierarchy default: DELIBERATE SILENCE. A continuous
+    # tonal/ambient bed is NOT the default (NARRATION > intentional SFX >
+    # subtle ambience/music). A bed is planned only when the story explicitly
+    # declares one (story.json "audio": {"bed": "audio/bed_ambient.wav"});
+    # an authored per-story audio_bed_plan.json always wins (copied by plan5).
     bed_plan_path = Path(paths.stories) / story_id / "audio_bed_plan.json"
     if not bed_plan_path.exists():
         n_shots = len(eplan.get("shots", []))
+        story = json.loads((Path(paths.stories) / story_id / "story.json").read_text())
+        declared = (story.get("audio") or {}).get("bed") if isinstance(
+            story.get("audio"), dict) else None
         bed_file = None
-        story_audio = Path(paths.stories) / story_id / "audio"
-        if story_audio.exists():
-            for cand in story_audio.glob("bed*.wav"):
-                bed_file = str(cand)
-                break
+        if declared and (Path(paths.stories) / story_id / str(declared)).exists():
+            bed_file = str(Path(paths.stories) / story_id / str(declared))
         plan = {
             "bed_files": [bed_file] * n_shots,
             "sfx": [],
             "bed_crossfade_ms": 600,
+            "authored": bool(declared),
         }
         (Path(paths.build) / "audio_bed_plan.json").write_text(
             json.dumps(plan, indent=2))

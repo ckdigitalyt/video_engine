@@ -315,6 +315,14 @@ def cmd_render5(args):
         Path(paths.stories) / args.story / "audio_bed_plan.json")
     if bed_src.exists() and bed_src != paths.build / "audio_bed_plan.json":
         shutil.copyfile(bed_src, paths.build / "audio_bed_plan.json")
+        # V11 P1 §9 — a per-story plan is an AUTHORED bed plan: the
+        # continuous-bed default check does not apply to it.
+        try:
+            _bp = json.loads((paths.build / "audio_bed_plan.json").read_text())
+            _bp["authored"] = True
+            (paths.build / "audio_bed_plan.json").write_text(json.dumps(_bp, indent=2))
+        except Exception:
+            pass
         print(f"audio: restored {bed_src.name} -> audio_bed_plan.json (per-story guard)")
     _print_flags()
     out = composev5.render_video_v5(paths, args.story, force=args.force,
@@ -711,9 +719,25 @@ def cmd_qa8full(args):
         from engine import (caption_qa, leak_scan, motion_class, occupancy_qa,
                             publish_gate)
         from engine import bible as B
+        # V11 P1 §9 — audio hierarchy QA over the rendered master + bed plan
+        from engine import audio_qa as _audio_qa
         bible = B.load_bible(paths.stories / story_id)
         video = Path(args.path) if getattr(args, "path", None) \
             else paths.output / f"{story_id}.mp4"
+        _master = Path("build") / "v5_audio_master.wav"
+        _bedp = Path("build") / "audio_bed_plan.json"
+        _timing = Path(paths.stories) / story_id / "audio" / "timing.json"
+        _nar = Path("build") / "v5_narration_stem.wav"
+        _mix_policy = {}
+        _ovr = Path("build") / "overlay_report.json"
+        if _ovr.exists():
+            _mix_policy = (json.loads(_ovr.read_text()).get("audio") or {})
+        ah_res = _audio_qa.run(
+            plan, json.loads(_bedp.read_text()) if _bedp.exists() else {},
+            json.loads(_timing.read_text()) if _timing.exists() else {},
+            _master, _nar if _nar.exists() else None,
+            mix_policy=_mix_policy)
+        _audio_qa.write_report(ah_res, Path("build/qa"), story_id)
         cap_res = caption_qa.run(plan, video, Path("build"), bible)
         leak_res = leak_scan.run(plan, story, bible,
                                  video if video.exists() else None, Path("build"))
@@ -721,7 +745,7 @@ def cmd_qa8full(args):
                                    video if video.exists() else None, Path("build"))
         mot_res = motion_class.run(plan)
         gate = publish_gate.run(qa5, qa7_res, res8, sem, cap_res, leak_res,
-                                occ_res, mot_res)
+                                occ_res, mot_res, audio_hier=ah_res)
         caption_qa.write_report(cap_res, Path("build/qa"), story_id)
         leak_scan.write_report(leak_res, Path("build/qa"), story_id)
         occupancy_qa.write_report(occ_res, Path("build/qa"), story_id)
@@ -739,6 +763,10 @@ def cmd_qa8full(args):
             "motion_ratio": {k: mot_res[k] for k in (
                 "EXPLANATORY_MOTION_RATIO", "shares", "motion_pass",
                 "advisory_strict_CBA")},
+            "audio_hierarchy": {
+                "AUDIO_HIERARCHY_PASS": ah_res["AUDIO_HIERARCHY_PASS"],
+                "checks": {k: v.get("pass") for k, v in ah_res["checks"].items()},
+                "findings": ah_res["findings"][:8]},
         }
         res8["CAN_PUBLISH"] = gate["CAN_PUBLISH"]
         res8["publish_gate"] = gate

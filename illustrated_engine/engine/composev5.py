@@ -822,11 +822,18 @@ def _glow_frames(src_dir: Path, dst_dir: Path, strength: float = 0.6,
 
 # --- V10_PUNCT — cinematic punctuation stems --------------------------------
 
-def _punct_stems(shots: list, shot_durs: list, build_dir: Path) -> list:
+def _punct_stems(shots: list, shot_durs: list, build_dir: Path,
+                 narration_spans: list | None = None) -> list:
     """Deterministic sub-bass punctuation SFX (V10_PUNCT, flags.py header):
     1.5s risers ENDING at each ESCALATION/REVEAL shot start, 40-80Hz
     sub-drops at PAYOFF starts. numpy-generated, wave-written, cached by
-    path; entries use audio_mix._concat_sfx absolute-timeline `at`."""
+    path; entries use audio_mix._concat_sfx absolute-timeline `at`.
+
+    V11 P1 §9 — silence is deliberate: a riser may occupy only the
+    narration pad gap before its hit (the span where the previous beat's
+    narration has already ended). When the gap is shorter than 0.45s the
+    riser is dropped entirely — the sub-bass sweep no longer rides over
+    speech tails as continuous low-frequency tonal fill."""
     import wave
     SR = 44100
     adir = Path(build_dir) / "punct"
@@ -851,7 +858,7 @@ def _punct_stems(shots: list, shot_durs: list, build_dir: Path) -> list:
         amp = 0.08 + 0.44 * (t / dur) ** 2
         x = np.sin(phase) * amp + 0.05 * (t / dur) ** 2 * np.sin(2 * np.pi * 55 * t)
         s = np.stack([x, x], axis=1)
-        return _wav("riser.wav", s)  # hard cut: the shot start IS the hit
+        return _wav(f"riser_{int(dur * 1000)}ms.wav", s)  # hard cut: the shot start IS the hit
 
     def _subdrop(dur=1.1):
         n = int(dur * SR)
@@ -864,12 +871,26 @@ def _punct_stems(shots: list, shot_durs: list, build_dir: Path) -> list:
         return _wav("subdrop.wav", s)
 
     sfx, t0 = [], 0.0
-    for s, d in zip(shots, shot_durs):
+    for i, (s, d) in enumerate(zip(shots, shot_durs)):
         stype = str(s.get("shot_type", "")).upper()
         bfn = str(s.get("beat_function", "")).upper()
         if stype == "REVEAL" or bfn == "ESCALATION":
-            sfx.append({"file": str(_riser()), "at": max(0.0, t0 - 1.5),
-                        "dur": 1.5, "kind": "punct_riser"})
+            riser_dur = 1.5
+            if narration_spans:
+                # gap between the previous narration's end and this cut
+                prev_end = 0.0
+                for j in range(i - 1, -1, -1):
+                    if narration_spans[j] is not None:
+                        prev_end = sum(shot_durs[:j]) + narration_spans[j]
+                        break
+                gap = max(0.0, t0 - prev_end)
+                riser_dur = round(min(1.5, gap), 2)
+                if riser_dur < 0.45:
+                    t0 += float(d)
+                    continue  # deliberate silence stays silent
+            sfx.append({"file": str(_riser(riser_dur)),
+                        "at": max(0.0, t0 - riser_dur),
+                        "dur": riser_dur, "kind": "punct_riser"})
         if stype == "PAYOFF" or bfn == "PAYOFF":
             sfx.append({"file": str(_subdrop()), "at": t0,
                         "dur": 1.1, "kind": "punct_subdrop"})
@@ -972,7 +993,16 @@ def render_video_v5(paths, story_id: str = "tallest_mountain", force: bool = Fal
     if _flags.punct10():
         # V10_PUNCT — risers/sub-drops + 1-3kHz bed notch (rollback:
         # V10_PUNCT=0 restores the pre-punct stems byte-for-byte).
-        sfx = list(sfx) + _punct_stems(shots, shot_durs, Path(paths.build))
+        # V11 P1 §9 — risers only fill the narration pad gap (deliberate
+        # silence), never ride over speech tails.
+        _nspans = []
+        for s in shots:
+            _t = timing.get(str(s.get("beat_id")) or "") or {}
+            _nd = float(_t.get("duration") or 0)
+            _nspans.append(min(_nd, float(s.get("duration_s", 0)))
+                           if _nd > 0 else None)
+        sfx = list(sfx) + _punct_stems(shots, shot_durs, Path(paths.build),
+                                       narration_spans=_nspans)
         bed_files = _notch_beds(bed_files, Path(paths.build))
     audio_out = Path(paths.build) / "v5_audio_master.wav"
     # V9 texture: post-composite subtle radial vignette + 1.5% fine film
@@ -1068,7 +1098,9 @@ def render_video_v5(paths, story_id: str = "tallest_mountain", force: bool = Fal
                   "narration_end": round(nar_end, 3) if nar_end is not None else None,
                   "video_dur": round(target, 3),
                   "tail_s": AUDIO_TAIL_S,
-                  "pad_s": round(pad, 3)}
+                  "pad_s": round(pad, 3),
+                  "sfx_ducked": bool(mixinfo.get("sfx_ducked")),
+                  "bed_files_non_null": sum(1 for b in bed_files if b)}
     report = _build_overlay_report(shots, bible, audio_info)
     (Path(paths.build) / "overlay_report.json").write_text(
         json.dumps(report, indent=2) + "\n")
