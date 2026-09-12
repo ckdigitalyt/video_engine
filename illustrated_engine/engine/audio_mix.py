@@ -296,11 +296,23 @@ def mix(narration_beats: list, bed_files: list, sfx: list,
                       "-ar", "44100", "-ac", "2", "-c:a", "pcm_s16le",
                       str(voice)])
             und = work / "v9_underscore.wav"
-            proc.write_underscore(total_s, intensities, shot_durations, und)
+            # V11 P1 §9 — the procedural underscore is an ACCENT, not a
+            # continuous bed: when the bed plan is bed-free (the silence
+            # default), music only supports escalation/reveal/payoff shots
+            # and ambience is omitted entirely. A declared/authored bed
+            # restores the continuous underscore + ambience behavior.
+            _bed_declared = any(b for b in (bed_files or []))
+            if _bed_declared:
+                proc.write_underscore(total_s, intensities, shot_durations, und)
+            else:
+                proc.write_underscore_accent(total_s, intensities,
+                                             shot_durations, und)
             undd = work / "v9_underscore_ducked.wav"
             proc.duck_under(voice, und, undd)
-            amb = work / "v9_ambience.wav"
-            proc.write_ambience(total_s, _gkey(story_type or ""), amb)
+            amb = None
+            if _bed_declared:
+                amb = work / "v9_ambience.wav"
+                proc.write_ambience(total_s, _gkey(story_type or ""), amb)
             # V11 P1 §9 — the SFX stem ducks under narration too
             sfx_stem = None
             if sfx and sfx_path:
@@ -313,7 +325,7 @@ def mix(narration_beats: list, bed_files: list, sfx: list,
             pre = work / "v9_premaster.wav"
             proc.sum_stems([(voice, 1.0) if voice else None,
                             (undd, 1.0),
-                            (amb, 1.0),
+                            (amb, 1.0) if amb else None,
                             (sfx_stem, 1.0) if sfx_stem else None],
                            total_s, pre)
             _run(["ffmpeg", "-nostdin", "-y", "-i", str(pre),

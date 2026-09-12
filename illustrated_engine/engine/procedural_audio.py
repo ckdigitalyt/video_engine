@@ -279,5 +279,29 @@ def write_underscore(total_s: float, intensities: list, shot_durs: list,
     return save_wav(out_path, underscore(total_s, intensities, shot_durs))
 
 
+def underscore_accent(dur: float, intensities: list, shot_durs: list,
+                      accent_floor: float = 0.78) -> np.ndarray:
+    """V11 P1 §9 — the underscore as an ACCENT, not a continuous bed.
+
+    Same signal as underscore(), but the gain envelope is zeroed for every
+    shot whose intensity tier sits below `accent_floor` (the escalation
+    tier): music supports only the escalation/reveal/payoff phases and
+    stays out of the hook/orientation/discovery shots, where narration +
+    intentional SFX + deliberate silence carry the mix. Ramps at the shot
+    boundaries keep the entries/exits musical."""
+    sig = underscore(dur, intensities, shot_durs)
+    gains = [1.0 if float(i or 0) >= accent_floor else 0.0
+             for i in (intensities or [])]
+    if not gains or not any(gains):
+        return sig * 0.0
+    return sig * _env_per_shot(gains, shot_durs, dur)
+
+
+def write_underscore_accent(total_s: float, intensities: list, shot_durs: list,
+                            out_path, accent_floor: float = 0.78) -> Path:
+    return save_wav(out_path, underscore_accent(total_s, intensities,
+                                                shot_durs, accent_floor))
+
+
 def write_ambience(total_s: float, grammar_key: str, out_path) -> Path:
     return save_wav(out_path, ambience(total_s, grammar_key))

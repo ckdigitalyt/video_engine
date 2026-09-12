@@ -77,8 +77,11 @@ def _quiet_windows(x: np.ndarray, sr: int, n: int = 6, win_s: float = 1.0) -> li
 
 
 def _tonal_peaks(x: np.ndarray, sr: int, offs: list) -> list:
-    """Spectral peaks in 30-160 Hz across the quietest windows -> strongest
-    single-bin energy share per window (tonal hum signature)."""
+    """Tonal peaks in 30-80 Hz across the quietest windows -> strongest
+    single-bin energy share per window. The band is sub-bass (hum, rumble,
+    synth pads): speech fundamentals sit ~85-180 Hz, so energy down here
+    in the quietest windows is the tonal-fill signature the directive
+    targets, not narration leakage."""
     w = int(1.0 * sr)
     out = []
     for o in offs:
@@ -87,7 +90,7 @@ def _tonal_peaks(x: np.ndarray, sr: int, offs: list) -> list:
             continue
         spec = np.abs(np.fft.rfft(seg * np.hanning(len(seg)))) ** 2
         freqs = np.fft.rfftfreq(len(seg), 1.0 / sr)
-        band = (freqs >= 30) & (freqs <= 160)
+        band = (freqs >= 30) & (freqs <= 80)
         if not band.any() or spec.sum() <= 0:
             continue
         out.append(round(float(spec[band].max() / spec.sum()), 4))
@@ -248,8 +251,9 @@ def run(plan: dict, bed_plan: dict, timing: dict, master: Path,
     checks["low_frequency_tonal_noise"] = {
         "quiet_window_peaks": peaks, "max_share": hum, "threshold": HUM_ABS,
         "pass": hum <= HUM_ABS,
-        "note": "tonal peaks in 30-160 Hz during the quietest windows — "
-                "silence must not be filled with tonal rumble"}
+        "note": "tonal peaks in 30-80 Hz (sub-bass: hum/rumble/pads) during "
+                "the quietest windows — silence must not be filled with "
+                "tonal rumble; speech fundamentals (85-180 Hz) excluded"}
     if hum > HUM_ABS:
         findings.append({"severity": "P1", "rule": "low_frequency_tonal_noise",
                          "detail": f"tonal share {hum} in quiet windows"})

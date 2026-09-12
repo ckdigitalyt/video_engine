@@ -178,14 +178,15 @@ def _caption_band() -> tuple:
     """Active caption safe band (top, bot) for the current flag set.
 
     V11_CAPTION/V10_VERTICAL anchor the band below the card (card bottom
-    + 24) — plate content cannot reach it. Legacy geometry keeps
-    1350..1520 unchanged. Used by BOTH the render path and the overlay
-    report so downstream QA (caption_safe_zone, caption_qa) follows the
-    active geometry automatically.
+    + 24) — plate content cannot reach it. The span is the KIN_CAP_H
+    carrier height (engine/captions.py band_rect), so the report band,
+    the adaptive zones (caption_place) and the rendered carrier agree
+    exactly. Legacy geometry keeps 1350..1520 unchanged.
     """
     if _flags.vertical10():
+        from engine.captions import KIN_CAP_H  # carrier height (single source)
         ct = max(SAFE_CAPTION_TOP, CARD_Y0 + CARD_H + 24)
-        return ct, ct + (SAFE_CAPTION_BOT - SAFE_CAPTION_TOP)
+        return ct, ct + KIN_CAP_H
     return SAFE_CAPTION_TOP, SAFE_CAPTION_BOT
 
 

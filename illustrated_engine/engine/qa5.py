@@ -293,21 +293,28 @@ def _overlay_compliance(build_dir: Path) -> dict:
 
 
 def _caption_safe_zone(build_dir: Path) -> dict:
-    """V6.2 §3: every caption anchor inside the 1350..1520 safe band."""
+    """V6.2 §3: every caption anchor inside its safe band.
+
+    V11 P1 §5 — bands are PER-SHOT (adaptive caption placement): the
+    check reads each shot's caption_zone from the overlay report and
+    falls back to the global band only for older reports.
+    """
     rep = _load(Path(build_dir) / "overlay_report.json")
     if not rep:
         return {"ok": True, "score": 100.0,
                 "detail": "skipped: no overlay report (pre-V6.2 render)"}
     caps = []
     for sid, s in (rep.get("shots") or {}).items():
+        zband = ((s.get("caption_zone") or {}).get("band")
+                 or rep.get("safe_caption_band", [1350, 1520]))
         for c in s.get("captions", []) or []:
-            caps.append((sid, c))
+            caps.append((sid, c, zband))
     band = rep.get("safe_caption_band", [1350, 1520])
     bad = [c for c in caps
-           if c[1]["bbox"][1] < band[0] - 10 or c[1]["bbox"][3] > band[1] + 10]
+           if c[1]["bbox"][1] < c[2][0] - 10 or c[1]["bbox"][3] > c[2][1] + 10]
     score = 100.0 if not bad else max(0.0, 100.0 - 25.0 * len(bad))
     detail = (f"captions={len(caps)} in_band={len(caps) - len(bad)} "
-              f"band={band[0]}..{band[1]}")
+              f"band={band[0]}..{band[1]} (per-shot adaptive zones)")
     if bad:
         detail += (f" first_out={bad[0][0]} "
                    f"y={bad[0][1]['bbox'][1]:.0f}..{bad[0][1]['bbox'][3]:.0f}")
