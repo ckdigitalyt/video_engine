@@ -18,8 +18,8 @@ narration wording is verified, not just the general concept:
                               general concept is insufficient if the exact
                               narration overstates it
 
-Deterministic rules run always; R4 runs when DEEPSEEK_API_KEY is present and
-reports skipped honestly otherwise.
+Deterministic rules run always; R4 runs when a judge key (GEMINI_API_KEY or
+OPENROUTER_API_KEY) is present and reports skipped honestly otherwise.
 """
 
 from __future__ import annotations
@@ -29,7 +29,7 @@ import re
 from pathlib import Path
 
 from engine.facts import SUPERLATIVE_RE, load_facts
-from engine.director import _load_env_key, DS_MODEL, DS_URL
+from engine.director import _env_key, text_ask
 
 _QUALIFIER_RE = re.compile(
     r"\b(loaded|unloaded|up to|at least|at most|about|roughly|approximately|"
@@ -131,9 +131,8 @@ def check_story(story: dict, facts: dict) -> dict:
 
 # ------------------------------------------------------------------- R4 (LLM)
 def semantic_verify(story: dict, facts: dict) -> dict:
-    key = _load_env_key()
-    if not key:
-        return {"status": "skipped", "reason": "no DEEPSEEK_API_KEY"}
+    if not (_env_key("GEMINI_API_KEY") or _env_key("OPENROUTER_API_KEY")):
+        return {"status": "skipped", "reason": "no judge key (GEMINI/OPENROUTER)"}
     claims = facts.get("claims", [])
     if not claims:
         return {"status": "skipped", "reason": "no facts.json claims"}
@@ -152,21 +151,13 @@ def semantic_verify(story: dict, facts: dict) -> dict:
         '"reason": "<one line>"}]\n\n'
         f"NARRATION BEATS:\n{beats_txt}\n\nCLAIM ENTRIES:\n"
         f"{json.dumps(claims, indent=1)}")
-    body = {"model": DS_MODEL, "temperature": 0.1, "max_tokens": 2000,
-            "messages": [{"role": "user", "content": prompt}],
-            "response_format": {"type": "json_object"}}
+    content = text_ask(prompt, temperature=0.1, max_tokens=2000)
+    if content is None:
+        return {"status": "error", "reason": "all judge providers failed"}
     try:
-        import urllib.request
-        req = urllib.request.Request(
-            DS_URL, data=json.dumps(body).encode(),
-            headers={"Content-Type": "application/json",
-                     "Authorization": f"Bearer {key}"})
-        with urllib.request.urlopen(req, timeout=120) as r:
-            data = json.loads(r.read())
-        content = data["choices"][0]["message"]["content"].strip()
         m = re.search(r"\[.*\]", content, re.S)
         verdicts = json.loads(m.group(0)) if m else []
-    except Exception as e:  # network/parse failure must not silently pass
+    except Exception as e:  # parse failure must not silently pass
         return {"status": "error", "reason": str(e)[:200]}
     overstated = [v for v in verdicts if str(v.get("verdict", "")).lower() != "supported"]
     return {"status": "ok", "verdicts": verdicts,
@@ -197,7 +188,7 @@ def verify(story_dir: Path) -> dict:
     if gates["exact_wording"] is not None:
         required.append(gates["exact_wording"])
     return {"story_id": story.get("story_id", story_dir.name),
-            "deterministic": det, "deepseek": r4,
+            "deterministic": det, "judges": r4,
             "nuance": {k: nun[k] for k in ("counts", "contested_present",
                                             "nuance_pass")},
             "gates": gates,

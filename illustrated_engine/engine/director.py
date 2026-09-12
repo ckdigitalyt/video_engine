@@ -48,33 +48,17 @@ EXPLANATORY_MOTION = ("INFORMATION_MOTION", "REVEAL", "TRANSFORMATION",
 ONE_SECOND_MODES = ("DIAGRAM", "COMPARISON", "SPLIT", "SCALE", "TIMELINE",
                     "TRANSFORMATION")
 
-DS_MODEL = "deepseek-v4-flash-vision-exp"
-DS_URL = "https://api.deepseek.com/chat/completions"
-GEMINI_MODEL = "gemini-2.5-flash"  # approved free-tier fallback (model policy)
+GEMINI_MODEL = "gemini-2.5-flash"  # judge primary (free tier)
+# Judge fallback: GLM 5.3 Flash via OpenRouter — owner directive 2026-09-12
+# retired DeepSeek from the judge stack entirely (dead 401 key).
+GLM_MODEL = "z-ai/glm-5.3-flash"
+GLM_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 _ONE_SECOND_GATE = 70.0
 _CINEMATIC_SHARE_MAX = 0.5  # §5: cinematic must not become the default
 
 
 # ----------------------------------------------------------- vision (§9) ----
-
-def _load_env_key() -> str:
-    """DEEPSEEK_API_KEY from env or repo .env (same pattern as tts.py)."""
-    key = os.environ.get("DEEPSEEK_API_KEY")
-    if key:
-        return key
-    envp = REPO / ".env"
-    if not envp.exists():
-        return ""
-    for line in envp.read_text().splitlines():
-        line = line.strip()
-        if not line or line.startswith("#") or "=" not in line:
-            continue
-        k, v = line.split("=", 1)
-        if k.strip() == "DEEPSEEK_API_KEY" and v.strip().strip('"\''):
-            return v.strip().strip('"\'')
-    return ""
-
 
 def _env_key(name: str) -> str:
     """Named key from env or repo .env (same pattern as tts.py)."""
@@ -95,6 +79,7 @@ def _env_key(name: str) -> str:
 
 
 _LAST_GEMINI_CALL = {"t": 0.0}
+_GEMINI_COOLDOWN = {"until": 0.0}  # on quota 429: skip Gemini 1h, GLM carries
 
 
 def _vision_gemini(image_path, question: str, max_tokens: int):
@@ -108,6 +93,8 @@ def _vision_gemini(image_path, question: str, max_tokens: int):
         return None
     import time as _t
     from urllib.error import HTTPError
+    if _t.time() < _GEMINI_COOLDOWN["until"]:
+        return None
 
     try:
         import urllib.request
@@ -141,50 +128,141 @@ def _vision_gemini(image_path, question: str, max_tokens: int):
                 if e.code in (429, 500, 503) and attempt < 2:
                     _t.sleep(12.0 * (attempt + 1))
                     continue
+                if e.code == 429:
+                    _GEMINI_COOLDOWN["until"] = _t.time() + 3600.0
                 raise
     except Exception:
         return None
     return None
 
 
+def _vision_glm(image_path, question: str, max_tokens: int):
+    """GLM 5.3 Flash judge via OpenRouter (OpenAI-compatible). -> text or None."""
+    key = _env_key("OPENROUTER_API_KEY")
+    if not key:
+        return None
+    try:
+        import time as _t
+        import urllib.request
+        from urllib.error import HTTPError
+
+        b64 = base64.b64encode(Path(image_path).read_bytes()).decode()
+        body = {
+            "model": GLM_MODEL,
+            "temperature": 0,
+            "max_tokens": max(512, max_tokens),
+            "messages": [{
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": question},
+                    {"type": "image_url",
+                     "image_url": {"url": f"data:image/png;base64,{b64}"}},
+                ],
+            }],
+        }
+        req = urllib.request.Request(
+            GLM_URL, data=json.dumps(body).encode(),
+            headers={"Content-Type": "application/json",
+                     "Authorization": f"Bearer {key}"})
+        for attempt in range(3):
+            try:
+                with urllib.request.urlopen(req, timeout=120) as r:
+                    data = json.loads(r.read())
+                msg = data["choices"][0]["message"]
+                return ((msg.get("content") or "").strip()
+                        or None)
+            except HTTPError as e:
+                if e.code in (429, 500, 502, 503) and attempt < 2:
+                    _t.sleep(8.0 * (attempt + 1))
+                    continue
+                raise
+    except Exception:
+        return None
+    return None
+
+
+def _text_gemini(prompt: str, temperature: float, max_tokens: int):
+    """Gemini text judge (generateContent). -> text or None."""
+    key = _env_key("GEMINI_API_KEY")
+    if not key:
+        return None
+    try:
+        import time as _t
+        import urllib.request
+        from urllib.error import HTTPError
+        if _t.time() < _GEMINI_COOLDOWN["until"]:
+            return None
+
+        body = {"contents": [{"parts": [{"text": prompt}]}],
+                "generationConfig": {"temperature": temperature,
+                                     "maxOutputTokens": max(1024, max_tokens * 3),
+                                     "thinkingConfig": {"thinkingBudget": 0}}}
+        url = ("https://generativelanguage.googleapis.com/v1beta/models/"
+               f"{GEMINI_MODEL}:generateContent?key={key}")
+        for attempt in range(3):
+            try:
+                req = urllib.request.Request(
+                    url, data=json.dumps(body).encode(),
+                    headers={"Content-Type": "application/json"})
+                with urllib.request.urlopen(req, timeout=120) as r:
+                    data = json.loads(r.read())
+                parts = data["candidates"][0]["content"]["parts"]
+                return " ".join(p.get("text", "") for p in parts).strip() or None
+            except HTTPError as e:
+                if e.code in (429, 500, 503) and attempt < 2:
+                    _t.sleep(12.0 * (attempt + 1))
+                    continue
+                if e.code == 429:
+                    _GEMINI_COOLDOWN["until"] = _t.time() + 3600.0
+                raise
+    except Exception:
+        return None
+    return None
+
+
+def _text_glm(prompt: str, temperature: float, max_tokens: int):
+    """GLM 5.3 Flash text judge via OpenRouter. -> text or None."""
+    key = _env_key("OPENROUTER_API_KEY")
+    if not key:
+        return None
+    try:
+        import urllib.request
+
+        body = {"model": GLM_MODEL, "temperature": temperature,
+                "max_tokens": max(512, max_tokens),
+                "messages": [{"role": "user", "content": prompt}]}
+        req = urllib.request.Request(
+            GLM_URL, data=json.dumps(body).encode(),
+            headers={"Content-Type": "application/json",
+                     "Authorization": f"Bearer {key}"})
+        with urllib.request.urlopen(req, timeout=120) as r:
+            data = json.loads(r.read())
+        return (data["choices"][0]["message"].get("content") or "").strip() or None
+    except Exception:
+        return None
+
+
+def text_ask(prompt: str, temperature: float = 0.1, max_tokens: int = 2000):
+    """Text judge chain: Gemini primary, GLM 5.3 Flash fallback.
+
+    None only when both judges fail — callers must treat that as an explicit
+    error/skip, never as a pass.
+    """
+    return (_text_gemini(prompt, temperature, max_tokens)
+            or _text_glm(prompt, temperature, max_tokens))
+
+
 def vision_ask(image_path, question: str, max_tokens: int = 400):
     """One vision question -> parsed JSON dict, or None if no path/failure.
 
-    Used ONLY as an acceptance check on high-value assets/frames (§9). If it
-    returns None the caller keeps the explicit human-inspection path.
+    Judge chain (2026-09-12 owner directive): Gemini primary, GLM 5.3 Flash
+    (OpenRouter) fallback; DeepSeek retired. Used ONLY as an acceptance check
+    on high-value assets/frames (§9). If it returns None the caller keeps the
+    explicit human-inspection path.
     """
-    key = _load_env_key()
-    text = None
-    if key:
-        try:
-            import urllib.request
-
-            p = Path(image_path)
-            b64 = base64.b64encode(p.read_bytes()).decode()
-            body = {
-                "model": DS_MODEL,
-                "temperature": 0,
-                "max_tokens": max_tokens,
-                "messages": [{
-                    "role": "user",
-                    "content": [
-                        {"type": "text", "text": question},
-                        {"type": "image_url",
-                         "image_url": {"url": f"data:image/png;base64,{b64}"}},
-                    ],
-                }],
-            }
-            req = urllib.request.Request(
-                DS_URL, data=json.dumps(body).encode(),
-                headers={"Content-Type": "application/json",
-                         "Authorization": f"Bearer {key}"})
-            with urllib.request.urlopen(req, timeout=90) as r:
-                data = json.loads(r.read())
-            text = data["choices"][0]["message"]["content"].strip()
-        except Exception:
-            text = None
+    text = _vision_gemini(image_path, question, max_tokens)
     if text is None:
-        text = _vision_gemini(image_path, question, max_tokens)
+        text = _vision_glm(image_path, question, max_tokens)
     if not text:
         return None
     m = re.search(r"\{.*\}", text, re.S)

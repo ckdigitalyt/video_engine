@@ -536,3 +536,27 @@ consistent with the contracts but does not substitute for the judge.
 (voices.yaml / src/providers untouched): B6 7.027→7.314 s, B7
 7.602→8.986 s ("tends to thin" / "The current picture:" now in the
 audio); timing.json + plan rebuilt (S07 8.00→9.39 s, total 54.78 s).
+
+### 5.1 Judge stack swap — DeepSeek retired (2026-09-12, owner directive)
+
+Owner directive: "Don't use deepseek. Use Gemini and glm 5.3 flash."
+
+- `director.py`: `DS_MODEL`/`DS_URL`/`_load_env_key` deleted. Judges are
+  now `gemini-2.5-flash` (primary) → `z-ai/glm-5.3-flash` via OpenRouter
+  (fallback), behind shared chains `vision_ask` (images) and new
+  `text_ask` (text). `semantic_qa` R4 moved onto `text_ask`; report key
+  `deepseek` → `judges`. `leak_scan` keeps DEEPSEEK as a blocklist token
+  (a guard, not a dependency).
+- Per-run 1h Gemini cooldown on quota-429 (`_GEMINI_COOLDOWN`): the first
+  call pays one backoff cycle, later calls skip straight to GLM. GLM
+  token budgets floored at 512 (reasoning-mode models can exhaust tiny
+  budgets — observed empty content at max_tokens=120).
+- Live state 2026-09-12: Gemini free tier billing-level 429; GLM via
+  OpenRouter answered every call (~$0.000024/call, probes verified).
+- Re-run `qa8full --story ice_slippery --v6` on the unchanged render:
+  2 subject rows verified via the vision judge, 0 FAIL rows →
+  VISUAL_EVIDENCE PASS, all 8 gate components PASS, p0_defects=[] →
+  **CAN_PUBLISH True** (first full V11 pass). TECHNICAL 100.0 /
+  VISUAL 94.84 / EDITORIAL 95.91; occupancy meaningful(major)=0.819;
+  motion C-share 1.00. Advisory (non-blocking, unchanged):
+  payoff_strength 55, style_continuity 48.
