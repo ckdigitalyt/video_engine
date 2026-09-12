@@ -186,6 +186,7 @@ def verify(story_dir: Path) -> dict:
     # gate; engine/nuance.py).
     from engine import nuance as _nuance
     nun = _nuance.check_story(story, facts)
+    nun["story_id"] = story.get("story_id", story_dir.name)
     _nuance.write_report(nun, Path("build/qa"))
     gates = {
         "deterministic_rules": det["deterministic_pass"],

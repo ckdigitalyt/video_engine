@@ -355,3 +355,139 @@ data).
   engine modules import (incl. caption_qa, leak_scan, occupancy_qa,
   motion_class, publish_gate). Pipeline verification only — no re-render
   (follow-up QA run owns render validation).
+
+## 4b. V11 P1b — editorial gates + audio hierarchy (2026-09-12)
+
+Scope: Jade_todo_v11 P1 items 5-10 (TTS benchmark excluded — separate
+stage). Built on the P1a modules (contradiction/surprise/visual_grammar/
+depth/antitemplate, HEAD 1f54eb2). planv7.py stays untracked-as-was.
+
+### Per-item changes
+
+**5. Adaptive caption placement — `engine/caption_place.py` (new) +
+`captions.py`/`composev5.py`/`caption_qa.py`/`qa5.py`.**
+Per-shot detection: evidence/label/arrow rects (events, v8 states,
+key_number), header chrome (brand block/tag/title overlay/end-card at
+frame y 64..184), evidence-mass thirds + dominant focal rect. Candidate
+zones (9:16): `below_card` (default, faces the card's bottom edge),
+`below_card_low` (retreat slot), `top_band` (faces the card's top edge).
+Deterministic scoring: evidence mass in the zone's facing third, focal
+proximity (<44px), chrome occupancy, default bias; an authored
+`shot["caption_zone"]` wins outright. Both caption paths (kinetic +
+legacy) anchor on the chosen zone; cap_state.json + overlay report
+record the per-shot zone; caption_qa carrier boxes AND pixel probes
+follow the shot's own band; new P0 rule `evidence_collision` (caption
+box ∩ evidence rect). qa5's `_caption_safe_zone` reads the per-shot
+bands. **Found + fixed a latent P0-era divergence:** the global report
+band was 1464..1634 while the carrier rendered 1464..1656 —
+`_caption_band()` now spans KIN_CAP_H exactly. ice_slippery result:
+all 7 shots resolve to `below_card` — the detector ran per shot
+(S01: below_card 0.45 vs low 0.55 vs top 6.35), but every shot carries
+header chrome (tag/title/end-card) blocking the top band and no
+bottom-edge evidence mass, so the default is genuinely the cleanest
+zone everywhere (`placement_varies: false` — honest outcome, not a
+stub: synthetic bottom-heavy geometry flips to below_card_low, authored
+overrides flip to top_band). Frame checks: labels legible, captions
+never touch card content.
+
+**6. Scientific nuance QA — `engine/nuance.py` (new) + semantic_qa
+wiring.** Six classes (ESTABLISHED..UNCERTAIN); authored facts.json
+`nuance.classification` wins, conservative lexicon fallback; contested
+classes (SUPPORTED_BUT_COMPLEX / ACTIVE_DEBATE / MODEL_DEPENDENT /
+UNCERTAIN) narrated WITHOUT a wording qualifier are a FAIL carrying a
+deterministic suggested wording. Source existence is explicitly
+insufficient. `SEMANTIC_PASS` now includes `nuance_qualification` (P0
+semantics via the FACTUAL component). Report: `build/qa/nuance_<story>.json`.
+ice_slippery reference updates (documented): facts.json nuance —
+pressure myth ESTABLISHED, quasi-liquid + friction heat STRONG_CONSENSUS,
+slippery-principle + film-vs-temperature SUPPORTED_BUT_COMPLEX; story
+narration hedges — B6 "tends to thin", B7 "The current picture: …".
+**Known gap:** beat_B6/B7 wavs still carry the OLD wording (TTS stage
+owns regeneration) — on-screen captions show the qualified wording.
+
+**7. Viewer value density — `engine/value_density.py` (new).** ~5s
+intervals; value = 2×counted semantic event (placed in the window where
+it fires) + opens/resolves + narration novelty (new content tokens vs
+everything seen); penalties for decorative motion (C-class, no events),
+generic hero plates, repeated diagrams/assets, redundant labels, filler
+narration, repeated information (novelty <1/3). A shot spanning several
+windows contributes to every one it occupies. Gate: mean ≥0.6 AND weak
+share ≤25%. ice_slippery: mean 4.79, 0 weak intervals, 11/11 ok/strong.
+
+**8. Scroll-stop test — `engine/scroll_stop.py` (new).** The directive's
+exact checkpoints 0.5/2/5/10/20/30/final-3s. Severity: MAJOR = {0.5
+subject, 2.0 reason-to-continue, 10s concrete learning, final payoff}
+(promise-breaking → publication-blocking), MINOR = {5s question open,
+20s escalation, 30s mental-model} (pacing quality). Wired into
+editorial8 gates + publish_gate VIEWER_SIMULATION; MAJOR failures are
+named P0 defects (`scroll_stop:<checkpoint>`). ice_slippery: 7/7 pass.
+
+**9. Audio hierarchy — planv5 + audio_mix + composev5 +
+`engine/audio_qa.py` (new).** Plan default is now DELIBERATE SILENCE:
+the auto `bed*.wav` pickup is gone — a bed exists only when story.json
+declares `audio.bed` (authored per-story bed plans still win, flagged
+`authored`). Mix enforces NARRATION > intentional SFX: the SFX stem
+sidechain-ducks under narration (gentle 2:1 @ -30dB; new bed-free
+narration+sfx graph branch + V9 path). V10_PUNCT risers now fit only
+the narration pad gap — ice_slippery's 0.4s pad < 0.45s minimum, so all
+risers drop (silence stays silent); sub-drop kept (transient, ducked).
+V9 procedural underscore becomes an ACCENT (gain zeroed outside
+escalation/reveal/payoff; ambience omitted unless a bed is declared).
+QA: speech-to-bed ratio, 30-80Hz tonal noise in the quietest windows,
+continuous-bed coverage (>70% fails unless authored), unnecessary
+ambience (bed-only spans), SFX/narration masking (transients tolerated;
+sustained overlaps fail unless the mix ducks SFX), dynamic range (LRA
+2..18). Wired into qa8full + publish_gate AUDIO (P0 on the
+continuous-bed default). voices.yaml / src/providers / TTS code
+untouched. Master: -14.16 LUFS / -1.46 dBTP (target -14/-1.5).
+
+**10. Performance plan — `engine/planv8.py`.** SURPRISE phase added to
+PHASE_MAP (0.85); DELIVERY_BY_PHASE: hook immediate/curious,
+orientation steady, discovery controlled, escalation building/tense,
+surprise pause+emphasis (longer holds, 5 emphasis words), reveal
+slower/weighty, payoff confident/resolved. Every beat carries
+pace/energy/emphasis/pause/arc/delivery/tone; plan-level
+`v8.performance_plan` report + variation check (distinct
+(pace,energy,delivery,arc) signatures). Gate in editorial8
+(`performance_plan` = complete AND varied). ice_slippery: 7 beats,
+6 distinct signatures, varied+complete. TTS wiring stays at the TTS
+stage (constraint honored).
+
+## 5. Validation — full re-render + QA (delta vs P0/P1a)
+
+Chain: plan5 → (TTS stub; existing beat wavs) → plan7 → plan8 →
+render5 (force, two passes after fixes) → qa8full --v6. Flags
+`…-v10v-v10k-v10d-v10p-v11c-v11f` confirmed. Duration 54.00s.
+
+| Metric | P1b run | P0 run (§2) | Δ / note |
+|---|---|---|---|
+| TECHNICAL | PASS (first pass failed 91.67: caption_safe_zone saw the stale 1464..1634 band — root-caused, unified to KIN_CAP_H, re-ran) | 100.0 | fixed in-run |
+| Caption safe zone | per-shot zones in overlay report; 23/23 captions in their shot's band; evidence_collisions=0 | global band | adaptive |
+| FACTUAL (incl. nuance) | PASS — deterministic + nuance_qualification (5 claims classified: 1 EST, 2 SC, 2 SBC; contested 2/2 qualified) | PASS (no nuance) | stricter |
+| CAPTION | PASS — 0 construction defects, pixels clean | PASS | = |
+| DEBUG_FREE | PASS | PASS | = |
+| Occupancy | 0.819 meaningful (target 0.75) | 0.819 | = |
+| Motion ratio | C=1.00 A=0.00 (C>A pass) | same | = |
+| VIEWER_SIMULATION | PASS — incl. NEW value_density (mean 4.79, weak 0/11) + scroll_stop (7/7, 0 MAJOR) | PASS (5 checks) | stricter |
+| ANTI_TEMPLATE | PASS | PASS | = |
+| AUDIO | FAIL — audio_continuity + completion PASS, hierarchy QA FAILS on low-frequency tonal noise: 0.0641 max bin share (30-80Hz) in the quiet windows = the accent underscore's 55Hz pulse + payoff sub-drop landing in narration pauses (windows t=5/8/46/49/51s) | PASS (no hierarchy QA) | V11 rejects what V10 passed — honest finding |
+| VISUAL_EVIDENCE | FAIL — subject recheck S02 votes UNVERIFIED×3: the external vision judge returned raw=None (API degraded during this run; an earlier same-day run FAIL-voted different shots S06/S07 — judge instability, not content). Manual frame inspection (subjframe_S06/S07 + f_8/25/50) confirms the contracts are depicted. NOT overridden. | PASS | infrastructure, reported |
+| Editorial gates | 11/11 PASS (8 V8 + value_density + scroll_stop + performance_plan) — documentary | 8/8 | stricter |
+| CAN_PUBLISH | **False** — AUDIO (tonal noise finding) + VISUAL_EVIDENCE (vision judge UNVERIFIED) | True | see above |
+
+Frame checks (build/qa/frames_p1b/, t=2.4/8/17/25/33/40/50): exactly one
+caption state per instant, always in the below-card band; plate labels
+(PRESSURE/ICE/MELTWATER, QUASI-LIQUID LAYER/ICE LATTICE/BELOW FREEZING),
+plate footers (THE CLASSIC ANSWER / THE SKIN OF WATER / BORN AT THE
+SURFACE) and the end card (ALREADY WET) fully legible and never covered —
+these are the coordinates the fixed V10 band collided with. No ghost
+text. B7 caption carries the nuance hedge on-screen ("The current
+picture: …").
+
+Honest deltas: (1) AUDIO fails its new hierarchy QA — the accent
+underscore's sub-bass pulse rings in narration pauses (0.0641 > 0.02);
+fixing it means dropping the pulse or gating the accent lower — an
+authoring/sound-design decision, surfaced not forced. (2) The vision
+subject judge was unreachable at QA time (UNVERIFIED) — can_publish
+stays False until a healthy judge run confirms; no threshold was moved.
+(3) B6/B7 narration hedges await TTS regeneration (separate stage).
