@@ -155,25 +155,63 @@ def run(plan: dict, video_path: Path, build_dir: Path, bible: dict,
                                      "shot": sid, "detail": json.dumps(r)[:120]})
     checks["construction"] = cons
 
-    # safe-zone from the renderer's overlay report (active band)
+    # safe-zone from the renderer's overlay report (per-shot adaptive
+    # caption zone, V11 P1 §5; falls back to the global band for older
+    # reports). Each shot's captions are checked against ITS OWN band.
     rep_path = build_dir / "overlay_report.json"
     band = None
+    zone_by_shot: dict = {}
     if rep_path.exists():
         rep = json.loads(rep_path.read_text())
         band = rep.get("safe_caption_band")
         for sid, sr in (rep.get("shots") or {}).items():
+            z = (sr.get("caption_zone") or {}).get("band")
+            if z:
+                zone_by_shot[sid] = (float(z[0]), float(z[1]))
             for c in sr.get("captions") or []:
                 bb = c.get("bbox")
-                if not bb or not band:
+                zb = z or band
+                if not bb or not zb:
                     continue
-                if bb[1] < band[0] - 10 or bb[3] > band[1] + 10:
+                if bb[1] < zb[0] - 10 or bb[3] > zb[1] + 10:
                     cons["safe_zone"] += 1
                     findings.append({"severity": "P0", "rule": "safe_zone",
                                      "shot": sid,
-                                     "detail": f"bbox {bb} vs band {band}"})
+                                     "detail": f"bbox {bb} vs zone band {zb}"})
     if band is None:
         band = list(caps_mod.band_rect())
     checks["band"] = band
+    checks["caption_zones"] = {k: list(v) for k, v in sorted(zone_by_shot.items())}
+
+    # V11 P1 §5 — evidence clearance (belt-and-braces beyond the
+    # out-of-card zone geometry): a rendered caption bbox must not
+    # intersect any evidence/label/arrow rect the shot declares.
+    from engine import caption_place as _cplace
+    ev_hits = 0
+    for s in shots:
+        sid = str(s.get("shot_id"))
+        sband = zone_by_shot.get(sid, tuple(band))
+        ev_rects = [_cplace.card_to_frame(rc) for rc, _k, _w
+                    in _cplace.evidence_rects(s)]
+        if not ev_rects:
+            continue
+        boxes = _carrier_boxes(s, bible, sband)
+        for bb in boxes:
+            if not bb:
+                continue
+            for ex0, ey0, ex1, ey1 in ev_rects:
+                ix = min(bb[2], ex1) - max(bb[0], ex0)
+                iy = min(bb[3], ey1) - max(bb[1], ey0)
+                if ix > 4 and iy > 4:
+                    ev_hits += 1
+                    findings.append({"severity": "P0",
+                                     "rule": "evidence_collision",
+                                     "shot": sid,
+                                     "detail": f"caption box {tuple(round(v) for v in bb)} "
+                                               f"intersects evidence rect "
+                                               f"({ex0:.0f},{ey0:.0f},{ex1:.0f},{ey1:.0f})"})
+                    break
+    checks["evidence_collisions"] = ev_hits
 
     # global uniqueness on the video timeline (plan-level, independent)
     timeline = []
@@ -208,8 +246,13 @@ def run(plan: dict, video_path: Path, build_dir: Path, bible: dict,
     # timeline uniqueness + the off-state frame carry the guarantee.)
     px = {"probes": 0, "offstate_hits": 0,
           "foreign_hits": 0, "shotend_hits": 0}
-    boxes_by_shot = {str(s.get("shot_id")): _carrier_boxes(s, bible, band)
-                     for s in shots}
+    # V11 P1 §5 — per-shot adaptive band: the carrier boxes and the pixel
+    # probes follow each shot's OWN zone, not one global coordinate.
+    boxes_by_shot = {}
+    for s in shots:
+        sid = str(s.get("shot_id"))
+        sband = zone_by_shot.get(sid, tuple(band))
+        boxes_by_shot[sid] = _carrier_boxes(s, bible, sband)
     samples: list = []
     for s in shots:
         sid = str(s.get("shot_id"))
@@ -220,10 +263,12 @@ def run(plan: dict, video_path: Path, build_dir: Path, bible: dict,
             cues, _r = caps_mod.normalize_cues(s.get("captions") or [], dur)
         off = shot_offsets[sid]
         boxes = boxes_by_shot.get(sid) or []
+        sband = zone_by_shot.get(sid, tuple(band))
         for i, c in enumerate(cues):
             t0, t1 = float(c["t0"]), float(c["t1"])
             if t1 - t0 > 2 * MID_CUE_INSET:
-                samples.append((off + t0 + MID_CUE_INSET, "ref", sid, i, None))
+                samples.append((off + t0 + MID_CUE_INSET, "ref", sid, i, None,
+                                sband))
             if i > 0:
                 prev_t1 = float(cues[i - 1]["t1"])
                 # probe just AFTER the previous state ends: ffmpeg -ss snaps
@@ -232,18 +277,19 @@ def run(plan: dict, video_path: Path, build_dir: Path, bible: dict,
                 # state gap (STATE_GAP=50ms > 1 frame at 30fps) — the frame
                 # where the old state must already be fully removed.
                 samples.append((off + prev_t1 + 0.005, "offstate", sid,
-                                i, i - 1))
+                                i, i - 1, sband))
         last_t1 = float(cues[-1]["t1"]) if cues else -1.0
         if last_t1 < dur - 0.15:
-            samples.append((off + dur - 0.08, "shotend", sid, None, None))
+            samples.append((off + dur - 0.08, "shotend", sid, None, None,
+                            sband))
         # cap samples per shot at ~12 to bound ffmpeg seeks
     samples = samples[:sample_cap]
-    y_off = max(0, int(band[0]) - 16)
-    for (t, kind, sid, ci, pi) in samples:
+    for (t, kind, sid, ci, pi, sband) in samples:
         img = _frame_at(Path(video_path), t)
         if img is None:
             continue
-        gray = _band_crop(img, band)
+        y_off = max(0, int(sband[0]) - 16)
+        gray = _band_crop(img, sband)
         mask = _text_mask(gray)
         px["probes"] += 1
         boxes = boxes_by_shot.get(sid) or []
@@ -278,6 +324,7 @@ def run(plan: dict, video_path: Path, build_dir: Path, bible: dict,
     cap_pass = (cons["cue_overlap"] == 0 and cons["past_beat_end"] == 0
                 and cons["line_cap"] == 0 and cons["safe_zone"] == 0
                 and n_overlap_states == 0
+                and ev_hits == 0
                 and px["offstate_hits"] == 0
                 and px["foreign_hits"] == 0 and px["shotend_hits"] == 0)
     return {"CAPTION_PASS": bool(cap_pass), "checks": checks,

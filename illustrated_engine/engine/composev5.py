@@ -557,10 +557,18 @@ def render_shot_v5(shot: dict, paths, bible: dict, force: bool = False,
     _cap_cues = list(shot.get("captions", []) or [])
     _cap_repairs: list = []
     _ct, _cb = _caption_band()
+    _zone = None
+    if shot.get("captions"):
+        # V11 P1 §5 — adaptive caption placement: per-shot cleanest safe
+        # zone (default below-card, top band, or bottom retreat slot);
+        # used by BOTH the kinetic and the legacy caption path.
+        from engine import caption_place as _cplace
+        _zone = _cplace.choose_zone(shot)
+        _ct, _cb = int(_zone["top"]), int(_zone["bot"])
     if _flags.kinetic10() and shot.get("captions"):
         from engine import captions as _caps
         kin_inputs, cue_bboxes, _cap_cues, _cap_repairs = _caps.build_shot_captions(
-            shot, bible, work, dur=dur)
+            shot, bible, work, dur=dur, zone_top=_zone["top"])
         for i, kc in enumerate(kin_inputs):
             png = Path(kc["png"])
             cmd += ["-loop", "1", "-framerate", str(fps), "-t", f"{dur:.3f}", "-i", png]
@@ -688,9 +696,12 @@ def render_shot_v5(shot: dict, paths, bible: dict, force: bool = False,
         raise RuntimeError(f"render_shot_v5 {shot['shot_id']} failed:\n{p.stderr[-1500:]}")
     # V11 caption state record — what the state machine actually rendered
     # (normalized states + authoring repairs) for engine/caption_qa.py.
+    # V11 P1 §5: the record carries the adaptive per-shot placement zone.
     (work / "cap_state.json").write_text(json.dumps({
         "shot_id": shot.get("shot_id"), "dur": dur,
-        "band": list(_caption_band()),
+        "band": [int(_zone["top"]), int(_zone["bot"])]
+                if _zone else list(_caption_band()),
+        "caption_zone": _zone,
         "normalized_cues": [{"text": str(c.get("text", "")),
                              "t0": float(c["t0"]), "t1": float(c["t1"])}
                             for c in _cap_cues],
@@ -740,7 +751,12 @@ def _build_overlay_report(shots: list, bible: dict, audio_info: dict) -> dict:
                         "rect_abs": [round(ax, 1), round(ay, 1),
                                      round(aw, 1), round(ah, 1)]})
         caps = []
-        _rb_top, _rb_bot = _caption_band()
+        # V11 P1 §5 — per-shot adaptive placement: report the zone this
+        # shot's captions actually use and check THAT band (not one global
+        # coordinate), so safe-zone QA follows the renderer by construction.
+        from engine import caption_place as _cplace
+        _zone = _cplace.choose_zone(s)
+        _rb_top, _rb_bot = int(_zone["top"]), int(_zone["bot"])
         for cue in s.get("captions", []) or []:
             lay = _layout_caption_v5(cue, bible, cap_top=_rb_top, cap_bot=_rb_bot)
             if not lay.get("ok") or not lay.get("bbox"):
@@ -754,12 +770,21 @@ def _build_overlay_report(shots: list, bible: dict, audio_info: dict) -> dict:
                                    "rect_abs": list(caps[-1]["bbox"]),
                                    "reason": "safe band"})
         shots_rep[sid] = {"events": evs, "captions": caps,
+                          "caption_zone": {"zone": _zone["zone"],
+                                           "band": [_rb_top, _rb_bot],
+                                           "reasons": _zone["reasons"],
+                                           "considered": _zone["considered"]},
                           "kinetic": s.get("kinetic"),
                           "ambient_bg": True}
+    zone_varies = len({r.get("caption_zone", {}).get("zone")
+                       for r in shots_rep.values()}) > 1
     return {
         "card": {"x": 0, "y": CARD_Y0, "w": CARD_W, "h": CARD_H},
         "zones": {"header_y": HEADER_Y, "footer_y": FOOTER_Y},
         "safe_caption_band": list(_caption_band()),
+        "caption_placement": {"mode": "adaptive_per_shot",
+                              "zones_available": sorted(_cplace.zones()),
+                              "placement_varies": zone_varies},
         "shots": shots_rep,
         "totals": totals,
         "violations": violations,

@@ -226,16 +226,18 @@ def _chunk_font(chunk, bible) -> tuple:
     return f, per_line, width
 
 
-def chunk_png(chunk: dict, bible: dict, out: Path, active: int) -> dict:
+def chunk_png(chunk: dict, bible: dict, out: Path, active: int,
+              zone_top: int | None = None) -> dict:
     """One chunk PNG with word `active` highlighted. -> layout dict.
 
     Rendered on the KIN_CAP_H strip carrier; bbox is returned in FULL-frame
-    coordinates (y offset by the active carrier_y) so downstream anchoring
-    keeps working. Declared 2-line chunks stack their lines centered — still
-    ONE caption state on ONE carrier window."""
+    coordinates (y offset by the active carrier_y — or the adaptive per-shot
+    `zone_top` from caption_place, V11 P1 §5) so downstream anchoring keeps
+    working. Declared 2-line chunks stack their lines centered — still ONE
+    caption state on ONE carrier window."""
     from engine import bible as B
     f, per_line, width = _chunk_font(chunk, bible)
-    cy_off = carrier_y()
+    cy_off = int(zone_top) if zone_top is not None else carrier_y()
     img = Image.new("RGBA", (FRAME_W, KIN_CAP_H), (0, 0, 0, 0))
     d = ImageDraw.Draw(img, "RGBA")
     line_h = f.size
@@ -285,7 +287,8 @@ def chunk_png(chunk: dict, bible: dict, out: Path, active: int) -> dict:
 
 
 def build_shot_captions(shot: dict, bible: dict, work_dir: Path,
-                        dur: float | None = None) -> tuple:
+                        dur: float | None = None,
+                        zone_top: int | None = None) -> tuple:
     """-> (inputs, cue_bboxes, normalized_cues, repairs).
 
     inputs: flat list of {png, t0, t1} overlay windows in time order —
@@ -293,6 +296,8 @@ def build_shot_captions(shot: dict, bible: dict, work_dir: Path,
     invariant is asserted here: windows may touch (within one cue) but never
     overlap — two visible caption carriers at one instant is a P0 defect and
     fails the render loudly instead of shipping ghost captions.
+    zone_top: adaptive per-shot caption zone top (caption_place.choose_zone);
+    None keeps the global band (V11 P0 geometry).
     cue_bboxes: one bbox per NORMALIZED cue (None when the cue produced no
     chunks) so downstream consumers that anchor on caption geometry
     (text_emphasis rules) keep working.
@@ -314,10 +319,11 @@ def build_shot_captions(shot: dict, bible: dict, work_dir: Path,
         for c in mine:
             for wi in range(len(c["windows"])):
                 png = work_dir / f"cap{ci:03d}_w{wi}.png"
-                lay = chunk_png(c, bible, png, active=wi)
+                lay = chunk_png(c, bible, png, active=wi, zone_top=zone_top)
                 w0, w1 = c["windows"][wi][1], c["windows"][wi][2]
                 inputs.append({"png": lay["png"], "t0": w0, "t1": w1,
-                               "top": carrier_y()})
+                               "top": int(zone_top) if zone_top is not None
+                               else carrier_y()})
                 bbox = lay["bbox"]
                 ci += 1
         cue_bboxes.append(bbox)
