@@ -1,0 +1,34 @@
+{
+ "version": "4.0",
+ "topic_grammar": ["BOTANICAL_DETAIL", "MOLECULAR_PROCESS", "SEASONAL_TIMELINE", "SCALE"],
+ "brand": "CANOPY",
+ "palette": {
+  "primary": "#4A5232",
+  "secondary": "#8A6A3C",
+  "accent": "#B23A2E",
+  "background": "#191510",
+  "text": "#F2E9D2",
+  "muted": "#8C8266",
+  "highlight": "#E9DFC0"
+ },
+ "illustration_style": "early 1900s botanical atlas lithograph, olive-green and crimson on aged cream paper, fine stipple and vein linework, macro botanical grammar, matte finish",
+ "illustration_medium": "vintage botanical-lithograph illustration with leaf-vein and cell-diagram grammar (not photoreal, not flat vector)",
+ "lighting": "soft autumnal side light with warm highlights",
+ "contrast": "medium-high, rich shadows",
+ "saturation": 0.7,
+ "texture": {
+  "grain": 0.012,
+  "vignette": 0.25
+ },
+ "typography": {
+  "display": "BebasNeue-Regular.ttf",
+  "body": "Inter-Variable.ttf"
+ },
+ "framing": "vertical 9:16, tight macro wides of leaf surfaces and cell cross-sections with breathing room",
+ "graphic_language": "fine olive linework on cream stipple paper, restrained crimson annotation arrows, measured typography, leaf surfaces as confident diagonal bands with vein hatching, no heavy drop shadows on graphic elements",
+ "transition_style": "hard cut; per-shot fade-in from background colour",
+ "prompt_fragments": {
+  "prefix": "Early 1900s botanical atlas lithograph, olive-green and crimson wash on aged cream paper, fine stipple engraving, macro botanical grammar, muted olive and crimson palette, soft autumnal light, soft vignette, matte finish",
+  "suffix": "No readable text, no watermarks, no modern objects, no logos"
+ }
+}

@@ -1,0 +1,166 @@
+{
+ "story_id": "autumn_red",
+ "brand": "CANOPY",
+ "title": "WHY AUTUMN LEAVES TURN RED",
+ "subject": "botany",
+ "story_type": "science_process",
+ "pad_s": 0.1,
+ "v7": {
+  "title_overlay": true
+ },
+ "concepts": [
+  {
+   "id": "leaf",
+   "beats": [
+    "B1",
+    "B2",
+    "B5",
+    "B7"
+   ],
+   "verb": "turn"
+  },
+  {
+   "id": "chlorophyll",
+   "beats": [
+    "B2",
+    "B3"
+   ],
+   "verb": "fade"
+  },
+  {
+   "id": "anthocyanin",
+   "beats": [
+    "B3",
+    "B4",
+    "B5",
+    "B6",
+    "B7"
+   ],
+   "verb": "brew"
+  },
+  {
+   "id": "sugars",
+   "beats": [
+    "B3",
+    "B4"
+   ],
+   "verb": "feed"
+  },
+  {
+   "id": "light",
+   "beats": [
+    "B4",
+    "B5",
+    "B6"
+   ],
+   "verb": "shield"
+  },
+  {
+   "id": "nutrients",
+   "beats": [
+    "B5",
+    "B7"
+   ],
+   "verb": "salvage"
+  }
+ ],
+ "beats": [
+  {
+   "beat_id": "B1",
+   "function": "HOOK",
+   "contradiction": {
+    "viewer_thinks": "autumn inks the leaves \u2014 the red was hiding under the green all summer",
+    "actually": "the yellow was hiding there all along, but the red is manufactured fresh, each fall",
+    "reveal_beat": "B3"
+   },
+   "narration": "Every fall the maples blaze with colors hidden all summer. For the yellows, that is true. For the red, it is exactly wrong.",
+   "claim": "yellow autumn colors are unmasked by chlorophyll loss, but the red is newly synthesized each autumn",
+   "visual_question": "where does the red in an autumn leaf come from?",
+   "visual_answer": "a crimson maple leaf on cream paper, its red not yet explained",
+   "fact_ids": [
+    "f_anthocyanin_new"
+   ],
+   "start": 0.0,
+   "end": 8.33
+  },
+  {
+   "beat_id": "B2",
+   "function": "CURIOSITY",
+   "narration": "The familiar story starts with a shutdown: chlorophyll is dismantled, and pale carotenoids that were there all along finally show.",
+   "claim": "chlorophyll breakdown in autumn unmasks yellow and orange carotenoids already present in the leaf",
+   "visual_question": "what happens when the green fades?",
+   "visual_answer": "chlorophyll fades and unmasks the yellow carotenoids that were present all along",
+   "fact_ids": [
+    "f_carotenoid_unmask"
+   ],
+   "start": 8.33,
+   "end": 16.37
+  },
+  {
+   "beat_id": "B3",
+   "function": "REVEAL",
+   "narration": "But the red is not revealed. It is brewed: a new pigment, anthocyanin, built fresh from sugars as the leaf dies.",
+   "claim": "red autumn color comes from anthocyanin synthesized fresh in the leaf during autumn, not from a hidden pigment",
+   "visual_question": "is the red hiding in the leaf all summer?",
+   "visual_answer": "no: the red pigment anthocyanin is manufactured fresh from sugars each autumn",
+   "fact_ids": [
+    "f_anthocyanin_new"
+   ],
+   "start": 16.37,
+   "end": 25.06
+  },
+  {
+   "beat_id": "B4",
+   "function": "EXPLANATION",
+   "narration": "The recipe needs what a dying leaf has plenty of: trapped sugars, bright light, cool nights \u2014 and the cell sap turns crimson.",
+   "claim": "autumn conditions \u2014 trapped sugars, bright light, cool temperatures \u2014 drive anthocyanin synthesis in the leaf",
+   "visual_question": "what does the leaf need to brew the red?",
+   "visual_answer": "trapped sugars and bright, cool autumn light brewing anthocyanin in the cell sap",
+   "fact_ids": [
+    "f_conditions"
+   ],
+   "start": 25.06,
+   "end": 33.44
+  },
+  {
+   "beat_id": "B5",
+   "function": "ESCALATION",
+   "narration": "Why spend pigment on a dying leaf? One leading idea: red works as a sunscreen while the tree strips out nitrogen.",
+   "claim": "one leading hypothesis is that anthocyanin protects the leaf's nutrient-recovery process from excess autumn light",
+   "visual_question": "what is the red actually for?",
+   "visual_answer": "a sunscreen: red pigment shielding the leaf while nutrients are recovered down the stem",
+   "fact_ids": [
+    "f_sunscreen_hypothesis"
+   ],
+   "start": 33.44,
+   "end": 41.64
+  },
+  {
+   "beat_id": "B6",
+   "function": "ESCALATION",
+   "narration": "It is not settled. Other hypotheses: an antioxidant, or a warning that keeps pests away. Scientists still argue.",
+   "claim": "why leaves synthesize anthocyanin remains debated: sunscreen, antioxidant, and pest-defense hypotheses all compete",
+   "visual_question": "is the sunscreen idea proven?",
+   "visual_answer": "three competing hypotheses for the red \u2014 sunscreen, antioxidant, pest defense \u2014 still debated",
+   "fact_ids": [
+    "f_hypotheses_debated"
+   ],
+   "start": 41.64,
+   "end": 50.36
+  },
+  {
+   "beat_id": "B7",
+   "function": "PAYOFF",
+   "narration": "So the red is not leftovers. It is a farewell broadcast \u2014 built at the end, as the tree salvages and the leaf lets go.",
+   "claim": "autumn red is an active, resource-spending process that accompanies the tree's final nutrient recovery before leaf fall",
+   "visual_question": "so what is the red, really?",
+   "visual_answer": "a farewell broadcast: a pigment built at the end, as the tree salvages and the leaf lets go",
+   "fact_ids": [
+    "f_anthocyanin_new",
+    "f_sunscreen_hypothesis"
+   ],
+   "start": 50.36,
+   "end": 58.4
+  }
+ ]
+}

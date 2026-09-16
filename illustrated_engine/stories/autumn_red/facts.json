@@ -1,0 +1,128 @@
+{
+ "claims": [
+  {
+   "id": "f_carotenoid_unmask",
+   "beats": [
+    "B2"
+   ],
+   "claim": "chlorophyll breakdown in autumn unmasks yellow and orange carotenoids already present in the leaf",
+   "definition": "as days shorten, chlorophyll is actively broken down and its nitrogen resorbed; carotenoid pigments that were present through the growing season, previously masked by the dominant green chlorophyll, become visible",
+   "current_record_holder": "n/a",
+   "measured_value": "qualitative: yellow/orange autumn color is unmasked pre-existing carotenoid; no single-number claim",
+   "date_verified": "2026-09",
+   "authoritative_source": "Hoch, Zeldin & McCown, 'Physiological significance of anthocyanins during autumnal leaf senescence', Tree Physiology 21 (2001); Lee, 'Anthocyanins in autumn leaf senescence', Advances in Botanical Research 37 (2002)",
+   "source_url": "https://doi.org/10.1093/treephys/21.9.639",
+   "historically_changed": false,
+   "sources": [
+    "Hoch et al., Tree Physiology 2001",
+    "Lee 2002"
+   ],
+   "verified": true,
+   "notes": "narration says 'pale carotenoids that were there all along finally show' \u2014 standard textbook account",
+   "nuance": {
+    "classification": "STRONG_CONSENSUS",
+    "note": "carotenoid unmasking during chlorophyll breakdown is textbook plant physiology"
+   }
+  },
+  {
+   "id": "f_anthocyanin_new",
+   "beats": [
+    "B1",
+    "B3",
+    "B7"
+   ],
+   "claim": "red autumn color comes from anthocyanin synthesized fresh in the leaf during autumn, not from a hidden pigment",
+   "definition": "unlike carotenoids, anthocyanins are largely absent in green summer leaves of many species (e.g., red maples); in autumn they are actively synthesized from sugars in the cell vacuole during senescence",
+   "current_record_holder": "n/a",
+   "measured_value": "qualitative: autumn anthocyanin is newly synthesized from sugars during senescence; no single-number claim",
+   "date_verified": "2026-09",
+   "authoritative_source": "Hoch, Zeldin & McCown, Tree Physiology 21 (2001); Feild, Lee & Holbrook, 'Why leaves turn red in autumn: the red flag for photoinhibition', Nature 410 (2001)",
+   "source_url": "https://doi.org/10.1038/35066059",
+   "historically_changed": true,
+   "sources": [
+    "Hoch et al. 2001",
+    "Feild et al., Nature 2001"
+   ],
+   "verified": true,
+   "notes": "this is the story's core contradiction; 'brewed' is metaphor, mechanism stated plainly in B4",
+   "nuance": {
+    "classification": "STRONG_CONSENSUS",
+    "note": "de novo anthocyanin synthesis during autumn senescence in red-coloring species is well documented (Hoch et al. 2001)"
+   }
+  },
+  {
+   "id": "f_conditions",
+   "beats": [
+    "B4"
+   ],
+   "claim": "autumn conditions \u2014 trapped sugars, bright light, cool temperatures \u2014 drive anthocyanin synthesis in the leaf",
+   "definition": "during senescence, sugars remaining in the leaf (from reduced phloem export) plus light promote anthocyanin biosynthesis; bright, cool (but not freezing) autumn weather intensifies red coloration",
+   "current_record_holder": "n/a",
+   "measured_value": "qualitative: bright sunny and cool autumn conditions deepen red color; narration avoids thresholds",
+   "date_verified": "2026-09",
+   "authoritative_source": "Feild, Lee & Holbrook, Nature 410 (2001); Hoch et al., Tree Physiology 21 (2001); standard plant-physiology treatments of anthocyanin biosynthesis regulation",
+   "source_url": "https://doi.org/10.1038/35066059",
+   "historically_changed": false,
+   "sources": [
+    "Feild et al. 2001",
+    "Hoch et al. 2001"
+   ],
+   "verified": true,
+   "notes": "narration deliberately avoids 'freezing' \u2014 cool, not cold, nights; no thresholds claimed",
+   "nuance": {
+    "classification": "STRONG_CONSENSUS",
+    "note": "light and sugar promotion of anthocyanin synthesis is well established; exact regulatory details vary by species"
+   }
+  },
+  {
+   "id": "f_sunscreen_hypothesis",
+   "beats": [
+    "B5",
+    "B7"
+   ],
+   "claim": "one leading hypothesis is that anthocyanin protects the leaf's nutrient-recovery process from excess autumn light",
+   "definition": "photoinhibition hypothesis: anthocyanins attenuate incoming light within the leaf, reducing photoinhibition while chlorophyll is degraded and nitrogen and phosphorus are resorbed before leaf fall (Feild et al. 2001; Hoch et al. 2001)",
+   "current_record_holder": "n/a",
+   "measured_value": "qualitative: protective effect on nutrient resorption reported in several species; narration says 'one leading idea'",
+   "date_verified": "2026-09",
+   "authoritative_source": "Feild, Lee & Holbrook, 'Why leaves turn red in autumn: the red flag for photoinhibition', Nature 410 (2001); Hoch et al., Tree Physiology 21 (2001)",
+   "source_url": "https://doi.org/10.1038/35066059",
+   "historically_changed": false,
+   "sources": [
+    "Feild et al. 2001",
+    "Hoch et al. 2001"
+   ],
+   "verified": true,
+   "notes": "narration hedges with 'One leading idea'; support varies by species and study",
+   "nuance": {
+    "classification": "SUPPORTED_BUT_COMPLEX",
+    "note": "photoprotection has empirical support (Feild et al. 2001; Hoch et al. 2003) but its generality and relative importance are actively studied"
+   }
+  },
+  {
+   "id": "f_hypotheses_debated",
+   "beats": [
+    "B6"
+   ],
+   "claim": "why leaves synthesize anthocyanin remains debated: sunscreen, antioxidant, and pest-defense hypotheses all compete",
+   "definition": "proposed functions of autumn anthocyanin include photoprotection ('sunscreen'), antioxidant protection during senescence, and anti-herbivore signaling (e.g., Archetti's coevolution hypothesis); no single function is universally accepted",
+   "current_record_holder": "n/a",
+   "measured_value": "qualitative: multiple competing hypotheses; narration explicitly says 'It is not settled' and 'Scientists still argue'",
+   "date_verified": "2026-09",
+   "authoritative_source": "Archetti, 'The origin of autumn colours by coevolution', Journal of Theoretical Biology 205 (2000); Lev-Yadun & Gould (eds.), 'Anthocyanins in Leaves', Advances in Botanical Research 37 (2002); Feild et al., Nature 410 (2001)",
+   "source_url": "https://doi.org/10.1006/jtbi.2000.2131",
+   "historically_changed": false,
+   "sources": [
+    "Archetti 2000",
+    "Feild et al. 2001",
+    "Lev-Yadun & Gould 2002"
+   ],
+   "verified": true,
+   "notes": "this beat exists to carry the contested mechanism honestly; every alternative is attributed as a hypothesis",
+   "nuance": {
+    "classification": "SUPPORTED_BUT_COMPLEX",
+    "note": "genuine scientific debate: multiple hypotheses with partial support; the video must not present any one as settled"
+   }
+  }
+ ]
+}

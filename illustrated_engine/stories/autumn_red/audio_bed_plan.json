@@ -1,0 +1,24 @@
+{
+  "bed_files": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+  ],
+  "sfx": [
+    {
+      "file": "illustrated_engine/stories/autumn_red/audio/sfx_reveal.wav",
+      "at": 16.77,
+      "kind": "reveal"
+    },
+    {
+      "file": "illustrated_engine/stories/autumn_red/audio/sfx_reveal.wav",
+      "at": 50.76,
+      "kind": "reveal"
+    }
+  ],
+  "authored": true
+}

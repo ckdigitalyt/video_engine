@@ -1,0 +1,398 @@
+{
+  "story_id": "autumn_red",
+  "engine": "v6",
+  "fps": 30,
+  "size": [
+    1080,
+    1920
+  ],
+  "regions": {
+    "visual_rect": [
+      0,
+      176,
+      1080,
+      1744
+    ],
+    "center": [
+      0.3,
+      0.38,
+      0.4,
+      0.24
+    ],
+    "upper": [
+      0.22,
+      0.06,
+      0.56,
+      0.2
+    ],
+    "lower": [
+      0.22,
+      0.7,
+      0.56,
+      0.2
+    ]
+  },
+  "beats": [
+    {
+      "beat_id": "B1",
+      "shots": [
+        {
+          "shot_id": "S01",
+          "shot_type": "HOOK",
+          "asset": "B1_autumn_hero",
+          "duration_est": 8.33,
+          "crop_bias_y": 0.45,
+          "captions": "phrase",
+          "role": "HERO",
+          "chrome": "none",
+          "tag": "",
+          "visual_mode": "CINEMATIC",
+          "evidence_type": "DIRECT_EVIDENCE",
+          "motion_type": "CAMERA_MOTION",
+          "opening": true,
+          "title": "",
+          "purpose": "Open on a single crimson maple leaf: the red presented as a mystery, not an explanation",
+          "claim": "yellow autumn colors are unmasked by chlorophyll loss, but the red is newly synthesized each autumn",
+          "evidence": "full-bleed plate: one crimson maple leaf with fine vein linework on cream stipple paper, no cause shown yet",
+          "motion_reason": "slow push-in so the leaf reads as the subject",
+          "transition_reason": "cut into the familiar shutdown story",
+          "cam_from_scale": 1.0,
+          "cam_to_scale": 1.08,
+          "cam_cx": 0.5,
+          "cam_cy": 0.5,
+          "subject_contract": {
+            "expected_subject": "botanical plate of a single crimson maple leaf with fine vein linework on cream paper",
+            "required": [
+              "crimson maple leaf",
+              "vein linework",
+              "cream paper"
+            ],
+            "forbidden": [
+              "photoreal leaf photos",
+              "human figures",
+              "brand logos"
+            ],
+            "role": "HERO"
+          },
+          "one_second": {
+            "relationship": "a red leaf, unexplained",
+            "labels": [
+              "MAPLE LEAF",
+              "AUTUMN"
+            ]
+          },
+          "overlays": []
+        }
+      ]
+    },
+    {
+      "beat_id": "B2",
+      "shots": [
+        {
+          "shot_id": "S02",
+          "shot_type": "DIAGRAM",
+          "asset": "B2_green_fade",
+          "duration_est": 8.04,
+          "crop_bias_y": 0.45,
+          "captions": "phrase",
+          "role": "DIAGRAM",
+          "chrome": "section",
+          "tag": "THE GREEN SHUTS DOWN",
+          "visual_mode": "DIAGRAM",
+          "evidence_type": "EXPLANATORY_DIAGRAM",
+          "motion_type": "INFORMATION_MOTION",
+          "purpose": "Show the textbook start: chlorophyll dismantled, pale yellow carotenoids finally visible",
+          "claim": "chlorophyll breakdown in autumn unmasks yellow and orange carotenoids already present in the leaf",
+          "evidence": "diagram card: a leaf fading from green to yellow along its length, a green pigment band draining out, yellow dots appearing beneath",
+          "motion_reason": "near-static drift so the green-to-yellow gradient is the motion",
+          "transition_reason": "cut to the red contradiction",
+          "cam_from_scale": 1.05,
+          "cam_to_scale": 1.1,
+          "cam_cx": 0.5,
+          "cam_cy": 0.5,
+          "subject_contract": {
+            "expected_subject": "botanical diagram: leaf fading green to yellow with a draining green pigment band and yellow carotenoid dots",
+            "required": [
+              "green-to-yellow gradient leaf",
+              "draining pigment band",
+              "yellow dots"
+            ],
+            "forbidden": [
+              "numeric axis units",
+              "app UI",
+              "photographic rendering"
+            ],
+            "role": "DIAGRAM"
+          },
+          "one_second": {
+            "relationship": "green fades and yellow shows",
+            "labels": [
+              "GREEN FADES",
+              "HIDDEN YELLOW",
+              "CAROTENOIDS"
+            ]
+          },
+          "overlays": []
+        }
+      ]
+    },
+    {
+      "beat_id": "B3",
+      "shots": [
+        {
+          "shot_id": "S03",
+          "shot_type": "REVEAL",
+          "asset": "B3_new_red",
+          "duration_est": 8.69,
+          "crop_bias_y": 0.45,
+          "captions": "phrase",
+          "role": "COMPARISON",
+          "chrome": "section",
+          "tag": "NOT REVEALED \u2014 BREWED",
+          "visual_mode": "SPLIT",
+          "evidence_type": "EXPLANATORY_DIAGRAM",
+          "motion_type": "INFORMATION_MOTION",
+          "purpose": "Split the misconception: yellow was hidden, but red is manufactured fresh this fall",
+          "claim": "red autumn color comes from anthocyanin synthesized fresh in the leaf during autumn, not from a hidden pigment",
+          "evidence": "split card: left, a yellow leaf under a green veil (hidden all along); right, a crimson leaf stamped NEW with brewing marks",
+          "motion_reason": "held framing; the hidden-versus-new contrast is the information",
+          "transition_reason": "cut to the brewing recipe",
+          "cam_from_scale": 1.02,
+          "cam_to_scale": 1.06,
+          "cam_cx": 0.5,
+          "cam_cy": 0.48,
+          "subject_contract": {
+            "expected_subject": "botanical split: yellow leaf under a green veil on the left, fresh crimson leaf on the right",
+            "required": [
+              "veiled yellow leaf",
+              "fresh crimson leaf",
+              "left-right contrast"
+            ],
+            "forbidden": [
+              "numeric equations",
+              "graph axes",
+              "photographic rendering"
+            ],
+            "role": "COMPARISON"
+          },
+          "one_second": {
+            "relationship": "yellow was hidden; red is new",
+            "labels": [
+              "HIDDEN YELLOW",
+              "MADE THIS FALL"
+            ]
+          },
+          "overlays": []
+        }
+      ]
+    },
+    {
+      "beat_id": "B4",
+      "shots": [
+        {
+          "shot_id": "S04",
+          "shot_type": "DIAGRAM",
+          "asset": "B4_sugar_brew",
+          "duration_est": 8.38,
+          "crop_bias_y": 0.45,
+          "captions": "phrase",
+          "visual_mode": "TRANSFORMATION",
+          "evidence_type": "EXPLANATORY_DIAGRAM",
+          "motion_type": "INFORMATION_MOTION",
+          "surprise": {
+            "class": "MICROSCOPIC_ZOOM",
+            "evidence": "the leaf surface resolves into a cell sap view: sugars and light building a new pigment molecule in place"
+          },
+          "chrome": "section",
+          "tag": "THE AUTUMN RECIPE",
+          "role": "DIAGRAM",
+          "purpose": "Show the brewing conditions: trapped sugars plus bright cool light building anthocyanin in the cell sap",
+          "claim": "autumn conditions \u2014 trapped sugars, bright light, cool temperatures \u2014 drive anthocyanin synthesis in the leaf",
+          "evidence": "cross-section card: a plant cell with sugar dots and a sun arrow entering, crimson anthocyanin dots filling the vacuole",
+          "motion_reason": "drift across the cell so the sugar-to-pigment conversion is the motion",
+          "transition_reason": "cut to the sunscreen question",
+          "cam_from_scale": 1.0,
+          "cam_to_scale": 1.07,
+          "cam_cx": 0.5,
+          "cam_cy": 0.5,
+          "subject_contract": {
+            "expected_subject": "botanical cross-section: plant cell with sugar dots, a sun arrow, and crimson anthocyanin dots filling the vacuole",
+            "required": [
+              "plant cell outline",
+              "sugar dots",
+              "crimson pigment dots"
+            ],
+            "forbidden": [
+              "chemical formulas",
+              "numeric axis units",
+              "photographic rendering"
+            ],
+            "role": "DIAGRAM"
+          },
+          "one_second": {
+            "relationship": "sugars and light brew the pigment",
+            "labels": [
+              "SUGARS",
+              "BRIGHT LIGHT",
+              "NEW PIGMENT"
+            ]
+          },
+          "overlays": []
+        }
+      ]
+    },
+    {
+      "beat_id": "B5",
+      "shots": [
+        {
+          "shot_id": "S05",
+          "shot_type": "EXPLAIN",
+          "asset": "B5_sun_shield",
+          "duration_est": 8.2,
+          "crop_bias_y": 0.45,
+          "captions": "phrase",
+          "role": "DIAGRAM",
+          "chrome": "section",
+          "tag": "THE SUNSCREEN IDEA",
+          "visual_mode": "DIAGRAM",
+          "evidence_type": "EXPLANATORY_DIAGRAM",
+          "motion_type": "INFORMATION_MOTION",
+          "purpose": "Show the leading hypothesis: the red shields the leaf while nitrogen and valuables are salvaged down the stem",
+          "claim": "one leading hypothesis is that anthocyanin protects the leaf's nutrient-recovery process from excess autumn light",
+          "evidence": "card: a crimson leaf with sun rays blocked by a red shield band, nutrient arrows flowing down the stem",
+          "motion_reason": "drift along the salvage path so the shield-and-recover relationship is the motion",
+          "transition_reason": "cut to the open debate",
+          "cam_from_scale": 1.0,
+          "cam_to_scale": 1.08,
+          "cam_cx": 0.5,
+          "cam_cy": 0.48,
+          "subject_contract": {
+            "expected_subject": "botanical plate: crimson leaf, blocked sun rays above a red shield band, nutrient arrows flowing down the stem",
+            "required": [
+              "crimson leaf",
+              "blocked light rays",
+              "nutrient arrows down stem"
+            ],
+            "forbidden": [
+              "chemical formulas",
+              "flame icons",
+              "photographic rendering"
+            ],
+            "role": "DIAGRAM"
+          },
+          "one_second": {
+            "relationship": "red shields while nutrients leave",
+            "labels": [
+              "AUTUMN LIGHT",
+              "RED SHIELD",
+              "NITROGEN OUT"
+            ]
+          },
+          "overlays": []
+        }
+      ]
+    },
+    {
+      "beat_id": "B6",
+      "shots": [
+        {
+          "shot_id": "S06",
+          "shot_type": "EXPLAIN",
+          "asset": "B6_hypotheses",
+          "duration_est": 8.72,
+          "crop_bias_y": 0.45,
+          "captions": "phrase",
+          "role": "COMPARISON",
+          "chrome": "section",
+          "tag": "STILL DEBATED",
+          "visual_mode": "SPLIT",
+          "evidence_type": "EXPLANATORY_DIAGRAM",
+          "motion_type": "INFORMATION_MOTION",
+          "purpose": "Show the honest state: three competing ideas, no winner \u2014 sunscreen, antioxidant, pest signal",
+          "claim": "why leaves synthesize anthocyanin remains debated: sunscreen, antioxidant, and pest-defense hypotheses all compete",
+          "evidence": "three-panel card: SUNSCREEN (blocked rays), ANTIOXIDANT (calmed molecule), PEST SIGNAL (warning marks), a question mark over all three",
+          "motion_reason": "held framing; the three-way panel contrast is the information",
+          "transition_reason": "cut to the calm farewell",
+          "cam_from_scale": 1.02,
+          "cam_to_scale": 1.02,
+          "cam_cx": 0.5,
+          "cam_cy": 0.5,
+          "subject_contract": {
+            "expected_subject": "botanical triptych: three small leaf panels labeled sunscreen, antioxidant, pest signal with a question mark",
+            "required": [
+              "three labeled panels",
+              "question mark",
+              "leaf motif per panel"
+            ],
+            "forbidden": [
+              "numeric axis units",
+              "chemical formulas",
+              "photographic rendering"
+            ],
+            "role": "COMPARISON"
+          },
+          "one_second": {
+            "relationship": "three ideas compete for the red",
+            "labels": [
+              "SUNSCREEN",
+              "ANTIOXIDANT",
+              "PEST SIGNAL"
+            ]
+          },
+          "overlays": []
+        }
+      ]
+    },
+    {
+      "beat_id": "B7",
+      "shots": [
+        {
+          "shot_id": "S07",
+          "shot_type": "PAYOFF",
+          "asset": "B7_farewell",
+          "duration_est": 8.04,
+          "crop_bias_y": 0.45,
+          "captions": "phrase",
+          "role": "PAYOFF",
+          "chrome": "none",
+          "tag": "",
+          "visual_mode": "PAYOFF",
+          "evidence_type": "DIRECT_EVIDENCE",
+          "motion_type": "CAMERA_MOTION",
+          "end_card": "BUILT AT THE END",
+          "opening": false,
+          "purpose": "Land the argument on the falling leaf at dusk: the red was built at the end, as the tree salvaged and the leaf let go",
+          "claim": "autumn red is an active, resource-spending process that accompanies the tree's final nutrient recovery before leaf fall",
+          "evidence": "dusk reprise: the crimson leaf drifting down with a clean scar at the stem, warm light, calm palette",
+          "motion_reason": "slow pull-out, the frame settles as the argument does",
+          "transition_reason": "final shot",
+          "cam_from_scale": 1.08,
+          "cam_to_scale": 1.0,
+          "cam_cx": 0.5,
+          "cam_cy": 0.5,
+          "subject_contract": {
+            "expected_subject": "botanical plate of a falling crimson leaf at dusk with a clean stem scar, warm calm light",
+            "required": [
+              "falling crimson leaf",
+              "stem scar",
+              "calm dusk palette"
+            ],
+            "forbidden": [
+              "sunscreen arrows",
+              "new subjects",
+              "photographic rendering"
+            ],
+            "role": "PAYOFF"
+          },
+          "one_second": {
+            "relationship": "the red was built at the end; the leaf lets go",
+            "labels": [
+              "BUILT AT THE END"
+            ]
+          },
+          "overlays": []
+        }
+      ]
+    }
+  ]
+}
