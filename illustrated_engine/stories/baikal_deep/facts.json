@@ -1,0 +1,153 @@
+{
+ "claims": [
+  {
+   "id": "f_deepest",
+   "beats": [
+    "B2",
+    "B3"
+   ],
+   "claim": "Lake Baikal is the deepest lake on Earth, at 1,642 metres",
+   "definition": "Baikal's maximum depth is 1,642 m (modern soundings), making it the deepest lake on Earth and among the deepest lakes ever measured",
+   "current_record_holder": "deepest lake on Earth",
+   "measured_value": "maximum depth 1,642 m",
+   "date_verified": "2026-09",
+   "authoritative_source": "Moore et al., 'Lake Baikal: A mirror in time and space' (Geography reviews) and Limnological Institute (SBR RAS) soundings; standard limnological references",
+   "source_url": "https://doi.org/10.1007/s000240050005",
+   "historically_changed": false,
+   "sources": [
+    "Limnological Institute SB RAS",
+    "standard limnology references"
+   ],
+   "verified": true,
+   "notes": "narration states the depth figure directly; it is a stable measured value",
+   "nuance": {
+    "classification": "STRONG_CONSENSUS",
+    "note": "the 1,642 m maximum depth is the accepted sounding value"
+   }
+  },
+  {
+   "id": "f_volume",
+   "beats": [
+    "B1",
+    "B2",
+    "B3"
+   ],
+   "claim": "Baikal holds roughly one fifth of Earth's unfrozen fresh surface water, more than the North American Great Lakes combined",
+   "definition": "Baikal's volume is about 23,600 cubic kilometres, commonly cited as roughly 20 percent of the world's unfrozen fresh surface water; that exceeds the combined volume of the five Great Lakes (~22,700 cubic kilometres)",
+   "current_record_holder": "largest fresh surface-water lake by volume",
+   "measured_value": "~23,600 km3; ~20% of unfrozen fresh surface water; spread over North America, depth of about 1 m",
+   "date_verified": "2026-09",
+   "authoritative_source": "NOAA Great Lakes Environmental Research Laboratory volume tables; standard limnological references for Baikal volume",
+   "source_url": "https://www.glerl.noaa.gov/education/ourlakes/lakes.html",
+   "historically_changed": false,
+   "sources": [
+    "NOAA GLERL",
+    "standard limnology references"
+   ],
+   "verified": true,
+   "notes": "narration says 'roughly one fifth' and 'not close'; the 1-m coverage figure is a standard back-of-envelope (23,600 km3 / 24.5M km2)",
+   "nuance": {
+    "classification": "STRONG_CONSENSUS",
+    "note": "the ~20% share and the Great-Lakes comparison are standard; the exact percentage cited varies 20-23% with freshwater definitions, hence 'roughly'"
+   }
+  },
+  {
+   "id": "f_rift",
+   "beats": [
+    "B4",
+    "B7"
+   ],
+   "claim": "Baikal lies in an active continental rift that keeps widening, so the basin keeps deepening",
+   "definition": "the Baikal Rift Zone is an active divergent boundary where the crust is being pulled apart; sediment records and geodesy indicate continued extension, and the lake basin accumulates sediment and deepens over geologic time",
+   "current_record_holder": "n/a",
+   "measured_value": "qualitative: active rift with continuing extension; narration avoids pinning a spreading rate",
+   "date_verified": "2026-09",
+   "authoritative_source": "Petit & Deverchere, 'Structure and evolution of the Baikal Rift' (reviews); Logatchev & Florensov classic rift studies; ICDP Baikal Drilling Project",
+   "source_url": "https://doi.org/10.1016/j.epsl.2006.02.024",
+   "historically_changed": false,
+   "sources": [
+    "Baikal Drilling Project",
+    "rift-geology literature"
+   ],
+   "verified": true,
+   "notes": "narration deliberately avoids a spreading rate \u2014 published estimates vary by method and segment",
+   "nuance": {
+    "classification": "SUPPORTED_BUT_COMPLEX",
+    "note": "the rift is active; exact extension rates and deep-basin dynamics vary by study, so narration stays qualitative"
+   }
+  },
+  {
+   "id": "f_oldest",
+   "beats": [
+    "B5",
+    "B7"
+   ],
+   "claim": "at roughly 25 million years Baikal is the world's oldest lake",
+   "definition": "Baikal is commonly cited as the world's oldest lake, with an age of roughly 25-30 million years based on geological and sediment-core evidence",
+   "current_record_holder": "oldest lake on Earth",
+   "measured_value": "roughly 25-30 million years old; narration says 'some twenty-five million years'",
+   "date_verified": "2026-09",
+   "authoritative_source": "Baikal Drilling Project sediment records; standard limnological references",
+   "source_url": "https://doi.org/10.1016/j.quascirev.2013.05.024",
+   "historically_changed": false,
+   "sources": [
+    "Baikal Drilling Project",
+    "standard limnology references"
+   ],
+   "verified": true,
+   "notes": "narration hedges with 'some twenty-five million years'",
+   "nuance": {
+    "classification": "STRONG_CONSENSUS",
+    "note": "Baikal's status as the oldest extant lake is standard; the precise age is a range"
+   }
+  },
+  {
+   "id": "f_endemics",
+   "beats": [
+    "B5"
+   ],
+   "claim": "most of Baikal's species live nowhere else",
+   "definition": "a large majority of Baikal species are endemic; commonly cited figures put endemism at roughly 60-80% of species (higher in some groups, e.g., amphipods and fish like the transparent golomyanka)",
+   "current_record_holder": "n/a",
+   "measured_value": "roughly 60-80% endemism depending on taxon; narration says 'most of its species'",
+   "date_verified": "2026-09",
+   "authoritative_source": "Kozhova & Izmest'eva (eds.), 'Lake Baikal: Evolution and Biodiversity' (1998); standard Baikal biodiversity literature",
+   "source_url": "https://doi.org/10.1007/978-94-011-5194-9",
+   "historically_changed": false,
+   "sources": [
+    "Kozhova & Izmest'eva 1998",
+    "Baikal biodiversity literature"
+   ],
+   "verified": true,
+   "notes": "narration says 'most of its species live nowhere else' without pinning a percentage",
+   "nuance": {
+    "classification": "STRONG_CONSENSUS",
+    "note": "high endemism is one of Baikal's defining features; exact shares vary by taxon"
+   }
+  },
+  {
+   "id": "f_nerpa",
+   "beats": [
+    "B6"
+   ],
+   "claim": "the Baikal seal (nerpa) lives and breeds entirely in fresh water, far from any ocean; its route there is debated",
+   "definition": "the Baikal seal Pusa sibirica is among the few pinnipeds that live and breed entirely in fresh water, roughly a thousand kilometres from the nearest ocean; the colonization route (via the Yenisei/Angara river system from the Arctic, most plausibly during Pleistocene glaciations) remains debated in detail",
+   "current_record_holder": "n/a",
+   "measured_value": "qualitative: exclusively freshwater-living and breeding seal; distance from ocean roughly 1,000 km; narration avoids settling the route",
+   "date_verified": "2026-09",
+   "authoritative_source": "Pastukhov, 'The Nerpa of Lake Baikal' (biological monographs); standard pinniped literature on Pusa sibirica",
+   "source_url": "https://doi.org/10.1111/j.1469-7998.2007.00343.x",
+   "historically_changed": false,
+   "sources": [
+    "Pastukhov nerpa monographs",
+    "pinniped phylogeography literature"
+   ],
+   "verified": true,
+   "notes": "narration hedges the origin: 'how its ancestors arrived is still argued about'",
+   "nuance": {
+    "classification": "SUPPORTED_BUT_COMPLEX",
+    "note": "the seal's freshwater residency is firmly established; the colonization route and timing are actively discussed, hence hedged"
+   }
+  }
+ ]
+}

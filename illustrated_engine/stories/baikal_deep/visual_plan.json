@@ -1,0 +1,394 @@
+{
+  "story_id": "baikal_deep",
+  "engine": "v6",
+  "fps": 30,
+  "size": [
+    1080,
+    1920
+  ],
+  "regions": {
+    "visual_rect": [
+      0,
+      176,
+      1080,
+      1744
+    ],
+    "center": [
+      0.3,
+      0.38,
+      0.4,
+      0.24
+    ],
+    "upper": [
+      0.22,
+      0.06,
+      0.56,
+      0.2
+    ],
+    "lower": [
+      0.22,
+      0.7,
+      0.56,
+      0.2
+    ]
+  },
+  "beats": [
+    {
+      "beat_id": "B1",
+      "shots": [
+        {
+          "shot_id": "S01",
+          "shot_type": "HOOK",
+          "asset": "B1_lake_tease",
+          "duration_est": 8.2,
+          "crop_bias_y": 0.45,
+          "captions": "phrase",
+          "role": "HERO",
+          "chrome": "none",
+          "tag": "",
+          "visual_mode": "CINEMATIC",
+          "evidence_type": "DIRECT_EVIDENCE",
+          "motion_type": "CAMERA_MOTION",
+          "opening": true,
+          "title": "",
+          "purpose": "Open on a long lake in frozen hills: the wrongness of the answer hiding in plain sight",
+          "claim": "Lake Baikal alone holds more unfrozen fresh surface water than the North American Great Lakes combined",
+          "evidence": "full-bleed plate: a long icy lake stretching between dark hills under cold light, no depth shown yet",
+          "motion_reason": "slow push-in so the long lake reads as the subject",
+          "transition_reason": "cut to the sounding line",
+          "cam_from_scale": 1.0,
+          "cam_to_scale": 1.08,
+          "cam_cx": 0.5,
+          "cam_cy": 0.5,
+          "subject_contract": {
+            "expected_subject": "survey plate of a long icy lake between dark hills under cold light",
+            "required": [
+              "long lake",
+              "dark hills",
+              "cold sky"
+            ],
+            "forbidden": [
+              "photoreal photos",
+              "human figures",
+              "brand logos"
+            ],
+            "role": "HERO"
+          },
+          "one_second": {
+            "relationship": "one lake, unexplained",
+            "labels": [
+              "SIBERIA",
+              "LAKE BAIKAL"
+            ]
+          },
+          "overlays": []
+        }
+      ]
+    },
+    {
+      "beat_id": "B2",
+      "shots": [
+        {
+          "shot_id": "S02",
+          "shot_type": "DIAGRAM",
+          "asset": "B2_depth_line",
+          "duration_est": 6.53,
+          "crop_bias_y": 0.45,
+          "captions": "phrase",
+          "role": "DIAGRAM",
+          "chrome": "section",
+          "tag": "THE SOUNDING LINE",
+          "visual_mode": "DIAGRAM",
+          "evidence_type": "EXPLANATORY_DIAGRAM",
+          "motion_type": "INFORMATION_MOTION",
+          "purpose": "Show the depth: a sounding line dropping far past any other lake's bottom",
+          "claim": "Lake Baikal is the deepest lake on Earth; its volume spread over North America would cover it by roughly a metre",
+          "evidence": "cross-section card: a plumb line descending through banded water to a lake floor far below, depth ticks along the way",
+          "motion_reason": "drift down the sounding line so the depth is the motion",
+          "transition_reason": "cut to the volume comparison",
+          "cam_from_scale": 1.05,
+          "cam_to_scale": 1.1,
+          "cam_cx": 0.5,
+          "cam_cy": 0.5,
+          "subject_contract": {
+            "expected_subject": "survey cross-section: sounding line through banded water to a deep lake floor with depth ticks",
+            "required": [
+              "sounding line",
+              "banded water",
+              "deep lake floor"
+            ],
+            "forbidden": [
+              "numeric axis units",
+              "app UI",
+              "photographic rendering"
+            ],
+            "role": "DIAGRAM"
+          },
+          "one_second": {
+            "relationship": "the line keeps going down",
+            "labels": [
+              "DEEPEST LAKE",
+              "1,642 M"
+            ]
+          },
+          "overlays": []
+        }
+      ]
+    },
+    {
+      "beat_id": "B3",
+      "shots": [
+        {
+          "shot_id": "S03",
+          "shot_type": "REVEAL",
+          "asset": "B3_volume_bars",
+          "duration_est": 8.04,
+          "crop_bias_y": 0.45,
+          "captions": "phrase",
+          "role": "COMPARISON",
+          "chrome": "section",
+          "tag": "ONE FIFTH OF EARTH",
+          "visual_mode": "SPLIT",
+          "evidence_type": "EXPLANATORY_DIAGRAM",
+          "motion_type": "INFORMATION_MOTION",
+          "purpose": "Reveal the ledger: one Baikal vessel towering over the combined Great Lakes vessel",
+          "claim": "Baikal holds roughly one fifth of Earth's unfrozen fresh surface water, at 1,642 metres the deepest lake",
+          "evidence": "split card: left, one tall full water vessel labeled Baikal; right, a shorter vessel for all five Great Lakes together",
+          "motion_reason": "held framing; the vessel-height contrast is the information",
+          "transition_reason": "cut to the rift engine",
+          "cam_from_scale": 1.02,
+          "cam_to_scale": 1.06,
+          "cam_cx": 0.5,
+          "cam_cy": 0.48,
+          "subject_contract": {
+            "expected_subject": "survey split: one tall full water vessel beside a shorter combined-lakes vessel",
+            "required": [
+              "tall Baikal vessel",
+              "shorter lakes vessel",
+              "water fill"
+            ],
+            "forbidden": [
+              "numeric axis units",
+              "graph axes",
+              "photographic rendering"
+            ],
+            "role": "COMPARISON"
+          },
+          "one_second": {
+            "relationship": "one vessel out-holds five great ones",
+            "labels": [
+              "BAIKAL",
+              "GREAT LAKES COMBINED"
+            ]
+          },
+          "overlays": []
+        }
+      ]
+    },
+    {
+      "beat_id": "B4",
+      "shots": [
+        {
+          "shot_id": "S04",
+          "shot_type": "EXPLAIN",
+          "asset": "B4_rift_tear",
+          "duration_est": 8.25,
+          "crop_bias_y": 0.45,
+          "captions": "phrase",
+          "visual_mode": "TRANSFORMATION",
+          "evidence_type": "EXPLANATORY_DIAGRAM",
+          "motion_type": "INFORMATION_MOTION",
+          "surprise": {
+            "class": "HIDDEN_CROSS_SECTION",
+            "evidence": "the calm lake surface opens into a cross-section of the crust beneath it, pulled apart on both sides with the basin sinking"
+          },
+          "chrome": "section",
+          "tag": "THE TEAR BENEATH",
+          "role": "DIAGRAM",
+          "purpose": "Show the engine: crust pulled apart, basin sinking, water collecting in the tear",
+          "claim": "Baikal lies in an active continental rift that keeps widening, so the basin keeps deepening",
+          "evidence": "cross-section card: two crust blocks with outward arrows, a sinking graben between them, the lake filling the tear",
+          "motion_reason": "drift across the pull-apart so the sinking basin is the motion",
+          "transition_reason": "cut to the ancient ark",
+          "cam_from_scale": 1.0,
+          "cam_to_scale": 1.07,
+          "cam_cx": 0.5,
+          "cam_cy": 0.5,
+          "subject_contract": {
+            "expected_subject": "survey cross-section: two crust blocks pulled apart with outward arrows and a sinking basin filled by the lake",
+            "required": [
+              "two crust blocks",
+              "outward arrows",
+              "sinking basin"
+            ],
+            "forbidden": [
+              "chemical formulas",
+              "numeric axis units",
+              "photographic rendering"
+            ],
+            "role": "DIAGRAM"
+          },
+          "one_second": {
+            "relationship": "the crust tears and the basin sinks",
+            "labels": [
+              "CRUST PULLED APART",
+              "BASIN SINKS"
+            ]
+          },
+          "overlays": []
+        }
+      ]
+    },
+    {
+      "beat_id": "B5",
+      "shots": [
+        {
+          "shot_id": "S05",
+          "shot_type": "EXPLAIN",
+          "asset": "B5_endemics",
+          "duration_est": 7.21,
+          "crop_bias_y": 0.45,
+          "captions": "phrase",
+          "role": "DIAGRAM",
+          "chrome": "section",
+          "tag": "THE ANCIENT ARK",
+          "visual_mode": "DIAGRAM",
+          "evidence_type": "EXPLANATORY_DIAGRAM",
+          "motion_type": "INFORMATION_MOTION",
+          "purpose": "Show what isolation builds: transparent flesh fish and sponge gardens found nowhere else",
+          "claim": "at roughly 25 million years Baikal is the world's oldest lake, and most of its species are endemics found nowhere else",
+          "evidence": "specimen card: a transparent golomyanka-style fish beside branching sponge forms on the deep floor, both drawn as survey specimens",
+          "motion_reason": "drift across the specimens so the strangeness is the information",
+          "transition_reason": "cut to the seal impossibility",
+          "cam_from_scale": 1.0,
+          "cam_to_scale": 1.08,
+          "cam_cx": 0.5,
+          "cam_cy": 0.48,
+          "subject_contract": {
+            "expected_subject": "survey specimen plate: transparent fish and branching sponges drawn as chart specimens",
+            "required": [
+              "transparent fish",
+              "branching sponges",
+              "specimen framing"
+            ],
+            "forbidden": [
+              "photoreal photos",
+              "numeric axis units",
+              "modern labels"
+            ],
+            "role": "DIAGRAM"
+          },
+          "one_second": {
+            "relationship": "species built by isolation",
+            "labels": [
+              "ENDEMICS",
+              "25 MILLION YEARS"
+            ]
+          },
+          "overlays": []
+        }
+      ]
+    },
+    {
+      "beat_id": "B6",
+      "shots": [
+        {
+          "shot_id": "S06",
+          "shot_type": "EXPLAIN",
+          "asset": "B6_nerpa_ice",
+          "duration_est": 8.64,
+          "crop_bias_y": 0.45,
+          "captions": "phrase",
+          "role": "COMPARISON",
+          "chrome": "section",
+          "tag": "THE IMPOSSIBILITY",
+          "visual_mode": "DIAGRAM",
+          "evidence_type": "EXPLANATORY_DIAGRAM",
+          "motion_type": "INFORMATION_MOTION",
+          "purpose": "Show the paradox: a seal on lake ice, with the ocean an unreachable distance away",
+          "claim": "the Baikal seal (nerpa) lives and breeds entirely in fresh water, far from any ocean; its route there is debated",
+          "evidence": "chart card: a seal resting on lake ice in the foreground, a long dashed route arc receding toward a distant ocean edge",
+          "motion_reason": "drift along the route arc so the impossible distance is the motion",
+          "transition_reason": "cut to the calm payoff",
+          "cam_from_scale": 1.02,
+          "cam_to_scale": 1.06,
+          "cam_cx": 0.5,
+          "cam_cy": 0.5,
+          "subject_contract": {
+            "expected_subject": "survey chart: seal on lake ice with a long dashed route arc toward a distant ocean",
+            "required": [
+              "seal on ice",
+              "dashed route arc",
+              "distant ocean edge"
+            ],
+            "forbidden": [
+              "photoreal photos",
+              "modern objects",
+              "numeric axis units"
+            ],
+            "role": "COMPARISON"
+          },
+          "one_second": {
+            "relationship": "a seal a thousand kilometres from home",
+            "labels": [
+              "THE NERPA",
+              "NO OCEAN IN SIGHT"
+            ]
+          },
+          "overlays": []
+        }
+      ]
+    },
+    {
+      "beat_id": "B7",
+      "shots": [
+        {
+          "shot_id": "S07",
+          "shot_type": "PAYOFF",
+          "asset": "B7_living_archive",
+          "duration_est": 7.13,
+          "crop_bias_y": 0.45,
+          "captions": "phrase",
+          "role": "PAYOFF",
+          "chrome": "none",
+          "tag": "",
+          "visual_mode": "PAYOFF",
+          "evidence_type": "DIRECT_EVIDENCE",
+          "motion_type": "CAMERA_MOTION",
+          "end_card": "A LIVING ARCHIVE",
+          "opening": false,
+          "purpose": "Land the argument on the same cross-section at dusk: ancient, deepening, still opening",
+          "claim": "Baikal is an ancient, still-active rift lake that keeps deepening as the rift opens",
+          "evidence": "dusk reprise: the rift cross-section in warm light, water banded deep, the tear still faintly widening",
+          "motion_reason": "slow pull-out, the frame settles as the argument does",
+          "transition_reason": "final shot",
+          "cam_from_scale": 1.08,
+          "cam_to_scale": 1.0,
+          "cam_cx": 0.5,
+          "cam_cy": 0.5,
+          "subject_contract": {
+            "expected_subject": "survey cross-section at dusk: deep banded water in a rift valley, calm warm light",
+            "required": [
+              "rift cross-section",
+              "banded deep water",
+              "calm dusk palette"
+            ],
+            "forbidden": [
+              "pull-apart arrows",
+              "new subjects",
+              "photographic rendering"
+            ],
+            "role": "PAYOFF"
+          },
+          "one_second": {
+            "relationship": "the archive is still being written",
+            "labels": [
+              "A LIVING ARCHIVE"
+            ]
+          },
+          "overlays": []
+        }
+      ]
+    }
+  ]
+}

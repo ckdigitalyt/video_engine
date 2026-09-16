@@ -1,0 +1,24 @@
+{
+  "bed_files": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+  ],
+  "sfx": [
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/baikal_deep/audio/sfx_reveal.wav",
+      "at": 15.120000000000001,
+      "kind": "reveal"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/baikal_deep/audio/sfx_reveal.wav",
+      "at": 47.26,
+      "kind": "reveal"
+    }
+  ],
+  "authored": true
+}

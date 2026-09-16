@@ -1,0 +1,34 @@
+{
+ "version": "4.0",
+ "topic_grammar": ["CROSS_SECTION", "DEPTH_PROFILE", "SCALE", "MAP_VIEW"],
+ "brand": "ABYSS",
+ "palette": {
+  "primary": "#1F4E52",
+  "secondary": "#7FA3A8",
+  "accent": "#2E7E8C",
+  "background": "#0F1416",
+  "text": "#E8EFE9",
+  "muted": "#7C8B84",
+  "highlight": "#DDE8DF"
+ },
+ "illustration_style": "vintage bathymetric survey chart, deep teal and glacial cyan on chart cream, fine depth-sounding linework, cross-section and profile grammar, matte finish",
+ "illustration_medium": "vintage bathymetric-chart illustration with cross-section and depth-profile grammar (not photoreal, not flat vector)",
+ "lighting": "cold even light with glacial highlights",
+ "contrast": "medium-high, rich shadows",
+ "saturation": 0.62,
+ "texture": {
+  "grain": 0.012,
+  "vignette": 0.25
+ },
+ "typography": {
+  "display": "BebasNeue-Regular.ttf",
+  "body": "Inter-Variable.ttf"
+ },
+ "framing": "vertical 9:16, tall cross-section wides of lake profiles and rift walls with breathing room",
+ "graphic_language": "fine teal linework on chart cream, restrained cyan depth arrows, measured typography, water bodies as confident horizontal bands with depth-sound ticks, no heavy drop shadows on graphic elements",
+ "transition_style": "hard cut; per-shot fade-in from background colour",
+ "prompt_fragments": {
+  "prefix": "Vintage bathymetric survey chart, deep teal and glacial cyan wash on chart cream paper, fine depth-sounding linework, cross-section grammar, teal and cyan palette, cold even light, soft vignette, matte finish",
+  "suffix": "No readable text, no watermarks, no modern objects, no logos"
+ }
+}

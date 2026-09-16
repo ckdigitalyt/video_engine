@@ -1,0 +1,162 @@
+{
+ "story_id": "baikal_deep",
+ "brand": "ABYSS",
+ "title": "THE LAKE THAT OUT-HOLDS THE GREAT LAKES",
+ "subject": "geography",
+ "story_type": "geography_place",
+ "pad_s": 0.1,
+ "v7": {
+  "title_overlay": true
+ },
+ "concepts": [
+  {
+   "id": "lake",
+   "beats": [
+    "B1",
+    "B2",
+    "B3",
+    "B7"
+   ],
+   "verb": "deepen"
+  },
+  {
+   "id": "rift",
+   "beats": [
+    "B4",
+    "B7"
+   ],
+   "verb": "tear"
+  },
+  {
+   "id": "water",
+   "beats": [
+    "B2",
+    "B3"
+   ],
+   "verb": "collect"
+  },
+  {
+   "id": "species",
+   "beats": [
+    "B5"
+   ],
+   "verb": "isolate"
+  },
+  {
+   "id": "seal",
+   "beats": [
+    "B6"
+   ],
+   "verb": "drift"
+  }
+ ],
+ "beats": [
+  {
+   "beat_id": "B1",
+   "function": "HOOK",
+   "contradiction": {
+    "viewer_thinks": "the Great Lakes hold the world's most fresh water",
+    "actually": "one single Siberian lake holds more than all of them combined",
+    "reveal_beat": "B3"
+   },
+   "narration": "Ask where Earth keeps its fresh water, and most people picture the Great Lakes. The real answer is one lake in Siberia.",
+   "claim": "Lake Baikal alone holds more unfrozen fresh surface water than the North American Great Lakes combined",
+   "visual_question": "where is most of Earth's liquid fresh water?",
+   "visual_answer": "a single long lake in frozen Siberia, its depth not yet revealed",
+   "fact_ids": [
+    "f_volume"
+   ],
+   "start": 0.0,
+   "end": 8.2
+  },
+  {
+   "beat_id": "B2",
+   "function": "CURIOSITY",
+   "narration": "Lake Baikal is the deepest lake on Earth \u2014 and its water would cover all of North America about a metre deep.",
+   "claim": "Lake Baikal is the deepest lake on Earth; its volume spread over North America would cover it by roughly a metre",
+   "visual_question": "just how deep is one lake allowed to be?",
+   "visual_answer": "a cross-section sounding line dropping far past any other lake's depth",
+   "fact_ids": [
+    "f_deepest",
+    "f_volume"
+   ],
+   "key_number": "1,642 m",
+   "key_number_rect": [
+    0.36,
+    0.24,
+    0.3,
+    0.11
+   ],
+   "start": 8.2,
+   "end": 14.72
+  },
+  {
+   "beat_id": "B3",
+   "function": "REVEAL",
+   "narration": "One thousand six hundred and forty-two metres deep, holding roughly one fifth of all the unfrozen fresh surface water on the planet.",
+   "claim": "Baikal holds roughly one fifth of Earth's unfrozen fresh surface water, at 1,642 metres the deepest lake",
+   "visual_question": "how much water does one rift valley gather?",
+   "visual_answer": "volume bars: one Baikal bar towering over the combined Great Lakes bar",
+   "fact_ids": [
+    "f_volume",
+    "f_deepest"
+   ],
+   "start": 14.72,
+   "end": 22.77
+  },
+  {
+   "beat_id": "B4",
+   "function": "EXPLANATION",
+   "narration": "The depth has an engine: Baikal sits in a rift, a tear in the crust that is still being pulled apart \u2014 so the basin keeps sinking.",
+   "claim": "Baikal lies in an active continental rift that keeps widening, so the basin keeps deepening",
+   "visual_question": "why is the lake still so deep?",
+   "visual_answer": "a crust cross-section being pulled apart, with the lake basin sinking between the shoulders",
+   "fact_ids": [
+    "f_rift"
+   ],
+   "start": 22.77,
+   "end": 31.02
+  },
+  {
+   "beat_id": "B5",
+   "function": "ESCALATION",
+   "narration": "It is also the oldest lake on Earth. Some twenty-five million years of isolation built species that live nowhere else.",
+   "claim": "at roughly 25 million years Baikal is the world's oldest lake, and most of its species are endemics found nowhere else",
+   "visual_question": "what does twenty-five million years of isolation build?",
+   "visual_answer": "an ark of strange endemic species: transparent fish, sponge gardens on the deep floor",
+   "fact_ids": [
+    "f_oldest",
+    "f_endemics"
+   ],
+   "start": 31.02,
+   "end": 38.22
+  },
+  {
+   "beat_id": "B6",
+   "function": "ESCALATION",
+   "narration": "Then the impossibility: a seal, living and breeding a thousand kilometres from any ocean \u2014 and its route in is still argued about.",
+   "claim": "the Baikal seal (nerpa) lives and breeds entirely in fresh water, far from any ocean; its route there is debated",
+   "visual_question": "what is a seal doing a thousand kilometres from the sea?",
+   "visual_answer": "a seal resting on lake ice, the nearest ocean far beyond the horizon",
+   "fact_ids": [
+    "f_nerpa"
+   ],
+   "start": 38.22,
+   "end": 46.86
+  },
+  {
+   "beat_id": "B7",
+   "function": "PAYOFF",
+   "narration": "Baikal is not a pond that got lucky. It is a living archive: ancient, deepening, still opening.",
+   "claim": "Baikal is an ancient, still-active rift lake that keeps deepening as the rift opens",
+   "visual_question": "so what is Lake Baikal, really?",
+   "visual_answer": "a living archive: a rift valley filling with twenty-five million years of water",
+   "fact_ids": [
+    "f_rift",
+    "f_oldest"
+   ],
+   "start": 46.86,
+   "end": 53.99
+  }
+ ]
+}
