@@ -1,0 +1,150 @@
+{
+ "claims": [
+  {
+   "id": "f_tambora_eruption",
+   "beats": [
+    "B2"
+   ],
+   "claim": "Mount Tambora erupted in April 1815 in the largest eruption in recorded history, losing over a kilometre of summit height",
+   "definition": "the April 1815 eruption of Mount Tambora on Sumbawa, Indonesia, is ranked VEI 7, the largest known historic eruption; the summit elevation was reduced by more than a kilometre (from roughly 4,300 m to about 2,850 m)",
+   "current_record_holder": "largest known eruption in recorded history (VEI 7)",
+   "measured_value": "VEI 7; summit height reduced by roughly 1,300-1,400 m",
+   "date_verified": "2026-09",
+   "authoritative_source": "Oppenheimer, 'Climatic, environmental and human consequences of the largest known historic eruption: Tambora volcano (Indonesia) 1815', Progress in Physical Geography 27 (2003); Self, Gertisser et al. field studies",
+   "source_url": "https://doi.org/10.1191/0309133303pp379ra",
+   "historically_changed": false,
+   "sources": [
+    "Oppenheimer 2003",
+    "Smithsonian GVP Tambora profile"
+   ],
+   "verified": true,
+   "notes": "narration says 'the largest eruption in recorded history' and 'more than a kilometre of its summit' \u2014 both defensible",
+   "nuance": {
+    "classification": "STRONG_CONSENSUS",
+    "note": "VEI 7 ranking and summit collapse magnitude are standard volcanology"
+   }
+  },
+  {
+   "id": "f_strato_veil",
+   "beats": [
+    "B3",
+    "B7"
+   ],
+   "claim": "Tambora injected tens of millions of tonnes of sulfur into the stratosphere, where global winds spread a planet-wide veil",
+   "definition": "the eruption injected an estimated ~50-60 Tg of sulfur dioxide into the stratosphere, oxidizing to sulfate aerosols that circled the hemisphere within months; the stratosphere is above the weather, so the aerosols were not rained out quickly",
+   "current_record_holder": "n/a",
+   "measured_value": "estimates ~40-60 Tg SO2 (tens of millions of tonnes); residence time roughly 1-3 years",
+   "date_verified": "2026-09",
+   "authoritative_source": "Oppenheimer, Progress in Physical Geography 27 (2003); Sigl et al., 'Timing and climate forcing of volcanic eruptions for the past 2,500 years', Nature 523 (2015)",
+   "source_url": "https://doi.org/10.1038/nature14565",
+   "historically_changed": true,
+   "sources": [
+    "Oppenheimer 2003",
+    "Sigl et al. 2015"
+   ],
+   "verified": true,
+   "notes": "narration deliberately says 'tens of millions of tonnes' to match the published range; 'above the rain' carries the residence-time point",
+   "nuance": {
+    "classification": "STRONG_CONSENSUS",
+    "note": "stratospheric injection and global aerosol spread are well established; the exact total varies by reconstruction (ice-core based)"
+   }
+  },
+  {
+   "id": "f_global_cooling",
+   "beats": [
+    "B4"
+   ],
+   "claim": "stratospheric sulfate aerosols scattered sunlight and cooled the planet by roughly half a degree Celsius in 1816",
+   "definition": "stratospheric sulfate aerosols scatter and absorb solar radiation; reconstructions put the 1816 global mean surface temperature anomaly at roughly -0.4 to -0.7 degrees Celsius relative to surrounding years",
+   "current_record_holder": "n/a",
+   "measured_value": "1816 global-mean anomaly of about -0.4 to -0.7 degC depending on reconstruction; narration says 'roughly half a degree'",
+   "date_verified": "2026-09",
+   "authoritative_source": "Sigl et al., Nature 523 (2015); Oppenheimer, Progress in Physical Geography 27 (2003); Raible et al., 'Tambora 1815 as a test case for high impact volcanic eruptions', WIREs Climate Change (2016)",
+   "source_url": "https://doi.org/10.1002/wcc.419",
+   "historically_changed": false,
+   "sources": [
+    "Sigl et al. 2015",
+    "Raible et al. 2016"
+   ],
+   "verified": true,
+   "notes": "narration hedges with 'roughly half a degree'; the small-number-huge-consequence contrast is the beat's point",
+   "nuance": {
+    "classification": "SUPPORTED_BUT_COMPLEX",
+    "note": "the cooling is firmly established; the exact global-mean magnitude varies across reconstructions (0.4-0.7 degC), so narration stays at 'roughly half a degree'"
+   }
+  },
+  {
+   "id": "f_june_snow",
+   "beats": [
+    "B1",
+    "B5"
+   ],
+   "claim": "in 1816 June snow fell on New England and killing frosts recurred through the summer months",
+   "definition": "documented weather records describe June 1816 snow across northern New England and killing frosts in June, July and August 1816, with dates recorded in contemporary diaries and almanacs ('eighteen-hundred-and-froze-to-death')",
+   "current_record_holder": "n/a",
+   "measured_value": "June snowfall in New England 1816 (documented); frosts in each summer month",
+   "date_verified": "2026-09",
+   "authoritative_source": "Oppenheimer, Progress in Physical Geography 27 (2003); Post, 'The Last Great Subsistence Crisis in the Western World' (1977); contemporary New England weather records",
+   "source_url": "https://doi.org/10.1191/0309133303pp379ra",
+   "historically_changed": false,
+   "sources": [
+    "Oppenheimer 2003",
+    "Post 1977"
+   ],
+   "verified": true,
+   "notes": "narration avoids specific snowfall amounts; 'every summer month' matches the documented June/July/August frosts",
+   "nuance": {
+    "classification": "STRONG_CONSENSUS",
+    "note": "the 1816 New England summer anomalies are among the best-documented weather events of the era"
+   }
+  },
+  {
+   "id": "f_famine",
+   "beats": [
+    "B6"
+   ],
+   "claim": "the 1816 harvest failures brought soaring prices, famine and food riots; historians describe it as the last great subsistence crisis of the Western world",
+   "definition": "the 1816-17 harvest failures across Europe and North America drove grain prices to record highs, sparked food riots, and caused famine conditions in parts of Europe and Asia; historian John D. Post characterized it as the last great subsistence crisis in the Western world",
+   "current_record_holder": "n/a",
+   "measured_value": "qualitative historical characterization; narration attributes the phrase to historians",
+   "date_verified": "2026-09",
+   "authoritative_source": "Post, 'The Last Great Subsistence Crisis in the Western World' (1977); Oppenheimer, Progress in Physical Geography 27 (2003)",
+   "source_url": "https://doi.org/10.1191/0309133303pp379ra",
+   "historically_changed": false,
+   "sources": [
+    "Post 1977",
+    "Oppenheimer 2003"
+   ],
+   "verified": true,
+   "notes": "narration says 'historians still call it' \u2014 the phrase is Post's, widely repeated in the literature",
+   "nuance": {
+    "classification": "STRONG_CONSENSUS",
+    "note": "harvest failure and social consequences are documented; the 'last great subsistence crisis' phrasing is historiographical, hence attributed"
+   }
+  },
+  {
+   "id": "f_attribution",
+   "beats": [
+    "B7"
+   ],
+   "claim": "the 1816 climate anomaly was traced to the 1815 Tambora eruption only decades later, after the veil had settled",
+   "definition": "contemporaries did not connect the strange weather of 1816 to Tambora; the volcanic attribution developed through 19th-20th century science (Franklin's 1784 'dry fog' analogy, later aerosol climatology), long after the aerosol veil had settled out",
+   "current_record_holder": "n/a",
+   "measured_value": "qualitative: attribution established long after the event; narration avoids pinning a date",
+   "date_verified": "2026-09",
+   "authoritative_source": "Oppenheimer, Progress in Physical Geography 27 (2003); Raible et al., WIREs Climate Change (2016)",
+   "source_url": "https://doi.org/10.1002/wcc.419",
+   "historically_changed": true,
+   "sources": [
+    "Oppenheimer 2003",
+    "Raible et al. 2016"
+   ],
+   "verified": true,
+   "notes": "narration says 'for years, no one connected' and 'only decades later' implicitly via 'traced ... only decades later' in the claim; the payoff stays qualitative",
+   "nuance": {
+    "classification": "STRONG_CONSENSUS",
+    "note": "the delayed attribution story is well documented in the history of science"
+   }
+  }
+ ]
+}

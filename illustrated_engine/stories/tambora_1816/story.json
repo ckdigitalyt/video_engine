@@ -1,0 +1,166 @@
+{
+ "story_id": "tambora_1816",
+ "brand": "EPOCH",
+ "title": "THE YEAR WITHOUT A SUMMER",
+ "subject": "history",
+ "story_type": "history_event",
+ "pad_s": 0.1,
+ "v7": {
+  "title_overlay": true
+ },
+ "concepts": [
+  {
+   "id": "volcano",
+   "beats": [
+    "B2",
+    "B3"
+   ],
+   "verb": "explode"
+  },
+  {
+   "id": "sulfur",
+   "beats": [
+    "B3",
+    "B4",
+    "B7"
+   ],
+   "verb": "veil"
+  },
+  {
+   "id": "sunlight",
+   "beats": [
+    "B4"
+   ],
+   "verb": "dim"
+  },
+  {
+   "id": "weather",
+   "beats": [
+    "B1",
+    "B5"
+   ],
+   "verb": "break"
+  },
+  {
+   "id": "harvest",
+   "beats": [
+    "B5",
+    "B6"
+   ],
+   "verb": "fail"
+  }
+ ],
+ "beats": [
+  {
+   "beat_id": "B1",
+   "function": "HOOK",
+   "contradiction": {
+    "viewer_thinks": "1816's bizarre weather was a local curse \u2014 some regions just got unlucky",
+    "actually": "one eruption on the far side of the planet reorganized the weather of the whole Northern Hemisphere",
+    "reveal_beat": "B3"
+   },
+   "narration": "In June 1816, snow fell on New England. Frost struck every summer month. No one could say why.",
+   "claim": "1816 brought anomalous summer cold and June snow to New England with no visible cause at the time",
+   "visual_question": "what could turn summer into winter?",
+   "visual_answer": "a New England field under June snow, the cause nowhere in sight",
+   "fact_ids": [
+    "f_june_snow"
+   ],
+   "start": 0.0,
+   "end": 7.81
+  },
+  {
+   "beat_id": "B2",
+   "function": "CURIOSITY",
+   "narration": "The seed was April 1815, on Sumbawa: Mount Tambora exploded \u2014 the largest eruption in recorded history \u2014 losing a kilometre of summit.",
+   "claim": "Mount Tambora erupted in April 1815 in the largest eruption in recorded history, losing over a kilometre of summit height",
+   "visual_question": "how big was Tambora's eruption?",
+   "visual_answer": "the volcano's blast column with more than a kilometre of the summit blown away",
+   "fact_ids": [
+    "f_tambora_eruption"
+   ],
+   "start": 7.81,
+   "end": 17.81
+  },
+  {
+   "beat_id": "B3",
+   "function": "REVEAL",
+   "narration": "Its real weapon was invisible: tens of millions of tonnes of sulfur into the stratosphere \u2014 above the rain \u2014 a veil around the planet.",
+   "claim": "Tambora injected tens of millions of tonnes of sulfur into the stratosphere, where global winds spread a planet-wide veil",
+   "visual_question": "how does one volcano reach the whole planet?",
+   "visual_answer": "a sulfur veil circling the globe in the stratosphere, above the weather",
+   "fact_ids": [
+    "f_strato_veil"
+   ],
+   "key_number": "VEI 7",
+   "key_number_rect": [
+    0.36,
+    0.24,
+    0.3,
+    0.11
+   ],
+   "start": 17.81,
+   "end": 26.58
+  },
+  {
+   "beat_id": "B4",
+   "function": "EXPLANATION",
+   "narration": "The veil scatters sunlight back to space. The world cooled by roughly half a degree. To a ripening crop, that was catastrophe.",
+   "claim": "stratospheric sulfate aerosols scattered sunlight and cooled the planet by roughly half a degree Celsius in 1816",
+   "visual_question": "how cold can a veil of droplets make the world?",
+   "visual_answer": "sunlight scattering off the veil, with global temperature down about half a degree",
+   "fact_ids": [
+    "f_global_cooling"
+   ],
+   "key_number": "\u22120.5\u00b0C",
+   "key_number_rect": [
+    0.58,
+    0.26,
+    0.28,
+    0.11
+   ],
+   "start": 26.58,
+   "end": 35.56
+  },
+  {
+   "beat_id": "B5",
+   "function": "ESCALATION",
+   "narration": "Then came 1816: June snow on New England, frost month after month, and the growing season collapsed.",
+   "claim": "in 1816 June snow fell on New England and killing frosts recurred through the summer months",
+   "visual_question": "what does a failed summer look like?",
+   "visual_answer": "June snow on a New England field, frost lines through young crops",
+   "fact_ids": [
+    "f_june_snow"
+   ],
+   "start": 35.56,
+   "end": 43.47
+  },
+  {
+   "beat_id": "B6",
+   "function": "ESCALATION",
+   "narration": "Harvests failed on three continents. Food riots spread \u2014 historians still call it the last great subsistence crisis of the Western world.",
+   "claim": "the 1816 harvest failures brought soaring prices, famine and food riots; historians describe it as the last great subsistence crisis of the Western world",
+   "visual_question": "what does half a degree do to dinner?",
+   "visual_answer": "empty granary sacks and bread queues: the harvest that never came",
+   "fact_ids": [
+    "f_famine"
+   ],
+   "start": 43.47,
+   "end": 52.3
+  },
+  {
+   "beat_id": "B7",
+   "function": "PAYOFF",
+   "narration": "For years, no one connected the skies to the mountain. The veil settled \u2014 one mountain, one planet, one atmosphere.",
+   "claim": "the 1816 climate anomaly was traced to the 1815 Tambora eruption only decades later, after the veil had settled",
+   "visual_question": "so what was the Year Without a Summer?",
+   "visual_answer": "a planet-scale echo of one eruption, and the first lesson that the atmosphere is one connected system",
+   "fact_ids": [
+    "f_attribution",
+    "f_strato_veil"
+   ],
+   "start": 52.3,
+   "end": 60.78
+  }
+ ]
+}

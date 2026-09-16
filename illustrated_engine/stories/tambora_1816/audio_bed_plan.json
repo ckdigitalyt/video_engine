@@ -1,0 +1,24 @@
+{
+  "bed_files": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+  ],
+  "sfx": [
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/tambora_1816/audio/sfx_reveal.wav",
+      "at": 18.209999999999997,
+      "kind": "reveal"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/tambora_1816/audio/sfx_reveal.wav",
+      "at": 52.699999999999996,
+      "kind": "reveal"
+    }
+  ],
+  "authored": true
+}

@@ -1,0 +1,34 @@
+{
+ "version": "4.0",
+ "topic_grammar": ["MAP_VIEW", "ATMOSPHERIC_COLUMN", "SCALE", "TIMELINE"],
+ "brand": "EPOCH",
+ "palette": {
+  "primary": "#3F4864",
+  "secondary": "#7A6A50",
+  "accent": "#C05A2E",
+  "background": "#14110D",
+  "text": "#EFE8D8",
+  "muted": "#8A8272",
+  "highlight": "#E5DCC4"
+ },
+ "illustration_style": "mid-1800s copperplate engraving, charcoal and ember on smoke-toned paper, dense cross-hatch shading, atmospheric column and map grammar, matte finish",
+ "illustration_medium": "vintage copperplate-engraving illustration with atmospheric-column and map grammar (not photoreal, not flat vector)",
+ "lighting": "low overcast light with ember highlights",
+ "contrast": "medium-high, rich shadows",
+ "saturation": 0.68,
+ "texture": {
+  "grain": 0.014,
+  "vignette": 0.27
+ },
+ "typography": {
+  "display": "BebasNeue-Regular.ttf",
+  "body": "Inter-Variable.ttf"
+ },
+ "framing": "vertical 9:16, tall atmospheric wides of eruption columns, globe arcs and snow fields with breathing room",
+ "graphic_language": "charcoal cross-hatch linework on smoke-toned paper, restrained ember annotation arrows, measured typography, sky masses as long horizontal hatch bands, no heavy drop shadows on graphic elements",
+ "transition_style": "hard cut; per-shot fade-in from background colour",
+ "prompt_fragments": {
+  "prefix": "Mid-1800s copperplate engraving, charcoal and ember wash on smoke-toned paper, dense cross-hatch linework, atmospheric column and map grammar, slate and ember palette, low overcast light, soft vignette, matte finish",
+  "suffix": "No readable text, no watermarks, no modern objects, no logos"
+ }
+}

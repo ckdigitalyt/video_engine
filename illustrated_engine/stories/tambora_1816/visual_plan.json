@@ -1,0 +1,398 @@
+{
+  "story_id": "tambora_1816",
+  "engine": "v6",
+  "fps": 30,
+  "size": [
+    1080,
+    1920
+  ],
+  "regions": {
+    "visual_rect": [
+      0,
+      176,
+      1080,
+      1744
+    ],
+    "center": [
+      0.3,
+      0.38,
+      0.4,
+      0.24
+    ],
+    "upper": [
+      0.22,
+      0.06,
+      0.56,
+      0.2
+    ],
+    "lower": [
+      0.22,
+      0.7,
+      0.56,
+      0.2
+    ]
+  },
+  "beats": [
+    {
+      "beat_id": "B1",
+      "shots": [
+        {
+          "shot_id": "S01",
+          "shot_type": "HOOK",
+          "asset": "B1_june_snow",
+          "duration_est": 7.81,
+          "crop_bias_y": 0.45,
+          "captions": "phrase",
+          "role": "HERO",
+          "chrome": "none",
+          "tag": "",
+          "visual_mode": "CINEMATIC",
+          "evidence_type": "DIRECT_EVIDENCE",
+          "motion_type": "CAMERA_MOTION",
+          "opening": true,
+          "title": "",
+          "purpose": "Open on a New England field under June snow: summer visibly broken, cause nowhere in sight",
+          "claim": "1816 brought anomalous summer cold and June snow to New England with no visible cause at the time",
+          "evidence": "full-bleed plate: snow drifts over a tilled field under a pale overcast sun, no explanation offered yet",
+          "motion_reason": "slow push-in so the snowed-in field reads as the subject",
+          "transition_reason": "cut back to the eruption that started it",
+          "cam_from_scale": 1.0,
+          "cam_to_scale": 1.08,
+          "cam_cx": 0.5,
+          "cam_cy": 0.5,
+          "subject_contract": {
+            "expected_subject": "engraving of a tilled field under June snow with a pale overcast sun",
+            "required": [
+              "snow-covered field",
+              "pale sun",
+              "overcast sky"
+            ],
+            "forbidden": [
+              "thermometer graphics",
+              "human figures close-up",
+              "brand logos"
+            ],
+            "role": "HERO"
+          },
+          "one_second": {
+            "relationship": "summer snow, unexplained",
+            "labels": [
+              "JUNE 1816",
+              "NEW ENGLAND"
+            ]
+          },
+          "overlays": []
+        }
+      ]
+    },
+    {
+      "beat_id": "B2",
+      "shots": [
+        {
+          "shot_id": "S02",
+          "shot_type": "DIAGRAM",
+          "asset": "B2_tambora_erupts",
+          "duration_est": 10.0,
+          "crop_bias_y": 0.45,
+          "captions": "phrase",
+          "role": "DIAGRAM",
+          "chrome": "section",
+          "tag": "APRIL 1815",
+          "visual_mode": "DIAGRAM",
+          "evidence_type": "EXPLANATORY_DIAGRAM",
+          "motion_type": "INFORMATION_MOTION",
+          "purpose": "Show the eruption: a full atmospheric column and the summit gone",
+          "claim": "Mount Tambora erupted in April 1815 in the largest eruption in recorded history, losing over a kilometre of summit height",
+          "evidence": "diagram card: volcano column rising into the sky, a dashed ghost outline marking the lost summit above the truncated cone",
+          "motion_reason": "near-static drift so the eruption column is the motion",
+          "transition_reason": "cut to the stratospheric veil reveal",
+          "cam_from_scale": 1.05,
+          "cam_to_scale": 1.1,
+          "cam_cx": 0.5,
+          "cam_cy": 0.5,
+          "subject_contract": {
+            "expected_subject": "engraving diagram: erupting volcano with a tall ash column and a dashed ghost outline of the lost summit",
+            "required": [
+              "eruption column",
+              "truncated cone",
+              "dashed lost-summit outline"
+            ],
+            "forbidden": [
+              "numeric axis units",
+              "app UI",
+              "photographic rendering"
+            ],
+            "role": "DIAGRAM"
+          },
+          "one_second": {
+            "relationship": "the mountain explodes and shrinks",
+            "labels": [
+              "TAMBORA",
+              "APRIL 1815",
+              "SUMMIT LOST"
+            ]
+          },
+          "overlays": []
+        }
+      ]
+    },
+    {
+      "beat_id": "B3",
+      "shots": [
+        {
+          "shot_id": "S03",
+          "shot_type": "REVEAL",
+          "asset": "B3_strato_veil",
+          "duration_est": 8.77,
+          "crop_bias_y": 0.45,
+          "captions": "phrase",
+          "role": "DIAGRAM",
+          "chrome": "section",
+          "tag": "ABOVE THE RAIN",
+          "visual_mode": "TRANSFORMATION",
+          "evidence_type": "EXPLANATORY_DIAGRAM",
+          "motion_type": "INFORMATION_MOTION",
+          "surprise": {
+            "class": "SPATIAL_REVEAL",
+            "evidence": "the eruption plume rises past the weather into the stratosphere and spreads into a veil ringing the entire globe arc"
+          },
+          "purpose": "Reveal the mechanism: sulfur driven above the weather, where winds spread a planet-wide veil",
+          "claim": "Tambora injected tens of millions of tonnes of sulfur into the stratosphere, where global winds spread a planet-wide veil",
+          "evidence": "globe-arc cross-section: a sulfur veil band ringing the arc, rain clouds hugging the surface far below it",
+          "motion_reason": "drift along the veil so the global spread is the motion",
+          "transition_reason": "cut to the sunlight arithmetic",
+          "cam_from_scale": 1.0,
+          "cam_to_scale": 1.07,
+          "cam_cx": 0.5,
+          "cam_cy": 0.48,
+          "subject_contract": {
+            "expected_subject": "engraving globe-arc: sulfur veil band ringing the planet above low rain clouds",
+            "required": [
+              "globe arc",
+              "veil band",
+              "rain clouds below"
+            ],
+            "forbidden": [
+              "chemical formulas",
+              "graph axes",
+              "photographic rendering"
+            ],
+            "role": "DIAGRAM"
+          },
+          "one_second": {
+            "relationship": "the veil rises above the weather and rings the planet",
+            "labels": [
+              "STRATOSPHERE",
+              "THE VEIL",
+              "RAIN BELOW"
+            ]
+          },
+          "overlays": []
+        }
+      ]
+    },
+    {
+      "beat_id": "B4",
+      "shots": [
+        {
+          "shot_id": "S04",
+          "shot_type": "EXPLAIN",
+          "asset": "B4_sun_scatter",
+          "duration_est": 8.98,
+          "crop_bias_y": 0.45,
+          "captions": "phrase",
+          "role": "COMPARISON",
+          "chrome": "section",
+          "tag": "HALF A DEGREE",
+          "visual_mode": "SPLIT",
+          "evidence_type": "EXPLANATORY_DIAGRAM",
+          "motion_type": "INFORMATION_MOTION",
+          "purpose": "Split the arithmetic: sun in, sunlight scattered back out, and what half a degree means to a crop",
+          "claim": "stratospheric sulfate aerosols scattered sunlight and cooled the planet by roughly half a degree Celsius in 1816",
+          "evidence": "split card: left, sun rays hitting a droplet veil and bouncing back up; right, one young plant under a small frost line",
+          "motion_reason": "held framing; the scattered-light contrast is the information",
+          "transition_reason": "cut to the failed summer",
+          "cam_from_scale": 1.02,
+          "cam_to_scale": 1.06,
+          "cam_cx": 0.5,
+          "cam_cy": 0.5,
+          "subject_contract": {
+            "expected_subject": "engraving split: sun rays bouncing off a droplet veil on the left, a frost-touched seedling on the right",
+            "required": [
+              "sun rays",
+              "droplet veil",
+              "frost-touched seedling"
+            ],
+            "forbidden": [
+              "numeric axis units",
+              "chemical formulas",
+              "photographic rendering"
+            ],
+            "role": "COMPARISON"
+          },
+          "one_second": {
+            "relationship": "sunlight out, warmth down",
+            "labels": [
+              "SUNLIGHT",
+              "SCATTERED",
+              "\u22120.5\u00b0C"
+            ]
+          },
+          "overlays": []
+        }
+      ]
+    },
+    {
+      "beat_id": "B5",
+      "shots": [
+        {
+          "shot_id": "S05",
+          "shot_type": "EXPLAIN",
+          "asset": "B5_frost_months",
+          "duration_est": 7.91,
+          "crop_bias_y": 0.45,
+          "captions": "phrase",
+          "role": "DIAGRAM",
+          "chrome": "section",
+          "tag": "THE FAILED SUMMER",
+          "visual_mode": "DIAGRAM",
+          "evidence_type": "EXPLANATORY_DIAGRAM",
+          "motion_type": "INFORMATION_MOTION",
+          "purpose": "Show the anomaly month by month: June snow, then frost on repeat through summer",
+          "claim": "in 1816 June snow fell on New England and killing frosts recurred through the summer months",
+          "evidence": "timeline card: three field panels labeled June, July, August, each with frost lines through young crops, snow on the June panel",
+          "motion_reason": "drift along the month panels so the recurring frost is the motion",
+          "transition_reason": "cut to the human cost",
+          "cam_from_scale": 1.0,
+          "cam_to_scale": 1.08,
+          "cam_cx": 0.5,
+          "cam_cy": 0.48,
+          "subject_contract": {
+            "expected_subject": "engraving timeline: three field panels for June, July, August with frost lines and June snow",
+            "required": [
+              "three month panels",
+              "frost lines",
+              "June snow"
+            ],
+            "forbidden": [
+              "numeric axis units",
+              "graph axes",
+              "photographic rendering"
+            ],
+            "role": "DIAGRAM"
+          },
+          "one_second": {
+            "relationship": "frost repeats every summer month",
+            "labels": [
+              "JUNE",
+              "JULY",
+              "AUGUST"
+            ]
+          },
+          "overlays": []
+        }
+      ]
+    },
+    {
+      "beat_id": "B6",
+      "shots": [
+        {
+          "shot_id": "S06",
+          "shot_type": "EXPLAIN",
+          "asset": "B6_harvest_fails",
+          "duration_est": 8.82,
+          "crop_bias_y": 0.45,
+          "captions": "phrase",
+          "role": "COMPARISON",
+          "chrome": "section",
+          "tag": "THE HARVEST THAT NEVER CAME",
+          "visual_mode": "DIAGRAM",
+          "evidence_type": "EXPLANATORY_DIAGRAM",
+          "motion_type": "INFORMATION_MOTION",
+          "purpose": "Show the human ledger: empty sacks, a bread queue, riots as the ledger of half a degree",
+          "claim": "the 1816 harvest failures brought soaring prices, famine and food riots; historians describe it as the last great subsistence crisis of the Western world",
+          "evidence": "engraving card: overturned empty grain sacks in the foreground, a long bread queue receding behind them",
+          "motion_reason": "near-static drift; the emptiness of the sacks is the information",
+          "transition_reason": "cut to the calm payoff",
+          "cam_from_scale": 1.02,
+          "cam_to_scale": 1.06,
+          "cam_cx": 0.5,
+          "cam_cy": 0.5,
+          "subject_contract": {
+            "expected_subject": "engraving: empty overturned grain sacks with a bread queue in the background",
+            "required": [
+              "empty grain sacks",
+              "bread queue",
+              "harvest ledger mood"
+            ],
+            "forbidden": [
+              "numeric price charts",
+              "modern clothing",
+              "photographic rendering"
+            ],
+            "role": "COMPARISON"
+          },
+          "one_second": {
+            "relationship": "no grain, rising hunger",
+            "labels": [
+              "HARVEST FAILS",
+              "FOOD RIOTS"
+            ]
+          },
+          "overlays": []
+        }
+      ]
+    },
+    {
+      "beat_id": "B7",
+      "shots": [
+        {
+          "shot_id": "S07",
+          "shot_type": "PAYOFF",
+          "asset": "B7_one_atmosphere",
+          "duration_est": 8.48,
+          "crop_bias_y": 0.45,
+          "captions": "phrase",
+          "role": "PAYOFF",
+          "chrome": "none",
+          "tag": "",
+          "visual_mode": "PAYOFF",
+          "evidence_type": "DIRECT_EVIDENCE",
+          "motion_type": "CAMERA_MOTION",
+          "end_card": "ONE ATMOSPHERE",
+          "opening": false,
+          "purpose": "Land the argument on the same field under clearing skies: the veil settled, the connection came decades later, the atmosphere is one system",
+          "claim": "the 1816 climate anomaly was traced to the 1815 Tambora eruption only decades later, after the veil had settled",
+          "evidence": "dusk reprise: the June-snow field now clear, a few fading veil dots high above a calm sky",
+          "motion_reason": "slow pull-out, the frame settles as the argument does",
+          "transition_reason": "final shot",
+          "cam_from_scale": 1.08,
+          "cam_to_scale": 1.0,
+          "cam_cx": 0.5,
+          "cam_cy": 0.5,
+          "subject_contract": {
+            "expected_subject": "engraving of the same field cleared of snow under a calm dusk sky with fading veil dots",
+            "required": [
+              "cleared field",
+              "calm dusk sky",
+              "fading veil dots"
+            ],
+            "forbidden": [
+              "eruption columns",
+              "new subjects",
+              "photographic rendering"
+            ],
+            "role": "PAYOFF"
+          },
+          "one_second": {
+            "relationship": "the sky cleared; the lesson remained",
+            "labels": [
+              "ONE ATMOSPHERE"
+            ]
+          },
+          "overlays": []
+        }
+      ]
+    }
+  ]
+}
