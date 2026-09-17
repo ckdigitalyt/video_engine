@@ -1,14 +1,20 @@
 """V11 P1 §8 — scroll-stop test (Jade_todo_v11).
 
-Editorial simulation of a feed viewer at the directive's checkpoints:
+Editorial simulation of a feed viewer at the directive's checkpoints.
+V12 P1 verification (Jade_todo_v12 §P1 Scroll Stop): the directive's
+question list is covered EXACTLY, one check per question, no gaps:
 
-  0.5 sec — What am I seeing?
-  2 sec   — Why should I continue?
-  5 sec   — What question am I waiting to have answered?
-  10 sec  — Have I learned something concrete?
-  20 sec  — Has the story escalated?
-  30 sec  — Has my mental model changed?
-  final 3 — Did the video pay off the opening promise?
+  0.5 s  What am I looking at?          -> t0.5_what_am_i_seeing (MAJOR)
+  2 s    Why should I continue?         -> t2_why_continue (MAJOR)
+  5 s    What question exists?          -> t5_question_open
+  10 s   What did I learn?              -> t10_learned_concrete (MAJOR)
+  20 s   Has the story escalated?       -> t20_escalated
+  30 s   Has the mental model changed?  -> t30_model_changed
+  final  Was the opening curiosity resolved? -> final_payoff (MAJOR)
+
+plus the V12-P0 hook-engine checkpoint t1_subject_visible (subject
+visible ~1s, no black/fade at 0.5s) which strengthens 0.5s/2s without
+duplicating any directive question.
 
 Severity model: a MAJOR failure must prevent publication (P0
 semantics, coordinated with the existing VIEWER_SIMULATION gate):
