@@ -210,7 +210,9 @@ def _ambient_base(shot, bible, plate_path: Path):
     # edge, no tone-mixed continuation bands) — the presentation-panel
     # look becomes one option among many, not the default.
     canvas = shot.get("canvas") or {}
-    full_bleed = str(canvas.get("panel_usage") or "") == "full_bleed"
+    # kit panel_usage "none" == no presentation panel == the art fills the
+    # canvas ("full_bleed" kept as an explicit alias).
+    full_bleed = str(canvas.get("panel_usage") or "") in ("none", "full_bleed")
     if _flags.fullbleed11() and not full_bleed:
         try:
             plate = Image.open(plate_path).convert("RGB")
