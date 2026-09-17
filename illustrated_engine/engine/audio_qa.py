@@ -1,4 +1,4 @@
-"""V11 P1 §9 — audio hierarchy QA (Jade_todo_v11).
+"""V11 P1 §9 — audio hierarchy QA (Jade_todo_v11); V12 P1 additions.
 
 Default hierarchy: NARRATION > intentional SFX > subtle ambience/music,
 with deliberate silence — a continuous tonal/ambient bed is NOT the
@@ -10,7 +10,13 @@ QA over the rendered master + bed plan + narration timing:
   speech_to_bed_ratio      narration stem vs bed loudness delta (null
                            when the plan is bed-free — the silence default)
   low_frequency_tonal_noise  spectral-peak scan of the quietest windows
-                           (tonal hum/rumble filling the silence)
+                           (tonal hum/rumble filling the silence); V12 P1
+                           DISCRIMINATES the source stem-level (narration
+                           harmonics / intentional tonal bed / electrical
+                           50/60 Hz hum / repetitive synthetic tone) —
+                           the 0.02 rule itself is unchanged
+  silence_usage            V12 P1 — share + longest span of sub-floor
+                           level (reported, informational)
   continuous_bed_duration  share of the timeline a bed covers; >70%
                            fails unless the bed is explicitly authored
   unnecessary_ambience     bed-only stretches (no narration, no SFX)
@@ -95,6 +101,131 @@ def _tonal_peaks(x: np.ndarray, sr: int, offs: list) -> list:
             continue
         out.append(round(float(spec[band].max() / spec.sum()), 4))
     return out
+
+
+# --- V12 P1 — LOW_FREQ_TONALITY discrimination (Jade_todo_v12 §P1) ---------
+# The 0.02 narration-silence rule above stays UNCHANGED. What is new: when
+# tonal energy shows up in the quiet windows, the QA now names WHAT it is —
+# narration harmonics, an intentional (declared) tonal bed, electrical
+# 50/60 Hz hum, or a repetitive synthetic tone — stem-level FFT root
+# cause, building on the V11 P1b-fix approach in audio_mix/procedural.
+
+_CLASS_BAND = (30.0, 300.0)   # hum + bed fundamentals + voice fundamentals
+_HUM_SERIES = (50.0, 60.0, 100.0, 120.0, 150.0, 180.0, 200.0, 240.0, 300.0)
+
+
+def _window_peaks(x: np.ndarray, sr: int, o: int, lo: float = _CLASS_BAND[0],
+                  hi: float = _CLASS_BAND[1], top: int = 3) -> list:
+    """Top spectral peaks (freq_hz, share) of one 1 s window."""
+    w = int(1.0 * sr)
+    seg = x[o:o + w]
+    if len(seg) < w // 2:
+        return []
+    spec = np.abs(np.fft.rfft(seg * np.hanning(len(seg)))) ** 2
+    freqs = np.fft.rfftfreq(len(seg), 1.0 / sr)
+    band = (freqs >= lo) & (freqs <= hi)
+    if not band.any() or spec.sum() <= 0:
+        return []
+    sb, fb = spec[band], freqs[band]
+    order = np.argsort(sb)[::-1]
+    peaks, taken = [], []
+    for i in order:
+        f = float(fb[i])
+        if any(abs(f - t) < 6.0 for t in taken):
+            continue  # skip sidebands of an already-taken peak
+        peaks.append((round(f, 1), round(float(sb[i] / spec.sum()), 4)))
+        taken.append(f)
+        if len(peaks) >= top:
+            break
+    return peaks
+
+
+def _stem_peaks(path: Path, lo: float = _CLASS_BAND[0],
+                hi: float = _CLASS_BAND[1], top: int = 3) -> list:
+    """Dominant tonal frequencies of a stem/file (average spectrum over
+    its 1 s windows) — the stem-level FFT root-cause reference."""
+    try:
+        x = _decode_mono(Path(path))
+    except Exception:
+        return []
+    if x.size < 16000:
+        return []
+    acc = None
+    n = 0
+    for o in range(0, len(x) - 8000, 16000):
+        seg = x[o:o + 16000]
+        if len(seg) < 16000:
+            break
+        spec = np.abs(np.fft.rfft(seg * np.hanning(len(seg)))) ** 2
+        acc = spec if acc is None else acc + spec
+        n += 1
+    if not n or acc.sum() <= 0:
+        return []
+    freqs = np.fft.rfftfreq(16000, 1.0 / 16000)
+    band = (freqs >= lo) & (freqs <= hi)
+    if not band.any():
+        return []
+    sb, fb = acc[band] / n, freqs[band]
+    order = np.argsort(sb)[::-1]
+    peaks, taken = [], []
+    for i in order:
+        f = float(fb[i])
+        if any(abs(f - t) < 6.0 for t in taken):
+            continue
+        peaks.append(round(f, 1))
+        taken.append(f)
+        if len(peaks) >= top:
+            break
+    return peaks
+
+
+def _classify_tonal(x: np.ndarray, sr: int, offs: list,
+                    narration_windows: list, bed_files: list,
+                    narration_stem: Path | None) -> dict:
+    """Classify tonal energy in the quiet windows into the directive's
+    four classes (narration harmonics / intentional tonal bed / electrical
+    50/60 Hz hum / repetitive synthetic tone)."""
+    bed_peaks = []
+    for bf in bed_files or []:
+        if bf and Path(bf).exists():
+            bed_peaks.extend(_stem_peaks(Path(bf)))
+    nar_peaks = _stem_peaks(narration_stem) if (
+        narration_stem and Path(narration_stem).exists()) else []
+    rows = []
+    for o in offs:
+        t = o / sr
+        in_narration = any(a - 0.25 <= t < b + 0.25
+                           for a, b in narration_windows)
+        for freq, share in _window_peaks(x, sr, o):
+            cls, ev = None, ""
+            if in_narration:
+                cls, ev = "narration_harmonics", "quiet window overlaps a " \
+                    "narration-active span"
+            elif nar_peaks and any(abs(freq - p) <= 2.0 for p in nar_peaks):
+                cls, ev = "narration_harmonics", \
+                    f"{freq} Hz matches a narration-stem peak"
+            elif any(abs(freq - h) <= 1.5 for h in _HUM_SERIES):
+                cls, ev = "electrical_hum", \
+                    f"{freq} Hz sits on the 50/60 Hz harmonic series"
+            elif bed_peaks and any(abs(freq - p) <= 2.0 for p in bed_peaks):
+                cls, ev = "intentional_tonal_bed", \
+                    f"{freq} Hz matches a declared bed stem peak"
+            else:
+                cls, ev = "repetitive_synthetic_tone", \
+                    f"stable {freq} Hz tone matching no bed/hum/voice peak"
+            rows.append({"t": round(t, 2), "freq_hz": freq, "share": share,
+                         "class": cls, "evidence": ev})
+    # stability: same class+fuzzy freq across >= 2 windows -> repetitive
+    by_class = {}
+    for r in rows:
+        by_class.setdefault(r["class"], []).append(r)
+    counts = {k: len(v) for k, v in by_class.items()}
+    dominant = (max(by_class.items(), key=lambda kv: max(
+        r["share"] for r in kv[1]))[0] if rows else None)
+    return {"rows": rows, "class_counts": counts,
+            "dominant_class": dominant,
+            "bed_reference_hz": sorted(set(bed_peaks))[:6],
+            "narration_reference_hz": sorted(set(nar_peaks))[:6]}
 
 
 def _bed_coverage(bed_plan: dict, shot_durs: list) -> tuple:
@@ -225,6 +356,8 @@ def run(plan: dict, bed_plan: dict, timing: dict, master: Path,
     # --- dynamic range + low-frequency tonal noise (rendered master) --------
     lra = None
     master_path = Path(master)
+    tonal_class = {"rows": [], "class_counts": {}, "dominant_class": None}
+    silence_usage = None
     if master_path.exists():
         p = subprocess.run(
             ["ffmpeg", "-nostdin", "-i", str(master_path), "-af",
@@ -238,8 +371,32 @@ def run(plan: dict, bed_plan: dict, timing: dict, master: Path,
                 except Exception:
                     pass
         x = _decode_mono(master_path)
-        peaks = _tonal_peaks(x, 16000, _quiet_windows(x, 16000)) if x.size else []
+        quiet_offs = _quiet_windows(x, 16000) if x.size else []
+        peaks = _tonal_peaks(x, 16000, quiet_offs) if x.size else []
         hum = max(peaks) if peaks else 0.0
+        if x.size:
+            # V12 P1 — discriminate WHAT the tonal energy is
+            tonal_class = _classify_tonal(
+                x, 16000, quiet_offs, nar_windows,
+                [b for b in (bed_plan.get("bed_files") or []) if b],
+                narration_stem)
+            # V12 P1 — silence usage (reported, informational)
+            w = 8000  # 0.5 s windows @16 kHz
+            rms = np.array([float(np.sqrt(np.mean(x[i:i + w] ** 2)))
+                            for i in range(0, len(x) - w, w)])
+            active = rms[rms > 1e-4]
+            floor = (float(np.median(active)) * 0.05) if active.size else 0.0
+            silent = rms <= max(floor, 1e-4)
+            share = float(silent.mean()) if silent.size else 0.0
+            longest, run_len = 0.0, 0
+            for sv in silent:
+                run_len = run_len + 0.5 if sv else 0.0
+                longest = max(longest, run_len)
+            silence_usage = {"share": round(share, 3),
+                             "longest_silence_s": round(longest, 2),
+                             "window_s": 0.5,
+                             "note": "deliberate silence is the default "
+                                     "hierarchy floor (reported, not gated)"}
     else:
         peaks, hum = [], 0.0
     checks["dynamic_range"] = {
@@ -248,15 +405,23 @@ def run(plan: dict, bed_plan: dict, timing: dict, master: Path,
     if lra is not None and not (LRA_MIN <= lra <= LRA_MAX):
         findings.append({"severity": "P1", "rule": "dynamic_range",
                          "detail": f"LRA {lra}"})
+    dominant_cls = tonal_class.get("dominant_class")
     checks["low_frequency_tonal_noise"] = {
         "quiet_window_peaks": peaks, "max_share": hum, "threshold": HUM_ABS,
         "pass": hum <= HUM_ABS,
+        "classification": tonal_class,
         "note": "tonal peaks in 30-80 Hz (sub-bass: hum/rumble/pads) during "
-                "the quietest windows — silence must not be filled with "
-                "tonal rumble; speech fundamentals (85-180 Hz) excluded"}
+                "the quietest windows; V12 P1 discriminates the source: "
+                f"dominant class = {dominant_cls}"}
     if hum > HUM_ABS:
         findings.append({"severity": "P1", "rule": "low_frequency_tonal_noise",
-                         "detail": f"tonal share {hum} in quiet windows"})
+                         "detail": f"tonal share {hum} in quiet windows "
+                                   f"(dominant class: {dominant_cls})"})
+    checks["silence_usage"] = {
+        **(silence_usage or {"share": None, "longest_silence_s": None}),
+        "pass": True,
+        "note": "reported for the directive's silence-usage addition; "
+                "informational, never gated"}
 
     hard = (checks["continuous_bed_duration"]["pass"]
             and checks["speech_to_bed_ratio"]["pass"]
