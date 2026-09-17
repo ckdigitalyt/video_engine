@@ -226,3 +226,138 @@ def plan_shot_zones(plan: dict) -> dict:
     varied = len({v["zone"] for v in out.values()}) > 1
     return {"shots": out, "zones_available": sorted(zones()),
             "placement_varies": varied}
+
+
+# ---------------------------------------------------------------------------
+# V12 P1 — caption hierarchy (Jade_todo_v12 §P1 Caption Hierarchy)
+# Three separated text classes; C minimized; narration max 2 lines; never
+# two text layers competing for attention; adaptive safe-zones stay
+# mandatory; per-kit caption zones respected.
+
+ARCHITECTURE_ZONES = {          # kit caption_architecture -> allowed zones
+    "edge_band": ("below_card", "below_card_low"),
+    "top_band": ("top_band",),
+    "in_scene": ("below_card", "below_card_low"),
+}
+
+_B_EVENT_KINDS = ("number_pop", "text_emphasis", "stage_overlay")
+
+
+def _narration_lines(cue: dict) -> int:
+    """Declared line count of a narration cue (mirrors captions._cue_lines:
+    explicit `lines` wins, then embedded newlines, else a single line)."""
+    lines = cue.get("lines")
+    if lines and all(str(l).strip() for l in lines):
+        return len(lines)
+    text = str(cue.get("text", ""))
+    if "\n" in text:
+        return len([l for l in text.split("\n") if l.strip()])
+    return 1
+
+
+def classify_shot_text(shot: dict) -> dict:
+    """Inventory the shot's text into A/B/C.
+
+    A = narration captions (the kinetic strip; shot["captions"])
+    B = semantic labels (number pops, text emphasis, stage overlays,
+        state labels — data attached to the visual evidence)
+    C = decorative text (title/tag/title-overlay/end-card chrome)
+    """
+    a = [{"text": str(c.get("text") or ""), "t0": float(c.get("t0") or 0),
+          "t1": float(c.get("t1") or 0), "lines": _narration_lines(c)}
+         for c in shot.get("captions") or []]
+    b = []
+    for e in shot.get("events") or []:
+        if str(e.get("kind")) in _B_EVENT_KINDS:
+            txt = str((e.get("spec") or {}).get("text") or "").strip()
+            if txt:
+                b.append({"kind": str(e.get("kind")), "text": txt,
+                          "t": float(e.get("t") or 0)})
+    for st in (shot.get("v8") or {}).get("states") or []:
+        lab = str((st.get("spec") or {}).get("label") or "").strip()
+        if lab:
+            b.append({"kind": f"state:{st.get('name')}", "text": lab,
+                      "t": float(st.get("t") or 0)})
+    c_texts = [str(x).strip() for x in (shot.get("title"), shot.get("tag"))
+               if str(x or "").strip()]
+    if shot.get("end_card"):
+        c_texts.append("end_card")
+    # title_overlay is a DISABLED render path (pre-V7 composev5 behavior):
+    # inventoried as declared chrome, but it draws nothing, so it cannot
+    # compete for attention on screen.
+    if shot.get("title_overlay"):
+        c_texts.append("title_overlay (disabled path)")
+    rendered_c = [t for t in c_texts if not t.startswith("title_overlay")]
+    return {"A": a, "B": b, "C": c_texts, "C_rendered": rendered_c}
+
+
+def caption_hierarchy(plan: dict) -> dict:
+    """3-class caption separation report over the whole plan.
+
+    Findings (honest, never silently repaired):
+      narration_line_cap      an A cue declared with more than 2 lines
+      competing_text_layers   B label inside an active A cue window, or C
+                              chrome while narration is on screen — two
+                              text layers fighting for the same eye
+      kit_zone_violated       a canvas (planv9) shot whose authored
+                              caption_zone leaves the kit's declared
+                              caption architecture
+    """
+    shots = plan.get("shots") or []
+    rows, findings = [], []
+    c_shots = 0
+    for s in shots:
+        inv = classify_shot_text(s)
+        sid = str(s.get("shot_id"))
+        max_lines = max([c["lines"] for c in inv["A"]], default=0)
+        if max_lines > 2:
+            findings.append({"rule": "narration_line_cap", "shot_id": sid,
+                             "severity": "FAIL", "lines": max_lines,
+                             "note": "narration captions render max 2 lines "
+                                     "(captions.MAX_LINES)"})
+        competing = []
+        for lbl in inv["B"]:
+            if any(c["t0"] - 0.05 <= lbl["t"] <= c["t1"] + 0.05
+                   for c in inv["A"]):
+                competing.append(f"B:{lbl['kind']}@{lbl['t']}")
+        if inv["C_rendered"] and inv["A"]:
+            competing.append("C:" + "+".join(inv["C_rendered"]))
+        if competing:
+            findings.append({"rule": "competing_text_layers",
+                             "shot_id": sid, "severity": "FAIL",
+                             "detail": competing,
+                             "note": "two text layers compete for attention; "
+                                     "move the label out of the narration "
+                                     "window or drop the chrome"})
+        zone_ok = None
+        canvas = s.get("canvas") or {}
+        arch = str(canvas.get("caption_architecture") or "")
+        if arch:
+            allowed = ARCHITECTURE_ZONES.get(arch, ("below_card",
+                                                    "below_card_low",
+                                                    "top_band"))
+            zone_ok = str(s.get("caption_zone") or "") in allowed
+            if not zone_ok:
+                findings.append({"rule": "kit_zone_violated", "shot_id": sid,
+                                 "severity": "FAIL",
+                                 "architecture": arch,
+                                 "zone": s.get("caption_zone"),
+                                 "allowed": list(allowed)})
+        if inv["C"]:
+            c_shots += 1
+        rows.append({"shot_id": sid, "A": len(inv["A"]), "B": len(inv["B"]),
+                     "C": inv["C"], "max_narration_lines": max_lines,
+                     "competing": competing,
+                     "caption_zone": s.get("caption_zone"),
+                     "kit_zone_ok": zone_ok})
+    n = len(shots) or 1
+    c_share = c_shots / n
+    return {"shots": rows,
+            "counts": {"A_cues": sum(r["A"] for r in rows),
+                       "B_labels": sum(r["B"] for r in rows),
+                       "C_shots": c_shots, "C_share": round(c_share, 3)},
+            "C_minimized": c_share <= 0.5,
+            "findings": findings,
+            "caption_hierarchy_pass": not findings,
+            "verdict": "pass" if not findings else
+                       ("c_heavy" if c_share > 0.5 else "findings")}
