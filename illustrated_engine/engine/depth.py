@@ -68,6 +68,59 @@ MODE_LAYERS = {
 # an INFORMATION reveal rather than a camera move.
 _INFO_EVENTS = {"reveal", "isolate", "flow", "fill_state", "consequence"}
 
+# --- V12 P1 — informational depth intents (Jade_todo_v12 §P1 2.5D) ---------
+# Every depth use declares an informational intent; the directive ladder:
+INTENTS = ("camera_entering_object", "layer_separation",
+           "internal_layer_reveal", "scale_transition",
+           "spatial_reconstruction", "parallax_geometry")
+
+# visual_mode -> depth intent (deterministic; authored depth.intent wins).
+MODE_INTENT = {
+    "MACRO_DETAIL": "camera_entering_object",
+    "MOLECULAR_PROCESS": "camera_entering_object",
+    "CELLULAR_DIAGRAM": "camera_entering_object",
+    "CUTAWAY": "internal_layer_reveal",
+    "CROSS_SECTION": "internal_layer_reveal",
+    "SCALE": "scale_transition",
+    "ASTRONOMICAL_SCALE": "scale_transition",
+    "MAP": "spatial_reconstruction",
+    "GEOGRAPHIC_TRANSFORMATION": "spatial_reconstruction",
+    "CLIMATE_RECON": "spatial_reconstruction",
+    "TIMELINE": "spatial_reconstruction",
+    "ARCHIVAL_ILLUSTRATION": "spatial_reconstruction",
+    "ORBITAL_DIAGRAM": "spatial_reconstruction",
+    "SPLIT": "layer_separation",
+    "COMPARISON": "layer_separation",
+    "FORCE_DIAGRAM": "layer_separation",
+    "CINEMATIC": "parallax_geometry",
+    "DARK_CINEMATIC": "parallax_geometry",
+}
+
+
+def intent_for(shot: dict) -> str:
+    """Informational intent of a shot's depth use ("none" when the shot
+    carries no depth information at all — flat single-plane modes)."""
+    a = shot.get("depth")
+    if isinstance(a, dict):
+        declared = str(a.get("intent") or "").strip()
+        if declared in INTENTS:
+            return declared
+    m = str(shot.get("visual_mode")
+            or (shot.get("visual_grammar") or {}).get("recommended_mode")
+            or "").upper()
+    if m in MODE_INTENT:
+        return MODE_INTENT[m]
+    layers = layer_for(shot)
+    if len(layers) >= 2:
+        # multi-plane stack without a mappable mode: classify by what the
+        # shot actually does (events/motion), never by camera decoration.
+        kinds = {str((e or {}).get("kind") or "").lower()
+                 for e in shot.get("events") or []}
+        if kinds & _INFO_EVENTS:
+            return "layer_separation"
+        return "none"
+    return "none"
+
 
 def layer_for(shot: dict, mode: str = "") -> tuple:
     """Layer stack for a shot: authored `depth.layers` wins, else derived
@@ -88,17 +141,32 @@ def run(plan: dict) -> dict:
     """Stamp per-shot `v8["depth"]`, classify consecutive transitions."""
     shots = plan.get("shots") or []
     rows, prev, prev_id = [], None, None
+    intent_rows, blurred_only = [], []
     for s in shots:
         layers = layer_for(s)
+        intent = intent_for(s)
+        kinds = {str((e or {}).get("kind") or "").lower()
+                 for e in s.get("events") or []}
+        has_info = bool(kinds & _INFO_EVENTS)
+        # V12 P1 — blurred-background-only depth: background ambience with
+        # nothing revealed (no foreground plane, no information event) is
+        # NOT informational depth and FAILS the QA.
+        blur_only = ("background" in layers and "foreground" not in layers
+                     and not has_info)
         s.setdefault("v8", {})["depth"] = {
             "layers": list(layers),
             "authored": isinstance(s.get("depth"), dict)
                         and bool(s["depth"].get("layers")),
+            "intent": intent,
+            "informational": bool(intent != "none"),
         }
+        intent_rows.append({"shot_id": str(s.get("shot_id")),
+                            "layers": list(layers), "intent": intent,
+                            "informational": bool(intent != "none")})
+        if blur_only:
+            blurred_only.append(str(s.get("shot_id")))
         if prev is not None and set(layers) != set(prev):
-            kinds = {str((e or {}).get("kind") or "").lower()
-                     for e in (s.get("events") or [])}
-            info = bool(kinds & _INFO_EVENTS)
+            info = has_info
             decorative_cam = str(s.get("motion_class") or "").upper() == "A"
             rows.append({"from": prev_id, "to": str(s.get("shot_id")),
                          "from_layers": list(prev), "to_layers": list(layers),
@@ -113,6 +181,20 @@ def run(plan: dict) -> dict:
     verdict = ("no_shots" if not shots else
                "layered" if n_rev >= 1 and layered >= max(1, len(shots) // 2)
                else "flat")
+    intents_used = {i: sum(1 for r in intent_rows if r["intent"] == i)
+                    for i in INTENTS if any(r["intent"] == i
+                                            for r in intent_rows)}
+    # V12 P1 informational-depth verdict: every multi-plane depth use must
+    # declare an informational intent; blurred-background-only fails.
+    informational_pass = bool(shots) and not blurred_only and (
+        sum(1 for r in intent_rows if r["intent"] != "none")
+        >= max(1, len(shots) // 2))
     return {"verdict": verdict, "n_transitions": len(rows),
             "n_revealing": n_rev, "n_decorative": len(rows) - n_rev,
-            "layered_shots": layered, "rows": rows}
+            "layered_shots": layered, "rows": rows,
+            "intents": intents_used,
+            "intent_rows": intent_rows,
+            "blurred_only_shots": blurred_only,
+            "informational_pass": informational_pass,
+            "informational_verdict": ("pass" if informational_pass else
+                                      "blurred_or_undeclared_depth")}
