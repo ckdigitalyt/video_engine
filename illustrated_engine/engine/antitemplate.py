@@ -122,6 +122,175 @@ def load_recent(exclude_story: str = None, n: int = 5) -> list:
     return sigs
 
 
+# ------------------------------------------------------------------ V12 P0
+# Cross-video STRUCTURAL fingerprint v2 (Jade_todo_v12 §P0 anti-template +
+# cross-video test).  Computed from PLANS only — no renders needed.  The v1
+# signature compared role/class/mode sequences; V11's stress test showed
+# three different story_types still rendered one shared template because
+# canvas ARCHITECTURE fields were never compared.  v2 adds the directive's
+# field list: grammar sequence, composition type, panel usage, background
+# type, caption architecture, transition types, shot-duration distribution,
+# camera behavior, chrome usage, visual state sequence.
+
+V2_SEQ_FIELDS = (
+    "role_sequence",          # scene-role sequence
+    "grammar_sequence",       # visual grammar per shot
+    "composition_sequence",   # composition type per shot
+    "panel_usage_sequence",   # presentation-panel usage per shot
+    "background_sequence",    # background type per shot
+    "caption_architecture",   # caption architecture per shot
+    "transition_types",       # transition vocabulary per shot
+    "state_sequence",         # visual state sequence
+    "camera_behavior",        # push/pull/hold per shot
+)
+V2_RATIO_FIELDS = ("diagram_ratio", "cinematic_ratio", "avg_shot_dur")
+V2_FLAG_FIELDS = ("title_behavior", "chrome_usage", "accent_usage",
+                  "duration_profile")
+
+# A video is a TEMPLATE CLONE when muting narration and swapping nouns
+# would leave the same video: near-identical architecture across most
+# fields.  Weights reflect how strongly each field reads as "same video".
+_V2_WEIGHTS = {
+    "grammar_sequence": 1.2, "composition_sequence": 1.2,
+    "panel_usage_sequence": 1.0, "background_sequence": 0.8,
+    "caption_architecture": 0.6, "transition_types": 0.6,
+    "state_sequence": 0.8, "camera_behavior": 0.8,
+    "role_sequence": 0.6,
+}
+_SAME_VIDEO_MEAN_D = 0.30   # weighted mean distance below this = same video
+_SAME_VIDEO_FIELDS = 8      # ... or this many of 13 fields near-identical
+
+
+def _cam_class(shot: dict) -> str:
+    cam = shot.get("camera") or {}
+    if not isinstance(cam, dict):
+        return "static"
+    f = float(cam.get("from_scale") or 1.0)
+    t = float(cam.get("to_scale") or 1.0)
+    if t > f * 1.06:
+        return "push"
+    if t < f * 0.94:
+        return "pull"
+    if abs(float(cam.get("from_cx") or cam.get("cx") or 0.5)
+           - float(cam.get("to_cx") or cam.get("cx") or 0.5)) > 0.04:
+        return "pan"
+    return "hold"
+
+
+def _duration_profile(shots: list, total: float) -> str:
+    if not total:
+        return "empty"
+    short = sum(1 for s in shots if float(s.get("duration_s") or 0) < 4.0)
+    long = sum(1 for s in shots if float(s.get("duration_s") or 0) > 8.0)
+    return f"n{len(shots)}_s{short}_l{long}"
+
+
+def build_signature_v2(plan: dict) -> dict:
+    """Directive field list, computed from the PLAN (no renders)."""
+    from engine import canvas_grammar as cg  # local: avoids import cycle
+    shots = plan.get("shots") or []
+    dur = sum(float(s.get("duration_s") or 0) for s in shots) or 1.0
+    # Pre-V12 plans carry no canvas dict: their architecture IS the
+    # universal presentation template (documented fallback, see
+    # canvas_grammar.LEGACY_DEFAULT).  planv9 plans always carry real ones.
+    canvas = [s.get("canvas") or dict(cg.LEGACY_DEFAULT) for s in shots]
+    openings = [s for s in shots if s.get("opening")]
+    title_behavior = "opening_only" if not openings else (
+        "none" if not str(openings[0].get("title") or "").strip()
+        else "opening_title")
+    chrome = [str(c.get("chrome_density") or "rail") for c in canvas] or ["rail"]
+    accents = sorted({str(s.get("accent_family") or "")
+                      for s in shots if s.get("accent_family")})
+    diag_d = sum(float(s.get("duration_s") or 0) for s in shots
+                 if str(s.get("visual_mode") or "").upper().startswith("DIAG"))
+    cin_d = sum(float(s.get("duration_s") or 0) for s in shots
+                if str(s.get("visual_mode") or "").upper().startswith("CINE"))
+    states = [str(st.get("name"))
+              for s in shots for st in ((s.get("v8") or {}).get("states") or [])]
+    return {
+        "v2": True,
+        "story_id": plan.get("story_id", "unknown"),
+        "built_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "n_shots": len(shots),
+        "avg_shot_dur": round(dur / max(len(shots), 1), 2),
+        "role_sequence": [s.get("role") for s in shots],
+        "grammar_sequence": [c.get("grammar") for c in canvas],
+        "composition_sequence": [c.get("composition") for c in canvas],
+        "panel_usage_sequence": [c.get("panel_usage") for c in canvas],
+        "background_sequence": [c.get("background") for c in canvas],
+        "caption_architecture": [c.get("caption_architecture") for c in canvas],
+        "transition_types": [str(s.get("transition_in")) for s in shots],
+        "state_sequence": states,
+        "camera_behavior": [_cam_class(s) for s in shots],
+        "title_behavior": title_behavior,
+        "chrome_usage": "/".join(sorted(set(chrome))),
+        "accent_usage": "/".join(accents),
+        "duration_profile": _duration_profile(shots, dur),
+        "diagram_ratio": round(diag_d / dur, 3),
+        "cinematic_ratio": round(cin_d / dur, 3),
+    }
+
+
+def cross_video_compare(sig: dict, recent: list) -> dict:
+    """"Mute narration + replace nouns -> same video?"  Weighted structural
+    distance of the v2 fingerprint vs the previous <=5 plans.  same_video
+    => CAN_PUBLISH=False (directive P0 cross-video template test)."""
+    if not recent:
+        return {"verdict": "no_history", "mean_distance": None,
+                "min_distance": None, "vs": [],
+                "note": "no comparable plans yet — signature recorded"}
+    per, dists = [], []
+    for r in recent:
+        num = den = 0.0
+        near = 0
+        fields = 0
+        for f, w in _V2_WEIGHTS.items():
+            d = _seq_distance(sig.get(f, []) or [], r.get(f, []) or [])
+            num += w * d
+            den += w
+            fields += 1
+            if d <= 0.05:
+                near += 1
+            per.append(round(d, 3))
+        for f in V2_RATIO_FIELDS:
+            d = min(1.0, abs(float(sig.get(f, 0) or 0)
+                             - float(r.get(f, 0) or 0)) / 0.5)
+            num += 0.4 * d
+            den += 0.4
+            fields += 1
+            if d <= 0.05:
+                near += 1
+        for f in V2_FLAG_FIELDS:
+            d = 0.0 if str(sig.get(f) or "") == str(r.get(f) or "") else 1.0
+            num += 0.5 * d
+            den += 0.5
+            fields += 1
+            if d <= 0.05:
+                near += 1
+        d = round(num / den, 3) if den else 0.0
+        dists.append(d)
+        per_note = {"vs": r.get("story_id"), "distance": d}
+        per.append(per_note)
+    mean_d = round(sum(dists) / len(dists), 3)
+    min_d = round(min(dists), 3)
+    same = mean_d < _SAME_VIDEO_MEAN_D or near >= _SAME_VIDEO_FIELDS
+    return {
+        "verdict": "same_video" if same else "distinct",
+        "mean_distance": mean_d, "min_distance": min_d,
+        "near_identical_fields": near, "fields_compared": fields,
+        "thresholds": {"mean_distance": _SAME_VIDEO_MEAN_D,
+                       "near_identical_fields": _SAME_VIDEO_FIELDS},
+        "vs": [r.get("story_id") for r in recent],
+    }
+
+
+def validate_signature_store() -> dict:
+    """Diagnostics for the signature store (was empty for fresh stories)."""
+    sigs = sorted(SIG_DIR.glob("*.json")) if SIG_DIR.exists() else []
+    return {"dir": str(SIG_DIR), "n_signatures": len(sigs),
+            "stories": [p.stem for p in sigs]}
+
+
 # ------------------------------------------------------------------ V11 P1 §3 / P2
 # Cross-topic MOTIF fingerprint.  The orange-circle / navy-strip / cream-panel
 # combination became a V10 visual fingerprint.  BRAND stays (palette,

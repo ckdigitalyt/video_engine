@@ -289,6 +289,22 @@ KITS: dict[str, dict] = {
 
 DEFAULT_KIT = "mechanism_flow"
 
+# The universal presentation architecture that V11 actually rendered for
+# every story regardless of grammar (verified on the autumn_red /
+# tambora_1816 / baikal_deep frames).  planv9 REMOVES this default: a plan
+# only carries these values when its planner never assigned a grammar
+# (pre-V12 legacy plans).  Declared here once so the anti-template
+# fingerprint can compare legacy plans as what they are — the shared
+# template — instead of comparing empty fields.
+LEGACY_DEFAULT = {
+    "grammar": "universal_presentation_panel",
+    "composition": "central_horizontal_panel",
+    "background": "grid_paper",
+    "panel_usage": "hero_island",
+    "chrome_density": "rail",
+    "caption_architecture": "edge_band",
+}
+
 # Rotation order used by the planner's regeneration loop: when the
 # cross-video template test flags the plan, the next kit for this story is
 # the next declared grammar that has not been tried (directive: regenerate
