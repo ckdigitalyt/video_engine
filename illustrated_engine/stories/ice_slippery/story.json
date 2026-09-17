@@ -99,7 +99,7 @@
    "fact_ids": [
     "f_pressure_myth"
    ],
-   "key_number": "0\u00b0C",
+   "key_number": "0°C",
    "key_number_rect": [
     0.36,
     0.24,
@@ -145,7 +145,7 @@
    "fact_ids": [
     "f_film_temperature"
    ],
-   "key_number": "\u221230\u00b0",
+   "key_number": "−30°",
    "key_number_rect": [
     0.58,
     0.26,
@@ -158,7 +158,7 @@
   {
    "beat_id": "B7",
    "function": "PAYOFF",
-   "narration": "The current picture: ice is slippery because it is already wet \u2014 a whisper of water, born at the surface, renewed under every glide.",
+   "narration": "The current picture: ice is slippery because it is already wet — a whisper of water, born at the surface, renewed under every glide.",
    "claim": "ice's slipperiness comes from the ever-present near-surface water film, renewed by pressure, friction and cold-dependent thickness",
    "visual_question": "so what is ice, really?",
    "visual_answer": "ice is already wet: a whisper of surface water, renewed under every glide",
@@ -169,5 +169,25 @@
    "start": 45.1,
    "end": 53.1
   }
- ]
+ ],
+ "visual_grammars": [
+  "scale_descent",
+  "mechanism_flow"
+ ],
+ "visual_contradiction": {
+  "seems": "solid ice, uniformly slippery",
+  "actually": "a microscopic interface of quasi-liquid water underneath",
+  "reveal": "the camera enters the ice surface and the hidden lubricating layer becomes visible",
+  "beat": "B3"
+ },
+ "hook_plan": {
+  "subject_visible_s": 1.0,
+  "curiosity_s": 2.0,
+  "question_s": 5.0,
+  "no_black_fade_at_0_5": true
+ },
+ "payoff_image": {
+  "image": "the skate blade riding its own invisible water film — solid above, liquid below, one frame holds the whole mechanism",
+  "beat": "B7"
+ }
 }

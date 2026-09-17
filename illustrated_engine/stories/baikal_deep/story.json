@@ -72,7 +72,7 @@
   {
    "beat_id": "B2",
    "function": "CURIOSITY",
-   "narration": "Lake Baikal is the deepest lake on Earth \u2014 and its water would cover all of North America about a metre deep.",
+   "narration": "Lake Baikal is the deepest lake on Earth — and its water would cover all of North America about a metre deep.",
    "claim": "Lake Baikal is the deepest lake on Earth; its volume spread over North America would cover it by roughly a metre",
    "visual_question": "just how deep is one lake allowed to be?",
    "visual_answer": "a cross-section sounding line dropping far past any other lake's depth",
@@ -107,7 +107,7 @@
   {
    "beat_id": "B4",
    "function": "EXPLANATION",
-   "narration": "The depth has an engine: Baikal sits in a rift, a tear in the crust that is still being pulled apart \u2014 so the basin keeps sinking.",
+   "narration": "The depth has an engine: Baikal sits in a rift, a tear in the crust that is still being pulled apart — so the basin keeps sinking.",
    "claim": "Baikal lies in an active continental rift that keeps widening, so the basin keeps deepening",
    "visual_question": "why is the lake still so deep?",
    "visual_answer": "a crust cross-section being pulled apart, with the lake basin sinking between the shoulders",
@@ -134,7 +134,7 @@
   {
    "beat_id": "B6",
    "function": "ESCALATION",
-   "narration": "Then the impossibility: a seal, living and breeding a thousand kilometres from any ocean \u2014 and its route in is still argued about.",
+   "narration": "Then the impossibility: a seal, living and breeding a thousand kilometres from any ocean — and its route in is still argued about.",
    "claim": "the Baikal seal (nerpa) lives and breeds entirely in fresh water, far from any ocean; its route there is debated",
    "visual_question": "what is a seal doing a thousand kilometres from the sea?",
    "visual_answer": "a seal resting on lake ice, the nearest ocean far beyond the horizon",
@@ -158,5 +158,25 @@
    "start": 46.86,
    "end": 53.99
   }
- ]
+ ],
+ "visual_grammars": [
+  "map_first",
+  "scale_descent"
+ ],
+ "visual_contradiction": {
+  "seems": "one long frozen lake in the hills",
+  "actually": "one fifth of all unfrozen fresh surface water on Earth",
+  "reveal": "the volume comparison overlay resolves on the map — Baikal dwarfs the Great Lakes combined",
+  "beat": "B3"
+ },
+ "hook_plan": {
+  "subject_visible_s": 1.0,
+  "curiosity_s": 2.0,
+  "question_s": 5.0,
+  "no_black_fade_at_0_5": true
+ },
+ "payoff_image": {
+  "image": "the world's lakes as thin rings around one deep bar — Baikal alone dominates the ring",
+  "beat": "B7"
+ }
 }
