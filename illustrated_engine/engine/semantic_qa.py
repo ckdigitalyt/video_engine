@@ -179,18 +179,38 @@ def verify(story_dir: Path) -> dict:
     nun = _nuance.check_story(story, facts)
     nun["story_id"] = story.get("story_id", story_dir.name)
     _nuance.write_report(nun, Path("build/qa"))
+    # V12 P1 — evidence-support implication QA: does visual + narration
+    # imply MORE than the evidence supports? Plan-aware when the planv9
+    # snapshot exists (visual-side contested-mechanism check).
+    plan = None
+    _snap = Path("build") / f"edit_plan_{story.get('story_id', story_dir.name)}.json"
+    if _snap.exists():
+        try:
+            plan = json.loads(_snap.read_text())
+        except Exception:
+            plan = None
+    ev = _nuance.evidence_support(story, facts, plan)
     gates = {
         "deterministic_rules": det["deterministic_pass"],
         "exact_wording": r4.get("exact_wording_pass") if r4.get("status") == "ok" else None,
         "nuance_qualification": nun["nuance_pass"],
+        # reported gate: FAIL-severity implication findings (causal
+        # overreach, inflated certainty, contested-drawn-definitive) block;
+        # WARN findings are honest advisory findings with suggested wording
+        "evidence_support": ev["evidence_support_pass"],
     }
-    required = [gates["deterministic_rules"], gates["nuance_qualification"]]
+    required = [gates["deterministic_rules"], gates["nuance_qualification"],
+                gates["evidence_support"]]
     if gates["exact_wording"] is not None:
         required.append(gates["exact_wording"])
     return {"story_id": story.get("story_id", story_dir.name),
             "deterministic": det, "judges": r4,
             "nuance": {k: nun[k] for k in ("counts", "contested_present",
                                             "nuance_pass")},
+            "evidence_support": {k: ev[k] for k in (
+                "n_findings", "n_fail", "rule_counts",
+                "evidence_support_pass")},
+            "evidence_support_findings": ev["findings"],
             "gates": gates,
             "SEMANTIC_PASS": all(required)}
 
