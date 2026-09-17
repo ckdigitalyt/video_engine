@@ -250,6 +250,14 @@ def _ambient_base(shot, bible, plate_path: Path):
     elif full_bleed:
         try:
             plate = Image.open(plate_path).convert("RGB")
+            # V12 P0 — the ambient cover drops the cardlib baked footer
+            # strip (bottom ~12% of 16:9 plates, footer_centered): it is
+            # legacy presentation chrome, and the card paste already shows
+            # it once at the card bottom.  Without this, the strip appears
+            # twice (ambient bottom + card bottom).
+            w0, h0 = plate.size
+            if w0 > h0:  # 16:9 cardlib plates only
+                plate = plate.crop((0, 0, w0, int(h0 * 0.88)))
             cover = layout.smart_crop(plate, CANVAS_W, CANVAS_H,
                                       bias_y=0.5)
             frame.paste(cover, (0, 0))
