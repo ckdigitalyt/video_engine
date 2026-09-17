@@ -1,0 +1,34 @@
+{
+ "version": "4.0",
+ "topic_grammar": ["MECHANISM_FLOW", "FIELD_LINE", "CUTAWAY", "HEAT_SPREAD"],
+ "brand": "FIELD LINES",
+ "palette": {
+  "primary": "#E0A33C",
+  "secondary": "#2E8C8C",
+  "accent": "#C4502E",
+  "background": "#0E1116",
+  "text": "#F0E9DA",
+  "muted": "#5C6672",
+  "highlight": "#F0E9DA"
+ },
+ "illustration_style": "dark-field physics-diagram illustration, glowing amber and teal field lines on near-black charcoal, thin engraved linework, cutaway grammar, matte finish",
+ "illustration_medium": "dark-field engraved physics-diagram illustration with glowing field-line grammar (not photoreal, not flat vector, not parchment)",
+ "lighting": "dark ground with luminous amber field glow, cool teal structure lines",
+ "contrast": "medium, luminous subjects on near-black ground",
+ "saturation": 0.3,
+ "texture": {
+  "grain": 0.012,
+  "vignette": 0.28
+ },
+ "typography": {
+  "display": "BebasNeue-Regular.ttf",
+  "body": "Inter-Variable.ttf"
+ },
+ "framing": "vertical 9:16, full-canvas dark diagrams with the food block or cavity centred and breathing room at the edges",
+ "graphic_language": "glowing amber field lines and teal structure outlines on a near-black charcoal field, restrained rust heat accents, no parchment, no grid paper, no header or footer chrome, labels as small dark chips with rust leader lines",
+ "transition_style": "hard cut; per-shot fade-in from background colour",
+ "prompt_fragments": {
+  "prefix": "Dark-field physics diagram illustration, glowing amber and teal field lines on near-black charcoal, engraved linework, cutaway grammar, matte finish, high contrast",
+  "suffix": "No readable text, no watermarks, no photoreal rendering, no logos"
+ }
+}

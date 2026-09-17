@@ -1,0 +1,137 @@
+{
+ "claims": [
+  {
+   "id": "f_center_cold",
+   "beats": ["B1", "B7"],
+   "claim": "in microwave reheating the food's centre can stay cold while the outer parts and the container become hot",
+   "definition": "because microwave energy is absorbed within the first few centimetres and the field pattern is uneven, the interior heats by conduction and lags the outside",
+   "current_record_holder": "n/a",
+   "measured_value": "qualitative: centre temperature lags the shell by many tens of degrees in typical reheat loads; no single-number claim",
+   "date_verified": "2026-09",
+   "authoritative_source": "USDA Food Safety and Inspection Service, 'Microwave Ovens and Food Safety'; Metaxas & Meredith, 'Industrial Microwave Heating' (1983)",
+   "source_url": "https://www.fsis.usda.gov/food-safety/safe-food-handling-and-preparation/food-safety-basics/microwave-ovens-and-food-safety",
+   "historically_changed": false,
+   "sources": ["USDA FSIS cooking guide", "Metaxas & Meredith 1983"],
+   "verified": true,
+   "notes": "hook observation; narration stays qualitative",
+   "nuance": {
+    "classification": "ESTABLISHED",
+    "note": "directly follows from limited penetration depth + uneven field pattern; documented by USDA guidance on stirring/standing time"
+   }
+  },
+  {
+   "id": "f_inside_out_myth",
+   "beats": ["B2", "B7"],
+   "claim": "the popular claim that microwaves cook food from the inside out is false",
+   "definition": "the microwave field is absorbed in the outer layers; the interior is heated by conduction, the opposite of the folk picture",
+   "current_record_holder": "n/a",
+   "measured_value": "qualitative myth-correction; penetration depth of order centimetres (see f_penetration_depth)",
+   "date_verified": "2026-09",
+   "authoritative_source": "USDA Food Safety and Inspection Service, 'Microwave Ovens and Food Safety' (addresses the inside-out myth explicitly)",
+   "source_url": "https://www.fsis.usda.gov/food-safety/safe-food-handling-and-preparation/food-safety-basics/microwave-ovens-and-food-safety",
+   "historically_changed": false,
+   "sources": ["USDA FSIS cooking guide"],
+   "verified": true,
+   "notes": "the myth is the story's stated contradiction; the visual reveal localizes it at B3",
+   "nuance": {
+    "classification": "ESTABLISHED",
+    "note": "myth-busting claim with an authoritative source; the correct mechanism is stated in positive form at B3/B7"
+   }
+  },
+  {
+   "id": "f_penetration_depth",
+   "beats": ["B3", "B7"],
+   "claim": "microwaves penetrate only a few centimetres into wet food, so the outer shell absorbs the energy directly",
+   "definition": "the field amplitude decays exponentially with depth (skin/penetration depth); in water-rich foods at 2.45 GHz the penetration depth is of order 1-3 centimetres depending on composition, temperature and salt content",
+   "current_record_holder": "n/a",
+   "measured_value": "penetration depth of order 1-3 cm in typical moist foods at 2.45 GHz (composition-dependent); narration says 'only a few centimetres'",
+   "date_verified": "2026-09",
+   "authoritative_source": "Metaxas & Meredith, 'Industrial Microwave Heating' (Peter Peregrinus, 1983); Datta & Anantheswaran, 'Handbook of Microwave Technology for Food Applications' (2001)",
+   "source_url": "https://doi.org/10.1049/PBE013E",
+   "historically_changed": false,
+   "sources": ["Metaxas & Meredith 1983", "Datta & Anantheswaran 2001"],
+   "verified": true,
+   "notes": "deliberately ranged: exact depth varies with salt/sugar/water content and temperature",
+   "nuance": {
+    "classification": "ESTABLISHED",
+    "note": "exponential decay of microwave fields in lossy media is standard electromagnetics; the centimetre scale in food is textbook"
+   }
+  },
+  {
+   "id": "f_dielectric_heating",
+   "beats": ["B4", "B7"],
+   "claim": "a microwave oven heats food by dielectric heating: an oscillating electric field torques polar molecules (chiefly water) and molecular collisions dissipate the energy as heat",
+   "definition": "dielectric (dipole-rotation and ionic-conduction) loss converts electromagnetic field energy into thermal energy inside the material; the field alternates at the oven's 2.45 GHz carrier and polar molecules lag the swing, transferring energy in collisions",
+   "current_record_holder": "n/a",
+   "measured_value": "carrier frequency 2.45 GHz (wavelength about 12.2 cm in air); power of a typical domestic oven 700-1200 W",
+   "date_verified": "2026-09",
+   "authoritative_source": "Metaxas & Meredith, 'Industrial Microwave Heating' (1983); IEEE definition of dielectric heating; US FCC Part 18 ISM allocations",
+   "source_url": "https://doi.org/10.1049/PBE013E",
+   "historically_changed": false,
+   "sources": ["Metaxas & Meredith 1983", "FCC Part 18"],
+   "verified": true,
+   "notes": "established physics; narration phrases it as torqued dipoles and 'jostling neighbours' (dipole rotation + ionic conduction)",
+   "nuance": {
+    "classification": "ESTABLISHED",
+    "note": "dielectric heating mechanism is standard physics; both dipole rotation and ionic conduction contribute, with the split depending on the food"
+   }
+  },
+  {
+   "id": "f_frequency_ism",
+   "beats": ["B4", "B6"],
+   "claim": "2.45 GHz is an international industrial-scientific-medical (ISM) band allocation chosen for regulatory convenience, not a special resonance frequency of water",
+   "definition": "liquid water's dielectric loss rises gradually over a broad band and its bulk absorption peak lies far above the oven band (tens of GHz at room temperature); ovens sit at 2.45 GHz because that band is reserved worldwide for ISM equipment",
+   "current_record_holder": "n/a",
+   "measured_value": "ISM band 2400-2500 MHz (centre 2.45 GHz); water's dielectric loss peak (room temperature, bulk liquid) lies in the tens of GHz range",
+   "date_verified": "2026-09",
+   "authoritative_source": "ITU Radio Regulations ISM band allocations (Article 5.150); FCC Part 18; 'Dielectric heating' peer-reviewed treatments of water relaxation spectra (e.g., Kaatze, 'Microwave dielectric properties of liquids', Radiation Physics and Chemistry, 1995)",
+   "source_url": "https://en.wikipedia.org/wiki/ISM_radio_band",
+   "historically_changed": false,
+   "sources": ["ITU RR Art. 5.150", "Kaatze 1995", "FCC Part 18"],
+   "verified": true,
+   "notes": "deliberate myth-correction of the '2.45 GHz = water resonance' legend; narration at B6 keeps the frequency point brief so the contested hot-spot claim carries the hedge",
+   "nuance": {
+    "classification": "ESTABLISHED",
+    "note": "the ISM allocation history and the broadband (non-resonant) nature of liquid water absorption at 2.45 GHz are both documented; absorption depends on temperature and state, so no single resonance value is claimed"
+   }
+  },
+  {
+   "id": "f_ice_low_loss",
+   "beats": ["B5"],
+   "claim": "ice absorbs microwave energy far more weakly than liquid water because its molecules are bound in a rigid lattice, which is why defrost cycles use low power with rests",
+   "definition": "rotational relaxation of water molecules is mobility-dependent: in ice the dipoles are lattice-bound and the dielectric loss factor at 2.45 GHz is far below that of liquid water, so frozen food couples weakly to the field until it thaws",
+   "current_record_holder": "n/a",
+   "measured_value": "dielectric loss factor of ice at 2.45 GHz is orders of magnitude below liquid water near 0 degrees Celsius (temperature-dependent); defrost cycles typically duty-cycle a fraction of full power",
+   "date_verified": "2026-09",
+   "authoritative_source": "Mudgett, 'Electrical properties of foods' in 'Microwaves in the Food Processing Industry' (1985); Metaxas & Meredith (1983); Kaatze, dielectric relaxation spectra of water and ice",
+   "source_url": "https://doi.org/10.1016/B978-0-12-786650-5.50009-2",
+   "historically_changed": false,
+   "sources": ["Mudgett 1985", "Metaxas & Meredith 1983", "Kaatze"],
+   "verified": true,
+   "notes": "narration stays qualitative ('barely answers the field'); defrost duty-cycle design follows",
+   "nuance": {
+    "classification": "ESTABLISHED",
+    "note": "the ice/water loss contrast is textbook dielectrics; exact loss values depend on temperature and impurity content, so narration avoids numbers"
+   }
+  },
+  {
+   "id": "f_hot_spots",
+   "beats": ["B6", "B7"],
+   "claim": "the oven's energy pattern shifts with every food load and tends to concentrate energy in hot spots near edges, which turntables and stirrers average out",
+   "definition": "the field inside a loaded oven cavity forms a complex pattern from interference between the magnetron output, cavity geometry and the load itself; energy density is higher at some locations (commonly edges/corners), so rotating or stirring redistributes the load through the pattern",
+   "current_record_holder": "n/a",
+   "measured_value": "qualitative pattern claim; measured hot-spot maps vary strongly with cavity, container and food geometry",
+   "date_verified": "2026-09",
+   "authoritative_source": "Metaxas & Meredith, 'Industrial Microwave Heating' (1983); Datta & Anantheswaran, 'Handbook of Microwave Technology for Food Applications' (2001); USDA guidance on stirring/rotating during microwaving",
+   "source_url": "https://doi.org/10.1049/PBE013E",
+   "historically_changed": false,
+   "sources": ["Metaxas & Meredith 1983", "Datta & Anantheswaran 2001", "USDA FSIS"],
+   "verified": true,
+   "notes": "narration deliberately hedges: 'part standing wave, part food shape' — the exact pattern is geometry- and load-dependent, so no single causal picture is asserted",
+   "nuance": {
+    "classification": "SUPPORTED_BUT_COMPLEX",
+    "note": "hot spots are real and documented, but their precise origin in a loaded cavity is model- and geometry-dependent (standing-wave structure, edge intensification, load shape all contribute); narration asserts only the hedged composite"
+   }
+  }
+ ]
+}
