@@ -50,6 +50,16 @@ def _tokens(text: str) -> set:
             if t not in _STOP and len(t) > 2}
 
 
+def _prev_shot(shots: list, starts: list, t0: float) -> dict | None:
+    """The shot immediately before t0 (None at the plan opening)."""
+    prev = None
+    for s, st in zip(shots, starts):
+        if abs(st - t0) < 1e-6:
+            return prev
+        prev = s
+    return None
+
+
 def value_density(plan: dict, story: dict | None = None) -> dict:
     shots = plan.get("shots") or []
     starts, total = _shot_starts(plan)
@@ -73,12 +83,24 @@ def value_density(plan: dict, story: dict | None = None) -> dict:
             if st.get("event") in COUNTED:
                 ew = min(int((t0 + float(st.get("t") or 0)) // WINDOW), n - 1)
                 ev_windows.append(ew)
-        decorative = (str(s.get("motion_class")) == "C"
-                      and not ev_windows)
+        decorative = (str(s.get("motion_class")) == "A"
+                      and not ev_windows)  # V12 2 fix: A is the DECORATIVE
+        # class (planv5._motion_class: C explanatory / B structural / A
+        # decorative) — the V11 code penalized C, punishing exactly the
+        # explanatory shots the metric exists to reward.
         generic_plate = (not ev_windows
                          and not (s.get("v8") or {}).get("states")
                          and str(s.get("shot_type", "")).upper() not in
                          ("HOOK", "PAYOFF", "REVEAL"))
+        # V12 P1 — generic transition: the cut INTO this shot carries no
+        # information (same visual mode, no living event, camera-only tag).
+        prev_mode = prev.get("visual_mode") if (prev := _prev_shot(
+            shots, starts, t0)) else None
+        generic_transition = (
+            prev_mode is not None
+            and str(prev_mode) == str(s.get("visual_mode"))
+            and not ev_windows
+            and str(s.get("motion_class")) == "A")
         # narration novelty (story text + captions carry the words)
         narration = str((s.get("v8") or {}).get("intent") or "")
         for b in (story or {}).get("beats", []):
@@ -105,6 +127,8 @@ def value_density(plan: dict, story: dict | None = None) -> dict:
                             "novelty": novelty if w == w0 else 0.0,
                             "decorative": decorative,
                             "generic_plate": generic_plate,
+                            "generic_transition": (generic_transition
+                                                   if w == w0 else False),
                             "repeated_asset": repeated_asset,
                             "redundant_label": redundant, "filler": filler})
     intervals = []
@@ -119,6 +143,9 @@ def value_density(plan: dict, story: dict | None = None) -> dict:
             if it["decorative"]:
                 value -= 0.75
                 penalties.append("decorative_motion")
+            if it.get("generic_transition"):
+                value -= 0.5
+                penalties.append("generic_transition")
             if it["generic_plate"]:
                 value -= 0.75
                 penalties.append("generic_hero_plate")
