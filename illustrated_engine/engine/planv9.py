@@ -24,6 +24,12 @@ EXTENDED, not rewritten.  planv9 adds the story-dependent layer planv8 lacks:
      ("mute narration + replace nouns -> same video?") — on same_video the
      planner regenerates with the next DIFFERENT valid grammar, bounded
      attempts, honest final verdict either way.
+  7. CLAIM CONFIDENCE (V12 P1): facts.json nuance classifications wire into
+     the beat model — every beat carries the confidence of the claims it
+     narrates (ESTABLISHED..UNCERTAIN) and contested claims are NEVER drawn
+     as definitive mechanism (cause_to_consequence / mechanism_visible /
+     object_transforms downgrade to hypothesis_branches, recorded as a
+     confidence_override, never silent).
 
 Backward compatible: stories without the new schema fields get classified
 grammars + derived beat model; planv8 output fields are untouched.
@@ -36,9 +42,20 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from engine import antitemplate, canvas_grammar, planv8
+from engine import antitemplate, canvas_grammar, nuance, planv8
+from engine.facts import load_facts
 
 MAX_REGENERATIONS = 2  # directive: bounded 2-3 regeneration attempts
+
+# V12 P1 — confidence taxonomy (same classes as engine/nuance.py), ordered
+# weakest last so beats carrying several claims take the MOST contested one.
+CONFIDENCE_SEVERITY = nuance.CLASSES
+# Transforms that draw causation/mechanism as SETTLED fact. A beat whose
+# claims are contested (nuance.CONTESTED) may not use these as primary
+# visual grammar — the directive: contested causation cannot be drawn as
+# definitive mechanism arrows.
+DEFINITIVE_TRANSFORMS = ("cause_to_consequence", "mechanism_visible",
+                         "object_transforms")
 
 
 # ---------------------------------------------------------------------------
@@ -95,7 +112,37 @@ def _payoff_image(story: dict) -> dict:
 # Beat model
 
 
-def _beat_model(plan: dict, story: dict, kit_id: str) -> dict:
+def _claims_by_beat(story_dir: Path) -> dict:
+    """beat_id -> {confidence, claim_ids} from facts.json nuance classes.
+
+    A beat narrating several claims takes the MOST CONTESTED class (the
+    visual grammar must satisfy the weakest claim it carries). Claims with
+    no authored classification fall back to nuance's conservative lexicon.
+    Missing/unreadable facts.json -> {} (backward compatible, reported).
+    """
+    try:
+        facts = load_facts(story_dir)
+    except Exception:
+        return {}
+    out: dict = {}
+    for c in facts.get("claims", []):
+        cls = str((c.get("nuance") or {}).get("classification") or "").upper()
+        if cls not in CONFIDENCE_SEVERITY:
+            cls = nuance.classify_claim(c)[0]
+        for bid in c.get("beats", []) or []:
+            bid = str(bid)
+            cur = out.get(bid)
+            if cur is None or (CONFIDENCE_SEVERITY.index(cls)
+                               > CONFIDENCE_SEVERITY.index(cur["confidence"])):
+                out[bid] = {"confidence": cls,
+                            "claim_ids": [str(c.get("id"))]}
+            elif cur["confidence"] == cls:
+                cur["claim_ids"].append(str(c.get("id")))
+    return out
+
+
+def _beat_model(plan: dict, story: dict, kit_id: str,
+                claims: dict | None = None) -> dict:
     """Annotate plan['beat_model']: per beat, viewer question -> visual
     intent -> visual experience -> state transformation -> payoff."""
     beats = {str(b.get("beat_id")): b for b in (story.get("beats") or [])}
@@ -120,17 +167,39 @@ def _beat_model(plan: dict, story: dict, kit_id: str) -> dict:
             f"{comp_label(kit, fn)}: "
             f"{str(beat.get('visual_answer') or beat.get('visual_question') or '').strip()}")
         payoff_intent = str(beat.get("payoff") or "").strip()
+        # V12 P1 — claim confidence: contested claims are never drawn as a
+        # definitive mechanism. The downgrade is recorded, never silent.
+        crow = (claims or {}).get(bid) or {}
+        conf = crow.get("confidence")
+        applied, override = transform, None
+        if conf in nuance.CONTESTED and transform in DEFINITIVE_TRANSFORMS:
+            applied = "hypothesis_branches"
+            override = {"from": transform, "to": applied,
+                        "claim_ids": crow.get("claim_ids") or [],
+                        "reason": f"claim confidence {conf} — contested "
+                                  f"causation is not drawn as a definitive "
+                                  f"mechanism"}
+            if declared_t:
+                problems.append(
+                    f"{bid}: declared '{transform}' overridden to "
+                    f"'hypothesis_branches' (claim confidence {conf})")
         rows[bid] = {
             "function": fn,
             "viewer_question": str(beat.get("visual_question") or "").strip(),
             "visual_intent": str(beat.get("visual_answer") or "").strip(),
             "visual_experience": experience,
-            "state_transformation": transform,
+            "state_transformation": applied,
             "payoff": payoff_intent,
             "n_shots": len(shots),
+            "claim_confidence": conf,
+            "claim_ids": crow.get("claim_ids") or [],
+            "confidence_override": override,
         }
     return {"grammar": kit_id, "beats": rows,
-            "transformation_problems": problems}
+            "transformation_problems": problems,
+            "claim_confidence": {bid: r["claim_confidence"]
+                                 for bid, r in rows.items()
+                                 if r["claim_confidence"]}}
 
 
 def comp_label(kit: dict, fn: str) -> str:
@@ -263,6 +332,7 @@ def make_edit_plan_v9(paths, story_id: str, out_name: str = "edit_plan.json",
     """planv8 plan + story-driven canvas architecture + beat model +
     hook/contradiction/payoff localization + cross-video template loop."""
     story = json.loads((Path(paths.stories) / story_id / "story.json").read_text())
+    claims = _claims_by_beat(Path(paths.stories) / story_id)
     candidates = (_declared_grammars(story) or canvas_grammar.classify_story(story))
     if force_grammar in canvas_grammar.KITS:
         # Forced grammar PREPENDS; regeneration can still fall through to
@@ -291,7 +361,7 @@ def make_edit_plan_v9(paths, story_id: str, out_name: str = "edit_plan.json",
     else:
         report["regeneration_exhausted"] = True
 
-    model = _beat_model(plan, story, chosen)
+    model = _beat_model(plan, story, chosen, claims)
     plan["beat_model"] = model
     plan["visual_contradiction"] = _locate_contradiction(plan, story, {})
     plan["hook_plan"] = _locate_hook(plan, _hook_plan(story))
@@ -303,6 +373,7 @@ def make_edit_plan_v9(paths, story_id: str, out_name: str = "edit_plan.json",
         "regeneration_attempts": attempts,
         "cross_video_template": report.get("cross_video"),
         "transformation_problems": model["transformation_problems"],
+        "claim_confidence": model.get("claim_confidence") or {},
     }
 
     # Persist the plan-level signature so the NEXT story compares against it
@@ -347,4 +418,12 @@ def summarize(plan: dict, v9: dict) -> str:
     probs = v9.get("transformation_problems") or []
     lines.append(f"  transformations: "
                  f"{'ok' if not probs else 'PROBLEMS: ' + '; '.join(probs[:4])}")
+    conf = (plan.get("beat_model") or {}).get("claim_confidence") or {}
+    ovr = [f"{bid}:{(r.get('confidence_override') or {}).get('from')}->"
+           f"{(r.get('confidence_override') or {}).get('to')}"
+           for bid, r in (plan.get("beat_model") or {}).get("beats", {}).items()
+           if r.get("confidence_override")]
+    lines.append(f"  claim confidence: "
+                 f"{conf if conf else 'no facts claims wired'}"
+                 + (f" | overrides: {', '.join(ovr)}" if ovr else ""))
     return "\n".join(lines)
