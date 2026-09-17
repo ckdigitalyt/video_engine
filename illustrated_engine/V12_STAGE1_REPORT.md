@@ -122,6 +122,9 @@ plate-internal art is the next stage.
 - Diagram/cinematic plate coverage for every composition variant
   (descent/micro layers currently reuse existing cardlib plates).
 - qa5full/qa5 vision judges not run in this stage (no full QA render).
+- Pre-existing (not V12): `cli validate` flags `unknown camera primitive
+  'zoompan'` on the planv8/v9 plans — identical on the pre-V12 plans;
+  renders succeed via motion_v6's flat camera path.
 - The 6-story stress test (Stage 3) will exercise kit coverage; the two
   replanned stories already cover science mechanism + geography.
 - `_title_overlay_png` remains disabled (pre-existing V7 behavior, out of
