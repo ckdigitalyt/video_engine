@@ -1,0 +1,555 @@
+Jade — DEEP REVIEW RESULT: V11/V10.x IS NOT FINAL PRODUCTION READY.
+
+I reviewed all 3 fresh stress-test videos:
+1. autumn_red.mp4 — 76s
+2. tambora_1816.mp4 — 63s
+3. baikal_deep.mp4 — 56s
+
+Technical production is now strong:
+- 1080x1920
+- 30fps
+- stable rendering
+- caption integrity substantially improved
+- no obvious debug leakage
+- meaningful explanatory diagrams
+- factual architecture is substantially better
+- audio level is controlled
+
+DO NOT REWRITE THE WHOLE ENGINE.
+DO NOT ADD RANDOM EFFECTS.
+DO NOT PATCH THESE THREE STORIES INDIVIDUALLY.
+
+The next problem is architectural:
+
+THE ENGINE HAS CREATED A NEW TEMPLATE.
+
+All three videos visibly share:
+- cream/gray presentation background
+- central horizontal information panel
+- grid
+- black annotation chips
+- navy horizontal rails
+- lower narration strip
+- beige/gray chrome
+- restrained orange accent
+- similar scene composition
+- similar information-panel transitions
+
+This is now the primary production-quality blocker.
+
+The goal is NOT "make the current template prettier."
+
+The goal is:
+
+MAKE VISUAL GRAMMAR STORY-DEPENDENT.
+
+==================================================
+P0 — STORY-DRIVEN VISUAL GRAMMAR ENGINE
+==================================================
+
+Before rendering, classify the story into one or more visual grammars.
+
+Examples:
+
+SCIENCE / PHYSICS
+- macro → micro
+- cross-section
+- particle/field
+- force vectors
+- causal transformation
+- scale transition
+
+BIOLOGY
+- organism → tissue → cell → molecule
+- internal cutaway
+- process loop
+- before/after
+- competing mechanisms
+
+GEOGRAPHY
+- planet → region → location
+- map
+- terrain
+- spatial scale
+- geographic transformation
+
+HISTORY
+- map
+- timeline
+- spatial reconstruction
+- event propagation
+- before/after
+- consequence chain
+
+CLIMATE / EARTH SCIENCE
+- globe
+- atmosphere layers
+- geographic propagation
+- temperature field
+- timeline
+- causal chain
+
+ENGINEERING
+- external object
+- cutaway
+- force/flow
+- internal mechanism
+- failure/consequence
+
+DO NOT FORCE ALL STORIES INTO THE SAME PRESENTATION-PANEL GRAMMAR.
+
+==================================================
+P0 — REMOVE UNIVERSAL PRESENTATION FRAME
+==================================================
+
+The cream/gray horizontal panel must NOT be the default canvas architecture.
+
+It may be used when semantically appropriate.
+
+Otherwise use:
+- full-canvas illustration
+- immersive diagram
+- map
+- large-scale object
+- layered cutaway
+- vertical composition
+- edge-to-edge transformation
+- camera entering/exiting the subject
+
+The 9:16 canvas must become part of the storytelling.
+
+Target:
+MEANINGFUL_CANVAS_OCCUPANCY >= 75%
+on major explanatory beats unless deliberate negative space is justified.
+
+Do not fill space with decorative chrome merely to satisfy occupancy.
+
+==================================================
+P0 — VISUAL EXPERIENCE PLANNER
+==================================================
+
+Change planning from:
+
+narration sentence -> illustration
+
+to:
+
+narration beat
+-> viewer question
+-> visual intent
+-> visual experience
+-> state transformation
+-> payoff
+
+Each major beat must answer:
+
+WHAT SHOULD THE VIEWER SEE CHANGE?
+
+Valid:
+- scale changes
+- hidden layer revealed
+- object transforms
+- cause produces consequence
+- geography expands/contracts
+- timeline advances
+- comparison resolves
+- internal mechanism becomes visible
+- competing hypothesis branches
+- before/after transformation
+
+Invalid as primary information gain:
+- zoom
+- pan
+- camera drift
+- particles
+- number pop
+- generic highlight
+- decorative sweep
+
+==================================================
+P0 — VISUAL CONTRADICTION ENGINE
+==================================================
+
+Every strong Short should attempt at least one genuine visual contradiction.
+
+Examples:
+
+BAIKAL:
+"What looks like one lake" -> reveal enormous freshwater reservoir.
+
+TAMBORA:
+"Summer" -> snow/frost -> pull back to volcanic eruption.
+
+AUTUMN:
+"Red was already there" -> chlorophyll disappears -> red pigment is synthesized.
+
+ICE:
+"Solid ice" -> enter microscopic interface -> hidden lubricating mechanism.
+
+VISUAL_CONTRADICTION must be a real visual reveal, not merely narration.
+
+==================================================
+P0 — HOOK ENGINE
+==================================================
+
+First 0.5 sec:
+NO unnecessary black/fade.
+
+First 1 sec:
+SHOW the subject/problem immediately.
+
+First 2 sec:
+Create curiosity through a visual contradiction, impossible scale, unexpected transformation, or consequence.
+
+First 5 sec:
+Viewer must understand:
+1. what is strange
+2. why it matters
+3. what question is about to be answered
+
+Do not use generic "beautiful establishing shot" as the default hook.
+
+==================================================
+P0 — PAYOFF ENGINE
+==================================================
+
+Final 3–5 seconds must resolve the opening curiosity.
+
+Do NOT use a generic poetic end card.
+
+Do NOT simply enlarge the hero object.
+
+The final visual should compress the entire causal model into one memorable image.
+
+PAYOFF = semantic resolution + visual synthesis.
+
+==================================================
+P0 — ANTI-TEMPLATE ENGINE
+==================================================
+
+Compute a cross-video fingerprint containing:
+
+- scene-role sequence
+- visual grammar sequence
+- composition type
+- panel usage
+- background type
+- caption architecture
+- transition types
+- shot duration distribution
+- camera behavior
+- diagram/cinematic ratio
+- title behavior
+- chrome usage
+- color/accent usage
+- visual state sequence
+
+Do NOT optimize by randomizing.
+
+Instead:
+
+If two unrelated stories independently produce highly similar visual fingerprints,
+the planner must regenerate the visual plan using a different valid story-specific grammar.
+
+Brand consistency may remain.
+
+STRUCTURAL INTERCHANGEABILITY must not.
+
+==================================================
+P0 — CROSS-VIDEO TEMPLATE TEST
+==================================================
+
+After generating each video, compare it against the previous 5 generated videos.
+
+Ask:
+
+"If I mute narration and replace nouns, would these videos still look like the same video?"
+
+If YES:
+CAN_PUBLISH = FALSE
+
+This is a stronger anti-template test than merely checking visual diversity inside one video.
+
+==================================================
+P1 — INFORMATION TRANSFORMATION
+==================================================
+
+Maintain:
+
+VISUAL_INFORMATION_GAIN
+
+Every ~2–4 seconds, there should be a meaningful new relationship:
+- cause
+- consequence
+- scale
+- location
+- mechanism
+- comparison
+- process
+- uncertainty
+- evidence
+
+Decorative motion does NOT count.
+
+Also calculate:
+
+EXPLANATORY_MOTION_RATIO
+=
+explanatory motion / total motion
+
+Target explanatory motion > structural motion > decorative motion.
+
+==================================================
+P1 — 2.5D DEPTH MUST BECOME INFORMATIONAL
+==================================================
+
+Do not use depth merely as blurred background extension.
+
+Depth should allow:
+- camera entering an object
+- foreground/midground/background separation
+- internal layer reveal
+- scale transition
+- spatial reconstruction
+- parallax that explains geometry
+
+Depth must reveal information.
+
+==================================================
+P1 — CAPTION HIERARCHY
+==================================================
+
+Current captions are substantially improved.
+
+Keep the state-machine fix.
+
+Now reduce text chrome.
+
+Separate:
+A. narration captions
+B. semantic labels
+C. decorative text
+
+C should be minimized.
+
+Never allow multiple text layers to compete for attention.
+
+Maximum 2 lines for narration captions.
+
+Adaptive safe-zone placement remains mandatory.
+
+==================================================
+P1 — SEMANTIC FACTUAL QA
+==================================================
+
+Upgrade factual QA from:
+
+"is the statement true?"
+
+to:
+
+"does the visual + narration imply more than the evidence supports?"
+
+Check:
+- object
+- number
+- timeframe
+- geography
+- population/scope
+- causal strength
+- certainty
+- perspective
+- comparison denominator
+- superlative qualification
+
+Examples:
+
+BAIKAL:
+"20% of Earth's freshwater"
+must become:
+"about 20% of Earth's unfrozen/surface freshwater"
+
+TAMBORA:
+avoid implying identical global cooling everywhere.
+
+AUTUMN:
+do not visually imply that anthocyanin directly "strips out nitrogen".
+Represent nutrient resorption and anthocyanin production as related but distinct processes.
+
+Scientific claims should be classified:
+ESTABLISHED
+STRONG_CONSENSUS
+SUPPORTED_BUT_COMPLEX
+ACTIVE_DEBATE
+MODEL_DEPENDENT
+UNCERTAIN
+
+The visual grammar must reflect the confidence level.
+
+==================================================
+P1 — VIEWER VALUE DENSITY
+==================================================
+
+Every ~5 sec ask:
+
+"What does the viewer now understand that they did not understand 5 seconds ago?"
+
+Penalize:
+- repeated static diagram
+- decorative camera motion
+- redundant labels
+- poetic filler
+- repeated hero
+- generic transition
+
+==================================================
+P1 — SCROLL STOP TEST
+==================================================
+
+Automated report:
+
+0.5 sec:
+What am I looking at?
+
+2 sec:
+Why should I continue?
+
+5 sec:
+What question exists?
+
+10 sec:
+What did I learn?
+
+20 sec:
+Has the mental model changed?
+
+30 sec:
+Has the story escalated?
+
+Final:
+Was the opening curiosity resolved?
+
+==================================================
+P1 — AUDIO
+==================================================
+
+Keep current normalization architecture.
+
+Do NOT replace the voice merely because of subjective preference.
+
+Continue:
+narration > intentional SFX > subtle ambience/music.
+
+Add:
+LOW_FREQ_TONALITY_QA
+
+Distinguish:
+- narration harmonics
+- intentional tonal bed
+- electrical 50/60 Hz hum
+- repetitive synthetic tone
+
+Also report:
+- speech/bed ratio
+- SFX masking
+- silence usage
+- dynamic range
+
+==================================================
+P2 — TTS BENCHMARK
+==================================================
+
+Do isolated A/B benchmark only:
+
+CURRENT VOICE
+vs
+Chatterbox Turbo
+vs
+Chatterbox Nano
+vs
+Qwen3-TTS 0.6B
+(optional Kokoro)
+
+Measure:
+- naturalness
+- authority
+- prosody
+- emotional variation
+- numbers/names
+- clarity
+- consistency
+- CPU generation cost
+
+Do not change production voice until benchmark.
+
+==================================================
+P0 — FINAL HUMAN EDITOR TEST
+==================================================
+
+For every generated video:
+
+1. Does it look like a documentary or a presentation?
+2. Would I recognize the generator if narration were muted?
+3. Does the first 2 seconds stop me?
+4. Does the visual itself create curiosity?
+5. Does something meaningful visually change every few seconds?
+6. Does the visual explain the narration?
+7. Is the subject represented using its natural visual grammar?
+8. Does the story escalate?
+9. Does the final visual resolve the opening?
+10. Would I mistake this for a human-directed piece rather than an automated template?
+
+If #1, #2, #3, #4, #8 or #9 fail:
+CAN_PUBLISH = FALSE.
+
+==================================================
+STRESS TEST
+==================================================
+
+After implementation, generate 6 completely fresh stories:
+
+1 science mechanism
+2 historical event
+3 geography phenomenon
+4 biology mechanism
+5 engineering phenomenon
+6 counterintuitive everyday science
+
+DO NOT reuse the current three stories.
+
+The six videos must intentionally exercise different visual grammars.
+
+Report:
+
+- technical QA
+- factual QA
+- caption QA
+- debug leakage
+- canvas occupancy
+- visual information gain
+- explanatory motion ratio
+- visual contradiction
+- visual surprise
+- viewer value density
+- hook quality
+- payoff quality
+- anti-template fingerprint
+- cross-video structural similarity
+- audio QA
+- TTS benchmark
+- human editor test
+- CAN_PUBLISH
+
+Most important question:
+
+IF I SHOW THE SIX VIDEOS MUTED IN RANDOM ORDER,
+DO THEY LOOK LIKE SIX DIFFERENT DOCUMENTARIES,
+OR SIX VERSIONS OF THE SAME TEMPLATE?
+
+Do not optimize the numerical scores.
+
+Optimize for:
+
+"Would a human viewer believe this was deliberately art-directed for this particular story?"
+
+That is the next milestone.
