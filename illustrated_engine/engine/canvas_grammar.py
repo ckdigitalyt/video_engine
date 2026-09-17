@@ -394,6 +394,7 @@ def shot_canvas(shot: dict, beat: dict, kit_id: str) -> dict:
         "caption_architecture": kit["caption_architecture"],
         "transition": _transition_for(shot, kit),
         "primary_transformation": transform,
+        "beat_function": fn,
     }
     if kit["caption_architecture"] == "edge_band":
         canvas["caption_zone"] = "below_card"

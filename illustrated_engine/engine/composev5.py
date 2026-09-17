@@ -205,7 +205,13 @@ def _ambient_base(shot, bible, plate_path: Path):
     """
     from engine import bible as B
     frame = layout.base_frame(bible)
-    if _flags.fullbleed11():
+    # V12 P0 — canvas architecture from the story's grammar.  panel_usage
+    # "full_bleed": the plate art IS the canvas (cover-cropped edge to
+    # edge, no tone-mixed continuation bands) — the presentation-panel
+    # look becomes one option among many, not the default.
+    canvas = shot.get("canvas") or {}
+    full_bleed = str(canvas.get("panel_usage") or "") == "full_bleed"
+    if _flags.fullbleed11() and not full_bleed:
         try:
             plate = Image.open(plate_path).convert("RGB")
             cover = layout.smart_crop(plate, CANVAS_W, CANVAS_H, bias_y=0.5)
@@ -239,6 +245,14 @@ def _ambient_base(shot, bible, plate_path: Path):
             frame.paste(amb, (0, 0))
         except Exception:
             pass  # flat bible bg fallback
+    elif full_bleed:
+        try:
+            plate = Image.open(plate_path).convert("RGB")
+            cover = layout.smart_crop(plate, CANVAS_W, CANVAS_H,
+                                      bias_y=0.5)
+            frame.paste(cover, (0, 0))
+        except Exception:
+            pass  # flat bible bg fallback
     else:
         try:
             plate = Image.open(plate_path).convert("RGB")
@@ -253,7 +267,16 @@ def _ambient_base(shot, bible, plate_path: Path):
             frame.paste(amb, (0, 0))
         except Exception:
             pass  # flat bible bg fallback
-    frame = layout.brand_block(frame, bible, shot)
+    # V12 P0 — chrome density: grammar kits may suppress the universal
+    # brand-rail chrome ("none") or keep only beat-boundary markers
+    # ("minimal").  Opening titles always render (hook engine).
+    chrome_density = str(canvas.get("chrome_density") or "rail")
+    if shot.get("opening") or chrome_density == "rail":
+        frame = layout.brand_block(frame, bible, shot)
+    elif chrome_density == "minimal" and (
+            shot.get("beat_function") or "").upper() in (
+            "REVEAL", "PAYOFF"):
+        frame = layout.brand_block(frame, bible, shot)
     if shot.get("end_card"):
         d = ImageDraw.Draw(frame, "RGBA")
         typ = bible.get("typography", {})
