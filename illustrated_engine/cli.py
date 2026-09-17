@@ -658,6 +658,16 @@ def cmd_plan8(args):
         print("  warn:", w)
 
 
+def cmd_plan9(args):
+    from engine import planv9
+    paths = _paths()
+    out_name = args.out or "edit_plan.json"
+    plan, v9 = planv9.make_edit_plan_v9(paths, args.story, out_name=out_name,
+                                        force_grammar=getattr(args, "grammar", None))
+    print(planv9.summarize(plan, v9))
+
+
+
 def cmd_semqa(args):
     from engine import semantic_qa
     paths = _paths()
@@ -908,6 +918,13 @@ def main():
     p7.add_argument("--out", default=None)
     p7.set_defaults(fn=cmd_plan7)
     p8 = sub.add_parser("plan8", help="build V8 edit plan (visual state machine over planv7)")
+
+    p9 = sub.add_parser("plan9", help="V12 planv9: story-driven canvas grammar + cross-video template loop")
+    p9.add_argument("story")
+    p9.add_argument("--out", default=None)
+    p9.add_argument("--grammar", default=None,
+                    help="force a canvas grammar kit id")
+    p9.set_defaults(fn=cmd_plan9)
     p8.add_argument("--story", default="sugar_star")
     p8.add_argument("--out", default=None)
     p8.set_defaults(fn=cmd_plan8)

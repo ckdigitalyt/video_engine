@@ -263,8 +263,12 @@ def make_edit_plan_v9(paths, story_id: str, out_name: str = "edit_plan.json",
     """planv8 plan + story-driven canvas architecture + beat model +
     hook/contradiction/payoff localization + cross-video template loop."""
     story = json.loads((Path(paths.stories) / story_id / "story.json").read_text())
-    candidates = ([force_grammar] if force_grammar in canvas_grammar.KITS
-                  else _declared_grammars(story) or canvas_grammar.classify_story(story))
+    candidates = (_declared_grammars(story) or canvas_grammar.classify_story(story))
+    if force_grammar in canvas_grammar.KITS:
+        # Forced grammar PREPENDS; regeneration can still fall through to
+        # the story's own next valid grammar (the loop needs alternatives).
+        candidates = [force_grammar] + [c for c in candidates
+                                        if c != force_grammar]
     recent = antitemplate.load_recent(exclude_story=story_id, n=5)
 
     attempts, chosen, plan, report = [], None, None, {}

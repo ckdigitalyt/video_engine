@@ -158,7 +158,8 @@ _V2_WEIGHTS = {
     "role_sequence": 0.6,
 }
 _SAME_VIDEO_MEAN_D = 0.30   # weighted mean distance below this = same video
-_SAME_VIDEO_FIELDS = 8      # ... or this many of 13 fields near-identical
+_SAME_VIDEO_FIELDS = 6      # ... AND this many of the 9 architecture fields
+                            # near-identical (directive: "highly similar")
 
 
 def _cam_class(shot: dict) -> str:
@@ -239,11 +240,19 @@ def cross_video_compare(sig: dict, recent: list) -> dict:
         return {"verdict": "no_history", "mean_distance": None,
                 "min_distance": None, "vs": [],
                 "note": "no comparable plans yet — signature recorded"}
+    # Only v2 signatures carry the architecture fields; pre-V12 signatures
+    # are structurally incomparable (empty fields would fake distance 1.0).
+    recent = [r for r in recent if r.get("v2")]
+    if not recent:
+        return {"verdict": "no_history", "mean_distance": None,
+                "min_distance": None, "vs": [],
+                "note": "no v2 plan signatures yet — signature recorded"}
     per, dists = [], []
     for r in recent:
         num = den = 0.0
         near = 0
         fields = 0
+        near_arch = 0
         for f, w in _V2_WEIGHTS.items():
             d = _seq_distance(sig.get(f, []) or [], r.get(f, []) or [])
             num += w * d
@@ -251,6 +260,7 @@ def cross_video_compare(sig: dict, recent: list) -> dict:
             fields += 1
             if d <= 0.05:
                 near += 1
+                near_arch += 1  # architecture fields drive the near-count
             per.append(round(d, 3))
         for f in V2_RATIO_FIELDS:
             d = min(1.0, abs(float(sig.get(f, 0) or 0)
@@ -273,11 +283,16 @@ def cross_video_compare(sig: dict, recent: list) -> dict:
         per.append(per_note)
     mean_d = round(sum(dists) / len(dists), 3)
     min_d = round(min(dists), 3)
-    same = mean_d < _SAME_VIDEO_MEAN_D or near >= _SAME_VIDEO_FIELDS
+    # "Highly similar" = BOTH a low weighted mean AND a dominated
+    # architecture field set (roles/camera/ratios are naturally stable
+    # across replans of one story — they must not fake a clone verdict,
+    # and their identity must not fake diversity either).
+    same = mean_d < _SAME_VIDEO_MEAN_D and near_arch >= _SAME_VIDEO_FIELDS
     return {
         "verdict": "same_video" if same else "distinct",
         "mean_distance": mean_d, "min_distance": min_d,
         "near_identical_fields": near, "fields_compared": fields,
+        "near_identical_architecture_fields": near_arch,
         "thresholds": {"mean_distance": _SAME_VIDEO_MEAN_D,
                        "near_identical_fields": _SAME_VIDEO_FIELDS},
         "vs": [r.get("story_id") for r in recent],
