@@ -23,7 +23,7 @@ ESCALATION_FLOOR = 0.78         # escalation tier intensity
 LEARN_BY_S = 10.0
 ESCALATE_BY_S = 20.0
 MODEL_BY_S = 30.0
-MAJOR = ("t0.5_what_am_i_seeing", "t2_why_continue",
+MAJOR = ("t0.5_what_am_i_seeing", "t1_subject_visible", "t2_why_continue",
          "t10_learned_concrete", "final_payoff")
 
 
@@ -65,6 +65,12 @@ def run(plan: dict, story: dict, payoff: dict | None = None) -> dict:
                    if t0 + float(s.get("duration_s") or 0) <= t)
 
     hero = (v8p.get("hero_recognizability") or {})
+    # V12 P0 hook engine — planv9 measures the declared hook plan on the
+    # plan itself (subject visible ~1s, no black/fade at 0.5s).
+    hook_plan = plan.get("hook_plan") or {}
+    hook_measured = hook_plan.get("measured") or {}
+    opening_fade = bool(hook_measured.get("opening_black_or_fade"))
+    subject_visible_s = hook_measured.get("subject_visible_s")
     first_action = None
     for _s, t, st in states_upto(total):
         if st.get("event"):
@@ -89,23 +95,46 @@ def run(plan: dict, story: dict, payoff: dict | None = None) -> dict:
     # state, or a resolved question by 30s
     contradictions = v8p.get("contradictions") or {}
     con_ok = bool(contradictions.get("honored"))
+    # V12 P0 — the DECLARED visual contradiction (a real visual reveal,
+    # story schema) joins the same checkpoint; it does not replace the
+    # v8 honored chain, it strengthens it.
+    con_declared = plan.get("visual_contradiction") or {}
+    if con_declared.get("declared") and not con_declared.get("honored"):
+        model_by_30 = False  # declared but never revealed: model unchanged
     reveal_by_30 = any(
         t <= MODEL_BY_S and str((s.get("v8") or {}).get("phase")) == "reveal"
         for s, t0 in zip(shots, starts)
         for t in [t0])
     model_by_30 = con_ok or reveal_by_30 or resolves_by(MODEL_BY_S) > 0
     payoff_ok = (payoff or {}).get("verdict") == "pass"
+    # V12 P0 payoff engine — the declared payoff IMAGE (causal model in one
+    # memorable image) must exist in the final window; generic end card or
+    # hero-enlarge default fails the check.
+    pay_img = plan.get("payoff_image") or {}
+    payoff_img_ok = (not pay_img.get("declared")) or bool(pay_img.get("ok"))
     last_dur = float(shots[-1].get("duration_s") or 0)
     final_has_payoff_state = any(
         st.get("name") == "PAYOFF"
         for st in (shots[-1].get("v8") or {}).get("states") or [])
-    final_ok = payoff_ok and (final_has_payoff_state or last_dur >= 3.0)
+    final_ok = payoff_ok and payoff_img_ok and (
+        final_has_payoff_state or last_dur >= 3.0)
 
     checks = {
         "t0.5_what_am_i_seeing": {
             "severity": "MAJOR",
-            "pass": bool(hero.get("ok")) or bool(shots[0].get("title_overlay")),
-            "why": "subject recognition in the first half-second (hero anchor)"},
+            "pass": (bool(hero.get("ok")) or bool(shots[0].get("title_overlay")))
+                    and not opening_fade,
+            "why": "subject recognition in the first half-second; no "
+                   "unnecessary black/fade opening (hook engine)"},
+        # V12 P0 hook engine — SHOW the subject/problem immediately.
+        "t1_subject_visible": {
+            "severity": "MAJOR",
+            "pass": subject_visible_s is None
+                    or float(subject_visible_s) <= float(
+                        (hook_plan.get("targets") or {}).get(
+                            "subject_visible_s", 1.0)),
+            "why": f"subject/problem visible by ~1s "
+                   f"(measured {subject_visible_s}s)"},
         "t2_why_continue": {
             "severity": "MAJOR",
             "pass": (first_action is not None and first_action <= 2.0)

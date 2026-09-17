@@ -30,7 +30,7 @@ from pathlib import Path
 
 COMPONENTS = ("TECHNICAL", "FACTUAL", "CAPTION", "DEBUG_FREE",
               "VISUAL_EVIDENCE", "VIEWER_SIMULATION", "ANTI_TEMPLATE",
-              "AUDIO")
+              "CROSS_VIDEO_TEMPLATE", "AUDIO")
 
 
 def run(qa5: dict, qa7: dict, res8: dict, sem: dict, caption_qa: dict,
@@ -84,6 +84,10 @@ def run(qa5: dict, qa7: dict, res8: dict, sem: dict, caption_qa: dict,
             and g8.get("scroll_stop", False)
         ),
         "ANTI_TEMPLATE": bool(q7g.get("anti_template", False)),
+        # V12 P0 — cross-video template test: "mute narration + replace
+        # nouns -> same video?" vs the previous <=5 plans.  Default True
+        # only when the producing planner predated the v12 gate field.
+        "CROSS_VIDEO_TEMPLATE": bool(q7g.get("cross_video_template", True)),
         # V11 P1 §9 — the AUDIO component adds the hierarchy QA (bed-free
         # silence default honored, no masking, sane dynamic range) on top of
         # continuity + completion.
@@ -127,9 +131,16 @@ def run(qa5: dict, qa7: dict, res8: dict, sem: dict, caption_qa: dict,
                 (occupancy or {}).get("below_target_undeclared", [])[:6]))
         if not (motion_ratio or {}).get("motion_pass", False):
             p0_defects.append("motion_ratio:A>=C")
-    for name in ("FACTUAL", "VIEWER_SIMULATION", "ANTI_TEMPLATE", "AUDIO"):
+    for name in ("FACTUAL", "VIEWER_SIMULATION", "ANTI_TEMPLATE",
+                 "CROSS_VIDEO_TEMPLATE", "AUDIO"):
         if not components[name]:
             p0_defects.append(name.lower())
+    if not components["CROSS_VIDEO_TEMPLATE"]:
+        cv = ((qa7 or {}).get("anti_template") or {}).get("cross_video") or {}
+        p0_defects.append(
+            "cross_video_template:same_video(mean_d=%s, near_fields=%s/%s)" % (
+                cv.get("mean_distance"), cv.get("near_identical_fields"),
+                cv.get("fields_compared")))
     if audio_hier is not None and not audio_hier.get("AUDIO_HIERARCHY_PASS", True):
         p0_defects.append("audio_hierarchy:" + ",".join(
             sorted({f.get("rule", "?") for f in audio_hier.get("findings", [])
