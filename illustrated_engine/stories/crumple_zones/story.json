@@ -1,0 +1,166 @@
+{
+ "story_id": "crumple_zones",
+ "brand": "CRASH PHYSICS",
+ "title": "WHY THE CAR THAT CRUMPLES PROTECTS YOU",
+ "subject": "engineering",
+ "story_type": "engineering_process",
+ "pad_s": 0.4,
+ "v7": {
+  "title_overlay": null
+ },
+ "concepts": [
+  {
+   "id": "states",
+   "beats": [
+    "B1",
+    "B3",
+    "B7"
+   ],
+   "verb": "collapse"
+  },
+  {
+   "id": "physics",
+   "beats": [
+    "B4"
+   ],
+   "verb": "spread"
+  },
+  {
+   "id": "staging",
+   "beats": [
+    "B5",
+    "B6"
+   ],
+   "verb": "sequence"
+  }
+ ],
+ "beats": [
+  {
+   "beat_id": "B1",
+   "function": "HOOK",
+   "contradiction": {
+    "viewer_thinks": "a car that stays rigid in a crash is the safe car",
+    "actually": "rigidity is the trap: the folding front end is the safety system",
+    "reveal_beat": "B3"
+   },
+   "narration": "The car that crumples protects you. The one that shrugs off the crash unmoved passes the impact straight into the people inside. Rigidity is the trap.",
+   "claim": "pre-crumple-era rigid designs transmitted sharp deceleration spikes and cabin intrusion to occupants",
+   "visual_question": "how can a crushed car be the safe one?",
+   "visual_answer": "one car split in two states: an intact rigid body on the cool side, a crumpled nose on the warm side with the cabin untouched",
+   "fact_ids": [
+    "f_rigid_history"
+   ],
+   "start": 0.0,
+   "end": 9.5
+  },
+  {
+   "beat_id": "B2",
+   "function": "CURIOSITY",
+   "narration": "Every modern car hides a bargain: a passenger cell built like a cage, and a front end built to fall apart on purpose. The two halves do opposite jobs.",
+   "claim": "modern cars pair deformable crush zones with a high-strength passenger cell designed to keep the survival space intact",
+   "visual_question": "what is the cabin, and what is the sacrifice?",
+   "visual_answer": "the high-strength cage glows intact while the front rail ahead of it is marked as the crush zone",
+   "fact_ids": [
+    "f_cabin_cage"
+   ],
+   "start": 9.5,
+   "end": 19.0
+  },
+  {
+   "beat_id": "B3",
+   "function": "REVEAL",
+   "narration": "The idea is older than you think. Bela Barenyi patented it in nineteen fifty-two: a rigid cell between deformable ends. Mercedes built the first production car with crumple zones in nineteen fifty-nine.",
+   "claim": "Bar\u00e9nyi patented the crumple-zone concept in 1952; Mercedes introduced it on the W111 in 1959",
+   "visual_question": "where did the folding front end come from?",
+   "visual_answer": "a patent-style drawing flips from straight rails to a bellows-folded rail: the design, not an accident",
+   "fact_ids": [
+    "f_barenyi",
+    "f_plastic_deformation"
+   ],
+   "key_number": "1952",
+   "key_number_rect": [
+    0.62,
+    0.2,
+    0.3,
+    0.12
+   ],
+   "start": 19.0,
+   "end": 30.5
+  },
+  {
+   "beat_id": "B4",
+   "function": "EXPLANATION",
+   "narration": "The physics is one line: force equals momentum change divided by stop time. Same crash, longer stop \u2014 the crush structure stretches the pulse and the peak force on you drops.",
+   "claim": "for the same change of momentum, spreading the stop over a longer time lowers the average force on the occupants",
+   "visual_question": "why does folding metal lower the force?",
+   "visual_answer": "two stop traces: a tall spike for the rigid stop, a long low curve for the crumpled stop \u2014 same area, lower peak",
+   "fact_ids": [
+    "f_impulse",
+    "f_pulse_duration"
+   ],
+   "start": 30.5,
+   "end": 41.0
+  },
+  {
+   "beat_id": "B5",
+   "function": "ESCALATION",
+   "narration": "Nothing about the collapse is accidental. Longitudinal rails fold in a designed sequence, each plastic hinge drinking up energy \u2014 while the cage behind them holds its shape.",
+   "claim": "crumple zones convert kinetic energy into plastic deformation of engineered fold structures in a designed sequence",
+   "visual_question": "what does the crush spend its energy on?",
+   "visual_answer": "stage-one, two, three folds light up down the rail while the survival cell stays bright and undeformed",
+   "fact_ids": [
+    "f_plastic_deformation",
+    "f_cabin_cage"
+   ],
+   "start": 41.0,
+   "end": 52.0
+  },
+  {
+   "beat_id": "B6",
+   "function": "ESCALATION",
+   "narration": "Then the restraints take their cues: the belt tightens, the airbag inflates within tens of milliseconds \u2014 all inside a crash pulse shorter than a blink.",
+   "claim": "restraints are staged inside the crash pulse: pretensioners first, airbag inflation within tens of milliseconds",
+   "visual_question": "what happens in the hundred milliseconds after contact?",
+   "visual_answer": "a crash-pulse timeline: fold stages, belt pretension tick, airbag bloom \u2014 every element in its slot",
+   "fact_ids": [
+    "f_restraint_staging"
+   ],
+   "start": 52.0,
+   "end": 62.0
+  },
+  {
+   "beat_id": "B7",
+   "function": "PAYOFF",
+   "narration": "The dent is the safety system doing its job. Energy spent folding metal is energy never delivered to the person the cage was built around.",
+   "claim": "the crush structure's extended pulse and energy absorption are what protect the occupant",
+   "visual_question": "so what is the dent, really?",
+   "visual_answer": "the resolved split: crumpled nose on one side, untouched glowing cage and occupant on the other",
+   "fact_ids": [
+    "f_barenyi",
+    "f_impulse",
+    "f_plastic_deformation"
+   ],
+   "start": 62.0,
+   "end": 71.5
+  }
+ ],
+ "visual_grammars": [
+  "before_after"
+ ],
+ "visual_contradiction": {
+  "seems": "the safe car is the one that survives the crash undeformed",
+  "actually": "the folding front end is the safety system \u2014 it spends energy and time so you don't have to",
+  "reveal": "the split canvas resolves with the crumpled nose beside a bright, intact survival cell",
+  "beat": "B3"
+ },
+ "hook_plan": {
+  "subject_visible_s": 1.0,
+  "curiosity_s": 2.0,
+  "question_s": 5.0,
+  "no_black_fade_at_0_5": true
+ },
+ "payoff_image": {
+  "image": "the hinge split resolved: warm-side nose fully crumpled, cool-side cage bright and undeformed around the occupant silhouette",
+  "beat": "B7"
+ }
+}

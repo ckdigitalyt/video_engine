@@ -1,0 +1,28 @@
+{
+ "version": "4.0",
+ "topic_grammar": ["BEFORE_AFTER", "SPLIT_HINGE", "CRUSH_SEQUENCE", "CRASH_PULSE"],
+ "brand": "CRASH PHYSICS",
+ "palette": {
+  "primary": "#C2543E",
+  "secondary": "#6E8CA0",
+  "accent": "#E0A33C",
+  "background": "#12181E",
+  "text": "#F0E9DA",
+  "muted": "#5C6670",
+  "highlight": "#D8E2E8"
+ },
+ "illustration_style": "engineering patent-style illustration split by a soft vertical hinge: cool steel-blue intact state against warm rust collapsed state, thin engraved linework, matte finish",
+ "illustration_medium": "engraved patent-style engineering illustration with a hinge-split palette (not photoreal, not flat vector, not parchment)",
+ "lighting": "cool steel light on the intact side, warm rust glow on the collapsed side",
+ "contrast": "medium, luminous vehicle outlines on a deep steel-dark ground",
+ "saturation": 0.26,
+ "texture": {"grain": 0.012, "vignette": 0.28},
+ "typography": {"display": "BebasNeue-Regular.ttf", "body": "Inter-Variable.ttf"},
+ "framing": "vertical 9:16, vehicle profile centred on the hinge line with breathing room above and below",
+ "graphic_language": "split before/after hinge compositions, bellows-fold crush drawings, crash-pulse curve overlays, glowing high-strength cage lines, no parchment, no grid paper, no header or footer chrome, labels as small dark chips with rust leader lines",
+ "transition_style": "hard cut; per-shot fade-in from background colour",
+ "prompt_fragments": {
+  "prefix": "Patent-style engineering illustration split by a soft vertical hinge, cool steel intact state against warm rust collapsed state, engraved linework, matte finish, high contrast",
+  "suffix": "No readable text, no watermarks, no photoreal rendering, no logos"
+ }
+}
