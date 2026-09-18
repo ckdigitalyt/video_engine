@@ -1,0 +1,28 @@
+{
+ "version": "4.0",
+ "topic_grammar": ["CUTAWAY", "LAYERED_REVEAL", "DIAL", "VESSEL_FLOW"],
+ "brand": "INNER CLIMATE",
+ "palette": {
+  "primary": "#C25442",
+  "secondary": "#469696",
+  "accent": "#E0A33C",
+  "background": "#24100F",
+  "text": "#F0E9DA",
+  "muted": "#7A6A64",
+  "highlight": "#E8C8A0"
+ },
+ "illustration_style": "anatomical cutaway illustration on a deep blood-warm dark field, rust-red tissue planes and teal vessel lines, dial and gauge motifs, thin engraved linework, matte finish",
+ "illustration_medium": "engraved anatomical cutaway illustration with warm visceral palette (not photoreal, not flat vector, not parchment)",
+ "lighting": "dark interior ground with a warm core glow, cool teal vessel outlines",
+ "contrast": "medium, luminous organs and dials on a deep warm dark ground",
+ "saturation": 0.28,
+ "texture": {"grain": 0.012, "vignette": 0.28},
+ "typography": {"display": "BebasNeue-Regular.ttf", "body": "Inter-Variable.ttf"},
+ "framing": "vertical 9:16, full-canvas cutaway figures centred with breathing room at the edges",
+ "graphic_language": "layered cutaway planes in rust and dusty rose on a blood-warm dark field, teal vessel linework, amber heat glow, set-point dials as circular gauge motifs, no parchment, no grid paper, no header or footer chrome, labels as small dark chips with rust leader lines",
+ "transition_style": "hard cut; per-shot fade-in from background colour",
+ "prompt_fragments": {
+  "prefix": "Anatomical cutaway diagram illustration, layered rust and rose tissue planes on a deep blood-warm dark field, teal vessel linework, amber heat glow, engraved lines, matte finish, high contrast",
+  "suffix": "No readable text, no watermarks, no photoreal rendering, no logos"
+ }
+}

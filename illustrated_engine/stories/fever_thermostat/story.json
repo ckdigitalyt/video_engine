@@ -1,0 +1,165 @@
+{
+ "story_id": "fever_thermostat",
+ "brand": "INNER CLIMATE",
+ "title": "HOW A FEVER ACTUALLY WORKS",
+ "subject": "biology",
+ "story_type": "physiology_process",
+ "pad_s": 0.4,
+ "v7": {
+  "title_overlay": null
+ },
+ "concepts": [
+  {
+   "id": "setpoint",
+   "beats": [
+    "B1",
+    "B3",
+    "B7"
+   ],
+   "verb": "recalibrate"
+  },
+  {
+   "id": "defense",
+   "beats": [
+    "B4",
+    "B5"
+   ],
+   "verb": "generate"
+  },
+  {
+   "id": "recovery",
+   "beats": [
+    "B6",
+    "B7"
+   ],
+   "verb": "shed"
+  }
+ ],
+ "beats": [
+  {
+   "beat_id": "B1",
+   "function": "HOOK",
+   "contradiction": {
+    "viewer_thinks": "a fever is the body overheating out of control \u2014 the heat is the illness",
+    "actually": "the brain deliberately raises the set point and the body defends that higher temperature",
+    "reveal_beat": "B3"
+   },
+   "narration": "You are burning hot \u2014 and shivering under a blanket. A fever is not your body losing control of its temperature. It is your body choosing a new one.",
+   "claim": "fever is a regulated rise of the body's temperature set point, orchestrated by the brain",
+   "visual_question": "why do you shiver while burning hot?",
+   "visual_answer": "a cutaway figure glows from the core while the skin surface shows shiver marks \u2014 heat inside, chills outside",
+   "fact_ids": [
+    "f_setpoint"
+   ],
+   "start": 0.0,
+   "end": 9.5
+  },
+  {
+   "beat_id": "B2",
+   "function": "CURIOSITY",
+   "narration": "Deep at the base of your brain sits the hypothalamus \u2014 the body's thermostat. In a fever it does not fail. It is recalibrated.",
+   "claim": "the hypothalamus acts as the body's thermostat for core temperature",
+   "visual_question": "where does the body keep its thermostat?",
+   "visual_answer": "a cutaway head profile with the hypothalamus lit deep at the brain's base, baseline dial beside it",
+   "fact_ids": [
+    "f_hypothalamus",
+    "f_baseline_varies"
+   ],
+   "start": 9.5,
+   "end": 18.5
+  },
+  {
+   "beat_id": "B3",
+   "function": "REVEAL",
+   "narration": "Immune cells in your blood release chemical messengers. They reach the brain and trigger prostaglandin E two \u2014 which pushes the thermostat's set point up, one or two degrees.",
+   "claim": "pyrogenic cytokines induce prostaglandin E2 in the hypothalamus, raising the set point",
+   "visual_question": "what physically moves the set point?",
+   "visual_answer": "cytokine dots travel a vessel into the hypothalamus and the set-point dial turns from 37 to 39",
+   "fact_ids": [
+    "f_pge2_pathway"
+   ],
+   "key_number": "+1-2\u00b0C",
+   "key_number_rect": [
+    0.62,
+    0.2,
+    0.3,
+    0.12
+   ],
+   "start": 18.5,
+   "end": 29.5
+  },
+  {
+   "beat_id": "B4",
+   "function": "EXPLANATION",
+   "narration": "Your core now sits below the new target \u2014 so you feel cold. Skin vessels clamp down, and you shiver: muscles cranking out heat until the body meets the number it set.",
+   "claim": "vasoconstriction and shivering raise core temperature toward the raised set point",
+   "visual_question": "how does the body climb to the new set point?",
+   "visual_answer": "narrowed skin vessels, zigzag shiver marks on muscles and inward heat arrows to the core",
+   "fact_ids": [
+    "f_shivering_response"
+   ],
+   "start": 29.5,
+   "end": 40.0
+  },
+  {
+   "beat_id": "B5",
+   "function": "ESCALATION",
+   "narration": "The fever itself is part of the defense. Higher temperatures slow many pathogens and speed immune cells \u2014 though very high fevers harm, and the balance is still debated.",
+   "claim": "moderate fever can slow pathogens and support immunity; very high fever harms; net benefit is debated",
+   "visual_question": "what does the higher temperature buy?",
+   "visual_answer": "bacterial chains replicating slowly beside a brisker immune cell \u2014 the trade-off shown, not hidden",
+   "fact_ids": [
+    "f_benefit_tradeoff"
+   ],
+   "start": 40.0,
+   "end": 51.0
+  },
+  {
+   "beat_id": "B6",
+   "function": "ESCALATION",
+   "narration": "When the infection quiets \u2014 or an ibuprofen tablet blocks the prostaglandins \u2014 the set point falls back. Now you are too hot. Vessels open, and sweat evaporates to dump the excess.",
+   "claim": "antipyretics inhibit prostaglandin synthesis; the falling set point drives vasodilation and sweating",
+   "visual_question": "why does the fever break with sweat?",
+   "visual_answer": "the dial unwinds to baseline, wide-open skin vessels glow and sweat beads lift off the skin surface",
+   "fact_ids": [
+    "f_defervescence",
+    "f_pge2_pathway"
+   ],
+   "start": 51.0,
+   "end": 62.0
+  },
+  {
+   "beat_id": "B7",
+   "function": "PAYOFF",
+   "narration": "The chills were the climb. The sweat is the descent. A fever is your own thermostat, aimed higher on purpose \u2014 and your body fighting to reach the target it set.",
+   "claim": "fever symptoms follow the set-point trajectory: chills on the ramp, sweat on the descent",
+   "visual_question": "what was the whole loop for?",
+   "visual_answer": "the resolved cutaway: dial at baseline, calm core gradient, open vessels \u2014 the regulation story closed in one frame",
+   "fact_ids": [
+    "f_setpoint",
+    "f_defervescence"
+   ],
+   "start": 62.0,
+   "end": 72.0
+  }
+ ],
+ "visual_grammars": [
+  "cutaway_reveal"
+ ],
+ "visual_contradiction": {
+  "seems": "a fever is your body overheating out of control \u2014 the heat IS the illness",
+  "actually": "the brain deliberately raises the set point and the body defends that higher temperature",
+  "reveal": "the cutaway head shows the set-point dial turning up while the body actively heats itself toward the new target",
+  "beat": "B3"
+ },
+ "hook_plan": {
+  "subject_visible_s": 1.0,
+  "curiosity_s": 2.0,
+  "question_s": 5.0,
+  "no_black_fade_at_0_5": true
+ },
+ "payoff_image": {
+  "image": "the cutaway figure at rest \u2014 dial back at baseline, open glowing vessels and a calm core gradient: the whole regulation loop resolved in one frame",
+  "beat": "B7"
+ }
+}

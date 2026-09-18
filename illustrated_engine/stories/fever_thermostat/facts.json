@@ -1,0 +1,125 @@
+{
+ "claims": [
+  {
+   "id": "f_setpoint",
+   "beats": [
+    "B1",
+    "B7"
+   ],
+   "claim": "fever is a regulated rise of the body's temperature set point, orchestrated by the brain \u2014 not a loss of temperature control",
+   "definition": "during fever the hypothalamic set point is elevated and thermoregulatory defenses (vasoconstriction, shivering) operate to defend the higher target, exactly as they defend 37 C at baseline",
+   "current_record_holder": "n/a",
+   "measured_value": "typical fever range 38-40 C core; set-point rise of roughly 1-2 C",
+   "date_verified": "2026-09",
+   "authoritative_source": "Guyton & Hall Textbook of Medical Physiology, ch. 74 (thermoregulation and fever); Dinarello & Gelfand, fever chapters in standard internal-medicine references",
+   "confidence": "established",
+   "nuance": {
+    "classification": "ESTABLISHED"
+   },
+   "verified": true
+  },
+  {
+   "id": "f_hypothalamus",
+   "beats": [
+    "B2"
+   ],
+   "claim": "the hypothalamus, at the base of the brain, acts as the body's thermostat for core temperature",
+   "definition": "preoptic/anterior hypothalamus integrates thermal signals from skin, viscera and blood and drives heat-production and heat-loss responses",
+   "current_record_holder": "n/a",
+   "measured_value": "qualitative anatomical/physiological role",
+   "date_verified": "2026-09",
+   "authoritative_source": "Guyton & Hall, ch. 74; standard neuroanatomy references",
+   "confidence": "established",
+   "nuance": {
+    "classification": "ESTABLISHED"
+   },
+   "verified": true
+  },
+  {
+   "id": "f_pge2_pathway",
+   "beats": [
+    "B3",
+    "B6"
+   ],
+   "claim": "pyrogenic cytokines from immune cells induce prostaglandin E2 in the hypothalamus, which raises the fever set point; antipyretics such as ibuprofen lower fever by inhibiting prostaglandin synthesis (COX)",
+   "definition": "circulating IL-1/IL-6/TNF act on the brain (humoral and endothelial routes) to induce COX-2-mediated PGE2; PGE2 raises the set point; NSAIDs block COX, lowering PGE2",
+   "current_record_holder": "n/a",
+   "measured_value": "set-point rise commonly ~1-2 C in common infections",
+   "date_verified": "2026-09",
+   "authoritative_source": "Dinarello, 'Infection, fever and pyrogens' (Ann Rev Physiol); Vane 1971 mechanism of aspirin (Nobel 1982); standard pharmacology references",
+   "confidence": "established",
+   "nuance": {
+    "classification": "ESTABLISHED"
+   },
+   "verified": true
+  },
+  {
+   "id": "f_shivering_response",
+   "beats": [
+    "B4"
+   ],
+   "claim": "when the set point rises above core temperature, the body responds as if cold: skin vasoconstriction and shivering generate and retain heat until the new target is met",
+   "definition": "shivering raises metabolic heat production several-fold; cutaneous vasoconstriction cuts radiant loss; both are set-point-driven",
+   "current_record_holder": "n/a",
+   "measured_value": "shivering can raise metabolic rate roughly 2-5x (studies vary); qualitative direction firm",
+   "date_verified": "2026-09",
+   "authoritative_source": "Guyton & Hall, ch. 74; cold-stress physiology literature (magnitude ranges vary by study \u2014 hedged)",
+   "confidence": "established",
+   "nuance": {
+    "classification": "ESTABLISHED"
+   },
+   "verified": true
+  },
+  {
+   "id": "f_benefit_tradeoff",
+   "beats": [
+    "B5"
+   ],
+   "claim": "moderate fever can slow replication of many pathogens and support immune function, but very high fevers can be harmful, and how much benefit fever provides in human infections remains debated",
+   "definition": "in-vitro and animal data show impaired pathogen growth and enhanced immune activity at elevated temperatures; human outcome data are mixed (e.g. antipyretic trial evidence varies by infection) \u2014 stated as a hedged trade-off",
+   "current_record_holder": "n/a",
+   "measured_value": "no single number; direction supported, magnitude debated",
+   "date_verified": "2026-09",
+   "authoritative_source": "Evans et al., 'Fever and the thermal control of bacterial virulence' (mitigation data); Earn et al. on antipyretics and viral evolution; systematic reviews of antipyretic treatment (mixed)",
+   "confidence": "hedged",
+   "nuance": {
+    "classification": "ACTIVE_DEBATE"
+   },
+   "verified": true
+  },
+  {
+   "id": "f_defervescence",
+   "beats": [
+    "B6"
+   ],
+   "claim": "when the set point falls \u2014 pyrogens clearing or prostaglandin synthesis blocked \u2014 the body is now above target and sheds heat: cutaneous vasodilation and sweating",
+   "definition": "the same regulated machinery runs in reverse; sweat evaporation dissipates the heat held during the fever ramp",
+   "current_record_holder": "n/a",
+   "measured_value": "qualitative mechanism",
+   "date_verified": "2026-09",
+   "authoritative_source": "Guyton & Hall, ch. 74; standard internal-medicine references",
+   "confidence": "established",
+   "nuance": {
+    "classification": "ESTABLISHED"
+   },
+   "verified": true
+  },
+  {
+   "id": "f_baseline_varies",
+   "beats": [
+    "B2"
+   ],
+   "claim": "normal core temperature is about 36.5-37.5 C and varies between people and across the day, so 37.0 C is an average rather than a fixed law",
+   "definition": "circadian rhythm of roughly 0.5 C and population variation are well documented; the classic 37 C figure comes from 19th-century averages",
+   "current_record_holder": "n/a",
+   "measured_value": "approx. 36.5-37.5 C normal band; ~0.5 C circadian swing",
+   "date_verified": "2026-09",
+   "authoritative_source": "normal-body-temperature reviews (e.g. Mackowiak et al. on Wunderlich's legacy); Guyton & Hall",
+   "confidence": "established",
+   "nuance": {
+    "classification": "ESTABLISHED"
+   },
+   "verified": true
+  }
+ ]
+}

@@ -1,0 +1,404 @@
+{
+ "story_id": "fever_thermostat",
+ "engine": "v6",
+ "fps": 30,
+ "size": [
+  1080,
+  1920
+ ],
+ "regions": {
+  "visual_rect": [
+   0,
+   176,
+   1080,
+   1744
+  ],
+  "center": [
+   0.3,
+   0.38,
+   0.4,
+   0.24
+  ],
+  "upper": [
+   0.22,
+   0.06,
+   0.56,
+   0.2
+  ],
+  "lower": [
+   0.22,
+   0.7,
+   0.56,
+   0.2
+  ]
+ },
+ "beats": [
+  {
+   "beat_id": "B1",
+   "shots": [
+    {
+     "shot_id": "S01",
+     "shot_type": "HOOK",
+     "asset": "FV_B1_hook",
+     "duration_est": 7.5,
+     "crop_bias_y": 0.45,
+     "captions": "phrase",
+     "role": "HERO",
+     "chrome": "none",
+     "tag": "",
+     "visual_mode": "DARK_CINEMATIC",
+     "evidence_type": "DIRECT_EVIDENCE",
+     "motion_type": "CAMERA_MOTION",
+     "opening": true,
+     "title": "",
+     "purpose": "Open mid-symptom: a core glowing amber while the skin surface shivers \u2014 the paradox stated in one image",
+     "claim": "fever is a regulated rise of the body's temperature set point, orchestrated by the brain",
+     "evidence": "blood-warm dark-field cutaway figure: amber core glow, shiver arcs at the skin, clamped teal vessels, 39C dial readout",
+     "motion_reason": "slow push-in so hot-core-versus-cold-skin reads immediately",
+     "transition_reason": "cut into the paradox",
+     "cam_from_scale": 1.0,
+     "cam_to_scale": 1.08,
+     "cam_cx": 0.5,
+     "cam_cy": 0.5,
+     "depth": {
+      "layers": [
+       "foreground",
+       "midground"
+      ],
+      "intent": "parallax_geometry",
+      "note": "shiver arcs in front of the body plane"
+     },
+     "subject_contract": {
+      "expected_subject": "blood-warm cutaway figure with amber core glow and skin shiver arcs",
+      "required": [
+       "cutaway figure",
+       "amber core glow",
+       "shiver arcs"
+      ],
+      "forbidden": [
+       "parchment",
+       "grid paper",
+       "header/footer chrome"
+      ],
+      "sibling_min": 2,
+      "art_style": "engraved anatomical cutaway"
+     }
+    }
+   ]
+  },
+  {
+   "beat_id": "B2",
+   "shots": [
+    {
+     "shot_id": "S02",
+     "shot_type": "CURIOSITY",
+     "asset": "FV_B2_thermostat",
+     "duration_est": 8.0,
+     "crop_bias_y": 0.45,
+     "captions": "phrase",
+     "role": "GUIDE",
+     "chrome": "none",
+     "tag": "",
+     "visual_mode": "DIAGRAM_CALL",
+     "evidence_type": "DIRECT_EVIDENCE",
+     "motion_type": "CAMERA_MOTION",
+     "opening": false,
+     "title": "",
+     "purpose": "Locate the thermostat: cutaway head with hypothalamus lit at the brain's base, baseline dial beside it",
+     "claim": "the hypothalamus acts as the body's thermostat for core temperature",
+     "evidence": "cutaway head profile, rose brain mass with rust gyri, amber hypothalamus dot, 37-degree set-point gauge",
+     "motion_reason": "gentle drift toward the lit hypothalamus dot",
+     "transition_reason": "cut from body to head cutaway",
+     "cam_from_scale": 1.02,
+     "cam_to_scale": 1.08,
+     "cam_cx": 0.46,
+     "cam_cy": 0.48,
+     "depth": {
+      "layers": [
+       "midground"
+      ],
+      "intent": "parallax_geometry",
+      "note": "vessel lines behind brain mass"
+     },
+     "subject_contract": {
+      "expected_subject": "cutaway head with lit hypothalamus and baseline set-point dial",
+      "required": [
+       "head cutaway",
+       "hypothalamus dot",
+       "set-point dial"
+      ],
+      "forbidden": [
+       "parchment",
+       "grid paper",
+       "header/footer chrome"
+      ],
+      "sibling_min": 2,
+      "art_style": "engraved anatomical cutaway"
+     }
+    }
+   ]
+  },
+  {
+   "beat_id": "B3",
+   "shots": [
+    {
+     "shot_id": "S03",
+     "shot_type": "REVEAL",
+     "asset": "FV_B3_reveal",
+     "duration_est": 9.5,
+     "crop_bias_y": 0.45,
+     "captions": "phrase",
+     "role": "GUIDE",
+     "chrome": "none",
+     "tag": "",
+     "visual_mode": "DIAGRAM_CALL",
+     "evidence_type": "MECHANISM_DIAGRAM",
+     "motion_type": "STATE_CHANGE",
+     "opening": false,
+     "title": "",
+     "purpose": "The mechanism reveal: cytokine dots travel the vessel into the hypothalamus and the dial turns to 39",
+     "claim": "pyrogenic cytokines induce prostaglandin E2 in the hypothalamus, raising the set point",
+     "evidence": "rust cytokine dots streaming down a teal vessel into the amber hypothalamus, dial needle at 39, +1-2C number",
+     "motion_reason": "flow animation follows the cytokine path, then the needle sweeps",
+     "transition_reason": "cut on the dial sweep",
+     "cam_from_scale": 1.0,
+     "cam_to_scale": 1.07,
+     "cam_cx": 0.5,
+     "cam_cy": 0.5,
+     "depth": {
+      "layers": [
+       "foreground",
+       "midground"
+      ],
+      "intent": "parallax_geometry",
+      "note": "dots in front of vessel"
+     },
+     "subject_contract": {
+      "expected_subject": "cytokine flow into lit hypothalamus with dial swept to 39",
+      "required": [
+       "cytokine dots",
+       "vessel",
+       "dial at 39"
+      ],
+      "forbidden": [
+       "parchment",
+       "grid paper",
+       "header/footer chrome"
+      ],
+      "sibling_min": 2,
+      "art_style": "engraved anatomical cutaway"
+     }
+    }
+   ]
+  },
+  {
+   "beat_id": "B4",
+   "shots": [
+    {
+     "shot_id": "S04",
+     "shot_type": "EXPLANATION",
+     "asset": "FV_B4_climb",
+     "duration_est": 9.5,
+     "crop_bias_y": 0.45,
+     "captions": "phrase",
+     "role": "GUIDE",
+     "chrome": "none",
+     "tag": "",
+     "visual_mode": "DIAGRAM_CALL",
+     "evidence_type": "MECHANISM_DIAGRAM",
+     "motion_type": "STATE_CHANGE",
+     "opening": false,
+     "title": "",
+     "purpose": "The climb: clamped vessels, shiver marks, amber heat arrows running inward to the core",
+     "claim": "vasoconstriction and shivering raise core temperature toward the raised set point",
+     "evidence": "thin teal clamped vessels, zigzag shiver arcs on muscle, three amber arrows pushing heat toward the glowing core",
+     "motion_reason": "arrows animate inward while shiver arcs pulse",
+     "transition_reason": "cut from head to body cutaway",
+     "cam_from_scale": 1.06,
+     "cam_to_scale": 1.0,
+     "cam_cx": 0.45,
+     "cam_cy": 0.5,
+     "depth": {
+      "layers": [
+       "foreground",
+       "midground"
+      ],
+      "intent": "parallax_geometry",
+      "note": "arrows in front of torso"
+     },
+     "subject_contract": {
+      "expected_subject": "body cutaway with clamped vessels, shiver arcs and inward amber heat arrows",
+      "required": [
+       "clamped vessels",
+       "shiver arcs",
+       "heat arrows"
+      ],
+      "forbidden": [
+       "parchment",
+       "grid paper",
+       "header/footer chrome"
+      ],
+      "sibling_min": 2,
+      "art_style": "engraved anatomical cutaway"
+     }
+    }
+   ]
+  },
+  {
+   "beat_id": "B5",
+   "shots": [
+    {
+     "shot_id": "S05",
+     "shot_type": "ESCALATION",
+     "asset": "FV_B5_defense",
+     "duration_est": 9.5,
+     "crop_bias_y": 0.45,
+     "captions": "phrase",
+     "role": "GUIDE",
+     "chrome": "none",
+     "tag": "",
+     "visual_mode": "DIAGRAM_CALL",
+     "evidence_type": "COMPARISON",
+     "motion_type": "SPLIT_STAGES",
+     "opening": false,
+     "title": "",
+     "purpose": "The stake: a slow rust pathogen chain on the left, a bristling immune cell on the right \u2014 the trade-off shown",
+     "claim": "moderate fever can slow pathogens and support immunity; very high fever harms; net benefit is debated",
+     "evidence": "linked rust rings (sluggish chain) beside a large rust immune cell with an amber nucleus and bristling receptors, debate caption chip",
+     "motion_reason": "receptors pulse outward; chain links drift slowly",
+     "transition_reason": "cut to the defense payoff",
+     "cam_from_scale": 1.0,
+     "cam_to_scale": 1.06,
+     "cam_cx": 0.5,
+     "cam_cy": 0.5,
+     "depth": {
+      "layers": [
+       "midground"
+      ],
+      "intent": "parallax_geometry",
+      "note": "receptors in front of cell body"
+     },
+     "subject_contract": {
+      "expected_subject": "slow pathogen chain versus activated immune cell, split by a hairline",
+      "required": [
+       "pathogen chain",
+       "immune cell",
+       "amber nucleus"
+      ],
+      "forbidden": [
+       "parchment",
+       "grid paper",
+       "header/footer chrome"
+      ],
+      "sibling_min": 2,
+      "art_style": "engraved anatomical cutaway"
+     }
+    }
+   ]
+  },
+  {
+   "beat_id": "B6",
+   "shots": [
+    {
+     "shot_id": "S06",
+     "shot_type": "ESCALATION",
+     "asset": "FV_B6_break",
+     "duration_est": 9.5,
+     "crop_bias_y": 0.45,
+     "captions": "phrase",
+     "role": "GUIDE",
+     "chrome": "none",
+     "tag": "",
+     "visual_mode": "DIAGRAM_CALL",
+     "evidence_type": "MECHANISM_DIAGRAM",
+     "motion_type": "STATE_CHANGE",
+     "opening": false,
+     "title": "",
+     "purpose": "The descent: dial unwinds to baseline, vessels open wide, sweat beads lift off the skin",
+     "claim": "antipyretics inhibit prostaglandin synthesis; the falling set point drives vasodilation and sweating",
+     "evidence": "wide teal vessels glowing on flushed skin, sweat beads above the shoulder line, dial back at 37",
+     "motion_reason": "beads rise while vessels widen",
+     "transition_reason": "cut on the bead lift",
+     "cam_from_scale": 1.04,
+     "cam_to_scale": 1.0,
+     "cam_cx": 0.5,
+     "cam_cy": 0.55,
+     "depth": {
+      "layers": [
+       "foreground"
+      ],
+      "intent": "parallax_geometry",
+      "note": "beads in front of skin plane"
+     },
+     "subject_contract": {
+      "expected_subject": "flushed figure with wide open vessels, rising sweat beads, dial at baseline",
+      "required": [
+       "open vessels",
+       "sweat beads",
+       "dial at 37"
+      ],
+      "forbidden": [
+       "parchment",
+       "grid paper",
+       "header/footer chrome"
+      ],
+      "sibling_min": 2,
+      "art_style": "engraved anatomical cutaway"
+     }
+    }
+   ]
+  },
+  {
+   "beat_id": "B7",
+   "shots": [
+    {
+     "shot_id": "S07",
+     "shot_type": "PAYOFF",
+     "asset": "FV_B7_payoff",
+     "duration_est": 9.5,
+     "crop_bias_y": 0.45,
+     "captions": "phrase",
+     "role": "HERO",
+     "chrome": "none",
+     "tag": "",
+     "visual_mode": "DARK_CINEMATIC",
+     "evidence_type": "DIRECT_EVIDENCE",
+     "motion_type": "CAMERA_MOTION",
+     "opening": false,
+     "title": "",
+     "purpose": "Resolve the loop: the same cutaway at rest, chills marked as the climb and sweat as the descent",
+     "claim": "fever symptoms follow the set-point trajectory: chills on the ramp, sweat on the descent",
+     "evidence": "calm cutaway figure, amber up arrow on the left, teal down arrow on the right, dial at baseline between them",
+     "motion_reason": "slow pull-back closes the story",
+     "transition_reason": "cut to the resting state",
+     "cam_from_scale": 1.06,
+     "cam_to_scale": 1.0,
+     "cam_cx": 0.5,
+     "cam_cy": 0.5,
+     "depth": {
+      "layers": [
+       "midground"
+      ],
+      "intent": "parallax_geometry",
+      "note": "arrows frame the figure"
+     },
+     "subject_contract": {
+      "expected_subject": "resolved cutaway with baseline dial, climb and descent arrows framed symmetrically",
+      "required": [
+       "calm figure",
+       "baseline dial",
+       "climb/descent arrows"
+      ],
+      "forbidden": [
+       "parchment",
+       "grid paper",
+       "header/footer chrome"
+      ],
+      "sibling_min": 2,
+      "art_style": "engraved anatomical cutaway"
+     }
+    }
+   ]
+  }
+ ]
+}

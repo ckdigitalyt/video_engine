@@ -106,12 +106,76 @@ def terrain_field(seed, base_col=(198, 186, 156), wash=((184, 168, 126, 20),
     return Image.alpha_composite(img.convert("RGBA"), ov)
 
 
+def split_field(seed, cool=(64, 82, 94), warm=(96, 68, 56),
+                seam=(226, 222, 212)):
+    """`split_field` — before_after: one canvas split by a soft hinge.
+
+    Cool steel half (state A / intact) meets a warm rust half (state B /
+    collapsed); a narrow desaturated seam keeps the split reading as ONE
+    composed canvas with a hinge, not two separate slides. No grid, no
+    chrome.
+    """
+    img = Image.new("RGB", (W, H))
+    img.paste(Image.new("RGB", (W // 2 + 40, H), cool), (0, 0))
+    img.paste(Image.new("RGB", (W // 2 + 40, H), warm), (W // 2 - 40, 0))
+    ov = Image.new("RGBA", img.size, (0, 0, 0, 0))
+    d = ImageDraw.Draw(ov)
+    rnd = random.Random(seed)
+    for _ in range(10):
+        cx, cy = rnd.randint(0, W), rnd.randint(0, H)
+        r = rnd.randint(160, 420)
+        col = cool if cx < W // 2 else warm
+        d.ellipse((cx - r, cy - r // 2, cx + r, cy + r // 2),
+                  fill=col + (rnd.randint(10, 26),))
+    ov = ov.filter(ImageFilter.GaussianBlur(70))
+    img = Image.alpha_composite(img.convert("RGBA"), ov)
+    grad = Image.new("L", (W, H), 0)
+    dg = ImageDraw.Draw(grad)
+    for i in range(26):
+        dg.line((W // 2 - 13 + i, 0, W // 2 - 13 + i, H),
+                fill=int(190 * (1 - i / 26)))
+    grad = grad.filter(ImageFilter.GaussianBlur(7))
+    seam_img = Image.new("RGBA", (W, H), seam + (255,))
+    return Image.composite(seam_img, img, grad.point(lambda v: v))
+
+
+def depth_field(seed, top=(44, 98, 106), mid=(22, 58, 76), bottom=(8, 18, 36)):
+    """`depth_gradient` — scale_descent: surface-to-abyss vertical gradient.
+
+    Reads as descending water column depth, not as a backdrop wash: cool
+    aqua light at the top sinking through slate blue to near-black navy —
+    the story code draws the scale ladder on top. No grid, no chrome.
+    """
+    base = Image.new("RGB", (1, H))
+    for y in range(H):
+        t = y / (H - 1)
+        if t < 0.5:
+            c = tuple(int(top[i] + (mid[i] - top[i]) * t * 2) for i in range(3))
+        else:
+            c = tuple(int(mid[i] + (bottom[i] - mid[i]) * (t - 0.5) * 2)
+                      for i in range(3))
+        base.putpixel((0, y), c)
+    img = base.resize((W, H)).convert("RGBA")
+    ov = Image.new("RGBA", img.size, (0, 0, 0, 0))
+    d = ImageDraw.Draw(ov)
+    rnd = random.Random(seed)
+    for _ in range(9):
+        cx, cy = rnd.randint(0, W), rnd.randint(0, H)
+        r = rnd.randint(180, 460)
+        d.ellipse((cx - r, cy - r // 2, cx + r, cy + r // 2),
+                  fill=(14, 38, 54, rnd.randint(10, 24)))
+    ov = ov.filter(ImageFilter.GaussianBlur(70))
+    return Image.alpha_composite(img, ov)
+
+
 # ------------------------------------------------------- kit dispatch -------
 
 KIT_BACKGROUND = {
     "edge_to_edge_dark": dark_field,
     "era_field": era_field,
     "terrain_field": terrain_field,
+    "split_field": split_field,
+    "depth_gradient": depth_field,
 }
 
 
