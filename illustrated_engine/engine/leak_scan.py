@@ -112,13 +112,25 @@ def _frame_at(video: Path, t: float) -> Image.Image | None:
 
 def _text_zones():
     """Declared text zones (x0, y0, x1, y1) in frame coords."""
-    from engine.layout import BRAND_RECT
-    from engine import captions as caps_mod
+    from engine import caption_place as cplace
     from engine.planv5 import CARD_H, CARD_Y0
     zones = [(0, 0, 1080, CARD_Y0),                       # header band (brand/title/end-card)
              (0, CARD_Y0, 1080, CARD_Y0 + CARD_H)]        # card content (plate labels/footer)
-    top, bot = caps_mod.band_rect()
-    zones.append((0, top - 8, 1080, bot + 8))             # caption band
+    # V12 3 fix — declare EVERY caption_place candidate zone, not just the
+    # default band. composev5 places captions per shot via
+    # caption_place.choose_zone (below_card / below_card_low retreat /
+    # top_band), so a caption drawn in a non-default candidate zone is
+    # engine output inside a declared zone, not a leak. The stale
+    # single-band declaration produced the systematic
+    # frame_text_outside_zones P0 on the 3a renders (evidence:
+    # microwave_dielectric S06 clusters y1774..1818 == below_card_low
+    # carrier text rows; S05 top_band likewise; atacama frame hits drop
+    # to zero once all candidate zones are declared). Detection itself
+    # (median-diff glyph mask, row clustering, dev-token source scan) is
+    # unchanged — only the declared-zone set now matches the render
+    # contract.
+    for _top, _bot in cplace.zones().values():
+        zones.append((0, max(0, _top - 8), 1080, min(1920, _bot + 8)))
     return zones
 
 
