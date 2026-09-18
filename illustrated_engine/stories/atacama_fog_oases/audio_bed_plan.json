@@ -1,0 +1,94 @@
+{
+  "bed_files": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+  ],
+  "sfx": [
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/atacama_fog_oases/audio/sfx_whoosh.wav",
+      "at": 0.952,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/atacama_fog_oases/audio/sfx_pulse.wav",
+      "at": 7.423,
+      "kind": "pulse"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/atacama_fog_oases/audio/sfx_whoosh.wav",
+      "at": 10.743,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/atacama_fog_oases/audio/sfx_tick.wav",
+      "at": 11.717,
+      "kind": "tick"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/atacama_fog_oases/audio/sfx_pulse.wav",
+      "at": 19.08,
+      "kind": "pulse"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/atacama_fog_oases/audio/sfx_whoosh.wav",
+      "at": 22.901,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/atacama_fog_oases/audio/sfx_pulse.wav",
+      "at": 30.545,
+      "kind": "pulse"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/atacama_fog_oases/audio/sfx_whoosh.wav",
+      "at": 34.351,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/atacama_fog_oases/audio/sfx_pulse.wav",
+      "at": 43.416,
+      "kind": "pulse"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/atacama_fog_oases/audio/sfx_whoosh.wav",
+      "at": 47.609,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/atacama_fog_oases/audio/sfx_tick.wav",
+      "at": 48.549,
+      "kind": "tick"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/atacama_fog_oases/audio/sfx_pulse.wav",
+      "at": 56.176,
+      "kind": "pulse"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/atacama_fog_oases/audio/sfx_whoosh.wav",
+      "at": 60.14,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/atacama_fog_oases/audio/sfx_pulse.wav",
+      "at": 68.246,
+      "kind": "pulse"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/atacama_fog_oases/audio/sfx_whoosh.wav",
+      "at": 72.144,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/atacama_fog_oases/audio/sfx_pulse.wav",
+      "at": 80.818,
+      "kind": "pulse"
+    }
+  ],
+  "bed_crossfade_ms": 600
+}

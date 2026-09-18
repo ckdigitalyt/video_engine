@@ -1,0 +1,192 @@
+{
+ "story_id": "atacama_fog_oases",
+ "brand": "TERRA INCOGNITA",
+ "title": "THE DESERT THAT DRINKS FOG",
+ "subject": "geography",
+ "story_type": "geography_process",
+ "pad_s": 0.4,
+ "v7": {
+  "title_overlay": true
+ },
+ "concepts": [
+  {
+   "id": "fog",
+   "beats": [
+    "B1",
+    "B4",
+    "B7"
+   ],
+   "verb": "crawl"
+  },
+  {
+   "id": "lomas",
+   "beats": [
+    "B1",
+    "B3",
+    "B7"
+   ],
+   "verb": "bloom"
+  },
+  {
+   "id": "ridge",
+   "beats": [
+    "B3",
+    "B4"
+   ],
+   "verb": "pierce"
+  },
+  {
+   "id": "mesh",
+   "beats": [
+    "B5",
+    "B6"
+   ],
+   "verb": "harvest"
+  },
+  {
+   "id": "desert",
+   "beats": [
+    "B2",
+    "B7"
+   ],
+   "verb": "wait"
+  }
+ ],
+ "beats": [
+  {
+   "beat_id": "B1",
+   "function": "HOOK",
+   "narration": "Think the driest place on Earth must be empty? On these ridgelines the desert grows secret gardens — watered by an ocean the sky never drops.",
+   "claim": "green vegetation patches survive on Atacama ridgelines without rain",
+   "fact_ids": [
+    "f_driest_nonpolar",
+    "f_lomas"
+   ],
+   "visual_question": "why does the driest desert on Earth carry green ribbons on its ridgelines?",
+   "visual_answer": "map plate: endless brown desert with thin green strips on coastal ridges, fog pressing in from the ocean",
+   "contradiction": "driest place on Earth vs thriving green gardens",
+   "start": 0.0,
+   "end": 9.12
+  },
+  {
+   "beat_id": "B2",
+   "function": "CURIOSITY",
+   "narration": "This is Chile's Atacama. Its core averages under 1 millimetre of rain a year; some gauges have never recorded a storm. Two moisture sources surround it — both fail.",
+   "claim": "the Atacama's core averages under 1 millimetre of rain per year and some stations have never recorded meaningful rainfall",
+   "fact_ids": [
+    "f_driest_nonpolar",
+    "f_rainshadow_lock"
+   ],
+   "visual_question": "how dry is the Atacama really?",
+   "visual_answer": "map zoom with blocked moisture arrows: the Andes wall to the east, the cold current killing rain to the west",
+   "contradiction": "the desert sits between two moisture sources yet stays bone dry",
+   "key_number": "1",
+   "key_number_rect": [
+    0.36,
+    0.2,
+    0.3,
+    0.12
+   ],
+   "start": 9.12,
+   "end": 20.98
+  },
+  {
+   "beat_id": "B3",
+   "function": "REVEAL",
+   "narration": "Zoom out and the paradox is on the map: bone-dry brown, cut by thin green ribbons on coastal ridges between 300 and 1,000 metres. The lomas.",
+   "claim": "fog oases called lomas form green ribbons on coastal ridgelines between roughly 300 and 1,000 metres elevation",
+   "fact_ids": [
+    "f_lomas"
+   ],
+   "visual_question": "where exactly does the desert refuse to be barren?",
+   "visual_answer": "satellite-style map reveal: brown everything, then thin green ribbons light up along ridgelines inside the fog band",
+   "contradiction": "a map of nowhere becomes a map of hidden gardens",
+   "start": 20.98,
+   "end": 31.82
+  },
+  {
+   "beat_id": "B4",
+   "function": "EXPLANATION",
+   "narration": "The Pacific sends fog, not rain. Cold water chills the air above it, and a warm lid traps that fog low. Where a ridge pierces the deck, droplets snag on leaves and stones.",
+   "claim": "the camanchaca is a coastal fog deck formed over the cold Humboldt Current and capped by a warm-air inversion, typically below about 1,000 metres",
+   "fact_ids": [
+    "f_camanchaca"
+   ],
+   "visual_question": "where does the water come from if rain never falls?",
+   "visual_answer": "cross-section diagram: ocean, cold current, fog deck under a warm lid, ridge spearing through it",
+   "contradiction": "the atmosphere refuses to rain yet hands over fog",
+   "start": 31.82,
+   "end": 44.75
+  },
+  {
+   "beat_id": "B5",
+   "function": "ESCALATION",
+   "narration": "Every leaf is a net. A square metre of fine mesh here harvests 2 to 5 litres of fog water a day — no well, no rain, no pipeline. The plants invented it first.",
+   "claim": "standard fog collectors in prime Atacama fog zones harvest roughly 2 to 5 litres of water per square metre of mesh per day",
+   "fact_ids": [
+    "f_mesh_yield"
+   ],
+   "visual_question": "how much water can this invisible rain actually give?",
+   "visual_answer": "mesh panel dripping into a tank beside a fog-fevered leaf doing the same trick",
+   "contradiction": "a desert that yields litres of water per square metre per day",
+   "key_number": "2–5",
+   "key_number_rect": [
+    0.36,
+    0.2,
+    0.3,
+    0.12
+   ],
+   "start": 44.75,
+   "end": 56.95
+  },
+  {
+   "beat_id": "B6",
+   "function": "ESCALATION",
+   "narration": "Engineers copy the lomas with stacked mesh walls feeding tanks. Village arrays deliver hundreds of litres a day, and the Yungay core is so dry NASA tests Mars instruments there.",
+   "claim": "village-scale fog collector arrays deliver hundreds of litres per day, and NASA uses the hyperarid Yungay core as a Mars analog test site",
+   "fact_ids": [
+    "f_mesh_yield",
+    "f_mars_analog"
+   ],
+   "visual_question": "can this trick be scaled — and how Mars-like is this place?",
+   "visual_answer": "village array of mesh walls and tanks, with a Mars-analog soil test flagged on the desert core",
+   "contradiction": "the most Mars-like place on Earth is also a working water supply",
+   "start": 56.95,
+   "end": 68.47
+  },
+  {
+   "beat_id": "B7",
+   "function": "PAYOFF",
+   "narration": "The Atacama never broke the rules of water — it hides them. Rain never arrives; the ocean delivers its water sideways, as fog. Catch it on a ridge, and the desert blooms.",
+   "claim": "the Atacama's hidden water source is sideways ocean fog that only ridgelines can catch",
+   "fact_ids": [
+    "f_camanchaca",
+    "f_lomas"
+   ],
+   "visual_question": "so what is the desert's real water rule?",
+   "visual_answer": "resolved map: fog arrows running sideways from ocean to ridges, gardens blooming exactly where they land",
+   "contradiction": "resolved: the desert is not waterless — its water never falls, it walks",
+   "start": 68.47,
+   "end": 80.83
+  }
+ ],
+ "visual_grammars": [
+  "map_first",
+  "field_propagation"
+ ],
+ "visual_contradiction": {
+  "seems": "the driest desert on Earth should be barren everywhere",
+  "actually": "a thin ribbon of forest survives on its ridgelines by harvesting coastal fog that never falls as rain",
+  "reveal": "the map cuts from endless brown to green ridgeline strips exactly inside the fog deck band"
+ },
+ "hook_plan": {
+  "subject_visible_s": 1.0,
+  "curiosity_s": 2.0,
+  "question_s": 5.0,
+  "no_black_fade_at_0_5": true
+ },
+ "payoff_image": {
+  "image": "the resolved map: sideways fog arrows running from the ocean onto blooming ridgelines — the complete sideways-water logic in one frame",
+  "beat": "B7"
+ }
+}

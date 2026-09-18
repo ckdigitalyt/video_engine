@@ -1,0 +1,25 @@
+{
+ "version": "4.0",
+ "topic_grammar": ["MAP", "TERRAIN_ILLUSTRATION", "LAYERED_ATMOSPHERE", "REGION_ZOOM"],
+ "brand": "TERRA INCOGNITA",
+ "palette": {
+  "primary": "#8A6B45",
+  "secondary": "#3B3428",
+  "accent": "#B04A28",
+  "background": "#1A1712",
+  "text": "#EDE4CE",
+  "muted": "#7A6F58",
+  "highlight": "#EDE4CE"
+ },
+ "illustration_style": "desaturated surveyor's map-field illustration, ink relief lines and wash on darkened map paper, matte finish, no grid paper",
+ "illustration_medium": "surveyor ink-and-wash terrain illustration on darkened desaturated map paper (not photoreal, not flat vector, not bright parchment)",
+ "lighting": "low cartographic light, warm wash, darkened edges like a folded survey chart",
+ "framing": "full-bleed map field, no parchment border, annotations as content drawn in the art",
+ "graphic_language": "terrain contours, coastline ink, fog rendered as soft warm-gray washes, vegetation as olive dashes, rust pins for anchors",
+ "contrast": "dark ground, pale cream ink, saturated rust reserved for small accents and glows",
+ "saturation": 0.34,
+ "texture": {"grain": 0.02, "vignette": 0.3},
+ "typography": {"display": "BebasNeue-Regular.ttf", "body": "Inter-Variable.ttf"},
+ "transition_style": "cut_on_state, no black fades inside the body",
+ "prompt_fragments": {"prefix": "desaturated surveyor map-field illustration, ink and wash on darkened map paper,", "suffix": "matte finish, warm tan ground, rust accents, no grid paper, no border chrome"}
+}

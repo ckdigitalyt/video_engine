@@ -1,0 +1,457 @@
+{
+ "story_id": "atacama_fog_oases",
+ "engine": "v6",
+ "fps": 30,
+ "size": [
+  1080,
+  1920
+ ],
+ "regions": {
+  "visual_rect": [
+   0,
+   176,
+   1080,
+   1744
+  ],
+  "center": [
+   0.3,
+   0.38,
+   0.4,
+   0.24
+  ],
+  "upper": [
+   0.22,
+   0.06,
+   0.56,
+   0.2
+  ],
+  "lower": [
+   0.22,
+   0.7,
+   0.56,
+   0.2
+  ]
+ },
+ "beats": [
+  {
+   "beat_id": "B1",
+   "shots": [
+    {
+     "shot_id": "S01",
+     "shot_type": "HOOK",
+     "asset": "AF_B1_hook",
+     "duration_est": 9.1,
+     "crop_bias_y": 0.45,
+     "captions": "phrase",
+     "role": "HERO",
+     "chrome": "none",
+     "tag": "",
+     "visual_mode": "TERRAIN_MAP_ILLUSTRATION",
+     "evidence_type": "DIRECT_EVIDENCE",
+     "motion_type": "CAMERA_MOTION",
+     "opening": true,
+     "title": "",
+     "purpose": "Open on the paradox: an ocean of brown desert cut by a green ridge strip with fog pressing in",
+     "claim": "green vegetation patches survive on Atacama ridgelines without rain",
+     "evidence": "terrain-field plate: brown desert field, dark ocean edge, thin green ridge dashes, soft fog wash from the coast",
+     "motion_reason": "slow push toward the green strip so the desert-versus-garden mismatch reads at once",
+     "transition_reason": "cut to the dryness number",
+     "cam_from_scale": 1.0,
+     "cam_to_scale": 1.08,
+     "cam_cx": 0.5,
+     "cam_cy": 0.42,
+     "depth": {
+      "layers": [
+       "fog wash",
+       "ridge strip",
+       "desert field"
+      ],
+      "intent": "spatial_reconstruction",
+      "note": "fog plane over ridge over desert reconstructs the coastal cross-section in map form"
+     },
+     "subject_contract": {
+      "expected_subject": "map plate: brown desert, dark ocean edge, green ridge strip, incoming fog wash",
+      "required": [
+       "desert field",
+       "green ridge strip",
+       "fog wash"
+      ],
+      "forbidden": [
+       "photoreal satellite photos",
+       "brand logos",
+       "grid paper"
+      ],
+      "role": "HERO"
+     },
+     "one_second": {
+      "relationship": "fog crawls toward a garden that should not exist",
+      "labels": [
+       "THE ATACAMA",
+       "SECRET GARDENS"
+      ]
+     },
+     "overlays": []
+    }
+   ]
+  },
+  {
+   "beat_id": "B2",
+   "shots": [
+    {
+     "shot_id": "S02",
+     "shot_type": "CURIOSITY",
+     "asset": "AF_B2_dry",
+     "duration_est": 11.9,
+     "crop_bias_y": 0.45,
+     "captions": "phrase",
+     "role": "CURIOSITY",
+     "chrome": "none",
+     "tag": "",
+     "visual_mode": "TERRAIN_MAP_ILLUSTRATION",
+     "evidence_type": "DIRECT_EVIDENCE",
+     "motion_type": "CAMERA_MOTION",
+     "opening": false,
+     "title": "",
+     "purpose": "Establish the dryness number and the two failing moisture sources",
+     "claim": "the Atacama's core averages under 1 millimetre of rain per year",
+     "evidence": "map zoom with blocked arrows: Andes wall east, cold current west, both moisture paths dead-ended",
+     "motion_reason": "contract from region to the desert core while the two arrows are cut off",
+     "transition_reason": "cut to the ridgeline reveal",
+     "cam_from_scale": 1.12,
+     "cam_to_scale": 1.3,
+     "cam_cx": 0.5,
+     "cam_cy": 0.45,
+     "depth": {
+      "layers": [
+       "arrow layer",
+       "terrain",
+       "number chip"
+      ],
+      "intent": "cause_map",
+      "note": "blocked arrows annotate the geography; the number chip carries the key figure"
+     },
+     "subject_contract": {
+      "expected_subject": "map plate: Atacama core with two blocked moisture arrows and a 1 MM/YEAR chip",
+      "required": [
+       "terrain map",
+       "blocked arrows"
+      ],
+      "forbidden": [
+       "photoreal satellite photos",
+       "grid paper"
+      ],
+      "role": "CURIOSITY"
+     },
+     "one_second": {
+      "relationship": "two moisture sources surround the desert and both fail",
+      "labels": [
+       "1 MM / YEAR",
+       "ANDES BLOCKS THE EAST",
+       "COLD CURRENT KILLS RAIN"
+      ]
+     },
+     "overlays": []
+    }
+   ]
+  },
+  {
+   "beat_id": "B3",
+   "shots": [
+    {
+     "shot_id": "S03",
+     "shot_type": "REVEAL",
+     "asset": "AF_B3_lomas",
+     "duration_est": 10.8,
+     "crop_bias_y": 0.45,
+     "captions": "phrase",
+     "role": "REVEAL",
+     "chrome": "none",
+     "tag": "",
+     "visual_mode": "TERRAIN_MAP_ILLUSTRATION",
+     "evidence_type": "DIRECT_EVIDENCE",
+     "motion_type": "CAMERA_MOTION",
+     "opening": false,
+     "title": "",
+     "purpose": "Reveal the lomas ribbons on the map inside the 300-1000 m band",
+     "claim": "fog oases called lomas form green ribbons on coastal ridgelines between roughly 300 and 1,000 metres",
+     "evidence": "map reveal: brown field cut by thin green ribbons along ridgelines, elevation band chip",
+     "motion_reason": "hold steady while ribbons light up; a small zoom keeps the map readable",
+     "transition_reason": "cut to the fog cross-section",
+     "cam_from_scale": 1.0,
+     "cam_to_scale": 1.1,
+     "cam_cx": 0.48,
+     "cam_cy": 0.44,
+     "depth": {
+      "layers": [
+       "ribbon highlights",
+       "terrain",
+       "elevation chip"
+      ],
+      "intent": "overlay_reveal",
+      "note": "ribbons are content drawn in the art, revealed by state changes"
+     },
+     "subject_contract": {
+      "expected_subject": "map plate: brown desert with green lomas ribbons and a 300-1000 M chip",
+      "required": [
+       "desert field",
+       "green ribbons"
+      ],
+      "forbidden": [
+       "photoreal satellite photos",
+       "grid paper"
+      ],
+      "role": "REVEAL"
+     },
+     "one_second": {
+      "relationship": "hidden gardens appear exactly on ridgelines",
+      "labels": [
+       "BONE DRY —",
+       "— EXCEPT HERE",
+       "300–1000 M"
+      ]
+     },
+     "overlays": []
+    }
+   ]
+  },
+  {
+   "beat_id": "B4",
+   "shots": [
+    {
+     "shot_id": "S04",
+     "shot_type": "EXPLANATION",
+     "asset": "AF_B4_fogdeck",
+     "duration_est": 12.9,
+     "crop_bias_y": 0.45,
+     "captions": "phrase",
+     "role": "EXPLANATION",
+     "chrome": "none",
+     "tag": "",
+     "visual_mode": "TERRAIN_MAP_ILLUSTRATION",
+     "evidence_type": "DIRECT_EVIDENCE",
+     "motion_type": "CAMERA_MOTION",
+     "opening": false,
+     "title": "",
+     "purpose": "Explain the camanchaca: cold current fog deck under a warm lid, pierced by ridges",
+     "claim": "the camanchaca is a coastal fog deck formed over the cold Humboldt Current and capped by a warm-air inversion",
+     "evidence": "cross-section: ocean, cold current band, fog deck, warm lid line, ridge spearing through with droplets on leaves",
+     "motion_reason": "slow traverse along the cross-section from ocean to ridge as the mechanism assembles",
+     "transition_reason": "cut to the mesh yield number",
+     "cam_from_scale": 1.0,
+     "cam_to_scale": 1.12,
+     "cam_cx": 0.55,
+     "cam_cy": 0.46,
+     "depth": {
+      "layers": [
+       "fog deck",
+       "cross-section line work",
+       "labels"
+      ],
+      "intent": "layer_interaction",
+      "note": "the deck-under-lid stack is the mechanism; the ridge is the failure point of the lid"
+     },
+     "subject_contract": {
+      "expected_subject": "cross-section plate: ocean, fog deck under warm lid, ridge piercing the deck",
+      "required": [
+       "fog deck",
+       "warm lid",
+       "ridge"
+      ],
+      "forbidden": [
+       "photoreal photos",
+       "grid paper"
+      ],
+      "role": "EXPLANATION"
+     },
+     "one_second": {
+      "relationship": "the ridge pierces the lid-capped fog deck and collects its water",
+      "labels": [
+       "CAMANCHACA — FOG DECK",
+       "WARM LID",
+       "RIDGE PIERCES THE DECK"
+      ]
+     },
+     "overlays": []
+    }
+   ]
+  },
+  {
+   "beat_id": "B5",
+   "shots": [
+    {
+     "shot_id": "S05",
+     "shot_type": "ESCALATION",
+     "asset": "AF_B5_mesh",
+     "duration_est": 12.2,
+     "crop_bias_y": 0.45,
+     "captions": "phrase",
+     "role": "ESCALATION",
+     "chrome": "none",
+     "tag": "",
+     "visual_mode": "TERRAIN_MAP_ILLUSTRATION",
+     "evidence_type": "DIRECT_EVIDENCE",
+     "motion_type": "CAMERA_MOTION",
+     "opening": false,
+     "title": "",
+     "purpose": "Quantify the yield: mesh panels harvest 2-5 litres per square metre per day",
+     "claim": "standard fog collectors in prime fog zones harvest roughly 2 to 5 litres per square metre per day",
+     "evidence": "mesh panel with droplets and drip line into a tank beside a leaf doing the same trick; yield chip",
+     "motion_reason": "push toward the dripping mesh while droplets count into the tank",
+     "transition_reason": "cut to the village array",
+     "cam_from_scale": 1.0,
+     "cam_to_scale": 1.1,
+     "cam_cx": 0.5,
+     "cam_cy": 0.45,
+     "depth": {
+      "layers": [
+       "mesh grid",
+       "droplet flow",
+       "yield chip"
+      ],
+      "intent": "process_quantify",
+      "note": "droplet-to-tank flow gives the number a physical source"
+     },
+     "subject_contract": {
+      "expected_subject": "plate: fog mesh panel dripping into a tank with a 2–5 L chip",
+      "required": [
+       "mesh panel",
+       "tank",
+       "droplets"
+      ],
+      "forbidden": [
+       "photoreal photos",
+       "grid paper"
+      ],
+      "role": "ESCALATION"
+     },
+     "one_second": {
+      "relationship": "mesh turns fog into litres of water",
+      "labels": [
+       "2–5 L / M² / DAY",
+       "NO WELL — NO RAIN"
+      ]
+     },
+     "overlays": []
+    }
+   ]
+  },
+  {
+   "beat_id": "B6",
+   "shots": [
+    {
+     "shot_id": "S06",
+     "shot_type": "ESCALATION",
+     "asset": "AF_B6_arrays",
+     "duration_est": 11.5,
+     "crop_bias_y": 0.45,
+     "captions": "phrase",
+     "role": "ESCALATION",
+     "chrome": "none",
+     "tag": "",
+     "visual_mode": "TERRAIN_MAP_ILLUSTRATION",
+     "evidence_type": "DIRECT_EVIDENCE",
+     "motion_type": "CAMERA_MOTION",
+     "opening": false,
+     "title": "",
+     "purpose": "Scale the mechanism: village arrays plus the Mars-analog twist",
+     "claim": "village-scale fog arrays deliver hundreds of litres per day and NASA tests Mars instruments in the Yungay core",
+     "evidence": "stacked mesh walls feeding tanks with a pipe run, and a Mars-analog flag pinned on the desert core",
+     "motion_reason": "pan across the array, then settle on the Mars-analog pin",
+     "transition_reason": "cut to the resolved map",
+     "cam_from_scale": 1.05,
+     "cam_to_scale": 1.12,
+     "cam_cx": 0.5,
+     "cam_cy": 0.45,
+     "depth": {
+      "layers": [
+       "mesh walls",
+       "tanks and pipes",
+       "mars pin"
+      ],
+      "intent": "scale_up",
+      "note": "the array is the lomas copied in steel and mesh"
+     },
+     "subject_contract": {
+      "expected_subject": "plate: village fog array with tanks plus a MARS ANALOG pin",
+      "required": [
+       "mesh walls",
+       "tanks"
+      ],
+      "forbidden": [
+       "photoreal photos",
+       "grid paper"
+      ],
+      "role": "ESCALATION"
+     },
+     "one_second": {
+      "relationship": "the same trick, engineered at village scale in the most Mars-like place on Earth",
+      "labels": [
+       "HUNDREDS OF LITRES / DAY",
+       "YUNGAY: MARS ANALOG"
+      ]
+     },
+     "overlays": []
+    }
+   ]
+  },
+  {
+   "beat_id": "B7",
+   "shots": [
+    {
+     "shot_id": "S07",
+     "shot_type": "PAYOFF",
+     "asset": "AF_B7_payoff",
+     "duration_est": 13.3,
+     "crop_bias_y": 0.45,
+     "captions": "phrase",
+     "role": "PAYOFF",
+     "chrome": "none",
+     "tag": "",
+     "visual_mode": "TERRAIN_MAP_ILLUSTRATION",
+     "evidence_type": "DIRECT_EVIDENCE",
+     "motion_type": "CAMERA_MOTION",
+     "opening": false,
+     "title": "",
+     "purpose": "Resolve the rule: rain never comes — the ocean delivers water sideways as fog, and ridges catch it",
+     "claim": "the Atacama's hidden water source is sideways ocean fog that only ridgelines can catch",
+     "evidence": "resolved map: fog arrows running sideways from ocean to ridges, gardens blooming exactly where the arrows land",
+     "motion_reason": "slow pull back so the whole sideways-water map resolves in one frame",
+     "transition_reason": "end",
+     "cam_from_scale": 1.15,
+     "cam_to_scale": 1.0,
+     "cam_cx": 0.5,
+     "cam_cy": 0.44,
+     "depth": {
+      "layers": [
+       "fog arrows",
+       "bloom strips",
+       "map field"
+      ],
+      "intent": "resolution",
+      "note": "the full map logic resolves: no rain, sideways water, ridges as taps"
+     },
+     "subject_contract": {
+      "expected_subject": "resolved map plate: sideways fog arrows onto blooming ridgelines",
+      "required": [
+       "fog arrows",
+       "green ridgelines"
+      ],
+      "forbidden": [
+       "photoreal satellite photos",
+       "grid paper"
+      ],
+      "role": "PAYOFF"
+     },
+     "one_second": {
+      "relationship": "the desert's water walks, it never falls",
+      "labels": [
+       "RAIN NEVER COMES",
+       "FOG IS THE WATER"
+      ]
+     },
+     "overlays": []
+    }
+   ]
+  }
+ ]
+}

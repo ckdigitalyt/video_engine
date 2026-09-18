@@ -1,0 +1,117 @@
+{
+ "claims": [
+  {
+   "id": "f_driest_nonpolar",
+   "beats": [
+    "B1",
+    "B2"
+   ],
+   "claim": "the Atacama's core averages under 1 millimetre of rain per year, and some weather stations have never recorded meaningful rainfall",
+   "definition": "the hyperarid core of the Atacama Desert in northern Chile: rain gauges at stations such as Calama and parts of Antofagasta province stay at or near zero year after year",
+   "measured_value": "<1 mm/year core average",
+   "nuance": {
+    "classification": "ESTABLISHED",
+    "note": "the desert's margins do receive occasional rain; the under-1-mm figure applies to the hyperarid core, not the whole region"
+   },
+   "sources": [
+    "multiple station records compiled in Atacama hyperaridity literature"
+   ],
+   "verified": true,
+   "date_verified": "2026-09-18"
+  },
+  {
+   "id": "f_rainshadow_lock",
+   "beats": [
+    "B2"
+   ],
+   "claim": "the Andes block Amazon moisture from the east while the cold Humboldt Current and a persistent Pacific anticyclone suppress rain from the west",
+   "definition": "a double rain shadow: mountain barrier to one side, cold-ocean stabilization plus high-pressure subsidence to the other",
+   "measured_value": "two blocked moisture sources",
+   "nuance": {
+    "classification": "ESTABLISHED",
+    "note": "the anticyclone's subsidence warms and dries descending air; the cold current chills marine air so it resists convective rain"
+   },
+   "sources": [
+    "standard Atacama climatology"
+   ],
+   "verified": true,
+   "date_verified": "2026-09-18"
+  },
+  {
+   "id": "f_lomas",
+   "beats": [
+    "B1",
+    "B3",
+    "B7"
+   ],
+   "claim": "fog oases called lomas form green ribbons on coastal ridgelines between roughly 300 and 1,000 metres elevation",
+   "definition": "lomas vegetacionales: vegetation patches inside the coastal fog band, found from Peru to northern Chile; individual lomas host dozens to over a hundred plant species",
+   "measured_value": "300–1000 m elevation band",
+   "nuance": {
+    "classification": "ESTABLISHED",
+    "note": "the exact band shifts with latitude and season; species counts vary strongly between individual lomas sites"
+   },
+   "sources": [
+    "lomas ecosystem literature (e.g. Lomas Paposo, Pan de Azúcar surveys)"
+   ],
+   "verified": true,
+   "date_verified": "2026-09-18"
+  },
+  {
+   "id": "f_camanchaca",
+   "beats": [
+    "B4",
+    "B7"
+   ],
+   "claim": "the camanchaca is a coastal fog deck that forms where air crosses the cold Humboldt Current and is capped by a warm-air inversion, typically below about 1,000 metres",
+   "definition": "warm, dry air over cold upwelled water produces low marine stratocumulus fog; the inversion lid keeps it from growing into rain clouds, so it moves inland as fog instead",
+   "measured_value": "fog deck typically below ~1000 m",
+   "nuance": {
+    "classification": "ESTABLISHED",
+    "note": "the deck's height varies seasonally; rain still occurs rarely at the desert margins"
+   },
+   "sources": [
+    "Atacama coastal meteorology literature"
+   ],
+   "verified": true,
+   "date_verified": "2026-09-18"
+  },
+  {
+   "id": "f_mesh_yield",
+   "beats": [
+    "B5",
+    "B6"
+   ],
+   "claim": "standard fog collectors in prime Atacama fog zones harvest roughly 2 to 5 litres of water per square metre of mesh per day",
+   "definition": "flat mesh fog collectors (atrapanieblas) intercept fog droplets that coalesce, run down, and drain to storage; yields swing with fog frequency and wind",
+   "measured_value": "2–5 L/m²/day typical; arrays of ~100 m² can reach hundreds of litres per day",
+   "nuance": {
+    "classification": "ESTABLISHED",
+    "note": "yields drop toward zero in fog-free stretches; published figures span wide ranges by site and season"
+   },
+   "sources": [
+    "published fog-harvesting studies in Chañaral and Peña Blanca, Chile"
+   ],
+   "verified": true,
+   "date_verified": "2026-09-18"
+  },
+  {
+   "id": "f_mars_analog",
+   "beats": [
+    "B6"
+   ],
+   "claim": "NASA and astrobiologists use the Atacama's Yungay core as a Mars analog because its soils are among the driest on Earth",
+   "definition": "in the Yungay region, soil moisture and organic content fall so low that instrument teams test life-detection hardware there before sending it to Mars",
+   "measured_value": "decades of instrument testing in Yungay",
+   "nuance": {
+    "classification": "ESTABLISHED",
+    "note": "even Yungay is not perfectly sterile; it approximates, not replicates, Martian surface conditions"
+   },
+   "sources": [
+    "NASA ASTEP / Mars-analog field campaigns in the Atacama"
+   ],
+   "verified": true,
+   "date_verified": "2026-09-18"
+  }
+ ]
+}
