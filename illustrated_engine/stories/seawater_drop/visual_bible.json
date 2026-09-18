@@ -1,0 +1,28 @@
+{
+ "version": "4.0",
+ "topic_grammar": ["SCALE_LADDER", "DEPTH_DESCENT", "MICRO_LIFE", "ION_FIELD"],
+ "brand": "ONE DROP",
+ "palette": {
+  "primary": "#3AA6A6",
+  "secondary": "#24405C",
+  "accent": "#E0A33C",
+  "background": "#0A1A2E",
+  "text": "#F0E9DA",
+  "muted": "#4C6478",
+  "highlight": "#BFE8E8"
+ },
+ "illustration_style": "marine scale-descent illustration on a surface-to-abyss blue gradient, aqua light fading to navy, luminous aqua organisms and amber scale markers, thin engraved linework, matte finish",
+ "illustration_medium": "engraved marine microbiology illustration on a depth gradient (not photoreal, not flat vector, not parchment)",
+ "lighting": "cool aqua light from above sinking to dark navy below, luminous organisms",
+ "contrast": "medium, glowing subjects on deep blue ground",
+ "saturation": 0.27,
+ "texture": {"grain": 0.012, "vignette": 0.28},
+ "typography": {"display": "BebasNeue-Regular.ttf", "body": "Inter-Variable.ttf"},
+ "framing": "vertical 9:16, subject centred with depth cues at the edges, scale markers as small amber chips",
+ "graphic_language": "vertical scale ladder with amber size chips, glowing aqua organism outlines, particle swarms for viruses and ions, no parchment, no grid paper, no header or footer chrome, labels as small dark chips with teal leader lines",
+ "transition_style": "hard cut; per-shot fade-in from background colour",
+ "prompt_fragments": {
+  "prefix": "Marine scale illustration on a surface-to-abyss blue gradient, glowing aqua organisms, amber scale markers, engraved linework, matte finish, high contrast",
+  "suffix": "No readable text, no watermarks, no photoreal rendering, no logos"
+ }
+}

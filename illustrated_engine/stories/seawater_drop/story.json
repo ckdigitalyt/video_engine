@@ -1,0 +1,169 @@
+{
+ "story_id": "seawater_drop",
+ "brand": "ONE DROP",
+ "title": "WHAT'S INSIDE A SINGLE DROP OF SEAWATER",
+ "subject": "science",
+ "story_type": "scale_process",
+ "pad_s": 0.4,
+ "v7": {
+  "title_overlay": null
+ },
+ "concepts": [
+  {
+   "id": "scale",
+   "beats": [
+    "B1",
+    "B3",
+    "B6"
+   ],
+   "verb": "descend"
+  },
+  {
+   "id": "life",
+   "beats": [
+    "B3",
+    "B4",
+    "B5"
+   ],
+   "verb": "cycle"
+  },
+  {
+   "id": "chemistry",
+   "beats": [
+    "B2",
+    "B6"
+   ],
+   "verb": "dissolve"
+  }
+ ],
+ "beats": [
+  {
+   "beat_id": "B1",
+   "function": "HOOK",
+   "contradiction": {
+    "viewer_thinks": "seawater is just salty water \u2014 a drop is chemically simple and mostly empty",
+    "actually": "a single drop is a crowded ecosystem: tens of thousands of bacteria and hundreds of thousands of viruses",
+    "reveal_beat": "B3"
+   },
+   "narration": "This is one drop of seawater. To your eye it is nothing \u2014 salt and wet. But it holds tens of thousands of bacteria and hundreds of thousands of viruses. It is a city in suspension.",
+   "claim": "a standard drop of surface seawater carries on the order of tens of thousands of bacteria and hundreds of thousands of viruses",
+   "visual_question": "what is actually inside one drop?",
+   "visual_answer": "a droplet silhouetted on the sea surface, its interior crowded with glowing specks no eye can see",
+   "fact_ids": [
+    "f_drop_volume",
+    "f_microbial_abundance"
+   ],
+   "start": 0.0,
+   "end": 10.0
+  },
+  {
+   "beat_id": "B2",
+   "function": "CURIOSITY",
+   "narration": "By volume, a drop is mostly water and about three and a half percent salt \u2014 sodium and chloride, torn apart into ions. But the salt is not the surprise.",
+   "claim": "average ocean salinity is about 3.5%, dominated by sodium and chloride ions",
+   "visual_question": "what is the drop made of, by volume?",
+   "visual_answer": "a composition bar: water mass, salt ions split apart, and a thin living sliver highlighted at the end",
+   "fact_ids": [
+    "f_salinity"
+   ],
+   "start": 10.0,
+   "end": 19.5
+  },
+  {
+   "beat_id": "B3",
+   "function": "REVEAL",
+   "narration": "Descend with the scale. At a tenth of a millimetre, the drop's architects appear: diatoms \u2014 drifting glass shells that harvest sunlight and make roughly a fifth of the food in the sea.",
+   "claim": "diatoms, glass-shelled single-celled algae, produce roughly a fifth of global photosynthetic production",
+   "visual_question": "what lives at the drop's largest scale?",
+   "visual_answer": "a diatom in engraved detail: a geometric glass shell with sunlight beams crossing it",
+   "fact_ids": [
+    "f_diatoms_production",
+    "f_size_ladder"
+   ],
+   "key_number": "100 \u03bcm",
+   "key_number_rect": [
+    0.62,
+    0.2,
+    0.3,
+    0.12
+   ],
+   "start": 19.5,
+   "end": 30.0
+  },
+  {
+   "beat_id": "B4",
+   "function": "EXPLANATION",
+   "narration": "Ten times smaller: bacteria, about a micrometre \u2014 the ocean's dominant engineers. And ten times smaller still, their constant companion: viruses, which burst cells daily and leak the carbon back into the water.",
+   "claim": "marine viruses repeatedly lyse bacteria, redirecting a substantial share of microbial biomass into dissolved organic matter",
+   "visual_question": "what happens between bacteria and viruses?",
+   "visual_answer": "a bacterium beside a swarm of smaller viruses; one cell bursts, its contents dissolving outward",
+   "fact_ids": [
+    "f_microbial_abundance",
+    "f_viral_shunt"
+   ],
+   "start": 30.0,
+   "end": 41.0
+  },
+  {
+   "beat_id": "B5",
+   "function": "ESCALATION",
+   "narration": "Those leaking molecules do not vanish. They feed the bacteria, the bacteria feed everything that swims \u2014 the drop is where the ocean's food web actually begins.",
+   "claim": "the viral shunt's dissolved carbon feeds microbes that anchor the marine food web",
+   "visual_question": "where does the leaked carbon go?",
+   "visual_answer": "arrows climb the ladder: molecules to bacteria, bacteria up through grazers to fish larvae",
+   "fact_ids": [
+    "f_viral_shunt"
+   ],
+   "start": 41.0,
+   "end": 51.0
+  },
+  {
+   "beat_id": "B6",
+   "function": "ESCALATION",
+   "narration": "Descend once more. Below the life, the chemistry: salt ions, dissolved gasses, a haze of organic molecules \u2014 a millionfold smaller than the bacteria, and just as busy.",
+   "claim": "the drop's smallest inhabitants \u2014 ions and dissolved molecules \u2014 operate at sub-nanometre scale, a millionfold below bacteria",
+   "visual_question": "what is left at the very bottom of the scale?",
+   "visual_answer": "the molecular floor: sodium and chloride ions drifting among dissolved gasses and organic specks",
+   "fact_ids": [
+    "f_size_ladder",
+    "f_salinity"
+   ],
+   "start": 51.0,
+   "end": 61.0
+  },
+  {
+   "beat_id": "B7",
+   "function": "PAYOFF",
+   "narration": "So the drop was never empty. One ladder of scale, one connected machine \u2014 and every glass of the ocean carries it: the city in suspension.",
+   "claim": "a drop of seawater is a connected multi-scale ecosystem, from molecules to algae",
+   "visual_question": "how do the scales connect?",
+   "visual_answer": "the full scale ladder resolved in one frame: drop, diatom, bacterium, virus, ion \u2014 one glowing chain",
+   "fact_ids": [
+    "f_microbial_abundance",
+    "f_drop_volume",
+    "f_size_ladder"
+   ],
+   "start": 61.0,
+   "end": 70.5
+  }
+ ],
+ "visual_grammars": [
+  "scale_descent"
+ ],
+ "visual_contradiction": {
+  "seems": "a drop of seawater is chemically simple \u2014 salty water and nothing more",
+  "actually": "it is a crowded ecosystem spanning a millionfold range of scale, from glass-shelled algae to ions",
+  "reveal": "the descent reveals the crowded interior: specks resolve into diatom, bacteria, viruses, then molecules",
+  "beat": "B3"
+ },
+ "hook_plan": {
+  "subject_visible_s": 1.0,
+  "curiosity_s": 2.0,
+  "question_s": 5.0,
+  "no_black_fade_at_0_5": true
+ },
+ "payoff_image": {
+  "image": "the resolved scale ladder in one frame \u2014 drop, diatom, bacterium, virus, ion linked by a single glowing line",
+  "beat": "B7"
+ }
+}
