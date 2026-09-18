@@ -1,0 +1,178 @@
+{
+ "story_id": "tunguska_1908",
+ "brand": "EVENT HORIZON",
+ "title": "THE BLAST WITH NO CRATER",
+ "subject": "history",
+ "story_type": "history_event",
+ "pad_s": 0.4,
+ "v7": {
+  "title_overlay": true
+ },
+ "concepts": [
+  {
+   "id": "fireball",
+   "beats": [
+    "B1",
+    "B2",
+    "B5"
+   ],
+   "verb": "streak"
+  },
+  {
+   "id": "blast_wave",
+   "beats": [
+    "B1",
+    "B3",
+    "B5",
+    "B6"
+   ],
+   "verb": "flatten"
+  },
+  {
+   "id": "forest",
+   "beats": [
+    "B1",
+    "B4",
+    "B7"
+   ],
+   "verb": "fall"
+  },
+  {
+   "id": "expedition",
+   "beats": [
+    "B4",
+    "B7"
+   ],
+   "verb": "record"
+  },
+  {
+   "id": "sky_glow",
+   "beats": [
+    "B3"
+   ],
+   "verb": "glow"
+  }
+ ],
+ "beats": [
+  {
+   "beat_id": "B1",
+   "function": "HOOK",
+   "contradiction": {
+    "viewer_thinks": "a cosmic impact means a crater in the ground",
+    "actually": "the impactor burst high in the air: ground zero's trees still stand, stripped, and no crater exists",
+    "reveal_beat": "B4"
+   },
+   "narration": "Siberia, just after seven in the morning, June 30th, 1908. A blast flattens the forest across two thousand square kilometres — and leaves no hole behind.",
+   "claim": "the 1908 Tunguska event flattened roughly 2,000 square kilometres of forest and left no crater at the centre",
+   "visual_question": "what can flatten two thousand square kilometres of forest without leaving a crater?",
+   "visual_answer": "a fireball streaking over a Siberian taiga morning, the forest below still standing",
+   "fact_ids": [
+    "f_flattened_forest"
+   ],
+   "start": 0.0,
+   "end": 11.65
+  },
+  {
+   "beat_id": "B2",
+   "function": "CURIOSITY",
+   "narration": "Sixty-five kilometres away, people felt the heat on their skin and were thrown from their chairs. The blast kept travelling.",
+   "claim": "eyewitnesses about sixty-five kilometres from the epicentre reported feeling heat and being thrown from their seats",
+   "visual_question": "what did the people under the blast actually feel?",
+   "visual_answer": "the trading post at Vanavara: figures knocked from chairs, heat rays crossing the yard",
+   "fact_ids": [
+    "f_eyewitness_vanavara"
+   ],
+   "start": 11.65,
+   "end": 19.46
+  },
+  {
+   "beat_id": "B3",
+   "function": "ESCALATION",
+   "narration": "For nights afterward, the sky refused to go dark. Barographs in England traced the pressure wave; glowing-sky reports arrived from across Europe and Asia.",
+   "claim": "the event registered on barographs and seismographs far from Siberia and was followed by documented reports of bright night skies across Europe and Asia",
+   "visual_question": "how far did the event reach?",
+   "visual_answer": "a barograph drum tracing the pressure wave under a sky that will not darken",
+   "fact_ids": [
+    "f_global_signals"
+   ],
+   "start": 19.46,
+   "end": 29.26
+  },
+  {
+   "beat_id": "B4",
+   "function": "REVEAL",
+   "narration": "It took nineteen years to reach the blast zone. Kulik's expedition found the trees laid flat in a radial fan — and at the centre, poles still standing. No crater.",
+   "claim": "the first scientific expedition in 1927 found a radial blowdown with upright stripped trees at ground zero and no crater",
+   "visual_question": "what did the first expedition actually find at ground zero?",
+   "visual_answer": "the radial blowdown seen from above, upright pole trees at the centre, and bare uncratered ground",
+   "fact_ids": [
+    "f_kulik_1927",
+    "f_flattened_forest"
+   ],
+   "start": 29.26,
+   "end": 40.62
+  },
+  {
+   "beat_id": "B5",
+   "function": "EXPLANATION",
+   "narration": "The leading model says the intruder never landed. A stony asteroid, tens of metres wide, is thought to have burst five to ten kilometres up — an airburst. The blast wave did the damage.",
+   "claim": "the leading model holds that a stony asteroid tens of metres across burst at an altitude of roughly five to ten kilometres, flattening the forest by blast wave",
+   "visual_question": "if there is no crater, where did the energy go?",
+   "visual_answer": "an atmospheric cross-section: the body entering, bursting at altitude, the shock wave driving down onto the forest",
+   "fact_ids": [
+    "f_airburst_model"
+   ],
+   "start": 40.62,
+   "end": 52.72
+  },
+  {
+   "beat_id": "B6",
+   "function": "ESCALATION",
+   "narration": "Estimates of the energy span three to thirty megatons — the largest impact in recorded history. Then, in 2013, an airburst crossed Chelyabinsk on camera and proved the mechanism.",
+   "claim": "published energy estimates for Tunguska span about 3 to 30 megatons, it ranks as the largest impact event in recorded history, and the 2013 Chelyabinsk airburst verified the airburst mechanism",
+   "visual_question": "is the airburst model more than a guess?",
+   "visual_answer": "the timeline band jumps to 2013: a bright trail over a city, windows broken, the same physics recorded",
+   "fact_ids": [
+    "f_energy_range",
+    "f_largest_recorded",
+    "f_chelyabinsk_parallel"
+   ],
+   "start": 52.72,
+   "end": 65.26
+  },
+  {
+   "beat_id": "B7",
+   "function": "PAYOFF",
+   "narration": "So the crater was never missing — it was never there. Tunguska's signature is written in the forest: rings of fallen trees, upright poles at the centre, and a story the sky told in one blast.",
+   "claim": "the absence of a crater with standing ground-zero trees is the expected signature of a high-altitude airburst, which is how the Tunguska event is read today",
+   "visual_question": "so what actually happened at Tunguska?",
+   "visual_answer": "the aftermath resolved: the radial forest fan and the standing poles beneath a calm sky, the airburst signature complete",
+   "fact_ids": [
+    "f_kulik_1927",
+    "f_airburst_model"
+   ],
+   "start": 65.26,
+   "end": 77.96
+  }
+ ],
+ "visual_grammars": [
+  "timeline_band",
+  "field_propagation"
+ ],
+ "visual_contradiction": {
+  "seems": "a cosmic impact leaves a crater in the ground",
+  "actually": "the impactor burst in the air: ground zero's trees still stand, stripped, and no crater exists",
+  "reveal": "the radial blowdown opens around upright stripped trees on bare, uncratered ground",
+  "beat": "B4"
+ },
+ "hook_plan": {
+  "subject_visible_s": 1.0,
+  "curiosity_s": 2.0,
+  "question_s": 5.0,
+  "no_black_fade_at_0_5": true
+ },
+ "payoff_image": {
+  "image": "the radial forest fan with upright stripped poles at its centre under a calm sky — the complete airburst signature in one frame",
+  "beat": "B7"
+ }
+}

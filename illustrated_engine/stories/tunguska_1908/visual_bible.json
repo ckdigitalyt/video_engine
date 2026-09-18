@@ -1,0 +1,34 @@
+{
+ "version": "4.0",
+ "topic_grammar": ["TIMELINE", "ARCHIVAL_ILLUSTRATION", "CROSS_SECTION", "EVENT_PROPAGATION"],
+ "brand": "EVENT HORIZON",
+ "palette": {
+  "primary": "#8A6642",
+  "secondary": "#3E362A",
+  "accent": "#B04A28",
+  "background": "#171310",
+  "text": "#EDE4CE",
+  "muted": "#7A6A52",
+  "highlight": "#EDE4CE"
+ },
+ "illustration_style": "archival sepia field-document illustration, expedition-notebook ink on darkened aged paper, 1920s survey-record grammar, matte finish",
+ "illustration_medium": "archival sepia expedition-record illustration with ink and wash on darkened aged paper (not photoreal, not flat vector, not bright parchment)",
+ "lighting": "low archival light, sepia wash, darkened edges like an old photographic record",
+ "contrast": "medium, aged-paper range",
+ "saturation": 0.34,
+ "texture": {
+  "grain": 0.014,
+  "vignette": 0.3
+ },
+ "typography": {
+  "display": "BebasNeue-Regular.ttf",
+  "body": "Inter-Variable.ttf"
+ },
+ "framing": "vertical 9:16, event scenes and survey diagrams centred with the era field carrying date anchors along the spine",
+ "graphic_language": "sepia ink linework on darkened aged paper, rust-red event accents, survey-note labels on small dark chips with rust leaders, no grid paper, no header or footer chrome",
+ "transition_style": "hard cut; per-shot fade-in from background colour",
+ "prompt_fragments": {
+  "prefix": "Archival sepia expedition-record illustration, ink and wash on darkened aged paper, 1920s survey grammar, rust event accents, matte finish",
+  "suffix": "No readable text, no watermarks, no photoreal rendering, no logos"
+ }
+}
