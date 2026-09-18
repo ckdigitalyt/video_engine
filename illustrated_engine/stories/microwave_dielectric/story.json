@@ -11,27 +11,48 @@
  "concepts": [
   {
    "id": "field",
-   "beats": ["B1", "B2", "B4", "B6", "B7"],
+   "beats": [
+    "B1",
+    "B2",
+    "B4",
+    "B6",
+    "B7"
+   ],
    "verb": "oscillate"
   },
   {
    "id": "water_dipole",
-   "beats": ["B2", "B4", "B5"],
+   "beats": [
+    "B2",
+    "B4",
+    "B5"
+   ],
    "verb": "torque"
   },
   {
    "id": "heat",
-   "beats": ["B3", "B4", "B5", "B7"],
+   "beats": [
+    "B3",
+    "B4",
+    "B5",
+    "B7"
+   ],
    "verb": "spread"
   },
   {
    "id": "penetration",
-   "beats": ["B1", "B3", "B7"],
+   "beats": [
+    "B1",
+    "B3",
+    "B7"
+   ],
    "verb": "fade"
   },
   {
    "id": "ice_lattice",
-   "beats": ["B5"],
+   "beats": [
+    "B5"
+   ],
    "verb": "lock"
   }
  ],
@@ -44,13 +65,15 @@
     "actually": "the field dies within a few centimetres: the outer shell absorbs first and heat conducts inward",
     "reveal_beat": "B3"
    },
-   "narration": "The box reheats your dinner in minutes — yet the plate scalds while the middle stays cold. Whatever is happening in there, it is not reaching the centre.",
+   "narration": "The box reheats your dinner in minutes \u2014 yet the plate scalds while the middle stays cold. Whatever is happening in there, it is not reaching the centre.",
    "claim": "in microwave reheating the food's centre can stay cold while the outer parts and the container become hot",
    "visual_question": "why does the middle of the food stay cold?",
    "visual_answer": "a glowing wave front wraps the outside of a food block while its core sits dark and unheated",
-   "fact_ids": ["f_center_cold"],
+   "fact_ids": [
+    "f_center_cold"
+   ],
    "start": 0.0,
-   "end": 7.2
+   "end": 9.39
   },
   {
    "beat_id": "B2",
@@ -59,9 +82,11 @@
    "claim": "the popular picture holds that microwaves cook food from the inside out",
    "visual_question": "what do people picture inside the oven cavity?",
    "visual_answer": "rays drawn straight through the food block, with a bright core marked inside-out",
-   "fact_ids": ["f_inside_out_myth"],
-   "start": 7.2,
-   "end": 13.4
+   "fact_ids": [
+    "f_inside_out_myth"
+   ],
+   "start": 9.39,
+   "end": 16.03
   },
   {
    "beat_id": "B3",
@@ -70,61 +95,83 @@
    "claim": "microwaves penetrate only a few centimetres into wet food, so the outer shell absorbs the energy directly and heat reaches the centre by conduction",
    "visual_question": "how deep does the microwave energy actually reach?",
    "visual_answer": "the glowing field fades out over the first centimetres of the food block; the core is reached by a slow conduction gradient",
-   "fact_ids": ["f_penetration_depth"],
+   "fact_ids": [
+    "f_penetration_depth"
+   ],
    "key_number": "a few cm",
-   "key_number_rect": [0.36, 0.2, 0.3, 0.12],
-   "start": 13.4,
-   "end": 23.0
+   "key_number_rect": [
+    0.36,
+    0.2,
+    0.3,
+    0.12
+   ],
+   "start": 16.03,
+   "end": 28.79
   },
   {
    "beat_id": "B4",
    "function": "EXPLANATION",
-   "narration": "The heating itself is dielectric. A field swinging two and a half billion times a second torques every water molecule, one after another — and jostling neighbours scrape that swing into heat.",
+   "narration": "The heating itself is dielectric. A field swinging two and a half billion times a second torques every water molecule, one after another \u2014 and jostling neighbours scrape that swing into heat.",
    "claim": "a microwave oven heats food dielectrically: an oscillating electric field torques polar water molecules and molecular collisions dissipate the energy as heat",
    "visual_question": "what does the oscillating field do to water molecules?",
    "visual_answer": "water dipoles flip back and forth with the swinging field; friction between neighbours radiates heat",
-   "fact_ids": ["f_dielectric_heating", "f_frequency_ism"],
-   "start": 23.0,
-   "end": 32.5
+   "fact_ids": [
+    "f_dielectric_heating",
+    "f_frequency_ism"
+   ],
+   "start": 28.79,
+   "end": 41.67
   },
   {
    "beat_id": "B5",
    "function": "ESCALATION",
-   "narration": "That is why frozen food sulks. Ice locks its molecules into a lattice — frozen water barely answers the field, so a defrost cycle trickles power in slowly.",
+   "narration": "That is why frozen food sulks. Ice locks its molecules into a lattice \u2014 frozen water barely answers the field, so a defrost cycle trickles power in slowly.",
    "claim": "ice absorbs microwave energy far more weakly than liquid water because its molecules are bound in a lattice, which is why defrost cycles use low power",
    "visual_question": "why does frozen food heat so slowly?",
    "visual_answer": "rigid lattice rows hold the dipoles locked while the liquid side flips freely and heats",
-   "fact_ids": ["f_ice_low_loss"],
-   "start": 32.5,
-   "end": 41.0
+   "fact_ids": [
+    "f_ice_low_loss"
+   ],
+   "start": 41.67,
+   "end": 53.25
   },
   {
    "beat_id": "B6",
    "function": "ESCALATION",
-   "narration": "And the scalding plate? The field pattern shifts with every load — part standing wave, part food shape — piling energy at the edges. The turntable is not a gadget; it is the apology the oven makes for that pattern.",
+   "narration": "And the scalding plate? The field pattern shifts with every load \u2014 part standing wave, part food shape \u2014 piling energy at the edges. The turntable is not a gadget; it is the apology the oven makes for that pattern.",
    "claim": "the oven's field pattern changes with the food load and tends to concentrate energy near edges, so turntables and stirrers average out the hot spots",
    "visual_question": "why do the edges burn while the centre waits?",
    "visual_answer": "a patchwork hot-spot map concentrates energy at the food's rim; the turntable swings the load through it",
-   "fact_ids": ["f_hot_spots", "f_frequency_ism"],
-   "start": 41.0,
-   "end": 51.5
+   "fact_ids": [
+    "f_hot_spots",
+    "f_frequency_ism"
+   ],
+   "start": 53.25,
+   "end": 67.92
   },
   {
    "beat_id": "B7",
    "function": "PAYOFF",
-   "narration": "The resolved picture: a microwave heats the outer shell dielectrically and lets conduction carry the heat in. Stirring is not superstition — it redistributes the map before it burns.",
+   "narration": "So the plate scalded while the middle stayed cold for one reason: the field only heats the outer shell, and conduction carries the rest inward. Stir and rest the food \u2014 the cold centre is physics, not a broken oven.",
    "claim": "microwave heating works at the food's outer shell and conduction plus stirring redistribute the heat; standing and resting food evens the temperature",
    "visual_question": "so what is the right way to reheat?",
    "visual_answer": "the food block with an even warm gradient after stirring, the field glow calm across the whole shell",
-   "fact_ids": ["f_penetration_depth", "f_dielectric_heating", "f_hot_spots"],
-   "start": 51.5,
-   "end": 60.0
+   "fact_ids": [
+    "f_penetration_depth",
+    "f_dielectric_heating",
+    "f_hot_spots"
+   ],
+   "start": 67.92,
+   "end": 80.02
   }
  ],
- "visual_grammars": ["mechanism_flow", "cutaway_reveal"],
+ "visual_grammars": [
+  "mechanism_flow",
+  "cutaway_reveal"
+ ],
  "visual_contradiction": {
   "seems": "waves cook food from the inside out",
-  "actually": "the field fades within a few centimetres — the outer shell absorbs first and conduction carries heat inward",
+  "actually": "the field fades within a few centimetres \u2014 the outer shell absorbs first and conduction carries heat inward",
   "reveal": "the glowing field visibly dies across the first centimetres of the food block, leaving the core to a slow conduction gradient",
   "beat": "B3"
  },
@@ -135,7 +182,7 @@
   "no_black_fade_at_0_5": true
  },
  "payoff_image": {
-  "image": "the food block at rest with one even warm gradient through the shell and a calm field glow — the whole mechanism settled in a single frame",
+  "image": "the food block at rest with one even warm gradient through the shell and a calm field glow \u2014 the whole mechanism settled in a single frame",
   "beat": "B7"
  }
 }
