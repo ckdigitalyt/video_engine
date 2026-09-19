@@ -62,7 +62,7 @@ def main():
                         "no metric/threshold tuning; no rewrites; deterministic gates win"),
         "next_action_hint": ("read latest_qa8 verdicts; failed gate -> targeted algorithm-level "
                              "fix; all verified PASS -> publish decision stays with deterministic "
-                             "gates (jev_publish_check is an independent observer only)"),
+                             "gates"),
     }
     os.makedirs(BUILD, exist_ok=True)
     tmp = OUT + ".tmp"
