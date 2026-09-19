@@ -200,10 +200,14 @@ def raster_text_qa(video_path: Path, story_dir: Path, plan: dict) -> dict:
         # detect near-edge brand text: column extents of non-background pixels
         bg = np.array([12, 12, 16])  # brand band background
         nonbg = np.any(np.abs(brand.astype(int) - bg) > 25, axis=-1)
-        cols = np.where(nonbg.any(axis=0))[0]
-        if cols.size:
-            if cols.min() < EDGE or cols.max() > W - 1 - EDGE:
-                clipped.append({"frame": i, "zone": "brand", "min": int(cols.min()), "max": int(cols.max())})
+        # full-bleed cards (TYPOGRAPHY §6) repaint this band with their own
+        # background — sparse text is <60% coverage; a repaint is ~100%.
+        # Treat dense fills as background change, not clipped glyphs.
+        if nonbg.mean() < 0.6:
+            cols = np.where(nonbg.any(axis=0))[0]
+            if cols.size:
+                if cols.min() < EDGE or cols.max() > W - 1 - EDGE:
+                    clipped.append({"frame": i, "zone": "brand", "min": int(cols.min()), "max": int(cols.max())})
         # caption block — calibrated to the composer's real caption band:
         # glyphs render at y~1650..1810 (measured across frames); rows above
         # 1620 are plate artwork in full-bleed compositions (e.g. the S07

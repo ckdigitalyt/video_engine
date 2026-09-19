@@ -1,0 +1,129 @@
+{
+ "story_id": "chili_burn",
+ "brand": "RED HEAT",
+ "title": "WHY CHILIES BURN",
+ "subject": "biology_medicine",
+ "story_type": "science_process",
+ "pad_s": 0.4,
+ "v7": {
+  "title_overlay": true
+ },
+ "concepts": [
+  {
+   "id": "capsaicin",
+   "beats": ["B1", "B2", "B3", "B4", "B5", "B6", "B7"],
+   "verb": "bind"
+  },
+  {
+   "id": "trpv1",
+   "beats": ["B2", "B3", "B4", "B7"],
+   "verb": "open"
+  },
+  {
+   "id": "nerve_signal",
+   "beats": ["B2", "B4"],
+   "verb": "fire"
+  },
+  {
+   "id": "milk",
+   "beats": ["B5", "B6"],
+   "verb": "wash"
+  },
+  {
+   "id": "birds",
+   "beats": ["B7"],
+   "verb": "disperse"
+  }
+ ],
+ "beats": [
+  {
+   "beat_id": "B1",
+   "function": "HOOK",
+   "contradiction": {
+    "viewer_thinks": "chilies are literally hot, like an ember",
+    "actually": "a molecule tricks the exact nerves that report real heat",
+    "reveal_beat": "B3"
+   },
+   "narration": "This fruit has no flame, no ember, no heat at all. Yet one bite convinces your whole mouth it is burning. How does a plant fake a burn?",
+   "claim": "chili heat is a chemical illusion: capsaicin triggers pain without real heat",
+   "visual_question": "why does a cold fruit feel like fire?",
+   "visual_answer": "a cross-sectioned chili glowing at the placenta, no flame anywhere",
+   "fact_ids": ["f_illusion"],
+   "start": 0.0,
+   "end": 7.0
+  },
+  {
+   "beat_id": "B2",
+   "function": "CURIOSITY",
+   "narration": "The alarm, at least, is real. Your mouth raises it the same way it reacts to scalding coffee: through the body's built-in heat sensor.",
+   "claim": "capsaicin and real heat trip the same nerve heat sensor",
+   "visual_question": "what part of the mouth reacts to a chili?",
+   "visual_answer": "a nerve ending under the tongue raising the same alarm as boiling coffee",
+   "fact_ids": ["f_illusion"],
+   "start": 7.0,
+   "end": 13.5
+  },
+  {
+   "beat_id": "B3",
+   "function": "REVEAL",
+   "narration": "The sensor is called TRPV1. It opens above forty-three degrees Celsius. Capsaicin wedges that same gate open at body temperature, with no heat in sight.",
+   "claim": "TRPV1 opens above 43 degrees Celsius, and capsaicin opens it without heat",
+   "visual_question": "how can a molecule open a heat gate without heat?",
+   "visual_answer": "the TRPV1 channel gate held open by a capsaicin molecule at a cool 37 degrees",
+   "fact_ids": ["f_trpv1"],
+   "key_number": "43\u00b0C",
+   "key_number_rect": [0.36, 0.22, 0.3, 0.11],
+   "start": 13.5,
+   "end": 21.5
+  },
+  {
+   "beat_id": "B4",
+   "function": "EXPLANATION",
+   "narration": "Wedged open, the channel floods the nerve with ions, and the nerve sends one message upward: burning. But nothing is actually burning, and at the levels we eat, nothing is damaged.",
+   "claim": "the burn is a false-alarm signal; capsaicin does not burn tissue at food levels",
+   "visual_question": "what does the open channel do to the nerve?",
+   "visual_answer": "ions pouring through the open channel, one word climbing the nerve: BURNING",
+   "fact_ids": ["f_no_damage"],
+   "start": 21.5,
+   "end": 30.0
+  },
+  {
+   "beat_id": "B5",
+   "function": "ESCALATION",
+   "contradiction": {
+    "viewer_thinks": "water puts out a chili burn",
+    "actually": "capsaicin is fat-loving, so water just smears it around",
+    "reveal_beat": "B5"
+   },
+   "narration": "So why does water make it worse? Capsaicin dissolves in fat, not water. A sip only smears the molecule across fresh territory.",
+   "claim": "capsaicin is fat-soluble, so water spreads it rather than washing it away",
+   "visual_question": "why does water fail against capsaicin?",
+   "visual_answer": "a water droplet pushing oily capsaicin droplets outward instead of removing them",
+   "fact_ids": ["f_fat_soluble"],
+   "start": 30.0,
+   "end": 37.0
+  },
+  {
+   "beat_id": "B6",
+   "function": "ESCALATION",
+   "narration": "Milk tends to work better. Its casein molecules surround capsaicin and carry it off, a wash more than an antidote.",
+   "claim": "milk casein binds capsaicin and tends to wash it away better than water",
+   "visual_question": "why does milk calm the burn?",
+   "visual_answer": "casein clusters capturing capsaicin droplets in a glass of milk",
+   "fact_ids": ["f_milk"],
+   "start": 37.0,
+   "end": 43.5
+  },
+  {
+   "beat_id": "B7",
+   "function": "PAYOFF",
+   "narration": "Birds feel none of this: their heat receptor shrugs capsaicin off. The burn is tuned for mammals alone, and one leading explanation says the plant keeps seed-crushers away while birds carry its seeds far.",
+   "claim": "bird TRPV1 is insensitive to capsaicin; the burn is thought to filter seed dispersers",
+   "visual_question": "who is immune to the chili's burn?",
+   "visual_answer": "a bird eating a red chili unbothered, seeds scattering beneath it",
+   "fact_ids": ["f_birds", "f_evolution"],
+   "start": 43.5,
+   "end": 52.5
+  }
+ ]
+}

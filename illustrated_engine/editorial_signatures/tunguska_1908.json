@@ -1,0 +1,131 @@
+{
+ "v2": true,
+ "story_id": "tunguska_1908",
+ "built_utc": "2026-09-18T19:25:40Z",
+ "n_shots": 7,
+ "avg_shot_dur": 11.54,
+ "role_sequence": [
+  "HERO",
+  "DIAGRAM",
+  "DIAGRAM",
+  "COMPARISON",
+  "DIAGRAM",
+  "COMPARISON",
+  "PAYOFF"
+ ],
+ "grammar_sequence": [
+  "timeline_band",
+  "timeline_band",
+  "timeline_band",
+  "timeline_band",
+  "timeline_band",
+  "timeline_band",
+  "timeline_band"
+ ],
+ "composition_sequence": [
+  "scene_in_media_res",
+  "date_anchor",
+  "consequence_cascade",
+  "event_propagation",
+  "cause_chain",
+  "consequence_cascade",
+  "aftermath_resolved"
+ ],
+ "panel_usage_sequence": [
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "none"
+ ],
+ "background_sequence": [
+  "era_field",
+  "era_field",
+  "era_field",
+  "era_field",
+  "era_field",
+  "era_field",
+  "era_field"
+ ],
+ "caption_architecture": [
+  "top_band",
+  "top_band",
+  "top_band",
+  "top_band",
+  "top_band",
+  "top_band",
+  "top_band"
+ ],
+ "transition_types": [
+  "CUT",
+  "CUT",
+  "CUT",
+  "CUT",
+  "CUT",
+  "CUT",
+  "CUT"
+ ],
+ "state_sequence": [
+  "ESTABLISH",
+  "FOCUS",
+  "TRANSFORM",
+  "CONSEQUENCE",
+  "ESTABLISH",
+  "FOCUS",
+  "TRANSFORM",
+  "CONSEQUENCE",
+  "ESTABLISH",
+  "FOCUS",
+  "TRANSFORM",
+  "CONSEQUENCE",
+  "ESTABLISH",
+  "FOCUS",
+  "TRANSFORM",
+  "CONSEQUENCE",
+  "ESTABLISH",
+  "FOCUS",
+  "TRANSFORM",
+  "CONSEQUENCE",
+  "ESTABLISH",
+  "FOCUS",
+  "TRANSFORM",
+  "CONSEQUENCE",
+  "ESTABLISH",
+  "FOCUS",
+  "TRANSFORM",
+  "CONSEQUENCE",
+  "PAYOFF"
+ ],
+ "camera_behavior": [
+  "push",
+  "hold",
+  "hold",
+  "pull",
+  "push",
+  "hold",
+  "pull"
+ ],
+ "title_behavior": "none",
+ "chrome_usage": "none",
+ "accent_usage": "",
+ "duration_profile": "n7_s0_l7",
+ "diagram_ratio": 0.126,
+ "cinematic_ratio": 0.0,
+ "motif": {
+  "plate": {
+   "strip_other": 7,
+   "polygon_other": 2,
+   "circle_other": 5,
+   "panel_other": 1
+  },
+  "plan": {
+   "strip_plan": 4,
+   "circle_plan": 15
+  },
+  "subject": "history",
+  "story_type": "history_event",
+  "justification": ""
+ }
+}

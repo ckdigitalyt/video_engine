@@ -1,0 +1,26 @@
+{
+  "B1": {
+    "file": "audio/beat_B1.wav",
+    "duration": 8.229
+  },
+  "B2": {
+    "file": "audio/beat_B2.wav",
+    "duration": 7.602
+  },
+  "B3": {
+    "file": "audio/beat_B3.wav",
+    "duration": 8.333
+  },
+  "B4": {
+    "file": "audio/beat_B4.wav",
+    "duration": 8.15
+  },
+  "B5": {
+    "file": "audio/beat_B5.wav",
+    "duration": 6.713
+  },
+  "B6": {
+    "file": "audio/beat_B6.wav",
+    "duration": 9.169
+  }
+}

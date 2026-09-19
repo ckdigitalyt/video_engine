@@ -1,0 +1,27 @@
+{
+  "version": "4.0",
+  "brand": "KEPT BY TIME",
+  "palette": {
+    "primary": "#5A4318",
+    "secondary": "#7A6A52",
+    "accent": "#C25B33",
+    "background": "#171310",
+    "text": "#EFE6D4",
+    "muted": "#8A7B63",
+    "highlight": "#F2DFAE"
+  },
+  "illustration_style": "vintage 1950s natural-history illustration, ink and honey-amber wash on aged parchment, engraving linework, matte finish",
+  "illustration_medium": "vintage ink-and-honey-amber-wash natural-history illustration with engraving linework (not photoreal, not flat vector)",
+  "lighting": "warm directional low-key with golden highlights",
+  "contrast": "medium-high, rich shadows",
+  "saturation": 0.72,
+  "texture": { "grain": 0.012, "vignette": 0.25 },
+  "typography": { "display": "BebasNeue-Regular.ttf", "body": "Inter-Variable.ttf" },
+  "framing": "vertical 9:16, subject centred with breathing room, deep dark grounds, horizon-low wides and tight macro details",
+  "graphic_language": "restrained rust annotations, thin amber linework, parchment diagrams, measured typography, no heavy drop shadows on graphic elements",
+  "transition_style": "hard cut; per-shot fade-in from background colour",
+  "prompt_fragments": {
+    "prefix": "Vintage 1950s natural-history illustration, ink and honey-amber watercolor wash on aged parchment, engraving linework, muted amber and rust palette, warm directional light, soft vignette, matte finish",
+    "suffix": "No readable text, no watermarks, no modern objects, no logos"
+  }
+}

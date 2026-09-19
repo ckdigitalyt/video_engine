@@ -1,0 +1,131 @@
+{
+ "v2": true,
+ "story_id": "fever_thermostat",
+ "built_utc": "2026-09-18T21:37:46Z",
+ "n_shots": 7,
+ "avg_shot_dur": 10.88,
+ "role_sequence": [
+  "HERO",
+  "GUIDE",
+  "GUIDE",
+  "GUIDE",
+  "GUIDE",
+  "GUIDE",
+  "HERO"
+ ],
+ "grammar_sequence": [
+  "cutaway_reveal",
+  "cutaway_reveal",
+  "cutaway_reveal",
+  "cutaway_reveal",
+  "cutaway_reveal",
+  "cutaway_reveal",
+  "cutaway_reveal"
+ ],
+ "composition_sequence": [
+  "object_exterior_full_bleed",
+  "skin_of_the_object",
+  "cutaway_open",
+  "layer_by_layer",
+  "failure_propagation",
+  "failure_propagation",
+  "cutaway_resolved"
+ ],
+ "panel_usage_sequence": [
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "none"
+ ],
+ "background_sequence": [
+  "edge_to_edge_dark",
+  "edge_to_edge_dark",
+  "edge_to_edge_dark",
+  "edge_to_edge_dark",
+  "edge_to_edge_dark",
+  "edge_to_edge_dark",
+  "edge_to_edge_dark"
+ ],
+ "caption_architecture": [
+  "edge_band",
+  "edge_band",
+  "edge_band",
+  "edge_band",
+  "edge_band",
+  "edge_band",
+  "edge_band"
+ ],
+ "transition_types": [
+  "CUT",
+  "CUT",
+  "CUT",
+  "CUT",
+  "CUT",
+  "CUT",
+  "CUT"
+ ],
+ "state_sequence": [
+  "ESTABLISH",
+  "FOCUS",
+  "TRANSFORM",
+  "CONSEQUENCE",
+  "ESTABLISH",
+  "FOCUS",
+  "TRANSFORM",
+  "CONSEQUENCE",
+  "ESTABLISH",
+  "FOCUS",
+  "TRANSFORM",
+  "CONSEQUENCE",
+  "ESTABLISH",
+  "FOCUS",
+  "TRANSFORM",
+  "CONSEQUENCE",
+  "ESTABLISH",
+  "FOCUS",
+  "TRANSFORM",
+  "CONSEQUENCE",
+  "ESTABLISH",
+  "FOCUS",
+  "TRANSFORM",
+  "CONSEQUENCE",
+  "ESTABLISH",
+  "FOCUS",
+  "TRANSFORM",
+  "CONSEQUENCE",
+  "PAYOFF"
+ ],
+ "camera_behavior": [
+  "push",
+  "hold",
+  "push",
+  "hold",
+  "hold",
+  "hold",
+  "hold"
+ ],
+ "title_behavior": "none",
+ "chrome_usage": "minimal",
+ "accent_usage": "",
+ "duration_profile": "n7_s0_l7",
+ "diagram_ratio": 0.737,
+ "cinematic_ratio": 0.0,
+ "motif": {
+  "plate": {
+   "circle_other": 14,
+   "panel_other": 2,
+   "polygon_other": 1
+  },
+  "plan": {
+   "circle_plan": 16,
+   "strip_plan": 3,
+   "panel_plan": 1
+  },
+  "subject": "biology",
+  "story_type": "physiology_process",
+  "justification": ""
+ }
+}

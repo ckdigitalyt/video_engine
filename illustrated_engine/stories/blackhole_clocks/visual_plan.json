@@ -1,0 +1,489 @@
+{
+  "story_id": "blackhole_clocks",
+  "engine": "v6",
+  "fps": 30,
+  "size": [
+    1080,
+    1920
+  ],
+  "regions": {
+    "visual_rect": [
+      0,
+      176,
+      1080,
+      1744
+    ],
+    "center": [
+      0.3,
+      0.38,
+      0.4,
+      0.24
+    ],
+    "upper": [
+      0.22,
+      0.06,
+      0.56,
+      0.2
+    ],
+    "lower": [
+      0.22,
+      0.7,
+      0.56,
+      0.2
+    ]
+  },
+  "beats": [
+    {
+      "beat_id": "B1",
+      "shots": [
+        {
+          "shot_id": "S01",
+          "shot_type": "HOOK",
+          "asset": "B1_bh_hero",
+          "duration_est": 6.0,
+          "crop_bias_y": 0.45,
+          "opening": true,
+          "title": "WHY CLOCKS RUN SLOWER NEAR A BLACK HOLE",
+          "tag": "",
+          "captions": "phrase",
+          "role": "HERO",
+          "chrome": "none",
+          "visual_mode": "CINEMATIC",
+          "evidence_type": "DIRECT_EVIDENCE",
+          "motion_type": "CAMERA_MOTION",
+          "purpose": "Stage the thought experiment: a clock parked beside a dark horizon",
+          "claim": "a clock near a black hole ticks slower than a distant one",
+          "evidence": "full-bleed dark plate: glowing accretion disk around a black disc, small clock silhouette in orbit",
+          "motion_reason": "slow push-in: stillness first so the question lands clean",
+          "transition_reason": "hard cut to the two-clock comparison",
+          "cam_from_scale": 1.0,
+          "cam_to_scale": 1.1,
+          "cam_cx": 0.5,
+          "cam_cy": 0.5,
+          "subject_contract": {
+            "expected_subject": "dark astronomical plate of a black hole with a bright accretion ring and a small clock silhouette nearby",
+            "required": [
+              "dark circular hole silhouette",
+              "bright ring or disk around it",
+              "clock face silhouette"
+            ],
+            "forbidden": [
+              "spaceship or astronaut figures",
+              "text labels",
+              "galaxy spiral dominating"
+            ],
+            "role": "HERO"
+          },
+          "one_second": {
+            "relationship": "a lone clock beside a dark horizon"
+          },
+          "overlays": [
+            {
+              "kind": "HIGHLIGHT",
+              "target": "center",
+              "style": "circle",
+              "at": 0.5
+            }
+          ],
+          "typography": []
+        }
+      ]
+    },
+    {
+      "beat_id": "B2",
+      "shots": [
+        {
+          "shot_id": "S02",
+          "shot_type": "COMPARE",
+          "asset": "B2_two_clocks",
+          "duration_est": 7.0,
+          "crop_bias_y": 0.45,
+          "captions": "phrase",
+          "role": "COMPARISON",
+          "chrome": "section",
+          "tag": "TWO CLOCKS",
+          "visual_mode": "COMPARISON",
+          "evidence_type": "DIRECT_EVIDENCE",
+          "motion_type": "INFORMATION_MOTION",
+          "purpose": "Frame the comparison: identical clocks, different rates",
+          "claim": "the slowdown is not mechanical: time itself runs slower",
+          "evidence": "two identical engraved clocks, one deep in the dark well, one far out in parchment sky",
+          "motion_reason": "hold the pair; the position difference is the information",
+          "transition_reason": "hard cut to the spacetime funnel",
+          "cam_from_scale": 1.02,
+          "cam_to_scale": 1.08,
+          "cam_cx": 0.5,
+          "cam_cy": 0.5,
+          "subject_contract": {
+            "expected_subject": "two identical round clocks in one frame, one near a dark mass, one in open sky, vintage engraving style",
+            "required": [
+              "two clock faces",
+              "clear near-far asymmetry",
+              "dark mass edge near the lower clock"
+            ],
+            "forbidden": [
+              "wristwatch straps",
+              "digital displays",
+              "human hands"
+            ],
+            "role": "COMPARISON"
+          },
+          "one_second": {
+            "relationship": "same clocks, different depths, different rates",
+            "labels": [
+              "NEAR",
+              "FAR"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "beat_id": "B3",
+      "shots": [
+        {
+          "shot_id": "S03",
+          "shot_type": "REVEAL",
+          "asset": "D1_spacetime_funnel",
+          "duration_est": 6.5,
+          "crop_bias_y": 0.45,
+          "captions": "phrase",
+          "role": "DIAGRAM",
+          "chrome": "section",
+          "tag": "THE WELL",
+          "visual_mode": "DIAGRAM",
+          "evidence_type": "EXPLANATORY_DIAGRAM",
+          "motion_type": "REVEAL",
+          "purpose": "Reveal curved spacetime: the grid funnels down toward the hole",
+          "claim": "gravity stretches time; deeper in the field, the stretch is stronger",
+          "evidence": "diagram card: curved grid funnel with clock circles at depths, rust depth markers",
+          "motion_reason": "push down the funnel while depth markers carry the information",
+          "transition_reason": "hard cut to the horizon detail",
+          "cam_from_scale": 1.0,
+          "cam_to_scale": 1.08,
+          "cam_cx": 0.5,
+          "cam_cy": 0.48,
+          "subject_contract": {
+            "expected_subject": "parchment diagram of a curved spacetime grid funneling toward a dark disc with small clock circles at depths",
+            "required": [
+              "curved grid lines forming a funnel",
+              "dark disc at the bottom",
+              "clock circles on the grid"
+            ],
+            "forbidden": [
+              "water and real ponds",
+              "text paragraphs",
+              "planetary rings photoreal"
+            ],
+            "role": "DIAGRAM"
+          },
+          "one_second": {
+            "relationship": "deeper in the funnel, slower the clock",
+            "labels": [
+              "DEEPER = SLOWER"
+            ]
+          },
+          "overlays": [
+            {
+              "kind": "NUMBER_POP",
+              "text": "DEEPER = SLOWER",
+              "target": "upper",
+              "at": 0.55
+            }
+          ],
+          "typography": []
+        },
+        {
+          "shot_id": "S04",
+          "shot_type": "DETAIL",
+          "asset": "B3_horizon_detail",
+          "duration_est": 5.0,
+          "crop_bias_y": 0.5,
+          "captions": "phrase",
+          "role": "DETAIL",
+          "chrome": "none",
+          "visual_mode": "DETAIL",
+          "evidence_type": "DIRECT_EVIDENCE",
+          "motion_type": "REVEAL",
+          "purpose": "Rest the eye at the edge: light bending around the horizon",
+          "claim": "light itself bends near the horizon",
+          "evidence": "tight macro of engraved light curves skimming a dark edge",
+          "motion_reason": "slow zoom reveals the bending curves",
+          "transition_reason": "hard cut to the dilation curve card",
+          "cam_from_scale": 1.24,
+          "cam_to_scale": 1.4,
+          "cam_cx": 0.52,
+          "cam_cy": 0.5,
+          "subject_contract": {
+            "expected_subject": "engraved close-up of light rays curving around a dark circular edge",
+            "required": [
+              "curved light rays",
+              "dark circular edge",
+              "engraving linework"
+            ],
+            "forbidden": [
+              "rainbows",
+              "lenses or glass",
+              "text labels"
+            ],
+            "role": "DETAIL"
+          },
+          "one_second": {
+            "relationship": "even light follows the curve of the well"
+          }
+        }
+      ]
+    },
+    {
+      "beat_id": "B4",
+      "shots": [
+        {
+          "shot_id": "S05",
+          "shot_type": "EXPLAIN",
+          "asset": "D2_dilation_curve",
+          "duration_est": 6.5,
+          "crop_bias_y": 0.45,
+          "captions": "phrase",
+          "role": "DIAGRAM",
+          "chrome": "section",
+          "tag": "THE CURVE",
+          "visual_mode": "DIAGRAM",
+          "evidence_type": "EXPLANATORY_DIAGRAM",
+          "motion_type": "INFORMATION_MOTION",
+          "purpose": "Explain the mechanism with a measured curve: clock rate versus depth",
+          "claim": "in general relativity, clocks deeper in a gravitational field tick fewer seconds",
+          "evidence": "graph card: clock rate dropping with depth along a drawn curve, axis ticks marked",
+          "motion_reason": "drift along the curve so its drop reads as the effect",
+          "transition_reason": "hard cut to the satellite network",
+          "cam_from_scale": 1.0,
+          "cam_to_scale": 1.07,
+          "cam_cx": 0.48,
+          "cam_cy": 0.48,
+          "subject_contract": {
+            "expected_subject": "parchment graph card showing a falling curve of clock rate against distance from a mass",
+            "required": [
+              "single falling curve",
+              "two labeled axes",
+              "tick marks along the curve"
+            ],
+            "forbidden": [
+              "bar charts",
+              "pie charts",
+              "screens or monitors"
+            ],
+            "role": "DIAGRAM"
+          },
+          "one_second": {
+            "relationship": "the deeper the clock, the lower its rate",
+            "labels": [
+              "RATE",
+              "DEPTH"
+            ]
+          }
+        },
+        {
+          "shot_id": "S06",
+          "shot_type": "EXPLAIN",
+          "asset": "B4_probe_clock",
+          "duration_est": 5.0,
+          "crop_bias_y": 0.5,
+          "captions": "phrase",
+          "role": "DIAGRAM",
+          "chrome": "none",
+          "visual_mode": "EVIDENCE",
+          "evidence_type": "DIRECT_EVIDENCE",
+          "motion_type": "INFORMATION_MOTION",
+          "purpose": "Ground the effect: a probe's clock runs measurably slow near the disk",
+          "claim": "a probe near the mass carries a clock that falls behind",
+          "evidence": "probe silhouette with a large clock face skimming above the glowing disk",
+          "motion_reason": "slow drift with the probe; the clock face is the annotation",
+          "transition_reason": "hard cut to the GPS card",
+          "cam_from_scale": 1.18,
+          "cam_to_scale": 1.3,
+          "cam_cx": 0.5,
+          "cam_cy": 0.5,
+          "subject_contract": {
+            "expected_subject": "vintage-engraving probe silhouette with a round clock face, skimming above a glowing accretion disk",
+            "required": [
+              "probe or satellite silhouette",
+              "round clock face on it",
+              "glowing disk below"
+            ],
+            "forbidden": [
+              "astronaut faces",
+              "rockets with flames",
+              "text labels"
+            ],
+            "role": "EVIDENCE"
+          },
+          "one_second": {
+            "relationship": "the probe's clock reads behind the distant one"
+          }
+        }
+      ]
+    },
+    {
+      "beat_id": "B5",
+      "shots": [
+        {
+          "shot_id": "S07",
+          "shot_type": "DIAGRAM",
+          "asset": "B5_gps_card",
+          "duration_est": 6.0,
+          "crop_bias_y": 0.45,
+          "captions": "phrase",
+          "role": "DIAGRAM",
+          "chrome": "section",
+          "tag": "GPS PROOF",
+          "visual_mode": "DIAGRAM",
+          "evidence_type": "EXPLANATORY_DIAGRAM",
+          "motion_type": "INFORMATION_MOTION",
+          "purpose": "Escalate into the measurable world: the GPS constellation's corrected clocks",
+          "claim": "GPS satellite clocks gain about 38 microseconds per day without relativistic corrections",
+          "evidence": "diagram card: Earth disc with orbit ring, satellite dots, 38-microsecond figure popped",
+          "motion_reason": "orbit ring drifts the eye around the corrected clocks",
+          "transition_reason": "hard cut to the horizon freeze",
+          "cam_from_scale": 1.02,
+          "cam_to_scale": 1.08,
+          "cam_cx": 0.5,
+          "cam_cy": 0.5,
+          "subject_contract": {
+            "expected_subject": "parchment diagram of Earth with an orbital ring of small satellites and a rust time correction figure",
+            "required": [
+              "Earth disc",
+              "orbital ring with satellite dots",
+              "rust correction figure"
+            ],
+            "forbidden": [
+              "phone screens",
+              "maps with roads",
+              "flags"
+            ],
+            "role": "DIAGRAM"
+          },
+          "one_second": {
+            "relationship": "satellite clocks corrected every day",
+            "big_number": "38",
+            "number_claim": true,
+            "labels": [
+              "ORBIT",
+              "38 MICROS"
+            ]
+          },
+          "overlays": [
+            {
+              "kind": "NUMBER_POP",
+              "text": "38",
+              "target": "center",
+              "at": 0.5
+            }
+          ],
+          "typography": []
+        }
+      ]
+    },
+    {
+      "beat_id": "B6",
+      "shots": [
+        {
+          "shot_id": "S08",
+          "shot_type": "COMPARE",
+          "asset": "B6_freeze_frame",
+          "duration_est": 7.0,
+          "crop_bias_y": 0.45,
+          "captions": "phrase",
+          "role": "COMPARISON",
+          "chrome": "section",
+          "tag": "THE HORIZON",
+          "visual_mode": "SPLIT",
+          "evidence_type": "EXPLANATORY_DIAGRAM",
+          "motion_type": "TRANSFORMATION",
+          "purpose": "Twist: the same fall looks different from outside and inside",
+          "claim": "at the event horizon the dilation grows without limit for a distant observer",
+          "evidence": "split card: probe falling locally on one side, frozen at the rim from afar on the other",
+          "motion_reason": "the split transforms as the two views resolve side by side",
+          "transition_reason": "hard cut to the payoff clock",
+          "cam_from_scale": 1.0,
+          "cam_to_scale": 1.06,
+          "cam_cx": 0.5,
+          "cam_cy": 0.5,
+          "subject_contract": {
+            "expected_subject": "parchment split card: left panel probe crossing a dark edge normally, right panel the same probe frozen as a faint image on the rim",
+            "required": [
+              "two panels",
+              "dark edge or rim",
+              "probe figure in both"
+            ],
+            "forbidden": [
+              "scream or horror imagery",
+              "clock melting surrealism",
+              "text paragraphs"
+            ],
+            "role": "COMPARISON"
+          },
+          "one_second": {
+            "relationship": "falling in locally, frozen from far away",
+            "labels": [
+              "LOCAL",
+              "DISTANT"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "beat_id": "B7",
+      "shots": [
+        {
+          "shot_id": "S09",
+          "shot_type": "PAYOFF",
+          "asset": "B7_clock_sky",
+          "duration_est": 7.0,
+          "crop_bias_y": 0.4,
+          "captions": "phrase",
+          "role": "PAYOFF",
+          "chrome": "none",
+          "end_card": "GRAVITY SETS THE RATE",
+          "visual_mode": "PAYOFF",
+          "evidence_type": "DIRECT_EVIDENCE",
+          "motion_type": "CAMERA_MOTION",
+          "purpose": "Land the payoff: the clock against the sky, its rate owned by gravity",
+          "claim": "time keeps ticking everywhere, but gravity sets its rate",
+          "evidence": "dusk-sky clock silhouette plate reprising the opening darkness",
+          "motion_reason": "slow pull to rest; the strongest composition holds still",
+          "transition_reason": "end",
+          "cam_from_scale": 1.14,
+          "cam_to_scale": 1.0,
+          "cam_cx": 0.5,
+          "cam_cy": 0.5,
+          "subject_contract": {
+            "expected_subject": "single engraved clock face silhouetted against a dark dusk sky with a faint accretion ring on the horizon",
+            "required": [
+              "clock face silhouette",
+              "dark sky",
+              "faint glow ring near the horizon"
+            ],
+            "forbidden": [
+              "roman numerals replaced by words",
+              "text on artwork",
+              "buildings"
+            ],
+            "role": "PAYOFF"
+          },
+          "one_second": {
+            "relationship": "the clock still ticking, just slower"
+          },
+          "overlays": [
+            {
+              "kind": "HIGHLIGHT",
+              "target": "center",
+              "style": "circle",
+              "at": 0.4
+            }
+          ],
+          "typography": []
+        }
+      ]
+    }
+  ]
+}

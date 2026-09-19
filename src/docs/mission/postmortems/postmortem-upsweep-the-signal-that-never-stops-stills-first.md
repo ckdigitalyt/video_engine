@@ -1,10 +1,10 @@
 # Postmortem — Upsweep: the signal that never stops (stills-first)
-**When:** 2026-08-21T03:54:16+00:00
+**When:** 2026-09-10T03:46:05+00:00
 
 ## Techniques that worked
 - stills-first visual strategy: NASA/Wikimedia/AI Ken Burns + Manim beats
-- manim scenes: 0, nasa: 1, wikimedia: 1, ai: 2
-- Gemini review score 55/100
+- manim scenes: 0, nasa: 2, wikimedia: 3, ai: 2
+- Gemini review score 65/100
 
 ## Techniques that failed
 - stock-video director (pexels) deprioritized by design in stills mode
@@ -27,18 +27,18 @@ _(none recorded)_
 ## Metrics
 ```json
 {
-  "final_score": 55,
-  "duration_s": 64.1,
-  "avg_wpm": 135.8,
+  "final_score": 65,
+  "duration_s": 68.2,
+  "avg_wpm": 139.2,
   "rushed_scene_count": 0,
   "manim": 0,
-  "nasa": 1,
-  "wikimedia": 1,
+  "nasa": 2,
+  "wikimedia": 3,
   "ai": 2,
   "video_fallback": 0,
-  "rejected": 17,
-  "vision_checked": 18,
+  "rejected": 14,
+  "vision_checked": 17,
   "deduped": 0,
-  "cached": 8
+  "cached": 12
 }
 ```

@@ -1,0 +1,292 @@
+{
+ "story_id": "chili_burn",
+ "engine": "v6",
+ "fps": 30,
+ "size": [1080, 1920],
+ "regions": {
+  "visual_rect": [0, 176, 1080, 1744],
+  "center": [0.3, 0.38, 0.4, 0.24],
+  "upper": [0.22, 0.06, 0.56, 0.2],
+  "lower": [0.22, 0.7, 0.56, 0.2]
+ },
+ "assets_planned": [],
+ "beats": [
+  {
+   "beat_id": "B1",
+   "shots": [
+    {
+     "shot_id": "S01",
+     "shot_type": "HOOK",
+     "asset": "B1_chili_hero",
+     "duration_est": 7.5,
+     "crop_bias_y": 0.45,
+     "captions": "phrase",
+     "role": "HERO",
+     "chrome": "none",
+     "tag": "",
+     "visual_mode": "CINEMATIC",
+     "evidence_type": "DIRECT_EVIDENCE",
+     "motion_type": "CAMERA_MOTION",
+     "opening": true,
+     "title": "",
+     "purpose": "Open on a cross-sectioned chili: bright placenta, dark seeds, and not one flame anywhere",
+     "claim": "chili heat is a chemical illusion: capsaicin triggers pain without real heat",
+     "evidence": "full-bleed plate: cut-open red chili with glowing oil glands on the placenta, cool background, no fire",
+     "motion_reason": "slow push-in so the placenta glow reads as the subject",
+     "transition_reason": "cut into the nerve's alarm",
+     "cam_from_scale": 1.0,
+     "cam_to_scale": 1.08,
+     "cam_cx": 0.5,
+     "cam_cy": 0.5,
+     "subject_contract": {
+      "expected_subject": "parchment plate of a cross-sectioned red chili with glowing placenta glands and seeds",
+      "required": ["cut chili cross-section", "placenta with glowing glands", "seeds"],
+      "forbidden": ["fire or flames", "brand logos", "human figures"],
+      "role": "HERO"
+     },
+     "one_second": {
+      "relationship": "the fruit glows where the burn is born, without fire",
+      "labels": ["PLACENTA", "CAPSAICIN GLANDS", "SEEDS"]
+     },
+     "overlays": []
+    }
+   ]
+  },
+  {
+   "beat_id": "B2",
+   "shots": [
+    {
+     "shot_id": "S02",
+     "shot_type": "DIAGRAM",
+     "asset": "B2_nerve_alarm",
+     "duration_est": 7.0,
+     "crop_bias_y": 0.45,
+     "captions": "phrase",
+     "role": "DIAGRAM",
+     "chrome": "section",
+     "tag": "THE SAME ALARM",
+     "visual_mode": "DIAGRAM",
+     "evidence_type": "EXPLANATORY_DIAGRAM",
+     "motion_type": "INFORMATION_MOTION",
+     "purpose": "Show the mouth raising the identical alarm for scalding coffee and for the chili",
+     "claim": "capsaicin and real heat trip the same nerve heat sensor",
+     "evidence": "diagram card: a nerve ending under the tongue firing upward toward a brain silhouette; two inputs, one alarm bell",
+     "motion_reason": "signal pulse travels along the nerve: information motion, not drift",
+     "transition_reason": "cut to the receptor reveal",
+     "cam_from_scale": 1.05,
+     "cam_to_scale": 1.1,
+     "cam_cx": 0.5,
+     "cam_cy": 0.5,
+     "subject_contract": {
+      "expected_subject": "parchment diagram of a nerve ending firing one alarm signal, two input arrows labeled heat and chili",
+      "required": ["nerve ending", "two input arrows", "single alarm output"],
+      "forbidden": ["photoreal mouths", "numeric axis units", "app UI"],
+      "role": "DIAGRAM"
+     },
+     "one_second": {
+      "relationship": "two triggers, one alarm",
+      "labels": ["HEAT", "CHILI", "ONE ALARM"]
+     },
+     "overlays": []
+    }
+   ]
+  },
+  {
+   "beat_id": "B3",
+   "shots": [
+    {
+     "shot_id": "S03",
+     "shot_type": "REVEAL",
+     "asset": "B3_trpv1_gate",
+     "duration_est": 8.5,
+     "crop_bias_y": 0.45,
+     "captions": "phrase",
+     "role": "DIAGRAM",
+     "chrome": "section",
+     "tag": "THE GATE OPENS",
+     "visual_mode": "SPLIT",
+     "evidence_type": "EXPLANATORY_DIAGRAM",
+     "motion_type": "INFORMATION_MOTION",
+     "purpose": "Reveal TRPV1: a gate that heat opens above 43C, and capsaicin opens at body temperature",
+     "claim": "TRPV1 opens above 43 degrees Celsius, and capsaicin opens it without heat",
+     "evidence": "split card: left, membrane gate pushed open by a heat arrow; right, the same gate wedged open by a capsaicin molecule with no heat",
+     "motion_reason": "both gates swing on the same hinge axis: the comparison is the motion",
+     "transition_reason": "cut to what the open gate does",
+     "cam_from_scale": 1.02,
+     "cam_to_scale": 1.06,
+     "cam_cx": 0.5,
+     "cam_cy": 0.5,
+     "subject_contract": {
+      "expected_subject": "parchment split diagram of a membrane channel gate opened by heat on one side and by capsaicin on the other",
+      "required": ["membrane double band", "channel gate", "capsaicin molecule"],
+      "forbidden": ["numeric axis units", "photoreal cells", "dna helices"],
+      "role": "DIAGRAM"
+     },
+     "one_second": {
+      "relationship": "heat opens it; capsaicin opens it too",
+      "labels": ["TRPV1", "HEAT 43 C", "CAPSAICIN"]
+     },
+     "overlays": []
+    }
+   ]
+  },
+  {
+   "beat_id": "B4",
+   "shots": [
+    {
+     "shot_id": "S04",
+     "shot_type": "DIAGRAM",
+     "asset": "B4_ion_flood",
+     "duration_est": 9.0,
+     "crop_bias_y": 0.45,
+     "captions": "phrase",
+     "role": "DIAGRAM",
+     "chrome": "section",
+     "tag": "A FALSE ALARM",
+     "visual_mode": "DIAGRAM",
+     "evidence_type": "EXPLANATORY_DIAGRAM",
+     "motion_type": "INFORMATION_MOTION",
+     "purpose": "Show ions flooding through the open channel and one word climbing the nerve: BURNING",
+     "claim": "the burn is a false-alarm signal; capsaicin does not burn tissue at food levels",
+     "evidence": "diagram card: ions pouring through the wedged-open channel, a signal dot climbing the nerve fiber toward the word BURNING",
+     "motion_reason": "ion stream and rising signal are the information motion",
+     "transition_reason": "cut to why water fails",
+     "cam_from_scale": 1.0,
+     "cam_to_scale": 1.07,
+     "cam_cx": 0.5,
+     "cam_cy": 0.5,
+     "subject_contract": {
+      "expected_subject": "parchment diagram of ions flooding through a membrane channel with a signal rising along a nerve",
+      "required": ["open channel", "ion stream", "rising signal"],
+      "forbidden": ["fire imagery", "numeric axis units", "app UI"],
+      "role": "DIAGRAM"
+     },
+     "one_second": {
+      "relationship": "open gate, ion flood, one message",
+      "labels": ["IONS", "OPEN CHANNEL", "BURNING"]
+     },
+     "overlays": []
+    }
+   ]
+  },
+  {
+   "beat_id": "B5",
+   "shots": [
+    {
+     "shot_id": "S05",
+     "shot_type": "EXPLAIN",
+     "asset": "B5_water_fails",
+     "duration_est": 7.5,
+     "crop_bias_y": 0.45,
+     "captions": "phrase",
+     "role": "DIAGRAM",
+     "chrome": "section",
+     "tag": "WATER MAKES IT WORSE",
+     "visual_mode": "TRANSFORMATION",
+     "evidence_type": "EXPLANATORY_DIAGRAM",
+     "motion_type": "INFORMATION_MOTION",
+     "purpose": "Show water smearing fat-loving capsaicin outward instead of removing it",
+     "claim": "capsaicin is fat-soluble, so water spreads it rather than washing it away",
+     "evidence": "transformation card: a water drop lands and oily capsaicin droplets are pushed outward into fresh territory",
+     "motion_reason": "outward spread over time: the transformation is the claim",
+     "transition_reason": "cut to the milk wash",
+     "cam_from_scale": 1.0,
+     "cam_to_scale": 1.08,
+     "cam_cx": 0.5,
+     "cam_cy": 0.5,
+     "subject_contract": {
+      "expected_subject": "parchment diagram of a water drop spreading oily capsaicin droplets outward",
+      "required": ["water drop", "oily droplets spreading outward", "arrow of spread"],
+      "forbidden": ["photoreal glassware", "numeric axis units", "brand logos"],
+      "role": "DIAGRAM"
+     },
+     "one_second": {
+      "relationship": "water lands, capsaicin spreads",
+      "labels": ["WATER", "FAT-LOVING", "SPREAD"]
+     },
+     "overlays": []
+    }
+   ]
+  },
+  {
+   "beat_id": "B6",
+   "shots": [
+    {
+     "shot_id": "S06",
+     "shot_type": "EXPLAIN",
+     "asset": "B6_milk_wash",
+     "duration_est": 7.0,
+     "crop_bias_y": 0.45,
+     "captions": "phrase",
+     "role": "COMPARISON",
+     "chrome": "section",
+     "tag": "THE MILK WASH",
+     "visual_mode": "SPLIT",
+     "evidence_type": "EXPLANATORY_DIAGRAM",
+     "motion_type": "INFORMATION_MOTION",
+     "purpose": "Compare water failing against casein clusters capturing capsaicin",
+     "claim": "milk casein binds capsaicin and tends to wash it away better than water",
+     "evidence": "split card: left, droplets free and spreading; right, casein clusters gripping the same droplets and carrying them off",
+     "motion_reason": "capture versus spread: mirrored motion makes the comparison",
+     "transition_reason": "cut to the bird payoff",
+     "cam_from_scale": 1.02,
+     "cam_to_scale": 1.02,
+     "cam_cx": 0.5,
+     "cam_cy": 0.5,
+     "subject_contract": {
+      "expected_subject": "parchment split diagram comparing spreading capsaicin droplets with casein clusters capturing them",
+      "required": ["two panels", "casein clusters", "captured droplets"],
+      "forbidden": ["photoreal glasses of milk", "numeric axis units", "app UI"],
+      "role": "COMPARISON"
+     },
+     "one_second": {
+      "relationship": "casein grips what water cannot",
+      "labels": ["WATER", "MILK CASEIN", "CAPTURED"]
+     },
+     "overlays": []
+    }
+   ]
+  },
+  {
+   "beat_id": "B7",
+   "shots": [
+    {
+     "shot_id": "S07",
+     "shot_type": "PAYOFF",
+     "asset": "B7_bird_payoff",
+     "duration_est": 9.5,
+     "crop_bias_y": 0.45,
+     "captions": "phrase",
+     "role": "HERO",
+     "chrome": "none",
+     "tag": "",
+     "visual_mode": "PAYOFF",
+     "evidence_type": "DIRECT_EVIDENCE",
+     "motion_type": "CAMERA_MOTION",
+     "opening": false,
+     "title": "",
+     "purpose": "Payoff: a bird eats the same chili unbothered; seeds scatter where the burn never reached",
+     "claim": "bird TRPV1 is insensitive to capsaicin; the burn is thought to filter seed dispersers",
+     "evidence": "full-bleed plate: a bird swallowing a red chili whole, scattered seeds below, calm posture",
+     "motion_reason": "slow pull-back reveals the bird among scattered seeds: the immune eater",
+     "transition_reason": "end card",
+     "cam_from_scale": 1.08,
+     "cam_to_scale": 1.0,
+     "cam_cx": 0.5,
+     "cam_cy": 0.5,
+     "subject_contract": {
+      "expected_subject": "parchment plate of a bird swallowing a red chili with scattered seeds below",
+      "required": ["bird", "whole red chili", "scattered seeds"],
+      "forbidden": ["burning imagery", "brand logos", "human figures"],
+      "role": "HERO"
+     },
+     "one_second": {
+      "relationship": "the immune eater and the scattered seeds",
+      "labels": ["UNBOTHERED", "SEEDS TRAVEL"]
+     },
+     "overlays": []
+    }
+   ]
+  }
+ ]
+}

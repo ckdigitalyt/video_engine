@@ -1,9 +1,9 @@
 # Postmortem — 52-Hertz Whale: the loneliest voice in the sea (stills-first)
-**When:** 2026-08-29T04:01:01+00:00
+**When:** 2026-09-08T03:23:41+00:00
 
 ## Techniques that worked
 - stills-first visual strategy: NASA/Wikimedia/AI Ken Burns + Manim beats
-- manim scenes: 0, nasa: 1, wikimedia: 2, ai: 7
+- manim scenes: 0, nasa: 3, wikimedia: 3, ai: 1
 - Gemini review score 45/100
 
 ## Techniques that failed
@@ -28,17 +28,17 @@ _(none recorded)_
 ```json
 {
   "final_score": 45,
-  "duration_s": 63.0,
-  "avg_wpm": 145.3,
-  "rushed_scene_count": 2,
+  "duration_s": 32.4,
+  "avg_wpm": 143.0,
+  "rushed_scene_count": 1,
   "manim": 0,
-  "nasa": 1,
-  "wikimedia": 2,
-  "ai": 7,
+  "nasa": 3,
+  "wikimedia": 3,
+  "ai": 1,
   "video_fallback": 0,
-  "rejected": 12,
-  "vision_checked": 10,
-  "deduped": 1,
+  "rejected": 5,
+  "vision_checked": 9,
+  "deduped": 6,
   "cached": 5
 }
 ```

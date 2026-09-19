@@ -1,0 +1,133 @@
+{
+ "story_id": "phone_heating",
+ "brand": "CHARGED",
+ "title": "WHY YOUR PHONE GETS HOT WHILE CHARGING",
+ "subject": "technology",
+ "story_type": "science_process",
+ "pad_s": 0.4,
+ "v7": {
+  "title_overlay": true
+ },
+ "concepts": [
+  {
+   "id": "phone",
+   "beats": [
+    "B1",
+    "B5",
+    "B6"
+   ],
+   "verb": "state_change"
+  },
+  {
+   "id": "battery",
+   "beats": [
+    "B2",
+    "B4"
+   ],
+   "verb": "zoom"
+  },
+  {
+   "id": "current",
+   "beats": [
+    "B2",
+    "B3"
+   ],
+   "verb": "flow"
+  },
+  {
+   "id": "heat",
+   "beats": [
+    "B1",
+    "B4",
+    "B5",
+    "B6"
+   ],
+   "verb": "grow"
+  }
+ ],
+ "beats": [
+  {
+   "beat_id": "B1",
+   "function": "HOOK",
+   "narration": "Your phone warms up while it charges, even when you never touch it. That heat is not a defect. It is physics you are paying for.",
+   "claim": "charging a phone always produces some waste heat",
+   "visual_question": "where does charging heat come from?",
+   "visual_answer": "the charge path itself, glowing inside the phone",
+   "fact_ids": [
+    "f_charge_heat"
+   ],
+   "start": 0.0,
+   "end": 8.0
+  },
+  {
+   "beat_id": "B2",
+   "function": "EXPLANATION",
+   "narration": "To charge, the charger pushes current into the battery, and lithium ions shuffle from one electrode to the other to store the energy.",
+   "claim": "charging stores energy by moving lithium ions between electrodes",
+   "visual_question": "what is the battery actually doing while it charges?",
+   "visual_answer": "ions crossing the cell from cathode to anode",
+   "fact_ids": [
+    "f_ion"
+   ],
+   "start": 8.0,
+   "end": 16.0
+  },
+  {
+   "beat_id": "B3",
+   "function": "EXPLANATION",
+   "narration": "Nothing that carries current is perfect. The cable, the charge chip, and the battery's own inner resistance all fight the flow.",
+   "claim": "every part of the charge path has electrical resistance",
+   "visual_question": "what stands between the plug and the battery?",
+   "visual_answer": "a chain of parts, each resisting the current a little",
+   "fact_ids": [],
+   "start": 16.0,
+   "end": 23.5
+  },
+  {
+   "beat_id": "B4",
+   "function": "ESCALATION",
+   "narration": "That fight turns a few percent of the charging power straight into heat. Fast charging pushes far more power through the same resistance.",
+   "claim": "a few percent of charging power dissipates as heat; fast charging increases it",
+   "visual_question": "where does the lost power go?",
+   "visual_answer": "a split of power in versus heat out, growing with charge rate",
+   "fact_ids": [
+    "f_charge_heat"
+   ],
+   "start": 23.5,
+   "end": 32.0,
+   "key_number": "A FEW %",
+   "key_number_rect": [
+    0.08,
+    0.58,
+    0.3,
+    0.1
+   ]
+  },
+  {
+   "beat_id": "B5",
+   "function": "ESCALATION",
+   "narration": "So when the phone runs warm, it defends itself. Charging slows down on purpose, to protect the battery.",
+   "claim": "phones reduce charging current when the battery runs hot",
+   "visual_question": "why does fast charging slow down after a while?",
+   "visual_answer": "the charge curve flattening under a thermal limit",
+   "fact_ids": [
+    "f_throttle"
+   ],
+   "start": 32.0,
+   "end": 39.5
+  },
+  {
+   "beat_id": "B6",
+   "function": "PAYOFF",
+   "narration": "The warmth is the receipt. Energy moved fast leaves a little behind as heat. The phone is not failing. It is paying the toll.",
+   "claim": "charging heat is the unavoidable cost of moving energy fast",
+   "visual_question": "so what is the heat, really?",
+   "visual_answer": "the phone reprised calm: warmth as the receipt for fast energy",
+   "fact_ids": [
+    "f_charge_heat"
+   ],
+   "start": 39.5,
+   "end": 47.0
+  }
+ ]
+}

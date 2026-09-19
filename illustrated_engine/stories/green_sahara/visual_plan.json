@@ -1,0 +1,344 @@
+{
+  "story_id": "green_sahara",
+  "regions": {
+    "visual_rect": [0, 176, 1080, 1744]
+  },
+  "beats": [
+    {
+      "beat_id": "B1",
+      "shots": [
+        {
+          "shot_id": "S01",
+          "shot_type": "HOOK",
+          "asset": "B1_sahara_lake",
+          "duration_est": 6.2,
+          "crop_bias_y": 0.45,
+          "opening": true,
+          "title": "THE SAHARA WAS GREEN",
+          "tag": "",
+          "captions": "phrase",
+          "role": "HERO",
+          "chrome": "none",
+          "visual_mode": "CINEMATIC",
+          "evidence_type": "DIRECT_EVIDENCE",
+          "motion_type": "CAMERA_MOTION",
+          "purpose": "Open on the impossible image: a green Sahara with lakes and hippos",
+          "claim": "the Sahara hosted lakes and wetland fauna ~6,000 years ago",
+          "evidence": "full-bleed dawn lakescape plate; the water and the hippos are the subject",
+          "motion_reason": "slow push-in: the impossible scene lands clean before any science",
+          "transition_reason": "hard cut to the rock-art panel when the proof is asked for",
+          "subject_contract": {
+            "expected_subject": "a dawn lakescape in a green Sahara: wide calm lake, hippopotamuses at the waterline, acacia trees",
+            "required": [
+              "lake or water as a major element",
+              "hippopotamus visible at or in the water",
+              "green grass/savannah vegetation"
+            ],
+            "forbidden": [
+              "sand dunes dominating the frame",
+              "polar, mountain or rainforest scene",
+              "cartoon style"
+            ],
+            "role": "HERO"
+          },
+          "one_second": {
+            "relationship": "hippos in a Sahara lake — the impossible image"
+          },
+          "typography": [],
+          "stage_chips": [
+            {"asset": "chip_g1", "at": 0.4}
+          ]
+        }
+      ]
+    },
+    {
+      "beat_id": "B2",
+      "shots": [
+        {
+          "shot_id": "S02",
+          "shot_type": "REVEAL",
+          "asset": "B2_sahara_rockart",
+          "duration_est": 7.5,
+          "crop_bias_y": 0.5,
+          "opening": false,
+          "title": "",
+          "tag": "",
+          "captions": "phrase",
+          "role": "EVIDENCE",
+          "chrome": "none",
+          "visual_mode": "EVIDENCE",
+          "evidence_type": "DIRECT_EVIDENCE",
+          "motion_type": "REVEAL",
+          "purpose": "Show the physical record: the panels are still on the rock",
+          "claim": "15,000+ rock-art panels across the Sahara record wetland life",
+          "evidence": "ochre rock-art plate: giraffes and figures on sandstone",
+          "motion_reason": "reveal across the panel face so the figures register in sequence",
+          "transition_reason": "cut to the then/now split for the contrast",
+          "subject_contract": {
+            "expected_subject": "ancient ochre rock art painted on a sandstone cliff face: giraffes and human figures",
+            "required": [
+              "rock or cliff wall bearing painted or engraved figures",
+              "giraffe figures recognisable",
+              "ochre/earthy pigments"
+            ],
+            "forbidden": [
+              "modern graffiti",
+              "framed canvas paintings",
+              "readable text"
+            ],
+            "role": "EVIDENCE"
+          },
+          "one_second": {
+            "relationship": "the giraffes on the rock — the record itself"
+          },
+          "typography": [],
+          "stage_chips": []
+        }
+      ]
+    },
+    {
+      "beat_id": "B3",
+      "shots": [
+        {
+          "shot_id": "S03",
+          "shot_type": "EXPLANATION",
+          "asset": "B3_sahara_split",
+          "duration_est": 7.8,
+          "crop_bias_y": 0.5,
+          "opening": false,
+          "title": "",
+          "tag": "",
+          "captions": "phrase",
+          "role": "EXPLANATION",
+          "chrome": "none",
+          "visual_mode": "COMPARISON",
+          "evidence_type": "DIRECT_EVIDENCE",
+          "motion_type": "CAMERA_MOTION",
+          "purpose": "Then vs now: the same land, two states — green with water, cracked dry",
+          "claim": "African Humid Period: monsoon-fed lakes vs today's hyperarid core",
+          "evidence": "split plate: green wetland half vs cracked arid half",
+          "motion_reason": "gentle drift across the split so both states are read",
+          "transition_reason": "cut to the orbital diagram when the mechanism must be seen",
+          "subject_contract": {
+            "expected_subject": "a split composition: lush green wetland on one side, cracked bone-dry desert on the other",
+            "required": [
+              "two clearly divided halves",
+              "one side green with water and vegetation",
+              "other side arid: cracked earth or dunes"
+            ],
+            "forbidden": [
+              "a single homogeneous scene"
+            ],
+            "role": "EXPLANATION"
+          },
+          "one_second": {
+            "relationship": "one land, two states — green and dry"
+          },
+          "typography": [
+            {"kind": "NUMBER_POP", "text": "25 MM/YR", "at": 0.5,
+             "rect": [0.52, 0.44, 0.42, 0.085]}
+          ],
+          "stage_chips": [
+            {"asset": "chip_g3", "at": 0.35}
+          ]
+        }
+      ]
+    },
+    {
+      "beat_id": "B4",
+      "shots": [
+        {
+          "shot_id": "S04",
+          "shot_type": "EVIDENCE",
+          "asset": "B4_sahara_orbit",
+          "duration_est": 8.1,
+          "crop_bias_y": 0.5,
+          "opening": false,
+          "title": "",
+          "tag": "",
+          "captions": "phrase",
+          "role": "EXPLANATION",
+          "chrome": "none",
+          "visual_mode": "DIAGRAM",
+          "evidence_type": "EXPLANATORY_DIAGRAM",
+          "motion_type": "INFORMATION_MOTION",
+          "purpose": "Make the switch visible: axial wobble dragging the monsoon north",
+          "claim": "axial precession (~26,000-year cycle) paces the North African monsoon",
+          "evidence": "parchment diagram plate: tilted Earth, axis line, wobble arrows, monsoon arrow",
+          "motion_reason": "slow zoom on the Earth so the wobble and the arrow read as one idea",
+          "transition_reason": "cut to the dry lakebed for the ending of the green age",
+          "subject_contract": {
+            "expected_subject": "a parchment-style scientific diagram: a tilted Earth with its axis drawn as a line, wobble arrows, and a monsoon wind arrow sweeping toward North Africa",
+            "required": [
+              "a drawn Earth with an axis line",
+              "wobble or rotation arrows",
+              "parchment diagram style"
+            ],
+            "forbidden": [
+              "realistic space photography",
+              "readable text labels"
+            ],
+            "role": "EXPLANATION"
+          },
+          "one_second": {
+            "relationship": "the wobbling Earth moving the monsoon"
+          },
+          "typography": [
+            {"kind": "NUMBER_POP", "text": "26,000-YEAR CYCLE", "at": 0.5,
+             "rect": [0.5, 0.44, 0.44, 0.085]}
+          ],
+          "stage_chips": [
+            {"asset": "chip_g4", "at": 0.35}
+          ]
+        }
+      ]
+    },
+    {
+      "beat_id": "B5",
+      "shots": [
+        {
+          "shot_id": "S05",
+          "shot_type": "DETAIL",
+          "asset": "B5_sahara_dry",
+          "duration_est": 8.0,
+          "crop_bias_y": 0.5,
+          "opening": false,
+          "title": "",
+          "tag": "",
+          "captions": "phrase",
+          "role": "DETAIL",
+          "chrome": "none",
+          "visual_mode": "TIMELINE",
+          "evidence_type": "DIRECT_EVIDENCE",
+          "motion_type": "CAMERA_MOTION",
+          "purpose": "Show the ending: the lakebed itself, dried within centuries",
+          "claim": "the humid period ended ~5,500 BP within centuries, driving migration to the Nile",
+          "evidence": "cracked dry lakebed plate where the lake once was",
+          "motion_reason": "slow drift over the cracks — emptiness carries the ending",
+          "transition_reason": "cut to the type card for the statement",
+          "subject_contract": {
+            "expected_subject": "a vast cracked dry lakebed where a lake once was, distant sand dunes, hazy sky",
+            "required": [
+              "cracked dry lakebed floor",
+              "dunes or desert haze",
+              "no standing water"
+            ],
+            "forbidden": [
+              "green vegetation",
+              "people or vehicles"
+            ],
+            "role": "DETAIL"
+          },
+          "one_second": {
+            "relationship": "the dead lakebed — the green age is over"
+          },
+          "typography": [
+            {"kind": "NUMBER_POP", "text": "5,500 YRS AGO", "at": 0.5,
+             "rect": [0.52, 0.44, 0.42, 0.085]}
+          ],
+          "stage_chips": [
+            {"asset": "chip_g5", "at": 0.35}
+          ]
+        }
+      ]
+    },
+    {
+      "beat_id": "B6",
+      "shots": [
+        {
+          "shot_id": "S06",
+          "shot_type": "TYPO",
+          "asset": "B5_sahara_dry",
+          "duration_est": 3.0,
+          "crop_bias_y": 0.5,
+          "opening": false,
+          "title": "",
+          "tag": "",
+          "captions": "phrase",
+          "role": "PUNCTUATION",
+          "chrome": "none",
+          "visual_mode": "TYPOGRAPHY",
+          "evidence_type": "DIRECT_EVIDENCE",
+          "motion_type": "TYPOGRAPHIC_MOTION",
+          "purpose": "State the claim bluntly: the type IS the visual",
+          "claim": "green Sahara episodes recur, paced by orbital cycles",
+          "evidence": "full-frame type card: IT WAS GREEN",
+          "motion_reason": "typographic hold — no camera",
+          "transition_reason": "cut to the dust plume for the payoff",
+          "subject_contract": {
+            "expected_subject": "a full-frame typographic card: IT WAS GREEN with a small supporting line",
+            "required": [
+              "large display type",
+              "single dominant statement",
+              "series cream-on-navy treatment"
+            ],
+            "forbidden": [
+              "photographic content",
+              "multiple competing statements"
+            ],
+            "role": "PUNCTUATION"
+          },
+          "one_second": {
+            "relationship": "the statement itself"
+          },
+          "typography": [],
+          "progressive": {
+            "stages": [
+              {"asset": "typo_sahara", "at": 0.1}
+            ]
+          },
+          "stage_chips": []
+        }
+      ]
+    },
+    {
+      "beat_id": "B7",
+      "shots": [
+        {
+          "shot_id": "S07",
+          "shot_type": "PAYOFF",
+          "asset": "B7_sahara_dust",
+          "duration_est": 10.2,
+          "crop_bias_y": 0.45,
+          "opening": false,
+          "title": "",
+          "tag": "",
+          "captions": "phrase",
+          "role": "PAYOFF",
+          "chrome": "none",
+          "visual_mode": "PAYOFF",
+          "evidence_type": "DIRECT_EVIDENCE",
+          "motion_type": "CAMERA_MOTION",
+          "purpose": "Land the payoff: the desert still feeds the green world — the link never cut",
+          "claim": "Saharan dust fertilizes the Amazon (~27 Mt/yr)",
+          "evidence": "satellite-style plate: orange dust plume crossing the Atlantic",
+          "motion_reason": "slow drift along the plume — motion across the ocean carries the link",
+          "transition_reason": "end card",
+          "subject_contract": {
+            "expected_subject": "satellite view of a vast orange dust plume drifting from the African coast across the Atlantic toward South America",
+            "required": [
+              "a long orange/brown dust plume",
+              "ocean seen from above",
+              "an African coast source region"
+            ],
+            "forbidden": [
+              "city lights dominating",
+              "hurricane or storm systems dominating"
+            ],
+            "role": "PAYOFF"
+          },
+          "one_second": {
+            "relationship": "the dust crossing the ocean — the link alive"
+          },
+          "typography": [
+            {"kind": "NUMBER_POP", "text": "27 MT/YR", "at": 0.45,
+             "rect": [0.52, 0.44, 0.42, 0.085]}
+          ],
+          "stage_chips": [
+            {"asset": "chip_g7", "at": 0.3}
+          ]
+        }
+      ]
+    }
+  ]
+}

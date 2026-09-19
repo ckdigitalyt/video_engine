@@ -1,0 +1,57 @@
+{
+  "claims": [
+    {
+      "id": "f_curved_spacetime",
+      "beats": ["B3", "B7"],
+      "claim": "In general relativity, gravity is the curvature of spacetime and it stretches time in a gravitational field",
+      "definition": "Mass-energy curves spacetime; proper time along a worldline deeper in a gravitational potential elapses more slowly relative to a distant observer (gravitational time dilation), with the effect growing with depth in the field.",
+      "measured_value": "qualitative: proper-time rate decreases with gravitational depth",
+      "date_verified": "2026-09",
+      "authoritative_source": "Einstein Online (Max Planck Institute for Gravitational Physics), 'Gravitational time dilation'; Will, 'Was Einstein Right?'",
+      "source_url": "https://www.einstein-online.info/en/spotlight/gravity_clocks/",
+      "historically_changed": false,
+      "sources": ["Einstein Online: Gravitational time dilation", "Will, Was Einstein Right? (2nd ed.)"],
+      "verified": true
+    },
+    {
+      "id": "f_gravitational_dilation",
+      "beats": ["B4"],
+      "claim": "Clocks deeper in a gravitational field tick fewer seconds than distant clocks (measured, not hypothetical)",
+      "definition": "Gravitational redshift/time dilation is experimentally verified — from the Pound-Rebka experiment (1959, 22.5 m tower) to modern optical clocks differing by millimeters of height. The narration states the measured relationship, not a movie effect.",
+      "measured_value": "Pound-Rebka 1959: frequency shift over 22.5 m; modern clocks resolve mm-scale height differences",
+      "date_verified": "2026-09",
+      "authoritative_source": "Pound & Rebka, Physical Review Letters 4 (1960); NIST optical clock height measurements",
+      "source_url": "https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.4.337",
+      "historically_changed": false,
+      "sources": ["Pound & Rebka, PRL 4 (1960)", "NIST news: relativistic geodesy with optical clocks"],
+      "verified": true
+    },
+    {
+      "id": "f_gps_38us",
+      "beats": ["B5"],
+      "claim": "GPS satellite clocks would gain about 38 microseconds per day without relativistic corrections",
+      "definition": "Net relativistic effect on GPS satellite clocks: gravitational blueshift speeds them by ~+45 microseconds/day (weaker gravity at 20,200 km orbit), special-relativistic time dilation slows them by ~-7 microseconds/day; net ~+38 microseconds/day. The system corrects for both; uncorrected errors would accumulate to kilometres of positioning error per day.",
+      "measured_value": "net ~+38 microseconds/day (about +45 gravity, about -7 velocity)",
+      "date_verified": "2026-09",
+      "authoritative_source": "Ashby, 'Relativity in the Global Positioning System', Living Reviews in Relativity (2003); NIST",
+      "source_url": "https://link.springer.com/article/10.12942/lrr-2003-1",
+      "historically_changed": false,
+      "sources": ["Ashby, Living Reviews in Relativity 6 (2003)", "NIST GPS relativistic corrections notes"],
+      "verified": true
+    },
+    {
+      "id": "f_horizon_freeze",
+      "beats": ["B6"],
+      "claim": "To a distant observer, an infalling object appears to freeze at the event horizon",
+      "definition": "In Schwarzschild coordinates, signals from an infalling probe arrive increasingly delayed; the distant observer sees the probe redden, dim and asymptotically freeze at the horizon. The probe itself crosses the horizon in finite proper time — the 'freeze' is an observational effect for the distant viewer.",
+      "measured_value": "qualitative: signal delay grows without limit at the horizon for distant observers",
+      "date_verified": "2026-09",
+      "authoritative_source": "Einstein Online (Max Planck Institute), 'Falling into a black hole'; Hawking & Ellis standard treatment",
+      "source_url": "https://www.einstein-online.info/en/spotlight/black_holes/",
+      "historically_changed": false,
+      "sources": ["Einstein Online: Falling into a black hole"],
+      "verified": true,
+      "notes": "Narration phrased from the distant observer's view ('you seem to freeze') to stay accurate."
+    }
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "bed_files": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+  ],
+  "sfx": [
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/tunguska_1908/audio/sfx_whoosh.wav",
+      "at": 1.205,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/tunguska_1908/audio/sfx_pulse.wav",
+      "at": 9.4,
+      "kind": "pulse"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/tunguska_1908/audio/sfx_whoosh.wav",
+      "at": 12.872,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/tunguska_1908/audio/sfx_pulse.wav",
+      "at": 18.456,
+      "kind": "pulse"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/tunguska_1908/audio/sfx_whoosh.wav",
+      "at": 21.282,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/tunguska_1908/audio/sfx_pulse.wav",
+      "at": 28.215,
+      "kind": "pulse"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/tunguska_1908/audio/sfx_whoosh.wav",
+      "at": 31.634,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/tunguska_1908/audio/sfx_pulse.wav",
+      "at": 39.633,
+      "kind": "pulse"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/tunguska_1908/audio/sfx_whoosh.wav",
+      "at": 43.471,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/tunguska_1908/audio/sfx_pulse.wav",
+      "at": 51.967,
+      "kind": "pulse"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/tunguska_1908/audio/sfx_whoosh.wav",
+      "at": 56.01,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/tunguska_1908/audio/sfx_pulse.wav",
+      "at": 64.808,
+      "kind": "pulse"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/tunguska_1908/audio/sfx_whoosh.wav",
+      "at": 68.965,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/tunguska_1908/audio/sfx_pulse.wav",
+      "at": 77.87,
+      "kind": "pulse"
+    }
+  ],
+  "bed_crossfade_ms": 600
+}

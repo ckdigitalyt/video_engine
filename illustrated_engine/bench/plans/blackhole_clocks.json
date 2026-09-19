@@ -1,0 +1,1055 @@
+{
+  "story_id": "blackhole_clocks",
+  "engine": "v6.2",
+  "fps": 30,
+  "size": [
+    1080,
+    1920
+  ],
+  "brand": "ABOVE THE CLOUDS",
+  "visual_rect": [
+    0,
+    176,
+    1080,
+    1744
+  ],
+  "caption_rect": [
+    0,
+    1536,
+    1080,
+    320
+  ],
+  "shots": [
+    {
+      "shot_id": "S01",
+      "shot_type": "HOOK",
+      "asset": "B1_bh_hero",
+      "duration_s": 6.107,
+      "camera": {
+        "primitive": "zoompan",
+        "from_scale": 1.0,
+        "to_scale": 1.1,
+        "pan": null,
+        "cx": 0.5,
+        "cy": 0.5,
+        "from_cx": null,
+        "from_cy": null
+      },
+      "events": [
+        {
+          "t": 3.0535,
+          "kind": "highlight",
+          "spec": {
+            "kind": "HIGHLIGHT",
+            "target": "center",
+            "style": "circle",
+            "at": 0.5,
+            "rect": [
+              0.3,
+              0.4414,
+              0.4,
+              0.4086
+            ]
+          }
+        }
+      ],
+      "captions": [
+        {
+          "text": "Park your clock beside a black hole",
+          "t0": 0.0,
+          "t1": 2.85,
+          "level": 1
+        },
+        {
+          "text": "and watch it.",
+          "t0": 2.85,
+          "t1": 4.071,
+          "level": 1
+        },
+        {
+          "text": "It ticks slower.",
+          "t0": 4.071,
+          "t1": 5.293,
+          "level": 1
+        },
+        {
+          "text": "Much slower.",
+          "t0": 5.293,
+          "t1": 6.107,
+          "level": 1
+        }
+      ],
+      "transition_in": "CUT",
+      "opening": true,
+      "title": "WHY CLOCKS RUN SLOWER NEAR A BLACK HOLE",
+      "tag": "",
+      "crop_bias_y": 0.45,
+      "end_card": null,
+      "chrome": "none",
+      "role": "HERO",
+      "purpose": "Stage the thought experiment: a clock parked beside a dark horizon",
+      "claim": "a clock near a black hole ticks slower than a distant one",
+      "evidence": "full-bleed dark plate: glowing accretion disk around a black disc, small clock silhouette in orbit",
+      "motion_reason": "slow push-in: stillness first so the question lands clean",
+      "transition_reason": "hard cut to the two-clock comparison",
+      "visual_mode": "CINEMATIC",
+      "evidence_type": "DIRECT_EVIDENCE",
+      "motion_type": "CAMERA_MOTION",
+      "subject_contract": {
+        "expected_subject": "dark astronomical plate of a black hole with a bright accretion ring and a small clock silhouette nearby",
+        "required": [
+          "dark circular hole silhouette",
+          "bright ring or disk around it",
+          "clock face silhouette"
+        ],
+        "forbidden": [
+          "spaceship or astronaut figures",
+          "text labels",
+          "galaxy spiral dominating"
+        ],
+        "role": "HERO"
+      },
+      "one_second": {
+        "relationship": "a lone clock beside a dark horizon"
+      },
+      "visual_grammar": {
+        "subject": "physics",
+        "recommended_mode": "CINEMATIC"
+      },
+      "beat_id": "B1"
+    },
+    {
+      "shot_id": "S02",
+      "shot_type": "COMPARE",
+      "asset": "B2_two_clocks",
+      "duration_s": 6.943,
+      "camera": {
+        "primitive": "zoompan",
+        "from_scale": 1.02,
+        "to_scale": 1.08,
+        "pan": null,
+        "cx": 0.5,
+        "cy": 0.5,
+        "from_cx": null,
+        "from_cy": null
+      },
+      "events": [
+        {
+          "t": 3.82,
+          "kind": "text_emphasis",
+          "spec": {
+            "kind": "TEXT_EMPHASIS",
+            "at": 0.5501944404436122
+          },
+          "auto": true
+        }
+      ],
+      "captions": [
+        {
+          "text": "The clock is not broken.",
+          "t0": 0.0,
+          "t1": 1.929,
+          "level": 1
+        },
+        {
+          "text": "Nothing is wrong with its gears.",
+          "t0": 1.929,
+          "t1": 4.243,
+          "level": 1
+        },
+        {
+          "text": "Time itself runs at a different rate.",
+          "t0": 4.243,
+          "t1": 6.943,
+          "level": 1
+        }
+      ],
+      "transition_in": "CUT",
+      "opening": false,
+      "title": "",
+      "tag": "TWO CLOCKS",
+      "crop_bias_y": 0.45,
+      "end_card": null,
+      "chrome": "section",
+      "role": "COMPARISON",
+      "purpose": "Frame the comparison: identical clocks, different rates",
+      "claim": "the slowdown is not mechanical: time itself runs slower",
+      "evidence": "two identical engraved clocks, one deep in the dark well, one far out in parchment sky",
+      "motion_reason": "hold the pair; the position difference is the information",
+      "transition_reason": "hard cut to the spacetime funnel",
+      "visual_mode": "COMPARISON",
+      "evidence_type": "DIRECT_EVIDENCE",
+      "motion_type": "INFORMATION_MOTION",
+      "subject_contract": {
+        "expected_subject": "two identical round clocks in one frame, one near a dark mass, one in open sky, vintage engraving style",
+        "required": [
+          "two clock faces",
+          "clear near-far asymmetry",
+          "dark mass edge near the lower clock"
+        ],
+        "forbidden": [
+          "wristwatch straps",
+          "digital displays",
+          "human hands"
+        ],
+        "role": "COMPARISON"
+      },
+      "one_second": {
+        "relationship": "same clocks, different depths, different rates",
+        "labels": [
+          "NEAR",
+          "FAR"
+        ]
+      },
+      "visual_grammar": {
+        "subject": "physics",
+        "recommended_mode": "COMPARISON"
+      },
+      "beat_id": "B2",
+      "kinetic": {
+        "type": "clocks",
+        "omega_ratio": 0.2
+      }
+    },
+    {
+      "shot_id": "S03",
+      "shot_type": "REVEAL",
+      "asset": "D1_spacetime_funnel",
+      "duration_s": 4.604,
+      "camera": {
+        "primitive": "zoompan",
+        "from_scale": 1.0,
+        "to_scale": 1.08,
+        "pan": null,
+        "cx": 0.5,
+        "cy": 0.48,
+        "from_cx": null,
+        "from_cy": null
+      },
+      "events": [
+        {
+          "t": 2.5320326086956526,
+          "kind": "number_pop",
+          "spec": {
+            "kind": "NUMBER_POP",
+            "text": "DEEPER = SLOWER",
+            "target": "upper",
+            "at": 0.55,
+            "rect": [
+              0.2369,
+              0.18,
+              0.5261,
+              0.1265
+            ],
+            "pulse": true,
+            "suppressed_original": true
+          }
+        }
+      ],
+      "captions": [
+        {
+          "text": "Gravity does not just pull on objects.",
+          "t0": 0.0,
+          "t1": 3.001,
+          "level": 1
+        }
+      ],
+      "transition_in": "CUT",
+      "opening": false,
+      "title": "",
+      "tag": "THE WELL",
+      "crop_bias_y": 0.45,
+      "end_card": null,
+      "chrome": "section",
+      "role": "DIAGRAM",
+      "purpose": "Reveal curved spacetime: the grid funnels down toward the hole",
+      "claim": "gravity stretches time; deeper in the field, the stretch is stronger",
+      "evidence": "diagram card: curved grid funnel with clock circles at depths, rust depth markers",
+      "motion_reason": "push down the funnel while depth markers carry the information",
+      "transition_reason": "hard cut to the horizon detail",
+      "visual_mode": "DIAGRAM",
+      "evidence_type": "EXPLANATORY_DIAGRAM",
+      "motion_type": "REVEAL",
+      "subject_contract": {
+        "expected_subject": "parchment diagram of a curved spacetime grid funneling toward a dark disc with small clock circles at depths",
+        "required": [
+          "curved grid lines forming a funnel",
+          "dark disc at the bottom",
+          "clock circles on the grid"
+        ],
+        "forbidden": [
+          "water and real ponds",
+          "text paragraphs",
+          "planetary rings photoreal"
+        ],
+        "role": "DIAGRAM"
+      },
+      "one_second": {
+        "relationship": "deeper in the funnel, slower the clock",
+        "labels": [
+          "DEEPER = SLOWER"
+        ]
+      },
+      "visual_grammar": {
+        "subject": "physics",
+        "recommended_mode": "DIAGRAM"
+      },
+      "beat_id": "B3"
+    },
+    {
+      "shot_id": "S04",
+      "shot_type": "DETAIL",
+      "asset": "B3_horizon_detail",
+      "duration_s": 3.541,
+      "camera": {
+        "primitive": "zoompan",
+        "from_scale": 1.24,
+        "to_scale": 1.4,
+        "pan": null,
+        "cx": 0.52,
+        "cy": 0.5,
+        "from_cx": null,
+        "from_cy": null
+      },
+      "events": [],
+      "captions": [
+        {
+          "text": "It stretches time, and the deeper you go,",
+          "t0": 0.0,
+          "t1": 1.827,
+          "level": 1
+        },
+        {
+          "text": "the stronger the stretch.",
+          "t0": 1.827,
+          "t1": 3.541,
+          "level": 1
+        }
+      ],
+      "transition_in": "CUT",
+      "opening": false,
+      "title": "",
+      "tag": "",
+      "crop_bias_y": 0.5,
+      "end_card": null,
+      "chrome": "none",
+      "role": "DETAIL",
+      "purpose": "Rest the eye at the edge: light bending around the horizon",
+      "claim": "light itself bends near the horizon",
+      "evidence": "tight macro of engraved light curves skimming a dark edge",
+      "motion_reason": "slow zoom reveals the bending curves",
+      "transition_reason": "hard cut to the dilation curve card",
+      "visual_mode": "DETAIL",
+      "evidence_type": "DIRECT_EVIDENCE",
+      "motion_type": "REVEAL",
+      "subject_contract": {
+        "expected_subject": "engraved close-up of light rays curving around a dark circular edge",
+        "required": [
+          "curved light rays",
+          "dark circular edge",
+          "engraving linework"
+        ],
+        "forbidden": [
+          "rainbows",
+          "lenses or glass",
+          "text labels"
+        ],
+        "role": "DETAIL"
+      },
+      "one_second": {
+        "relationship": "even light follows the curve of the well"
+      },
+      "visual_grammar": {
+        "subject": "physics",
+        "recommended_mode": "DETAIL"
+      },
+      "beat_id": "B3"
+    },
+    {
+      "shot_id": "S05",
+      "shot_type": "EXPLAIN",
+      "asset": "D2_dilation_curve",
+      "duration_s": 5.165,
+      "camera": {
+        "primitive": "zoompan",
+        "from_scale": 1.0,
+        "to_scale": 1.07,
+        "pan": [
+          "x",
+          0.3,
+          0.62
+        ],
+        "cx": 0.48,
+        "cy": 0.48,
+        "from_cx": null,
+        "from_cy": null
+      },
+      "events": [
+        {
+          "t": 2.84,
+          "kind": "text_emphasis",
+          "spec": {
+            "kind": "TEXT_EMPHASIS",
+            "at": 0.5498594205094532
+          },
+          "auto": true
+        }
+      ],
+      "captions": [
+        {
+          "text": "Einstein's relativity says gravity is curved spacetime.",
+          "t0": 0.0,
+          "t1": 3.763,
+          "level": 1
+        },
+        {
+          "text": "Near mass,",
+          "t0": 3.763,
+          "t1": 4.838,
+          "level": 1
+        }
+      ],
+      "transition_in": "CUT",
+      "opening": false,
+      "title": "",
+      "tag": "THE CURVE",
+      "crop_bias_y": 0.45,
+      "end_card": null,
+      "chrome": "section",
+      "role": "DIAGRAM",
+      "purpose": "Explain the mechanism with a measured curve: clock rate versus depth",
+      "claim": "in general relativity, clocks deeper in a gravitational field tick fewer seconds",
+      "evidence": "graph card: clock rate dropping with depth along a drawn curve, axis ticks marked",
+      "motion_reason": "drift along the curve so its drop reads as the effect",
+      "transition_reason": "hard cut to the satellite network",
+      "visual_mode": "DIAGRAM",
+      "evidence_type": "EXPLANATORY_DIAGRAM",
+      "motion_type": "INFORMATION_MOTION",
+      "subject_contract": {
+        "expected_subject": "parchment graph card showing a falling curve of clock rate against distance from a mass",
+        "required": [
+          "single falling curve",
+          "two labeled axes",
+          "tick marks along the curve"
+        ],
+        "forbidden": [
+          "bar charts",
+          "pie charts",
+          "screens or monitors"
+        ],
+        "role": "DIAGRAM"
+      },
+      "one_second": {
+        "relationship": "the deeper the clock, the lower its rate",
+        "labels": [
+          "RATE",
+          "DEPTH"
+        ]
+      },
+      "visual_grammar": {
+        "subject": "physics",
+        "recommended_mode": "DIAGRAM"
+      },
+      "beat_id": "B4"
+    },
+    {
+      "shot_id": "S06",
+      "shot_type": "EXPLAIN",
+      "asset": "B4_probe_clock",
+      "duration_s": 3.973,
+      "camera": {
+        "primitive": "zoompan",
+        "from_scale": 1.18,
+        "to_scale": 1.3,
+        "pan": [
+          "x",
+          0.3,
+          0.62
+        ],
+        "cx": 0.5,
+        "cy": 0.5,
+        "from_cx": null,
+        "from_cy": null
+      },
+      "events": [],
+      "captions": [
+        {
+          "text": "clocks genuinely tick fewer seconds than distant ones.",
+          "t0": 0.0,
+          "t1": 3.973,
+          "level": 1
+        }
+      ],
+      "transition_in": "CUT",
+      "opening": false,
+      "title": "",
+      "tag": "",
+      "crop_bias_y": 0.5,
+      "end_card": null,
+      "chrome": "none",
+      "role": "DIAGRAM",
+      "purpose": "Ground the effect: a probe's clock runs measurably slow near the disk",
+      "claim": "a probe near the mass carries a clock that falls behind",
+      "evidence": "probe silhouette with a large clock face skimming above the glowing disk",
+      "motion_reason": "slow drift with the probe; the clock face is the annotation",
+      "transition_reason": "hard cut to the GPS card",
+      "visual_mode": "EVIDENCE",
+      "evidence_type": "DIRECT_EVIDENCE",
+      "motion_type": "INFORMATION_MOTION",
+      "subject_contract": {
+        "expected_subject": "vintage-engraving probe silhouette with a round clock face, skimming above a glowing accretion disk",
+        "required": [
+          "probe or satellite silhouette",
+          "round clock face on it",
+          "glowing disk below"
+        ],
+        "forbidden": [
+          "astronaut faces",
+          "rockets with flames",
+          "text labels"
+        ],
+        "role": "EVIDENCE"
+      },
+      "one_second": {
+        "relationship": "the probe's clock reads behind the distant one"
+      },
+      "visual_grammar": {
+        "subject": "physics",
+        "recommended_mode": "EVIDENCE"
+      },
+      "beat_id": "B4"
+    },
+    {
+      "shot_id": "S07",
+      "shot_type": "DIAGRAM",
+      "asset": "B5_gps_card",
+      "duration_s": 9.085,
+      "camera": {
+        "primitive": "zoompan",
+        "from_scale": 1.02,
+        "to_scale": 1.08,
+        "pan": null,
+        "cx": 0.5,
+        "cy": 0.5,
+        "from_cx": null,
+        "from_cy": null
+      },
+      "events": [
+        {
+          "t": 4.5424999999999995,
+          "kind": "number_pop",
+          "spec": {
+            "kind": "NUMBER_POP",
+            "text": "38",
+            "target": "center",
+            "at": 0.5,
+            "rect": [
+              0.733,
+              0.4775,
+              0.1555,
+              0.2804
+            ],
+            "pulse": true,
+            "suppressed_original": true
+          }
+        }
+      ],
+      "captions": [
+        {
+          "text": "GPS satellites feel this every day.",
+          "t0": 0.0,
+          "t1": 3.028,
+          "level": 1
+        },
+        {
+          "text": "Their clocks run 38 microseconds fast,",
+          "t0": 3.028,
+          "t1": 6.057,
+          "level": 2
+        },
+        {
+          "text": "and navigation would drift without corrections.",
+          "t0": 6.057,
+          "t1": 9.085,
+          "level": 1
+        }
+      ],
+      "transition_in": "CUT",
+      "opening": false,
+      "title": "",
+      "tag": "GPS PROOF",
+      "crop_bias_y": 0.45,
+      "end_card": null,
+      "chrome": "section",
+      "role": "DIAGRAM",
+      "purpose": "Escalate into the measurable world: the GPS constellation's corrected clocks",
+      "claim": "GPS satellite clocks gain about 38 microseconds per day without relativistic corrections",
+      "evidence": "diagram card: Earth disc with orbit ring, satellite dots, 38-microsecond figure popped",
+      "motion_reason": "orbit ring drifts the eye around the corrected clocks",
+      "transition_reason": "hard cut to the horizon freeze",
+      "visual_mode": "DIAGRAM",
+      "evidence_type": "EXPLANATORY_DIAGRAM",
+      "motion_type": "INFORMATION_MOTION",
+      "subject_contract": {
+        "expected_subject": "parchment diagram of Earth with an orbital ring of small satellites and a rust time correction figure",
+        "required": [
+          "Earth disc",
+          "orbital ring with satellite dots",
+          "rust correction figure"
+        ],
+        "forbidden": [
+          "phone screens",
+          "maps with roads",
+          "flags"
+        ],
+        "role": "DIAGRAM"
+      },
+      "one_second": {
+        "relationship": "satellite clocks corrected every day",
+        "big_number": "38",
+        "number_claim": true,
+        "labels": [
+          "ORBIT",
+          "38 MICROS"
+        ]
+      },
+      "visual_grammar": {
+        "subject": "physics",
+        "recommended_mode": "DIAGRAM"
+      },
+      "beat_id": "B5"
+    },
+    {
+      "shot_id": "S08",
+      "shot_type": "COMPARE",
+      "asset": "B6_freeze_frame",
+      "duration_s": 7.622,
+      "camera": {
+        "primitive": "zoompan",
+        "from_scale": 1.0,
+        "to_scale": 1.06,
+        "pan": null,
+        "cx": 0.5,
+        "cy": 0.5,
+        "from_cx": null,
+        "from_cy": null
+      },
+      "events": [
+        {
+          "t": 4.19,
+          "kind": "text_emphasis",
+          "spec": {
+            "kind": "TEXT_EMPHASIS",
+            "at": 0.5497244817633168
+          },
+          "auto": true
+        }
+      ],
+      "captions": [
+        {
+          "text": "Fall toward the horizon",
+          "t0": 0.0,
+          "t1": 1.605,
+          "level": 2
+        },
+        {
+          "text": "and the slowdown grows without limit.",
+          "t0": 1.605,
+          "t1": 4.012,
+          "level": 2
+        },
+        {
+          "text": "To a distant observer, you seem to freeze there.",
+          "t0": 4.012,
+          "t1": 7.622,
+          "level": 2
+        }
+      ],
+      "transition_in": "CUT",
+      "opening": false,
+      "title": "",
+      "tag": "THE HORIZON",
+      "crop_bias_y": 0.45,
+      "end_card": null,
+      "chrome": "section",
+      "role": "COMPARISON",
+      "purpose": "Twist: the same fall looks different from outside and inside",
+      "claim": "at the event horizon the dilation grows without limit for a distant observer",
+      "evidence": "split card: probe falling locally on one side, frozen at the rim from afar on the other",
+      "motion_reason": "the split transforms as the two views resolve side by side",
+      "transition_reason": "hard cut to the payoff clock",
+      "visual_mode": "SPLIT",
+      "evidence_type": "EXPLANATORY_DIAGRAM",
+      "motion_type": "TRANSFORMATION",
+      "subject_contract": {
+        "expected_subject": "parchment split card: left panel probe crossing a dark edge normally, right panel the same probe frozen as a faint image on the rim",
+        "required": [
+          "two panels",
+          "dark edge or rim",
+          "probe figure in both"
+        ],
+        "forbidden": [
+          "scream or horror imagery",
+          "clock melting surrealism",
+          "text paragraphs"
+        ],
+        "role": "COMPARISON"
+      },
+      "one_second": {
+        "relationship": "falling in locally, frozen from far away",
+        "labels": [
+          "LOCAL",
+          "DISTANT"
+        ]
+      },
+      "visual_grammar": {
+        "subject": "physics",
+        "recommended_mode": "SPLIT"
+      },
+      "beat_id": "B6"
+    },
+    {
+      "shot_id": "S09",
+      "shot_type": "PAYOFF",
+      "asset": "B7_clock_sky",
+      "duration_s": 8.145,
+      "camera": {
+        "primitive": "zoompan",
+        "from_scale": 1.14,
+        "to_scale": 1.0,
+        "pan": null,
+        "cx": 0.5,
+        "cy": 0.5,
+        "from_cx": null,
+        "from_cy": null
+      },
+      "events": [
+        {
+          "t": 3.258,
+          "kind": "highlight",
+          "spec": {
+            "kind": "HIGHLIGHT",
+            "target": "center",
+            "style": "circle",
+            "at": 0.4,
+            "rect": [
+              0.3,
+              0.4414,
+              0.4,
+              0.4086
+            ]
+          }
+        }
+      ],
+      "captions": [
+        {
+          "text": "So a black hole is a place where time",
+          "t0": 0.0,
+          "t1": 3.665,
+          "level": 1
+        },
+        {
+          "text": "drains away.",
+          "t0": 3.665,
+          "t1": 4.48,
+          "level": 1
+        },
+        {
+          "text": "Even there, clocks still tick.",
+          "t0": 4.48,
+          "t1": 6.516,
+          "level": 1
+        },
+        {
+          "text": "Just slower than yours.",
+          "t0": 6.516,
+          "t1": 8.145,
+          "level": 1
+        }
+      ],
+      "transition_in": "CUT",
+      "opening": false,
+      "title": "",
+      "tag": "",
+      "crop_bias_y": 0.4,
+      "end_card": "GRAVITY SETS THE RATE",
+      "chrome": "none",
+      "role": "PAYOFF",
+      "purpose": "Land the payoff: the clock against the sky, its rate owned by gravity",
+      "claim": "time keeps ticking everywhere, but gravity sets its rate",
+      "evidence": "dusk-sky clock silhouette plate reprising the opening darkness",
+      "motion_reason": "slow pull to rest; the strongest composition holds still",
+      "transition_reason": "end",
+      "visual_mode": "PAYOFF",
+      "evidence_type": "DIRECT_EVIDENCE",
+      "motion_type": "CAMERA_MOTION",
+      "subject_contract": {
+        "expected_subject": "single engraved clock face silhouetted against a dark dusk sky with a faint accretion ring on the horizon",
+        "required": [
+          "clock face silhouette",
+          "dark sky",
+          "faint glow ring near the horizon"
+        ],
+        "forbidden": [
+          "roman numerals replaced by words",
+          "text on artwork",
+          "buildings"
+        ],
+        "role": "PAYOFF"
+      },
+      "one_second": {
+        "relationship": "the clock still ticking, just slower"
+      },
+      "visual_grammar": {
+        "subject": "physics",
+        "recommended_mode": "PAYOFF"
+      },
+      "beat_id": "B7"
+    }
+  ],
+  "captions_v3": true,
+  "overlay_compiler": {
+    "card": {
+      "x": 0,
+      "y": 176,
+      "w": 1080,
+      "h": 780
+    },
+    "zones": {
+      "header_y": 0.18,
+      "footer_y": 0.85
+    },
+    "plate_manifest_assets": [
+      "B1_bh_hero",
+      "B2_two_clocks",
+      "B3_horizon_detail",
+      "B4_probe_clock",
+      "B5_gps_card",
+      "B6_freeze_frame",
+      "B7_clock_sky",
+      "D1_spacetime_funnel",
+      "D2_dilation_curve",
+      "__main__"
+    ],
+    "totals": {
+      "pulses": 2,
+      "clamped": 2,
+      "collisions": 0,
+      "dedup": 2
+    },
+    "per_shot": {
+      "S01": {
+        "events": [
+          {
+            "kind": "highlight",
+            "t": 3.0535,
+            "spec": {
+              "kind": "HIGHLIGHT",
+              "target": "center",
+              "style": "circle",
+              "at": 0.5,
+              "rect": [
+                0.3,
+                0.4414,
+                0.4,
+                0.4086
+              ]
+            }
+          }
+        ],
+        "kinetic": null
+      },
+      "S02": {
+        "events": [
+          {
+            "kind": "text_emphasis",
+            "t": 3.82,
+            "spec": {
+              "kind": "TEXT_EMPHASIS",
+              "at": 0.5501944404436122
+            }
+          }
+        ],
+        "kinetic": {
+          "type": "clocks",
+          "omega_ratio": 0.2
+        }
+      },
+      "S03": {
+        "events": [
+          {
+            "kind": "number_pop",
+            "t": 2.5320326086956526,
+            "spec": {
+              "kind": "NUMBER_POP",
+              "text": "DEEPER = SLOWER",
+              "target": "upper",
+              "at": 0.55,
+              "rect": [
+                0.2369,
+                0.18,
+                0.5261,
+                0.1265
+              ],
+              "pulse": true,
+              "suppressed_original": true
+            }
+          }
+        ],
+        "kinetic": null
+      },
+      "S04": {
+        "events": [],
+        "kinetic": null
+      },
+      "S05": {
+        "events": [
+          {
+            "kind": "text_emphasis",
+            "t": 2.84,
+            "spec": {
+              "kind": "TEXT_EMPHASIS",
+              "at": 0.5498594205094532
+            }
+          }
+        ],
+        "kinetic": null
+      },
+      "S06": {
+        "events": [],
+        "kinetic": null
+      },
+      "S07": {
+        "events": [
+          {
+            "kind": "number_pop",
+            "t": 4.5424999999999995,
+            "spec": {
+              "kind": "NUMBER_POP",
+              "text": "38",
+              "target": "center",
+              "at": 0.5,
+              "rect": [
+                0.733,
+                0.4775,
+                0.1555,
+                0.2804
+              ],
+              "pulse": true,
+              "suppressed_original": true
+            }
+          }
+        ],
+        "kinetic": null
+      },
+      "S08": {
+        "events": [
+          {
+            "kind": "text_emphasis",
+            "t": 4.19,
+            "spec": {
+              "kind": "TEXT_EMPHASIS",
+              "at": 0.5497244817633168
+            }
+          }
+        ],
+        "kinetic": null
+      },
+      "S09": {
+        "events": [
+          {
+            "kind": "highlight",
+            "t": 3.258,
+            "spec": {
+              "kind": "HIGHLIGHT",
+              "target": "center",
+              "style": "circle",
+              "at": 0.4,
+              "rect": [
+                0.3,
+                0.4414,
+                0.4,
+                0.4086
+              ]
+            }
+          }
+        ],
+        "kinetic": null
+      }
+    }
+  },
+  "visual_grammar_plan": {
+    "subject": "physics",
+    "default_grammar": [
+      "FORCE_DIAGRAM",
+      "SCALE",
+      "TRANSFORMATION",
+      "ANIMATION"
+    ],
+    "per_shot": [
+      {
+        "shot_id": "S01",
+        "subject": "physics",
+        "beat_function": "HOOK",
+        "recommended_mode": "CINEMATIC",
+        "is_explanatory": false
+      },
+      {
+        "shot_id": "S02",
+        "subject": "physics",
+        "beat_function": "CURIOSITY",
+        "recommended_mode": "COMPARISON",
+        "is_explanatory": true
+      },
+      {
+        "shot_id": "S03",
+        "subject": "physics",
+        "beat_function": "REVEAL",
+        "recommended_mode": "DIAGRAM",
+        "is_explanatory": false
+      },
+      {
+        "shot_id": "S04",
+        "subject": "physics",
+        "beat_function": "REVEAL",
+        "recommended_mode": "DETAIL",
+        "is_explanatory": false
+      },
+      {
+        "shot_id": "S05",
+        "subject": "physics",
+        "beat_function": "EXPLANATION",
+        "recommended_mode": "DIAGRAM",
+        "is_explanatory": false
+      },
+      {
+        "shot_id": "S06",
+        "subject": "physics",
+        "beat_function": "EXPLANATION",
+        "recommended_mode": "EVIDENCE",
+        "is_explanatory": false
+      },
+      {
+        "shot_id": "S07",
+        "subject": "physics",
+        "beat_function": "ESCALATION",
+        "recommended_mode": "DIAGRAM",
+        "is_explanatory": false
+      },
+      {
+        "shot_id": "S08",
+        "subject": "physics",
+        "beat_function": "TWIST",
+        "recommended_mode": "SPLIT",
+        "is_explanatory": false
+      },
+      {
+        "shot_id": "S09",
+        "subject": "physics",
+        "beat_function": "PAYOFF",
+        "recommended_mode": "PAYOFF",
+        "is_explanatory": false
+      }
+    ]
+  }
+}

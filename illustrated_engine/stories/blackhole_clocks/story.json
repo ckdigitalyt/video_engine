@@ -1,0 +1,96 @@
+{
+  "story_id": "blackhole_clocks",
+  "brand": "ABOVE THE CLOUDS",
+  "title": "Why Clocks Run Slower Near a Black Hole",
+  "subject": "physics",
+  "pad_s": 0.7,
+  "beats": [
+    {
+      "beat_id": "B1",
+      "function": "HOOK",
+      "narration": "Park your clock beside a black hole and watch it. It ticks slower. Much slower.",
+      "claim": "a clock near a black hole ticks slower than a distant one",
+      "visual_question": "what does gravity do to a clock?",
+      "visual_answer": "a lone clock beside a dark horizon, visibly out of step with the sky",
+      "fact_ids": [],
+      "start": 0.0,
+      "end": 6.21
+    },
+    {
+      "beat_id": "B2",
+      "function": "CURIOSITY",
+      "narration": "The clock is not broken. Nothing is wrong with its gears. Time itself runs at a different rate.",
+      "claim": "the slowdown is not mechanical: time itself runs slower",
+      "visual_question": "if the gears are fine, what changes?",
+      "visual_answer": "two identical clocks side by side, one deep in the well of a dark mass",
+      "fact_ids": [],
+      "start": 6.21,
+      "end": 13.15
+    },
+    {
+      "beat_id": "B3",
+      "function": "REVEAL",
+      "narration": "Gravity does not just pull on objects. It stretches time, and the deeper you go, the stronger the stretch.",
+      "claim": "gravity stretches time; deeper in the field, the stretch is stronger",
+      "visual_question": "what does the stretching look like?",
+      "visual_answer": "a curved spacetime grid funneling down, clocks at depths ticking at different rates",
+      "fact_ids": [
+        "f_curved_spacetime"
+      ],
+      "start": 13.16,
+      "end": 20.96
+    },
+    {
+      "beat_id": "B4",
+      "function": "EXPLANATION",
+      "narration": "Einstein's relativity says gravity is curved spacetime. Near mass, clocks genuinely tick fewer seconds than distant ones.",
+      "claim": "in general relativity, clocks deeper in a gravitational field tick fewer seconds",
+      "visual_question": "how much slower does the clock run with depth?",
+      "visual_answer": "a measured curve of clock rate against distance from the horizon",
+      "fact_ids": [
+        "f_gravitational_dilation"
+      ],
+      "start": 20.96,
+      "end": 29.5
+    },
+    {
+      "beat_id": "B5",
+      "function": "ESCALATION",
+      "narration": "GPS satellites feel this every day. Their clocks run 38 microseconds fast, and navigation would drift without corrections.",
+      "claim": "GPS satellite clocks gain about 38 microseconds per day without relativistic corrections",
+      "visual_question": "where can you measure this today?",
+      "visual_answer": "the satellite network above Earth with its corrected clock rate annotated",
+      "fact_ids": [
+        "f_gps_38us"
+      ],
+      "start": 29.5,
+      "end": 38.69
+    },
+    {
+      "beat_id": "B6",
+      "function": "TWIST",
+      "narration": "Fall toward the horizon and the slowdown grows without limit. To a distant observer, you seem to freeze there.",
+      "claim": "at the event horizon the dilation grows without limit for a distant observer",
+      "visual_question": "what happens exactly at the horizon?",
+      "visual_answer": "the same falling probe seen twice: falling in locally, frozen from far away",
+      "fact_ids": [
+        "f_horizon_freeze"
+      ],
+      "start": 38.69,
+      "end": 46.6
+    },
+    {
+      "beat_id": "B7",
+      "function": "PAYOFF",
+      "narration": "So a black hole is a place where time drains away. Even there, clocks still tick. Just slower than yours.",
+      "claim": "time keeps ticking everywhere, but gravity sets its rate",
+      "visual_question": "what should you picture now when you see a clock?",
+      "visual_answer": "the clock silhouette against the sky, its rate owned by gravity",
+      "fact_ids": [
+        "f_curved_spacetime"
+      ],
+      "start": 46.6,
+      "end": 54.72
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+ "story_id": "aircraft_wing_lift",
+ "built_utc": "2026-09-06T01:01:33Z",
+ "n_shots": 9,
+ "avg_shot_dur": 6.25,
+ "opening_class": "EVIDENCE",
+ "opening_structure": [
+  "HOOK",
+  "CINEMATIC"
+ ],
+ "role_sequence": [
+  "HERO",
+  "DIAGRAM",
+  "DIAGRAM",
+  "DIAGRAM",
+  "DIAGRAM",
+  "DETAIL",
+  "DIAGRAM",
+  "COMPARISON",
+  "PAYOFF"
+ ],
+ "class_sequence": [
+  "EVIDENCE",
+  "EVIDENCE",
+  "EVIDENCE",
+  "EVIDENCE",
+  "EVIDENCE",
+  "EVIDENCE",
+  "EVIDENCE",
+  "EVIDENCE",
+  "EVIDENCE"
+ ],
+ "mode_sequence": [
+  "CINEMATIC",
+  "DIAGRAM",
+  "DIAGRAM",
+  "SPLIT",
+  "DIAGRAM",
+  "DETAIL",
+  "TRANSFORMATION",
+  "TRANSFORMATION",
+  "PAYOFF"
+ ],
+ "transition_pattern": [
+  "CUT",
+  "CUT",
+  "CUT",
+  "CUT",
+  "CUT",
+  "CUT",
+  "CUT",
+  "CUT",
+  "CUT"
+ ],
+ "title_behavior": "opening_title",
+ "blur_ratio": 0.0,
+ "diagram_ratio": 1.0,
+ "cinematic_ratio": 0.0
+}

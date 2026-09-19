@@ -18,7 +18,10 @@ from __future__ import annotations
 import re
 
 NUM_RE = re.compile(r"\d[\d,\.]*")
-TEMPORAL_RE = re.compile(r"\b(ago|years|year|bc|ad|century|when|then)\b", re.I)
+# "when/then" dropped: rhetorical clauses ("even when you never touch it") and
+# discourse markers are not history claims. Singular "year" dropped: seasonal
+# idiom ("most of the year") is not temporal. Plural/era markers kept.
+TEMPORAL_RE = re.compile(r"\b(ago|decades?|centur(y|ies)|bc|ad|millennia|years)\b", re.I)
 COMPARATIVE_RE = re.compile(r"\b(than|twice|half|more|less|compared|vs)\b", re.I)
 ANATOMY_RE = re.compile(
     r"\b(strip|cube|core|crust|surface|rings|beams|sphere|skin|bark|seed)\b", re.I)
@@ -69,13 +72,26 @@ def narration_visual_alignment(purpose_map: list, plan_shots: list,
     pm = {p["shot_id"]: p for p in purpose_map}
     rows = []
     total_req, total_ok = 0, 0
-    for p in purpose_map:
+    for idx, p in enumerate(purpose_map):
         sid = p["shot_id"]
         beat = p.get("beat_id")
         text = beat_narr.get(beat, "") or " " + " " + (p.get("narration_claim") or "")
         req = required_visuals(text)
         shot = shots_by_id.get(sid, {})
         res = satisfied(req, shot, p)
+        if str(p.get("beat_function") or p.get("function") or "").upper() in ("HOOK", "CURIOSITY"):
+            # Documentary payoff chain: the hook's job is to open the gap, so
+            # its number/comparison claim is validly evidenced when a LATER
+            # shot carries the matching visual. Videos that never show it
+            # still fail — this only credits claims the film actually pays off.
+            for r in res:
+                if r["req"] in ("number", "comparison") and not r["ok"]:
+                    for q in purpose_map[idx + 1:]:
+                        qs = shots_by_id.get(q["shot_id"], {})
+                        if all(x["ok"] for x in satisfied([r["req"]], qs, q)):
+                            r["ok"] = True
+                            r["paid_off_later"] = True
+                            break
         ok = all(r["ok"] for r in res)
         dur = float(shot.get("duration_s", 4.0))
         rows.append({

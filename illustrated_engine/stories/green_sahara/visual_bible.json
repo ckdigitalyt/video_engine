@@ -1,0 +1,27 @@
+{
+  "version": "4.0",
+  "brand": "DEEP TIME",
+  "palette": {
+    "primary": "#3E5A3A",
+    "secondary": "#A98952",
+    "accent": "#C25B33",
+    "background": "#171310",
+    "text": "#EFE6D4",
+    "muted": "#8A7B63",
+    "highlight": "#E9DFC8"
+  },
+  "illustration_style": "vintage 1950s natural-history and geological survey illustration, ink and ochre-green wash on aged parchment, engraving linework, matte finish",
+  "illustration_medium": "vintage ink-and-ochre-green-wash natural-history illustration with engraving linework (not photoreal, not flat vector)",
+  "lighting": "soft directional low-key with warm dawn highlights",
+  "contrast": "medium-high, rich shadows",
+  "saturation": 0.72,
+  "texture": { "grain": 0.012, "vignette": 0.25 },
+  "typography": { "display": "BebasNeue-Regular.ttf", "body": "Inter-Variable.ttf" },
+  "framing": "vertical 9:16, subject centred with breathing room, horizon-low wides for landscapes and tight detail crops, deep dark grounds",
+  "graphic_language": "restrained rust annotations, thin sage linework, parchment diagrams, measured typography, no heavy drop shadows on graphic elements",
+  "transition_style": "hard cut; per-shot fade-in from background colour",
+  "prompt_fragments": {
+    "prefix": "Vintage 1950s natural-history illustration, ink and ochre-green watercolor wash on aged parchment, engraving linework, muted sage and rust palette, soft directional light, soft vignette, matte finish",
+    "suffix": "No readable text, no watermarks, no modern objects, no logos"
+  }
+}

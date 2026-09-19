@@ -1,0 +1,131 @@
+{
+ "v2": true,
+ "story_id": "crumple_zones",
+ "built_utc": "2026-09-18T21:49:05Z",
+ "n_shots": 7,
+ "avg_shot_dur": 11.1,
+ "role_sequence": [
+  "HERO",
+  "GUIDE",
+  "GUIDE",
+  "GUIDE",
+  "GUIDE",
+  "GUIDE",
+  "HERO"
+ ],
+ "grammar_sequence": [
+  "before_after",
+  "before_after",
+  "before_after",
+  "before_after",
+  "before_after",
+  "before_after",
+  "before_after"
+ ],
+ "composition_sequence": [
+  "state_a_full_bleed",
+  "hinge_split",
+  "state_b_full_bleed",
+  "split_with_cause",
+  "split_intensifies",
+  "split_intensifies",
+  "states_resolved"
+ ],
+ "panel_usage_sequence": [
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "none"
+ ],
+ "background_sequence": [
+  "split_field",
+  "split_field",
+  "split_field",
+  "split_field",
+  "split_field",
+  "split_field",
+  "split_field"
+ ],
+ "caption_architecture": [
+  "edge_band",
+  "edge_band",
+  "edge_band",
+  "edge_band",
+  "edge_band",
+  "edge_band",
+  "edge_band"
+ ],
+ "transition_types": [
+  "CUT",
+  "CUT",
+  "CUT",
+  "CUT",
+  "CUT",
+  "CUT",
+  "CUT"
+ ],
+ "state_sequence": [
+  "ESTABLISH",
+  "FOCUS",
+  "TRANSFORM",
+  "CONSEQUENCE",
+  "ESTABLISH",
+  "FOCUS",
+  "TRANSFORM",
+  "CONSEQUENCE",
+  "ESTABLISH",
+  "FOCUS",
+  "TRANSFORM",
+  "CONSEQUENCE",
+  "ESTABLISH",
+  "FOCUS",
+  "TRANSFORM",
+  "CONSEQUENCE",
+  "ESTABLISH",
+  "FOCUS",
+  "TRANSFORM",
+  "CONSEQUENCE",
+  "ESTABLISH",
+  "FOCUS",
+  "TRANSFORM",
+  "CONSEQUENCE",
+  "ESTABLISH",
+  "FOCUS",
+  "TRANSFORM",
+  "CONSEQUENCE",
+  "PAYOFF"
+ ],
+ "camera_behavior": [
+  "push",
+  "hold",
+  "push",
+  "hold",
+  "hold",
+  "hold",
+  "hold"
+ ],
+ "title_behavior": "none",
+ "chrome_usage": "none",
+ "accent_usage": "",
+ "duration_profile": "n7_s0_l7",
+ "diagram_ratio": 0.753,
+ "cinematic_ratio": 0.0,
+ "motif": {
+  "plate": {
+   "panel_other": 3,
+   "polygon_other": 1,
+   "circle_other": 5
+  },
+  "plan": {
+   "circle_plan": 17,
+   "strip_plan": 2,
+   "panel_plan": 1
+  },
+  "subject": "engineering",
+  "story_type": "engineering_process",
+  "justification": ""
+ }
+}

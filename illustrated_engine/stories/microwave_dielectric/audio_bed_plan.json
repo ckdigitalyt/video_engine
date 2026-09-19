@@ -1,0 +1,84 @@
+{
+  "bed_files": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+  ],
+  "sfx": [
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/microwave_dielectric/audio/sfx_whoosh.wav",
+      "at": 0.939,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/microwave_dielectric/audio/sfx_pulse.wav",
+      "at": 7.321,
+      "kind": "pulse"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/microwave_dielectric/audio/sfx_whoosh.wav",
+      "at": 10.05,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/microwave_dielectric/audio/sfx_whoosh.wav",
+      "at": 17.305,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/microwave_dielectric/audio/sfx_tick.wav",
+      "at": 18.229,
+      "kind": "tick"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/microwave_dielectric/audio/sfx_pulse.wav",
+      "at": 25.979,
+      "kind": "pulse"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/microwave_dielectric/audio/sfx_whoosh.wav",
+      "at": 30.074,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/microwave_dielectric/audio/sfx_pulse.wav",
+      "at": 38.837,
+      "kind": "pulse"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/microwave_dielectric/audio/sfx_whoosh.wav",
+      "at": 42.83,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/microwave_dielectric/audio/sfx_pulse.wav",
+      "at": 50.704,
+      "kind": "pulse"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/microwave_dielectric/audio/sfx_whoosh.wav",
+      "at": 54.718,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/microwave_dielectric/audio/sfx_pulse.wav",
+      "at": 64.689,
+      "kind": "pulse"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/microwave_dielectric/audio/sfx_whoosh.wav",
+      "at": 69.321,
+      "kind": "whoosh"
+    },
+    {
+      "file": "/home/ubuntu/video_engine/illustrated_engine/stories/microwave_dielectric/audio/sfx_pulse.wav",
+      "at": 78.883,
+      "kind": "pulse"
+    }
+  ],
+  "bed_crossfade_ms": 600
+}

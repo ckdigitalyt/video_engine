@@ -29,3 +29,6 @@ rebuild_smoke.py
 
 # node
 node_modules/
+
+# generated audio assets — not part of codebase (owner directive 2026-09-19)
+*.wav

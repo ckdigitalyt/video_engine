@@ -1,0 +1,95 @@
+{
+  "claims": [
+    {
+      "id": "egypt_tomb_honey_3000yr",
+      "beats": ["B1", "B7"],
+      "claim": "Honey found in ancient Egyptian tombs — roughly 3,000 years old — has been reported in edible condition by archaeologists.",
+      "definition": "honey stored in sealed ceramic vessels in tombs, found unspoiled after ~3,000 years",
+      "current_record_holder": "n/a",
+      "measured_value": "~3,000 years (reported edible)",
+      "date_verified": "2026-09",
+      "authoritative_source": "Smithsonian Magazine — 'The Science Behind Honey's Eternal Shelf Life'",
+      "source_url": "https://www.smithsonianmag.com/science-nature/the-science-behind-honeys-eternal-shelf-life-1218690/",
+      "historically_changed": false,
+      "notes": "status stable; recurring archaeology report, not a living record"
+    },
+    {
+      "id": "spoilage_needs_water",
+      "beats": ["B2"],
+      "claim": "Microbial growth requires available water: most spoilage bacteria cannot grow below a water activity of about 0.91.",
+      "definition": "water activity (aw) minimum for bacterial growth",
+      "current_record_holder": "n/a",
+      "measured_value": "bacterial minimum aw ≈ 0.91",
+      "date_verified": "2026-09",
+      "authoritative_source": "FDA Bad Bug Book (2nd edition), microbial growth parameters",
+      "source_url": "https://www.fda.gov/media/83271/download",
+      "historically_changed": false,
+      "notes": "established food-science constant"
+    },
+    {
+      "id": "honey_supersaturated_osmosis",
+      "beats": ["B3"],
+      "claim": "Honey is a supersaturated sugar solution (~82% sugars, ~17-18% water); its high osmotic pressure draws water out of microbial cells, inhibiting growth.",
+      "definition": "osmotic stress from supersaturated sugars",
+      "current_record_holder": "n/a",
+      "measured_value": "~82% sugars / 17-18% water",
+      "date_verified": "2026-09",
+      "authoritative_source": "National Honey Board — honey composition and stability",
+      "source_url": "https://honey.com/",
+      "historically_changed": false,
+      "notes": "mechanism statement consistent with food-microbiology literature"
+    },
+    {
+      "id": "nectar_to_honey_water",
+      "beats": ["B4"],
+      "claim": "Nectar commonly runs 60-80% water; bees reduce it to honey at 17-18% water before capping the cells.",
+      "definition": "water content of nectar vs finished honey",
+      "current_record_holder": "n/a",
+      "measured_value": "nectar ≈60-80% water → honey 17-18%",
+      "date_verified": "2026-09",
+      "authoritative_source": "USDA Agricultural Research Service — honey processing",
+      "source_url": "https://www.ars.usda.gov/",
+      "historically_changed": false,
+      "notes": "ranges vary by floral source; figures are standard"
+    },
+    {
+      "id": "bee_fanning_evaporation",
+      "beats": ["B4"],
+      "claim": "Honeybees evaporate nectar by fanning with rapid wingbeats — about 230 beats per second — speeding the water loss that turns nectar into honey.",
+      "definition": "fanning behavior and honeybee wingbeat frequency",
+      "current_record_holder": "n/a",
+      "measured_value": "≈230 Hz wingbeat",
+      "date_verified": "2026-09",
+      "authoritative_source": "USDA-ARS Carl Hayden Bee Research Center; insect-flight literature",
+      "source_url": "https://www.ars.usda.gov/",
+      "historically_changed": false,
+      "notes": "wingbeat ≈230 Hz is the standard measured figure for Apis mellifera"
+    },
+    {
+      "id": "honey_ph_acid",
+      "beats": ["B5"],
+      "claim": "Honey is acidic, with a pH typically between 3.2 and 4.5, due mainly to gluconic acid.",
+      "definition": "pH range of honey",
+      "current_record_holder": "n/a",
+      "measured_value": "pH 3.2-4.5",
+      "date_verified": "2026-09",
+      "authoritative_source": "Bogdanov, S. — Bee Product Science, honey composition reviews",
+      "source_url": "https://www.bee-hexagon.net/",
+      "historically_changed": false,
+      "notes": "stable compositional fact"
+    },
+    {
+      "id": "glucose_oxidase_h2o2",
+      "beats": ["B5"],
+      "claim": "Bees add the enzyme glucose oxidase to nectar; in honey it slowly generates trace hydrogen peroxide, one of honey's antibacterial systems.",
+      "definition": "enzyme-derived hydrogen peroxide in honey",
+      "current_record_holder": "n/a",
+      "measured_value": "trace H2O2 (low-micromolar)",
+      "date_verified": "2026-09",
+      "authoritative_source": "Molan, P.C. — reviews of honey's antibacterial activity (Univ. of Waikato)",
+      "source_url": "https://www.waikato.ac.nz/",
+      "historically_changed": false,
+      "notes": "well-established mechanism in apitherapy research literature"
+    }
+  ]
+}

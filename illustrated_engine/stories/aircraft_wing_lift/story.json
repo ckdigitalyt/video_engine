@@ -1,0 +1,96 @@
+{
+  "story_id": "aircraft_wing_lift",
+  "brand": "ABOVE THE CLOUDS",
+  "title": "How a 747 Wing Actually Lifts",
+  "subject": "aircraft",
+  "pad_s": 0.7,
+  "beats": [
+    {
+      "beat_id": "B1",
+      "function": "HOOK",
+      "narration": "A loaded 747 weighs up to 400 tonnes. What holds that much metal in the sky?",
+      "claim": "a loaded 747 can weigh up to 400 tonnes",
+      "visual_question": "what keeps 400 tonnes of aircraft in the air?",
+      "visual_answer": "the wing itself, seen from below, carrying the whole problem",
+      "fact_ids": [
+        "f_747_weight"
+      ],
+      "start": 0.0,
+      "end": 7.52
+    },
+    {
+      "beat_id": "B2",
+      "function": "CURIOSITY",
+      "narration": "The answer is not a vacuum or a trick. It is the wing's shape, sliced edge-on, doing quiet work.",
+      "claim": "lift comes from the wing's cross-sectional shape",
+      "visual_question": "what does a wing look like to an engineer?",
+      "visual_answer": "an edge-on slice: a cambered airfoil outline on a blueprint grid",
+      "fact_ids": [],
+      "start": 7.52,
+      "end": 15.3
+    },
+    {
+      "beat_id": "B3",
+      "function": "REVEAL",
+      "narration": "Cut a wing across and you get an airfoil: flat back, steeply curved top. That curve is the whole secret.",
+      "claim": "the airfoil has a curved upper surface and a flat trailing section",
+      "visual_question": "what exactly is an airfoil?",
+      "visual_answer": "streamlines bending over a curved top while passing flat beneath",
+      "fact_ids": [
+        "f_bernoulli_pressure"
+      ],
+      "start": 15.3,
+      "end": 23.6
+    },
+    {
+      "beat_id": "B4",
+      "function": "EXPLANATION",
+      "narration": "Air rushing over the curved top speeds up, and its pressure drops. Higher pressure underneath pushes the wing upward.",
+      "claim": "faster flow over the curved top means lower pressure above the wing",
+      "visual_question": "why does the pressure difference push up?",
+      "visual_answer": "a streamtube squeezing over the camber: arrows speed up above, pressure pushes from below",
+      "fact_ids": [],
+      "start": 23.6,
+      "end": 32.29
+    },
+    {
+      "beat_id": "B5",
+      "function": "ESCALATION",
+      "narration": "Newton agrees: the wing steers air downward, and the air shoves back up. Action, meet reaction.",
+      "claim": "the wing deflects air downward and the reaction pushes the wing up",
+      "visual_question": "where is the second half of the lift story?",
+      "visual_answer": "downwash behind the wing plus an equal upward reaction arrow",
+      "fact_ids": [
+        "f_newton_downwash"
+      ],
+      "start": 32.29,
+      "end": 40.44
+    },
+    {
+      "beat_id": "B6",
+      "function": "TWIST",
+      "narration": "Push the nose up too far and the smooth flow peels away. Lift collapses. Pilots call it a stall.",
+      "claim": "past a critical nose-up angle the flow separates and lift collapses",
+      "visual_question": "what breaks the lift?",
+      "visual_answer": "the same airfoil twice: attached flow, then separated tumbling flow",
+      "fact_ids": [
+        "f_stall_angle"
+      ],
+      "start": 40.44,
+      "end": 48.24
+    },
+    {
+      "beat_id": "B7",
+      "function": "PAYOFF",
+      "narration": "So lift is pressure and deflection working together. At cruise, 400 tonnes, held up by moving air.",
+      "claim": "in cruise, lift balances the aircraft's 400-tonne weight",
+      "visual_question": "what should you see when a jet passes overhead now?",
+      "visual_answer": "the same wing at dusk, now visibly holding the aircraft",
+      "fact_ids": [
+        "f_747_weight"
+      ],
+      "start": 48.24,
+      "end": 56.26
+    }
+  ]
+}

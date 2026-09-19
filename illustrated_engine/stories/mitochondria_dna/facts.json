@@ -1,0 +1,57 @@
+{
+  "claims": [
+    {
+      "id": "f_mtdna_37genes",
+      "beats": ["B3"],
+      "claim": "Human mitochondrial DNA is a circular genome carrying 37 genes",
+      "definition": "The human mitochondrial genome (mtDNA) is a closed circular double-stranded molecule of about 16,569 base pairs encoding 37 genes: 13 proteins, 22 transfer RNAs and 2 ribosomal RNAs. It is separate from the nuclear genome.",
+      "measured_value": "16,569 bp; 37 genes",
+      "date_verified": "2026-09",
+      "authoritative_source": "NCBI Books, 'Mitochondrial DNA' (Genes and Disease); Anderson et al., Nature 1981 (complete mtDNA sequence)",
+      "source_url": "https://www.ncbi.nlm.nih.gov/books/NBK1229/",
+      "historically_changed": false,
+      "sources": ["NCBI Genes and Disease: Mitochondrial DNA", "Anderson et al., Nature 290 (1981)"],
+      "verified": true
+    },
+    {
+      "id": "f_endosymbiosis_age",
+      "beats": ["B4", "B7"],
+      "claim": "Mitochondria descend from a bacterium engulfed roughly 1.5 billion years ago (endosymbiosis)",
+      "definition": "The endosymbiotic theory holds that mitochondria derive from an alpha-proteobacterium taken up by an ancestral eukaryotic/archaeal host cell, with an established-or-derived age on the order of 1.4-2 billion years; 'about 1.5 billion years' is the commonly cited order of magnitude.",
+      "measured_value": "~1.4-2.0 billion years ago (commonly cited ~1.5 By)",
+      "date_verified": "2026-09",
+      "authoritative_source": "Lane & Martin, Nature 2010 (origin of mitochondria); Gray, Cold Spring Harbor Perspectives in Biology 2012",
+      "source_url": "https://www.nature.com/articles/nature08792",
+      "historically_changed": false,
+      "sources": ["Lane & Martin, Nature 467 (2010)", "Gray, CSH Perspectives in Biology 4 (2012)"],
+      "verified": true,
+      "notes": "Age has uncertainty of a few hundred million years; narration uses the common order-of-magnitude figure."
+    },
+    {
+      "id": "f_double_membrane",
+      "beats": ["B5"],
+      "claim": "Mitochondria keep a double membrane, their own ribosomes and their own DNA — bacterial heritage",
+      "definition": "Ultrastructure: an outer membrane plus an inner membrane folded into cristae; mitochondria contain 70S-type ribosomes and their own circular genome, all traits consistent with their bacterial ancestry.",
+      "measured_value": "2 membranes; 70S ribosomes; circular genome",
+      "date_verified": "2026-09",
+      "authoritative_source": "Alberts et al., 'Molecular Biology of the Cell' (mitochondria chapter)",
+      "source_url": "https://www.ncbi.nlm.nih.gov/books/NBK26894/",
+      "historically_changed": false,
+      "sources": ["Alberts et al., Molecular Biology of the Cell"],
+      "verified": true
+    },
+    {
+      "id": "f_maternal_inheritance",
+      "beats": ["B6"],
+      "claim": "Mitochondrial DNA is inherited almost exclusively through the mother",
+      "definition": "The egg contributes the vast majority of the zygote's mitochondria; paternal mtDNA is typically eliminated after fertilization, so mtDNA traces the maternal line. Rare paternal leakage exists but is exceptional.",
+      "measured_value": "maternal inheritance; paternal leakage exceptional",
+      "date_verified": "2026-09",
+      "authoritative_source": "NCBI Books, 'Mitochondrial DNA' (maternal inheritance); Luo et al., PNAS 2018 (paternal leakage rarity)",
+      "source_url": "https://www.ncbi.nlm.nih.gov/books/NBK1229/",
+      "historically_changed": false,
+      "sources": ["NCBI Genes and Disease: Mitochondrial DNA", "Luo et al., PNAS 115 (2018)"],
+      "verified": true
+    }
+  ]
+}

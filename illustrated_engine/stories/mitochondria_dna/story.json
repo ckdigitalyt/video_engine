@@ -1,0 +1,96 @@
+{
+  "story_id": "mitochondria_dna",
+  "brand": "ABOVE THE CLOUDS",
+  "title": "Why Mitochondria Have Their Own DNA",
+  "subject": "biology",
+  "pad_s": 0.7,
+  "beats": [
+    {
+      "beat_id": "B1",
+      "function": "HOOK",
+      "narration": "Inside every cell in your body sits a tiny power plant with its own DNA. Why?",
+      "claim": "cells contain an organelle that keeps its own DNA",
+      "visual_question": "why would a power plant need its own genetic code?",
+      "visual_answer": "the cell interior with the mitochondrion singled out as the stranger inside",
+      "fact_ids": [],
+      "start": 0.0,
+      "end": 7.0
+    },
+    {
+      "beat_id": "B2",
+      "function": "CURIOSITY",
+      "narration": "Mitochondria burn sugar to make ATP, the energy coin of life. But they hold a strange secret.",
+      "claim": "mitochondria produce ATP and carry a hidden anomaly",
+      "visual_question": "what is strange about this organelle?",
+      "visual_answer": "macro mitochondrion with folded cristae, drawn closer than comfortable",
+      "fact_ids": [],
+      "start": 7.0,
+      "end": 14.62
+    },
+    {
+      "beat_id": "B3",
+      "function": "REVEAL",
+      "narration": "Every mitochondrion keeps a ring of DNA, separate from the nucleus. Human mitochondrial DNA carries just 37 genes.",
+      "claim": "mitochondria hold their own circular DNA with 37 genes in humans",
+      "visual_question": "what is inside the mitochondrion?",
+      "visual_answer": "a cutaway showing cristae, matrix, and a small circular DNA ring apart from the nucleus",
+      "fact_ids": [
+        "f_mtdna_37genes"
+      ],
+      "start": 14.62,
+      "end": 24.49
+    },
+    {
+      "beat_id": "B4",
+      "function": "EXPLANATION",
+      "narration": "About 1.5 billion years ago a large cell swallowed a bacterium, and kept it, instead of digesting it.",
+      "claim": "mitochondria began as a swallowed bacterium about 1.5 billion years ago",
+      "visual_question": "where did the separate DNA come from?",
+      "visual_answer": "endosymbiosis sequence: host cell engulfs a bacterium, and the pair becomes one",
+      "fact_ids": [
+        "f_endosymbiosis_age"
+      ],
+      "start": 24.49,
+      "end": 32.55
+    },
+    {
+      "beat_id": "B5",
+      "function": "ESCALATION",
+      "narration": "The guest stayed, copying itself, keeping its own membrane, its own ribosomes, and its own DNA.",
+      "claim": "mitochondria kept bacterial traits: double membrane, own ribosomes, own DNA",
+      "visual_question": "what bacterial traits did the tenant keep?",
+      "visual_answer": "diagram of the double membrane with its own ribosomes and DNA ring annotated",
+      "fact_ids": [
+        "f_double_membrane"
+      ],
+      "start": 32.55,
+      "end": 40.36
+    },
+    {
+      "beat_id": "B6",
+      "function": "TWIST",
+      "narration": "Mitochondrial DNA passes almost entirely through the mother. Your mitochondrial genome is your mother's line, unchanged by fathers.",
+      "claim": "mitochondrial DNA is inherited through the maternal line",
+      "visual_question": "whose mitochondria did you inherit?",
+      "visual_answer": "egg carrying mitochondria forward while the sperm contributes none",
+      "fact_ids": [
+        "f_maternal_inheritance"
+      ],
+      "start": 40.36,
+      "end": 49.68
+    },
+    {
+      "beat_id": "B7",
+      "function": "PAYOFF",
+      "narration": "So the power plant in your cells was never really yours. It is a 1.5-billion-year-old tenant, still dividing.",
+      "claim": "the mitochondrion is a 1.5-billion-year-old tenant still dividing in your cells",
+      "visual_question": "what should you see when you think of your own cells now?",
+      "visual_answer": "the cell at rest with mitochondria quietly dividing inside it",
+      "fact_ids": [
+        "f_endosymbiosis_age"
+      ],
+      "start": 49.68,
+      "end": 57.93
+    }
+  ]
+}

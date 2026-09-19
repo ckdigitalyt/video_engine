@@ -1,0 +1,132 @@
+{
+ "v2": true,
+ "story_id": "atacama_fog_oases",
+ "built_utc": "2026-09-18T19:57:28Z",
+ "n_shots": 7,
+ "avg_shot_dur": 11.95,
+ "role_sequence": [
+  "HERO",
+  "CURIOSITY",
+  "REVEAL",
+  "EXPLANATION",
+  "ESCALATION",
+  "ESCALATION",
+  "PAYOFF"
+ ],
+ "grammar_sequence": [
+  "map_first",
+  "map_first",
+  "map_first",
+  "map_first",
+  "map_first",
+  "map_first",
+  "map_first"
+ ],
+ "composition_sequence": [
+  "place_full_bleed",
+  "region_zoom",
+  "overlay_reveal",
+  "comparison_overlay",
+  "propagation_spread",
+  "propagation_spread",
+  "map_resolved"
+ ],
+ "panel_usage_sequence": [
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "none"
+ ],
+ "background_sequence": [
+  "terrain_field",
+  "terrain_field",
+  "terrain_field",
+  "terrain_field",
+  "terrain_field",
+  "terrain_field",
+  "terrain_field"
+ ],
+ "caption_architecture": [
+  "top_band",
+  "top_band",
+  "top_band",
+  "top_band",
+  "top_band",
+  "top_band",
+  "top_band"
+ ],
+ "transition_types": [
+  "CUT",
+  "CUT",
+  "CUT",
+  "CUT",
+  "CUT",
+  "CUT",
+  "CUT"
+ ],
+ "state_sequence": [
+  "ESTABLISH",
+  "FOCUS",
+  "TRANSFORM",
+  "CONSEQUENCE",
+  "ESTABLISH",
+  "FOCUS",
+  "TRANSFORM",
+  "CONSEQUENCE",
+  "ESTABLISH",
+  "FOCUS",
+  "TRANSFORM",
+  "CONSEQUENCE",
+  "ESTABLISH",
+  "FOCUS",
+  "TRANSFORM",
+  "CONSEQUENCE",
+  "ESTABLISH",
+  "FOCUS",
+  "TRANSFORM",
+  "CONSEQUENCE",
+  "ESTABLISH",
+  "FOCUS",
+  "TRANSFORM",
+  "CONSEQUENCE",
+  "ESTABLISH",
+  "FOCUS",
+  "TRANSFORM",
+  "CONSEQUENCE",
+  "PAYOFF"
+ ],
+ "camera_behavior": [
+  "push",
+  "push",
+  "push",
+  "push",
+  "push",
+  "push",
+  "pull"
+ ],
+ "title_behavior": "none",
+ "chrome_usage": "minimal",
+ "accent_usage": "",
+ "duration_profile": "n7_s0_l7",
+ "diagram_ratio": 0.0,
+ "cinematic_ratio": 0.0,
+ "motif": {
+  "plate": {
+   "panel_other": 2,
+   "polygon_other": 4,
+   "strip_other": 3,
+   "circle_other": 6
+  },
+  "plan": {
+   "strip_plan": 3,
+   "circle_plan": 16,
+   "panel_plan": 2
+  },
+  "subject": "geography",
+  "story_type": "geography_process",
+  "justification": ""
+ }
+}

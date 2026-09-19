@@ -1,0 +1,84 @@
+{
+  "story_id": "green_sahara",
+  "brand": "DEEP TIME",
+  "title": "The Sahara Was Green",
+  "beats": [
+    {
+      "beat_id": "B1",
+      "function": "HOOK",
+      "narration": "Six thousand years ago, the Sahara had lakes — hippos in the water, giraffes painted on its rocks.",
+      "claim": "the Sahara hosted lakes and wetland fauna ~6,000 years ago",
+      "visual_question": "how could a desert have hippos?",
+      "visual_answer": "a dawn lakescape — hippos at the waterline under acacias, full-bleed",
+      "fact_ids": ["holocene_sahara_water"],
+      "start": 0.0,
+      "end": 6.7
+    },
+    {
+      "beat_id": "B2",
+      "function": "REVEAL",
+      "narration": "The rock art is still there: swimming figures, cattle herds, giraffes — drawn where nothing survives today.",
+      "claim": "15,000+ rock-art panels across the Sahara record wetland life",
+      "visual_question": "where is the proof?",
+      "visual_answer": "an ochre rock-art panel on desert sandstone — the record itself",
+      "fact_ids": ["tassili_rock_art"],
+      "start": 6.7,
+      "end": 14.6
+    },
+    {
+      "beat_id": "B3",
+      "function": "EXPLANATION",
+      "narration": "Today the desert's heart gets under 25 millimeters of rain a year. Back then, monsoons fed grasslands and vast lakes.",
+      "claim": "African Humid Period: monsoon-fed lakes vs today's hyperarid core",
+      "visual_question": "how different was it?",
+      "visual_answer": "split plate: green lake shore on one side, the same land cracked dry on the other",
+      "fact_ids": ["african_humid_period", "sahara_rain_today"],
+      "start": 14.6,
+      "end": 22.7
+    },
+    {
+      "beat_id": "B4",
+      "function": "EVIDENCE",
+      "narration": "The switch is the Earth itself: its axis wobbles on a 26,000-year cycle, dragging the monsoon north — then letting it go.",
+      "claim": "axial precession (~26,000-year cycle) paces the North African monsoon",
+      "visual_question": "what flips a desert?",
+      "visual_answer": "a parchment diagram: tilted Earth, axis wobble, the monsoon belt moving north",
+      "fact_ids": ["orbital_precession_26000"],
+      "start": 22.7,
+      "end": 31.1
+    },
+    {
+      "beat_id": "B5",
+      "function": "DETAIL",
+      "narration": "The green age ended fast: around 5,500 years ago the rains withdrew within centuries, and people drifted toward the Nile.",
+      "claim": "the humid period ended ~5,500 BP within centuries, driving migration to the Nile",
+      "visual_question": "how did it end?",
+      "visual_answer": "a cracked dry lakebed where the lake was — the end of the green age",
+      "fact_ids": ["ahp_end_5500_fast"],
+      "start": 31.1,
+      "end": 39.4
+    },
+    {
+      "beat_id": "B6",
+      "function": "TYPOGRAPHY",
+      "narration": "Six thousand years of rain, paused — not erased.",
+      "claim": "green Sahara episodes recur, paced by orbital cycles",
+      "visual_question": "so what is the desert?",
+      "visual_answer": "the type card states it: IT WAS GREEN",
+      "fact_ids": ["green_sahara_cyclic"],
+      "start": 39.4,
+      "end": 42.3
+    },
+    {
+      "beat_id": "B7",
+      "function": "PAYOFF",
+      "narration": "The link still lives: each year the desert lifts about 180 million tons of dust — 27 million tons lands on the Amazon, fertilizer from a green world.",
+      "claim": "Saharan dust fertilizes the Amazon (~27 Mt/yr)",
+      "visual_question": "where did the green go?",
+      "visual_answer": "satellite view: an orange dust plume crossing the Atlantic from Africa",
+      "fact_ids": ["dust_amazon_fertilizer"],
+      "start": 42.3,
+      "end": 52.8
+    }
+  ]
+}

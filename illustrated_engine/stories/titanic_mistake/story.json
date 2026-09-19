@@ -1,0 +1,148 @@
+{
+ "story_id": "titanic_mistake",
+ "brand": "DEEP WATER",
+ "title": "HOW ONE TINY MISTAKE SANK THE TITANIC",
+ "subject": "history",
+ "story_type": "history",
+ "pad_s": 0.4,
+ "v7": {
+  "title_overlay": true
+ },
+ "concepts": [
+  {
+   "id": "ship",
+   "beats": [
+    "B1",
+    "B2",
+    "B6",
+    "B7"
+   ],
+   "verb": "state_change"
+  },
+  {
+   "id": "iceberg",
+   "beats": [
+    "B1",
+    "B2",
+    "B3"
+   ],
+   "verb": "present"
+  },
+  {
+   "id": "compartments",
+   "beats": [
+    "B3",
+    "B4",
+    "B7"
+   ],
+   "verb": "fill"
+  },
+  {
+   "id": "bulkheads",
+   "beats": [
+    "B4",
+    "B5",
+    "B7"
+   ],
+   "verb": "compare"
+  }
+ ],
+ "beats": [
+  {
+   "beat_id": "B1",
+   "function": "HOOK",
+   "narration": "The press called her practically unsinkable. She went down in under three hours. The iceberg? Half the story.",
+   "claim": "the Titanic sank in under three hours despite contemporary claims she was practically unsinkable",
+   "visual_question": "why did one iceberg doom a ship this size?",
+   "visual_answer": "the ship's own compartments, failing one by one",
+   "fact_ids": [
+    "f_sinking_time"
+   ],
+   "start": 0.0,
+   "end": 7.5,
+   "key_number": "UNDER 3 HRS",
+   "key_number_rect": [
+    0.6,
+    0.2,
+    0.33,
+    0.1
+   ]
+  },
+  {
+   "beat_id": "B2",
+   "function": "REVEAL",
+   "narration": "11:40 PM, April 14. Lookouts spot the iceberg. Thirty-seven seconds later, she grazes the hull.",
+   "claim": "the lookouts reported the iceberg at 11:40 PM on April 14, 1912, about thirty-seven seconds before impact",
+   "visual_question": "how fast did the disaster unfold once spotted?",
+   "visual_answer": "a timeline: sighting, thirty-seven seconds, impact",
+   "fact_ids": [
+    "f_lookout"
+   ],
+   "start": 7.5,
+   "end": 14.5
+  },
+  {
+   "beat_id": "B3",
+   "function": "EXPLANATION",
+   "narration": "The impact buckled hull plates across six forward compartments \u2014 not a gash, a wound the pumps could never fight.",
+   "claim": "the collision breached the first six forward compartments along about three hundred feet of hull",
+   "visual_question": "what did the iceberg actually do to the hull?",
+   "visual_answer": "a reconstruction of the hull with six compartments opened",
+   "fact_ids": [
+    "f_six_compartments"
+   ],
+   "start": 14.5,
+   "end": 22.0
+  },
+  {
+   "beat_id": "B4",
+   "function": "ESCALATION",
+   "narration": "The watertight doors slammed. But the bulkheads only rose to D deck \u2014 each compartment filled like an ice-cube tray, spilling over.",
+   "claim": "the watertight bulkheads rose only to D deck, so water spilled from full compartments into the next",
+   "visual_question": "why could the ship not simply float on the flooded compartments?",
+   "visual_answer": "an overflow chain: each full compartment spills into the next",
+   "fact_ids": [
+    "f_bulkhead_height"
+   ],
+   "start": 22.0,
+   "end": 30.0
+  },
+  {
+   "beat_id": "B5",
+   "function": "TWIST",
+   "narration": "The first drawings showed taller bulkheads. Revisions cut them by about ten feet \u2014 margin traded for roomier decks.",
+   "claim": "design revisions before approval lowered the watertight bulkhead height by roughly ten feet from the earlier drawings",
+   "visual_question": "where was the mistake made?",
+   "visual_answer": "two designs side by side, the approved one with less margin",
+   "fact_ids": [
+    "f_bulkhead_cut"
+   ],
+   "start": 30.0,
+   "end": 37.5
+  },
+  {
+   "beat_id": "B6",
+   "function": "ESCALATION",
+   "narration": "Two hours forty minutes after the collision, she was gone. About twenty-two hundred aboard \u2014 seven hundred five survived.",
+   "claim": "the Titanic foundered two hours and forty minutes after the collision; of roughly two thousand two hundred aboard, seven hundred and five survived",
+   "visual_question": "what did that margin cost?",
+   "visual_answer": "the count: two thousand two hundred aboard, seven hundred and five saved",
+   "fact_ids": [
+    "f_casualties"
+   ],
+   "start": 37.5,
+   "end": 45.0
+  },
+  {
+   "beat_id": "B7",
+   "function": "PAYOFF",
+   "narration": "Titanic did not sink because she hit an iceberg, but because the margin that should have contained one was traded away. Her flaw, all along.",
+   "claim": "the loss of designed safety margin, not the iceberg alone, is what sank the Titanic",
+   "visual_question": "so what actually sank the Titanic?",
+   "visual_answer": "the ship reprised, her hull margin line lit: the flaw was built in",
+   "fact_ids": [],
+   "start": 45.0,
+   "end": 52.5
+  }
+ ]
+}

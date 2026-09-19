@@ -1,0 +1,39 @@
+{
+ "version": "4.0",
+ "topic_grammar": [
+  "MOLECULAR_PROCESS",
+  "MACRO_DETAIL",
+  "CUTAWAY",
+  "COMPARISON"
+ ],
+ "brand": "RED HEAT",
+ "palette": {
+  "primary": "#3E2A2E",
+  "secondary": "#5E6B43",
+  "accent": "#C23B22",
+  "background": "#181310",
+  "text": "#F0E6D2",
+  "muted": "#8A7B63",
+  "highlight": "#E9DFC8"
+ },
+ "illustration_style": "vintage botanical-physics illustration, ink and warm sepia wash on aged parchment, engraving linework, cutaway and molecular grammar, matte finish",
+ "illustration_medium": "vintage ink-and-wash botanical illustration with cutaway chili cross-sections and channel diagrams (not photoreal, not flat vector)",
+ "lighting": "soft directional low-key with a warm glow behind the chili subject",
+ "contrast": "medium-high, rich shadows",
+ "saturation": 0.7,
+ "texture": {
+  "grain": 0.012,
+  "vignette": 0.24
+ },
+ "typography": {
+  "display": "BebasNeue-Regular.ttf",
+  "body": "Inter-Variable.ttf"
+ },
+ "framing": "vertical 9:16, tight wides of chili cross-sections and molecular channel diagrams with breathing room",
+ "graphic_language": "thin dark-plum linework on parchment blueprint grids, restrained chili-red annotation arrows, measured typography, membranes drawn as confident double bands with channel gates, no heavy drop shadows on graphic elements",
+ "transition_style": "hard cut; per-shot fade-in from background colour",
+ "prompt_fragments": {
+  "prefix": "Vintage botanical science illustration, ink and warm sepia watercolor wash on aged parchment, engraving linework, cutaway and molecular grammar, muted dark-plum, leaf-green and chili-red palette, soft directional light, soft vignette, matte finish",
+  "suffix": "No readable text, no watermarks, no modern objects, no logos"
+ }
+}

@@ -1,0 +1,108 @@
+{
+  "claims": [
+    {
+      "id": "holocene_sahara_water",
+      "beats": ["B1"],
+      "claim": "During the Holocene humid phase, the Sahara supported permanent lakes and wetland fauna — hippopotamus and crocodile remains and depictions are documented across the region.",
+      "definition": "permanent water bodies and wetland fauna in the mid-Holocene Sahara",
+      "current_record_holder": "n/a",
+      "measured_value": "Holocene lake and fauna records, North Africa",
+      "date_verified": "2026-09",
+      "authoritative_source": "Kuper & Kröpelin, 'Climate-Controlled Holocene Occupation in the Sahara', Science 313 (2006)",
+      "source_url": "https://www.science.org/",
+      "historically_changed": false,
+      "notes": "established paleoclimate synthesis; not a living record"
+    },
+    {
+      "id": "tassili_rock_art",
+      "beats": ["B2"],
+      "claim": "Tassili n'Ajjer (Algeria) preserves one of the world's largest collections of prehistoric rock art — 15,000+ engravings and paintings, including giraffes, hippos, cattle herds and swimming figures.",
+      "definition": "rock-art corpus of the Tassili n'Ajjer plateau",
+      "current_record_holder": "n/a",
+      "measured_value": "15,000+ engravings and paintings",
+      "date_verified": "2026-09",
+      "authoritative_source": "UNESCO World Heritage Centre — Tassili n'Ajjer (List #179)",
+      "source_url": "https://whc.unesco.org/en/list/179/",
+      "historically_changed": false,
+      "notes": "UNESCO listing; stable"
+    },
+    {
+      "id": "sahara_rain_today",
+      "beats": ["B3"],
+      "claim": "The hyperarid core of the Sahara receives under about 25 millimeters of rain per year on average.",
+      "definition": "mean annual rainfall of the Saharan hyperarid core",
+      "current_record_holder": "n/a",
+      "measured_value": "<25 mm/yr core",
+      "date_verified": "2026-09",
+      "authoritative_source": "NASA Earth Observatory — Sahara climate",
+      "source_url": "https://earthobservatory.nasa.gov/",
+      "historically_changed": false,
+      "notes": "climate normal; some core areas receive <10 mm/yr"
+    },
+    {
+      "id": "african_humid_period",
+      "beats": ["B3"],
+      "claim": "The African Humid Period (roughly 11,000-5,500 years ago) brought strengthened monsoon rains, grasslands and lakes across the present-day Sahara.",
+      "definition": "Holocene wet phase of North Africa",
+      "current_record_holder": "n/a",
+      "measured_value": "≈11,000-5,500 BP",
+      "date_verified": "2026-09",
+      "authoritative_source": "Kuper & Kröpelin, Science 313 (2006); deMenocal, Nature Geoscience reviews",
+      "source_url": "https://www.science.org/",
+      "historically_changed": false,
+      "notes": "canonical dating for the strong monsoon phase"
+    },
+    {
+      "id": "orbital_precession_26000",
+      "beats": ["B4"],
+      "claim": "Earth's axial precession cycles over about 26,000 years and paces the strength of the North African monsoon — the orbital switch behind green Sahara episodes.",
+      "definition": "orbital precession forcing of the monsoon",
+      "current_record_holder": "n/a",
+      "measured_value": "~26,000-year cycle",
+      "date_verified": "2026-09",
+      "authoritative_source": "Tierney, Pausata & deMenocal, 'Rainfall regimes of the Green Sahara', Science Advances 3 (2017)",
+      "source_url": "https://www.science.org/doi/10.1126/sciadv.1601503",
+      "historically_changed": false,
+      "notes": "standard orbital-forcing result"
+    },
+    {
+      "id": "ahp_end_5500_fast",
+      "beats": ["B5"],
+      "claim": "The African Humid Period ended around 5,500 years ago; the return to aridity took centuries, driving population movement toward the Nile valley, the Sahel and the coast.",
+      "definition": "termination of the African Humid Period and human response",
+      "current_record_holder": "n/a",
+      "measured_value": "≈5,500 BP; transition over centuries",
+      "date_verified": "2026-09",
+      "authoritative_source": "Kuper & Kröpelin, Science 313 (2006)",
+      "source_url": "https://www.science.org/",
+      "historically_changed": false,
+      "notes": "termination date and migration interpretation from the same synthesis"
+    },
+    {
+      "id": "green_sahara_cyclic",
+      "beats": ["B6"],
+      "claim": "Green Sahara episodes recurred multiple times across the late Quaternary, paced by orbital cycles — the desert has flipped between green and arid states before.",
+      "definition": "recurrent humid episodes in North African paleorecords",
+      "current_record_holder": "n/a",
+      "measured_value": "multiple episodes, orbital pacing",
+      "date_verified": "2026-09",
+      "authoritative_source": "Tierney, Pausata & deMenocal, Science Advances 3 (2017); proxy syntheses",
+      "source_url": "https://www.science.org/doi/10.1126/sciadv.1601503",
+      "historically_changed": false,
+      "notes": "recurrence established in marine and terrestrial proxy records"
+    },
+    {
+      "id": "dust_amazon_fertilizer",
+      "beats": ["B7"],
+      "claim": "About 182 million tons of dust leave North Africa each year; roughly 27-29 million tons cross the Atlantic and settle over the Amazon basin, delivering phosphorus fertilizer.",
+      "definition": "transatlantic Saharan dust transport and Amazon fertilization",
+      "current_record_holder": "n/a",
+      "measured_value": "≈182 Mt/yr leaves Africa; ≈27 Mt/yr reaches the Amazon",
+      "date_verified": "2026-09",
+      "authoritative_source": "Yu et al., Geophysical Research Letters 42 (2015), NASA CALIPSO",
+      "source_url": "https://agupubs.onlinelibrary.wiley.com/doi/10.1002/2015GL063026",
+      "historically_changed": false,
+      "notes": "first multiyear CALIPSO assessment"
+    }
+  ]
+}

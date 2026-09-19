@@ -1,0 +1,57 @@
+{
+  "claims": [
+    {
+      "id": "f_747_weight",
+      "beats": ["B1", "B7"],
+      "claim": "A loaded Boeing 747-400 can weigh up to about 400 tonnes",
+      "definition": "Maximum take-off weight (MTOW) class of the 747-400: approximately 396,890 kg (875,000 lb), i.e. just under 400 t; 'loaded up to 400 tonnes' refers to the MTOW class, not every departure weight.",
+      "measured_value": "MTOW ~396.9 t (747-400)",
+      "date_verified": "2026-09",
+      "authoritative_source": "Boeing 747-400 airplane characteristics; NASA Glenn Research Center educational pages",
+      "source_url": "https://www.boeing.com/commercial/aeromagazine/articles/qtr_2_07/article_02_1.html",
+      "historically_changed": false,
+      "sources": ["Boeing 747-400 airplane characteristics for airport planning", "NASA Glenn educational 'Beginner's Guide to Aeronautics'"],
+      "verified": true,
+      "notes": "Rounded to 400 t for narration; MTOW is a certification figure, stable for the type."
+    },
+    {
+      "id": "f_bernoulli_pressure",
+      "beats": ["B3"],
+      "claim": "Flow that accelerates over a curved surface sits at lower static pressure (Bernoulli principle)",
+      "definition": "Along a streamline of incompressible flow, an increase in speed coincides with a drop in static pressure. Lift is best described as a pressure difference integrated over the airfoil surface; the curvature/turning of the flow is the physical cause.",
+      "measured_value": "qualitative relationship: faster flow -> lower static pressure",
+      "date_verified": "2026-09",
+      "authoritative_source": "NASA Glenn Research Center, 'Bernoulli and Newton' (Beginner's Guide to Aeronautics); Anderson, 'Fundamentals of Aerodynamics'",
+      "source_url": "https://www.grc.nasa.gov/www/k-12/airplane/bern.html",
+      "historically_changed": false,
+      "sources": ["NASA Glenn Beginner's Guide to Aeronautics", "Anderson, Fundamentals of Aerodynamics"],
+      "verified": true
+    },
+    {
+      "id": "f_newton_downwash",
+      "beats": ["B5"],
+      "claim": "A lifting wing deflects air downward (downwash) and the equal-and-opposite reaction acts upward on the wing",
+      "definition": "Newton's third law applied to a lifting surface: the wing turns the airflow downward; the momentum change corresponds to an upward force on the wing. Same physical lift as the pressure-integral description, told from the momentum side.",
+      "measured_value": "qualitative: downwash momentum flux balances lift",
+      "date_verified": "2026-09",
+      "authoritative_source": "NASA Glenn Research Center, 'Newton's Third Law of Motion' (Beginner's Guide to Aeronautics)",
+      "source_url": "https://www.grc.nasa.gov/www/k-12/airplane/newton3.html",
+      "historically_changed": false,
+      "sources": ["NASA Glenn Beginner's Guide to Aeronautics"],
+      "verified": true
+    },
+    {
+      "id": "f_stall_angle",
+      "beats": ["B6"],
+      "claim": "Beyond a critical angle of attack the flow separates and lift collapses (stall)",
+      "definition": "As nose-up angle grows, lift rises roughly linearly until a critical angle of attack (of order 15 degrees for a clean transport wing); beyond it the boundary layer separates, the attached-flow pattern breaks down and lift drops sharply.",
+      "measured_value": "critical angle of attack of order 15 degrees (clean wing)",
+      "date_verified": "2026-09",
+      "authoritative_source": "FAA Pilot's Handbook of Aeronautical Knowledge (stall chapter); Anderson, 'Fundamentals of Aerodynamics'",
+      "source_url": "https://www.faa.gov/regulations_policies/handbooks_manuals/aviation/phak",
+      "historically_changed": false,
+      "sources": ["FAA Pilot's Handbook of Aeronautical Knowledge"],
+      "verified": true
+    }
+  ]
+}

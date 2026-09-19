@@ -1,0 +1,42 @@
+{
+  "story": "sahara_greening",
+  "generated": "20260908_162603",
+  "voices": {
+    "fish": "FishAudioProvider",
+    "chatterbox": "ChatterboxProvider"
+  },
+  "lines": [
+    {
+      "beat": "B1",
+      "text": "The world's largest hot desert is quietly turning greener, from its edges inward. Most of the year, you would never notice.",
+      "fish": {
+        "provider": "fish",
+        "file": "bench/tts_ab/sahara_greening_20260908_162603/fish/line1_B1.wav",
+        "duration": 7.941,
+        "synth_s": 3.9
+      },
+      "chatterbox": {
+        "provider": "chatterbox",
+        "file": "bench/tts_ab/sahara_greening_20260908_162603/chatterbox/line1_B1.wav",
+        "duration": 6.28,
+        "synth_s": 121.1
+      }
+    },
+    {
+      "beat": "B4",
+      "text": "Two drivers push it. Rains have come back to the Sahel after the long droughts of the nineteen seventies and eighties. And rising carbon dioxide feeds photosynthesis, so plants grow more with the same water. But every gain stops where the rain stops.",
+      "fish": {
+        "provider": "fish",
+        "file": "bench/tts_ab/sahara_greening_20260908_162603/fish/line2_B4.wav",
+        "duration": 16.118,
+        "synth_s": 6.6
+      },
+      "chatterbox": {
+        "provider": "chatterbox",
+        "file": "bench/tts_ab/sahara_greening_20260908_162603/chatterbox/line2_B4.wav",
+        "duration": 13.04,
+        "synth_s": 172.0
+      }
+    }
+  ]
+}

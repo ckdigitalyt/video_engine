@@ -1,0 +1,47 @@
+{
+ "story_id": "phone_heating",
+ "built_utc": "2026-09-06T02:59:02Z",
+ "n_shots": 6,
+ "avg_shot_dur": 8.43,
+ "opening_class": "EVIDENCE",
+ "opening_structure": [
+  "HOOK",
+  "CINEMATIC"
+ ],
+ "role_sequence": [
+  "HERO",
+  "DIAGRAM",
+  "DIAGRAM",
+  "DIAGRAM",
+  "DIAGRAM",
+  "PAYOFF"
+ ],
+ "class_sequence": [
+  "EVIDENCE",
+  "EVIDENCE",
+  "EVIDENCE",
+  "EVIDENCE",
+  "EVIDENCE",
+  "EVIDENCE"
+ ],
+ "mode_sequence": [
+  "CINEMATIC",
+  "DIAGRAM",
+  "DIAGRAM",
+  "SPLIT",
+  "TRANSFORMATION",
+  "PAYOFF"
+ ],
+ "transition_pattern": [
+  "CUT",
+  "CUT",
+  "CUT",
+  "CUT",
+  "CUT",
+  "CUT"
+ ],
+ "title_behavior": "none",
+ "blur_ratio": 0.0,
+ "diagram_ratio": 1.0,
+ "cinematic_ratio": 0.0
+}

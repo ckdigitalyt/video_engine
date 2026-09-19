@@ -1,0 +1,155 @@
+{
+ "claims": [
+  {
+   "id": "f_illusion",
+   "beats": ["B1", "B2"],
+   "claim": "chili heat is a chemical illusion: capsaicin triggers pain without real heat",
+   "definition": "capsaicin, the pungent molecule in chili peppers, activates the same nociceptive pathway that real heat activates, producing burning pain with no thermal energy involved",
+   "current_record_holder": "n/a",
+   "measured_value": "qualitative: pain without heat; no single-number claim",
+   "date_verified": "2026-09",
+   "authoritative_source": "Caterina et al., 'The capsaicin receptor: a heat-activated ion channel in the pain pathway', Nature 389, 816-824 (1997); Julius, 'TRP channels and pain', Annual Review of Cell and Developmental Biology (2013)",
+   "source_url": "https://doi.org/10.1038/39807",
+   "historically_changed": true,
+   "sources": [
+    "Caterina et al., Nature 1997",
+    "Julius, Annu. Rev. Cell Dev. Biol. 2013"
+   ],
+   "verified": true,
+   "notes": "narration stays qualitative; no numeric claims",
+   "nuance": {
+    "classification": "STRONG_CONSENSUS",
+    "note": "capsaicin as a TRPV1 agonist producing heat-like pain is well established; the sensory overlap with real heat is textbook"
+   }
+  },
+  {
+   "id": "f_trpv1",
+   "beats": ["B3"],
+   "claim": "TRPV1 opens above 43 degrees Celsius, and capsaicin opens it without heat",
+   "definition": "TRPV1 is a heat- and ligand-gated ion channel; its thermal activation threshold is about 43 C, and capsaicin gates the same channel open at normal body temperature",
+   "current_record_holder": "n/a",
+   "measured_value": "43 C heat-activation threshold (Caterina et al. 1997)",
+   "date_verified": "2026-09",
+   "authoritative_source": "Caterina et al., Nature 389, 816-824 (1997)",
+   "source_url": "https://doi.org/10.1038/39807",
+   "historically_changed": false,
+   "sources": [
+    "Caterina et al., Nature 1997"
+   ],
+   "verified": true,
+   "notes": "threshold value is the canonical figure from the cloning paper",
+   "nuance": {
+    "classification": "ESTABLISHED",
+    "note": "textbook result; TRPV1 cloning and its 43 C threshold are settled"
+   }
+  },
+  {
+   "id": "f_no_damage",
+   "beats": ["B4"],
+   "claim": "the burn is a false-alarm signal; capsaicin does not burn tissue at food levels",
+   "definition": "at dietary doses capsaicin activates pain neurons without causing thermal injury; the sensation of burning occurs without tissue damage, though very high concentrations can irritate or desensitize",
+   "current_record_holder": "n/a",
+   "measured_value": "qualitative: no thermal injury at food doses",
+   "date_verified": "2026-09",
+   "authoritative_source": "Julius, 'TRP channels and pain', Annu Rev Cell Dev Biol 29, 355-384 (2013); Szallasi & Blumberg, 'vanilloid (capsaicin) receptors and mechanisms', Pharmacological Reviews (1999)",
+   "source_url": "https://doi.org/10.1146/annurev-cellbio-092912-140354",
+   "historically_changed": false,
+   "sources": [
+    "Julius 2013",
+    "Szallasi & Blumberg, Pharmacol. Rev. 1999"
+   ],
+   "verified": true,
+   "notes": "narration hedges with 'at the levels we eat'; concentrated extracts are excluded",
+   "nuance": {
+    "classification": "STRONG_CONSENSUS",
+    "note": "pain-without-damage at dietary levels is standard; scope limited to food doses by narration"
+   }
+  },
+  {
+   "id": "f_fat_soluble",
+   "beats": ["B5"],
+   "claim": "capsaicin is fat-soluble, so water spreads it rather than washing it away",
+   "definition": "capsaicin is a hydrophobic vanilloid lipid; it partitions into oils and fats and is poorly soluble in water, so water rinsing redistributes it on mucosal surfaces",
+   "current_record_holder": "n/a",
+   "measured_value": "qualitative molecular property: hydrophobic, water-insoluble",
+   "date_verified": "2026-09",
+   "authoritative_source": "Szallasi & Blumberg, Pharmacological Reviews 51(2), 159-212 (1999); material safety and solubility data for capsaicin (practically insoluble in water, freely soluble in ethanol/fat)",
+   "source_url": "https://doi.org/10.1124/pr.51.2.03",
+   "historically_changed": false,
+   "sources": [
+    "Szallasi & Blumberg 1999",
+    "capsaicin solubility data"
+   ],
+   "verified": true,
+   "notes": "hydrophobicity of the molecule is a settled chemical property",
+   "nuance": {
+    "classification": "ESTABLISHED",
+    "note": "chemical property, uncontested"
+   }
+  },
+  {
+   "id": "f_milk",
+   "beats": ["B6"],
+   "claim": "milk casein binds capsaicin and tends to wash it away better than water",
+   "definition": "casein micelles in milk can bind lipophilic capsaicin; sensory studies found milk reduces oral burn more effectively than water, though effect sizes are modest and partly studied in small panels",
+   "current_record_holder": "n/a",
+   "measured_value": "qualitative: milk outperforms water in rinse trials",
+   "date_verified": "2026-09",
+   "authoritative_source": "Nasrawi & Pangborn, 'Temporal effectiveness of mouth-rinsing on capsaicin mouth-burn', Physiology & Behavior 47(3), 617-621 (1990); later sensory-comparison work (e.g., Beer vs dairy trials)",
+   "source_url": "https://doi.org/10.1016/0031-9384(90)90359-4",
+   "historically_changed": false,
+   "sources": [
+    "Nasrawi & Pangborn, Physiol. Behav. 1990"
+   ],
+   "verified": true,
+   "notes": "narration hedges with 'tends to work better'",
+   "nuance": {
+    "classification": "STRONG_CONSENSUS",
+    "note": "direction of effect is consistent across trials; casein-binding mechanism is broadly accepted but partly inferred from hydrophobicity"
+   }
+  },
+  {
+   "id": "f_birds",
+   "beats": ["B7"],
+   "claim": "bird TRPV1 is insensitive to capsaicin",
+   "definition": "avian TRPV1 differs from mammalian TRPV1 at a few key residues; the avian receptor responds to heat but is not gated by capsaicin, so birds do not perceive chili burn",
+   "current_record_holder": "n/a",
+   "measured_value": "qualitative: capsaicin insensitivity of avian TRPV1",
+   "date_verified": "2026-09",
+   "authoritative_source": "Jordt & Julius, 'Molecular basis for species-specific sensitivity to hot chili peppers', Cell 108, 421-430 (2002)",
+   "source_url": "https://doi.org/10.1016/S0092-8674(02)00631-2",
+   "historically_changed": false,
+   "sources": [
+    "Jordt & Julius, Cell 2002"
+   ],
+   "verified": true,
+   "notes": "molecular basis identified in Cell 2002",
+   "nuance": {
+    "classification": "STRONG_CONSENSUS",
+    "note": "species-specific capsaicin resistance of bird TRPV1 is well established"
+   }
+  },
+  {
+   "id": "f_evolution",
+   "beats": ["B7"],
+   "claim": "the burn is thought to filter seed dispersers: deter mammals, keep birds",
+   "definition": "capsaicin is proposed to be an anti-mammalian defense: mammals crush seeds with molars while birds swallow them intact and disperse them; direct field evidence exists for fungal defense and mammal deterrence, with the disperser-filter picture supported but multi-causal",
+   "current_record_holder": "n/a",
+   "measured_value": "qualitative evolutionary explanation; no single-number claim",
+   "date_verified": "2026-09",
+   "authoritative_source": "Jordt & Julius, Cell (2002) (species-specific sensitivity); Tewksbury & Nabhan, 'Seed dispersal: directed deterrence by capsaicin in chillies', Nature 412, 403-404 (2001); Levey et al., 'A field test of the directed deterrence hypothesis in a wild pepper', PNAS (2006)",
+   "source_url": "https://doi.org/10.1038/35086553",
+   "historically_changed": true,
+   "sources": [
+    "Tewksbury & Nabhan, Nature 2001",
+    "Levey et al., PNAS 2006"
+   ],
+   "verified": true,
+   "notes": "narration hedges with 'one leading explanation says'; directed deterrence has field support but is not the only proposed driver (fungi, pathogens)",
+   "nuance": {
+    "classification": "SUPPORTED_BUT_COMPLEX",
+    "note": "directed deterrence is evidence-backed (Nature 2001, PNAS 2006) but multi-causal: fungal defense also implicated; narration keeps 'one leading explanation'"
+   }
+  }
+ ]
+}

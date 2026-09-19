@@ -1,0 +1,522 @@
+{
+  "story_id": "aircraft_wing_lift",
+  "engine": "v6",
+  "fps": 30,
+  "size": [
+    1080,
+    1920
+  ],
+  "regions": {
+    "visual_rect": [
+      0,
+      176,
+      1080,
+      1744
+    ],
+    "center": [
+      0.3,
+      0.38,
+      0.4,
+      0.24
+    ],
+    "upper": [
+      0.22,
+      0.06,
+      0.56,
+      0.2
+    ],
+    "lower": [
+      0.22,
+      0.7,
+      0.56,
+      0.2
+    ]
+  },
+  "beats": [
+    {
+      "beat_id": "B1",
+      "shots": [
+        {
+          "shot_id": "S01",
+          "shot_type": "HOOK",
+          "asset": "B1_wing_hero",
+          "duration_est": 6.5,
+          "crop_bias_y": 0.45,
+          "opening": true,
+          "title": "HOW A 747 WING ACTUALLY LIFTS",
+          "tag": "",
+          "captions": "phrase",
+          "role": "HERO",
+          "chrome": "none",
+          "visual_mode": "CINEMATIC",
+          "evidence_type": "DIRECT_EVIDENCE",
+          "motion_type": "CAMERA_MOTION",
+          "purpose": "Put the carrying problem on screen first: the wing holding 400 tonnes",
+          "claim": "a loaded 747 can weigh up to 400 tonnes",
+          "evidence": "full-bleed underside plate of a 747 wing with engines, weight figure popped as annotation",
+          "motion_reason": "slow push-in: stillness first so the question lands clean",
+          "transition_reason": "hard cut to the blueprint slice when the engineering starts",
+          "cam_from_scale": 1.0,
+          "cam_to_scale": 1.1,
+          "cam_cx": 0.5,
+          "cam_cy": 0.5,
+          "subject_contract": {
+            "expected_subject": "underside view of a large four-engine airliner wing drawn in vintage ink-wash style",
+            "required": [
+              "swept aircraft wing seen from below",
+              "engine nacelles under the wing",
+              "sky background"
+            ],
+            "forbidden": [
+              "text labels on the artwork",
+              "cars or buildings",
+              "fighters or propellers"
+            ],
+            "role": "HERO"
+          },
+          "one_second": {
+            "relationship": "the wing itself is the subject carrying the weight",
+            "big_number": "400 T",
+            "number_claim": true
+          },
+          "overlays": [
+            {
+              "kind": "NUMBER_POP",
+              "text": "400 T",
+              "target": "center",
+              "at": 0.5
+            }
+          ],
+          "typography": [
+            {
+              "kind": "NUMBER_POP",
+              "text": "400 T",
+              "at": 0.5,
+              "region": [
+                0.08,
+                0.06,
+                0.4,
+                0.12
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "beat_id": "B2",
+      "shots": [
+        {
+          "shot_id": "S02",
+          "shot_type": "DIAGRAM",
+          "asset": "B2_wing_blueprint",
+          "duration_est": 7.5,
+          "crop_bias_y": 0.45,
+          "captions": "phrase",
+          "role": "DIAGRAM",
+          "chrome": "section",
+          "tag": "THE SLICE",
+          "visual_mode": "DIAGRAM",
+          "evidence_type": "EXPLANATORY_DIAGRAM",
+          "motion_type": "INFORMATION_MOTION",
+          "purpose": "Introduce the engineer's view: a wing reduced to one cross-section",
+          "claim": "lift comes from the wing's cross-sectional shape",
+          "evidence": "blueprint card: edge-on airfoil slice on a grid with chord line and camber curve labelled",
+          "motion_reason": "near-static drift so the annotation is the motion, not the camera",
+          "transition_reason": "hard cut into the reveal card of the same airfoil",
+          "cam_from_scale": 1.05,
+          "cam_to_scale": 1.12,
+          "cam_cx": 0.5,
+          "cam_cy": 0.5,
+          "subject_contract": {
+            "expected_subject": "parchment blueprint card of a single airfoil cross-section with chord line",
+            "required": [
+              "closed airfoil outline",
+              "straight chord line through it",
+              "blueprint grid background"
+            ],
+            "forbidden": [
+              "full aircraft top view",
+              "runway or hangar",
+              "photographic rendering"
+            ],
+            "role": "DIAGRAM"
+          },
+          "one_second": {
+            "relationship": "a wing is one curved slice repeated across the span",
+            "labels": [
+              "CHORD",
+              "CAMBER"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "beat_id": "B3",
+      "shots": [
+        {
+          "shot_id": "S03",
+          "shot_type": "REVEAL",
+          "asset": "B3_airfoil_card",
+          "duration_est": 6.5,
+          "crop_bias_y": 0.45,
+          "captions": "phrase",
+          "role": "DIAGRAM",
+          "chrome": "section",
+          "tag": "AIRFOIL",
+          "visual_mode": "DIAGRAM",
+          "evidence_type": "EXPLANATORY_DIAGRAM",
+          "motion_type": "REVEAL",
+          "purpose": "Reveal the airfoil geometry itself: curved top, flatter bottom",
+          "claim": "the airfoil has a curved upper surface and a flat trailing section",
+          "evidence": "airfoil card with streamlines bending over the camber and a highlight on the curve",
+          "motion_reason": "push toward the upper surface while streamlines carry the story",
+          "transition_reason": "hard cut to the pressure map of the same section",
+          "cam_from_scale": 1.0,
+          "cam_to_scale": 1.08,
+          "cam_cx": 0.5,
+          "cam_cy": 0.48,
+          "subject_contract": {
+            "expected_subject": "parchment diagram of an airfoil cross-section with flowing streamline curves above it",
+            "required": [
+              "airfoil outline with curved top",
+              "streamline lines flowing left to right",
+              "flat lower edge"
+            ],
+            "forbidden": [
+              "aircraft cockpit view",
+              "clouds photograph",
+              "parachutes or balloons"
+            ],
+            "role": "DIAGRAM"
+          },
+          "one_second": {
+            "relationship": "streamlines squeeze over the curved top surface",
+            "labels": [
+              "CURVED TOP",
+              "FLAT BACK"
+            ]
+          },
+          "overlays": [
+            {
+              "kind": "HIGHLIGHT",
+              "target": "upper",
+              "style": "rect",
+              "at": 0.55
+            }
+          ],
+          "typography": []
+        },
+        {
+          "shot_id": "S04",
+          "shot_type": "REVEAL",
+          "asset": "B3_pressure_card",
+          "duration_est": 5.5,
+          "crop_bias_y": 0.45,
+          "captions": "phrase",
+          "role": "DIAGRAM",
+          "chrome": "section",
+          "tag": "PRESSURE",
+          "visual_mode": "SPLIT",
+          "evidence_type": "EXPLANATORY_DIAGRAM",
+          "motion_type": "INFORMATION_MOTION",
+          "purpose": "Show the pressure field: suction above, pressure below",
+          "claim": "pressure above the wing is lower than pressure below it",
+          "evidence": "split pressure card with sparse suction arrows above and dense push arrows below",
+          "motion_reason": "hold the comparison still; the arrow density is the information",
+          "transition_reason": "hard cut to the streamtube explanation",
+          "cam_from_scale": 1.02,
+          "cam_to_scale": 1.02,
+          "cam_cx": 0.5,
+          "cam_cy": 0.5,
+          "subject_contract": {
+            "expected_subject": "parchment diagram comparing sparse long arrows above an airfoil with dense short arrows below",
+            "required": [
+              "airfoil section",
+              "arrow rows above and below",
+              "clear up-down asymmetry"
+            ],
+            "forbidden": [
+              "weather map",
+              "wind turbines",
+              "human figures"
+            ],
+            "role": "DIAGRAM"
+          },
+          "one_second": {
+            "relationship": "low pressure above, high pressure below",
+            "labels": [
+              "LOW",
+              "HIGH"
+            ]
+          },
+          "overlays": [
+            {
+              "kind": "NUMBER_POP",
+              "text": "LOW",
+              "target": "upper",
+              "at": 0.35
+            },
+            {
+              "kind": "NUMBER_POP",
+              "text": "HIGH",
+              "target": "lower",
+              "at": 0.65
+            }
+          ],
+          "typography": []
+        }
+      ]
+    },
+    {
+      "beat_id": "B4",
+      "shots": [
+        {
+          "shot_id": "S05",
+          "shot_type": "EXPLAIN",
+          "asset": "B4_bernoulli_card",
+          "duration_est": 6.5,
+          "crop_bias_y": 0.45,
+          "captions": "phrase",
+          "role": "DIAGRAM",
+          "chrome": "section",
+          "tag": "SPEED VS PRESSURE",
+          "visual_mode": "DIAGRAM",
+          "evidence_type": "EXPLANATORY_DIAGRAM",
+          "motion_type": "INFORMATION_MOTION",
+          "purpose": "Explain the mechanism: a squeezed streamtube speeds up and loses pressure",
+          "claim": "faster flow over the curved top means lower pressure above the wing",
+          "evidence": "streamtube card with narrow fast section over the camber and wide slow section beneath",
+          "motion_reason": "drift along the tube so the narrowing reads as acceleration",
+          "transition_reason": "hard cut to the macro streamline detail",
+          "cam_from_scale": 1.0,
+          "cam_to_scale": 1.07,
+          "cam_cx": 0.48,
+          "cam_cy": 0.48,
+          "subject_contract": {
+            "expected_subject": "parchment diagram of a flow tube narrowing over an airfoil curve with speed arrows",
+            "required": [
+              "narrowing tube section",
+              "two sets of speed arrows",
+              "airfoil curve inside the flow"
+            ],
+            "forbidden": [
+              "pipes or plumbing",
+              "water droplets",
+              "turbine machinery"
+            ],
+            "role": "DIAGRAM"
+          },
+          "one_second": {
+            "relationship": "narrow tube: faster air, lower pressure",
+            "labels": [
+              "FASTER",
+              "LOWER P"
+            ]
+          }
+        },
+        {
+          "shot_id": "S06",
+          "shot_type": "DETAIL",
+          "asset": "B4_streamline_detail",
+          "duration_est": 5.0,
+          "crop_bias_y": 0.5,
+          "captions": "phrase",
+          "role": "DETAIL",
+          "chrome": "none",
+          "visual_mode": "DETAIL",
+          "evidence_type": "ANALOGY",
+          "motion_type": "REVEAL",
+          "purpose": "Rest the eye inside the flow itself: ink-wash streamlines over camber",
+          "claim": "the flow follows the curved surface before recovering behind the wing",
+          "evidence": "tight macro of engraved streamlines hugging the curved surface",
+          "motion_reason": "slow zoom reveals the surface following the curves",
+          "transition_reason": "hard cut to the Newton card",
+          "cam_from_scale": 1.24,
+          "cam_to_scale": 1.4,
+          "cam_cx": 0.52,
+          "cam_cy": 0.52,
+          "subject_contract": {
+            "expected_subject": "engraved close-up of parallel streamline curves bending over a cambered surface",
+            "required": [
+              "parallel curved streamlines",
+              "cambered surface below them",
+              "engraving linework"
+            ],
+            "forbidden": [
+              "ocean waves",
+              "hair or fabric",
+              "text labels"
+            ],
+            "role": "DETAIL"
+          },
+          "one_second": {
+            "relationship": "air hugging the curve of the surface"
+          }
+        }
+      ]
+    },
+    {
+      "beat_id": "B5",
+      "shots": [
+        {
+          "shot_id": "S07",
+          "shot_type": "DIAGRAM",
+          "asset": "B5_newton_card",
+          "duration_est": 6.0,
+          "crop_bias_y": 0.45,
+          "captions": "phrase",
+          "role": "DIAGRAM",
+          "chrome": "section",
+          "tag": "NEWTON",
+          "visual_mode": "TRANSFORMATION",
+          "evidence_type": "EXPLANATORY_DIAGRAM",
+          "motion_type": "TRANSFORMATION",
+          "purpose": "Complete the physics: downwash behind the wing, reaction up",
+          "claim": "the wing deflects air downward and the reaction pushes the wing up",
+          "evidence": "Newton card: airfoil deflecting streamlines downward with a large rust reaction arrow up",
+          "motion_reason": "the arrow pair is the animation: downwash down, reaction up",
+          "transition_reason": "hard cut to the stall card",
+          "cam_from_scale": 1.0,
+          "cam_to_scale": 1.05,
+          "cam_cx": 0.5,
+          "cam_cy": 0.5,
+          "subject_contract": {
+            "expected_subject": "parchment diagram of an airfoil deflecting airflow downward with one large upward arrow",
+            "required": [
+              "airfoil at a small nose-up angle",
+              "downward-deflected streamlines",
+              "large upward reaction arrow"
+            ],
+            "forbidden": [
+              "rocket exhaust",
+              "birds",
+              "rain"
+            ],
+            "role": "DIAGRAM"
+          },
+          "one_second": {
+            "relationship": "air pushed down, wing pushed up",
+            "labels": [
+              "DOWNWASH",
+              "LIFT"
+            ]
+          },
+          "overlays": [
+            {
+              "kind": "NUMBER_POP",
+              "text": "LIFT",
+              "target": "upper",
+              "at": 0.55
+            }
+          ],
+          "typography": []
+        }
+      ]
+    },
+    {
+      "beat_id": "B6",
+      "shots": [
+        {
+          "shot_id": "S08",
+          "shot_type": "COMPARE",
+          "asset": "B6_stall_card",
+          "duration_est": 7.0,
+          "crop_bias_y": 0.45,
+          "captions": "phrase",
+          "role": "COMPARISON",
+          "chrome": "section",
+          "tag": "STALL",
+          "visual_mode": "TRANSFORMATION",
+          "evidence_type": "EXPLANATORY_DIAGRAM",
+          "motion_type": "TRANSFORMATION",
+          "purpose": "Twist: the same curve stops working when pushed too far",
+          "claim": "past a critical nose-up angle the flow separates and lift collapses",
+          "evidence": "before/after card: attached flow at small angle, separated tumble at large angle",
+          "motion_reason": "the transformation from attached to separated flow is the motion",
+          "transition_reason": "hard cut back to the dusk wing for the payoff",
+          "cam_from_scale": 1.0,
+          "cam_to_scale": 1.06,
+          "cam_cx": 0.5,
+          "cam_cy": 0.5,
+          "subject_contract": {
+            "expected_subject": "parchment before-and-after card of attached airflow versus separated swirling airflow on an airfoil",
+            "required": [
+              "two airfoil panels",
+              "attached streamlines on one",
+              "separating swirl on the other"
+            ],
+            "forbidden": [
+              "crashed aircraft",
+              "smoke stacks",
+              "storm clouds"
+            ],
+            "role": "COMPARISON"
+          },
+          "one_second": {
+            "relationship": "attached flow lifts; separated flow does not",
+            "labels": [
+              "LIFTING",
+              "STALLED"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "beat_id": "B7",
+      "shots": [
+        {
+          "shot_id": "S09",
+          "shot_type": "PAYOFF",
+          "asset": "B7_wing_dusk",
+          "duration_est": 7.0,
+          "crop_bias_y": 0.4,
+          "captions": "phrase",
+          "role": "PAYOFF",
+          "chrome": "none",
+          "end_card": "LIFTED BY AIR",
+          "visual_mode": "PAYOFF",
+          "evidence_type": "DIRECT_EVIDENCE",
+          "motion_type": "CAMERA_MOTION",
+          "purpose": "Land the argument on the same wing, now carrying its explanation",
+          "claim": "in cruise, lift balances the aircraft's 400-tonne weight",
+          "evidence": "dusk underside wing plate reprising the opening composition",
+          "motion_reason": "slow pull to rest; the strongest composition holds still",
+          "transition_reason": "end",
+          "cam_from_scale": 1.16,
+          "cam_to_scale": 1.0,
+          "cam_cx": 0.5,
+          "cam_cy": 0.5,
+          "subject_contract": {
+            "expected_subject": "underside view of an airliner wing at dusk drawn in vintage ink-wash style",
+            "required": [
+              "swept wing from below",
+              "dusk sky gradient",
+              "engine nacelle silhouette"
+            ],
+            "forbidden": [
+              "text on artwork",
+              "airport buildings",
+              "other aircraft"
+            ],
+            "role": "PAYOFF"
+          },
+          "one_second": {
+            "relationship": "the wing at dusk, still holding the weight"
+          },
+          "overlays": [
+            {
+              "kind": "HIGHLIGHT",
+              "target": "center",
+              "style": "circle",
+              "at": 0.4
+            }
+          ],
+          "typography": []
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,246 @@
+Jade, V6.2 rendering infrastructure is now considered stable.
+Do not redesign the renderer. Do not return to Manim. Do not add AI video generation. Do not chase style-continuity scores. Do not add uncontrolled sub-agents. Do not increase context unnecessarily.
+The next objective is V7 — Editorial Intelligence & Anti-Template.
+The goal is:
+Make the generated video feel like a human-edited mini-documentary rather than a sequence of generated slides.
+P0 — 1. Eliminate narration-card dependency
+The current blurred-background + centered-narration-card pattern is still overused.
+Classify visuals as:
+	•	EVIDENCE — diagram, transformation, comparison, map, timeline, process, scale, quantitative graphic, cutaway, cause/effect.
+	•	CINEMATIC — meaningful subject-specific illustration.
+	•	BREATHING — restrained typography/atmosphere.
+Generic blurred-background narration cards must become an exception, not a normal shot type.
+Initial gates:
+	•	EVIDENCE + CINEMATIC ≥ 80% of narration duration
+	•	BREATHING ≤ 20%
+	•	Generic blur-card ≤ 10%
+A subtitle over a blurred picture does not count as visual evidence.
+ 
+⸻
+ 
+P0 — 2. Make the first 2 seconds a real hook
+The opening must establish:
+SURPRISE / QUESTION / CONTRADICTION / SCALE / IMPOSSIBLE FACT
+plus immediate visual proof.
+Do not spend 5–8 seconds introducing the subject before revealing the curiosity gap.
+The planner must explicitly generate:
+	•	hook_claim
+	•	hook_visual
+	•	curiosity_gap
+	•	payoff
+The opening must make sense even with audio muted.
+ 
+⸻
+ 
+P0 — 3. Remove persistent large titles
+Large title/header is allowed during the opening.
+After approximately 2 seconds, remove the persistent large episode title.
+Use only subtle section markers/branding when genuinely useful.
+Do not let every video look like the same branded presentation template.
+ 
+⸻
+ 
+P1 — 4. Introduce conceptual continuity chains
+Stop treating every shot as an independent slide.
+Create persistent conceptual objects such as:
+	•	Black hole: blackhole + far_clock + near_clock
+	•	Aircraft: 747_wing + airflow + pressure_field
+	•	Mitochondria: cell + mitochondrion + bacterial_ancestor
+Objects should be able to:
+	•	move
+	•	zoom
+	•	split
+	•	transform
+	•	connect
+	•	compare
+	•	become annotated
+	•	change state
+Prefer:
+same object → transformation → consequence
+over:
+new image → narration → new image
+ 
+⸻
+ 
+P1 — 5. Add Information Transformation Score
+For every major beat calculate:
+information_transformation
+A visual change counts only if it communicates a new:
+	•	relationship
+	•	state
+	•	comparison
+	•	scale
+	•	process
+	•	causal consequence
+Camera movement alone does NOT count.
+Number pops alone do NOT count.
+Decorative motion does NOT count.
+Repeated imagery with changed narration should score near zero.
+ 
+⸻
+ 
+P1 — 6. Add Visual Redundancy detection
+Calculate redundancy over rolling 5-second windows.
+Detect:
+	•	repeated background
+	•	repeated composition
+	•	repeated camera state
+	•	repeated diagram
+	•	repeated layout
+	•	repeated blur narration card
+Flag periods where narration changes but meaningful visual evidence does not.
+ 
+⸻
+ 
+P1 — 7. Let the story determine the visual grammar
+Do NOT force every video into:
+hero → narration card → diagram → narration card → diagram
+The planner must select a structure appropriate to the story.
+Examples:
+Aircraft
+impossible load → wing → airflow → pressure → downward deflection → lift → consequence
+Mitochondria
+modern cell → mitochondrion → strange DNA → ancient bacterium → engulfment → retained DNA → modern payoff
+Black hole
+two clocks → move one closer → clocks diverge → spacetime explanation → distant observer perspective → horizon → payoff
+The sequence must emerge from the explanation, not from a fixed shot template.
+ 
+⸻
+ 
+P0 — 8. Upgrade factual QA to semantic verification
+Current claim verification is not sufficient.
+Verify:
+claim + exact wording + qualification + observer/perspective + number + object + timeframe
+Examples:
+Do not allow:
+“A 747 weighs 400 tonnes”
+without defining the relevant variant/context.
+Do not allow:
+“Time runs slower near a black hole”
+when observer perspective is scientifically important.
+Do not allow superlatives such as:
+oldest / largest / nearest / first
+without explicit definition, verification date and authoritative source.
+A source supporting the general concept is insufficient if the exact narration overstates it.
+ 
+⸻
+ 
+P0 — 9. Make the ending a payoff
+The final 3–5 seconds must resolve the curiosity established at the beginning.
+Do not introduce an unrelated new fact in the final beat.
+Require:
+hook_question → story → answer/payoff
+The final visual should be one of the strongest explanatory or emotional visuals in the video.
+Do not end with generic imagery merely because the narration has finished.
+ 
+⸻
+ 
+P0 — 10. Add an Anti-Template system
+Maintain a rolling structural signature of recent videos.
+Track:
+	•	opening structure
+	•	shot-role sequence
+	•	layout sequence
+	•	blur-card ratio
+	•	diagram ratio
+	•	cinematic ratio
+	•	average shot duration
+	•	transition pattern
+	•	title behavior
+	•	visual-mode sequence
+Compare every new video against recent videos.
+Do NOT randomly vary these parameters.
+The story should determine the structure.
+The goal is:
+Consistent brand, variable storytelling.
+Keep consistent:
+	•	typography family
+	•	overall visual quality
+	•	color philosophy
+	•	narration quality
+	•	audio quality
+	•	brand identity
+Vary:
+	•	storytelling structure
+	•	visual grammar
+	•	shot sequencing
+	•	information representation
+	•	animation behavior
+	•	transitions
+	•	opening mechanism
+	•	ending/payoff
+ 
+⸻
+ 
+P0 — 11. Upgrade the Human Editor Test
+Add these questions:
+	1.	Would I mistake this for an automated slideshow?
+	2.	Does every narration beat have a meaningful visual?
+	3.	Does the visual actually explain the sentence?
+	4.	Is the opening compelling within 2 seconds?
+	5.	Does the video contain genuine visual transformation?
+	6.	Does the story maintain conceptual continuity?
+	7.	Does any shot feel like filler?
+	8.	Does the ending pay off the opening?
+	9.	Could this exact visual structure be reused for another topic by merely changing the nouns?
+	10.	Does this feel like a human editor made deliberate visual decisions?
+A video should not be CAN_PUBLISH if it fails #1, #2, #4, #8 or #9.
+ 
+⸻
+ 
+P1 — 12. Keep all V6.2 technical foundations
+Do NOT remove or weaken:
+	•	motion smoothness QA
+	•	continuous audio bed
+	•	audio completion
+	•	overlay compliance
+	•	caption safe-zone QA
+	•	frame distinctness
+	•	CAS
+	•	subject correctness
+	•	factual verification
+	•	phone QA
+These are now foundation infrastructure.
+ 
+⸻
+ 
+V7 TEST PLAN
+Do not test with three more nearly identical science explainers.
+Create three deliberately different stories:
+A — Science/process
+Example: Why Your Phone Gets Hot While Charging
+Visual grammar: cause → process → heat → consequence.
+B — History
+Example: How One Tiny Mistake Sank the Titanic
+Visual grammar: chronology → reconstruction → causal chain → consequence.
+C — Geography/natural phenomenon
+Example: Why the Sahara Is Getting Greener
+Visual grammar: map → time → transformation → comparison.
+The purpose is to prove that V7 is a general storytelling engine, not merely a better science-diagram engine.
+ 
+⸻
+ 
+V7 REPORT REQUIREMENTS
+Do not report only:
+Technical / Visual / Editorial / CAN_PUBLISH
+Also report:
+	•	Hook score
+	•	Evidence coverage %
+	•	Cinematic coverage %
+	•	Breathing %
+	•	Generic blur %
+	•	Information Transformation Score
+	•	Visual Redundancy Score
+	•	Conceptual Continuity Score
+	•	Structural Diversity / Anti-Template Score
+	•	Semantic Factual QA
+	•	Ending Payoff Score
+	•	Human Editor Score
+	•	Top 5 genuine human-editor problems
+The Top 5 human-editor problems must be based on actual viewing, not simply the five easiest automated QA failures.
+Final principle
+Do not optimize for internal scores.
+Optimize for:
+Would a real person stop scrolling? Would they understand the idea? Would the visuals make the explanation easier to remember? Would they watch to the end? Would they feel a human deliberately edited this video? Would the next video feel meaningfully different rather than template-generated?
+V6.2 is the technical foundation.
+V7 is about making the editor smarter.

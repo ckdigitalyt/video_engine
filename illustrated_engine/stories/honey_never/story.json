@@ -1,0 +1,84 @@
+{
+  "story_id": "honey_never",
+  "brand": "KEPT BY TIME",
+  "title": "Honey Never Spoils",
+  "beats": [
+    {
+      "beat_id": "B1",
+      "function": "HOOK",
+      "narration": "Archaeologists opened an Egyptian tomb and found a jar of honey, three thousand years old. It was still good.",
+      "claim": "honey found in ancient tombs remains edible after ~3,000 years",
+      "visual_question": "what is this golden stuff — and why hasn't it died?",
+      "visual_answer": "a full-bleed pour of dense amber honey — the substance itself is the subject",
+      "fact_ids": ["egypt_tomb_honey_3000yr"],
+      "start": 0.0,
+      "end": 6.7
+    },
+    {
+      "beat_id": "B2",
+      "function": "REVEAL",
+      "narration": "That shouldn't happen. Food dies because microbes need water. Spoilage is a water problem.",
+      "claim": "microbial spoilage requires available water",
+      "visual_question": "why does food rot but honey doesn't?",
+      "visual_answer": "a split scene: water-rich food rotting on one side, untouched honey on the other",
+      "fact_ids": ["spoilage_needs_water"],
+      "start": 6.7,
+      "end": 13.2
+    },
+    {
+      "beat_id": "B3",
+      "function": "EXPLANATION",
+      "narration": "Honey is sugar so concentrated it's violent. Water moves toward the dense side — and a microbe landing in honey is drained dry from the inside.",
+      "claim": "supersaturated sugar solution dehydrates microbes by osmosis",
+      "visual_question": "what actually kills a microbe inside honey?",
+      "visual_answer": "a parchment diagram: one small bacterium in a dense golden field with osmotic arrows pulling water out",
+      "fact_ids": ["honey_supersaturated_osmosis"],
+      "start": 13.2,
+      "end": 22.5
+    },
+    {
+      "beat_id": "B4",
+      "function": "EVIDENCE",
+      "narration": "Bees do it: nectar starts at 80 percent water — honey is 17 to 18. They fan it at two hundred wingbeats a second until nothing can live in it.",
+      "claim": "bees evaporate nectar from ~70-80% water down to 17-18% honey",
+      "visual_question": "how do bees make water the enemy?",
+      "visual_answer": "worker bees fanning honeycomb cells — the industrial process that removes the water",
+      "fact_ids": ["nectar_to_honey_water", "bee_fanning_evaporation"],
+      "start": 22.5,
+      "end": 32.7
+    },
+    {
+      "beat_id": "B5",
+      "function": "DETAIL",
+      "narration": "Then more locks: honey is acid, near pH four, and bee enzymes leave trace hydrogen peroxide.",
+      "claim": "honey's acidity (pH 3.2-4.5) plus trace hydrogen peroxide add antibacterial layers",
+      "visual_question": "what are the extra layers of defense?",
+      "visual_answer": "extreme macro of capped comb cells — the sealed vault, chemistry layered underneath",
+      "fact_ids": ["honey_ph_acid", "glucose_oxidase_h2o2"],
+      "start": 32.7,
+      "end": 40.7
+    },
+    {
+      "beat_id": "B6",
+      "function": "TYPOGRAPHY",
+      "narration": "So it doesn't spoil. Not for years. Not for centuries.",
+      "claim": "honey resists spoilage on archaeological timescales",
+      "visual_question": "how long is long?",
+      "visual_answer": "the type card states it outright: IT DOESN'T DIE",
+      "fact_ids": [],
+      "start": 40.7,
+      "end": 44.1
+    },
+    {
+      "beat_id": "B7",
+      "function": "PAYOFF",
+      "narration": "Three thousand years in the dark — no fridge, no preservatives. Not sealed by a lid. Sealed by its own chemistry.",
+      "claim": "honey's stability is intrinsic chemistry, not storage",
+      "visual_question": "what does three thousand years of that chemistry look like?",
+      "visual_answer": "an amphora of honey glowing in a torchlit tomb — kept by itself",
+      "fact_ids": ["egypt_tomb_honey_3000yr"],
+      "start": 44.1,
+      "end": 52.2
+    }
+  ]
+}

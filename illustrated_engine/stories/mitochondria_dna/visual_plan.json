@@ -1,0 +1,543 @@
+{
+  "story_id": "mitochondria_dna",
+  "engine": "v6",
+  "fps": 30,
+  "size": [
+    1080,
+    1920
+  ],
+  "regions": {
+    "visual_rect": [
+      0,
+      176,
+      1080,
+      1744
+    ],
+    "center": [
+      0.3,
+      0.38,
+      0.4,
+      0.24
+    ],
+    "upper": [
+      0.22,
+      0.06,
+      0.56,
+      0.2
+    ],
+    "lower": [
+      0.22,
+      0.7,
+      0.56,
+      0.2
+    ]
+  },
+  "beats": [
+    {
+      "beat_id": "B1",
+      "shots": [
+        {
+          "shot_id": "S01",
+          "shot_type": "HOOK",
+          "asset": "B1_cell_hero",
+          "duration_est": 6.5,
+          "crop_bias_y": 0.45,
+          "opening": true,
+          "title": "WHY MITOCHONDRIA HAVE THEIR OWN DNA",
+          "tag": "",
+          "captions": "phrase",
+          "role": "HERO",
+          "chrome": "none",
+          "visual_mode": "CINEMATIC",
+          "evidence_type": "DIRECT_EVIDENCE",
+          "motion_type": "CAMERA_MOTION",
+          "purpose": "Put the stranger on screen first: a cell interior where one organelle does not belong to the pattern",
+          "claim": "cells contain an organelle that keeps its own DNA",
+          "evidence": "full-bleed ink-wash cell interior plate, mitochondria prominent among organelles",
+          "motion_reason": "slow push-in: stillness first so the question lands clean",
+          "transition_reason": "hard cut to the macro mitochondrion",
+          "cam_from_scale": 1.0,
+          "cam_to_scale": 1.1,
+          "cam_cx": 0.5,
+          "cam_cy": 0.5,
+          "subject_contract": {
+            "expected_subject": "interior of a eukaryotic cell drawn in vintage ink-wash style with several bean-shaped mitochondria",
+            "required": [
+              "cell interior with organelles",
+              "bean-shaped mitochondria visible",
+              "nucleus region in the background"
+            ],
+            "forbidden": [
+              "bacteria on a petri dish",
+              "text labels on the artwork",
+              "laboratory glassware"
+            ],
+            "role": "HERO"
+          },
+          "one_second": {
+            "relationship": "a busy cell interior where the mitochondria stand out"
+          },
+          "overlays": [
+            {
+              "kind": "HIGHLIGHT",
+              "target": "center",
+              "style": "circle",
+              "at": 0.5
+            }
+          ],
+          "typography": []
+        }
+      ]
+    },
+    {
+      "beat_id": "B2",
+      "shots": [
+        {
+          "shot_id": "S02",
+          "shot_type": "DETAIL",
+          "asset": "B2_mito_macro",
+          "duration_est": 7.0,
+          "crop_bias_y": 0.45,
+          "captions": "phrase",
+          "role": "DETAIL",
+          "chrome": "section",
+          "tag": "THE POWER PLANT",
+          "visual_mode": "DETAIL",
+          "evidence_type": "DIRECT_EVIDENCE",
+          "motion_type": "REVEAL",
+          "purpose": "Show the working organelle up close before its secret surfaces",
+          "claim": "mitochondria produce ATP and carry a hidden anomaly",
+          "evidence": "macro plate of a single mitochondrion with folded cristae inside",
+          "motion_reason": "slow zoom reads as getting closer to a secret",
+          "transition_reason": "hard cut into the cutaway",
+          "cam_from_scale": 1.2,
+          "cam_to_scale": 1.35,
+          "cam_cx": 0.5,
+          "cam_cy": 0.5,
+          "subject_contract": {
+            "expected_subject": "close-up of one bean-shaped mitochondrion with folded inner cristae, vintage ink-wash style",
+            "required": [
+              "single mitochondrion dominating frame",
+              "folded cristae inside",
+              "outer membrane outline"
+            ],
+            "forbidden": [
+              "whole cell view dominating",
+              "text labels",
+              "bacteria rods"
+            ],
+            "role": "DETAIL"
+          },
+          "one_second": {
+            "relationship": "one mitochondrion, folded inside like a furnace"
+          }
+        }
+      ]
+    },
+    {
+      "beat_id": "B3",
+      "shots": [
+        {
+          "shot_id": "S03",
+          "shot_type": "REVEAL",
+          "asset": "D1_mito_cutaway",
+          "duration_est": 6.5,
+          "crop_bias_y": 0.45,
+          "captions": "phrase",
+          "role": "DIAGRAM",
+          "chrome": "section",
+          "tag": "THE SECRET",
+          "visual_mode": "DIAGRAM",
+          "evidence_type": "EXPLANATORY_DIAGRAM",
+          "motion_type": "REVEAL",
+          "purpose": "Reveal the cutaway: cristae, matrix, and a circular DNA ring apart from the nucleus",
+          "claim": "mitochondria hold their own circular DNA with 37 genes in humans",
+          "evidence": "cutaway diagram card with the small DNA ring highlighted and a 37-genes pop",
+          "motion_reason": "push toward the DNA ring while the cutaway labels carry the information",
+          "transition_reason": "hard cut to the DNA ring macro",
+          "cam_from_scale": 1.0,
+          "cam_to_scale": 1.08,
+          "cam_cx": 0.52,
+          "cam_cy": 0.48,
+          "subject_contract": {
+            "expected_subject": "parchment cutaway diagram of a mitochondrion showing outer membrane, folded cristae, matrix and a small circular DNA ring",
+            "required": [
+              "cutaway of the mitochondrion",
+              "cristae folds",
+              "small circle representing DNA"
+            ],
+            "forbidden": [
+              "whole cell diagram dominating",
+              "photographic texture",
+              "animals or tissue"
+            ],
+            "role": "DIAGRAM"
+          },
+          "one_second": {
+            "relationship": "a tiny separate ring of DNA lives inside",
+            "big_number": "37",
+            "number_claim": true,
+            "labels": [
+              "OUTER MEMBRANE",
+              "CRISTAE",
+              "DNA"
+            ]
+          },
+          "overlays": [
+            {
+              "kind": "NUMBER_POP",
+              "text": "37 GENES",
+              "target": "upper",
+              "at": 0.55
+            }
+          ],
+          "typography": []
+        },
+        {
+          "shot_id": "S04",
+          "shot_type": "DETAIL",
+          "asset": "B3_dna_loop",
+          "duration_est": 5.0,
+          "crop_bias_y": 0.5,
+          "captions": "phrase",
+          "role": "DETAIL",
+          "chrome": "none",
+          "visual_mode": "DETAIL",
+          "evidence_type": "DIRECT_EVIDENCE",
+          "motion_type": "REVEAL",
+          "purpose": "Rest the eye on the evidence: the bare circular genome itself",
+          "claim": "the mitochondrial genome is a small closed ring",
+          "evidence": "tight macro of the circular DNA ring drawn as an engraved loop",
+          "motion_reason": "slow zoom on the ring: the artifact is the subject",
+          "transition_reason": "hard cut to the endosymbiosis sequence",
+          "cam_from_scale": 1.25,
+          "cam_to_scale": 1.4,
+          "cam_cx": 0.5,
+          "cam_cy": 0.5,
+          "subject_contract": {
+            "expected_subject": "engraved close-up of a small circular DNA loop floating in matrix shading",
+            "required": [
+              "closed circular loop",
+              "stranded texture on the loop",
+              "dark matrix background"
+            ],
+            "forbidden": [
+              "double helix ladder",
+              "chromosome X shapes",
+              "text labels"
+            ],
+            "role": "DETAIL"
+          },
+          "one_second": {
+            "relationship": "a closed ring of DNA, separate from the nucleus"
+          },
+          "typography": [
+            {
+              "kind": "NUMBER_POP",
+              "text": "37 GENES",
+              "at": 0.5,
+              "region": [
+                0.28,
+                0.76,
+                0.44,
+                0.11
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "beat_id": "B4",
+      "shots": [
+        {
+          "shot_id": "S05",
+          "shot_type": "EXPLAIN",
+          "asset": "D2_endosymbiosis",
+          "duration_est": 6.5,
+          "crop_bias_y": 0.45,
+          "captions": "phrase",
+          "role": "DIAGRAM",
+          "chrome": "section",
+          "tag": "ENDOSYMBIOSIS",
+          "visual_mode": "TRANSFORMATION",
+          "evidence_type": "EXPLANATORY_DIAGRAM",
+          "motion_type": "TRANSFORMATION",
+          "purpose": "Explain the origin: host engulfs bacterium, the pair becomes one cell",
+          "claim": "mitochondria began as a swallowed bacterium about 1.5 billion years ago",
+          "evidence": "three-step transformation card: free bacterium, engulfment, settled organelle",
+          "motion_reason": "the sequence itself is the motion: left to right transformation",
+          "transition_reason": "hard cut to the engulfment detail",
+          "cam_from_scale": 1.0,
+          "cam_to_scale": 1.06,
+          "cam_cx": 0.5,
+          "cam_cy": 0.5,
+          "subject_contract": {
+            "expected_subject": "parchment diagram in three panels: a free bacterium, a large cell engulfing it, and the bacterium settled inside as an organelle",
+            "required": [
+              "three sequential panels",
+              "rod-shaped bacterium",
+              "large host cell with nucleus"
+            ],
+            "forbidden": [
+              "cartoon faces",
+              "arrows with text",
+              "modern laboratory items"
+            ],
+            "role": "DIAGRAM"
+          },
+          "one_second": {
+            "relationship": "bacterium in, kept instead of digested",
+            "big_number": "1.5 BY",
+            "number_claim": true
+          },
+          "overlays": [
+            {
+              "kind": "NUMBER_POP",
+              "text": "1.5 BY",
+              "target": "upper",
+              "at": 0.5
+            }
+          ],
+          "typography": []
+        },
+        {
+          "shot_id": "S06",
+          "shot_type": "EXPLAIN",
+          "asset": "B4_engulf_detail",
+          "duration_est": 5.0,
+          "crop_bias_y": 0.5,
+          "captions": "phrase",
+          "role": "DIAGRAM",
+          "chrome": "none",
+          "visual_mode": "TRANSFORMATION",
+          "evidence_type": "DIRECT_EVIDENCE",
+          "motion_type": "TRANSFORMATION",
+          "purpose": "Show the decisive moment close up: membrane folding around the guest",
+          "claim": "the host membrane folded around the bacterium and closed",
+          "evidence": "macro of the engulfing membrane wrapping the rod-shaped guest",
+          "motion_reason": "slow push as the membrane closes around the bacterium",
+          "transition_reason": "hard cut to the kept-traits diagram",
+          "cam_from_scale": 1.18,
+          "cam_to_scale": 1.32,
+          "cam_cx": 0.52,
+          "cam_cy": 0.5,
+          "subject_contract": {
+            "expected_subject": "close-up of a cell membrane folding around a rod-shaped bacterium, vintage ink-wash style",
+            "required": [
+              "curving membrane edge",
+              "rod-shaped bacterium inside the fold",
+              "cell interior shading"
+            ],
+            "forbidden": [
+              "teeth or mouth imagery",
+              "text labels",
+              "amoeba pseudopods art style"
+            ],
+            "role": "EVIDENCE"
+          },
+          "one_second": {
+            "relationship": "the membrane closing around the guest"
+          },
+          "typography": [
+            {
+              "kind": "NUMBER_POP",
+              "text": "1.5 BYA",
+              "at": 0.45,
+              "region": [
+                0.55,
+                0.05,
+                0.4,
+                0.11
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "beat_id": "B5",
+      "shots": [
+        {
+          "shot_id": "S07",
+          "shot_type": "DIAGRAM",
+          "asset": "B5_kept_traits",
+          "duration_est": 6.0,
+          "crop_bias_y": 0.45,
+          "captions": "phrase",
+          "role": "DIAGRAM",
+          "chrome": "section",
+          "tag": "WHAT IT KEPT",
+          "visual_mode": "DIAGRAM",
+          "evidence_type": "EXPLANATORY_DIAGRAM",
+          "motion_type": "INFORMATION_MOTION",
+          "purpose": "Escalate with the bacterial traits the organelle never gave up",
+          "claim": "mitochondria kept bacterial traits: double membrane, own ribosomes, own DNA",
+          "evidence": "diagram card annotating double membrane, ribosome dots and the DNA ring",
+          "motion_reason": "annotations appear over a still structure; the camera only breathes",
+          "transition_reason": "hard cut to the maternal line",
+          "cam_from_scale": 1.02,
+          "cam_to_scale": 1.08,
+          "cam_cx": 0.5,
+          "cam_cy": 0.5,
+          "subject_contract": {
+            "expected_subject": "parchment diagram of a mitochondrion with its double membrane and tiny ribosome dots annotated",
+            "required": [
+              "double membrane outline",
+              "small dots for ribosomes",
+              "ring of DNA"
+            ],
+            "forbidden": [
+              "bacteria cells dominating",
+              "human figures",
+              "text-heavy poster"
+            ],
+            "role": "DIAGRAM"
+          },
+          "one_second": {
+            "relationship": "two membranes, own ribosomes, own DNA",
+            "big_number": "2",
+            "number_claim": true,
+            "labels": [
+              "2 MEMBRANES",
+              "RIBOSOMES",
+              "DNA"
+            ]
+          },
+          "overlays": [
+            {
+              "kind": "NUMBER_POP",
+              "text": "2 MEMBRANES",
+              "target": "upper",
+              "at": 0.5
+            }
+          ],
+          "typography": []
+        }
+      ]
+    },
+    {
+      "beat_id": "B6",
+      "shots": [
+        {
+          "shot_id": "S08",
+          "shot_type": "COMPARE",
+          "asset": "B6_maternal_card",
+          "duration_est": 7.0,
+          "crop_bias_y": 0.45,
+          "captions": "phrase",
+          "role": "COMPARISON",
+          "chrome": "section",
+          "tag": "THE MATERNAL LINE",
+          "visual_mode": "SPLIT",
+          "evidence_type": "EXPLANATORY_DIAGRAM",
+          "motion_type": "TRANSFORMATION",
+          "purpose": "Twist: the inheritance rule \u2014 egg passes mitochondria, sperm does not",
+          "claim": "mitochondrial DNA is inherited through the maternal line",
+          "evidence": "split card: egg cell with mitochondria flowing to child, sperm side contributing none",
+          "motion_reason": "the split comparison holds while the inheritance arrow transforms the frame",
+          "transition_reason": "hard cut to the payoff cell",
+          "cam_from_scale": 1.0,
+          "cam_to_scale": 1.05,
+          "cam_cx": 0.5,
+          "cam_cy": 0.5,
+          "subject_contract": {
+            "expected_subject": "parchment split diagram: a large round egg cell passing mitochondria forward, a slim sperm cell contributing none",
+            "required": [
+              "round egg cell with dots",
+              "slim sperm cell",
+              "directional arrow between generations"
+            ],
+            "forbidden": [
+              "family photographs",
+              "babies",
+              "medical charts"
+            ],
+            "role": "COMPARISON"
+          },
+          "one_second": {
+            "relationship": "mitochondria travel down the mother's line",
+            "labels": [
+              "EGG",
+              "SPERM"
+            ]
+          },
+          "typography": [
+            {
+              "kind": "NUMBER_POP",
+              "text": "100% MATERNAL",
+              "at": 0.5,
+              "region": [
+                0.55,
+                0.08,
+                0.4,
+                0.1
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "beat_id": "B7",
+      "shots": [
+        {
+          "shot_id": "S09",
+          "shot_type": "PAYOFF",
+          "asset": "B7_cell_glow",
+          "duration_est": 7.0,
+          "crop_bias_y": 0.4,
+          "captions": "phrase",
+          "role": "PAYOFF",
+          "chrome": "none",
+          "end_card": "THE TENANT INSIDE",
+          "visual_mode": "PAYOFF",
+          "evidence_type": "DIRECT_EVIDENCE",
+          "motion_type": "CAMERA_MOTION",
+          "purpose": "Land the payoff: the tenant still dividing, quietly, in your own cells",
+          "claim": "the mitochondrion is a 1.5-billion-year-old tenant still dividing in your cells",
+          "evidence": "cell-at-rest plate with mitochondria shown dividing in two",
+          "motion_reason": "slow drift to rest; the strongest composition holds still",
+          "transition_reason": "end",
+          "cam_from_scale": 1.14,
+          "cam_to_scale": 1.0,
+          "cam_cx": 0.5,
+          "cam_cy": 0.5,
+          "subject_contract": {
+            "expected_subject": "calm cell interior at rest with several mitochondria, one caught mid-division, vintage ink-wash style",
+            "required": [
+              "cell interior at rest",
+              "mitochondria prominent",
+              "one mitochondrion pinching into two"
+            ],
+            "forbidden": [
+              "text on artwork",
+              "germs or virus spikes",
+              "laboratory equipment"
+            ],
+            "role": "PAYOFF"
+          },
+          "one_second": {
+            "relationship": "the tenant inside, still dividing"
+          },
+          "overlays": [
+            {
+              "kind": "HIGHLIGHT",
+              "style": "rust_circle",
+              "target": {
+                "x": 0.45,
+                "y": 0.45,
+                "w": 0.28,
+                "h": 0.28
+              },
+              "at": 0.55,
+              "dur": 2.2,
+              "color": "rust"
+            }
+          ],
+          "typography": []
+        }
+      ]
+    }
+  ]
+}

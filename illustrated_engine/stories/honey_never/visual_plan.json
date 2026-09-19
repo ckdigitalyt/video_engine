@@ -1,0 +1,343 @@
+{
+  "story_id": "honey_never",
+  "regions": {
+    "visual_rect": [0, 176, 1080, 1744]
+  },
+  "beats": [
+    {
+      "beat_id": "B1",
+      "shots": [
+        {
+          "shot_id": "S01",
+          "shot_type": "HOOK",
+          "asset": "B1_honey_hero",
+          "duration_est": 6.0,
+          "crop_bias_y": 0.45,
+          "opening": true,
+          "title": "HONEY NEVER SPOILS",
+          "tag": "",
+          "captions": "phrase",
+          "role": "HERO",
+          "chrome": "none",
+          "visual_mode": "CINEMATIC",
+          "evidence_type": "DIRECT_EVIDENCE",
+          "motion_type": "CAMERA_MOTION",
+          "purpose": "Put the substance itself on trial — dense, golden, alive — before any science arrives",
+          "claim": "honey found in ancient tombs remains edible after ~3,000 years",
+          "evidence": "full-bleed amber honey pour plate; the substance is the subject",
+          "motion_reason": "slow push-in: stillness first so the question lands clean",
+          "transition_reason": "hard cut to the rot-vs-honey split when the mechanism question opens",
+          "subject_contract": {
+            "expected_subject": "a close-up of thick golden honey — slow pour or heavy drip on a dark ground",
+            "required": [
+              "golden-amber honey as the dominant subject",
+              "thick viscous texture: pour, drip or swirl",
+              "dark moody background"
+            ],
+            "forbidden": [
+              "bees, hives or honeycomb dominating the frame",
+              "labeled jars, cans or packaging",
+              "pancakes, toast or prepared food dishes"
+            ],
+            "role": "HERO"
+          },
+          "one_second": {
+            "relationship": "the honey itself — pure, dense, alive"
+          },
+          "typography": [],
+          "stage_chips": [
+            {"asset": "chip_h1", "at": 0.4}
+          ]
+        }
+      ]
+    },
+    {
+      "beat_id": "B2",
+      "shots": [
+        {
+          "shot_id": "S02",
+          "shot_type": "REVEAL",
+          "asset": "B2_honey_rot",
+          "duration_est": 6.2,
+          "crop_bias_y": 0.5,
+          "opening": false,
+          "title": "",
+          "tag": "",
+          "captions": "phrase",
+          "role": "EVIDENCE",
+          "chrome": "none",
+          "visual_mode": "COMPARISON",
+          "evidence_type": "DIRECT_EVIDENCE",
+          "motion_type": "CAMERA_MOTION",
+          "purpose": "Show the water problem: the same table, two fates — one rots, one doesn't",
+          "claim": "microbial spoilage requires available water",
+          "evidence": "split plate: rotting water-rich fruit vs untouched honey",
+          "motion_reason": "gentle drift across the split so both fates are read",
+          "transition_reason": "hard cut to the osmosis diagram when the mechanism must be seen",
+          "subject_contract": {
+            "expected_subject": "a split composition: rotting water-rich fruit on one side, clean golden honey on the other",
+            "required": [
+              "two clearly divided halves",
+              "one side decaying fruit with mould",
+              "other side golden honey untouched"
+            ],
+            "forbidden": [
+              "a single homogeneous scene",
+              "people or faces"
+            ],
+            "role": "EVIDENCE"
+          },
+          "one_second": {
+            "relationship": "the rot and the honey — same table, different water"
+          },
+          "typography": [],
+          "stage_chips": []
+        }
+      ]
+    },
+    {
+      "beat_id": "B3",
+      "shots": [
+        {
+          "shot_id": "S03",
+          "shot_type": "EXPLANATION",
+          "asset": "B3_honey_osmosis",
+          "duration_est": 9.0,
+          "crop_bias_y": 0.5,
+          "opening": false,
+          "title": "",
+          "tag": "",
+          "captions": "phrase",
+          "role": "EXPLANATION",
+          "chrome": "none",
+          "visual_mode": "DIAGRAM",
+          "evidence_type": "EXPLANATORY_DIAGRAM",
+          "motion_type": "INFORMATION_MOTION",
+          "purpose": "Make the kill mechanism visible: osmotic arrows draining a single cell",
+          "claim": "supersaturated sugar solution dehydrates microbes by osmosis",
+          "evidence": "parchment diagram plate: one bacterium in a dense golden field, arrows outward",
+          "motion_reason": "slow zoom on the cell so the outward arrows read as one idea",
+          "transition_reason": "cut to the hive when the story asks how the water got removed",
+          "subject_contract": {
+            "expected_subject": "a parchment-style scientific diagram: one small round bacterium at the centre of a dense golden field with arrows pointing outward",
+            "required": [
+              "one clearly drawn microbe-like cell",
+              "outward-pointing arrows",
+              "parchment diagram style"
+            ],
+            "forbidden": [
+              "photorealistic bees",
+              "readable text labels",
+              "beehive scenes"
+            ],
+            "role": "EXPLANATION"
+          },
+          "one_second": {
+            "relationship": "one cell losing its water to the syrup around it"
+          },
+          "typography": [
+            {"kind": "NUMBER_POP", "text": "82% SUGAR", "at": 0.45,
+             "rect": [0.52, 0.44, 0.42, 0.085]}
+          ],
+          "stage_chips": [
+            {"asset": "chip_h3", "at": 0.35}
+          ]
+        }
+      ]
+    },
+    {
+      "beat_id": "B4",
+      "shots": [
+        {
+          "shot_id": "S04",
+          "shot_type": "EVIDENCE",
+          "asset": "B4_honey_hive",
+          "duration_est": 9.8,
+          "crop_bias_y": 0.45,
+          "opening": false,
+          "title": "",
+          "tag": "",
+          "captions": "phrase",
+          "role": "EVIDENCE",
+          "chrome": "none",
+          "visual_mode": "EVIDENCE",
+          "evidence_type": "DIRECT_EVIDENCE",
+          "motion_type": "CAMERA_MOTION",
+          "purpose": "Show the industry: bees fanning the comb — evaporation as labour",
+          "claim": "bees evaporate nectar from ~70-80% water down to 17-18% honey",
+          "evidence": "worker bees on comb, wings fanning; the numbers ride the captions",
+          "motion_reason": "slow drift across the comb keeps the colony's motion alive without cuts",
+          "transition_reason": "cut to the capped-cell macro for the defense layers",
+          "subject_contract": {
+            "expected_subject": "worker honeybees on a honeycomb frame, some fanning wings, hexagonal cells filled with honey",
+            "required": [
+              "bees on comb",
+              "hexagonal cells visible",
+              "natural hive light"
+            ],
+            "forbidden": [
+              "cartoon bees",
+              "a single giant bee portrait only"
+            ],
+            "role": "EVIDENCE"
+          },
+          "one_second": {
+            "relationship": "the fanning colony — evaporation as labour"
+          },
+          "typography": [
+            {"kind": "NUMBER_POP", "text": "200 WINGBEATS/S", "at": 0.5,
+             "rect": [0.5, 0.44, 0.44, 0.085]}
+          ],
+          "stage_chips": [
+            {"asset": "chip_h4", "at": 0.35}
+          ]
+        }
+      ]
+    },
+    {
+      "beat_id": "B5",
+      "shots": [
+        {
+          "shot_id": "S05",
+          "shot_type": "DETAIL",
+          "asset": "B5_honey_cells",
+          "duration_est": 7.8,
+          "crop_bias_y": 0.5,
+          "opening": false,
+          "title": "",
+          "tag": "",
+          "captions": "phrase",
+          "role": "DETAIL",
+          "chrome": "none",
+          "visual_mode": "DETAIL",
+          "evidence_type": "DIRECT_EVIDENCE",
+          "motion_type": "CAMERA_MOTION",
+          "purpose": "The vault itself: capped hexagonal cells — layered chemistry underneath",
+          "claim": "honey's acidity plus trace hydrogen peroxide add antibacterial layers",
+          "evidence": "extreme macro plate: hexagonal cells, wax caps, glistening honey",
+          "motion_reason": "macro drift: the geometry carries the stillness",
+          "transition_reason": "cut to the type card for the blunt statement",
+          "subject_contract": {
+            "expected_subject": "extreme macro of hexagonal honeycomb cells, some capped with pale beeswax, honey glistening inside",
+            "required": [
+              "hexagonal cell geometry",
+              "liquid honey inside cells",
+              "wax caps visible"
+            ],
+            "forbidden": [
+              "bees dominating the frame",
+              "wide hive landscape"
+            ],
+            "role": "DETAIL"
+          },
+          "one_second": {
+            "relationship": "the capped hexagons — a sealed vault"
+          },
+          "typography": [
+            {"kind": "NUMBER_POP", "text": "pH 3.2-4.5", "at": 0.5,
+             "rect": [0.52, 0.44, 0.42, 0.085]}
+          ],
+          "stage_chips": [
+            {"asset": "chip_h5", "at": 0.35}
+          ]
+        }
+      ]
+    },
+    {
+      "beat_id": "B6",
+      "shots": [
+        {
+          "shot_id": "S06",
+          "shot_type": "TYPO",
+          "asset": "B5_honey_cells",
+          "duration_est": 3.5,
+          "crop_bias_y": 0.5,
+          "opening": false,
+          "title": "",
+          "tag": "",
+          "captions": "phrase",
+          "role": "PUNCTUATION",
+          "chrome": "none",
+          "visual_mode": "TYPOGRAPHY",
+          "evidence_type": "DIRECT_EVIDENCE",
+          "motion_type": "TYPOGRAPHIC_MOTION",
+          "purpose": "State the claim bluntly: the type IS the visual",
+          "claim": "honey resists spoilage on archaeological timescales",
+          "evidence": "full-frame type card: IT DOESN'T DIE",
+          "motion_reason": "typographic hold — no camera",
+          "transition_reason": "cut to the tomb for the payoff",
+          "subject_contract": {
+            "expected_subject": "a full-frame typographic card: IT DOESN'T DIE with a small supporting line",
+            "required": [
+              "large display type",
+              "single dominant statement",
+              "series cream-on-navy treatment"
+            ],
+            "forbidden": [
+              "photographic content",
+              "multiple competing statements"
+            ],
+            "role": "PUNCTUATION"
+          },
+          "one_second": {
+            "relationship": "the statement itself"
+          },
+          "typography": [],
+          "progressive": {
+            "stages": [
+              {"asset": "typo_honey", "at": 0.1}
+            ]
+          },
+          "stage_chips": []
+        }
+      ]
+    },
+    {
+      "beat_id": "B7",
+      "shots": [
+        {
+          "shot_id": "S07",
+          "shot_type": "PAYOFF",
+          "asset": "B7_honey_tomb",
+          "duration_est": 8.2,
+          "crop_bias_y": 0.45,
+          "opening": false,
+          "title": "",
+          "tag": "",
+          "captions": "phrase",
+          "role": "PAYOFF",
+          "chrome": "none",
+          "visual_mode": "PAYOFF",
+          "evidence_type": "DIRECT_EVIDENCE",
+          "motion_type": "CAMERA_MOTION",
+          "purpose": "Land the payoff: the jar in the dark, sealed by its own chemistry",
+          "claim": "honey's stability is intrinsic chemistry, not storage",
+          "evidence": "amphora of honey glowing in a torchlit tomb",
+          "motion_reason": "slow drift to rest — the strongest composition holds",
+          "transition_reason": "end card",
+          "subject_contract": {
+            "expected_subject": "an ancient clay amphora glowing in a torchlit dark stone tomb",
+            "required": [
+              "clay amphora or jar as focal subject",
+              "dark stone tomb interior",
+              "warm torch light"
+            ],
+            "forbidden": [
+              "museum shelves or gift shops",
+              "modern refrigerators",
+              "people dominating the frame"
+            ],
+            "role": "PAYOFF"
+          },
+          "one_second": {
+            "relationship": "the kept jar — three thousand years of dark"
+          },
+          "typography": [],
+          "stage_chips": [
+            {"asset": "chip_h7", "at": 0.3}
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,161 @@
+{
+ "story_id": "baikal_deep",
+ "built_utc": "2026-09-17T03:16:13Z",
+ "n_shots": 7,
+ "avg_shot_dur": 7.71,
+ "opening_class": "EVIDENCE",
+ "opening_structure": [
+  "HOOK",
+  "CINEMATIC"
+ ],
+ "role_sequence": [
+  "HERO",
+  "DIAGRAM",
+  "COMPARISON",
+  "DIAGRAM",
+  "DIAGRAM",
+  "COMPARISON",
+  "PAYOFF"
+ ],
+ "class_sequence": [
+  "EVIDENCE",
+  "EVIDENCE",
+  "EVIDENCE",
+  "EVIDENCE",
+  "EVIDENCE",
+  "EVIDENCE",
+  "EVIDENCE"
+ ],
+ "mode_sequence": [
+  "CINEMATIC",
+  "DIAGRAM",
+  "SPLIT",
+  "TRANSFORMATION",
+  "DIAGRAM",
+  "DIAGRAM",
+  "PAYOFF"
+ ],
+ "transition_pattern": [
+  "CUT",
+  "CUT",
+  "CUT",
+  "CUT",
+  "CUT",
+  "CUT",
+  "CUT"
+ ],
+ "title_behavior": "none",
+ "blur_ratio": 0.0,
+ "diagram_ratio": 0.414,
+ "cinematic_ratio": 0.152,
+ "v2": true,
+ "grammar_sequence": [
+  "map_first",
+  "map_first",
+  "map_first",
+  "map_first",
+  "map_first",
+  "map_first",
+  "map_first"
+ ],
+ "composition_sequence": [
+  "place_full_bleed",
+  "region_zoom",
+  "overlay_reveal",
+  "comparison_overlay",
+  "propagation_spread",
+  "propagation_spread",
+  "map_resolved"
+ ],
+ "panel_usage_sequence": [
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "none",
+  "none"
+ ],
+ "background_sequence": [
+  "terrain_field",
+  "terrain_field",
+  "terrain_field",
+  "terrain_field",
+  "terrain_field",
+  "terrain_field",
+  "terrain_field"
+ ],
+ "caption_architecture": [
+  "top_band",
+  "top_band",
+  "top_band",
+  "top_band",
+  "top_band",
+  "top_band",
+  "top_band"
+ ],
+ "transition_types": [
+  "CUT",
+  "CUT",
+  "CUT",
+  "CUT",
+  "CUT",
+  "CUT",
+  "CUT"
+ ],
+ "state_sequence": [
+  "ESTABLISH",
+  "FOCUS",
+  "TRANSFORM",
+  "CONSEQUENCE",
+  "ESTABLISH",
+  "FOCUS",
+  "TRANSFORM",
+  "ESTABLISH",
+  "FOCUS",
+  "TRANSFORM",
+  "CONSEQUENCE",
+  "ESTABLISH",
+  "FOCUS",
+  "TRANSFORM",
+  "CONSEQUENCE",
+  "ESTABLISH",
+  "FOCUS",
+  "TRANSFORM",
+  "ESTABLISH",
+  "FOCUS",
+  "TRANSFORM",
+  "CONSEQUENCE",
+  "ESTABLISH",
+  "FOCUS",
+  "TRANSFORM",
+  "PAYOFF"
+ ],
+ "camera_behavior": [
+  "push",
+  "hold",
+  "hold",
+  "push",
+  "push",
+  "hold",
+  "pull"
+ ],
+ "chrome_usage": "minimal",
+ "accent_usage": "",
+ "duration_profile": "n7_s0_l4",
+ "motif": {
+  "plate": {
+   "strip_other": 9,
+   "polygon_other": 10,
+   "circle_other": 6
+  },
+  "plan": {
+   "circle_plan": 14,
+   "panel_plan": 1,
+   "strip_plan": 2
+  },
+  "subject": "geography",
+  "story_type": "geography_place",
+  "justification": ""
+ }
+}

@@ -1,0 +1,390 @@
+{
+ "story_id": "titanic_mistake",
+ "engine": "v6",
+ "fps": 30,
+ "size": [
+  1080,
+  1920
+ ],
+ "regions": {
+  "visual_rect": [
+   0,
+   176,
+   1080,
+   1744
+  ],
+  "center": [
+   0.3,
+   0.38,
+   0.4,
+   0.24
+  ],
+  "upper": [
+   0.22,
+   0.06,
+   0.56,
+   0.2
+  ],
+  "lower": [
+   0.22,
+   0.7,
+   0.56,
+   0.2
+  ]
+ },
+ "beats": [
+  {
+   "beat_id": "B1",
+   "shots": [
+    {
+     "shot_id": "S01",
+     "shot_type": "HOOK",
+     "asset": "B1_titanic_hero",
+     "duration_est": 7.5,
+     "crop_bias_y": 0.45,
+     "captions": "phrase",
+     "role": "HERO",
+     "chrome": "none",
+     "tag": "",
+     "visual_mode": "CINEMATIC",
+     "evidence_type": "DIRECT_EVIDENCE",
+     "motion_type": "CAMERA_MOTION",
+     "opening": true,
+     "title": "",
+     "purpose": "Put the impossible loss on screen first: the great ship going down by the bow",
+     "claim": "the Titanic sank in under three hours despite contemporary claims she was practically unsinkable",
+     "evidence": "full-bleed night-sea plate: ship silhouette bow-down, iceberg standing off, 1912 engraved style",
+     "motion_reason": "slow push toward the bow-down silhouette so the loss is immediate",
+     "transition_reason": "hard cut to the timeline of the night",
+     "cam_from_scale": 1.0,
+     "cam_to_scale": 1.08,
+     "cam_cx": 0.5,
+     "cam_cy": 0.52,
+     "subject_contract": {
+      "expected_subject": "parchment engraving-style plate: Titanic silhouette bow-down with iceberg on the horizon",
+      "required": [
+       "ship silhouette",
+       "iceberg shape",
+       "night sea band"
+      ],
+      "forbidden": [
+       "modern ships",
+       "cartoon style",
+       "photographic rendering"
+      ],
+      "role": "HERO"
+     },
+     "one_second": {
+      "relationship": "the unsinkable ship is going down",
+      "labels": [
+       "RMS TITANIC",
+       "APRIL 1912"
+      ]
+     },
+     "overlays": []
+    }
+   ]
+  },
+  {
+   "beat_id": "B2",
+   "shots": [
+    {
+     "shot_id": "S02",
+     "shot_type": "CHRONOLOGY",
+     "asset": "B2_timeline_card",
+     "duration_est": 7.0,
+     "crop_bias_y": 0.45,
+     "captions": "phrase",
+     "role": "DIAGRAM",
+     "chrome": "section",
+     "tag": "THE TIMELINE",
+     "visual_mode": "TIMELINE",
+     "evidence_type": "EXPLANATORY_DIAGRAM",
+     "motion_type": "INFORMATION_MOTION",
+     "purpose": "Make the night a clock: sighting, thirty-seven seconds, impact",
+     "claim": "the lookouts reported the iceberg at 11:40 PM on April 14, 1912, about thirty-seven seconds before impact",
+     "evidence": "timeline card: clock face at 11:40, a 37-second gap marked, impact marker at the starboard bow",
+     "motion_reason": "slow drift along the timeline so the 37 seconds feel short",
+     "transition_reason": "cut into the hull reconstruction",
+     "cam_from_scale": 1.05,
+     "cam_to_scale": 1.12,
+     "cam_cx": 0.5,
+     "cam_cy": 0.5,
+     "subject_contract": {
+      "expected_subject": "parchment timeline card: clock face reading 11:40 with a short 37-second gap to an impact marker",
+      "required": [
+       "clock face",
+       "37-second gap",
+       "impact marker"
+      ],
+      "forbidden": [
+       "modern clocks",
+       "calendar grids",
+       "photographic rendering"
+      ],
+      "role": "DIAGRAM"
+     },
+     "one_second": {
+      "relationship": "the warning window was under a minute",
+      "labels": [
+       "SPOTTED 11:40 PM",
+       "IMPACT +37 S"
+      ]
+     },
+     "overlays": []
+    }
+   ]
+  },
+  {
+   "beat_id": "B3",
+   "shots": [
+    {
+     "shot_id": "S03",
+     "shot_type": "RECONSTRUCTION",
+     "asset": "B3_hull_wound",
+     "duration_est": 7.5,
+     "crop_bias_y": 0.45,
+     "captions": "phrase",
+     "role": "DIAGRAM",
+     "chrome": "section",
+     "tag": "THE WOUND",
+     "visual_mode": "DIAGRAM",
+     "evidence_type": "EXPLANATORY_DIAGRAM",
+     "motion_type": "INFORMATION_MOTION",
+     "purpose": "Reconstruct the damage: six forward compartments opened along the hull",
+     "claim": "the collision breached the first six forward compartments along about three hundred feet of hull",
+     "evidence": "hull side-profile reconstruction: six forward compartments outlined and hatched, buckled plate marks along the seam line",
+     "motion_reason": "lateral drift along the hull so the wound reads as one long line",
+     "transition_reason": "cut to the overflow chain the damage triggers",
+     "cam_from_scale": 1.0,
+     "cam_to_scale": 1.07,
+     "cam_cx": 0.5,
+     "cam_cy": 0.5,
+     "subject_contract": {
+      "expected_subject": "parchment hull profile: ship side view with six hatched forward compartments",
+      "required": [
+       "ship side profile",
+       "six outlined compartments",
+       "buckle marks"
+      ],
+      "forbidden": [
+       "top-down deck plan",
+       "lifeboat detail",
+       "photographic rendering"
+      ],
+      "role": "DIAGRAM"
+     },
+     "one_second": {
+      "relationship": "the damage is a chain of rooms, not one hole",
+      "labels": [
+       "SIX COMPARTMENTS",
+       "BUCKLED PLATES"
+      ]
+     },
+     "overlays": []
+    }
+   ]
+  },
+  {
+   "beat_id": "B4",
+   "shots": [
+    {
+     "shot_id": "S04",
+     "shot_type": "CAUSAL_CHAIN",
+     "asset": "B4_overflow_chain",
+     "duration_est": 8.0,
+     "crop_bias_y": 0.45,
+     "captions": "phrase",
+     "role": "DIAGRAM",
+     "chrome": "section",
+     "tag": "THE CHAIN",
+     "visual_mode": "TRANSFORMATION",
+     "evidence_type": "EXPLANATORY_DIAGRAM",
+     "motion_type": "INFORMATION_MOTION",
+     "purpose": "Show the failure mechanism: water spilling compartment to compartment over a D-deck line",
+     "claim": "the watertight bulkheads rose only to D deck, so water spilled from full compartments into the next",
+     "evidence": "overflow chain card: four compartment boxes with water levels rising, dashed D-deck line above, spill arrows over each wall",
+     "motion_reason": "held framing; the rising levels and spill arrows carry the mechanism",
+     "transition_reason": "dip to white into the design decision (act pivot)",
+     "cam_from_scale": 1.02,
+     "cam_to_scale": 1.02,
+     "cam_cx": 0.5,
+     "cam_cy": 0.5,
+     "subject_contract": {
+      "expected_subject": "parchment diagram: four compartment boxes filling with water, spill arrows over D-deck line",
+      "required": [
+       "four compartments",
+       "rising water levels",
+       "D-deck dashed line"
+      ],
+      "forbidden": [
+       "realistic water",
+       "ship exterior",
+       "photographic rendering"
+      ],
+      "role": "DIAGRAM"
+     },
+     "one_second": {
+      "relationship": "each full compartment becomes the next one's flood",
+      "labels": [
+       "D DECK",
+       "SPILL"
+      ]
+     },
+     "overlays": []
+    }
+   ]
+  },
+  {
+   "beat_id": "B5",
+   "shots": [
+    {
+     "shot_id": "S05",
+     "shot_type": "DECISION",
+     "asset": "B5_design_cut",
+     "duration_est": 7.5,
+     "crop_bias_y": 0.45,
+     "captions": "phrase",
+     "role": "COMPARISON",
+     "chrome": "section",
+     "tag": "THE DECISION",
+     "visual_mode": "COMPARISON",
+     "evidence_type": "EXPLANATORY_DIAGRAM",
+     "motion_type": "INFORMATION_MOTION",
+     "purpose": "Show the mistake: two drawings, the approved one with ten feet less margin",
+     "claim": "design revisions before approval lowered the watertight bulkhead height by roughly ten feet from the earlier drawings",
+     "evidence": "side-by-side design cards: earlier drawing with taller bulkheads (dashed extension) versus approved drawing with the cut height, minus-ten-feet callout between",
+     "motion_reason": "slow push on the gap between the two heights",
+     "transition_reason": "cut to the human count",
+     "cam_from_scale": 1.0,
+     "cam_to_scale": 1.1,
+     "cam_cx": 0.5,
+     "cam_cy": 0.5,
+     "subject_contract": {
+      "expected_subject": "parchment comparison card: two bulkhead profiles with a height difference callout",
+      "required": [
+       "two profiles",
+       "dashed original height",
+       "minus-ten-feet callout"
+      ],
+      "forbidden": [
+       "photographs",
+       "modern CAD style",
+       "decorative compass roses"
+      ],
+      "role": "COMPARISON"
+     },
+     "one_second": {
+      "relationship": "the approved ship had less margin than the designed one",
+      "labels": [
+       "DESIGNED",
+       "APPROVED"
+      ]
+     },
+     "overlays": []
+    }
+   ]
+  },
+  {
+   "beat_id": "B6",
+   "shots": [
+    {
+     "shot_id": "S06",
+     "shot_type": "CONSEQUENCE",
+     "asset": "B6_count_card",
+     "duration_est": 7.5,
+     "crop_bias_y": 0.45,
+     "captions": "phrase",
+     "role": "DIAGRAM",
+     "chrome": "section",
+     "tag": "THE COUNT",
+     "visual_mode": "SCALE",
+     "evidence_type": "EXPLANATORY_DIAGRAM",
+     "motion_type": "INFORMATION_MOTION",
+     "purpose": "Land the cost: two thousand two hundred aboard, seven hundred and five saved",
+     "claim": "the Titanic foundered two hours and forty minutes after the collision; of roughly two thousand two hundred aboard, seven hundred and five survived",
+     "evidence": "count card: tall column of 2,200 person marks against a short column of 705, scale difference visible at a glance",
+     "motion_reason": "near-static so the scale contrast carries the beat",
+     "transition_reason": "cut to the payoff reprise",
+     "cam_from_scale": 1.05,
+     "cam_to_scale": 1.05,
+     "cam_cx": 0.5,
+     "cam_cy": 0.5,
+     "subject_contract": {
+      "expected_subject": "parchment count card: tall mark-column for 2,200 against short mark-column for 705",
+      "required": [
+       "two mark columns",
+       "705 and 2,200 labels",
+       "obvious height contrast"
+      ],
+      "forbidden": [
+       "names list",
+       "gravestone imagery",
+       "photographic rendering"
+      ],
+      "role": "DIAGRAM"
+     },
+     "one_second": {
+      "relationship": "the saved are a small fraction of the aboard",
+      "labels": [
+       "2,200 ABOARD",
+       "705 SURVIVED"
+      ]
+     },
+     "overlays": []
+    }
+   ]
+  },
+  {
+   "beat_id": "B7",
+   "shots": [
+    {
+     "shot_id": "S07",
+     "shot_type": "PAYOFF",
+     "asset": "B7_payoff_card",
+     "duration_est": 7.5,
+     "crop_bias_y": 0.45,
+     "captions": "phrase",
+     "role": "PAYOFF",
+     "chrome": "none",
+     "tag": "",
+     "visual_mode": "PAYOFF",
+     "evidence_type": "DIRECT_EVIDENCE",
+     "motion_type": "CAMERA_MOTION",
+     "end_card": true,
+     "opening": false,
+     "purpose": "Resolve the hook: the margin line lit along the hull, the flaw that was built in",
+     "claim": "the loss of designed safety margin, not the iceberg alone, is what sank the Titanic",
+     "evidence": "dusk reprise of the opening silhouette, calm sea, the hull margin line lit warm where the compartments failed",
+     "motion_reason": "slow pull-out, the frame settles with the argument",
+     "transition_reason": "final shot",
+     "cam_from_scale": 1.08,
+     "cam_to_scale": 1.0,
+     "cam_cx": 0.5,
+     "cam_cy": 0.52,
+     "subject_contract": {
+      "expected_subject": "parchment-plate ship silhouette reprise with a lit hull margin line, calm sea",
+      "required": [
+       "same ship geometry as opening",
+       "lit margin line",
+       "calm palette"
+      ],
+      "forbidden": [
+       "sinking again",
+       "new subjects",
+       "photographic rendering"
+      ],
+      "role": "PAYOFF"
+     },
+     "one_second": {
+      "relationship": "the flaw was in the design, not the sea",
+      "labels": [
+       "THE MARGIN"
+      ]
+     },
+     "overlays": []
+    }
+   ]
+  }
+ ]
+}
