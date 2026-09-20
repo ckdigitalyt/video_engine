@@ -400,3 +400,27 @@ def emit_evidence(spec: dict) -> str:
     if svg13():
         return _emit_upgraded(spec)
     return _emit_legacy(spec)
+
+
+# ------------------------------------------------------------ render seam --
+
+def beat_evidence_overlay(beat: dict, sidecar: dict | None = None,
+                          palette: dict | None = None) -> dict | None:
+    """V13 integration — THE public function render calls for evidence
+    overlays on plate beats. Builds the spec from planv9 beat fields +
+    v13-plate-sidecar@1 rects (clip_rects_from_plan) and emits via
+    emit_evidence (flag-aware). Returns {"svg", "clip_rects"} or None when
+    the beat declares neither evidence items nor rects.
+
+    Hookup point (unwired by design — no clean seam in the overlay
+    assembly yet): the beat overlay assembly in the cli.py render path
+    (composev5 render_shot_v5, build/ov5/<shot>/ base composite). Splice
+    the returned svg there once plate beats render.
+    """
+    rects = clip_rects_from_plan(beat, sidecar)
+    items = beat.get("evidence_items") or []
+    if not rects and not items:
+        return None
+    spec = {"clip_rects": rects, "items": items, "palette": palette or {},
+            "canvas": beat.get("evidence_canvas") or [1080, 1744]}
+    return {"svg": emit_evidence(spec), "clip_rects": rects}

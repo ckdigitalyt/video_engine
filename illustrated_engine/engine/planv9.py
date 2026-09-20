@@ -306,6 +306,18 @@ def _beat_model(plan: dict, story: dict, kit_id: str,
             "representation": rec["representation"],
             "mode_justification": rec["mode_justification"],
         }
+        # V13 integration — rich-plate beats carry a plate spec so the
+        # render/plate path (plate_pipeline.generate_plate, pilot run) can
+        # consume it. Additive: legacy plans without plate_spec stay valid.
+        if str(rec["representation"]) in ("PLATE", "PLATE+OVERLAY", "HYBRID"):
+            rows[bid]["plate_spec"] = {
+                "subject_bbox_px": [float(v) for v in (
+                    beat.get("subject_bbox_px") or (0.2, 0.3, 0.8, 0.7))],
+                "texture_tags": [str(rec.get("mode") or "plate").lower()],
+                "lighting": (str(rec.get("mode_justification") or "").strip()
+                             or "soft ambient"),
+                "max_scale": 1.6,
+            }
     # V13 M5 — stamp hook fields on the FIRST beat and payoff fields on the
     # final-act beat (same-beat edge on single-beat plans is acceptable:
     # hook opens it, payoff closes it).

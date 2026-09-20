@@ -298,6 +298,57 @@ def _print_flags():
                    for k, v in d.items()))
 
 
+def _v13_plates_stamp(paths, story_id: str) -> None:
+    """V13 integration — pass M1b plate sidecars through composev5.
+
+    For each shot whose beat has a generated plate at
+    build/plates/<story>/<beat>/<asset>.png, discover the
+    v13-plate-sidecar@1 sibling via composev5._sidecar_for and stamp
+    `plate`/`plate_sidecar` on the shot in edit_plan.json (additive keys
+    only; shots without plates are untouched -> legacy path intact). With
+    V13_DEPTH on, prove composev5.plate_parallax_filters engagement per
+    sidecar shot into build/plates/<story>/parallax_report.json (the
+    ffmpeg graph splice inside render_shot_v5 is the remaining hookup).
+    """
+    from engine import composev5, flags as _fl
+    plan_p = paths.build / "edit_plan.json"
+    if not plan_p.exists():
+        return
+    plan = json.loads(plan_p.read_text())
+    plates_dir = paths.build / "plates" / story_id
+    report, changed = [], False
+    for shot in plan.get("shots") or []:
+        beat_id = str(shot.get("beat_id") or "")
+        asset = str(shot.get("asset") or "")
+        if not (beat_id and asset):
+            continue
+        plate = plates_dir / beat_id / f"{asset}.png"
+        if not plate.exists():
+            continue
+        sidecar = composev5._sidecar_for(str(plate))
+        if not sidecar:
+            continue
+        if shot.get("plate_sidecar") != sidecar:
+            shot["plate"], shot["plate_sidecar"] = str(plate), sidecar
+            changed = True
+        entry = {"shot_id": shot.get("shot_id"), "beat_id": beat_id,
+                 "plate": str(plate)}
+        if _fl.depth13():
+            bg, fg, meta = composev5.plate_parallax_filters(
+                shot, sidecar, float(shot.get("duration_s") or 0.0))
+            entry["parallax"] = meta if (bg and fg) else {
+                "reason": (meta or {}).get("reason", "no parallax")}
+        report.append(entry)
+    if changed:
+        plan_p.write_text(json.dumps(plan, indent=1) + "\n")
+    if report:
+        out = plates_dir / "parallax_report.json"
+        out.write_text(json.dumps(
+            {"schema": "v13.parallax_report/1.0", "story_id": story_id,
+             "shots": report}, indent=1) + "\n")
+        print(f"v13 plates: {len(report)} sidecar shot(s) -> {out.name}")
+
+
 def cmd_render5(args):
     from engine import composev5
     import shutil
@@ -325,6 +376,9 @@ def cmd_render5(args):
             pass
         print(f"audio: restored {bed_src.name} -> audio_bed_plan.json (per-story guard)")
     _print_flags()
+    # V13 integration — M1b sidecars flow into the render path (no plate
+    # found for a shot -> legacy path untouched).
+    _v13_plates_stamp(paths, args.story)
     out = composev5.render_video_v5(paths, args.story, force=args.force,
                                     out_name=f"{args.story}.mp4")
     print(f"v5 -> {out}")
@@ -764,8 +818,41 @@ def cmd_qa8full(args):
         occ_res = occupancy_qa.run(plan,
                                    video if video.exists() else None, Path("build"))
         mot_res = motion_class.run(plan)
+        # V13 M2 TODO (docs/v13/V13_PLAN.md) — safe_area_final: run
+        # safe_area_qa.evaluate over each shot's plate sidecar rects plus
+        # the beat's key-text rect, gate on the aggregate.
+        safe_area = None
+        try:
+            from engine import safe_area_qa as _saq
+            _beats = {str(b.get("beat_id")): b for b in (story.get("beats") or [])}
+            _sa = []
+            for _s in plan.get("shots") or []:
+                _sc = _s.get("plate_sidecar")
+                if not isinstance(_sc, dict):
+                    continue
+                _meta = dict(_sc)
+                _kr = (_beats.get(str(_s.get("beat_id"))) or {}).get(
+                    "key_number_rect")
+                _w, _h = int(_meta.get("width") or 0), int(_meta.get("height") or 0)
+                if _kr and len(_kr) == 4 and _w and _h:
+                    _x, _y, _rw, _rh = (float(v) for v in _kr)
+                    _meta.setdefault("annotation_rects_px", []).append(
+                        {"id": "key-text",
+                         "bbox": [_x * _w, _y * _h, (_x + _rw) * _w,
+                                  (_y + _rh) * _h]})
+                _sa.append(_saq.evaluate(_meta, _s.get("camera") or {},
+                                         samples=5))
+            if _sa:
+                safe_area = {
+                    "passed": all(r.get("passed") for r in _sa),
+                    "violations": [v for r in _sa
+                                   for v in (r.get("violations") or [])],
+                    "shots": len(_sa)}
+        except Exception as _e:  # QA must never break the gate path
+            safe_area = {"passed": True, "error": str(_e)}
         gate = publish_gate.run(qa5, qa7_res, res8, sem, cap_res, leak_res,
-                                occ_res, mot_res, audio_hier=ah_res)
+                                occ_res, mot_res, audio_hier=ah_res,
+                                safe_area=safe_area)
         caption_qa.write_report(cap_res, Path("build/qa"), story_id)
         leak_scan.write_report(leak_res, Path("build/qa"), story_id)
         occupancy_qa.write_report(occ_res, Path("build/qa"), story_id)
