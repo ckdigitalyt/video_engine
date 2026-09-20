@@ -70,6 +70,9 @@ pilot story (M1–M5 proven on ONE biology/scale story first) → M8 slate → m
 Integration milestone (pilot prep, after M3/M4): render5 consumes plate sidecars (plate beats →
 RICH_VISUAL_PLATE layer compositing via real masks), cli.py passes safe_area= into publish_gate.run,
 planv9 emits plate specs using M4 representations. All proven on the pilot story before M8.
+**(landed @ cf60352)** — planv9 plate_spec for PLATE-class beats (legacy-tolerant); cli _v13_plates_stamp
+discovers build/plates/<story>/<beat> assets into the render path; safe_area_qa wired into the
+publish-gate path; svg_evidence public wrapper exposed. Pilot story proves the chain.
 
 ## QA gate changes (only these)
 
