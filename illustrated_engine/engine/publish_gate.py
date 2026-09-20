@@ -30,12 +30,13 @@ from pathlib import Path
 
 COMPONENTS = ("TECHNICAL", "FACTUAL", "CAPTION", "DEBUG_FREE",
               "VISUAL_EVIDENCE", "VIEWER_SIMULATION", "ANTI_TEMPLATE",
-              "CROSS_VIDEO_TEMPLATE", "AUDIO")
+              "CROSS_VIDEO_TEMPLATE", "AUDIO", "SAFE_AREA_FINAL")
 
 
 def run(qa5: dict, qa7: dict, res8: dict, sem: dict, caption_qa: dict,
         leak: dict, occupancy: dict, motion_ratio: dict,
-        audio_hier: dict | None = None) -> dict:
+        audio_hier: dict | None = None,
+        safe_area: dict | None = None) -> dict:
     tech = ((qa5 or {}).get("groups") or {}).get("TECHNICAL") or {}
     tech_gate = ((qa5 or {}).get("gates") or {}).get("TECHNICAL", 95.0)
     motion = (qa5 or {}).get("motion") or {}
@@ -94,6 +95,12 @@ def run(qa5: dict, qa7: dict, res8: dict, sem: dict, caption_qa: dict,
         "AUDIO": bool(audio.get("ok", False)
                       and (v62.get("audio_completion") or {}).get("ok", False)
                       and ((audio_hier or {}).get("AUDIO_HIERARCHY_PASS", True))),
+        # V13 M2 — safe_area_final: final-transform safe-area QA
+        # (engine/safe_area_qa.py projects sidecar annotation/subject bboxes
+        # through the final camera window). Default True when the QA result
+        # has not been supplied yet (same compat pattern as
+        # CROSS_VIDEO_TEMPLATE); a supplied FAIL forces CAN_PUBLISH=false.
+        "SAFE_AREA_FINAL": bool((safe_area or {}).get("passed", True)),
     }
     reported_diagnostics = {
         "human_editor_gates": q7g.get("human_editor_gates"),
@@ -135,6 +142,11 @@ def run(qa5: dict, qa7: dict, res8: dict, sem: dict, caption_qa: dict,
                  "CROSS_VIDEO_TEMPLATE", "AUDIO"):
         if not components[name]:
             p0_defects.append(name.lower())
+    if not components["SAFE_AREA_FINAL"]:
+        _sa_v = (safe_area or {}).get("violations") or []
+        p0_defects.append("safe_area_final:" + (",".join(
+            "%s:%s@t=%s" % (v.get("id"), v.get("reason"), v.get("frame"))
+            for v in _sa_v[:6]) or "failed(no violations listed)"))
     if not components["CROSS_VIDEO_TEMPLATE"]:
         cv = ((qa7 or {}).get("anti_template") or {}).get("cross_video") or {}
         p0_defects.append(
@@ -161,7 +173,8 @@ def run(qa5: dict, qa7: dict, res8: dict, sem: dict, caption_qa: dict,
         "reported_diagnostics": reported_diagnostics,
         "CAN_PUBLISH": bool(can_publish),
         "p0_defects": p0_defects,
-        "note": ("CAN_PUBLISH = AND of 8 named components; numeric scores do "
+        "note": ("CAN_PUBLISH = AND of named components (V13 M2 adds "
+                 "safe_area_final); numeric scores do "
                  "not override a false component (Jade_todo_v11 P0)"),
     }
 
