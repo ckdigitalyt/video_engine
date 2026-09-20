@@ -70,3 +70,7 @@ class MediaProvider(ABC):
 
     def edit_image(self, image: str | Path, instruction: str, **kw: Any) -> BrokerResult:
         raise ProviderError(f"{self.id}: image editing not supported")
+
+    def generate_multi_ref(self, prompt: str, refs: list[str | Path],
+                           **kw: Any) -> BrokerResult:
+        raise ProviderError(f"{self.id}: multi-reference generation not supported")

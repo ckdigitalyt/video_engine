@@ -10,6 +10,22 @@ Supported providers (v1):
   - nvidia_nim   : NVIDIA NIM (FLUX.1-schnell family)  [needs NVIDIA_API_KEY]
   - siliconflow  : SiliconFlow FLUX endpoint            [needs SILICONFLOW_API_KEY]
   - hf_serverless: Hugging Face Inference Endpoints     [needs HF_TOKEN]
+
+V13 M1a (2026-09-20): the interface gains two multi-stage ops with
+NotImplemented-safe fallbacks to the existing single-pass text→img:
+
+  - edit_image(prompt, image: str|list[str], aspect, seed)
+  - generate_multi_ref(prompt, refs: list[str], aspect, seed)
+
+Implementations behind the SAME interface, existing keys only:
+  - gemini_image : Gemini image model — edit (1 ref) + multi-ref (2+ refs)
+                   via inline images                      [needs GEMINI_API_KEY]
+  - nvidia_nim   : FLUX.1-Kontext-dev edit endpoint (single ref)
+  - siliconflow  : Qwen-Image-Edit / FLUX.1-Kontext-dev edit (single ref)
+  - pollinations : single-pass fallback only (keyless)
+
+See tools/image_capability_audit.py + docs/v13/PROVIDER_CAPABILITIES.md for
+the live-probed capability matrix (key names only, never values).
 """
 
 from __future__ import annotations
@@ -72,6 +88,41 @@ def _looks_like_image(path: str) -> bool:
         return False
 
 
+def _read_data_uri(path: str) -> str:
+    """Encode an image file as a data URI for img2img request payloads."""
+    mime = "image/png"
+    try:
+        from PIL import Image
+        with Image.open(path) as im:
+            mime = Image.MIME.get(im.format, "image/png")
+    except Exception:
+        pass
+    raw = Path(path).read_bytes()
+    return f"data:{mime};base64,{base64.b64encode(raw).decode('ascii')}"
+
+
+def _derived_out(provider: str, op: str, prompt: str,
+                 seed: Optional[int]) -> str:
+    """Output path for a multi-stage op result under cache/generated/."""
+    tag = deterministic_seed(f"{op}:{prompt}", seed or 0)
+    ts = time.strftime("%Y%m%d_%H%M%S")
+    return f"cache/generated/{provider}_{op}_{tag}_{ts}.png"
+
+
+def _write_verified(raw: bytes, out: str, name: str) -> str:
+    """Write *raw* to *out* and run the v42 image sanity guard on it."""
+    Path(out).parent.mkdir(parents=True, exist_ok=True)
+    Path(out).write_bytes(raw)
+    if not _looks_like_image(out):
+        try:
+            Path(out).unlink()
+        except OSError:
+            pass
+        raise RuntimeError(
+            f"{name}: payload failed image sanity check ({len(raw)} bytes)")
+    return out
+
+
 # ═══════════════════════════════════════════════════════════════════════ #
 # Interface
 # ═══════════════════════════════════════════════════════════════════════ #
@@ -92,6 +143,28 @@ class ImageGenProvider(ABC):
     def is_available(self) -> bool:
         """Whether this provider has the credentials needed to run."""
         return True
+
+    # ── V13 M1a multi-stage ops (default: unsupported) ───────────────────
+
+    def edit_image(self, prompt: str, image: "str | list[str]",
+                   aspect: str = "16:9", seed: Optional[int] = None) -> str:
+        """Edit *image* (path or list of paths) per *prompt*; return path.
+
+        Providers without an editing endpoint raise NotImplementedError —
+        callers fall back to single-pass text→img (edit_image_with_fallback).
+        """
+        raise NotImplementedError(
+            f"{self.name}: image editing not supported (single-pass text→img only)")
+
+    def generate_multi_ref(self, prompt: str, refs: list[str],
+                           aspect: str = "16:9", seed: Optional[int] = None) -> str:
+        """Compose an image from *refs* (2+ paths) per *prompt*; return path.
+
+        NotImplementedError → caller falls back to single-pass text→img
+        (generate_multi_ref_with_fallback).
+        """
+        raise NotImplementedError(
+            f"{self.name}: multi-reference generation not supported")
 
 
 # ═══════════════════════════════════════════════════════════════════════ #
@@ -246,6 +319,49 @@ class NvidiaNimProvider(ImageGenProvider):
                 continue
         raise RuntimeError(f"NVIDIA NIM generation failed: {last_err}")
 
+    # ── V13 M1a: image editing (FLUX.1-Kontext-dev, hosted NIM) ─────────
+    #
+    # The text→img FLUX.2 endpoints take no image input; kontext is the
+    # NIM-hosted editing model on the same free NVIDIA_API_KEY.  Payload
+    # shape per NIM docs: {"prompt", "image": <data-uri>, "seed", "steps"}.
+    KONTEXT_ENDPOINT = ("https://ai.api.nvidia.com/v1/genai/"
+                        "black-forest-labs/flux.1-kontext-dev")
+
+    def edit_image(self, prompt: str, image: "str | list[str]",
+                   aspect: str = "16:9", seed: Optional[int] = None) -> str:
+        if not self._api_key:
+            raise RuntimeError("NVIDIA_API_KEY not set")
+        paths = [str(image)] if isinstance(image, (str, Path)) else [str(p) for p in image]
+        if len(paths) != 1:
+            raise NotImplementedError(
+                "nvidia_nim: edit takes exactly one reference image (kontext)")
+        payload = {
+            "prompt": prompt,
+            "image": _read_data_uri(paths[0]),
+            "seed": seed if seed is not None else int(time.time()) % 100000,
+            "steps": 30,
+        }
+        req = urllib.request.Request(
+            self.KONTEXT_ENDPOINT, data=json.dumps(payload).encode(),
+            headers={
+                "Authorization": f"Bearer {self._api_key}",
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            },
+        )
+        with urllib.request.urlopen(req, timeout=180) as resp:
+            body = json.loads(resp.read().decode())
+        b64 = (
+            body.get("artifacts", [{}])[0].get("base64")
+            or body.get("image")
+            or body.get("images", [None])[0]
+        )
+        if not b64:
+            raise RuntimeError(f"nvidia_nim kontext: unexpected response {list(body)[:5]}")
+        raw = base64.b64decode(b64)
+        out = _derived_out("nvidia_nim", "edit", prompt, seed)
+        return _write_verified(raw, out, self.name)
+
 
 # ═══════════════════════════════════════════════════════════════════════ #
 # SiliconFlow (FLUX family, OpenAI-compatible)
@@ -307,6 +423,194 @@ class SiliconFlowProvider(ImageGenProvider):
                 Path(output_path).write_bytes(r.read())
             return output_path
         raise RuntimeError(f"SiliconFlow unexpected response: {list(body)[:5]}")
+
+    # ── V13 M1a: image editing on the same generations endpoint ──────────
+    # Both edit models accept {"prompt", "image": <data-uri>, "seed"};
+    # output follows the input image.  Tried in order, first success wins.
+    EDIT_MODELS = ["Qwen/Qwen-Image-Edit", "black-forest-labs/FLUX.1-Kontext-dev"]
+
+    def edit_image(self, prompt: str, image: "str | list[str]",
+                   aspect: str = "16:9", seed: Optional[int] = None) -> str:
+        if not self._api_key:
+            raise RuntimeError("SILICONFLOW_API_KEY not set")
+        paths = [str(image)] if isinstance(image, (str, Path)) else [str(p) for p in image]
+        if len(paths) != 1:
+            raise NotImplementedError(
+                "siliconflow: edit takes exactly one reference image")
+        last_err: Optional[Exception] = None
+        for model in self.EDIT_MODELS:
+            try:
+                payload = {
+                    "model": model,
+                    "prompt": prompt,
+                    "image": _read_data_uri(paths[0]),
+                    "seed": seed if seed is not None else 0,
+                }
+                req = urllib.request.Request(
+                    self._base_url, data=json.dumps(payload).encode(),
+                    headers={
+                        "Authorization": f"Bearer {self._api_key}",
+                        "Content-Type": "application/json",
+                    },
+                )
+                with urllib.request.urlopen(req, timeout=180) as resp:
+                    body = json.loads(resp.read().decode())
+                b64 = body.get("data", [{}])[0].get("b64_json")
+                if b64:
+                    raw = base64.b64decode(b64)
+                else:
+                    url = body.get("data", [{}])[0].get("url")
+                    if not url:
+                        raise RuntimeError(f"unexpected response: {list(body)[:5]}")
+                    with urllib.request.urlopen(url, timeout=60) as r:
+                        raw = r.read()
+                out = _derived_out("siliconflow", "edit", prompt, seed)
+                return _write_verified(raw, out, self.name)
+            except Exception as exc:  # noqa: BLE001 — try the next edit model
+                last_err = exc
+                continue
+        raise RuntimeError(f"siliconflow edit failed: {last_err}")
+
+    def generate_multi_ref(self, prompt: str, refs: list[str],
+                           aspect: str = "16:9", seed: Optional[int] = None) -> str:
+        """Multi-reference composition via Qwen-Image-Edit-2509.
+
+        The 2509 revision accepts an image LIST (wired 2026-09-20, not yet
+        live-probed — see PROVIDER_CAPABILITIES.md).  First ref failure
+        falls through to the edit-model chain: single image → kontext.
+        """
+        if not self._api_key:
+            raise RuntimeError("SILICONFLOW_API_KEY not set")
+        paths = [str(r) for r in refs]
+        if len(paths) < 2:
+            raise NotImplementedError(
+                "siliconflow: generate_multi_ref needs 2+ reference images")
+        payload = {
+            "model": "Qwen/Qwen-Image-Edit-2509",
+            "prompt": prompt,
+            "image": [_read_data_uri(p) for p in paths],
+            "seed": seed if seed is not None else 0,
+        }
+        req = urllib.request.Request(
+            self._base_url, data=json.dumps(payload).encode(),
+            headers={
+                "Authorization": f"Bearer {self._api_key}",
+                "Content-Type": "application/json",
+            },
+        )
+        with urllib.request.urlopen(req, timeout=180) as resp:
+            body = json.loads(resp.read().decode())
+        b64 = body.get("data", [{}])[0].get("b64_json")
+        if b64:
+            raw = base64.b64decode(b64)
+        else:
+            url = body.get("data", [{}])[0].get("url")
+            if not url:
+                raise RuntimeError(f"unexpected response: {list(body)[:5]}")
+            with urllib.request.urlopen(url, timeout=60) as r:
+                raw = r.read()
+        out = _derived_out("siliconflow", "multiref", prompt, seed)
+        return _write_verified(raw, out, self.name)
+
+
+# ═══════════════════════════════════════════════════════════════════════ #
+# Gemini image model (gemini-2.5-flash-image "nano banana")
+# ═══════════════════════════════════════════════════════════════════════ #
+
+
+class GeminiImageProvider(ImageGenProvider):
+    """Google Gemini image model — edit AND multi-reference composition.
+
+    One ``generateContent`` endpoint covers all three ops: zero image
+    parts → single-pass text→img, one part → edit, 2+ parts →
+    multi-reference blend (each reference is a separate Part; the model
+    merges them into ONE output image).  Up to 14 reference images.
+    The API does not honour a seed (accepted, ignored).
+    """
+
+    name = "gemini_image"
+
+    _AR = {"1:1": 1.0, "4:3": 4 / 3, "3:4": 3 / 4,
+           "16:9": 16 / 9, "9:16": 9 / 16, "21:9": 21 / 9}
+
+    def __init__(self, api_key: Optional[str] = None,
+                 model: Optional[str] = None):
+        self._api_key = api_key or os.environ.get("GEMINI_API_KEY", "")
+        self._model = model or get_config(
+            "image_gen.gemini.model", "gemini-2.5-flash-image")
+
+    def is_available(self) -> bool:
+        return bool(self._api_key)
+
+    @classmethod
+    def _nearest_aspect(cls, width: int, height: int) -> str:
+        target = width / max(height, 1)
+        return min(cls._AR, key=lambda a: abs(cls._AR[a] - target))
+
+    def _run(self, contents: list, aspect: Optional[str] = None) -> bytes:
+        """Call the image model; return the raw image bytes of the reply."""
+        from google import genai
+        from google.genai import types
+        client = genai.Client(api_key=self._api_key)
+        config = types.GenerateContentConfig(
+            response_modalities=["IMAGE"],
+            image_config=types.ImageConfig(aspect_ratio=aspect) if aspect else None,
+        )
+        response = client.models.generate_content(
+            model=self._model, contents=contents, config=config)
+        cands = list(response.candidates or [])
+        for cand in cands:
+            for part in (cand.content.parts or []):
+                inline = getattr(part, "inline_data", None) \
+                    or getattr(part, "inlineData", None)
+                if inline is not None and getattr(inline, "data", None):
+                    return inline.data
+        finish = cands[0].finish_reason if cands else "no-candidates"
+        raise RuntimeError(
+            f"gemini_image: no image part in response (model={self._model}, "
+            f"finish_reason={finish})")
+
+    @staticmethod
+    def _load(path: str):
+        from PIL import Image
+        return Image.open(path)
+
+    def generate(self, prompt: str, output_path: str,
+                 width: int = 1024, height: int = 576,
+                 seed: Optional[int] = None) -> str:
+        if not self._api_key:
+            raise RuntimeError("GEMINI_API_KEY not set")
+        raw = self._run([prompt], self._nearest_aspect(width, height))
+        return _write_verified(raw, output_path, self.name)
+
+    def edit_image(self, prompt: str, image: "str | list[str]",
+                   aspect: str = "16:9", seed: Optional[int] = None) -> str:
+        if not self._api_key:
+            raise RuntimeError("GEMINI_API_KEY not set")
+        paths = [str(image)] if isinstance(image, (str, Path)) \
+            else [str(p) for p in image]
+        if len(paths) != 1:
+            raise NotImplementedError(
+                "gemini_image: edit takes exactly one reference "
+                "(use generate_multi_ref for 2+)")
+        raw = self._run([prompt, self._load(paths[0])], aspect)
+        out = _derived_out(self.name, "edit", prompt, seed)
+        return _write_verified(raw, out, self.name)
+
+    def generate_multi_ref(self, prompt: str, refs: list[str],
+                           aspect: str = "16:9", seed: Optional[int] = None) -> str:
+        if not self._api_key:
+            raise RuntimeError("GEMINI_API_KEY not set")
+        paths = [str(r) for r in refs]
+        if len(paths) < 2:
+            raise NotImplementedError(
+                "gemini_image: multi-ref needs 2+ reference images")
+        if len(paths) > 14:
+            raise NotImplementedError(
+                "gemini_image: at most 14 reference images")
+        raw = self._run([prompt] + [self._load(p) for p in paths], aspect)
+        out = _derived_out(self.name, "multiref", prompt, seed)
+        return _write_verified(raw, out, self.name)
 
 
 # ═══════════════════════════════════════════════════════════════════════ #
@@ -423,6 +727,7 @@ _PROVIDERS: dict[str, type[ImageGenProvider]] = {
     "siliconflow": SiliconFlowProvider,
     "hf_serverless": HFServerlessProvider,
     "pollinations": PollinationsProvider,
+    "gemini_image": GeminiImageProvider,
 }
 
 
@@ -452,6 +757,51 @@ class ImageGenFactory:
                 return p
         avail = self.available()
         return avail[0] if avail else None
+
+
+# ═══════════════════════════════════════════════════════════════════════ #
+# V13 M1a: graceful degradation — multi-stage op → single-pass text→img
+# ═══════════════════════════════════════════════════════════════════════ #
+
+_FALLBACK_SIZES = {"16:9": (1280, 720), "9:16": (720, 1280), "1:1": (1024, 1024)}
+
+
+def edit_image_with_fallback(provider: ImageGenProvider, prompt: str,
+                             image: "str | list[str]", aspect: str = "16:9",
+                             seed: Optional[int] = None) -> "tuple[str, bool]":
+    """edit_image, degrading to single-pass text→img when unavailable.
+
+    Returns ``(path, edited)`` so plate stages (M1b) can flag degraded
+    output in their sidecar.  Never raises for "op unsupported" or a
+    failed endpoint — the factory/callers must keep working.
+    """
+    try:
+        return provider.edit_image(prompt, image, aspect=aspect, seed=seed), True
+    except (NotImplementedError, RuntimeError):
+        pass
+    width, height = _FALLBACK_SIZES.get(aspect, _FALLBACK_SIZES["16:9"])
+    out = _derived_out(provider.name, "edit_fallback", prompt, seed)
+    return (provider.generate(prompt, out, width=width, height=height,
+                              seed=seed), False)
+
+
+def generate_multi_ref_with_fallback(provider: ImageGenProvider, prompt: str,
+                                     refs: list[str], aspect: str = "16:9",
+                                     seed: Optional[int] = None) -> "tuple[str, bool]":
+    """generate_multi_ref, degrading to single-pass text→img likewise.
+
+    Returns ``(path, composed)``; *composed* is False when the provider
+    lacked multi-reference support and a plain generation was produced.
+    """
+    try:
+        return provider.generate_multi_ref(prompt, refs, aspect=aspect,
+                                           seed=seed), True
+    except (NotImplementedError, RuntimeError):
+        pass
+    width, height = _FALLBACK_SIZES.get(aspect, _FALLBACK_SIZES["16:9"])
+    out = _derived_out(provider.name, "multiref_fallback", prompt, seed)
+    return (provider.generate(prompt, out, width=width, height=height,
+                              seed=seed), False)
 
 
 # ═══════════════════════════════════════════════════════════════════════ #

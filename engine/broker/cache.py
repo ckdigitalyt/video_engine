@@ -54,6 +54,7 @@ def broker_cache_key(
     model: str = "",
     seed: int | str | None = None,
     input_path: str | Path | None = None,
+    input_paths: list[str | Path] | None = None,
     style: Any = None,
     duration: float | None = None,
     aspect: str | None = None,
@@ -64,6 +65,9 @@ def broker_cache_key(
     """Deterministic cache key over every input that can change the output.
 
     Same inputs (in any process, any order of dict keys) → same key.
+
+    ``input_paths`` (V13 M1a) hashes every reference image so multi-ref
+    ops get per-ref content hashes in the key, order-sensitive.
     """
     parts = [
         op,
@@ -71,6 +75,7 @@ def broker_cache_key(
         model or "",
         str(seed) if seed is not None else "",
         _file_hash(input_path),
+        *([_file_hash(p) for p in input_paths] if input_paths else []),
         _style_hash(style),
         f"{duration:.3f}" if duration is not None else "",
         aspect or "",

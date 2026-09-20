@@ -329,6 +329,28 @@ class MediaBroker:
             prompt=instruction, input_path=image, seed=seed,
         )
 
+    def generate_multi_ref(self, prompt: str, refs: list[str | Path], *,
+                           aspect: str = "16:9", seed: int = 0,
+                           style: Any = None,
+                           renderer_version: str = "w1") -> BrokerResult:
+        """Compose ONE image from 2+ reference images (V13 M1a).
+
+        Cache key carries (op, per-ref content hashes) — order-sensitive.
+        Providers without multi-ref support raise ProviderError and the
+        broker fails over; if no provider succeeds, ProviderError escapes.
+        """
+        key = broker_cache_key(
+            prompt=prompt, input_paths=refs, seed=seed, style=style,
+            aspect=aspect, renderer_version=renderer_version,
+            op="generate_multi_ref",
+        )
+        return self._run(
+            "image", "generate_multi_ref", key, "png",
+            lambda p: p.generate_multi_ref(prompt, refs, aspect=aspect,
+                                           seed=seed),
+            prompt=prompt, input_paths=refs, seed=seed, aspect=aspect,
+        )
+
     # ── Stock (§13) ──────────────────────────────────────────────────────
 
     def search_stock(self, query: str, *, per_page: int = 5,
