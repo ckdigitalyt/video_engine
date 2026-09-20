@@ -213,3 +213,18 @@ def depth13() -> bool:
     blurred ambient field stays as decoration and earns no depth credit).
     """
     return os.environ.get("V13_DEPTH", "").strip().lower() not in _FALSE
+
+
+def jev13() -> bool:
+    """V13 M7 — Jev inert shadow stub (engine/jev_stub.py).
+
+    INVERSE of the V13 default-ON convention, deliberately. Jev (the
+    AI-judge experiment) was CLOSED by owner decision 2026-09-19:
+    expanded validation scored 60/100 with 12 unsafe false-positives
+    against a >=95% bar, and production decisions stayed 100%
+    deterministic. The stub exists only as an inert seam for a future
+    re-evaluation; it is OPT-IN ONLY (V13_JEV=1) and, even when on,
+    performs zero network/API/subprocess/file activity — see jev_stub.
+    Any live (model-calling) Jev requires explicit owner re-approval.
+    """
+    return os.environ.get("V13_JEV", "").strip().lower() in ("1", "true", "yes", "on")
