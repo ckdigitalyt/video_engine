@@ -54,7 +54,7 @@ Broker cache keys extend with (op, ref-hashes). Never log or commit key values; 
 
 | M | Deliverable | Acceptance | Global? | Blocks 6-video |
 |---|-------------|-----------|---------|----------------|
-| M1a | Provider ops + capability audit doc | one real edit roundtrip at low res per claimed provider; doc matrix committed | G | YES |
+| M1a | Provider ops + capability audit doc **(landed @ 79edeb3 — code complete, live edit UNVERIFIED)** | ops wired both stacks w/ fallback; live probes: Gemini edit 429 quota, NIM 422 payload, SiliconFlow 401 (key scoped to generations?). Follow-ups: retry Gemini edit after 1h quota cooldown (pilot run), fix NIM img2img payload shape, re-probe SiliconFlow edit endpoint | G | YES |
 | M1b | Plate pipeline `engine/plates.py`: 4 stages (composition → detail/material → semantic edit → depth/edge) writing plate + sidecar | pilot plate sidecar validates against schema; stage failures degrade gracefully to single-pass with sidecar flag | G+S | YES |
 | M2 | Final-transform safe-area QA `engine/safe_area_qa.py` + publish_gate component `safe_area_final` | synthetic test: bbox pushed off-canvas by zoompan → CAN_PUBLISH=FALSE; passes on in-spec plate; runs on sampled final frames post-transform | G | YES (P0 defect) |
 | M3 | Depth-aware 2.5D: masks from generation stage (M1b) or CPU seg benchmark (rembg/BiRefNet-class, seconds/plate — adopt only if CPU-cheap); composev5 true fg/mg/bg parallax, focus shift, push-through; ambient blur no longer counts as depth credit | pilot plate renders parallax from real masks; occupancy/depth QA updated | G+S | art-direct verdict |
