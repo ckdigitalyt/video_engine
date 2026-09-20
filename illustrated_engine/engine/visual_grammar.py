@@ -105,7 +105,59 @@ EXPLANATORY_MODES = (
     "FORCE_DIAGRAM", "ANIMATION",
     # generic fallbacks
     "COMPARISON", "TRANSFORMATION", "SCALE", "DIAGRAM",
+    # V13 M4 — mode→representation mapping (JADE_V13_RICH_VISUAL_DIRECTIVE
+    # P0 "STORY-SPECIFIC VISUAL REPRESENTATION"): every major beat classifies
+    # into the most informative visual mode; the rich visual plate + overlays
+    # is the NORMAL visual, diagrams are evidence.
+    "RICH_PLATE", "MATERIAL_DEFORMATION", "VECTOR_DIAGRAM",
+    "DATA_GRAPHIC", "PROCESS_LOOP", "CAUSAL_CHAIN",
 )
+
+# V13 M4 — every mode maps to exactly ONE representation class:
+#   PLATE          rich visual plate (the normal visual)
+#   PLATE+OVERLAY  plate + annotation overlay (callouts, measures, arrows)
+#   DIAGRAM        standalone diagram painter — evidence, never the default
+#   HYBRID         diagram elements composed over the staged plate
+# Unknown modes default to PLATE: a rich plate is always renderable and the
+# directive forbids defaulting to diagram painters.
+MODE_REPRESENTATION = {
+    # PLATE
+    "RICH_PLATE": "PLATE", "DARK_CINEMATIC": "PLATE",
+    "ARCHIVAL_ILLUSTRATION": "PLATE", "MACRO_DETAIL": "PLATE",
+    "TYPOGRAPHY": "PLATE",
+    # PLATE+OVERLAY
+    "CUTAWAY": "PLATE+OVERLAY", "CROSS_SECTION": "PLATE+OVERLAY",
+    "MAP": "PLATE+OVERLAY", "MAP_TRANSFORMATION": "PLATE+OVERLAY",
+    "GEOGRAPHIC_TRANSFORMATION": "PLATE+OVERLAY",
+    "CLIMATE_RECON": "PLATE+OVERLAY", "ASTRONOMICAL_SCALE": "PLATE+OVERLAY",
+    "MATERIAL_DEFORMATION": "PLATE+OVERLAY",
+    # DIAGRAM (evidence)
+    "DIAGRAM": "DIAGRAM", "STRUCTURAL_DIAGRAM": "DIAGRAM",
+    "CELLULAR_DIAGRAM": "DIAGRAM", "ORBITAL_DIAGRAM": "DIAGRAM",
+    "FORCE_DIAGRAM": "DIAGRAM", "BLUEPRINT": "DIAGRAM",
+    "TIMELINE": "DIAGRAM", "COMPARISON": "DIAGRAM",
+    "TRANSFORMATION": "DIAGRAM", "SCALE": "DIAGRAM",
+    "VECTOR_DIAGRAM": "DIAGRAM", "DATA_GRAPHIC": "DIAGRAM",
+    "MOLECULAR_PROCESS": "DIAGRAM", "ANIMATION": "DIAGRAM",
+    # HYBRID (diagram composed over the plate)
+    "PROCESS_LOOP": "HYBRID", "CAUSAL_CHAIN": "HYBRID",
+}
+
+REPRESENTATION_CLASSES = ("PLATE", "PLATE+OVERLAY", "DIAGRAM", "HYBRID")
+
+
+def representation_for(mode: str) -> str:
+    """One representation class per mode (V13 M4); unknown -> PLATE."""
+    return MODE_REPRESENTATION.get(str(mode or "").upper().strip(), "PLATE")
+
+
+def representation_of(record: dict) -> tuple[str, str]:
+    """Legacy tolerance (V13 M4): plans/beats stamped before M4 carry no
+    representation field -> ("DIAGRAM", "legacy").  Old plans stay valid."""
+    rep = str((record or {}).get("representation") or "").strip()
+    if not rep:
+        return "DIAGRAM", "legacy"
+    return rep, str((record or {}).get("mode_justification") or "legacy")
 
 
 def grammar_for(subject: str, beat_function: str = "", topic_grammar=None) -> tuple:
@@ -131,19 +183,48 @@ def grammar_for(subject: str, beat_function: str = "", topic_grammar=None) -> tu
     return pref
 
 
+def recommend_mode_detailed(subject: str, beat_function: str, claim: str = "",
+                            visual_mode: str = "") -> dict:
+    """V13 M4: pick a mode AND justify it.  Returns
+    {"mode", "representation", "mode_justification"}.  Richer representations
+    (PLATE / PLATE+OVERLAY / HYBRID) are preferred whenever the subject
+    grammar supports them; a DIAGRAM-class default carries an explicit
+    justification (directive P0: diagrams are evidence, not the default)."""
+    if visual_mode:
+        rep = representation_for(visual_mode)
+        just = ("author-declared mode" if rep != "DIAGRAM" else
+                "author-declared diagram-class mode (evidence)")
+        return {"mode": visual_mode, "representation": rep,
+                "mode_justification": just}
+    pref = grammar_for(subject, beat_function)
+    valid = [m for m in pref if m in EXPLANATORY_MODES]
+    rich = [m for m in valid if representation_for(m) != "DIAGRAM"]
+    if rich:
+        mode = rich[0]
+        just = (f"subject grammar '{subject or 'general'}' supports "
+                f"{representation_for(mode)}; {mode} preferred over "
+                f"diagram painters")
+    elif valid:
+        mode = valid[0]
+        just = (f"subject grammar '{subject or 'general'}' offers only "
+                f"diagram-class modes; {mode} used as evidence")
+    else:
+        mode = "COMPARISON"
+        just = "no subject grammar match; generic diagram fallback"
+    return {"mode": mode, "representation": representation_for(mode),
+            "mode_justification": just}
+
+
 def recommend_mode(subject: str, beat_function: str, claim: str = "",
                    visual_mode: str = "") -> str:
     """Pick one recommended mode for a shot. Respects an explicit visual_mode
     if the visual_plan set one (V5 §5: don't override intentional choices);
     otherwise resolves the subject+function grammar and chooses the first
-    mode that maps to an implemented diagram type."""
-    if visual_mode:
-        return visual_mode
-    pref = grammar_for(subject, beat_function)
-    for mode in pref:
-        if mode in EXPLANATORY_MODES:
-            return mode
-    return "COMPARISON"
+    mode that maps to an implemented diagram type.  V13 M4: now prefers
+    richer representations when the subject grammar supports them; see
+    recommend_mode_detailed for the justification companion."""
+    return recommend_mode_detailed(subject, beat_function, claim,
+                                   visual_mode)["mode"]
 
 
 def is_explanatory_mode(mode: str) -> bool:
@@ -155,7 +236,8 @@ def is_explanatory_mode(mode: str) -> bool:
         "CELLULAR_DIAGRAM", "MOLECULAR_PROCESS", "GEOGRAPHIC_TRANSFORMATION",
         "CLIMATE_RECON", "ASTRONOMICAL_SCALE", "ORBITAL_DIAGRAM",
         "ARCHIVAL_ILLUSTRATION", "MAP_TRANSFORMATION", "FORCE_DIAGRAM",
-        "ANIMATION",
+        "ANIMATION", "RICH_PLATE", "MATERIAL_DEFORMATION",
+        "VECTOR_DIAGRAM", "DATA_GRAPHIC", "PROCESS_LOOP", "CAUSAL_CHAIN",
     }
 
 

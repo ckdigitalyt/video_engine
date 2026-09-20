@@ -42,7 +42,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from engine import antitemplate, canvas_grammar, nuance, planv8
+from engine import antitemplate, canvas_grammar, nuance, planv8, visual_grammar
 from engine.facts import load_facts
 
 MAX_REGENERATIONS = 2  # directive: bounded 2-3 regeneration attempts
@@ -147,6 +147,10 @@ def _beat_model(plan: dict, story: dict, kit_id: str,
     intent -> visual experience -> state transformation -> payoff."""
     beats = {str(b.get("beat_id")): b for b in (story.get("beats") or [])}
     kit = canvas_grammar.KITS[kit_id]
+    # V13 M4 — mode→representation mapping: per-beat representation +
+    # justification stamped additively (directive P0: the rich plate +
+    # overlays is the normal visual; diagrams are evidence).
+    subject = str(story.get("subject") or "general")
     rows, problems = {}, []
     for bid, beat in beats.items():
         fn = str(beat.get("function") or "").upper()
@@ -183,6 +187,8 @@ def _beat_model(plan: dict, story: dict, kit_id: str,
                 problems.append(
                     f"{bid}: declared '{transform}' overridden to "
                     f"'hypothesis_branches' (claim confidence {conf})")
+        rec = visual_grammar.recommend_mode_detailed(
+            subject, fn, visual_mode=str(beat.get("visual_mode") or ""))
         rows[bid] = {
             "function": fn,
             "viewer_question": str(beat.get("visual_question") or "").strip(),
@@ -194,6 +200,10 @@ def _beat_model(plan: dict, story: dict, kit_id: str,
             "claim_confidence": conf,
             "claim_ids": crow.get("claim_ids") or [],
             "confidence_override": override,
+            # V13 M4 — additive stamp (missing field on old plans reads as
+            # legacy DIAGRAM via visual_grammar.representation_of).
+            "representation": rec["representation"],
+            "mode_justification": rec["mode_justification"],
         }
     return {"grammar": kit_id, "beats": rows,
             "transformation_problems": problems,
@@ -374,6 +384,13 @@ def make_edit_plan_v9(paths, story_id: str, out_name: str = "edit_plan.json",
         "cross_video_template": report.get("cross_video"),
         "transformation_problems": model["transformation_problems"],
         "claim_confidence": model.get("claim_confidence") or {},
+        # V13 M4 — representation mix across beats (evidence the planner did
+        # NOT collapse everything into diagram painters).
+        "representation_mix": {
+            r["representation"]: sum(
+                1 for x in model["beats"].values()
+                if x["representation"] == r["representation"])
+            for r in model["beats"].values()},
     }
 
     # Persist the plan-level signature so the NEXT story compares against it

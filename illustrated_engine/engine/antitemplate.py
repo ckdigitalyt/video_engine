@@ -142,6 +142,10 @@ V2_SEQ_FIELDS = (
     "transition_types",       # transition vocabulary per shot
     "state_sequence",         # visual state sequence
     "camera_behavior",        # push/pull/hold per shot
+    # V13 M4 — cross-video template-collapse dims (directive P0)
+    "asset_class_mix",           # plate vs diagram asset mix by duration
+    "composition_architecture",  # full_bleed / board / split / depth_stage
+    "background_architecture",   # photographic / gradient / flat / pattern
 )
 V2_RATIO_FIELDS = ("diagram_ratio", "cinematic_ratio", "avg_shot_dur")
 V2_FLAG_FIELDS = ("title_behavior", "chrome_usage", "accent_usage",
@@ -156,9 +160,13 @@ _V2_WEIGHTS = {
     "caption_architecture": 0.6, "transition_types": 0.6,
     "state_sequence": 0.8, "camera_behavior": 0.8,
     "role_sequence": 0.6,
+    # V13 M4 — template collapse survives noun-swapping; the asset-class mix
+    # and the collapsed composition/background architectures catch it.
+    "asset_class_mix": 0.8, "composition_architecture": 1.0,
+    "background_architecture": 0.8,
 }
 _SAME_VIDEO_MEAN_D = 0.30   # weighted mean distance below this = same video
-_SAME_VIDEO_FIELDS = 6      # ... AND this many of the 9 architecture fields
+_SAME_VIDEO_FIELDS = 6      # ... AND this many of the 12 architecture fields
                             # near-identical (directive: "highly similar")
 
 
@@ -184,6 +192,47 @@ def _duration_profile(shots: list, total: float) -> str:
     short = sum(1 for s in shots if float(s.get("duration_s") or 0) < 4.0)
     long = sum(1 for s in shots if float(s.get("duration_s") or 0) > 8.0)
     return f"n{len(shots)}_s{short}_l{long}"
+
+
+def _comp_arch(comp: str) -> str:
+    """V13 M4: collapse a composition label to its architecture class."""
+    c = str(comp or "").lower()
+    if "full" in c or "bleed" in c:
+        return "full_bleed"
+    if "depth" in c or "stage" in c:
+        return "depth_stage"
+    if "split" in c:
+        return "split"
+    if "board" in c or "panel" in c:
+        return "board"
+    return c.replace(" ", "_") or "unknown"
+
+
+def _bg_arch(bg: str) -> str:
+    """V13 M4: collapse a background label to its architecture class."""
+    b = str(bg or "").lower()
+    if "photo" in b or "plate" in b or "scene" in b or "environment" in b:
+        return "photographic"
+    if "gradient" in b:
+        return "gradient"
+    if "flat" in b or "solid" in b or "color" in b or "colour" in b:
+        return "flat"
+    if "pattern" in b or "texture" in b:
+        return "pattern"
+    return b.replace(" ", "_") or "unknown"
+
+
+def _asset_class_mix(shots: list) -> list:
+    """V13 M4: duration share by representation class (plate vs diagram
+    asset mix) — a template clone keeps the same mix even when nouns change.
+    Shares quantized to 0.1 so near-identical mixes compare equal."""
+    from engine import visual_grammar as vg  # local: pure resolver, no cycle
+    dur = sum(float(s.get("duration_s") or 0) for s in shots) or 1.0
+    tally: dict = {}
+    for s in shots:
+        rep = vg.representation_for(str(s.get("visual_mode") or ""))
+        tally[rep] = tally.get(rep, 0.0) + float(s.get("duration_s") or 0)
+    return [f"{k}:{round(v / dur, 1)}" for k, v in sorted(tally.items())]
 
 
 def build_signature_v2(plan: dict) -> dict:
@@ -229,6 +278,12 @@ def build_signature_v2(plan: dict) -> dict:
         "duration_profile": _duration_profile(shots, dur),
         "diagram_ratio": round(diag_d / dur, 3),
         "cinematic_ratio": round(cin_d / dur, 3),
+        # V13 M4 — cross-video template-collapse dims
+        "asset_class_mix": _asset_class_mix(shots),
+        "composition_architecture": [_comp_arch(c.get("composition"))
+                                     for c in canvas],
+        "background_architecture": [_bg_arch(c.get("background"))
+                                    for c in canvas],
     }
 
 
