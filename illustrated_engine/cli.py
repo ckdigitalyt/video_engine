@@ -714,6 +714,16 @@ def cmd_qa8full(args):
         "SEMANTIC_PASS": sem["SEMANTIC_PASS"]}
     res8["story_id"] = story_id
     res8["V6_CAN_PUBLISH"] = v6_ok
+    # V13 M6a — diagnostics only (non-gating; no publish_gate component,
+    # no CAN_PUBLISH effect; calibration on pilot later).
+    try:
+        from engine import visual_sophistication as _vs
+        _scs = _vs.load_sidecars(Path("build"))
+        res8["visual_sophistication"] = _vs.assess(plan, _scs)
+        res8["rich_asset_coverage"] = _vs.rich_asset_coverage(plan, _scs)
+    except Exception as _e:  # diagnostics must never break qa8
+        res8["visual_sophistication"] = {"schema": "v13.visual_sophistication/1.0",
+                                         "error": str(_e)}
     editorial8.write_report(res8, Path("build/qa"))
     print(f"qa8full {story_id} -> build/qa/qa8_{story_id}.json")
     for k, v in res8["gates"].items():
