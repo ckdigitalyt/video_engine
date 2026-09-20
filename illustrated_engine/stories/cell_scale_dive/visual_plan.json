@@ -1,0 +1,237 @@
+{
+ "story_id": "cell_scale_dive",
+ "engine": "v5",
+ "fps": 30,
+ "size": [1080, 1920],
+ "regions": {"visual_rect": [0, 176, 1080, 1744], "center": [0.3, 0.38, 0.4, 0.24], "upper": [0.22, 0.06, 0.56, 0.2], "lower": [0.22, 0.7, 0.56, 0.2]},
+ "beats": [
+  {
+   "beat_id": "B1",
+   "shots": [
+    {
+     "shot_id": "S01",
+     "shot_type": "HOOK",
+     "asset": "SD_B1_hair_hook",
+     "duration_est": 6.8,
+     "crop_bias_y": 0.45,
+     "opening": true,
+     "title": "HOW BIG IS A CELL, REALLY?",
+     "tag": "",
+     "captions": "phrase",
+     "role": "HERO",
+     "chrome": "none",
+     "visual_mode": "CINEMATIC",
+     "evidence_type": "DIRECT_EVIDENCE",
+     "motion_type": "CAMERA_MOTION",
+     "purpose": "Put the hidden scale on screen first: a single hair shaft crossing the frame with an unseen world at its edge",
+     "claim": "a human hair is about 80 micrometers wide and hides a microscopic universe",
+     "evidence": "full-bleed ink-wash hair shaft plate with faint organelle shapes hinted at the lower edge",
+     "motion_reason": "slow push-in along the hair: stillness first so the question lands clean",
+     "transition_reason": "hard cut to the eye-limit macro",
+     "cam_from_scale": 1.0,
+     "cam_to_scale": 1.1,
+     "cam_cx": 0.5,
+     "cam_cy": 0.45,
+     "subject_contract": {
+      "expected_subject": "a single human hair shaft crossing the frame in vintage ink-wash style, faint microscopic world hinted beneath",
+      "required": ["one hair shaft crossing the frame", "parchment background with soft wash"],
+      "forbidden": ["microscopes or laboratory glassware", "text labels on the artwork", "cartoon characters"]
+     },
+     "one_second": {"relationship": "one strand of hair against an implied invisible world"},
+     "overlays": [],
+     "typography": []
+    }
+   ]
+  },
+  {
+   "beat_id": "B2",
+   "shots": [
+    {
+     "shot_id": "S02",
+     "shot_type": "DETAIL",
+     "asset": "SD_B2_eye_limit",
+     "duration_est": 7.4,
+     "crop_bias_y": 0.45,
+     "opening": false,
+     "title": "",
+     "tag": "",
+     "captions": "phrase",
+     "role": "DETAIL",
+     "chrome": "footer",
+     "visual_mode": "DETAIL",
+     "evidence_type": "DIRECT_EVIDENCE",
+     "motion_type": "CAMERA_MOTION",
+     "purpose": "Show vision hitting its floor: measurement ticks fade out along the hair edge as detail dissolves",
+     "claim": "the naked eye resolves detail only down to about 0.1 millimeters",
+     "evidence": "macro plate of the hair edge with resolution ticks dissolving into blank wash",
+     "motion_reason": "slow drift along the edge toward the blur boundary",
+     "transition_reason": "hard cut to the dive",
+     "cam_from_scale": 1.05,
+     "cam_to_scale": 1.15,
+     "cam_cx": 0.5,
+     "cam_cy": 0.5,
+     "subject_contract": {
+      "expected_subject": "macro view of a hair shaft edge dissolving into blur, faint measurement ticks fading, vintage ink-wash style",
+      "required": ["hair edge in macro", "dissolving blur region"],
+      "forbidden": ["measuring instruments", "text labels on the artwork", "human figures"]
+     },
+     "one_second": {"relationship": "detail dissolving past the eye's limit"},
+     "overlays": [],
+     "typography": []
+    }
+   ]
+  },
+  {
+   "beat_id": "B3",
+   "shots": [
+    {
+     "shot_id": "S03",
+     "shot_type": "REVEAL",
+     "asset": "SD_B3_dive_rings",
+     "duration_est": 9.0,
+     "crop_bias_y": 0.5,
+     "opening": false,
+     "title": "",
+     "tag": "",
+     "captions": "phrase",
+     "role": "DETAIL",
+     "chrome": "footer",
+     "visual_mode": "DETAIL",
+     "evidence_type": "DERIVED_EVIDENCE",
+     "motion_type": "CAMERA_MOTION",
+     "purpose": "The signature move: one continuous dive through nested rings, hair to cell to mitochondrion to DNA",
+     "claim": "one continuous dive runs from hair width through a cell and a mitochondrion down to DNA at 2 nanometers",
+     "evidence": "plate of concentric nested rings shrinking toward a glowing center, largest ring hair-width scale, smallest a helix",
+     "motion_reason": "continuous zoom through the rings: the dive IS the explanation",
+     "transition_reason": "hard cut into the mitochondrion macro",
+     "cam_from_scale": 1.0,
+     "cam_to_scale": 1.35,
+     "cam_cx": 0.5,
+     "cam_cy": 0.5,
+     "subject_contract": {
+      "expected_subject": "concentric nested rings shrinking toward a small glowing double helix at center, vintage ink-wash parchment style",
+      "required": ["concentric nested rings", "small helix at the center"],
+      "forbidden": ["text labels on the artwork", "modern UI elements", "human figures"]
+     },
+     "one_second": {"relationship": "each ring is a world inside the last"},
+     "overlays": [{"kind": "NUMBER_POP", "text": "30 MICROMETERS", "target": "upper", "at": 0.4}],
+     "typography": []
+    }
+   ]
+  },
+  {
+   "beat_id": "B4",
+   "shots": [
+    {
+     "shot_id": "S04",
+     "shot_type": "EXPLAIN",
+     "asset": "SD_B4_mito_macro",
+     "duration_est": 8.5,
+     "crop_bias_y": 0.45,
+     "opening": false,
+     "title": "",
+     "tag": "",
+     "captions": "phrase",
+     "role": "DETAIL",
+     "chrome": "footer",
+     "visual_mode": "DETAIL",
+     "evidence_type": "DIRECT_EVIDENCE",
+     "motion_type": "CAMERA_MOTION",
+     "purpose": "Macro detail of the working machinery: folded cristae burning sugar into ATP inside one organelle",
+     "claim": "a mitochondrion about 1 micrometer wide burns sugar into ATP inside folded cristae membranes",
+     "evidence": "full-bleed macro plate of one mitochondrion with warm glowing cristae folds",
+     "motion_reason": "slow push onto the cristae folds so the machinery reads as texture",
+     "transition_reason": "hard cut to the DNA thread",
+     "cam_from_scale": 1.0,
+     "cam_to_scale": 1.12,
+     "cam_cx": 0.5,
+     "cam_cy": 0.5,
+     "subject_contract": {
+      "expected_subject": "one bean-shaped mitochondrion filling the frame with folded inner cristae, warm rust glow, vintage ink-wash style",
+      "required": ["single large mitochondrion", "folded cristae visible", "warm glow at the folds"],
+      "forbidden": ["bacteria", "text labels on the artwork", "human figures"]
+     },
+     "one_second": {"relationship": "folded machinery burning fuel inside a speck"},
+     "overlays": [{"kind": "NUMBER_POP", "text": "1 MICROMETER", "target": "upper", "at": 0.5}],
+     "typography": []
+    }
+   ]
+  },
+  {
+   "beat_id": "B5",
+   "shots": [
+    {
+     "shot_id": "S05",
+     "shot_type": "DIAGRAM",
+     "asset": "SD_B5_dna_thread",
+     "duration_est": 9.5,
+     "crop_bias_y": 0.5,
+     "opening": false,
+     "title": "",
+     "tag": "",
+     "captions": "phrase",
+     "role": "DIAGRAM",
+     "chrome": "footer",
+     "visual_mode": "TRANSFORMATION",
+     "evidence_type": "DERIVED_EVIDENCE",
+     "motion_type": "CAMERA_MOTION",
+     "purpose": "The absurd ratio made visible: a 2-meter thread coiled inside a cell, its width 2 nanometers",
+     "claim": "the DNA in one human cell uncoils to about 2 meters, yet the double helix is only 2 nanometers wide",
+     "evidence": "plate of a long coiled thread spilling out of a small cell outline, with a magnified helix segment at its end",
+     "motion_reason": "slow pan along the uncoiling thread, ending at the magnified helix",
+     "transition_reason": "hard cut to the payoff hair shot",
+     "cam_from_scale": 1.0,
+     "cam_to_scale": 1.2,
+     "cam_cx": 0.45,
+     "cam_cy": 0.5,
+     "subject_contract": {
+      "expected_subject": "a long coiled thread spilling from a small cell outline with a magnified double-helix segment, vintage ink-wash parchment style",
+      "required": ["coiled thread spilling from a cell outline", "double-helix segment visible"],
+      "forbidden": ["text labels on the artwork", "human figures", "modern objects"]
+     },
+     "one_second": {"relationship": "two meters of thread coiled into a speck"},
+     "overlays": [{"kind": "NUMBER_POP", "text": "2 METERS / 2 NM", "target": "upper", "at": 0.5}],
+     "typography": []
+    }
+   ]
+  },
+  {
+   "beat_id": "B6",
+   "shots": [
+    {
+     "shot_id": "S06",
+     "shot_type": "PAYOFF",
+     "asset": "SD_B6_hair_universe",
+     "duration_est": 8.2,
+     "crop_bias_y": 0.45,
+     "opening": false,
+     "title": "",
+     "tag": "",
+     "captions": "phrase",
+     "role": "PAYOFF",
+     "chrome": "none",
+     "visual_mode": "PAYOFF",
+     "evidence_type": "DERIVED_EVIDENCE",
+     "motion_type": "CAMERA_MOTION",
+     "purpose": "Payoff collapse: the ordinary hair back in warm light, its shadow now understood as 30 trillion nested worlds",
+     "claim": "the human body holds roughly 30 trillion cells, each a nested universe of unseen machines",
+     "evidence": "full-bleed plate of a single hair against warm light with a faint glowing universe of cells beneath",
+     "motion_reason": "slow pull-back to the quiet wide shot; the question resolves in one image",
+     "transition_reason": "fade out",
+     "cam_from_scale": 1.08,
+     "cam_to_scale": 1.0,
+     "cam_cx": 0.5,
+     "cam_cy": 0.45,
+     "subject_contract": {
+      "expected_subject": "a single hair shaft in warm backlight with a faint field of glowing cells beneath it, vintage ink-wash style",
+      "required": ["single hair shaft", "faint glowing cell field below"],
+      "forbidden": ["text labels on the artwork", "human figures", "modern objects"]
+     },
+     "one_second": {"relationship": "the hair you know, now shadowing a universe"},
+     "overlays": [{"kind": "NUMBER_POP", "text": "30 TRILLION", "target": "upper", "at": 0.5}],
+     "typography": []
+    }
+   ]
+  }
+ ]
+}

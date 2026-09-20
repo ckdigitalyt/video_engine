@@ -1,0 +1,75 @@
+{
+ "story_id": "cell_scale_dive",
+ "brand": "ABOVE THE CLOUDS",
+ "title": "How Big Is a Cell, Really?",
+ "subject": "biology",
+ "pad_s": 0.7,
+ "beats": [
+  {
+   "beat_id": "B1",
+   "function": "HOOK",
+   "narration": "Think your world is small? An invisible universe is hiding under one 80-micrometer strand of your hair.",
+   "claim": "a human hair is about 80 micrometers wide and hides a microscopic universe",
+   "visual_question": "what hides under a single strand of hair?",
+   "visual_answer": "a full-bleed hair shaft crossing the frame with a hidden microscopic world at its edge",
+   "fact_ids": ["f_hair_width"],
+   "start": 0.0,
+   "end": 7.5
+  },
+  {
+   "beat_id": "B2",
+   "function": "CURIOSITY",
+   "narration": "Your eyes bottom out near one tenth of a millimeter. Anything smaller stays a rumor you can only measure.",
+   "claim": "the naked eye resolves detail only down to about 0.1 millimeters",
+   "visual_question": "where does human vision hit its floor?",
+   "visual_answer": "macro close-up of the hair edge dissolving past the eye's resolution limit, measurement ticks fading",
+   "fact_ids": ["f_eye_limit"],
+   "start": 7.5,
+   "end": 15.0
+  },
+  {
+   "beat_id": "B3",
+   "function": "REVEAL",
+   "narration": "So dive: through the skin, into a cell 30 micrometers wide, a mitochondrion 30 times smaller, then DNA just 2 nanometers thin.",
+   "claim": "one continuous dive runs from hair width through a cell and a mitochondrion down to DNA at 2 nanometers",
+   "visual_question": "what does the full zoom from hair to DNA look like?",
+   "visual_answer": "nested rings shrinking from hair width to cell to mitochondrion to DNA strand, one continuous dive",
+   "fact_ids": ["f_hair_width", "f_scale_chain"],
+   "start": 15.0,
+   "end": 24.0
+  },
+  {
+   "beat_id": "B4",
+   "function": "EXPLANATION",
+   "narration": "Inside that power plant, folded cristae burn your sugar into usable energy, machinery 80 times thinner than the hair it hides under.",
+   "claim": "a mitochondrion about 1 micrometer wide burns sugar into ATP inside folded cristae membranes",
+   "visual_question": "what is doing the work down there?",
+   "visual_answer": "macro detail of one mitochondrion with folded cristae glowing warm in its matrix",
+   "fact_ids": ["f_mito_atp"],
+   "start": 24.0,
+   "end": 32.5
+  },
+  {
+   "beat_id": "B5",
+   "function": "ESCALATION",
+   "narration": "Uncoil the DNA in one nucleus and it stretches 2 meters, yet the strand is only 2 nanometers wide, 40,000 times thinner than your hair.",
+   "claim": "the DNA in one human cell uncoils to about 2 meters, yet the double helix is only 2 nanometers wide",
+   "visual_question": "how much DNA hides in one nucleus?",
+   "visual_answer": "a 2-meter DNA thread laid beside a cell, with the 2-nanometer helix magnified at its end",
+   "fact_ids": ["f_dna_2m_2nm"],
+   "start": 32.5,
+   "end": 42.0
+  },
+  {
+   "beat_id": "B6",
+   "function": "PAYOFF",
+   "narration": "So next time you brush your hair, remember the universe in its shadow: 30 trillion cells, each carrying machines you will never see.",
+   "claim": "the human body holds roughly 30 trillion cells, each a nested universe of unseen machines",
+   "visual_question": "what should you see when you look at your own hair now?",
+   "visual_answer": "a single hair against warm light with a faint glowing universe of cells beneath it",
+   "fact_ids": ["f_trillion_cells"],
+   "start": 42.0,
+   "end": 50.0
+  }
+ ]
+}

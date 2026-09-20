@@ -1,0 +1,85 @@
+{
+  "claims": [
+    {
+      "id": "f_hair_width",
+      "beats": ["B1", "B3"],
+      "claim": "A human hair is roughly 80 micrometers (0.08 mm) wide",
+      "definition": "The average diameter of a human head hair is about 70-100 micrometers, with ~80 µm the commonly cited midpoint; fine blonde hairs run thinner, coarse dark hairs thicker. 80 µm = 0.08 mm.",
+      "measured_value": "~70-100 µm (commonly cited ~80 µm)",
+      "date_verified": "2026-09",
+      "authoritative_source": "Standard microscopy references (hair diameter ranges); e.g., 'Human hair diameter' compendia in microscopy texts",
+      "source_url": "https://www.sciencelearn.org.nz/resources/1782-hair-and-fibres",
+      "historically_changed": false,
+      "sources": ["Science Learning Hub: Hair and fibres", "standard microscopy reference ranges"],
+      "verified": true,
+      "notes": "Narration uses the ~80 µm midpoint; the range is honest."
+    },
+    {
+      "id": "f_eye_limit",
+      "beats": ["B2"],
+      "claim": "The unaided human eye resolves detail down to about 0.1 millimeters",
+      "definition": "Maximum visual acuity of the normal human eye at 25 cm near point corresponds to resolving features of roughly 0.1 mm (100 µm); anything smaller requires magnification.",
+      "measured_value": "~0.1 mm (100 µm) at 25 cm",
+      "date_verified": "2026-09",
+      "authoritative_source": "Standard human-physiology/optics texts (visual acuity, minimum separable)",
+      "source_url": "https://www.ncbi.nlm.nih.gov/books/NBK470994/",
+      "historically_changed": false,
+      "sources": ["standard visual acuity references"],
+      "verified": true
+    },
+    {
+      "id": "f_scale_chain",
+      "beats": ["B3"],
+      "claim": "One continuous zoom runs hair width (~80 µm) to skin cell (~30 µm) to mitochondrion (~1 µm) to DNA width (~2 nm)",
+      "definition": "Typical mammalian skin cells (keratinocytes) measure ~25-40 µm across; a mitochondrion is ~0.5-1 µm wide and 1-2 µm long; the DNA double helix is ~2 nm wide. Ratios along the chain: hair→cell ~3×, cell→mitochondrion ~30×, mitochondrion→DNA width ~500×.",
+      "measured_value": "80 µm / 30 µm / 1 µm / 2 nm",
+      "date_verified": "2026-09",
+      "authoritative_source": "Alberts et al., 'Molecular Biology of the Cell' (cell and organelle size ranges); standard cell-biology size scales",
+      "source_url": "https://www.ncbi.nlm.nih.gov/books/NBK26894/",
+      "historically_changed": false,
+      "sources": ["Alberts, Molecular Biology of the Cell", "standard cell biology size tables"],
+      "verified": true,
+      "notes": "Narration cites the 30× cell→mitochondrion step and the 2 nm DNA width."
+    },
+    {
+      "id": "f_mito_atp",
+      "beats": ["B4"],
+      "claim": "A mitochondrion about 1 micrometer wide burns sugar into ATP inside folded cristae membranes",
+      "definition": "Mitochondria (~0.5-1 µm wide) carry out oxidative phosphorylation: folded inner-membrane cristae host the electron-transport chain that converts sugar-derived carriers into ATP, the cell's energy currency.",
+      "measured_value": "~0.5-1 µm wide; cristae-folded inner membrane",
+      "date_verified": "2026-09",
+      "authoritative_source": "Alberts et al., 'Molecular Biology of the Cell' (mitochondria chapter)",
+      "source_url": "https://www.ncbi.nlm.nih.gov/books/NBK26894/",
+      "historically_changed": false,
+      "sources": ["Alberts, Molecular Biology of the Cell"],
+      "verified": true
+    },
+    {
+      "id": "f_dna_2m_2nm",
+      "beats": ["B5"],
+      "claim": "The DNA in one human cell uncoils to about 2 meters, yet the double helix is only 2 nanometers wide",
+      "definition": "A human diploid cell carries ~6.4 billion base pairs; at ~0.34 nm per base pair along the helix, fully uncoiled DNA measures about 2 meters, while the double helix is ~2 nm in diameter — roughly 40,000× thinner than an 80 µm hair.",
+      "measured_value": "~2 m uncoiled; ~2 nm helix width; 40,000× vs 80 µm hair",
+      "date_verified": "2026-09",
+      "authoritative_source": "NCBI Bookshelf, 'The Machinery of Life'/molecular biology of the cell references; standard genome-length derivations",
+      "source_url": "https://www.ncbi.nlm.nih.gov/books/NBK26821/",
+      "historically_changed": false,
+      "sources": ["Alberts, Molecular Biology of the Cell (DNA dimensions)", "standard 2 m per cell derivation"],
+      "verified": true
+    },
+    {
+      "id": "f_trillion_cells",
+      "beats": ["B6"],
+      "claim": "The human body contains roughly 30 trillion cells",
+      "definition": "Bianconi et al. (2013) estimate 3.72×10^13 cells (~37 trillion) in a reference adult male; ~30 trillion is the commonly cited order of magnitude across body sizes.",
+      "measured_value": "~3×10^13 cells (30-37 trillion)",
+      "date_verified": "2026-09",
+      "authoritative_source": "Bianconi et al., 'An estimation of the number of cells in the human body', Annals of Human Biology 2013",
+      "source_url": "https://pubmed.ncbi.nlm.nih.gov/23829164/",
+      "historically_changed": false,
+      "sources": ["Bianconi et al., Ann Hum Biol 40(6), 2013"],
+      "verified": true,
+      "notes": "Narration uses the common '30 trillion' order of magnitude."
+    }
+  ]
+}
