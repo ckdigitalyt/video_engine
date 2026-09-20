@@ -43,15 +43,39 @@ _PLATE_REPS = {"PLATE", "SCENE", "SCENE_PLATE", "ENVIRONMENT", "PHOTOREAL"}
 # ── plan / sidecar plumbing ──────────────────────────────────────────────────
 
 def _beats(plan):
-    """Yield (beat_id, beat_dict) from either dict- or list-shaped beats."""
+    """Yield (beat_id, beat_dict) from dict/list beats, or a shots view.
+
+    V13 — render-path edit plans carry `shots` (no `beats`); derive the beat
+    view from shots so the diagnostics see plate-bearing beats. Representation
+    preference: shot stamp -> beat_model row -> plate presence -> None.
+    """
     beats = plan.get("beats") or {}
-    if isinstance(beats, dict):
+    if isinstance(beats, dict) and beats:
         for bid, b in beats.items():
             yield str(bid), (b if isinstance(b, dict) else {})
-    else:
+        return
+    if isinstance(beats, list) and beats:
         for i, b in enumerate(beats):
             if isinstance(b, dict):
                 yield str(b.get("beat_id", f"beat{i}")), b
+        return
+    bm = ((plan.get("beat_model") or {}).get("beats")) or {}
+    for i, s in enumerate(plan.get("shots") or []):
+        if not isinstance(s, dict):
+            continue
+        bid = str(s.get("beat_id") or s.get("shot_id") or f"shot{i}")
+        row = bm.get(bid) or {}
+        yield bid, {
+            "beat_id": bid,
+            "mode": s.get("visual_mode") or row.get("mode"),
+            "representation": (s.get("representation") or row.get("representation")
+                               or ("PLATE" if (s.get("plate") or s.get("plate_sidecar")) else None)),
+            "mode_justification": (s.get("mode_justification")
+                                   or row.get("mode_justification")),
+            "duration_s": float(s.get("duration_s") or 0.0),
+            "plate": s.get("plate"),
+            "asset": s.get("asset"),
+        }
 
 
 def load_sidecars(base, limit=400):

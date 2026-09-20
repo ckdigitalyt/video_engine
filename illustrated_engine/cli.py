@@ -197,9 +197,18 @@ def cmd_qa4(args):
     if man4.exists():
         man = _json.loads(man4.read_text())
         assets_dir = Path(paths.assets)
+        # V13 — diagram legibility probes apply to programmatic cards only:
+        # assets must be in the plan (stray alternates excluded) AND not be
+        # photographic plates (no accent glyphs; probing them reads photo
+        # noise as a false P0). Plate-beat number pops are probed via events.
+        _plan_assets = {str(s.get("asset")) for s in (plan4.get("shots") or [])}
+        _plate_assets = {str(s.get("asset")) for s in (plan4.get("shots") or [])
+                         if s.get("plate") or s.get("plate_sidecar")}
         for stages in man.values():
             stage_pngs += [str(Path(paths.build) / "diag_stages" / f"{st['asset']}_full.png")
-                           for st in stages]
+                           for st in stages
+                           if str(st.get("asset")) in _plan_assets
+                           and str(st.get("asset")) not in _plate_assets]
     leg = phone_qa.phone_legibility(video, plan_shots=plan4.get("shots"),
                                     stage_pngs=stage_pngs)
     (Path(paths.build) / "phone_qa.json").write_text(_json.dumps(leg, indent=2))
@@ -516,9 +525,16 @@ def cmd_qa5full(args):
     stage_pngs = []
     if man4.exists():
         man = _json.loads(man4.read_text())
+        # V13 — same rule (see above): plan assets only, photographic plates
+        # excluded.
+        _plan_assets = {str(s.get("asset")) for s in (plan4.get("shots") or [])}
+        _plate_assets = {str(s.get("asset")) for s in (plan4.get("shots") or [])
+                         if s.get("plate") or s.get("plate_sidecar")}
         for stages in man.values():
             stage_pngs += [str(Path(paths.build) / "diag_stages" / f"{st['asset']}_full.png")
-                           for st in stages]
+                           for st in stages
+                           if str(st.get("asset")) in _plan_assets
+                           and str(st.get("asset")) not in _plate_assets]
     leg = phone_qa.phone_legibility(video, plan_shots=plan4.get("shots"),
                                     stage_pngs=stage_pngs)
     (Path(paths.build) / "phone_qa.json").write_text(_json.dumps(leg, indent=2))

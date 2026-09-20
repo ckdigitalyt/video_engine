@@ -528,6 +528,11 @@ def make_edit_plan_v9(paths, story_id: str, out_name: str = "edit_plan.json",
     # Persist the annotated snapshot (plan8 wrote edit_plan_<story>.json).
     snap = Path(paths.build) / f"edit_plan_{story_id}.json"
     snap.write_text(json.dumps(plan, indent=1) + "\n")
+    # V13 integration — the render/QA path consumes build/edit_plan.json;
+    # persist the annotated plan there too (the unsuffixed copy otherwise
+    # stays plan8-era: no v9 stamps, no representation, no plate_spec).
+    if out_name and out_name != snap.name:
+        (Path(paths.build) / out_name).write_text(json.dumps(plan, indent=1) + "\n")
     return plan, plan["v9"]
 
 
