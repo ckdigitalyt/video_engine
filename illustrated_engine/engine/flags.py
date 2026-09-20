@@ -202,3 +202,14 @@ def fullbleed11() -> bool:
 
 def gates11() -> bool:
     return os.environ.get("V11_GATES", "").strip().lower() not in _FALSE
+
+
+# ── V13 — rich visual plates (docs/v13/V13_PLAN.md) ───────────────────
+
+def depth13() -> bool:
+    """V13 M3 — real-mask 2.5D parallax from plate sidecar masks.
+
+    Default ON; V13_DEPTH=0 restores the ambient-only baseline (the
+    blurred ambient field stays as decoration and earns no depth credit).
+    """
+    return os.environ.get("V13_DEPTH", "").strip().lower() not in _FALSE

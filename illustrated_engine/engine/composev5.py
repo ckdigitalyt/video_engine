@@ -174,6 +174,94 @@ def _camera_filter(shot, fps: int = 30):
     return motion.camera_filter(v6_cam, float(shot["duration_s"]), fps)
 
 
+# ── V13 M3 — true 2.5D plate parallax (flags.depth13()) ─────────────────────
+
+def _sidecar_for(plate_path):
+    """Discover the v13-plate-sidecar@1 sibling of a plate asset."""
+    from pathlib import Path as _P
+    import json as _json
+    p = _P(str(plate_path))
+    cand = p.with_name(p.stem + ".sidecar.json")
+    if cand.exists():
+        try:
+            return _json.loads(cand.read_text())
+        except Exception:
+            return None
+    return None
+
+
+def _damped_v6(v6_cam, damp):
+    """Camera windows interpolated toward identity at `damp` (BOTH endpoints).
+
+    The BACKGROUND layer rides this damped pair while the SUBJECT layer rides
+    the authored pair — the differential IS the parallax. Damping only the
+    `to` endpoint would collapse pure pans to static bg (from 0.35→0.5 pan
+    would become 0.5→0.5); interpolating both endpoints preserves the motion
+    shape at exactly `damp` magnitude.
+    """
+    f, t = v6_cam["from"], v6_cam["to"]
+    def _d(v, base):
+        return base + (v - base) * float(damp)
+    return {
+        "primitive": v6_cam["primitive"],
+        "from": {"w": _d(f["w"], 1.0), "cx": _d(f["cx"], 0.5),
+                 "cy": _d(f["cy"], 0.5)},
+        "to": {"w": _d(t["w"], 1.0), "cx": _d(t["cx"], 0.5),
+               "cy": _d(t["cy"], 0.5)},
+    }
+
+
+def plate_parallax_filters(shot, sidecar, dur, fps=30, damp=0.35):
+    """True 2.5D layer parallax over a rich plate (V13 M3, flags.depth13()).
+
+    Returns (bg_filter, fg_filter, meta): proven camera chains for the
+    BACKGROUND-masked plate (damped to `damp`, occluded underneath) and the
+    SUBJECT-masked plate (full authored camera rate, composited on top).
+    Masks come from depth_layers.derive_masks via the sidecar. Returns
+    (None, None, reason-dict) when the flag is off or masks are not derived —
+    callers keep the single-plate path. HOLD cameras yield identical chains
+    (no motion → no parallax). The beat-render hookup lands with the
+    integration milestone (sidecars flow through render5); this ships the
+    geometry contract + proof, not the graph splice.
+    """
+    if not _flags.depth13():
+        return None, None, {"reason": "V13_DEPTH=0 rollback — ambient-only baseline"}
+    layers = (sidecar or {}).get("layers") or []
+    masks = {l.get("name"): l.get("mask") for l in layers}
+    if not (masks.get("SUBJECT") and masks.get("BACKGROUND")):
+        return None, None, {"reason": "masks not derived — run depth_layers.derive_masks"}
+    cam = shot.get("camera") or {}
+    prim = str(cam.get("primitive", "zoompan")).upper()
+    if "from" in cam and "to" in cam and isinstance(cam.get("from"), dict):
+        v6 = {"primitive": prim, "from": dict(cam["from"]), "to": dict(cam["to"])}
+    else:
+        fs = float(cam.get("from_scale") or 1.0)
+        ts = float(cam.get("to_scale") or 1.0)
+        def _num(v, d):
+            return float(v) if v is not None else float(d)
+        fcx = _num(cam.get("from_cx"), _num(cam.get("cx"), 0.5))
+        fcy = _num(cam.get("from_cy"), _num(cam.get("cy"), 0.5))
+        v6 = {"primitive": prim,
+              "from": {"w": round(1.0 / max(0.01, fs), 4), "cx": fcx, "cy": fcy},
+              "to": {"w": round(1.0 / max(0.01, ts), 4),
+                     "cx": _num(cam.get("cx"), fcx), "cy": _num(cam.get("cy"), fcy)}}
+    if (abs(v6["from"]["w"] - v6["to"]["w"]) < 1e-4
+            and abs(v6["from"]["cx"] - v6["to"]["cx"]) < 1e-4
+            and abs(v6["from"]["cy"] - v6["to"]["cy"]) < 1e-4):
+        v6["primitive"] = "HOLD"
+    fg_filter, _n, prim_used, _notes = motion.camera_filter(v6, float(dur), fps)
+    bg_v6 = _damped_v6(v6, damp)
+    bg_filter, _bn, _bp, _bnotes = motion.camera_filter(bg_v6, float(dur), fps)
+    meta = {"primitive": prim_used, "damp": damp,
+            "fg_camera": v6, "bg_camera": bg_v6,
+            "masks": {"SUBJECT": masks["SUBJECT"],
+                      "BACKGROUND": masks["BACKGROUND"]},
+            "compose": ("[bg][fg]overlay=0:0 — SUBJECT occludes the damped "
+                        "BACKGROUND; focus shift / push-through ride the same "
+                        "two rates")}
+    return bg_filter, fg_filter, meta
+
+
 def _caption_band() -> tuple:
     """Active caption safe band (top, bot) for the current flag set.
 

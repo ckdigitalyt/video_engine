@@ -217,9 +217,9 @@ def validate_sidecar(d: dict) -> list[str]:
                 errors.append(f"generation.{key} must be an object")
                 continue
             if key == "depth":
-                if g.get("status") != "deferred_to_M3":
+                if g.get("status") not in ("deferred_to_M3", "derived"):
                     errors.append("generation.depth.status must be "
-                                  "deferred_to_M3 in M1b")
+                                  "deferred_to_M3 or derived")
             elif not isinstance(g.get("provider"), str) or not g["provider"]:
                 errors.append(f"generation.{key}.provider must be a "
                               "non-empty string")
@@ -380,10 +380,24 @@ def generate_plate(spec: dict, out_dir) -> tuple[str, dict]:
             _adopt(str(stage_png), plate_path, width, height)
         gen["semantic_edit"] = rec
 
-    # ── stage 4: depth / edge (deferred to M3) ──────────────────────────
-    gen["depth"] = {"provider": None, "model": None, "seed": None,
-                    "status": "deferred_to_M3", "depth_map": None,
-                    "note": "depth/edge conditioning deferred to M3"}
+    # ── stage 4: depth / edge (V13 M3 real-mask derivation) ─────────────
+    _depth_result = None
+    try:
+        from engine.depth_layers import derive_masks as _derive_masks
+        _depth_result = _derive_masks(plate_path)
+    except Exception:
+        _depth_result = None
+    if _depth_result and (_depth_result.get("masks") or {}):
+        gen["depth"] = {"provider": "depth_layers",
+                        "model": _depth_result.get("method"), "seed": None,
+                        "status": "derived", "depth_map": None,
+                        "seconds": _depth_result.get("seconds"),
+                        "note": "V13 M3 real-mask 2.5D derivation "
+                                "(CPU, deterministic)"}
+    else:
+        gen["depth"] = {"provider": None, "model": None, "seed": None,
+                        "status": "deferred_to_M3", "depth_map": None,
+                        "note": "depth/edge conditioning deferred to M3"}
 
     # ── sidecar (Contract 1) ────────────────────────────────────────────
     subject = spec.get("subject_bbox_px") or [int(0.2 * width), int(0.3 * height),
@@ -413,6 +427,17 @@ def generate_plate(spec: dict, out_dir) -> tuple[str, dict]:
                                  if placeholder_composed else ["illustration"])),
         "lighting": spec.get("lighting", "soft ambient"),
     }
+
+    # V13 M3 — stamp derived masks onto the declared layers (empty coverage
+    # earns no parallax weight, mirroring depth_layers._apply_to_sidecar).
+    if _depth_result:
+        _masks = _depth_result.get("masks") or {}
+        _cov = _depth_result.get("coverage") or {}
+        for _layer in sidecar["layers"]:
+            _m = _masks.get(_layer["name"])
+            _layer["mask"] = _rel(_m) if _m else None
+            if _m and _cov.get(_layer["name"], 0.0) < 0.005:
+                _layer["parallax_weight"] = 0.0
 
     errors = validate_sidecar(sidecar)
     if errors:
