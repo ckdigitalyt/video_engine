@@ -215,6 +215,17 @@ def depth13() -> bool:
     return os.environ.get("V13_DEPTH", "").strip().lower() not in _FALSE
 
 
+def svg13() -> bool:
+    """V13 M6b — upgraded SVG evidence layer (engine/svg_evidence.py).
+
+    Default ON: gradients, edge-fade mask, declared-rect clip-paths, and
+    feGaussianBlur glow on emphasis marks only (never text). V13_SVG=0
+    restores the flat-fill legacy emit byte-identically (engine/
+    svg_evidence.py::_emit_legacy is the untouched rollback path).
+    """
+    return os.environ.get("V13_SVG", "").strip().lower() not in _FALSE
+
+
 def jev13() -> bool:
     """V13 M7 — Jev inert shadow stub (engine/jev_stub.py).
 
