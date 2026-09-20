@@ -5,17 +5,28 @@
   "generation": {
     "composition": {
       "provider": "pollinations",
-      "status": "external_preauth"
+      "model": "flux",
+      "seed": 37080,
+      "resolution": "720x1280",
+      "mode": "text_to_img",
+      "degraded": false,
+      "source": "illustrated_engine/build/plates/cell_scale_dive/B6/SD_B6_hair_universe_comp_src.png"
     },
     "detail": {
       "provider": "pollinations",
-      "status": "skipped",
-      "edited": false
+      "model": "flux",
+      "seed": 37081,
+      "edited": false,
+      "degraded": true,
+      "note": "edit op unsupported; stage skipped"
     },
     "semantic_edit": {
       "provider": "pollinations",
-      "status": "skipped",
-      "edited": false
+      "model": "flux",
+      "seed": 37082,
+      "edited": false,
+      "degraded": true,
+      "note": "edit op unsupported; stage skipped"
     },
     "depth": {
       "provider": "depth_layers",
@@ -23,55 +34,55 @@
       "seed": null,
       "status": "derived",
       "depth_map": null,
-      "seconds": 0.59,
+      "seconds": 2.78,
       "note": "V13 M3 real-mask 2.5D derivation (CPU, deterministic)"
     }
   },
   "layers": [
     {
       "name": "BACKGROUND",
-      "mask": "build/plates/cell_scale_dive/B6/SD_B6_hair_universe.mask.BACKGROUND.png",
+      "mask": "illustrated_engine/build/plates/cell_scale_dive/B6/SD_B6_hair_universe.mask.BACKGROUND.png",
       "bbox_px": [
         0,
         0,
-        1536,
-        1024
+        2160,
+        3840
       ],
       "parallax_weight": 0.15
     },
     {
       "name": "MIDGROUND",
-      "mask": "build/plates/cell_scale_dive/B6/SD_B6_hair_universe.mask.MIDGROUND.png",
+      "mask": "illustrated_engine/build/plates/cell_scale_dive/B6/SD_B6_hair_universe.mask.MIDGROUND.png",
       "bbox_px": [
-        0,
-        0,
-        1536,
-        1024
+        216,
+        768,
+        1944,
+        3072
       ],
-      "parallax_weight": 0.35
+      "parallax_weight": 0.45
     },
     {
       "name": "SUBJECT",
-      "mask": "build/plates/cell_scale_dive/B6/SD_B6_hair_universe.mask.SUBJECT.png",
+      "mask": "illustrated_engine/build/plates/cell_scale_dive/B6/SD_B6_hair_universe.mask.SUBJECT.png",
       "bbox_px": [
-        0,
-        0,
-        1536,
-        1024
+        432,
+        1152,
+        1728,
+        2688
       ],
-      "parallax_weight": 0.65
+      "parallax_weight": 0.85
     }
   ],
   "subject_bbox_px": [
-    0,
-    0,
-    1536,
-    1024
+    432,
+    1152,
+    1728,
+    2688
   ],
   "annotation_rects_px": [],
   "depth_map": null,
   "zoom_safe": {
-    "max_scale": 1.2
+    "max_scale": 1.6
   },
   "safe_margin_px": 40,
   "texture_tags": [
