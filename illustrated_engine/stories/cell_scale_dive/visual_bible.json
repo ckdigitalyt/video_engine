@@ -2,10 +2,10 @@
   "version": "4.0",
   "brand": "ABOVE THE CLOUDS",
   "palette": {
-    "primary": "#22304E",
+    "primary": "#2B2622",
     "secondary": "#7A6A52",
-    "accent": "#C25B33",
-    "background": "#171310",
+    "accent": "#9C522C",
+    "background": "#D6C7AC",
     "text": "#EFE6D4",
     "muted": "#8A7B63",
     "highlight": "#E9DFC8"
