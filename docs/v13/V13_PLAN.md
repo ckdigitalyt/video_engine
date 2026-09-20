@@ -69,8 +69,11 @@ pilot story (M1–M5 proven on ONE biology/scale story first) → M8 slate → m
 
 ## QA gate changes (only these)
 
-- `safe_area_final` (M2): project `annotation_rects_px` + `subject_bbox_px` through the final camera
+- `safe_area_final` (M2, landed @ f997f3c): project `annotation_rects_px` + `subject_bbox_px` through the final camera
   window per sampled frame; any semantic clipping or margin violation → component FAIL → CAN_PUBLISH=FALSE.
+  Integration TODO (folded into M1b): call `safe_area_qa.evaluate` from cli.py and pass `safe_area=` into
+  `publish_gate.run` once plate sidecars exist; address M2 coupling notes — densify samples or port
+  `resolve_camera` eased curves (current projection is linear-at-t, may miss brief eased-window clips).
 - `viewer_simulation` / `hero_recognizable` unchanged; hook timing folded into existing planv9 gates (M5).
 - No other gate components added.
 
