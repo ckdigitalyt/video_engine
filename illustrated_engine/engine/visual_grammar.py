@@ -141,6 +141,11 @@ MODE_REPRESENTATION = {
     "MOLECULAR_PROCESS": "DIAGRAM", "ANIMATION": "DIAGRAM",
     # HYBRID (diagram composed over the plate)
     "PROCESS_LOOP": "HYBRID", "CAUSAL_CHAIN": "HYBRID",
+    # V13 M5 — signature move: continuous zoom through nested scales
+    # rendered as layered plates.  Compositor-side zoom primitive is
+    # DEFERRED to the integration milestone (GAP_ANALYSIS #13 — needs M3
+    # depth layers); the planner stamps the mode now, motion renders later.
+    "SCALE_DIVE": "PLATE",
 }
 
 REPRESENTATION_CLASSES = ("PLATE", "PLATE+OVERLAY", "DIAGRAM", "HYBRID")
@@ -158,6 +163,23 @@ def representation_of(record: dict) -> tuple[str, str]:
     if not rep:
         return "DIAGRAM", "legacy"
     return rep, str((record or {}).get("mode_justification") or "legacy")
+
+
+# V13 M5 — SCALE_DIVE routing: nested-scale domains where a continuous
+# zoom across scales IS the explanation (directive P0 signature move;
+# mountain-to-microscope is the canonical class pair).
+SCALE_DIVE_TERMS = (
+    "cell", "cellular", "atom", "atomic", "molecule", "molecular",
+    "galaxy", "galaxies", "universe", "cosmos",
+    "ocean depth", "deep ocean", "abyss", "hadal", "trench",
+    "mountain-to-microscope", "microscope",
+)
+
+
+def scale_dive_candidate(subject: str = "", claim: str = "") -> bool:
+    """True when subject/claim text mentions a nested-scale domain."""
+    text = f"{subject or ''} {claim or ''}".lower()
+    return any(t in text for t in SCALE_DIVE_TERMS)
 
 
 def grammar_for(subject: str, beat_function: str = "", topic_grammar=None) -> tuple:
@@ -184,7 +206,8 @@ def grammar_for(subject: str, beat_function: str = "", topic_grammar=None) -> tu
 
 
 def recommend_mode_detailed(subject: str, beat_function: str, claim: str = "",
-                            visual_mode: str = "") -> dict:
+                            visual_mode: str = "",
+                            scale_dive_allowed: bool = False) -> dict:
     """V13 M4: pick a mode AND justify it.  Returns
     {"mode", "representation", "mode_justification"}.  Richer representations
     (PLATE / PLATE+OVERLAY / HYBRID) are preferred whenever the subject
@@ -196,6 +219,17 @@ def recommend_mode_detailed(subject: str, beat_function: str, claim: str = "",
                 "author-declared diagram-class mode (evidence)")
         return {"mode": visual_mode, "representation": rep,
                 "mode_justification": just}
+    # V13 M5 — SCALE_DIVE signature routing.  The caller gates eligibility
+    # (at most ONE mid-story beat; never the hook, never the payoff).
+    if (scale_dive_allowed
+            and str(beat_function or "").upper() not in ("HOOK", "PAYOFF")
+            and scale_dive_candidate(subject, claim)):
+        return {"mode": "SCALE_DIVE",
+                "representation": representation_for("SCALE_DIVE"),
+                "mode_justification":
+                    "SCALE_DIVE: continuous zoom through nested scales "
+                    "rendered as layered plates — single mid-story "
+                    "signature move (not hook, not payoff)"}
     pref = grammar_for(subject, beat_function)
     valid = [m for m in pref if m in EXPLANATORY_MODES]
     rich = [m for m in valid if representation_for(m) != "DIAGRAM"]

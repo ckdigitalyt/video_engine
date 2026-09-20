@@ -141,8 +141,96 @@ def _claims_by_beat(story_dir: Path) -> dict:
     return out
 
 
+def _claim_texts_by_beat(story_dir) -> dict:
+    """V13 M5 — {beat_id: [claim text, ...]} in facts order.  Missing or
+    unreadable facts.json -> {} (hook/payoff synthesis degrades honestly,
+    backward compatible)."""
+    if not story_dir:
+        return {}
+    try:
+        facts = load_facts(Path(story_dir))
+    except Exception:
+        return {}
+    out: dict = {}
+    for c in facts.get("claims", []):
+        text = str(c.get("claim") or "").strip()
+        if not text:
+            continue
+        for bid in c.get("beats", []) or []:
+            out.setdefault(str(bid), []).append(text)
+    return out
+
+
+def _hook_fields(story: dict, beats: dict, claim_texts: dict) -> dict:
+    """V13 M5 — hook structure on the FIRST beat (directive P0: the first
+    two seconds are a promise — phenomenon + tension).  Authored when the
+    story/beat declares the material; otherwise synthesized deterministically
+    from declared claim/contradiction/question text only (no invented
+    facts).  Diagnostic fields only — no gate reads them yet."""
+    first_bid = next(iter(beats), None)
+    if first_bid is None:
+        return {}
+    beat = beats[first_bid] or {}
+    hp = story.get("hook_plan") if isinstance(story.get("hook_plan"), dict) else {}
+    phenomenon = str(hp.get("phenomenon") or "").strip()
+    tension = str(hp.get("tension") or "").strip()
+    authored = bool(phenomenon and tension)
+    if not phenomenon:
+        declared = str(beat.get("phenomenon") or "").strip()
+        if declared:
+            phenomenon, authored = declared, True
+        else:
+            texts = claim_texts.get(first_bid) or []
+            phenomenon = texts[0] if texts else (
+                str(beat.get("visual_answer") or beat.get("visual_question")
+                    or "").strip()
+                or f"{story.get('subject') or 'the subject'} — seen before "
+                   f"it is explained")
+    if not tension:
+        con = _contradiction(story)  # declared 'seems' is honest tension
+        tension = (str(con.get("seems") or "").strip()
+                   or str(beat.get("visual_question") or "").strip()
+                   or "nothing on screen explains itself yet — the "
+                      "mechanism is still hidden")
+    return {"phenomenon": phenomenon, "tension": tension,
+            "hook_source": "authored" if authored else "synthesized"}
+
+
+def _payoff_fields(story: dict, beats: dict, claim_texts: dict) -> tuple:
+    """V13 M5 — causal-chain payoff on the FINAL-ACT beat (first beat with
+    function PAYOFF, else the last beat): the ordered claim steps collected
+    from preceding beats, which the payoff collapses into one image.
+    Diagnostic only."""
+    order = list(beats)
+    if not order:
+        return None, {}
+    payoff_bid = next((b for b in order if str((beats[b] or {}).get("function")
+                                               or "").upper() == "PAYOFF"),
+                      order[-1])
+    chain: list = []
+    for bid in order:
+        if bid == payoff_bid:
+            break
+        texts = claim_texts.get(bid) or []
+        if texts:
+            chain.extend(texts)
+        else:
+            intent = str((beats[bid] or {}).get("visual_answer") or "").strip()
+            if intent:
+                chain.append(intent)
+    beat = beats[payoff_bid] or {}
+    pay_img = story.get("payoff_image")
+    authored = bool(str(beat.get("payoff") or "").strip()
+                    or (isinstance(pay_img, dict)
+                        and str(pay_img.get("image") or "").strip()))
+    return payoff_bid, {"causal_chain": chain,
+                        "payoff_source": "authored" if authored
+                        else "synthesized"}
+
+
 def _beat_model(plan: dict, story: dict, kit_id: str,
-                claims: dict | None = None) -> dict:
+                claims: dict | None = None,
+                claim_texts: dict | None = None) -> dict:
     """Annotate plan['beat_model']: per beat, viewer question -> visual
     intent -> visual experience -> state transformation -> payoff."""
     beats = {str(b.get("beat_id")): b for b in (story.get("beats") or [])}
@@ -151,6 +239,17 @@ def _beat_model(plan: dict, story: dict, kit_id: str,
     # justification stamped additively (directive P0: the rich plate +
     # overlays is the normal visual; diagrams are evidence).
     subject = str(story.get("subject") or "general")
+    # V13 M5 — hook/payoff structure + SCALE_DIVE routing (all diagnostic,
+    # additive; legacy plans without the stamps stay valid).
+    texts = claim_texts or {}
+    hook_fields = _hook_fields(story, beats, texts)
+    payoff_bid, payoff_fields = _payoff_fields(story, beats, texts)
+    order = list(beats)
+    first_bid = order[0] if order else None
+    mid_bids = [b for b in order if b not in (first_bid, payoff_bid)]
+    dive_bid = next((b for b in mid_bids
+                     if visual_grammar.scale_dive_candidate(
+                         subject, " ".join(texts.get(b) or []))), None)
     rows, problems = {}, []
     for bid, beat in beats.items():
         fn = str(beat.get("function") or "").upper()
@@ -188,7 +287,9 @@ def _beat_model(plan: dict, story: dict, kit_id: str,
                     f"{bid}: declared '{transform}' overridden to "
                     f"'hypothesis_branches' (claim confidence {conf})")
         rec = visual_grammar.recommend_mode_detailed(
-            subject, fn, visual_mode=str(beat.get("visual_mode") or ""))
+            subject, fn, visual_mode=str(beat.get("visual_mode") or ""),
+            claim=" ".join(texts.get(bid) or []),
+            scale_dive_allowed=(bid == dive_bid))
         rows[bid] = {
             "function": fn,
             "viewer_question": str(beat.get("visual_question") or "").strip(),
@@ -205,7 +306,15 @@ def _beat_model(plan: dict, story: dict, kit_id: str,
             "representation": rec["representation"],
             "mode_justification": rec["mode_justification"],
         }
+    # V13 M5 — stamp hook fields on the FIRST beat and payoff fields on the
+    # final-act beat (same-beat edge on single-beat plans is acceptable:
+    # hook opens it, payoff closes it).
+    if hook_fields and first_bid in rows:
+        rows[first_bid].update(hook_fields)
+    if payoff_bid is not None and payoff_bid in rows:
+        rows[payoff_bid].update(payoff_fields)
     return {"grammar": kit_id, "beats": rows,
+            "hook_beat": first_bid, "payoff_beat": payoff_bid,
             "transformation_problems": problems,
             "claim_confidence": {bid: r["claim_confidence"]
                                  for bid, r in rows.items()
@@ -371,7 +480,9 @@ def make_edit_plan_v9(paths, story_id: str, out_name: str = "edit_plan.json",
     else:
         report["regeneration_exhausted"] = True
 
-    model = _beat_model(plan, story, chosen, claims)
+    model = _beat_model(plan, story, chosen, claims,
+                        claim_texts=_claim_texts_by_beat(
+                            Path(paths.stories) / story_id))
     plan["beat_model"] = model
     plan["visual_contradiction"] = _locate_contradiction(plan, story, {})
     plan["hook_plan"] = _locate_hook(plan, _hook_plan(story))
