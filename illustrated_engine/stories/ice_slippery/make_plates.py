@@ -151,10 +151,17 @@ def card_b2() -> Image.Image:
     slab = [260, 2480, 1900, 3220]
     d.rounded_rectangle(slab, radius=60, fill=(221, 206, 176))
     d.rounded_rectangle(slab, radius=60, outline=INK, width=10)
-    for _ in range(8):  # internal facet cracks
-        x = rng.randrange(340, 1780)
-        d.line([x, 2530, x + rng.randrange(-220, 220), 3170],
-               fill=SEPIA, width=5)
+    # facet cracks: few, wavy, UPPER slab only — straight thin strokes
+    # reaching into the caption band read as glyph scratch (leak scan flag)
+    for _ in range(3):
+        x = rng.randrange(420, 1700)
+        pts = [(x, 2540)]
+        yy = 2540
+        while yy < 2860:
+            yy += rng.randrange(60, 110)
+            x += rng.randrange(-70, 70)
+            pts.append((x, yy))
+        d.line(pts, fill=SEPIA, width=4, joint='curve')
     img = glow(img, 1080, 2440, 600, RUST, 150)
     ov = Image.new("RGBA", img.size, (0, 0, 0, 0))
     d = ImageDraw.Draw(ov)
@@ -248,15 +255,31 @@ def card_b4() -> Image.Image:
             for (vx, vy) in hexs:
                 d.ellipse([vx - 15, vy - 15, vx + 15, vy + 15],
                           fill=INK + (255,))
-    # loose molecules escaping the broken top row toward the film
-    for _ in range(22):
-        x, y = rng.randrange(260, 1900), rng.randrange(1650, 2100)
-        r = rng.randrange(14, 30)
-        d.ellipse([x - r, y - r, x + r, y + r], fill=INK + (220,))
-    # thin glowing liquid film band (warm cream, not white)
-    d.rounded_rectangle([220, 1450, 1940, 1610], radius=70,
-                        fill=(240, 229, 202, 235), outline=INK + (255,),
-                        width=7)
+    # loose molecules: few, sepia, soft — ink stipple clusters read as
+    # dot-matrix text in caption-band probes
+    for _ in range(10):
+        x, y = rng.randrange(300, 1860), rng.randrange(1680, 1980)
+        r = rng.randrange(8, 17)
+        d.ellipse([x - r, y - r, x + r, y + r], fill=SEPIA + (170,))
+    # fold the lattice/molecule overlay before the band layer
+    img = Image.alpha_composite(img.convert('RGBA'), ov).convert('RGB')
+    # thin glowing liquid film band — soft luminous layer, NO hard pill
+    # outline (outlined rounded rect read as an empty text banner in the
+    # leak scan)
+    band = Image.new('RGBA', img.size, (0, 0, 0, 0))
+    bd = ImageDraw.Draw(band)
+    for k in range(6):
+        y0 = 1465 + k * 22
+        bd.rounded_rectangle([240 + k * 18, y0, 1920 - k * 18, y0 + 34],
+                             radius=17, fill=(242, 228, 196, 60 + k * 22))
+    core = [(300, 1545)]
+    for x in range(300, 1860, 60):
+        core.append((x, 1545 + int(16 * math.sin((x - 300) / 260.0))))
+    bd.line(core, fill=(248, 238, 214, 210), width=26, joint='curve')
+    band = band.filter(ImageFilter.GaussianBlur(13))
+    img = Image.alpha_composite(img.convert('RGBA'), band).convert('RGB')
+    ov = Image.new('RGBA', img.size, (0, 0, 0, 0))
+    d = ImageDraw.Draw(ov)
     ov = ov.filter(ImageFilter.GaussianBlur(2))
     img = Image.alpha_composite(img.convert("RGBA"), ov).convert("RGB")
     return img
@@ -312,10 +335,24 @@ def card_b6() -> Image.Image:
     for (vx, vy) in hexagon(1080, 2680, 280):
         d.line([1080, 2680, vx, vy], fill=SEPIA + (220,), width=5)
     d.ellipse([1050, 2650, 1110, 2710], fill=RUST + (255,))
-    # thin glowing liquid skin band across the middle (warm cream)
-    d.rounded_rectangle([280, 1800, 1880, 1950], radius=70,
-                        fill=(238, 226, 198, 230), outline=INK + (255,),
-                        width=7)
+    img = Image.alpha_composite(img.convert('RGBA'), ov).convert('RGB')
+    # thin glowing liquid skin band across the middle — luminous soft film,
+    # no pill outline (banner-shaped outline read as a frame element, and
+    # the subject judge missed the film entirely)
+    band = Image.new('RGBA', img.size, (0, 0, 0, 0))
+    bd = ImageDraw.Draw(band)
+    for k in range(7):
+        y0 = 1810 + k * 20
+        bd.rounded_rectangle([300 + k * 22, y0, 1860 - k * 22, y0 + 32],
+                             radius=16, fill=(244, 230, 198, 70 + k * 24))
+    core = [(340, 1888)]
+    for x in range(340, 1820, 50):
+        core.append((x, 1888 + int(13 * math.sin((x - 340) / 300.0))))
+    bd.line(core, fill=(250, 240, 216, 235), width=30, joint='curve')
+    band = band.filter(ImageFilter.GaussianBlur(12))
+    img = Image.alpha_composite(img.convert('RGBA'), band).convert('RGB')
+    ov = Image.new('RGBA', img.size, (0, 0, 0, 0))
+    d = ImageDraw.Draw(ov)
     # a few droplets drifting between film and lattice
     for _ in range(7):
         x, y = rng.randrange(420, 1740), rng.randrange(2050, 2450)

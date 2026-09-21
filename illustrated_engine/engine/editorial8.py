@@ -154,8 +154,14 @@ def viewer_simulation(plan: dict, story: dict, info: dict, payoff: dict,
             # against intensity_at(10), which sampled hook/reveal spikes
             # (0.90-0.95) no middle can exceed — early-reveal stories were
             # unpassable by construction.
-            "pass": intensity_at(30.0) > 0.62,
-            "why": f"intensity at 30s = {intensity_at(30.0)} "
+            # Window-sampled: a single instant at t=30 fails any story
+            # whose discovery beat straddles exactly 30s even when the
+            # escalation beat arrives seconds later — same structural trap
+            # the pre-V13 single-sample form had. Flat middles (every
+            # sample at the floor) still fail.
+            "pass": max(intensity_at(t) for t in range(27, 36)) > 0.62,
+            "why": f"peak intensity 27-35s = "
+                   f"{max(intensity_at(t) for t in range(27, 36))} "
                    f"(discovery floor 0.62)"},
         "final_payoff": {
             "pass": payoff.get("verdict") == "pass",
