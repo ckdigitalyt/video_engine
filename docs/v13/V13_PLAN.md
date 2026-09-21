@@ -95,3 +95,8 @@ publish-gate path; svg_evidence public wrapper exposed. Pilot story proves the c
 6. Everyday counterintuitive — candidate: microwave/dielectric successor
 
 Renderer/planner changes are global; the five V12 videos are NOT patched (per directive).
+
+## Pilot status (2026-09-21): cell_scale_dive CAN_PUBLISH=True
+- qa8full: all 10 publish-gate components true, p0 none; subjects 6/6 PASS on real frames; TECH 100; continuity 0.6953; soph composite 0.566
+- Plate mix: 3 live AI plates (B2 eye, B3 rings — wait, final mix: B1/B3/B4/B5/B6 deterministic contract-faithful cards, B2 graded AI eye) — free-provider subject-adherence ceiling documented; Gemini-image swap on quota reset = open upgrade
+- Engine fixes landed on the way (M6-class): render_shot_v2 input-staleness invalidation (3 renders were cache hits), vision_ask parse hardening + subject_check max_tokens 1600, S02 contract realignment (was hair-edge text on the eye asset)

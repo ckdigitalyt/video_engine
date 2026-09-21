@@ -4,13 +4,9 @@
   "asset_class": "RICH_VISUAL_PLATE",
   "generation": {
     "composition": {
-      "provider": "pollinations",
-      "model": "flux",
-      "seed": 86169,
-      "resolution": "720x1280",
-      "mode": "text_to_img",
-      "degraded": false,
-      "source": "illustrated_engine/build/plates/cell_scale_dive/B3/SD_B3_dive_rings_comp_src.png"
+      "provider": "cardlib_deterministic",
+      "status": "authored",
+      "note": "contract-faithful deterministic card (rings + helix center); AI provider could not compose multi-element subject"
     },
     "detail": {
       "provider": "pollinations",
@@ -30,12 +26,7 @@
     },
     "depth": {
       "provider": "depth_layers",
-      "model": "saliency_v1",
-      "seed": null,
-      "status": "derived",
-      "depth_map": null,
-      "seconds": 3.5,
-      "note": "V13 M3 real-mask 2.5D derivation (CPU, deterministic)"
+      "status": "derived"
     }
   },
   "layers": [
