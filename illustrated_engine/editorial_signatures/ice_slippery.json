@@ -1,20 +1,18 @@
 {
  "v2": true,
  "story_id": "ice_slippery",
- "built_utc": "2026-09-17T03:45:13Z",
- "n_shots": 7,
- "avg_shot_dur": 7.83,
+ "built_utc": "2026-09-21T04:45:10Z",
+ "n_shots": 6,
+ "avg_shot_dur": 7.94,
  "role_sequence": [
   "HERO",
+  "DETAIL",
+  "DETAIL",
+  "DETAIL",
   "DIAGRAM",
-  "COMPARISON",
-  "DIAGRAM",
-  "DIAGRAM",
-  "COMPARISON",
   "PAYOFF"
  ],
  "grammar_sequence": [
-  "scale_descent",
   "scale_descent",
   "scale_descent",
   "scale_descent",
@@ -28,11 +26,9 @@
   "micro_layer_full_bleed",
   "interface_layer",
   "deeper_layer",
-  "deeper_layer",
   "scale_ladder_resolved"
  ],
  "panel_usage_sequence": [
-  "none",
   "none",
   "none",
   "none",
@@ -46,11 +42,9 @@
   "depth_gradient",
   "depth_gradient",
   "depth_gradient",
-  "depth_gradient",
   "depth_gradient"
  ],
  "caption_architecture": [
-  "edge_band",
   "edge_band",
   "edge_band",
   "edge_band",
@@ -64,16 +58,11 @@
   "CUT",
   "CUT",
   "CUT",
-  "CUT",
   "CUT"
  ],
  "state_sequence": [
   "ESTABLISH",
   "FOCUS",
-  "ESTABLISH",
-  "FOCUS",
-  "ESTABLISH",
-  "FOCUS",
   "TRANSFORM",
   "ESTABLISH",
   "FOCUS",
@@ -81,11 +70,12 @@
   "CONSEQUENCE",
   "ESTABLISH",
   "FOCUS",
+  "ESTABLISH",
+  "FOCUS",
   "TRANSFORM",
   "CONSEQUENCE",
   "ESTABLISH",
   "FOCUS",
-  "TRANSFORM",
   "ESTABLISH",
   "FOCUS",
   "TRANSFORM",
@@ -94,29 +84,44 @@
  ],
  "camera_behavior": [
   "push",
-  "hold",
-  "hold",
   "push",
   "push",
-  "hold",
+  "push",
+  "push",
   "pull"
  ],
- "title_behavior": "none",
+ "title_behavior": "opening_title",
  "chrome_usage": "none",
  "accent_usage": "",
- "duration_profile": "n7_s0_l3",
- "diagram_ratio": 0.274,
- "cinematic_ratio": 0.116,
+ "duration_profile": "n6_s0_l3",
+ "diagram_ratio": 0.0,
+ "cinematic_ratio": 0.141,
+ "asset_class_mix": [
+  "DIAGRAM:0.1",
+  "PLATE:0.9"
+ ],
+ "composition_architecture": [
+  "full_bleed",
+  "descent_entry",
+  "full_bleed",
+  "interface_layer",
+  "deeper_layer",
+  "scale_ladder_resolved"
+ ],
+ "background_architecture": [
+  "gradient",
+  "gradient",
+  "gradient",
+  "gradient",
+  "gradient",
+  "gradient"
+ ],
  "motif": {
-  "plate": {
-   "strip_other": 3,
-   "panel_other": 1,
-   "circle_other": 5
-  },
+  "plate": {},
   "plan": {
-   "circle_plan": 12,
-   "strip_plan": 2,
-   "panel_plan": 2
+   "circle_plan": 7,
+   "panel_plan": 5,
+   "strip_plan": 1
   },
   "subject": "physics",
   "story_type": "science_process",

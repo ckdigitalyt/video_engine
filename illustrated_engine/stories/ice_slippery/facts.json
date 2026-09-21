@@ -4,7 +4,7 @@
    "id": "f_slippery_principle",
    "beats": [
     "B1",
-    "B7"
+    "B6"
    ],
    "claim": "ice is slippery because of a thin near-surface water layer, not because of standing water or pressure alone",
    "definition": "the modern explanation of ice friction: a molecular-scale liquid-like layer at the ice-air interface, fed by premelting and by frictional heating during sliding, lubricates the contact",
@@ -28,8 +28,7 @@
   {
    "id": "f_pressure_myth",
    "beats": [
-    "B2",
-    "B3"
+    "B2"
    ],
    "claim": "a skater's pressure lowers ice's melting point by only a fraction of a degree, far too little to create the water film",
    "definition": "Clausius-Clapeyron: melting point drops roughly 0.007 degrees Celsius per atmosphere; typical skate pressures correspond to a few atmospheres, so the shift is fractions of a degree",
@@ -44,7 +43,7 @@
     "Clausius-Clapeyron literature"
    ],
    "verified": true,
-   "notes": "narration deliberately avoids the per-atmosphere coefficient; 'fraction of a degree' is the defensible center",
+   "notes": "narration says 'only about 0.1 degrees' — the defensible tenths-of-a-degree center; per-atmosphere coefficient avoided",
    "nuance": {
     "classification": "ESTABLISHED",
     "note": "Clausius-Clapeyron melting-point depression magnitude is textbook physics"
@@ -54,7 +53,7 @@
    "id": "f_quasi_liquid",
    "beats": [
     "B4",
-    "B7"
+    "B6"
    ],
    "claim": "a quasi-liquid layer exists on the ice surface even below the melting point",
    "definition": "surface premelting: the topmost molecular layers of ice lose their rigid order and become liquid-like at temperatures below 0 degrees Celsius; proposed by Faraday and confirmed by modern surface studies",
@@ -69,7 +68,7 @@
     "Somorjai & Li 1997"
    ],
    "verified": true,
-   "notes": "narration says 'thin skin of water' without pinning a thickness",
+   "notes": "narration pins the film at about 10 nanometers, matching the authored plate claim; thickness varies with temperature and technique",
    "nuance": {
     "classification": "STRONG_CONSENSUS",
     "note": "surface premelting / quasi-liquid layer is well documented experimentally (Dash et al. 1995); its detailed structure remains studied"
@@ -97,31 +96,6 @@
    "nuance": {
     "classification": "STRONG_CONSENSUS",
     "note": "frictional heating contribution to the water film is well established; its relative share vs premelting is quantitatively debated"
-   }
-  },
-  {
-   "id": "f_film_temperature",
-   "beats": [
-    "B6",
-    "B7"
-   ],
-   "claim": "the quasi-liquid film thins as temperature falls, so blade behavior changes between mild and deep cold",
-   "definition": "premelted layer thickness decreases with decreasing temperature; with less lubricating water, the blade's grip and glide characteristics change, which is why ice behaves differently at mild versus deep frost",
-   "current_record_holder": "n/a",
-   "measured_value": "qualitative: film thickness decreases as temperature drops; narration uses minus five and minus thirty as illustrative conditions without claiming measured thresholds",
-   "date_verified": "2026-09",
-   "authoritative_source": "Dash, Fu & Wettlaufer, 'The premelting of ice and its environmental consequences', Reviews of Geophysics (1995); Rosenberg, Physics Today (2005)",
-   "source_url": "https://doi.org/10.1063/1.2169444",
-   "historically_changed": false,
-   "sources": [
-    "Dash et al., Rev. Geophys. 1995",
-    "Rosenberg, Physics Today 2005"
-   ],
-   "verified": true,
-   "notes": "narration spells out 'minus five' and 'minus thirty' as conditions only; no threshold claimed",
-   "nuance": {
-    "classification": "SUPPORTED_BUT_COMPLEX",
-    "note": "film thickness/behavior vs temperature is qualitative and complex; precise dependence modeled, not settled"
    }
   }
  ]
