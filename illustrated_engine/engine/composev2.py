@@ -250,7 +250,17 @@ def render_shot_v2(shot: dict, paths, bible: dict, force: bool = False,
     out = Path(paths.build) / shots_subdir / f"{shot['shot_id']}.mp4"
     out.parent.mkdir(parents=True, exist_ok=True)
     if out.exists() and not force:
-        return out
+        # V13 M6: input-staleness invalidation — a swapped asset or updated
+        # bible must never ride an old cached shot (3 pilot renders burned
+        # on this cache while the plate art changed underneath).
+        inputs = [Path(paths.assets) / f"{shot.get('asset', '')}.png"]
+        inputs += sorted(Path(paths.stories).glob("*/visual_bible.json"))
+        try:
+            newest_in = max(p.stat().st_mtime for p in inputs if p.exists())
+            if out.stat().st_mtime >= newest_in:
+                return out
+        except OSError:
+            return out
     dur = float(shot["duration_s"])
     work = Path(paths.build) / "ov2" / shot["shot_id"]
     work.mkdir(parents=True, exist_ok=True)
