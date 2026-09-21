@@ -265,8 +265,26 @@ def vision_ask(image_path, question: str, max_tokens: int = 400):
         text = _vision_glm(image_path, question, max_tokens)
     if not text:
         return None
+    # V13 M6 judge-robustness: models return fenced, prose-wrapped,
+    # trailing-comma or truncated JSON; a brittle parse turns a reachable
+    # judge into a phantom UNVERIFIED. Repair ladder, then prose fallback.
     m = re.search(r"\{.*\}", text, re.S)
-    return json.loads(m.group()) if m else {"raw": text}
+    if m:
+        for cand in (m.group(), re.sub(r",\s*([}\]])", r"\1", m.group())):
+            try:
+                return json.loads(cand)
+            except Exception:
+                pass
+    m2 = re.search(r"\{[^{}]*\}", text, re.S)
+    if m2:
+        try:
+            return json.loads(m2.group())
+        except Exception:
+            pass
+    um = re.search(r"\b(PASS|FAIL)\b", text, re.I)
+    if um:
+        return {"verdict": um.group(1).upper(), "raw": text}
+    return {"raw": text}
 
 
 def subject_check(image_path, contract: dict) -> dict:
