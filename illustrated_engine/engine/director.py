@@ -307,7 +307,7 @@ def subject_check(image_path, contract: dict) -> dict:
         '"required_present": [...], "required_missing": [...], '
         '"forbidden_found": [...], "verdict": "PASS"|"FAIL"}'
     )
-    res = vision_ask(image_path, prompt)
+    res = vision_ask(image_path, prompt, max_tokens=1600)
     if not res or "verdict" not in res:
         return {"ok": None, "verdict": "UNVERIFIED", "depicted": "",
                 "missing": req, "forbidden_found": [], "via": "unverified",
