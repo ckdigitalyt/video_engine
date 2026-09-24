@@ -794,6 +794,23 @@ def cmd_qa8full(args):
     except Exception as _e:  # diagnostics must never break qa8
         res8["visual_sophistication"] = {"schema": "v13.visual_sophistication/1.0",
                                          "error": str(_e)}
+    # V13B M5a — presentation-template signature detector (JADE_V13B P0):
+    # deterministic per-shot flags (>=4/6 template features -> flagged);
+    # diagnostics only, non-gating — recompose-on-flag wiring lands with the
+    # M5 planner work. See engine/template_signature.py.
+    try:
+        from engine import template_signature as _tsig
+        _vid = Path(args.path) if getattr(args, "path", None) \
+            else paths.output / f"{story_id}.mp4"
+        res8["template_signature"] = _tsig.detect_story(
+            plan, story_id, video=_vid if _vid.exists() else None,
+            build=Path("build"))
+        _fl = res8["template_signature"]["summary"]
+        print(f"  template_signature: {_fl['flagged']}/{_fl['shots']} shots "
+              f"flagged {_fl['flagged_shot_ids']}")
+    except Exception as _e:  # diagnostics must never break qa8
+        res8["template_signature"] = {"schema": "v13b.template_signature/1.0",
+                                      "error": str(_e)}
     editorial8.write_report(res8, Path("build/qa"))
     print(f"qa8full {story_id} -> build/qa/qa8_{story_id}.json")
     for k, v in res8["gates"].items():
