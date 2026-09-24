@@ -16,6 +16,11 @@ false component:
                      (it also surfaces through qa5's EDITORIAL group and the
                      top-concerns list; its payoff_70 numeric is advisory-class
                      where editorial8's semantic payoff gate passes)
+  HUMAN_EDITOR       V13B M5b P1 — the six-question human-editor test
+                     (engine/human_editor.py) over the rendered video;
+                     q1/q2/q3/q4/q6 must pass and no failed-tier plate
+                     (default True when the verdict was not supplied, so
+                     pre-M5b callers stay compatible)
   AUDIO              bed continuity + audio completion (loudness is
                      normalized at the mix: -14 LUFS / -1.5 dBTP, per qa5)
 
@@ -30,13 +35,15 @@ from pathlib import Path
 
 COMPONENTS = ("TECHNICAL", "FACTUAL", "CAPTION", "DEBUG_FREE",
               "VISUAL_EVIDENCE", "VIEWER_SIMULATION", "ANTI_TEMPLATE",
-              "CROSS_VIDEO_TEMPLATE", "AUDIO", "SAFE_AREA_FINAL")
+              "CROSS_VIDEO_TEMPLATE", "AUDIO", "SAFE_AREA_FINAL",
+              "HUMAN_EDITOR")
 
 
 def run(qa5: dict, qa7: dict, res8: dict, sem: dict, caption_qa: dict,
         leak: dict, occupancy: dict, motion_ratio: dict,
         audio_hier: dict | None = None,
-        safe_area: dict | None = None) -> dict:
+        safe_area: dict | None = None,
+        human_editor: dict | None = None) -> dict:
     tech = ((qa5 or {}).get("groups") or {}).get("TECHNICAL") or {}
     tech_gate = ((qa5 or {}).get("gates") or {}).get("TECHNICAL", 95.0)
     motion = (qa5 or {}).get("motion") or {}
@@ -101,6 +108,11 @@ def run(qa5: dict, qa7: dict, res8: dict, sem: dict, caption_qa: dict,
         # has not been supplied yet (same compat pattern as
         # CROSS_VIDEO_TEMPLATE); a supplied FAIL forces CAN_PUBLISH=false.
         "SAFE_AREA_FINAL": bool((safe_area or {}).get("passed", True)),
+        # V13B M5b P1 — human-editor six-question gate over the rendered
+        # video (engine/human_editor.py). Supplied verdicts gate directly
+        # (unjudged/unavailable fails); absent verdicts stay neutral so
+        # pre-M5b callers are unchanged (SAFE_AREA_FINAL compat pattern).
+        "HUMAN_EDITOR": bool((human_editor or {}).get("gate_pass", True)),
     }
     reported_diagnostics = {
         "human_editor_gates": q7g.get("human_editor_gates"),

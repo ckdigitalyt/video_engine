@@ -243,6 +243,34 @@ def m4_fullcanvas13b() -> bool:
     return os.environ.get("V13B_M4_FULLCANVAS", "").strip().lower() not in _FALSE
 
 
+# ── V13B M5b — recompose-on-flag + human-editor gate wiring ──────────────
+
+def recompose13b() -> bool:
+    """V13B M5b P0 — planner recompose-on-flag (JADE_V13B directive:
+    "Do not simply score this and allow it to pass. The planner should
+    regenerate/recompose the scene").
+
+    Default ON: after the plan is built, planv9 runs the M5a template-
+    signature detector over the plate images and, for every FLAGGED shot,
+    deterministically reselects the composition from the domain's ordered
+    preference list (skipping the one that flagged), re-stamps the world
+    canvas, and re-detects that shot ONCE. V13B_RECOMPOSE=0 disables the
+    pass (the detector then stays a pass-able diagnostic, which the
+    directive forbids).
+    """
+    return os.environ.get("V13B_RECOMPOSE", "").strip().lower() not in _FALSE
+
+
+def mute_live13b() -> bool:
+    """V13B M5b P1 — LIVE visual-authorship mute test in qa8full.
+
+    Default OFF (diagnostic, non-gating): qa8full stores per-segment mute-
+    test metadata with dry_run=True and zero API calls. V13B_MUTE_LIVE=1
+    runs the real vision judge chain per segment window.
+    """
+    return os.environ.get("V13B_MUTE_LIVE", "").strip().lower() in _TRUE
+
+
 def svg13() -> bool:
     """V13 M6b — upgraded SVG evidence layer (engine/svg_evidence.py).
 

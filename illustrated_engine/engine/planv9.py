@@ -461,6 +461,26 @@ def detect_domain_for_story(story: dict) -> dict:
     return visual_grammar.detect_domain(story, lines)
 
 
+def _stamp_shot(s: dict, beat: dict, rec: dict, kit_id: str, comp: str,
+                just: str) -> None:
+    """Stamp ONE shot with the world canvas + per-shot visual_grammar record
+    (shared by apply_canvas and the M5b recompose pass; identical fields so
+    downstream consumers read them unchanged)."""
+    domain = str(rec.get("domain") or "general")
+    s["canvas"] = canvas_grammar.world_canvas(s, beat, rec, comp, just,
+                                              family_kit_id=kit_id)
+    s["caption_zone"] = s["canvas"].get("caption_zone",
+                                        s.get("caption_zone"))
+    prior = s.get("visual_grammar") or {}
+    s["visual_grammar"] = {**prior,
+                           "domain": domain,
+                           "world": comp,
+                           "composition": comp,
+                           "overlays": list(visual_grammar.overlays_for(domain)),
+                           "accent": visual_grammar.accent_for(domain),
+                           "composition_justification": just}
+
+
 def apply_canvas(plan: dict, story: dict, kit_id: str,
                  domain_rec: dict | None = None) -> int:
     """V13B M2 — write the DOMAIN-AWARE world canvas onto every shot plus a
@@ -480,24 +500,11 @@ def apply_canvas(plan: dict, story: dict, kit_id: str,
     beats = {str(b.get("beat_id")): b for b in (story.get("beats") or [])}
     rec = domain_rec or detect_domain_for_story(story)
     domain = str(rec.get("domain") or "general")
-    overlays = list(visual_grammar.overlays_for(domain))
-    accent = visual_grammar.accent_for(domain)
     n = 0
     for s in (plan.get("shots") or []):
         beat = beats.get(str(s.get("beat_id")), {})
         comp, just = canvas_grammar.select_world(s, beat, rec, kit_id)
-        s["canvas"] = canvas_grammar.world_canvas(s, beat, rec, comp, just,
-                                                  family_kit_id=kit_id)
-        s["caption_zone"] = s["canvas"].get("caption_zone",
-                                            s.get("caption_zone"))
-        prior = s.get("visual_grammar") or {}
-        s["visual_grammar"] = {**prior,
-                               "domain": domain,
-                               "world": comp,
-                               "composition": comp,
-                               "overlays": overlays,
-                               "accent": accent,
-                               "composition_justification": just}
+        _stamp_shot(s, beat, rec, kit_id, comp, just)
         n += 1
     plan["canvas_grammar"] = kit_id
     plan["canvas_grammar_covers"] = canvas_grammar.kit_covers(kit_id)
@@ -505,6 +512,121 @@ def apply_canvas(plan: dict, story: dict, kit_id: str,
                             "confidence": rec.get("confidence"),
                             "evidence": rec.get("evidence") or []}
     return n
+
+
+# ---------------------------------------------------------------------------
+# V13B M5b P0 — recompose-on-flag
+
+
+def _next_composition(prefs: list, from_comp: str) -> str | None:
+    """Deterministic next choice from the domain's ORDERED preference list:
+    the first preference AFTER the one that flagged (wrapping once); a
+    panel/unknown start falls to the first world preference. Never returns
+    the flagged composition itself."""
+    if not prefs:
+        return None
+    if from_comp in prefs:
+        i = prefs.index(from_comp)
+        order = prefs[i + 1:] + prefs[:i]
+    else:
+        order = prefs
+    return order[0]
+
+
+def recompose_on_flag(plan: dict, story: dict, story_id: str,
+                      domain_rec: dict | None = None,
+                      build: Path = Path("build")) -> dict:
+    """V13B M5b P0 — the presentation-template signature is NOT a pass-able
+    score (JADE_V13B directive: "Do not simply score this and allow it to
+    pass. The planner should regenerate/recompose the scene").
+
+    One bounded deterministic round: run the M5a detector over the plate
+    images (prefer="plate"; no video exists at plan time); for each FLAGGED
+    shot, reselect its composition from the domain's ordered preference list
+    (skipping the one that flagged — _next_composition), re-stamp the world
+    canvas + visual_grammar, and re-run the detector on that changed shot
+    ONCE. Max N = len(flagged) shots; no loop. A shot that stays flagged
+    after recomposition is LEFT FLAGGED (QA surfaces it honestly; M6
+    re-authors the plates). Shots whose plate is a tier5 simple diagram keep
+    their composition — the M3 tier5 gate requires the justified panel.
+
+    V13B_RECOMPOSE=0 disables (detector reverts to a diagnostic). Records
+    per-shot {recomposed, from, to, reason} + a plan-level summary.
+    """
+    from engine import flags, template_signature
+    summary = {"schema": "v13b.recompose/1.0", "enabled": False}
+    if not flags.recompose13b():
+        summary["note"] = "recompose pass disabled (V13B_RECOMPOSE=0)"
+        return summary
+    summary["enabled"] = True
+    rec = domain_rec or detect_domain_for_story(story)
+    prefs = [c for c in canvas_grammar.visual_grammar_domain_compositions(
+                 str(rec.get("domain") or "general"))
+             if c in canvas_grammar.WORLD_KITS]
+    beats = {str(b.get("beat_id")): b for b in (story.get("beats") or [])}
+    before = template_signature.detect_story(plan, story_id, video=None,
+                                             story=story, build=build,
+                                             save=False, prefer="plate")
+    flagged_ids = set(before["summary"]["flagged_shot_ids"])
+    summary["flagged_before"] = sorted(flagged_ids)
+    summary["flag_rate_before"] = before["summary"]["flag_rate"]
+    rows, recomposed = [], 0
+    t = 0.0
+    for s in (plan.get("shots") or []):
+        sid = str(s.get("shot_id"))
+        vg = s.get("visual_grammar") or {}
+        from_comp = str(vg.get("composition") or "")
+        row = {"shot_id": s.get("shot_id"), "recomposed": False,
+               "from": from_comp, "to": from_comp,
+               "reason": "template_signature"}
+        if sid in flagged_ids:
+            tier = (s.get("plate_sidecar") or {}).get("asset_tier")
+            if tier == "tier5_simple_diagram":
+                # M3 tier5 panel gate: a simple-diagram plate is allowed only
+                # inside the justified panel — recomposition would invalidate
+                # the plate contract, so the flag is left standing.
+                row["skip"] = ("tier5 panel gate: simple-diagram plate "
+                               "requires the justified panel composition")
+            else:
+                to_comp = _next_composition(prefs, from_comp)
+                if to_comp and to_comp != from_comp:
+                    _stamp_shot(
+                        s, beats.get(str(s.get("beat_id")), {}), rec,
+                        str(plan.get("canvas_grammar") or ""), to_comp,
+                        f"recompose-on-flag: '{from_comp}' carried >=4/6 "
+                        f"presentation-template features; next domain "
+                        f"preference '{to_comp}'")
+                    row["recomposed"] = True
+                    row["to"] = to_comp
+                    recomposed += 1
+                else:
+                    row["skip"] = (f"no alternative domain preference "
+                                   f"(prefs={prefs})")
+            # single re-detection of the changed shot (plate source)
+            after = template_signature.detect_shot(
+                s, story, story_id, None, t,
+                build, prefer="plate")
+            row["still_flagged"] = bool(after["flagged"])
+            row["feature_count_after"] = after["feature_count"]
+        s["recompose"] = row
+        rows.append(row)
+        t += float(s.get("duration_s") or 0)
+    after = template_signature.detect_story(plan, story_id, video=None,
+                                            story=story, build=build,
+                                            save=True, prefer="plate")
+    summary.update({
+        "domain": rec.get("domain"),
+        "preference_order": prefs,
+        "shots": rows,
+        "recomposed_count": recomposed,
+        "flagged_after": after["summary"]["flagged_shot_ids"],
+        "flag_rate_after": after["summary"]["flag_rate"],
+        "note": ("single bounded round (max N = flagged shots); shots still "
+                 "flagged after recomposition are left flagged for honest QA "
+                 "(plates re-authored in M6)"),
+    })
+    plan["recompose"] = summary
+    return summary
 
 
 # ---------------------------------------------------------------------------
@@ -556,6 +678,12 @@ def make_edit_plan_v9(paths, story_id: str, out_name: str = "edit_plan.json",
     plan["visual_contradiction"] = _locate_contradiction(plan, story, {})
     plan["hook_plan"] = _locate_hook(plan, _hook_plan(story))
     plan["payoff_image"] = _locate_payoff(plan, _payoff_image(story))
+    # V13B M5b P0 — recompose-on-flag (the detector is not a pass-able
+    # score): flagged shots get one bounded deterministic recomposition
+    # round before the plan snapshot is persisted.
+    recompose = recompose_on_flag(plan, story, story_id,
+                                  domain_rec=domain_rec,
+                                  build=Path(paths.build))
     plan["v9"] = {
         "schema": "v12.planv9/1.0",
         "grammar_candidates": candidates,
@@ -574,6 +702,8 @@ def make_edit_plan_v9(paths, story_id: str, out_name: str = "edit_plan.json",
                 1 for x in model["beats"].values()
                 if x["representation"] == r["representation"])
             for r in model["beats"].values()},
+        # V13B M5b — recompose-on-flag summary (flagged -> recomposed shots).
+        "recompose": recompose,
     }
 
     # Persist the plan-level signature so the NEXT story compares against it
@@ -633,4 +763,13 @@ def summarize(plan: dict, v9: dict) -> str:
     lines.append(f"  claim confidence: "
                  f"{conf if conf else 'no facts claims wired'}"
                  + (f" | overrides: {', '.join(ovr)}" if ovr else ""))
+    rec = v9.get("recompose") or {}
+    if rec.get("enabled"):
+        moved = [f"{r['shot_id']} {r['from']}->{r['to']}"
+                 for r in rec.get("shots", []) if r.get("recomposed")]
+        lines.append(f"  recompose-on-flag: {rec.get('recomposed_count', 0)} "
+                     f"shot(s) recomposed "
+                     f"({rec.get('flag_rate_before')} -> "
+                     f"{rec.get('flag_rate_after')} flag rate)"
+                     + (f": {', '.join(moved)}" if moved else ""))
     return "\n".join(lines)

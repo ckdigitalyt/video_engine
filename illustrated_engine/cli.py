@@ -811,6 +811,64 @@ def cmd_qa8full(args):
     except Exception as _e:  # diagnostics must never break qa8
         res8["template_signature"] = {"schema": "v13b.template_signature/1.0",
                                       "error": str(_e)}
+    # V13B M5b — M3 asset-tier roll-up into the qa8 json (evidence for the
+    # human-editor force-fail on unpublishable placeholder plates).
+    try:
+        _tiers = [{"shot_id": _s.get("shot_id"),
+                   "asset_tier": (_s.get("plate_sidecar") or {}).get(
+                       "asset_tier"),
+                   "tier_method": (_s.get("plate_sidecar") or {}).get(
+                       "tier_method")}
+                  for _s in plan.get("shots") or []]
+        res8["asset_tiers"] = {
+            "shots": _tiers,
+            "failed": [t["shot_id"] for t in _tiers
+                       if t["asset_tier"] == "failed"]}
+    except Exception as _e:  # diagnostics must never break qa8
+        res8["asset_tiers"] = {"error": str(_e)}
+    # V13B M5b P1 — HUMAN-EDITOR TEST (engine/human_editor.py): the
+    # directive's six questions per VIDEO over the shared vision chain;
+    # q1..q4,q6 gate (unjudged fails), q5 is the deterministic swap-nouns
+    # test (evidence only). Any asset_tier=="failed" plate force-fails.
+    # Vision budget: 8 real calls (<=24 verification cap).
+    _vid_he = Path(args.path) if getattr(args, "path", None) \
+        else paths.output / f"{story_id}.mp4"
+    try:
+        from engine import human_editor as _he_mod
+        res8["human_editor"] = _he_mod.evaluate(
+            plan, story, story_id,
+            _vid_he if _vid_he.exists() else None,
+            build=Path("build"),
+            ts_result=res8.get("template_signature")
+            if isinstance(res8.get("template_signature"), dict) else None)
+    except Exception as _e:  # gate verdict must never break qa8 assembly
+        res8["human_editor"] = {"schema": "v13b.human_editor/1.0",
+                                "available": False, "gate_pass": False,
+                                "error": str(_e)}
+    _he = res8["human_editor"]
+    _heq = _he.get("questions") or {}
+    print("  human_editor: "
+          + " ".join(f"{q}={'PASS' if (_heq.get(q) or {}).get('pass') else 'FAIL'}"
+                     for q in ("q1", "q2", "q3", "q4", "q5", "q6"))
+          + f" | gate={'PASS' if _he.get('gate_pass') else 'FAIL'}"
+            f" (vision calls {_he.get('vision_calls', 0)})"
+          + (f" | failed-tier shots: {res8['asset_tiers']['failed']}"
+             if (res8.get("asset_tiers") or {}).get("failed") else ""))
+    # V13B M5b P1 — visual-authorship mute test (diagnostic, NON-gating):
+    # per ~2-4s segment windows. Default dry_run=True (metadata only, zero
+    # API calls); V13B_MUTE_LIVE=1 runs the real judge chain, capped so the
+    # human-editor + mute calls stay inside the 24-call verification budget.
+    try:
+        from engine import flags as _m5f
+        from engine import template_signature as _tsig_m
+        _live = _m5f.mute_live13b() and _vid_he.exists()
+        res8["visual_authorship"] = _tsig_m.mute_test(
+            plan, story_id, video=_vid_he if _live else None,
+            dry_run=not _live, build=Path("build"),
+            max_calls=max(0, 24 - int(_he.get("vision_calls") or 0)))
+    except Exception as _e:  # diagnostics must never break qa8
+        res8["visual_authorship"] = {"schema": "v13b.mute_test/1.0",
+                                     "error": str(_e)}
     editorial8.write_report(res8, Path("build/qa"))
     print(f"qa8full {story_id} -> build/qa/qa8_{story_id}.json")
     for k, v in res8["gates"].items():
@@ -885,7 +943,8 @@ def cmd_qa8full(args):
             safe_area = {"passed": True, "error": str(_e)}
         gate = publish_gate.run(qa5, qa7_res, res8, sem, cap_res, leak_res,
                                 occ_res, mot_res, audio_hier=ah_res,
-                                safe_area=safe_area)
+                                safe_area=safe_area,
+                                human_editor=res8.get("human_editor"))
         caption_qa.write_report(cap_res, Path("build/qa"), story_id)
         leak_scan.write_report(leak_res, Path("build/qa"), story_id)
         occupancy_qa.write_report(occ_res, Path("build/qa"), story_id)
