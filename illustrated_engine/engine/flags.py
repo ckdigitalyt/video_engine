@@ -90,6 +90,8 @@ def token() -> str:
         parts.append("v11c")
     if fullbleed11():
         parts.append("v11f")
+    if m4_captions13b() or m4_fullcanvas13b():
+        parts.append("v13bm4")
     return "-".join(parts)
 
 
@@ -213,6 +215,32 @@ def depth13() -> bool:
     blurred ambient field stays as decoration and earns no depth credit).
     """
     return os.environ.get("V13_DEPTH", "").strip().lower() not in _FALSE
+
+
+# ── V13B M4 — full-canvas worlds, visual-first captions, hook support title ──
+
+def m4_captions13b() -> bool:
+    """V13B M4 — visual-first caption placement + hook support line.
+
+    Default ON: shots carrying a plate sidecar get their caption band chosen
+    against the MEASURED plate art occupancy (caption_place.
+    choose_caption_zone) and opening shots render the title as a compact
+    support line instead of a top header band. V13B_M4_CAPTIONS=0 restores
+    the static below-card default and the legacy opening title byte-
+    identically.
+    """
+    return os.environ.get("V13B_M4_CAPTIONS", "").strip().lower() not in _FALSE
+
+
+def m4_fullcanvas13b() -> bool:
+    """V13B M4 — full-canvas 9:16 world shots.
+
+    Default ON: world-kit (non-panel) compositions place the plate FULL-
+    FRAME (9:16 cover, camera over the whole frame, no panel island);
+    panel-justified shots keep the card/panel layout. V13B_M4_FULLCANVAS=0
+    restores the panel overlay for every shot.
+    """
+    return os.environ.get("V13B_M4_FULLCANVAS", "").strip().lower() not in _FALSE
 
 
 def svg13() -> bool:

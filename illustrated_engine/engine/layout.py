@@ -86,8 +86,33 @@ def base_frame(bible: dict) -> Image.Image:
     return frame
 
 
+def hook_support_anchor(shot: dict):
+    """V13B M4 hook P0 — frame-y slot for an opening shot's compact title
+    support line: the caption-safe sibling of the shot's CHOSEN caption
+    band (the slot the captions did not take), so support text and
+    narration never share rows and the title never rides a top header
+    band over the subject. -> (top, bot) or None when the shot keeps the
+    legacy opening treatment (no plate sidecar / not an opening)."""
+    if not (shot.get("opening") and shot.get("plate_sidecar")):
+        return None
+    from engine import caption_place as _cp
+    if not _cp.zones():
+        return None
+    zone = _cp.choose_zone(shot)
+    zs = _cp.zones()
+    zid = str(zone.get("zone") or "")
+    if zid == "top_band":
+        return zs["below_card"]
+    sibling = "below_card_low" if zid == "below_card" else "below_card"
+    return zs.get(sibling) or zs["below_card"]
+
+
 def brand_block(frame: Image.Image, bible: dict, shot: dict) -> Image.Image:
-    """Opening shots: large display title. Later shots: small brand marker."""
+    """Opening shots: large display title. Later shots: small brand marker.
+
+    V13B M4 hook P0 — opening shots WITH a plate sidecar demote the title
+    to a compact support line in the chosen caption-safe region (the
+    subject owns frame one; the title is never the primary event)."""
     from engine import bible as B
     draw = ImageDraw.Draw(frame, "RGBA")
     text_col = B.rgb255(bible, "text") + (255,)
@@ -97,6 +122,20 @@ def brand_block(frame: Image.Image, bible: dict, shot: dict) -> Image.Image:
 
     if shot.get("opening"):
         title = str(shot.get("title", bible.get("brand", ""))).upper()
+        anchor = hook_support_anchor(shot)
+        if anchor is not None:
+            # compact support line: small letterspaced caps in the sibling
+            # caption-safe slot, soft shadow for legibility over art.
+            size = 30
+            f = _font(typ.get("display", "BebasNeue-Regular.ttf"), size)
+            t = " ".join(title.strip())
+            tw = draw.textlength(t, font=f)
+            sy = anchor[0] + max(0, (anchor[1] - anchor[0] - size) // 2 - 8)
+            draw.text(((CANVAS_W - tw) / 2 + 2, sy + 2), t, font=f,
+                      fill=(0, 0, 0, 170))
+            draw.text(((CANVAS_W - tw) / 2, sy), t, font=f,
+                      fill=text_col[:3] + (235,))
+            return frame
         # width-fit stepping: protect longer titles the way captions are protected
         size, max_w = 84, CANVAS_W - 2 * 64
         f = _font(typ.get("display", "BebasNeue-Regular.ttf"), size)

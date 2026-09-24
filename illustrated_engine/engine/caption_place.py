@@ -43,6 +43,9 @@ W_CHROME = 6.0           # zone carries title / tag / chrome / end-card
 W_DEFAULT = 0.35         # mild bias keeping the default zone on ties
 W_EVIDENCE = 1.0         # evidence mass share in the zone's facing third
 W_LOW_EXTRA = 0.20       # below_card_low is the retreat slot
+W_SIDECAR = 3.0          # per-unit coverage of the measured plate art
+COVER_BLOCK = 0.60       # band coverage at/above this reads as occupied art
+MIN_BAND_H = 96          # a candidate band must be at least this tall
 EDGE_THIRD = 1.0 / 3.0   # card thirds adjacent to the top/bottom zones
 
 DEFAULT_ZONE = "below_card"
@@ -189,15 +192,80 @@ def score_zone(zone_id: str, zrect: tuple, evidence: list, chrome: list) -> tupl
     return penalty, reasons
 
 
-def choose_zone(shot: dict) -> dict:
-    """Pick the cleanest safe zone for this shot's captions.
+def _plate_frame_size(sidecar: dict | None) -> tuple:
+    """(plate_w, plate_h) for px-rect mapping, from the sidecar's full-
+    extent layer bbox (BACKGROUND covers the whole plate). (0, 0) when
+    the sidecar carries no measurable full extent -> no coverage scoring."""
+    for layer in (sidecar or {}).get("layers") or []:
+        bb = layer.get("bbox_px") or []
+        if (len(bb) == 4 and float(bb[0]) == 0.0 and float(bb[1]) == 0.0
+                and float(bb[2]) > 0.0 and float(bb[3]) > 0.0):
+            return float(bb[2]), float(bb[3])
+    return 0.0, 0.0
 
-    An authored shot["caption_zone"] (valid zone id) wins outright —
-    editorial placement stays possible; the detector covers every shot
-    that does not declare one. Deterministic otherwise: ties resolve in
-    zones() declaration order with the default zone biased to win, so
-    placement varies only when evidence geometry or chrome demands it.
-    """
+
+def _sidecar_spans(sidecar: dict | None) -> list:
+    """V13B M4 — vertical FRAME spans (y0, y1) occupied by the plate art.
+
+    sidecar subject_bbox_px + annotation_rects_px are plate pixels; the
+    plate's normalized geometry maps onto the frame (cover crop only
+    trims edges), so y-frame = y-plate / plate_h * FRAME_H. Declared
+    overlay rects (card-space events/states) are added by the caller."""
+    if not sidecar:
+        return []
+    pw, ph = _plate_frame_size(sidecar)
+    if pw <= 0.0 or ph <= 0.0:
+        return []
+    rects = []
+    sb = sidecar.get("subject_bbox_px") or []
+    if len(sb) == 4:
+        rects.append([float(v) for v in sb])
+    for r in sidecar.get("annotation_rects_px") or []:
+        if r and len(r) == 4:
+            rects.append([float(v) for v in r])
+    spans = []
+    for _x0, y0, _x1, y1 in rects:
+        if y1 <= y0:
+            continue
+        fy0 = min(max(y0 / ph * FRAME_H, 0.0), FRAME_H)
+        fy1 = min(max(y1 / ph * FRAME_H, 0.0), FRAME_H)
+        if fy1 > fy0:
+            spans.append((fy0, fy1))
+    return spans
+
+
+def _declared_spans(shot: dict) -> list:
+    """Declared overlay rects (evidence/labels/arrows/pops) as frame-y
+    spans — the same vocabulary evidence_rects scores, but measured as
+    DIRECT band coverage alongside the plate art."""
+    spans = []
+    for rc, _kind, _w in evidence_rects(shot):
+        fx0, fy0, _fx1, fy1 = card_to_frame(rc)
+        if fy1 > fy0:
+            spans.append((fy0, fy1))
+    return spans
+
+
+def _band_coverage(spans: list, top: float, bot: float) -> float:
+    """Union share of the band (top..bot) overlapped by occupied spans."""
+    merged = []
+    for a, b in sorted((max(0.0, float(a)), min(FRAME_H, float(b)))
+                       for a, b in spans if b > a):
+        if merged and a <= merged[-1][1]:
+            merged[-1][1] = max(merged[-1][1], b)
+        else:
+            merged.append([a, b])
+    covered = 0.0
+    for a, b in merged:
+        lo, hi = max(a, top), min(b, bot)
+        if hi > lo:
+            covered += hi - lo
+    return min(1.0, covered / max(1.0, bot - top))
+
+
+def _choose_zone_legacy(shot: dict) -> dict:
+    """V11 P1 §5 placement (pre-M4 behavior, byte-identical): evidence-
+    and chrome-scored zones over the card, below-card default on ties."""
     evidence = evidence_rects(shot)
     chrome = _chrome_rects(shot)
     ranked = []
@@ -216,6 +284,70 @@ def choose_zone(shot: dict) -> dict:
     return {"zone": zid, "top": int(top), "bot": int(bot),
             "penalty": round(pen, 2), "reasons": reasons[:6],
             "evidence_count": len(evidence), "considered": considered}
+
+
+def choose_caption_zone(shot: dict, sidecar: dict | None = None) -> dict:
+    """V13B M4 — visual-first caption placement over a rich plate.
+
+    Scores the existing zones() vocabulary (below_card, below_card_low,
+    top_band) against the plate's MEASURED art occupancy — sidecar
+    subject_bbox_px + annotation_rects_px mapped onto the frame — plus
+    the shot's declared overlay rects. The lowest-coverage band that
+    still satisfies the safety margins and the min-band height wins;
+    the V11 evidence/chrome penalties stay stacked underneath so chrome
+    never shares a band and the default zone keeps its tie bias. No
+    sidecar, no measurable plate extent, or no surviving candidate
+    (art fills every band) -> the historical below-card default via
+    _choose_zone_legacy. Authored shot["caption_zone"] still wins
+    outright, and the returned dict is the choose_zone structure plus an
+    additive sidecar_coverage record.
+    """
+    if not _flags.m4_captions13b():
+        return _choose_zone_legacy(shot)
+    zs = zones()
+    authored = str(shot.get("caption_zone") or "").strip()
+    if authored and authored in zs:
+        return _choose_zone_legacy(shot)  # authored control stays absolute
+    spans = _sidecar_spans(sidecar)
+    if not spans:
+        return _choose_zone_legacy(shot)  # no sidecar -> today's behavior
+    spans += _declared_spans(shot)  # declared overlays join the measurement
+    evidence = evidence_rects(shot)
+    chrome = _chrome_rects(shot)
+    order = list(zs)
+    ranked = []
+    for zid, (top, bot) in zs.items():
+        if (bot - top) < MIN_BAND_H or top < 0 or bot > FRAME_H:
+            continue  # safety margins / min-band height unsatisfied
+        cov = _band_coverage(spans, top, bot)
+        pen, reasons = score_zone(zid, (top, bot), evidence, chrome)
+        pen += W_SIDECAR * cov
+        if cov >= COVER_BLOCK:
+            pen += W_CHROME  # band is occupied art — effectively excluded
+            reasons.append(f"plate_covered:{cov:.2f}")
+        elif cov > 0.0:
+            reasons.append(f"plate_share:{cov:.2f}")
+        ranked.append((pen, order.index(zid), zid, top, bot,
+                       round(cov, 2), reasons))
+    if not ranked:
+        return _choose_zone_legacy(shot)
+    ranked.sort(key=lambda r: (r[0], r[1]))
+    pen, _i, zid, top, bot, cov, reasons = ranked[0]
+    considered = {r[2]: round(r[0], 2) for r in ranked}
+    return {"zone": zid, "top": int(top), "bot": int(bot),
+            "penalty": round(pen, 2), "reasons": reasons[:6],
+            "evidence_count": len(evidence), "considered": considered,
+            "sidecar_coverage": {r[2]: r[5] for r in ranked}}
+
+
+def choose_zone(shot: dict) -> dict:
+    """Pick the cleanest safe zone for this shot's captions.
+
+    V13B M4 — sidecar-aware: a shot carrying a stamped plate_sidecar is
+    scored against the measured plate art (choose_caption_zone); every
+    other shot keeps the V11 behavior exactly. Both the renderer and the
+    overlay report call this, so caption QA follows whatever was chosen."""
+    return choose_caption_zone(shot, shot.get("plate_sidecar"))
 
 
 def plan_shot_zones(plan: dict) -> dict:

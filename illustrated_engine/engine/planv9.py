@@ -193,7 +193,11 @@ def _hook_fields(story: dict, beats: dict, claim_texts: dict) -> dict:
                    or "nothing on screen explains itself yet — the "
                       "mechanism is still hidden")
     return {"phenomenon": phenomenon, "tension": tension,
-            "hook_source": "authored" if authored else "synthesized"}
+            "hook_source": "authored" if authored else "synthesized",
+            # V13B M4 hook P0 — the opening title is support, never the
+            # primary event: composev5/layout render it as a compact line
+            # in the chosen caption-safe region on plate shots.
+            "title_role": "support"}
 
 
 def _payoff_fields(story: dict, beats: dict, claim_texts: dict) -> tuple:

@@ -77,24 +77,43 @@ def _fonts(bible):
     return _font(typ.get("display", "BebasNeue-Regular.ttf"), 92)
 
 
-def _title_overlay_png(text: str, bible: dict, out: Path):
+def _title_overlay_png(text: str, bible: dict, out: Path, band=None):
     """V7 P0-3 — episode title as a compose overlay; fades out by ~2.5s.
-    Lives in the header band, top-center; card content zones untouched."""
+
+    Default geometry: header band, top-center; card content zones untouched.
+    V13B M4 hook contract — band=(top, bot) renders a COMPACT support line
+    (30px letterspaced caps) anchored inside that frame band instead: for
+    opening shots with a plate, the title rides the chosen caption-safe
+    region as support, never a top header band over the subject. The
+    ffmpeg overlay input itself stays disabled in render_shot_v5 (V7 P0-3
+    note below); the rendered hook title takes the same geometry via
+    layout.brand_block's compact support branch.
+    """
     from PIL import ImageDraw
     W, H = 1536, 1024
     img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
     t = " ".join(text.strip().upper())  # letterspaced caps
-    size = 72
-    fname = bible.get("typography", {}).get("display", "BebasNeue-Regular.ttf")
-    while True:
+    if band:
+        size = 30
+        fname = bible.get("typography", {}).get("display",
+                                                "BebasNeue-Regular.ttf")
         f = _font(fname, size)
         bbox = d.textbbox((0, 0), t, font=f)
-        if bbox[2] - bbox[0] <= W - 160 or size <= 40:
-            break
-        size -= 6
-    x = (W - (bbox[2] - bbox[0])) // 2
-    y = 66
+        x = (W - (bbox[2] - bbox[0])) // 2
+        y = int(band[0]) + max(0, (int(band[1]) - int(band[0]) - size) // 2 - 8)
+    else:
+        size = 72
+        fname = bible.get("typography", {}).get("display",
+                                                "BebasNeue-Regular.ttf")
+        while True:
+            f = _font(fname, size)
+            bbox = d.textbbox((0, 0), t, font=f)
+            if bbox[2] - bbox[0] <= W - 160 or size <= 40:
+                break
+            size -= 6
+        x = (W - (bbox[2] - bbox[0])) // 2
+        y = 66
     d.text((x + 3, y + 3), t, font=f, fill=(8, 10, 14, 210))
     d.text((x, y), t, font=f, fill=(240, 238, 232, 255))
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -115,6 +134,95 @@ def _build_visual_rect_shot(shot, paths, bible, v3_rect):
     out.parent.mkdir(parents=True, exist_ok=True)
     img.save(out, "PNG")
     return out, smax, W_c, H_c
+
+
+# ── V13B M4 — full-canvas world shots (flags.m4_fullcanvas13b) ───────────────
+
+WORLD_STAGE_W = 2160     # 2x of the 1080 frame width (motion.UPSCALE parity)
+
+
+def _shot_is_world(shot: dict) -> bool:
+    """V13B M4 — a world-kit (non-panel) composition: the plate owns the
+    full 9:16 frame. World kits declare panel_usage "none" ("full_bleed"
+    kept as an explicit alias); the justified presentation panel
+    (universal_presentation_panel) keeps the card/panel layout."""
+    if not _flags.m4_fullcanvas13b():
+        return False
+    canvas = shot.get("canvas") or {}
+    if str(canvas.get("panel_usage") or "") not in ("none", "full_bleed"):
+        return False
+    comp = str((shot.get("visual_grammar") or {}).get("composition")
+               or canvas.get("composition") or "")
+    return bool(comp) and comp != "universal_presentation_panel"
+
+
+def _build_world_frame_shot(shot, paths):
+    """Full-frame 9:16 world canvas: the plate cover-cropped to the whole
+    frame (no panel island), sized so the widest authored camera window
+    keeps motion.STAGE-grade resolution. -> (png_path, W_f, H_f)."""
+    plate = Path(paths.assets) / f"{shot['asset']}.png"
+    _prim, f, t, _curve, _notes = motion.resolve_camera(shot["camera"])
+    smax = max(f["w"], t["w"])
+    w_f = int(round(WORLD_STAGE_W * smax))
+    h_f = int(round(w_f * CANVAS_H / CANVAS_W))  # layout CANVAS = 1080x1920
+    img = layout.smart_crop(Image.open(plate), w_f, h_f,
+                            bias_y=float(shot.get("crop_bias_y", 0.5)))
+    out = Path(paths.build) / "cam" / f"{shot['shot_id']}_world.png"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    img.save(out, "PNG")
+    return out, w_f, h_f
+
+
+def _world_camera_filter(shot, content_w: int, content_h: int,
+                         dur: float, fps: int = 30):
+    """Full-frame camera over the 9:16 world content.
+
+    motion_v6 resolves/clamps camera windows against the PANEL geometry
+    (V10 re-scales the authored window by CONTENT_H/CANVAS_H), so the
+    panel rescale is inverted here: the world window covers the same
+    fraction of the full-frame cover crop that the author asked for.
+    Trajectory construction mirrors motion.camera_filter exactly (same
+    resolve, easing profile, zoompan expressions) with world constants —
+    zoom/pan shape is preserved, no letterbox. -> (fragment, n_frames,
+    meta)."""
+    prim, f, t, curve, notes = motion.resolve_camera(shot["camera"])
+    _r = motion.CONTENT_H / motion.CANVAS_H  # V10 panel rescale factor
+
+    def _wmap(v):
+        return min(max(float(v) / _r, 0.30), 1.0)
+
+    def _cmap(v, w):
+        return min(max(float(v), w / 2.0), 1.0 - w / 2.0)
+
+    fw, tw = _wmap(f["w"]), _wmap(t["w"])
+    fcx, tcx = _cmap(f["cx"], fw), _cmap(t["cx"], tw)
+    fcy, tcy = _cmap(f["cy"], fw), _cmap(t["cy"], tw)
+    n = motion.frame_count(dur, fps)
+    p = f"clip(on/{n - 1},0,1)" if n > 1 else "0"
+    p_e = motion._profile_p_e(curve, p)
+
+    def _blend(a, b):
+        if abs(b - a) < 1e-9:
+            return f"({a:.6f})"
+        return f"(({a:.6f})+({p_e})*({b - a:.6f}))"
+
+    w_e, cx_e, cy_e = _blend(fw, tw), _blend(fcx, tcx), _blend(fcy, tcy)
+    z_e = f"(1/({w_e}))"
+    x_e = (f"clip({content_w}*({cx_e})-({content_w})*({w_e})/2,"
+           f"0,{content_w}-{content_w}*({w_e}))")
+    y_e = (f"clip({content_h}*({cy_e})-({content_h})*({w_e})/2,"
+           f"0,{content_h}-{content_h}*({w_e}))")
+    frag = (f"zoompan=z='{z_e}':x='{x_e}':y='{y_e}':d={n}:"
+            f"s={content_w}x{content_h}:fps={fps},"
+            f"scale={CANVAS_W}:{CANVAS_H}:flags=lanczos,setsar=1")
+    meta = {"primitive": prim,
+            "world_content": [int(content_w), int(content_h)],
+            "world_camera": {"from": {"w": round(fw, 4), "cx": round(fcx, 4),
+                                     "cy": round(fcy, 4)},
+                             "to": {"w": round(tw, 4), "cx": round(tcx, 4),
+                                    "cy": round(tcy, 4)}},
+            "resolve_notes": notes[-2:]}
+    return frag, n, meta
 
 
 def _camera_filter(shot, fps: int = 30):
@@ -643,28 +751,49 @@ def render_shot_v5(shot: dict, paths, bible: dict, force: bool = False,
         graph = [f"[0:v]scale={motion.PANEL_W}:{motion.PANEL_H}:flags=lanczos,setsar=1[cam]",
                  f"[1:v][cam]overlay=0:{card_y0}[b]"]
     else:
+        # V13B M4 — world-kit (non-panel) compositions: the plate goes
+        # FULL-FRAME (9:16 cover, camera over the whole frame, overlay at
+        # 0:0 — no panel island). Panel-justified shots keep the card
+        # layout below. Any world-canvas build failure falls back
+        # deterministically to the panel path.
+        _world = None
+        if _shot_is_world(shot):
+            try:
+                _world = _build_world_frame_shot(shot, paths)
+            except Exception:
+                _world = None
         cmd = ["ffmpeg", "-nostdin", "-hide_banner", "-loglevel", "error", "-y",
-               "-loop", "1", "-framerate", str(fps), "-t", f"{dur:.3f}", "-i", str(canvas),
+               "-loop", "1", "-framerate", str(fps), "-t", f"{dur:.3f}",
+               "-i", str(_world[0] if _world else canvas),
                "-loop", "1", "-framerate", str(fps), "-t", f"{dur:.3f}", "-i", str(base_png)]
-        cam_filter, n, prim, notes = _camera_filter(shot, fps=fps)
-        if (_flags.parallax_enabled() and prim != "HOLD"
-                and not shot.get("end_card") and not shot.get("opening")
-                and not _flags.fullbleed11()):
-            # ENABLE_PARALLAX: ambient field moves at damp x camera rate.
-            # The card plate keeps the authored camera — text never distorts.
-            # Opening/end-card shots keep a fully static base (their baked-in
-            # display title / end mark must not drift).
-            # V11_FULLBLEED skips the drift: the backdrop is a mirror
-            # continuation seam-locked to the card edges — drifting it would
-            # tear the seam. Card camera motion is untouched.
-            amb_filter, _an, _ap = motion.ambient_parallax_filter(
-                shot.get("camera") or {}, dur, fps=fps)
-            graph = [f"[1:v]{amb_filter}[amb]",
-                     f"[0:v]{cam_filter}[cam]",
-                     f"[amb][cam]overlay=0:{card_y0}[b]"]
+        if _world:
+            _wpng, _ww, _wh = _world
+            wf, _wn, _wmeta = _world_camera_filter(shot, _ww, _wh, dur, fps=fps)
+            # The world canvas occludes the ambient entirely; the ambient
+            # parallax drift branch is meaningless here and is skipped
+            # (same seam logic that V11_FULLBLEED applies to the backdrop).
+            graph = [f"[0:v]{wf}[cam]",
+                     f"[1:v][cam]overlay=0:0[b]"]
         else:
-            graph = [f"[0:v]{cam_filter}[cam]",
-                     f"[1:v][cam]overlay=0:{card_y0}[b]"]
+            cam_filter, n, prim, notes = _camera_filter(shot, fps=fps)
+            if (_flags.parallax_enabled() and prim != "HOLD"
+                    and not shot.get("end_card") and not shot.get("opening")
+                    and not _flags.fullbleed11()):
+                # ENABLE_PARALLAX: ambient field moves at damp x camera rate.
+                # The card plate keeps the authored camera — text never distorts.
+                # Opening/end-card shots keep a fully static base (their baked-in
+                # display title / end mark must not drift).
+                # V11_FULLBLEED skips the drift: the backdrop is a mirror
+                # continuation seam-locked to the card edges — drifting it would
+                # tear the seam. Card camera motion is untouched.
+                amb_filter, _an, _ap = motion.ambient_parallax_filter(
+                    shot.get("camera") or {}, dur, fps=fps)
+                graph = [f"[1:v]{amb_filter}[amb]",
+                         f"[0:v]{cam_filter}[cam]",
+                         f"[amb][cam]overlay=0:{card_y0}[b]"]
+            else:
+                graph = [f"[0:v]{cam_filter}[cam]",
+                         f"[1:v][cam]overlay=0:{card_y0}[b]"]
     last = "b"
     idx = 2
 
@@ -685,7 +814,10 @@ def render_shot_v5(shot: dict, paths, bible: dict, force: bool = False,
         # zone (default below-card, top band, or bottom retreat slot);
         # used by BOTH the kinetic and the legacy caption path.
         from engine import caption_place as _cplace
-        _zone = _cplace.choose_zone(shot)
+        # V13B M4 — visual-first placement: a stamped plate sidecar scores
+        # the zones against the MEASURED plate art (choose_caption_zone);
+        # no sidecar -> historical behavior, identical result.
+        _zone = _cplace.choose_caption_zone(shot, shot.get("plate_sidecar"))
         _ct, _cb = int(_zone["top"]), int(_zone["bot"])
     if _flags.kinetic10() and shot.get("captions"):
         from engine import captions as _caps
@@ -877,7 +1009,7 @@ def _build_overlay_report(shots: list, bible: dict, audio_info: dict) -> dict:
         # shot's captions actually use and check THAT band (not one global
         # coordinate), so safe-zone QA follows the renderer by construction.
         from engine import caption_place as _cplace
-        _zone = _cplace.choose_zone(s)
+        _zone = _cplace.choose_caption_zone(s, s.get("plate_sidecar"))
         _rb_top, _rb_bot = int(_zone["top"]), int(_zone["bot"])
         for cue in s.get("captions", []) or []:
             lay = _layout_caption_v5(cue, bible, cap_top=_rb_top, cap_bot=_rb_bot)
