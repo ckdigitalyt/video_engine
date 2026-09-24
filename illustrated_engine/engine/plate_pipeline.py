@@ -6,9 +6,17 @@ per-stage provenance.
 
 Stages
 ------
-1. composition     text→img (or multi-ref when refs provided, via
-                   ``generate_multi_ref_with_fallback``); on provider failure
-                   degrades to a deterministic PIL placeholder plate.
+1. composition     V13B M3 tiered rich-asset descent (directive P0 "RICH
+                   ASSET FALLBACK HIERARCHY"): tier1 rich AI plate (text→img
+                   or multi-ref via ``generate_multi_ref_with_fallback``) →
+                   tier2 rich procedural FULL-FRAME scene → tier3 layered
+                   hybrid (environment base + overlay evidence) → tier4
+                   subject-specific technical diagram → tier5 simple
+                   diagram (only when the shot's M2 visual_grammar
+                   composition is a justified panel).  A failed tier
+                   descends to the next; the bare PIL gradient placeholder
+                   is RETIRED as publishable — reaching it records
+                   asset_tier="failed" in the sidecar.
 2. detail/material edit pass via ``edit_image_with_fallback``; degrades
                    gracefully (edited=False, composition preserved).
 3. semantic-edit   edit pass placing/reserving annotation areas; same
@@ -23,15 +31,21 @@ falls back to the deterministic placeholder and records it in
 
 from __future__ import annotations
 
+import math
 import json
 import os
 import random
+import re
 import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
+_ENGINE_ROOT = Path(__file__).resolve().parents[1]
+# V13B M3: the ``engine`` package must resolve to illustrated_engine/engine
+# (the repo-root ``engine`` package is a different project).
+for _p in (REPO_ROOT, _ENGINE_ROOT):
+    if str(_p) not in sys.path:
+        sys.path.insert(0, str(_p))
 
 from PIL import Image, ImageDraw, ImageFilter  # noqa: E402
 
@@ -187,6 +201,728 @@ def _adopt(path, plate_path, width, height):
     img.save(plate_path)
 
 
+# ── V13B M3 — tiered rich-asset fallback (directive P0) ─────────────────
+#
+# docs/directives/JADE_V13B_STORY_SPECIFIC_VISUAL_GRAMMAR.md:
+#   "RICH ASSET FALLBACK HIERARCHY"  tier1 rich plate → tier2 rich
+#     procedural reconstruction → tier3 layered hybrid → tier4
+#     subject-specific technical diagram → tier5 simple diagram (only when
+#     the concept genuinely requires it / justified panel).
+#   "RICH VISUALS MUST BE PRIMARY"   procedural art composes a FULL-FRAME
+#     scene with texture/depth/lighting — never a small centered diagram
+#     card (tier2/3).
+#   "NO EMPTY VISUAL CONTAINERS"     every drawn container carries real
+#     payload (label/measure/state) or is not drawn (_callout refuses).
+# The bare PIL gradient placeholder is RETIRED as publishable: a shot that
+# reaches it records asset_tier="failed" in the sidecar.
+
+TIER_METHODS = {
+    "tier1": "ai_composition",
+    "tier2": "procedural_fullframe_scene",
+    "tier3": "procedural_layered_hybrid",
+    "tier4": "domain_technical_diagram",
+    "tier5": "panel_simple_diagram",
+    "failed": "placeholder_gradient_retired",
+}
+
+_TIER_TAGS = {
+    "tier1": ["illustration"],
+    "tier2": ["procedural_scene", "gradient", "grain", "glow", "vignette"],
+    "tier3": ["procedural_hybrid", "overlay_evidence", "gradient", "grain"],
+    "tier4": ["parchment", "ink_linework", "mottle"],
+    "tier5": ["parchment", "ink_linework"],
+    "failed": ["gradient", "mottle", "vignette"],
+}
+
+# Deep full-frame scene tints per M2 story domain: (sky top, sky bottom,
+# ground).  Procedural scenes render as world-bleed environments.
+_SCENE_TINTS = {
+    "biology": ((8, 34, 38), (22, 78, 66), (16, 58, 42)),
+    "physics_mechanism": ((20, 28, 40), (48, 60, 76), (38, 46, 58)),
+    "geography_environment": ((38, 66, 86), (106, 110, 84), (94, 84, 54)),
+    "history": ((30, 24, 18), (90, 70, 46), (66, 52, 34)),
+    "engineering": ((24, 26, 30), (58, 62, 68), (46, 50, 56)),
+    "everyday_science": ((36, 28, 22), (100, 82, 62), (76, 62, 46)),
+    "general": ((22, 26, 36), (52, 58, 72), (42, 46, 58)),
+}
+
+# M2 composition class -> tier2 subject-form family.
+_FORM_FAMILY = {
+    "macro_world": "facet", "macro_zoom": "facet", "macro_reveal": "facet",
+    "cutaway": "vessel", "machine_cutaway": "vessel", "exploded": "vessel",
+    "process_zoom": "bodies", "mechanism_reveal": "bodies",
+    "interaction": "bodies", "object_contact": "bodies",
+    "force_deformation": "bodies", "deformation": "bodies",
+    "load_path": "bodies",
+    "landscape": "terrain", "map": "terrain",
+    "atmosphere_reconstruction": "terrain", "place_reconstruction": "terrain",
+    "before_after": "terrain", "timeline": "terrain",
+    "real_object": "object",
+}
+
+# M2 overlay vocabulary -> real payload text for callouts.
+_OVERLAY_TEXT = {
+    "scale_bar": "SCALE", "structure_label": "STRUCTURE",
+    "membrane_callout": "MEMBRANE", "process_arrow": "PROCESS",
+    "magnitude_compare": "RELATIVE SIZE", "force_arrow": "FORCE",
+    "contact_point": "CONTACT", "friction_vector": "FRICTION",
+    "state_label": "STATE", "cause_chain": "CAUSE",
+    "region_label": "REGION", "climate_band": "CLIMATE BAND",
+    "wind_arrow": "WIND", "elevation_tint": "ELEVATION",
+    "flow_path": "FLOW", "date_marker": "DATE", "site_label": "SITE",
+    "route_line": "ROUTE", "before_after_pair": "BEFORE / AFTER",
+    "impact_radius": "IMPACT", "load_path_line": "LOAD PATH",
+    "material_callout": "MATERIAL", "measurement": "MEASURE",
+    "failure_point": "FAILURE POINT", "section_label": "SECTION",
+    "object_label": "OBJECT", "state_change": "STATE CHANGE",
+    "temperature_tag": "TEMPERATURE", "cause_arrow": "CAUSE",
+    "result_tag": "RESULT",
+}
+
+_STOPWORDS = frozenset("""
+a an the of on in at to for with and or is are was were be been being it its
+this that these those from by as into over under near very more most than
+then when while during about across between vertical horizontal rich detail
+composition illustration style cinematic closeup wide shot view scene frame
+plate generated rendered new
+""".split())
+
+_MEASURE_RE = re.compile(
+    r"(-?\d+(?:[.,]\d+)?)\s?(km|mm|cm|µm|um|nm|°c|°f|°|mpa|kpa|psi|bar|%|"
+    r"m/s|km/h|mph|million|billion|k|m|g)\b", re.IGNORECASE)
+
+
+def _overlay_text(kind: str) -> str:
+    return _OVERLAY_TEXT.get(str(kind or "").strip(),
+                             str(kind or "").replace("_", " ").upper())
+
+
+def _key_terms(text, limit: int = 4) -> list:
+    out = []
+    for w in re.findall(r"[a-zA-Z][a-zA-Z-]{2,}", str(text or "")):
+        lw = w.lower()
+        if lw in _STOPWORDS or lw in out:
+            continue
+        out.append(lw)
+        if len(out) >= limit:
+            break
+    return out
+
+
+def _measure_of(text) -> str:
+    m = _MEASURE_RE.search(str(text or ""))
+    if not m:
+        return ""
+    unit = m.group(2)
+    if unit.lower() == "°c":
+        unit = "°C"
+    elif unit.lower() == "°f":
+        unit = "°F"
+    return f"{m.group(1).replace(',', '.')} {unit}"
+
+
+def _vg(spec: dict) -> dict:
+    """Normalize the shot's M2 visual_grammar for the procedural tiers."""
+    raw = spec.get("visual_grammar") if isinstance(spec.get("visual_grammar"),
+                                                   dict) else {}
+    domain = str(raw.get("domain") or "general").strip().lower() or "general"
+    composition = str(raw.get("composition") or raw.get("world") or "").strip().lower() \
+        or "real_object"
+    overlays = [str(o).strip() for o in (raw.get("overlays") or [])
+                if str(o).strip()]
+
+    def _rgb(v):
+        if (isinstance(v, (list, tuple)) and len(v) == 3
+                and all(isinstance(c, (int, float)) and not isinstance(c, bool)
+                        for c in v)):
+            return tuple(int(max(0, min(255, c))) for c in v)
+        return None
+
+    accent = _rgb((raw.get("accent") or {}).get("rgb"))
+    if accent is None:
+        try:
+            from engine.visual_grammar import accent_for
+            accent = _rgb(accent_for(domain).get("rgb"))
+        except Exception:  # noqa: BLE001 — resolver unavailable → brand fallback
+            accent = None
+    return {"domain": domain, "composition": composition,
+            "overlays": overlays, "accent": accent or (194, 91, 51)}
+
+
+def _tier_fonts():
+    from engine.diagrams import _fonts
+    return _fonts({"typography": {"display": "BebasNeue-Regular.ttf",
+                                  "body": "Inter-Variable.ttf"}})
+
+
+def _subject_anchor(spec: dict, width: int, height: int) -> tuple:
+    b = spec.get("subject_bbox_px")
+    cx, cy = width * 0.5, height * 0.42
+    if (isinstance(b, (list, tuple)) and len(b) == 4
+            and all(isinstance(v, (int, float)) and not isinstance(v, bool)
+                    for v in b)):
+        if all(abs(v) <= 1.5 for v in b):        # planv9 stores fractions
+            cx, cy = (b[0] + b[2]) / 2 * width, (b[1] + b[3]) / 2 * height
+        else:
+            cx, cy = (b[0] + b[2]) / 2, (b[1] + b[3]) / 2
+    return (int(max(0.12 * width, min(0.88 * width, cx))),
+            int(max(0.14 * height, min(0.72 * height, cy))))
+
+
+def _gradient_canvas(width: int, height: int, top, bottom) -> Image.Image:
+    strip = Image.new("RGB", (1, 512))
+    for y in range(512):
+        t = y / 511
+        strip.putpixel((0, y), tuple(int(top[i] + (bottom[i] - top[i]) * t)
+                                     for i in range(3)))
+    return strip.resize((width, height))
+
+
+def _glow(img: Image.Image, cx, cy, r, color, strength: int = 120):
+    """Radial key light (rendered quarter-size; deterministic)."""
+    w, h = img.size
+    s = 4
+    small = Image.new("RGBA", (max(1, w // s), max(1, h // s)), (0, 0, 0, 0))
+    ImageDraw.Draw(small).ellipse([(cx - r) / s, (cy - r) / s,
+                                   (cx + r) / s, (cy + r) / s],
+                                  fill=color + (strength,))
+    small = small.filter(ImageFilter.GaussianBlur(max(2, int(r / s * 0.6))))
+    return Image.alpha_composite(img.convert("RGBA"),
+                                 small.resize(img.size, Image.BILINEAR)
+                                 ).convert("RGB")
+
+
+def _haze(d, width: int, horizon: int, tint, unit: int) -> None:
+    """Soft atmospheric depth band above the horizon (alpha strips)."""
+    for i in range(18):
+        t = i / 17
+        y = horizon - int(unit * 0.16 * t)
+        d.line([(0, y), (width, y)], fill=tint + (int(26 * (1 - t)),),
+               width=max(2, int(unit * 0.012)))
+
+
+def _grain(img: Image.Image, seed) -> Image.Image:
+    """Seeded film grain (numpy PRNG, quarter res — deterministic)."""
+    import numpy as np
+    w, h = img.size
+    rng_np = np.random.default_rng((int(seed) or 0) ^ 0x60A1)
+    small = rng_np.normal(0, 14.0, (max(2, h // 4), max(2, w // 4)))
+    mask = Image.fromarray(np.clip(128 + small, 0, 255).astype("uint8"), "L") \
+        .resize(img.size, Image.BILINEAR)
+    hi = mask.point(lambda v: 255 if v > 150 else 0)
+    lo = mask.point(lambda v: 255 if v < 106 else 0)
+    img = Image.composite(Image.new("RGB", img.size, (236, 229, 212)), img, hi)
+    return Image.composite(Image.new("RGB", img.size, (12, 12, 14)), img, lo)
+
+
+def _vignette(img: Image.Image, strength: int = 110, start: float = 0.62):
+    w, h = img.size
+    vw, vh = max(48, w // 16), max(48, h // 16)
+    vig = Image.new("L", (vw, vh), 0)
+    vd = ImageDraw.Draw(vig)
+    cx, cy = (vw - 1) / 2, (vh - 1) / 2
+    maxd = (cx * cx + cy * cy) ** 0.5
+    for y in range(vh):
+        for x in range(vw):
+            dd = ((x - cx) ** 2 + (y - cy) ** 2) ** 0.5 / maxd
+            if dd > start:
+                vig.putpixel((x, y), min(strength, int(
+                    (dd - start) / (1 - start + 1e-6) * strength)))
+    img.paste((0, 0, 0), (0, 0), vig.resize(img.size, Image.BILINEAR)
+              .filter(ImageFilter.GaussianBlur(24)))
+    return img
+
+
+def _finish_scene(img: Image.Image, seed) -> Image.Image:
+    return _vignette(_grain(img, seed))
+
+
+def _shadow_text(d, xy, text, font, fill, shadow=(0, 0, 0, 200)) -> None:
+    d.text((xy[0] + 4, xy[1] + 4), text, font=font, fill=shadow)
+    d.text(xy, text, font=font, fill=fill)
+
+
+def _callout(d, anchor, tip, text, font, accent,
+             text_fill=(240, 234, 218), shadow=(0, 0, 0, 200),
+             frame=None, measure=None) -> bool:
+    """Leader + accent dot + payload text.  NO EMPTY VISUAL CONTAINERS:
+    a callout without label/measure payload is NOT drawn."""
+    payload = " ".join(str(text or "").split())
+    if measure:
+        payload = f"{payload} {measure}".strip()
+    if not payload:
+        return False
+    ax, ay = float(anchor[0]), float(anchor[1])
+    tx, ty = float(tip[0]), float(tip[1])
+    d.line([(ax, ay), (tx, ty)], fill=accent + (225,), width=6)
+    d.ellipse([ax - 13, ay - 13, ax + 13, ay + 13], fill=accent + (255,))
+    if frame:
+        tw = d.textlength(payload, font=font)
+        if tx + tw + 24 > frame[0] - 24:
+            tx = max(24.0, frame[0] - 24 - tw)
+        ty = min(max(24.0, ty), frame[1] - 80)
+    _shadow_text(d, (tx, ty), payload, font, text_fill, shadow)
+    return True
+
+
+def _parchment(size, seed) -> Image.Image:
+    img = Image.new("RGB", size, (233, 223, 200))
+    rng = random.Random((int(seed) or 0) ^ 0x0DD5)
+    w, h = size
+    blot = Image.new("RGB", size, (233, 223, 200))
+    bd = ImageDraw.Draw(blot)
+    for _ in range(46):
+        x, y = rng.randrange(w), rng.randrange(h)
+        r = int(min(w, h) * rng.uniform(0.02, 0.09))
+        col = (216, 204, 178) if rng.random() < 0.55 else (240, 231, 208)
+        bd.ellipse([x - r, y - r, x + r, y + r], fill=col)
+    blot = blot.filter(ImageFilter.GaussianBlur(max(4, min(w, h) // 24)))
+    return Image.blend(img, blot, 0.5)
+
+
+# ── tier2 subject-form painters (full-frame, never a centered card) ─────
+
+def _facet_subject(size, cx, cy, radius, base, accent, rng) -> Image.Image:
+    layer = Image.new("RGBA", size, (0, 0, 0, 0))
+    d = ImageDraw.Draw(layer)
+    lite = tuple(min(255, c + 70) for c in base)
+    n = 8
+    outer, inner = [], []
+    for i in range(n):
+        a = 2 * math.pi * i / n + rng.uniform(-0.22, 0.22)
+        rr = radius * rng.uniform(0.74, 1.06)
+        outer.append((cx + rr * math.cos(a), cy + rr * math.sin(a) * 0.9))
+        a2 = 2 * math.pi * i / n + 0.45
+        rr2 = radius * rng.uniform(0.30, 0.44)
+        inner.append((cx + rr2 * math.cos(a2), cy + rr2 * math.sin(a2) * 0.9))
+    for i in range(n):
+        j = (i + 1) % n
+        t = rng.uniform(0.16, 0.52)
+        fill = tuple(int(accent[k] * t + lite[k] * (1 - t)) for k in range(3))
+        d.polygon([outer[i], outer[j], inner[j], inner[i]], fill=fill + (245,))
+        d.line([outer[i], outer[j]], fill=(18, 16, 14, 210), width=5)
+        d.line([inner[i], inner[j]], fill=(18, 16, 14, 120), width=3)
+    for _ in range(3):  # specular glints — lighting
+        gx = rng.uniform(cx - radius * 0.5, cx + radius * 0.5)
+        gy = rng.uniform(cy - radius * 0.5, cy + radius * 0.3)
+        gr = radius * rng.uniform(0.03, 0.07)
+        d.ellipse([gx - gr, gy - gr, gx + gr, gy + gr],
+                  fill=(255, 250, 238, 190))
+    return layer
+
+
+def _vessel_subject(size, cx, cy, hw, hh, accent, rng) -> Image.Image:
+    layer = Image.new("RGBA", size, (0, 0, 0, 0))
+    rad = int(min(hw, hh) * 0.42)
+    box = [cx - hw, cy - hh, cx + hw, cy + hh]
+    body = Image.new("RGBA", size, (0, 0, 0, 0))
+    bd = ImageDraw.Draw(body)
+    bd.rounded_rectangle(box, radius=rad, fill=(210, 202, 188, 250))
+    for i in range(4):  # cutaway strata (scene content; labels via callouts)
+        f = 0.30 + 0.18 * i
+        col = tuple(int(accent[k] * f + 226 * (1 - f)) for k in range(3))
+        y0 = cy - hh + (2 * hh) * (0.12 + 0.20 * i)
+        y1 = cy - hh + (2 * hh) * (0.12 + 0.20 * i + 0.14)
+        bd.rectangle([cx - hw + hw * 0.12, y0, cx + hw - hw * 0.12, y1],
+                     fill=col + (235,))
+    mask = Image.new("L", size, 0)
+    ImageDraw.Draw(mask).rounded_rectangle(box, radius=rad, fill=255)
+    body.putalpha(Image.composite(body.split()[3], Image.new("L", size, 0),
+                                  mask))
+    layer = Image.alpha_composite(layer, body)
+    ImageDraw.Draw(layer).rounded_rectangle(box, radius=rad,
+                                            outline=(18, 16, 14, 230), width=7)
+    return layer
+
+
+def _bodies_subject(size, cx, cy, spread, radius, accent, rng) -> Image.Image:
+    from engine.diagrams_v4 import _arrow
+    layer = Image.new("RGBA", size, (0, 0, 0, 0))
+    d = ImageDraw.Draw(layer)
+    lx, rx = cx - spread / 2, cx + spread / 2
+    d.rounded_rectangle([lx - radius, cy - radius * 0.72,
+                         lx + radius * 0.86, cy + radius * 0.72],
+                        radius=int(radius * 0.4), fill=(206, 214, 224, 250),
+                        outline=(18, 16, 14, 220), width=6)
+    d.rounded_rectangle([rx - radius * 0.86, cy - radius * 0.62,
+                         rx + radius, cy + radius * 0.62],
+                        radius=int(radius * 0.4), fill=(120, 130, 142, 250),
+                        outline=(18, 16, 14, 220), width=6)
+    _arrow(d, int(lx), int(cy - radius * 1.25), int(rx - radius * 0.5),
+           int(cy - radius * 1.25), accent, w=10)
+    d.ellipse([cx - 14, cy - 14, cx + 14, cy + 14], fill=accent + (255,))
+    return layer
+
+
+def _terrain_subject(size, cx, cy, accent, rng) -> Image.Image:
+    from engine.diagrams import _ridge
+    w, h = size
+    layer = Image.new("RGBA", size, (0, 0, 0, 0))
+    d = ImageDraw.Draw(layer)
+    base_y = int(h * 0.72)
+    pts = _ridge(int(w * 0.42), base_y, int(h * 0.30), int(w * 0.55), sharp=2.6)
+    d.polygon([(pts[0][0], base_y)] + pts + [(pts[-1][0], base_y)],
+              fill=(46, 54, 48, 255))
+    pts2 = _ridge(int(w * 0.78), base_y, int(h * 0.46), int(w * 0.36),
+                  sharp=2.2)
+    d.polygon([(pts2[0][0], base_y)] + pts2 + [(pts2[-1][0], base_y)],
+              fill=(66, 74, 64, 255))
+    my = base_y - int(h * 0.16)
+    d.ellipse([cx - 16, my - 16, cx + 16, my + 16], fill=accent + (255,))
+    return layer
+
+
+def _object_subject(size, cx, cy, hw, hh, accent, rng) -> Image.Image:
+    layer = Image.new("RGBA", size, (0, 0, 0, 0))
+    d = ImageDraw.Draw(layer)
+    rad = int(min(hw, hh) * 0.32)
+    d.rounded_rectangle([cx - hw, cy - hh, cx + hw, cy + hh], radius=rad,
+                        fill=(198, 190, 176, 250), outline=(18, 16, 14, 225),
+                        width=7)
+    d.rounded_rectangle([cx - hw, cy - hh, cx + hw, cy - hh + hh * 0.4],
+                        radius=rad, fill=(232, 226, 212, 120))
+    return layer
+
+
+def _tier2_fullframe_scene(spec: dict, width: int, height: int,
+                           seed) -> Image.Image:
+    """tier2 — rich procedural reconstruction: a FULL-FRAME scene with
+    texture/depth/lighting composed from the shot's M2 visual_grammar
+    (world/composition/accent), using the diagram painters' vocabulary
+    (_ridge/_arrow/_fonts).  Raises on failure (descends); deterministic."""
+    vg = _vg(spec)
+    accent = vg["accent"]
+    top, bottom, ground = _SCENE_TINTS.get(vg["domain"],
+                                           _SCENE_TINTS["general"])
+    disp, body = _tier_fonts()
+    rng = random.Random((int(seed) or 0) ^ 0x13B3)
+    unit = min(width, height)
+    cx, cy = _subject_anchor(spec, width, height)
+    fam = _FORM_FAMILY.get(vg["composition"], "object")
+
+    img = _gradient_canvas(width, height, top, bottom)
+    d = ImageDraw.Draw(img, "RGBA")
+    horizon = int(height * (0.62 if fam == "terrain" else 0.78))
+    d.rectangle([0, horizon, width, height],
+                fill=tuple(int(c * 0.9) for c in ground) + (255,))
+    _haze(d, width, horizon, bottom, unit)
+    img = _glow(img, cx, cy - unit * 0.08, unit * 0.55, accent, 60)
+
+    if fam == "facet":
+        r = unit * 0.30
+        layer = _facet_subject(img.size, cx, cy, r, bottom, accent, rng)
+        anchors = ((cx - r * 0.55, cy - r * 0.45), (cx + r * 0.5, cy),
+                   (cx, cy + r * 0.72))
+    elif fam == "vessel":
+        hw, hh = unit * 0.34, unit * 0.52
+        layer = _vessel_subject(img.size, cx, cy, hw, hh, accent, rng)
+        anchors = ((cx - hw * 0.55, cy - hh * 0.6), (cx + hw * 0.5, cy - hh * 0.15),
+                   (cx, cy + hh * 0.6))
+    elif fam == "bodies":
+        layer = _bodies_subject(img.size, cx, cy, unit * 0.40, unit * 0.24,
+                                accent, rng)
+        anchors = ((cx - unit * 0.2, cy - unit * 0.30), (cx, cy),
+                   (cx + unit * 0.2, cy))
+    elif fam == "terrain":
+        layer = _terrain_subject(img.size, cx, cy, accent, rng)
+        anchors = ((cx, int(height * 0.56)), (cx - unit * 0.22, int(height * 0.66)),
+                   (cx + unit * 0.2, int(height * 0.70)))
+    else:
+        hw, hh = unit * 0.30, unit * 0.40
+        layer = _object_subject(img.size, cx, cy, hw, hh, accent, rng)
+        anchors = ((cx - hw * 0.6, cy - hh * 0.5), (cx + hw * 0.6, cy),
+                   (cx, cy + hh * 0.6))
+    img = Image.alpha_composite(img.convert("RGBA"), layer).convert("RGB")
+    d = ImageDraw.Draw(img, "RGBA")
+
+    terms = _key_terms(spec.get("title") or spec.get("claim")
+                       or spec.get("prompt"), 3)
+    subject_txt = " ".join(terms).upper()
+    if subject_txt:
+        _shadow_text(d, (int(width * 0.07), int(height * 0.86)), subject_txt,
+                     disp(max(28, int(unit * 0.05))), accent)
+    ovs = (vg["overlays"] * 3)[:3] or ["object_label", "state_label",
+                                       "cause_arrow"]
+    small = body(max(16, int(unit * 0.026)))
+    m = _measure_of(spec.get("prompt"))
+    tips = ((int(width * 0.07), cy - int(unit * 0.30)),
+            (int(width * 0.68), cy - int(unit * 0.16)),
+            (int(width * 0.60), cy + int(unit * 0.34)))
+    for anchor, tip, kind in zip(anchors, tips, ovs):
+        _callout(d, anchor, tip, _overlay_text(kind), small, accent,
+                 frame=img.size, measure=m if kind is ovs[1] else None)
+    return _finish_scene(img, seed)
+
+
+def _tier3_layered_hybrid(spec: dict, width: int, height: int,
+                          seed) -> Image.Image:
+    """tier3 — layered hybrid: procedural environment base (gradient,
+    terrain depth, haze, key light) + a separate transparent overlay-evidence
+    layer (payload callouts + markers).  Raises on failure; deterministic."""
+    vg = _vg(spec)
+    accent = vg["accent"]
+    top, bottom, ground = _SCENE_TINTS.get(vg["domain"],
+                                           _SCENE_TINTS["general"])
+    disp, body = _tier_fonts()
+    rng = random.Random((int(seed) or 0) ^ 0x13B4)
+    unit = min(width, height)
+
+    img = _gradient_canvas(width, height, top, bottom)
+    d = ImageDraw.Draw(img, "RGBA")
+    horizon = int(height * 0.64)
+    d.rectangle([0, horizon, width, height], fill=ground + (255,))
+    from engine.diagrams import _ridge
+    pts = _ridge(int(width * 0.5), horizon, horizon - int(unit * 0.12),
+                 int(width * 0.60), sharp=2.0)
+    d.polygon([(pts[0][0], horizon)] + pts + [(pts[-1][0], horizon)],
+              fill=tuple(int(c * 0.74) for c in ground) + (255,))
+    _haze(d, width, horizon, bottom, unit)
+    img = _glow(img, width * 0.5, height * 0.30, unit * 0.62, accent, 55)
+    base = img.convert("RGBA")
+
+    ov = Image.new("RGBA", img.size, (0, 0, 0, 0))
+    d = ImageDraw.Draw(ov)
+    cx, cy = _subject_anchor(spec, width, height)
+    r = int(unit * 0.05)
+    d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=accent + (255,))
+    d.ellipse([cx - 2 * r, cy - 2 * r, cx + 2 * r, cy + 2 * r],
+              outline=accent + (170,), width=6)
+    ly = cy - int(unit * 0.10)
+    mx = int(width * 0.76)
+    step = max(8, int(unit * 0.05))
+    for xseg in range(cx + 3 * r, mx - 3 * r, step):  # relation/flow evidence
+        d.line([(xseg, ly), (xseg + max(4, int(unit * 0.022)), ly)],
+               fill=(240, 234, 218, 235), width=6)
+    d.ellipse([mx - int(r * 0.7), ly - int(r * 0.7),
+               mx + int(r * 0.7), ly + int(r * 0.7)], outline=accent + (255,),
+              width=7)
+
+    terms = _key_terms(spec.get("title") or spec.get("claim")
+                       or spec.get("prompt"), 3)
+    label = " ".join(terms).upper()
+    if label:
+        _shadow_text(d, (int(width * 0.07), int(height * 0.80)), label,
+                     disp(max(28, int(unit * 0.05))), accent)
+    ovs = (vg["overlays"] * 2)[:2] or ["object_label", "cause_arrow"]
+    small = body(max(16, int(unit * 0.026)))
+    m = _measure_of(spec.get("prompt"))
+    _callout(d, (cx, cy), (int(width * 0.08), int(height * 0.30)),
+             _overlay_text(ovs[0]), small, accent, frame=img.size,
+             measure=m or None)
+    _callout(d, (mx, ly), (int(width * 0.58), ly - int(unit * 0.14)),
+             _overlay_text(ovs[1]), small, accent, frame=img.size)
+    return _finish_scene(Image.alpha_composite(base, ov).convert("RGB"), seed)
+
+
+def _tier4_technical_diagram(spec: dict, width: int, height: int,
+                             seed) -> Image.Image:
+    """tier4 — subject-specific technical diagram: full parchment technical
+    plate with a domain-aware schematic; every part carries a label/measure
+    payload (no empty containers).  Reuses the diagram painters' vocabulary
+    (engine.diagrams._ridge/_fonts, engine.diagrams_v4._arrow)."""
+    vg = _vg(spec)
+    accent = vg["accent"]
+    ink, navy = (43, 38, 34), (34, 44, 60)
+    paper_shadow = (233, 223, 200, 160)
+    disp, body = _tier_fonts()
+    unit = min(width, height)
+    img = _parchment((width, height), seed)
+    d = ImageDraw.Draw(img, "RGBA")
+    cx = width // 2
+    cy = int(height * 0.46)
+    terms = _key_terms(spec.get("title") or spec.get("claim")
+                       or spec.get("prompt"), 3)
+    big = disp(max(28, int(unit * 0.05)))
+    small = body(max(16, int(unit * 0.024)))
+    d.text((int(width * 0.07), int(height * 0.08)),
+           " ".join(terms).upper() or "TECHNICAL DIAGRAM", font=big,
+           fill=navy + (255,))
+    d.line([(int(width * 0.07), int(height * 0.08) + int(unit * 0.07)),
+            (int(width * 0.07) + int(unit * 0.34),
+             int(height * 0.08) + int(unit * 0.07))], fill=accent + (255,),
+           width=6)
+    ovs = (vg["overlays"] * 3)[:3] or ["structure_label", "measurement",
+                                       "state_label"]
+    t0, t1, t2 = (_overlay_text(k) for k in ovs)
+    m = _measure_of(spec.get("prompt"))
+    dark = {"text_fill": navy, "shadow": paper_shadow}
+
+    if vg["domain"] == "biology":
+        rx, ry = int(unit * 0.34), int(unit * 0.44)
+        d.ellipse([cx - rx, cy - ry, cx + rx, cy + ry],
+                  fill=(214, 226, 214, 90), outline=navy + (255,), width=8)
+        nx = int(unit * 0.12)
+        d.ellipse([cx - nx, cy - nx, cx + nx, cy + nx],
+                  outline=accent + (255,), width=7)
+        ox, oy = cx + int(rx * 0.5), cy + int(ry * 0.3)
+        d.ellipse([ox - 12, oy - 12, ox + 12, oy + 12], fill=accent + (255,))
+        _callout(d, (cx - nx, cy), (int(width * 0.10), cy - int(unit * 0.30)),
+                 "NUCLEUS", small, accent, frame=img.size, **dark)
+        _callout(d, (cx + int(rx * 0.92), cy - int(ry * 0.5)),
+                 (int(width * 0.72), cy - int(unit * 0.34)), "MEMBRANE",
+                 small, accent, frame=img.size, measure=m or None, **dark)
+        _callout(d, (ox, oy), (int(width * 0.68), cy + int(unit * 0.28)),
+                 t2, small, accent, frame=img.size, **dark)
+    elif vg["domain"] == "physics_mechanism":
+        from engine.diagrams_v4 import _arrow
+        surf = cy + int(unit * 0.20)
+        bw, bh = int(unit * 0.30), int(unit * 0.18)
+        d.line([(int(width * 0.10), surf), (int(width * 0.90), surf)],
+               fill=navy + (255,), width=9)
+        d.rounded_rectangle([cx - bw, surf - bh, cx + bw * 0.2, surf],
+                            radius=int(bh * 0.25), fill=(210, 202, 188, 250),
+                            outline=navy + (255,), width=6)
+        _arrow(d, cx, surf - bh - int(unit * 0.16), cx, surf - bh, accent, w=10)
+        _arrow(d, cx + int(unit * 0.06), surf - bh - int(unit * 0.05),
+               cx + int(unit * 0.30), surf - bh - int(unit * 0.05), accent, w=8)
+        _callout(d, (cx, surf - bh - int(unit * 0.16)),
+                 (int(width * 0.66), surf - bh - int(unit * 0.30)), t0,
+                 small, accent, frame=img.size, measure=m or None, **dark)
+        _callout(d, (cx + int(unit * 0.30), surf - bh - int(unit * 0.05)),
+                 (int(width * 0.70), surf + int(unit * 0.08)), t1, small,
+                 accent, frame=img.size, **dark)
+        _callout(d, (cx + int(bw * 0.1), surf),
+                 (int(width * 0.20), surf + int(unit * 0.16)), t2, small,
+                 accent, frame=img.size, **dark)
+    elif vg["domain"] == "engineering":
+        from engine.diagrams_v4 import _arrow
+        by = cy
+        bx0, bx1, bh = int(width * 0.14), int(width * 0.86), int(unit * 0.07)
+        d.rounded_rectangle([bx0, by, bx1, by + bh], radius=bh // 3,
+                            fill=(206, 198, 184, 250), outline=navy + (255,),
+                            width=6)
+        d.polygon([(bx0, by + bh),
+                   (bx0 - int(unit * 0.06), by + bh + int(unit * 0.10)),
+                   (bx0 + int(unit * 0.06), by + bh + int(unit * 0.10))],
+                  outline=navy + (255,), width=5)
+        ax = int(width * 0.72)
+        _arrow(d, ax, by - int(unit * 0.18), ax, by, accent, w=11)
+        fx = int(width * 0.44)
+        d.line([(fx - 18, by + bh + 18), (fx + 18, by + bh - 18)],
+               fill=accent + (255,), width=8)
+        d.line([(fx - 18, by + bh - 18), (fx + 18, by + bh + 18)],
+               fill=accent + (255,), width=8)
+        _callout(d, (ax, by - int(unit * 0.18)),
+                 (int(width * 0.76), by - int(unit * 0.30)), t0, small,
+                 accent, frame=img.size, measure=m or None, **dark)
+        _callout(d, (fx, by + bh), (int(width * 0.18), by + int(unit * 0.20)),
+                 t1, small, accent, frame=img.size, **dark)
+        _callout(d, (bx0 + (bx1 - bx0) // 2, by + bh // 2),
+                 (int(width * 0.20), by - int(unit * 0.18)), t2, small,
+                 accent, frame=img.size, **dark)
+    elif vg["domain"] == "geography_environment":
+        base_y = cy + int(unit * 0.26)
+        pts = _ridge4(cx, base_y, cy - int(unit * 0.22), int(width * 0.40))
+        d.polygon([(pts[0][0], base_y)] + pts + [(pts[-1][0], base_y)],
+                  fill=(146, 130, 96, 255), outline=navy + (255,), width=6)
+        d.line([(int(width * 0.08), base_y), (int(width * 0.92), base_y)],
+               fill=navy + (255,), width=6)
+        for i in range(4):
+            tx = int(width * (0.16 + 0.22 * i))
+            d.line([(tx, base_y), (tx, base_y - int(unit * 0.03))],
+                   fill=navy + (220,), width=4)
+        _callout(d, (cx, cy - int(unit * 0.10)),
+                 (int(width * 0.66), cy - int(unit * 0.26)), t0, small,
+                 accent, frame=img.size, measure=m or None, **dark)
+        _callout(d, (int(width * 0.20), base_y),
+                 (int(width * 0.10), base_y + int(unit * 0.10)), t1, small,
+                 accent, frame=img.size, **dark)
+        _callout(d, (int(width * 0.84), base_y),
+                 (int(width * 0.70), base_y + int(unit * 0.10)), t2, small,
+                 accent, frame=img.size, **dark)
+    elif vg["domain"] == "history":
+        ay = cy
+        x0, x1 = int(width * 0.12), int(width * 0.88)
+        d.line([(x0, ay), (x1, ay)], fill=navy + (255,), width=8)
+        for i in range(3):
+            mx = x0 + int((x1 - x0) * (0.12 + 0.38 * i))
+            d.ellipse([mx - 14, ay - 14, mx + 14, ay + 14],
+                      fill=(accent if i == 1 else navy) + (255,))
+            tip_y = ay - int(unit * (0.16 if i == 1 else 0.08))
+            d.line([(mx, ay), (mx, tip_y)], fill=navy + (200,), width=4)
+            _shadow_text(d, (mx - int(unit * 0.06), tip_y - int(unit * 0.05)),
+                         f"PHASE {i + 1}" + (f" · {m}" if i == 1 and m else ""),
+                         small, navy)
+    elif vg["domain"] == "everyday_science":
+        from engine.diagrams_v4 import _arrow
+        hw, hh = int(unit * 0.26), int(unit * 0.30)
+        d.rounded_rectangle([cx - hw, cy - hh, cx + hw, cy + hh],
+                            radius=int(min(hw, hh) * 0.3),
+                            fill=(206, 198, 184, 250), outline=navy + (255,),
+                            width=7)
+        _arrow(d, cx - int(unit * 0.4), cy, cx - hw - 12, cy, accent, w=9)
+        _arrow(d, cx + hw + 12, cy, cx + int(unit * 0.4), cy, accent, w=9)
+        _callout(d, (cx - hw - 12, cy), (int(width * 0.10), cy - int(unit * 0.18)),
+                 t0, small, accent, frame=img.size, **dark)
+        _callout(d, (cx + hw + 12, cy), (int(width * 0.70), cy - int(unit * 0.18)),
+                 t1, small, accent, frame=img.size, measure=m or None, **dark)
+        _callout(d, (cx, cy + hh), (int(width * 0.62), cy + int(unit * 0.24)),
+                 t2, small, accent, frame=img.size, **dark)
+    else:
+        hw, hh = int(unit * 0.30), int(unit * 0.22)
+        d.rounded_rectangle([cx - hw, cy - hh, cx + hw, cy + hh],
+                            radius=int(min(hw, hh) * 0.28),
+                            fill=(206, 198, 184, 250), outline=navy + (255,),
+                            width=7)
+        ex, ey = cx - int(hw * 0.35), cy
+        er = int(hh * 0.5)
+        d.ellipse([ex - er, cy - er, ex + er, cy + er],
+                  outline=accent + (255,), width=6)
+        _callout(d, (cx - int(hw * 0.2), cy - hh),
+                 (int(width * 0.14), cy - int(unit * 0.24)), t0, small,
+                 accent, frame=img.size, **dark)
+        _callout(d, (ex, cy), (int(width * 0.66), cy - int(unit * 0.20)),
+                 t1, small, accent, frame=img.size, **dark)
+        _callout(d, (cx + int(hw * 0.6), cy + hh),
+                 (int(width * 0.70), cy + int(unit * 0.18)), t2, small,
+                 accent, frame=img.size, measure=m or None, **dark)
+    _shadow_text(d, (int(width * 0.07), int(height * 0.90)),
+                 f"TECHNICAL DIAGRAM · {vg['domain'].upper()}", small,
+                 (122, 106, 82))
+    return _vignette(img, strength=70)
+
+
+def _ridge4(cx, base_y, peak_y, half_w):
+    """_ridge re-exported lazily so a diagrams import failure raises inside
+    the tier (and descends) rather than at module import."""
+    from engine.diagrams import _ridge
+    return _ridge(cx, base_y, peak_y, half_w, sharp=2.4)
+
+
+def _tier5_simple_diagram(spec: dict, width: int, height: int,
+                          seed) -> Image.Image:
+    """tier5 — simple diagram.  Allowed ONLY when the shot's M2
+    visual_grammar composition is the justified presentation panel."""
+    vg = _vg(spec)
+    comp = vg["composition"]
+    if not comp.endswith("panel"):
+        raise ValueError(f"tier5 gate: composition '{comp}' is not a "
+                         f"justified panel — simple diagram not allowed")
+    img = _parchment((width, height), seed)
+    d = ImageDraw.Draw(img, "RGBA")
+    navy = (34, 44, 60)
+    disp, body = _tier_fonts()
+    unit = min(width, height)
+    cx, cy = width // 2, int(height * 0.44)
+    terms = _key_terms(spec.get("title") or spec.get("claim")
+                       or spec.get("prompt"), 3)
+    label = " ".join(terms).upper() or "DIAGRAM"
+    hw, hh = int(unit * 0.26), int(unit * 0.16)
+    d.rounded_rectangle([cx - hw, cy - hh, cx + hw, cy + hh],
+                        radius=int(min(hw, hh) * 0.3),
+                        fill=(206, 198, 184, 250), outline=navy + (255,),
+                        width=6)
+    _shadow_text(d, (cx - hw, cy - hh - int(unit * 0.08)), label,
+                 body(max(18, int(unit * 0.028))), navy)
+    m = _measure_of(spec.get("prompt"))
+    _callout(d, (cx + hw, cy), (int(width * 0.66), cy + int(unit * 0.14)),
+             _overlay_text((vg["overlays"] or ["object_label"])[0]),
+             body(max(16, int(unit * 0.024))), vg["accent"],
+             text_fill=navy, shadow=(233, 223, 200, 160), frame=img.size,
+             measure=m or None)
+    return _vignette(img, strength=60)
+
+
 # ── sidecar validation (Contract 1: v13-plate-sidecar@1) ──────────────── #
 
 def _rect_ok(r) -> bool:
@@ -290,6 +1026,33 @@ def validate_sidecar(d: dict) -> list[str]:
 
 # ── pipeline ──────────────────────────────────────────────────────────── #
 
+def _descend_tiers(spec: dict, width: int, height: int, seed,
+                   tier: dict) -> Image.Image:
+    """V13B M3 - directive P0 tier descent.  Try tier2 through tier5 in
+    order and return the first success; every attempt (ok or failed) is
+    appended to tier["attempts"].  tier5 self-gates on justified panel
+    compositions.  Raises RuntimeError when no allowed tier produces an
+    image (caller records asset_tier="failed")."""
+    chain = (("tier2_rich_procedural", _tier2_fullframe_scene),
+             ("tier3_layered_hybrid", _tier3_layered_hybrid),
+             ("tier4_technical_diagram", _tier4_technical_diagram),
+             ("tier5_simple_diagram", _tier5_simple_diagram))
+    last: Exception | None = None
+    for name, fn in chain:
+        try:
+            img = fn(spec, width, height, seed)
+        except Exception as exc:  # noqa: BLE001 - descent survives tier failures
+            tier["attempts"].append({"tier": name, "ok": False,
+                                     "note": str(exc)[:160]})
+            last = exc
+            continue
+        tier["attempts"].append({"tier": name, "ok": True})
+        tier["asset_tier"] = name
+        tier["tier_method"] = f"{name} (deterministic fallback)"
+        return img
+    raise RuntimeError(f"all V13B tiers failed; last error: {last}")
+
+
 def generate_plate(spec: dict, out_dir) -> tuple[str, dict]:
     """Generate a rich visual plate + sidecar. Returns (plate_path, sidecar).
 
@@ -315,6 +1078,7 @@ def generate_plate(spec: dict, out_dir) -> tuple[str, dict]:
 
     gen: dict = {}
     img: Image.Image | None = None
+    tier: dict = {"asset_tier": None, "tier_method": None, "attempts": []}
 
     # ── stage 1: composition ────────────────────────────────────────────
     if dry_run:
@@ -323,14 +1087,34 @@ def generate_plate(spec: dict, out_dir) -> tuple[str, dict]:
                               "model": "deterministic-kitlib", "seed": seed,
                               "mode": "placeholder", "degraded": True,
                               "note": "dry_run: deterministic placeholder requested"}
+        tier["asset_tier"] = "failed"
+        tier["tier_method"] = "dry_run placeholder (not publishable)"
     else:
         provider = _get_factory().get(spec.get("provider", "pollinations"))
         img, rec = _compose(provider, spec, seed, gen_w, gen_h, out_dir)
         if img is None:
+            # V13B M3 tier descent (directive P0): the bare gradient
+            # placeholder is retired as publishable - descend deterministic
+            # tiers; every attempt is recorded for QA visibility.
             attempted, rec["attempted_provider"] = rec.get("provider"), rec.get("provider")
-            rec["provider"], rec["model"] = "placeholder", "deterministic-kitlib"
-            rec["note"] = f"provider failed ({attempted}); deterministic placeholder"
-            img = _placeholder_image(seed, width, height)
+            tier["attempts"].append({"tier": "tier1_rich_plate", "ok": False,
+                                     "note": f"provider failed ({attempted})"})
+            try:
+                img = _descend_tiers(spec, width, height, seed, tier)
+                rec["provider"], rec["model"] = "procedural", tier["tier_method"]
+                rec["mode"] = tier["asset_tier"]
+                rec["degraded"] = True
+                rec["note"] = (f"AI composition failed ({attempted}); "
+                               f"descended to {tier['asset_tier']}")
+            except Exception as _texc:  # noqa: BLE001 - publish-block, not silent
+                img = _placeholder_image(seed, width, height)
+                rec["provider"], rec["model"] = "placeholder", "deterministic-kitlib"
+                rec["mode"] = "placeholder"
+                rec["degraded"] = True
+                rec["note"] = (f"provider failed ({attempted}) AND tier descent "
+                               f"failed ({_texc}); unpublishable placeholder")
+                tier["asset_tier"] = "failed"
+                tier["tier_method"] = "all tiers failed (unpublishable)"
         gen["composition"] = rec
 
     if img.size != (width, height):
@@ -338,10 +1122,10 @@ def generate_plate(spec: dict, out_dir) -> tuple[str, dict]:
     plate_path = out_dir / f"{asset}.png"
     img.save(plate_path)
 
-    placeholder_composed = gen["composition"]["provider"] == "placeholder"
+    procedural_fallback = tier["asset_tier"] not in (None, "tier1_rich_plate")
 
     # ── stage 2: detail / material ──────────────────────────────────────
-    if dry_run or placeholder_composed:
+    if dry_run or tier["asset_tier"] != "tier1_rich_plate":
         gen["detail"] = {"provider": "skipped", "edited": False,
                          "degraded": True, "note": "skipped: placeholder composition"}
     else:
@@ -361,7 +1145,7 @@ def generate_plate(spec: dict, out_dir) -> tuple[str, dict]:
         gen["detail"] = rec
 
     # ── stage 3: semantic edit (annotation placement) ───────────────────
-    if dry_run or placeholder_composed:
+    if dry_run or tier["asset_tier"] != "tier1_rich_plate":
         gen["semantic_edit"] = {"provider": "skipped", "edited": False,
                                 "degraded": True, "note": "skipped: placeholder composition"}
     else:
@@ -406,6 +1190,9 @@ def generate_plate(spec: dict, out_dir) -> tuple[str, dict]:
         "schema": SCHEMA,
         "plate": _rel(plate_path),
         "asset_class": ASSET_CLASS,
+        "asset_tier": tier["asset_tier"],
+        "tier_method": tier["tier_method"],
+        "tier_attempts": tier["attempts"],
         "generation": gen,
         "layers": [
             {"name": "BACKGROUND", "mask": None,
@@ -424,7 +1211,10 @@ def generate_plate(spec: dict, out_dir) -> tuple[str, dict]:
         "safe_margin_px": int(spec.get("safe_margin_px", 40)),
         "texture_tags": list(spec.get("texture_tags")
                              or (["gradient", "mottle", "vignette"]
-                                 if placeholder_composed else ["illustration"])),
+                                 if tier["asset_tier"] == "failed"
+                                 else (["procedural_scene"]
+                                       if procedural_fallback
+                                       else ["illustration"]))),
         "lighting": spec.get("lighting", "soft ambient"),
     }
 
