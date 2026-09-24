@@ -71,6 +71,258 @@ SUBJECT_HINTS = [
 ]
 
 
+# ------------------------------------------------------------------ #
+# V13B M2 — story-domain model (docs/directives/
+# JADE_V13B_STORY_SPECIFIC_VISUAL_GRAMMAR.md P0 STORY-SPECIFIC VISUAL
+# GRAMMAR).  Before choosing compositions the planner classifies the STORY
+# into one of seven deterministic domains.  Each domain carries:
+#   compositions  ordered preference list — world classes first, "panel"
+#                 last and only for justified data/list/comparison beats
+#   overlays      semantic overlay vocabulary (evidence, never decoration)
+#   accent        per-domain accent guidance; non-general domains NEVER
+#                 default to the RUST/orange house accent
+#   keywords      weighted keyword model (prefix match, canvas_grammar
+#                 semantics) consumed by detect_domain
+# Deterministic throughout: no randomness, no per-story hacks.
+
+STORY_DOMAINS: dict[str, dict] = {
+    "biology": {
+        "covers": "organisms, cells, medicine, living-scale dives",
+        "compositions": ("macro_world", "cutaway", "process_zoom", "panel"),
+        "overlays": ("scale_bar", "structure_label", "membrane_callout",
+                     "process_arrow", "magnitude_compare"),
+        "accent": {"name": "deep_teal_olive", "rgb": (23, 92, 84),
+                   "secondary_rgb": (98, 108, 52),
+                   "note": "deep teal primary, olive secondary; never "
+                           "RUST/orange"},
+        "keywords": {
+            "cell": 3, "cellular": 3, "organism": 3, "dna": 3,
+            "mitochondr": 3, "organelle": 3, "membrane": 3, "nucleus": 3,
+            "bacteria": 3, "virus": 3, "gene": 3, "protein": 2,
+            "tissue": 2, "neuron": 3, "brain": 2, "micrometer": 2,
+            "micron": 2, "microscopic": 2, "microscope": 2, "immune": 3,
+            "enzyme": 3, "blood": 2, "anatomy": 2, "species": 2,
+            "biology": 3, "chlorophyll": 3, "cristae": 3, "skin": 1,
+            "hair": 1, "medicine": 2, "medical": 2,
+        },
+    },
+    "physics_mechanism": {
+        "covers": "physical objects in contact, forces, material response",
+        "compositions": ("object_contact", "force_deformation",
+                         "macro_reveal", "panel"),
+        "overlays": ("force_arrow", "contact_point", "friction_vector",
+                     "state_label", "cause_chain"),
+        "accent": {"name": "cool_slate", "rgb": (74, 90, 110),
+                   "secondary_rgb": (110, 124, 138),
+                   "note": "cool slate blue-grey; never RUST/orange"},
+        "keywords": {
+            "force": 3, "pressure": 3, "friction": 3, "gravity": 3,
+            "velocity": 2, "acceleration": 3, "momentum": 3, "ice": 3,
+            "frozen": 3, "freeze": 3, "melt": 3, "crystal": 3,
+            "lattice": 3, "molecule": 2, "bond": 2, "quantum": 3,
+            "relativity": 3, "mass": 2, "energy": 2, "physics": 3,
+            "glide": 2, "slide": 2, "slip": 2, "surface": 2,
+            "lubricant": 3, "blade": 2, "skate": 2, "nanometer": 2,
+            "liquid film": 3, "heat": 2, "wave": 2, "field": 1,
+            "materials": 2, "solid": 2,
+        },
+    },
+    "geography_environment": {
+        "covers": "landscapes, climate, terrain, environmental phenomena",
+        "compositions": ("landscape", "map", "atmosphere_reconstruction",
+                         "panel"),
+        "overlays": ("region_label", "climate_band", "wind_arrow",
+                     "elevation_tint", "flow_path"),
+        "accent": {"name": "sky_terrain", "rgb": (70, 118, 128),
+                   "secondary_rgb": (128, 118, 84),
+                   "note": "desaturated sky blue over terrain ochre; never "
+                           "RUST/orange"},
+        "keywords": {
+            "desert": 3, "oasis": 3, "fog": 3, "climate": 3, "terrain": 3,
+            "coast": 3, "ocean": 2, "sea": 2, "lake": 2, "river": 3,
+            "mountain": 2, "valley": 3, "erosion": 3, "atmosphere": 2,
+            "weather": 3, "monsoon": 3, "glacier": 3, "plateau": 3,
+            "island": 2, "rain": 2, "rainfall": 3, "drought": 3,
+            "region": 2, "continent": 3, "geography": 3, "geology": 3,
+            "landscape": 3, "wind": 2, "humidity": 3, "vegetation": 3,
+            "green": 1,
+        },
+    },
+    "history": {
+        "covers": "events, places and consequences reconstructed in time",
+        "compositions": ("place_reconstruction", "map", "timeline",
+                         "before_after", "panel"),
+        "overlays": ("date_marker", "site_label", "route_line",
+                     "before_after_pair", "impact_radius"),
+        "accent": {"name": "sepia_ink", "rgb": (112, 84, 48),
+                   "secondary_rgb": (46, 42, 38),
+                   "note": "sepia brown with ink black; never RUST/orange"},
+        "keywords": {
+            "history": 3, "ancient": 3, "century": 3, "empire": 3,
+            "war": 3, "civilization": 3, "dynasty": 3, "archaeolog": 3,
+            "expedition": 3, "voyage": 3, "revolution": 3, "ruins": 3,
+            "witness": 2, "event": 1, "explosion": 2, "eruption": 2,
+            "battle": 3, "treaty": 3, "king": 2, "year": 1,
+            "years ago": 3, "disaster": 2, "aftermath": 3,
+        },
+    },
+    "engineering": {
+        "covers": "machines, structures, load paths, failure and consequence",
+        "compositions": ("machine_cutaway", "load_path", "exploded",
+                         "deformation", "panel"),
+        "overlays": ("load_path_line", "material_callout", "measurement",
+                     "failure_point", "section_label"),
+        "accent": {"name": "steel_graphite_warm", "rgb": (58, 62, 68),
+                   "secondary_rgb": (184, 106, 64),
+                   "note": "graphite/steel primary with ONE warm signal "
+                           "secondary, not a global orange identity"},
+        "keywords": {
+            "engineer": 3, "blueprint": 3, "structure": 2, "machine": 3,
+            "engine": 3, "turbine": 3, "bridge": 3, "tower": 2,
+            "crumple": 3, "crash": 3, "chassis": 3, "steel": 2,
+            "load": 3, "stress": 3, "deform": 3, "collapse": 3,
+            "failure": 2, "battery": 2, "cable": 2, "gate": 2,
+            "lock": 2, "wing": 2, "aircraft": 2, "plane": 2,
+            "hull": 3, "schematic": 3, "mechanism": 2, "component": 2,
+            "assembly": 2, "weld": 3, "safety": 2,
+        },
+    },
+    "everyday_science": {
+        "covers": "counterintuitive everyday objects and interactions",
+        "compositions": ("real_object", "interaction", "macro_zoom",
+                         "mechanism_reveal", "panel"),
+        "overlays": ("object_label", "state_change", "temperature_tag",
+                     "cause_arrow", "result_tag"),
+        "accent": {"name": "warm_neutral", "rgb": (146, 116, 90),
+                   "secondary_rgb": (96, 88, 78),
+                   "note": "warm neutral umber — keeps the household "
+                           "register without the orange house accent"},
+        "keywords": {
+            "kitchen": 3, "microwave": 3, "coffee": 3, "honey": 3,
+            "chili": 3, "spice": 3, "sleep": 3, "yawn": 3, "phone": 2,
+            "toast": 3, "boil": 3, "everyday": 3, "daily": 2,
+            "sticky": 2, "slippery": 2, "household": 3, "cup": 2,
+            "shower": 3, "brush": 2, "soap": 3, "refrigerator": 3,
+        },
+    },
+    "general": {
+        "covers": "no dominant domain signal — world-first still applies",
+        "compositions": ("real_object", "mechanism_reveal", "macro_zoom",
+                         "panel"),
+        "overlays": ("object_label", "cause_arrow", "measurement",
+                     "state_label"),
+        "accent": {"name": "brand_default", "rgb": None,
+                   "secondary_rgb": None,
+                   "note": "no domain opinion — the visual bible accent "
+                           "applies (general may keep brand RUST)"},
+        "keywords": {},
+    },
+}
+
+# Legacy story.subject values map onto domains with a strong, deterministic
+# bonus (the authored subject is the clearest single signal).
+_SUBJECT_DOMAIN_ALIASES = {
+    "biology": "biology", "medicine": "biology", "biology_medicine": "biology",
+    "physics": "physics_mechanism", "mechanism": "physics_mechanism",
+    "materials": "physics_mechanism", "space": "physics_mechanism",
+    "astronomy": "physics_mechanism",
+    "geography": "geography_environment", "geology": "geography_environment",
+    "climate": "geography_environment", "ocean": "geography_environment",
+    "history": "history",
+    "engineering": "engineering", "engineering_failure": "engineering",
+    "aviation": "engineering", "technology": "engineering",
+    "everyday": "everyday_science", "everyday_science": "everyday_science",
+}
+
+# story_meta fields scanned with their weights; title/subject are the
+# double-weight fields per the M2 task spec.
+_DOMAIN_FIELD_WEIGHTS = (
+    ("title", 2.0), ("subject", 2.0),
+    ("topic", 2.0), ("subject_domain", 2.0),
+    ("story_type", 1.0),
+)
+
+# Subject-alias bonus (strong but not absolute — narration can outvote it
+# only by a wide margin, which is the desired behavior).
+_SUBJECT_ALIAS_BONUS = 6.0
+
+
+def _domain_scan(text: str, weight: float, source: str,
+                 scores: dict, evidence: list) -> None:
+    """Accumulate deterministic keyword scores for one text blob."""
+    t = str(text or "").lower()
+    if not t:
+        return
+    for domain, spec in STORY_DOMAINS.items():
+        for kw, w in (spec.get("keywords") or {}).items():
+            if re.search(rf"\b{re.escape(kw)}", t):
+                scores[domain] += float(w) * weight
+                evidence.append({"source": source, "domain": domain,
+                                 "keyword": kw, "weight": float(w) * weight})
+
+
+def detect_domain(story_meta: dict, narration_lines=None) -> dict:
+    """V13B M2 — classify the story into a STORY_DOMAIN deterministically.
+
+    Weighted keyword scoring: story_meta fields (title/subject double
+    weight) plus one pass over the narration lines (single weight).  An
+    explicit legacy subject alias adds a strong fixed bonus.  Returns
+    {"domain", "confidence", "evidence"} — no randomness; ties resolve by
+    STORY_DOMAINS declaration order; zero signal falls back to "general".
+    """
+    meta = story_meta or {}
+    scores = {d: 0.0 for d in STORY_DOMAINS}
+    evidence: list = []
+    for field, weight in _DOMAIN_FIELD_WEIGHTS:
+        _domain_scan(meta.get(field), weight, field, scores, evidence)
+    subj = str(meta.get("subject") or "").strip().lower()
+    alias = _SUBJECT_DOMAIN_ALIASES.get(subj)
+    if alias:
+        scores[alias] += _SUBJECT_ALIAS_BONUS
+        evidence.append({"source": "subject-alias", "domain": alias,
+                         "keyword": subj,
+                         "weight": _SUBJECT_ALIAS_BONUS})
+    for line in narration_lines or []:
+        _domain_scan(line, 1.0, "narration", scores, evidence)
+    ranked = sorted(STORY_DOMAINS,
+                    key=lambda d: (-scores[d], list(STORY_DOMAINS).index(d)))
+    top, second = ranked[0], ranked[1]
+    domain = top if scores[top] > 0 else "general"
+    denom = scores[top] + scores[second]
+    confidence = round(scores[top] / denom, 3) if denom > 0 else 0.0
+    evidence.sort(key=lambda e: (-e["weight"], list(STORY_DOMAINS).index(
+        e["domain"]), e["source"], e["keyword"]))
+    return {"domain": domain, "confidence": confidence,
+            "evidence": evidence[:8],
+            "scores": {d: round(scores[d], 2) for d in ranked
+                       if scores[d] > 0}}
+
+
+def domain_spec(domain: str) -> dict:
+    """The STORY_DOMAINS record for a domain (general-safe)."""
+    return STORY_DOMAINS.get(str(domain or "").strip().lower(),
+                             STORY_DOMAINS["general"])
+
+
+def compositions_for(domain: str) -> tuple:
+    """Ordered composition preference list for a domain (panel last)."""
+    return domain_spec(domain)["compositions"]
+
+
+def overlays_for(domain: str) -> tuple:
+    """Semantic overlay vocabulary for a domain."""
+    return domain_spec(domain)["overlays"]
+
+
+def accent_for(domain: str) -> dict:
+    """Per-domain accent guidance dict (rgb None = brand default applies)."""
+    return dict(domain_spec(domain)["accent"])
+
+
+def is_general(domain: str) -> bool:
+    return str(domain or "").strip().lower() == "general"
+
+
 def detect_subject(story: dict, visual_plan: dict = None) -> str:
     """Best-effort subject classification from story text + tags."""
     # 1) explicit tag wins

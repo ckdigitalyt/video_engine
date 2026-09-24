@@ -230,9 +230,12 @@ def _payoff_fields(story: dict, beats: dict, claim_texts: dict) -> tuple:
 
 def _beat_model(plan: dict, story: dict, kit_id: str,
                 claims: dict | None = None,
-                claim_texts: dict | None = None) -> dict:
+                claim_texts: dict | None = None,
+                domain_rec: dict | None = None) -> dict:
     """Annotate plan['beat_model']: per beat, viewer question -> visual
-    intent -> visual experience -> state transformation -> payoff."""
+    intent -> visual experience -> state transformation -> payoff.
+    V13B M2: carries the story domain record (detected once per story by
+    the caller) as a model-level stamp; per-beat rows are unchanged."""
     beats = {str(b.get("beat_id")): b for b in (story.get("beats") or [])}
     kit = canvas_grammar.KITS[kit_id]
     # V13 M4 — mode→representation mapping: per-beat representation +
@@ -328,6 +331,9 @@ def _beat_model(plan: dict, story: dict, kit_id: str,
     return {"grammar": kit_id, "beats": rows,
             "hook_beat": first_bid, "payoff_beat": payoff_bid,
             "transformation_problems": problems,
+            # V13B M2 — story domain stamp (additive; diagnostic).
+            "domain": (domain_rec or {}).get("domain"),
+            "domain_confidence": (domain_rec or {}).get("confidence"),
             "claim_confidence": {bid: r["claim_confidence"]
                                  for bid, r in rows.items()
                                  if r["claim_confidence"]}}
@@ -439,18 +445,61 @@ def _locate_payoff(plan: dict, payoff: dict) -> dict:
 # Canvas application
 
 
-def apply_canvas(plan: dict, story: dict, kit_id: str) -> int:
-    """Write the kit's canvas dict onto every shot + the plan header."""
+def detect_domain_for_story(story: dict) -> dict:
+    """V13B M2 — detect_domain ONCE per story: story_meta (title/subject
+    double-weighted inside detect_domain) plus one narration line per beat
+    (narration + claim).  Deterministic; missing beats just contribute less
+    evidence."""
+    lines = []
+    for b in (story.get("beats") or []):
+        lines.append(str(b.get("narration") or ""))
+        lines.append(str(b.get("claim") or ""))
+    return visual_grammar.detect_domain(story, lines)
+
+
+def apply_canvas(plan: dict, story: dict, kit_id: str,
+                 domain_rec: dict | None = None) -> int:
+    """V13B M2 — write the DOMAIN-AWARE world canvas onto every shot plus a
+    per-shot visual_grammar record {domain, world, composition, overlays,
+    accent}.  Selection = domain ordered composition preferences + beat role
+    (hook beat -> world composition, panel forbidden; data/list/comparison
+    beats may keep a panel, justified).  universal_presentation_panel is
+    never an automatic default — it reaches a shot only through the justified
+    evidence path or explicit author declaration.  kit_id stays the plan
+    header grammar and biases world preference (canvas_grammar.WORLD_BIAS)
+    so bounded grammar regeneration remains meaningful.
+
+    Backward compatible: planv5's per-shot visual_grammar keys (subject /
+    recommended_mode — depth.py consumers) are preserved; M2 keys merge in
+    additively, and shots with no prior record get the full M2 record.
+    """
     beats = {str(b.get("beat_id")): b for b in (story.get("beats") or [])}
+    rec = domain_rec or detect_domain_for_story(story)
+    domain = str(rec.get("domain") or "general")
+    overlays = list(visual_grammar.overlays_for(domain))
+    accent = visual_grammar.accent_for(domain)
     n = 0
     for s in (plan.get("shots") or []):
         beat = beats.get(str(s.get("beat_id")), {})
-        s["canvas"] = canvas_grammar.shot_canvas(s, beat, kit_id)
+        comp, just = canvas_grammar.select_world(s, beat, rec, kit_id)
+        s["canvas"] = canvas_grammar.world_canvas(s, beat, rec, comp, just,
+                                                  family_kit_id=kit_id)
         s["caption_zone"] = s["canvas"].get("caption_zone",
                                             s.get("caption_zone"))
+        prior = s.get("visual_grammar") or {}
+        s["visual_grammar"] = {**prior,
+                               "domain": domain,
+                               "world": comp,
+                               "composition": comp,
+                               "overlays": overlays,
+                               "accent": accent,
+                               "composition_justification": just}
         n += 1
     plan["canvas_grammar"] = kit_id
     plan["canvas_grammar_covers"] = canvas_grammar.kit_covers(kit_id)
+    plan["story_domain"] = {"domain": domain,
+                            "confidence": rec.get("confidence"),
+                            "evidence": rec.get("evidence") or []}
     return n
 
 
@@ -464,6 +513,9 @@ def make_edit_plan_v9(paths, story_id: str, out_name: str = "edit_plan.json",
     hook/contradiction/payoff localization + cross-video template loop."""
     story = json.loads((Path(paths.stories) / story_id / "story.json").read_text())
     claims = _claims_by_beat(Path(paths.stories) / story_id)
+    # V13B M2 — the story domain is detected ONCE (title/subject double
+    # weight) and drives per-shot composition selection below.
+    domain_rec = detect_domain_for_story(story)
     candidates = (_declared_grammars(story) or canvas_grammar.classify_story(story))
     if force_grammar in canvas_grammar.KITS:
         # Forced grammar PREPENDS; regeneration can still fall through to
@@ -475,7 +527,7 @@ def make_edit_plan_v9(paths, story_id: str, out_name: str = "edit_plan.json",
     attempts, chosen, plan, report = [], None, None, {}
     for i, kit_id in enumerate(candidates[: MAX_REGENERATIONS + 1]):
         plan, v8 = planv8.make_edit_plan_v8(paths, story_id, out_name=out_name)
-        apply_canvas(plan, story, kit_id)
+        apply_canvas(plan, story, kit_id, domain_rec=domain_rec)
         sig = antitemplate.build_signature_v2(plan)
         cross = antitemplate.cross_video_compare(sig, recent)
         attempts.append({
@@ -494,7 +546,8 @@ def make_edit_plan_v9(paths, story_id: str, out_name: str = "edit_plan.json",
 
     model = _beat_model(plan, story, chosen, claims,
                         claim_texts=_claim_texts_by_beat(
-                            Path(paths.stories) / story_id))
+                            Path(paths.stories) / story_id),
+                        domain_rec=domain_rec)
     plan["beat_model"] = model
     plan["visual_contradiction"] = _locate_contradiction(plan, story, {})
     plan["hook_plan"] = _locate_hook(plan, _hook_plan(story))
@@ -507,6 +560,9 @@ def make_edit_plan_v9(paths, story_id: str, out_name: str = "edit_plan.json",
         "cross_video_template": report.get("cross_video"),
         "transformation_problems": model["transformation_problems"],
         "claim_confidence": model.get("claim_confidence") or {},
+        # V13B M2 — story domain visibility in the plan report.
+        "story_domain": {"domain": domain_rec.get("domain"),
+                         "confidence": domain_rec.get("confidence")},
         # V13 M4 — representation mix across beats (evidence the planner did
         # NOT collapse everything into diagram painters).
         "representation_mix": {
@@ -546,6 +602,8 @@ def summarize(plan: dict, v9: dict) -> str:
     lines = [
         f"planv9: {len(shots)} shots, {total:.1f}s | grammar: "
         f"{plan.get('canvas_grammar')} ({plan.get('canvas_grammar_covers')})",
+        f"  story domain: {(plan.get('story_domain') or {}).get('domain')} "
+        f"(confidence {(plan.get('story_domain') or {}).get('confidence')})",
         f"  grammar candidates: {', '.join(v9.get('grammar_candidates') or [])}",
         f"  cross-video: {cross.get('verdict')} "
         f"(mean distance {cross.get('mean_distance')} vs "

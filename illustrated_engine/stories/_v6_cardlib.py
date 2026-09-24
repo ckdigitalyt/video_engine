@@ -45,6 +45,81 @@ RUST = (194, 91, 51)
 CREAM = (239, 230, 212)
 MUTED = (122, 106, 82)
 
+# ---------------------------------------------------------------------------
+# V13B M2 — per-domain palette override hook (JADE_V13B directive: the
+# parchment/RUST presentation identity must not be the automatic face of
+# every story).  apply_domain_palette() deterministically rewrites the
+# module-level palette constants (PARCH family + ACCENT) for a story domain;
+# accent defaults below resolve ACCENT at CALL time, so overridden domains
+# never fall back to RUST/orange.  Unknown/None domain resets the defaults.
+# Card scripts call it right after import and read colors via module
+# attributes (cardlib.PARCH) — `from _v6_cardlib import PARCH` snapshots the
+# pre-override value.
+
+DOMAIN_PALETTES: dict[str, dict] = {
+    "biology":   {"name": "deep_teal_olive",
+                  "PARCH": (206, 216, 208), "PARCH_D": (192, 204, 195),
+                  "PARCH_L": (226, 233, 226),
+                  "ACCENT": (23, 92, 84)},
+    "physics_mechanism": {"name": "cool_slate",
+                          "PARCH": (208, 212, 218), "PARCH_D": (196, 201, 209),
+                          "PARCH_L": (227, 231, 236),
+                          "ACCENT": (74, 90, 110)},
+    "geography_environment": {"name": "sky_terrain",
+                              "PARCH": (212, 216, 210), "PARCH_D": (200, 206, 199),
+                              "PARCH_L": (230, 234, 228),
+                              "ACCENT": (70, 118, 128)},
+    "history":   {"name": "sepia_ink",
+                  "PARCH": (222, 210, 188), "PARCH_D": (211, 198, 175),
+                  "PARCH_L": (235, 226, 208),
+                  "ACCENT": (112, 84, 48)},
+    "engineering": {"name": "steel_graphite",
+                    "PARCH": (208, 210, 212), "PARCH_D": (197, 200, 203),
+                    "PARCH_L": (228, 229, 231),
+                    "ACCENT": (58, 62, 68)},
+    "everyday_science": {"name": "warm_neutral",
+                         "PARCH": (220, 212, 198), "PARCH_D": (209, 200, 184),
+                         "PARCH_L": (234, 228, 216),
+                         "ACCENT": (146, 116, 90)},
+}
+
+_DEFAULT_PALETTE = {"name": "brand_default", "PARCH": (216, 208, 190),
+                    "PARCH_D": (206, 197, 178), "PARCH_L": (236, 230, 217),
+                    "ACCENT": RUST}
+
+# The ACTIVE accent: RUST until a domain palette is applied.  Functions
+# below default col=None and resolve this at call time.
+ACCENT = RUST
+_ACTIVE_PALETTE = "brand_default"
+
+
+def domain_accent(domain: str) -> tuple:
+    """Accent RGB for a domain per DOMAIN_PALETTES (general -> RUST/brand)."""
+    pal = DOMAIN_PALETTES.get(str(domain or "").strip().lower())
+    return tuple(pal["ACCENT"]) if pal else RUST
+
+
+def apply_domain_palette(domain: str | None) -> str:
+    """Rewrite the module palette constants for a story domain.
+
+    Deterministic, no randomness.  Returns the applied palette name.
+    None/unknown -> brand default (exact pre-hook behavior)."""
+    global PARCH, PARCH_D, PARCH_L, ACCENT, _ACTIVE_PALETTE
+    pal = DOMAIN_PALETTES.get(str(domain or "").strip().lower()) \
+        if domain else None
+    pal = pal or _DEFAULT_PALETTE
+    PARCH = tuple(pal["PARCH"])
+    PARCH_D = tuple(pal["PARCH_D"])
+    PARCH_L = tuple(pal["PARCH_L"])
+    ACCENT = tuple(pal["ACCENT"])
+    _ACTIVE_PALETTE = pal["name"]
+    return _ACTIVE_PALETTE
+
+
+def _resolve_accent(col):
+    """col=None -> the active (possibly domain-overridden) accent."""
+    return ACCENT if col is None else col
+
 _fd = Path(FONT_DIR)
 
 
@@ -115,26 +190,44 @@ def bgrid(d, x0=40, y0=40, x1=None, y1=None, step=64, col=INK, alpha=13):
         d.line((x0, y, x1, y), fill=col + (alpha,), width=1)
 
 
-def title_bar(d, text, y=64, sub=None):
-    """Solid ink header band (counts as ink for the density gate)."""
+def title_bar(d, text, y=64, sub=None, col=None):
+    """Solid ink header band (counts as ink for the density gate).
+    V13B M2: the underline uses the ACTIVE accent (domain-overridable); an
+    empty text payload draws nothing (no empty containers)."""
+    if not str(text or "").strip():
+        return None
+    col = _resolve_accent(col)
     d.rectangle((40, y + 6, W - 40, y + 82), fill=BANDC + (255,))
     d.text((70, y), text, font=bebas(64), fill=CREAM + (255,))
     d.line((70, y + 78, 70 + int(d.textlength(text, font=bebas(64))) + 10, y + 78),
-           fill=RUST + (230,), width=5)
+           fill=col + (230,), width=5)
     if sub:
         d.text((72, y + 98), sub, font=inter(26), fill=MUTED + (245,))
+    return (40, y, W - 40, y + 82)
 
 
-def footer_band(d, text, y=920, col=NAVY):
-    """Solid navy footer strip with cream text (density + continuity ink)."""
+def footer_band(d, payload, y=920, col=None):
+    """Solid footer strip with cream text (density + continuity ink).
+    V13B M2: payload-required — an empty/missing payload omits the band
+    entirely (no empty containers; directive P0 NO EMPTY VISUAL CONTAINERS)."""
+    if not str(payload or "").strip():
+        return None
+    col = _resolve_accent(col)
     d.rectangle((40, y, W - 40, y + 66), fill=BANDC + (255,))
-    d.text((64, y + 10), text, font=inter(30), fill=CREAM + (245,))
+    d.text((64, y + 10), payload, font=inter(30), fill=CREAM + (245,))
+    return (40, y, W - 40, y + 66)
 
 
-def label(d, text, anchor, bar_xy, font=None, align="left", col=NAVY):
-    """Small caption box with a leader line to an anchor point."""
+def label(d, payload, anchor, bar_xy, font=None, align="left", col=None):
+    """Small caption box with a leader line to an anchor point.
+    V13B M2: payload-required — an empty/missing payload omits the element
+    ENTIRELY (no box, no leader, no dot): a graphical container must carry
+    a label/measurement/state to earn screen space (directive P0)."""
+    if not str(payload or "").strip():
+        return None
+    col = _resolve_accent(col)
     font = font or bebas(34)
-    tw = d.textlength(text, font=font)
+    tw = d.textlength(payload, font=font)
     th = font.size
     pad_x, pad_y = 12, 7
     if align == "left":
@@ -143,15 +236,57 @@ def label(d, text, anchor, bar_xy, font=None, align="left", col=NAVY):
         x0, y0 = bar_xy[0] - int(tw) - 2 * pad_x, bar_xy[1]
     x1, y1 = x0 + int(tw) + 2 * pad_x, y0 + th + 2 * pad_y
     d.rounded_rectangle((x0, y0, x1, y1), radius=6, fill=(23, 19, 16, 210))
-    d.text((x0 + pad_x, y0 + pad_y - 2), text, font=font, fill=CREAM)
+    d.text((x0 + pad_x, y0 + pad_y - 2), payload, font=font, fill=CREAM)
     ex = x0 if anchor[0] < x0 else x1
     ey = (y0 + y1) // 2
-    d.line((anchor[0], anchor[1], ex, ey), fill=RUST + (220,), width=3)
+    d.line((anchor[0], anchor[1], ex, ey), fill=col + (220,), width=3)
     d.ellipse((anchor[0] - 4, anchor[1] - 4, anchor[0] + 4, anchor[1] + 4),
-              fill=RUST + (230,))
+              fill=col + (230,))
+    return (x0, y0, x1, y1)
 
 
-def arrow(d, p0, p1, col=RUST, w=7, head=22):
+def box(d, payload, xy, size=(520, 120), pad=18, font=None, col=None,
+        fill=(23, 19, 16, 200)):
+    """V13B M2 — information container, payload-required.
+
+    Draws a rounded info box ONLY when the payload carries useful content
+    (non-empty label; dict payloads use their 'label'/'value' fields).
+    Empty/missing payload -> the element is omitted entirely and None is
+    returned: do not reserve screen space because a template expects a box.
+    Returns the box rect (x0, y0, x1, y1) when drawn."""
+    if isinstance(payload, dict):
+        text = " ".join(str(payload.get(k) or "")
+                        for k in ("label", "value", "state", "text")).strip()
+    else:
+        text = str(payload or "").strip()
+    if not text:
+        return None
+    col = _resolve_accent(col)
+    font = font or inter(30)
+    x0, y0 = xy
+    x1, y1 = x0 + size[0], y0 + size[1]
+    d.rounded_rectangle((x0, y0, x1, y1), radius=10, fill=fill,
+                        outline=col + (200,), width=3)
+    # wrap the payload into the box (deterministic greedy wrap)
+    words, lines, cur = text.split(), [], ""
+    max_w = size[0] - 2 * pad
+    for w in words:
+        trial = (cur + " " + w).strip()
+        if d.textlength(trial, font=font) <= max_w:
+            cur = trial
+        else:
+            lines.append(cur)
+            cur = w
+    lines.append(cur)
+    ty = y0 + pad
+    for line in lines[: max(1, (size[1] - 2 * pad) // (font.size + 6))]:
+        d.text((x0 + pad, ty), line, font=font, fill=CREAM + (245,))
+        ty += font.size + 6
+    return (x0, y0, x1, y1)
+
+
+def arrow(d, p0, p1, col=None, w=7, head=22):
+    col = _resolve_accent(col)
     dx, dy = p1[0] - p0[0], p1[1] - p0[1]
     L = math.hypot(dx, dy) or 1.0
     ux, uy = dx / L, dy / L
@@ -164,7 +299,8 @@ def arrow(d, p0, p1, col=RUST, w=7, head=22):
                (bx - px * head * 0.55, by - py * head * 0.55)], fill=col + (235,))
 
 
-def big_number(d, text, xy, size=120, col=RUST, anchor_center=True, shadow=True):
+def big_number(d, text, xy, size=120, col=None, anchor_center=True, shadow=True):
+    col = _resolve_accent(col)
     f = bebas(size)
     tw = d.textlength(text, font=f)
     x = xy[0] - tw / 2 if anchor_center else xy[0]

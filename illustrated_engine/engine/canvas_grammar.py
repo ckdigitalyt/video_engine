@@ -285,9 +285,285 @@ KITS: dict[str, dict] = {
         "subject_keywords": ("climate", "monsoon", "volcano", "ash", "storm",
                              "atmosphere", "temperature", "current", "el nino"),
     },
+    # V13B M2 (JADE_V13B directive P0 REMOVE PRESENTATION-TEMPLATE DEFAULT):
+    # the parchment/panel/board architecture is now an EXPLICIT kit instead
+    # of an ambient default.  It has NO story_types and NO subject_keywords,
+    # so classify_story can never score it — it reaches a plan only when an
+    # author declares it, or when the domain+beat-role selection justifies a
+    # panel for a data/list/comparison evidence beat (planv9.apply_canvas
+    # records the justification on the shot).  Kept in the registry because
+    # genuine evidence boards remain a legitimate, occasional choice.
+    "universal_presentation_panel": {
+        "covers": "explicit data/list/comparison evidence board (justified)",
+        "composition": "central_horizontal_panel",
+        "background": "grid_paper",
+        "panel_usage": "hero_island",
+        "chrome_density": "rail",
+        "caption_architecture": "edge_band",
+        "transition_vocab": ["cut_on_state"],
+        "camera": "the panel is the message; the board holds still",
+        "beat_composition": {
+            "HOOK": "central_horizontal_panel",
+            "CURIOSITY": "central_horizontal_panel",
+            "REVEAL": "central_horizontal_panel",
+            "EXPLANATION": "central_horizontal_panel",
+            "ESCALATION": "central_horizontal_panel",
+            "PAYOFF": "central_horizontal_panel",
+        },
+        "default_transform": {
+            "HOOK": "object_transforms",
+            "CURIOSITY": "comparison_resolves",
+            "REVEAL": "hidden_layer_revealed",
+            "EXPLANATION": "cause_to_consequence",
+            "ESCALATION": "cause_to_consequence",
+            "PAYOFF": "comparison_resolves",
+        },
+        "story_types": (),
+        "subject_keywords": (),
+    },
 }
 
 DEFAULT_KIT = "mechanism_flow"
+
+# ---------------------------------------------------------------------------
+# V13B M2 — full-bleed 9:16 WORLD KITS (JADE_V13B P0 STORY-SPECIFIC VISUAL
+# GRAMMAR + FULL-CANVAS COMPOSITION).  One world kit per composition class
+# in visual_grammar.STORY_DOMAINS ordered preference lists.  A world kit is
+# a full-bleed 9:16 profile: art owns the frame (panel_usage "none"), no
+# presentation chrome, captions live in composed negative space.  Fields
+# mirror the KITS kit shape so antitemplate/caption_place/consumers read
+# them unchanged.  "triggers" are the narration keywords that justify the
+# composition for a beat; selection is deterministic (see select_world).
+
+WORLD_KITS: dict[str, dict] = {
+    # biology
+    "macro_world": {
+        "covers": "biology — tissue/organism/cell visual world",
+        "background": "depth_field",
+        "panel_usage": "none",
+        "chrome_density": "none",
+        "caption_architecture": "edge_band",
+        "camera": "full-bleed 9:16 world; the subject owns the frame",
+        "transition_vocab": ["cut_on_state", "scale_dive"],
+        "triggers": ("cell", "tissue", "organism", "membrane", "organelle",
+                     "bacteria", "microscopic", "universe", "skin"),
+    },
+    "cutaway": {
+        "covers": "any domain — interior shown through the surface",
+        "background": "depth_field",
+        "panel_usage": "none",
+        "chrome_density": "none",
+        "caption_architecture": "edge_band",
+        "camera": "hold the object; the interior opens toward the lens",
+        "transition_vocab": ["cut_on_state", "reveal_carry"],
+        "triggers": ("inside", "interior", "cross-section", "layers",
+                     "internal", "beneath", "within"),
+    },
+    "process_zoom": {
+        "covers": "biology — scale transition / process progression",
+        "background": "depth_gradient",
+        "panel_usage": "none",
+        "chrome_density": "none",
+        "caption_architecture": "edge_band",
+        "camera": "descend or advance through stages; each stage a world",
+        "transition_vocab": ["scale_dive", "cut_on_state"],
+        "triggers": ("dive", "scale", "shrink", "magnify", "smaller",
+                     "thinner", "stages", "journey", "micrometer",
+                     "nanometer"),
+    },
+    # physics_mechanism
+    "object_contact": {
+        "covers": "physics — recognizable object, actual contact",
+        "background": "environment_field",
+        "panel_usage": "none",
+        "chrome_density": "none",
+        "caption_architecture": "edge_band",
+        "camera": "frame the contact; the interaction is the event",
+        "transition_vocab": ["cut_on_state", "flow_carry"],
+        "triggers": ("contact", "touch", "slide", "grip", "blade", "glide",
+                     "pressure", "weight", "surface", "ride"),
+    },
+    "force_deformation": {
+        "covers": "physics — force applied, material responds",
+        "background": "environment_field",
+        "panel_usage": "none",
+        "chrome_density": "none",
+        "caption_architecture": "edge_band",
+        "camera": "show the force and the response in one frame chain",
+        "transition_vocab": ["cut_on_state", "flow_carry"],
+        "triggers": ("force", "bend", "crush", "deform", "squeeze",
+                     "stretch", "stress", "bond", "friction"),
+    },
+    "macro_reveal": {
+        "covers": "physics — microscopic explanation after macroscopic setup",
+        "background": "depth_gradient",
+        "panel_usage": "none",
+        "chrome_density": "none",
+        "caption_architecture": "edge_band",
+        "camera": "push from the object to its hidden structure",
+        "transition_vocab": ["scale_dive", "cut_on_state"],
+        "triggers": ("molecule", "crystal", "lattice", "reveal", "hidden",
+                     "actually", "microscope", "nanometer", "film"),
+    },
+    # geography_environment
+    "landscape": {
+        "covers": "geography — recognizable landscape / terrain",
+        "background": "terrain_field",
+        "panel_usage": "none",
+        "chrome_density": "minimal",
+        "caption_architecture": "top_band",
+        "camera": "let the land breathe; the place is the subject",
+        "transition_vocab": ["map_jump", "cut_on_state"],
+        "triggers": ("desert", "valley", "coast", "mountain", "forest",
+                     "plain", "horizon", "terrain", "oasis", "lake"),
+    },
+    "map": {
+        "covers": "geography/history — spatial position and relations",
+        "background": "terrain_field",
+        "panel_usage": "none",
+        "chrome_density": "minimal",
+        "caption_architecture": "top_band",
+        "camera": "overlays annotate the map; the camera never crops it",
+        "transition_vocab": ["map_jump", "cut_on_state"],
+        "triggers": ("map", "region", "continent", "located", "north",
+                     "south", "border", "where", "across"),
+    },
+    "atmosphere_reconstruction": {
+        "covers": "geography — weather/environment in motion",
+        "background": "atmosphere_field",
+        "panel_usage": "none",
+        "chrome_density": "minimal",
+        "caption_architecture": "top_band",
+        "camera": "the atmosphere moves through a held frame",
+        "transition_vocab": ["flow_carry", "map_jump"],
+        "triggers": ("fog", "cloud", "wind", "rain", "weather", "air",
+                     "mist", "humidity", "climate"),
+    },
+    # history
+    "place_reconstruction": {
+        "covers": "history — the place/environment rebuilt",
+        "background": "era_field",
+        "panel_usage": "none",
+        "chrome_density": "none",
+        "caption_architecture": "top_band",
+        "camera": "reconstruct the scene; stand where the event stood",
+        "transition_vocab": ["time_jump", "cut_on_state"],
+        "triggers": ("city", "site", "ruins", "village", "forest",
+                     "building", "event", "explosion", "witness"),
+    },
+    "timeline": {
+        "covers": "history — the event chain anchored in time",
+        "background": "era_field",
+        "panel_usage": "none",
+        "chrome_density": "none",
+        "caption_architecture": "top_band",
+        "camera": "drift along the spine; dates anchor, consequence follows",
+        "transition_vocab": ["time_jump", "cut_on_state"],
+        "triggers": ("year", "century", "date", "years ago", "when", "era",
+                     "history", "decade"),
+    },
+    "before_after": {
+        "covers": "history/physics — state A against state B",
+        "background": "split_field",
+        "panel_usage": "none",
+        "chrome_density": "none",
+        "caption_architecture": "edge_band",
+        "camera": "two states, one hinge; the flip is the information",
+        "transition_vocab": ["flip", "cut_on_state"],
+        "triggers": ("before", "after", "used to", "became", "changed",
+                     "transformed", "instead"),
+    },
+    # engineering
+    "machine_cutaway": {
+        "covers": "engineering — the machine opened",
+        "background": "edge_to_edge_dark",
+        "panel_usage": "none",
+        "chrome_density": "minimal",
+        "caption_architecture": "edge_band",
+        "camera": "hold the object; layers open in place",
+        "transition_vocab": ["cut_on_state", "reveal_carry"],
+        "triggers": ("engine", "machine", "chassis", "housing", "section",
+                     "hull", "turbine", "inside", "power plant"),
+    },
+    "load_path": {
+        "covers": "engineering — force traveling through structure",
+        "background": "edge_to_edge_dark",
+        "panel_usage": "none",
+        "chrome_density": "minimal",
+        "caption_architecture": "edge_band",
+        "camera": "track the path the force takes; nothing else moves",
+        "transition_vocab": ["flow_carry", "cut_on_state"],
+        "triggers": ("load", "force", "energy", "transfer", "through the",
+                     "stress", "carries"),
+    },
+    "exploded": {
+        "covers": "engineering — parts separated to explain assembly",
+        "background": "edge_to_edge_dark",
+        "panel_usage": "none",
+        "chrome_density": "minimal",
+        "caption_architecture": "edge_band",
+        "camera": "parts separate along one axis and hold",
+        "transition_vocab": ["reveal_carry", "cut_on_state"],
+        "triggers": ("parts", "components", "assembly", "apart",
+                     "exploded", "layer"),
+    },
+    "deformation": {
+        "covers": "engineering — material response and failure",
+        "background": "edge_to_edge_dark",
+        "panel_usage": "none",
+        "chrome_density": "minimal",
+        "caption_architecture": "edge_band",
+        "camera": "the frame holds while the material gives way",
+        "transition_vocab": ["cut_on_state", "flow_carry"],
+        "triggers": ("crumple", "crush", "dent", "fold", "buckle",
+                     "collapse", "failure", "deform"),
+    },
+    # everyday_science
+    "real_object": {
+        "covers": "everyday — the recognizable household object",
+        "background": "environment_field",
+        "panel_usage": "none",
+        "chrome_density": "none",
+        "caption_architecture": "edge_band",
+        "camera": "the object at home scale, centered and honest",
+        "transition_vocab": ["cut_on_state", "flip"],
+        "triggers": ("kitchen", "phone", "coffee", "cup", "hair", "you",
+                     "your", "home", "brush", "glass", "ice"),
+    },
+    "interaction": {
+        "covers": "everyday — the obvious physical interaction",
+        "background": "environment_field",
+        "panel_usage": "none",
+        "chrome_density": "none",
+        "caption_architecture": "edge_band",
+        "camera": "frame the interaction as an event, not a diagram",
+        "transition_vocab": ["cut_on_state", "flow_carry"],
+        "triggers": ("heat", "cook", "spin", "shake", "pour", "rub",
+                     "press", "stand", "glide", "brush"),
+    },
+    "macro_zoom": {
+        "covers": "everyday — zoom from macro into the invisible",
+        "background": "depth_gradient",
+        "panel_usage": "none",
+        "chrome_density": "none",
+        "caption_architecture": "edge_band",
+        "camera": "one continuous push from the object into its parts",
+        "transition_vocab": ["scale_dive", "cut_on_state"],
+        "triggers": ("molecule", "microwave", "wave", "invisible", "tiny",
+                     "magnify", "micrometer", "nanometer"),
+    },
+    "mechanism_reveal": {
+        "covers": "everyday/general — the mechanism behind the object",
+        "background": "depth_field",
+        "panel_usage": "none",
+        "chrome_density": "none",
+        "caption_architecture": "edge_band",
+        "camera": "the object becomes its own explanation",
+        "transition_vocab": ["reveal_carry", "cut_on_state"],
+        "triggers": ("why", "how", "actually", "mechanism", "cause",
+                     "because", "explanation"),
+    },
+}
 
 # The universal presentation architecture that V11 actually rendered for
 # every story regardless of grammar (verified on the autumn_red /
@@ -369,6 +645,155 @@ def classify_story(story: dict, visual_plan: dict | None = None) -> list:
 # Per-shot canvas architecture
 
 
+# ---------------------------------------------------------------------------
+# V13B M2 — domain + beat-role composition selection (per shot).
+
+# Legacy V12 kit -> preferred world composition classes.  Keeps the bounded
+# regeneration loop meaningful: a regeneration with the NEXT kit biases a
+# DIFFERENT world composition when narration alone does not trigger one
+# (deterministic; narration triggers always win over kit bias).
+WORLD_BIAS: dict[str, tuple] = {
+    "mechanism_flow": ("object_contact", "force_deformation", "process_zoom"),
+    "scale_descent": ("macro_world", "process_zoom", "macro_reveal"),
+    "map_first": ("landscape", "map", "atmosphere_reconstruction"),
+    "timeline_band": ("timeline", "place_reconstruction", "map"),
+    "cutaway_reveal": ("machine_cutaway", "cutaway", "load_path",
+                       "exploded", "deformation"),
+    "before_after": ("before_after", "interaction", "real_object"),
+    "field_propagation": ("atmosphere_reconstruction", "map", "landscape"),
+    "universal_presentation_panel": (),
+}
+
+# Beat roles / narration shapes that genuinely justify a presentation panel:
+# data, lists and comparisons are evidence boards, not stories.
+_EVIDENCE_BEAT_FUNCTIONS = ("DATA", "LIST", "COMPARISON", "STAT", "FACT")
+_EVIDENCE_HINTS = (
+    "how many", "how much", "compared", "comparison", "versus", " vs ",
+    "percent", "number of", "list", "measure", "count", "times bigger",
+    "times smaller", "times thinner", "times larger", "graph", "chart",
+)
+
+
+def _beat_text(shot: dict, beat: dict) -> str:
+    parts = [beat.get("narration"), beat.get("claim"), beat.get("text"),
+             shot.get("purpose"), shot.get("evidence"), shot.get("claim")]
+    return " ".join(str(p or "") for p in parts).lower()
+
+
+def is_evidence_beat(shot: dict, beat: dict) -> bool:
+    """Deterministic: data/list/comparison beats may carry a panel."""
+    fn = str(beat.get("function") or "").upper()
+    if any(tag in fn for tag in _EVIDENCE_BEAT_FUNCTIONS):
+        return True
+    et = str(shot.get("evidence_type") or "").upper()
+    if any(tag in et for tag in _EVIDENCE_BEAT_FUNCTIONS):
+        return True
+    text = _beat_text(shot, beat)
+    return any(h in text for h in _EVIDENCE_HINTS)
+
+
+def select_world(shot: dict, beat: dict, domain_rec: dict,
+                 kit_id: str = "") -> tuple[str, str]:
+    """(composition, justification) for one shot — V13B M2 selection.
+
+    Order of authority (deterministic, no randomness):
+      1. hook beats -> the domain's FIRST world composition (panel is
+         forbidden on the hook: the subject must own frame one)
+      2. the domain preference with the MOST narration trigger hits
+         (ties resolve by domain preference order) — a rich/world beat
+         wins over the panel path
+      3. data/list/comparison evidence beats with NO world trigger ->
+         the justified presentation panel (panel is a MAY, not a default:
+         any narration trigger keeps the beat a world composition)
+      4. first domain preference preferred by the chosen legacy kit
+         (WORLD_BIAS — keeps grammar regeneration meaningful)
+      5. the domain's first world preference
+    """
+    domain = str((domain_rec or {}).get("domain") or "general")
+    prefs = visual_grammar_domain_compositions(domain)
+    world_prefs = [c for c in prefs if c in WORLD_KITS]
+    fn = str(beat.get("function") or "").upper()
+    if fn in ("HOOK", "TEASER", "COLD_OPEN"):
+        return (world_prefs[0],
+                f"hook beat -> world composition ({world_prefs[0]}; panel "
+                f"forbidden on the hook)")
+    text = _beat_text(shot, beat)
+    hits: dict[str, list] = {}
+    for comp in world_prefs:
+        matched = [t for t in WORLD_KITS[comp]["triggers"]
+                   if re.search(rf"\b{re.escape(t)}", text)]
+        if matched:
+            hits[comp] = matched
+    if hits:
+        comp = max(world_prefs,
+                   key=lambda c: (len(hits.get(c, [])),
+                                  -world_prefs.index(c)))
+        return (comp, f"narration triggers {comp} "
+                      f"({', '.join(hits[comp][:3])})")
+    if is_evidence_beat(shot, beat):
+        return ("universal_presentation_panel",
+                f"{fn.lower() or 'evidence'} beat (data/list/comparison, no "
+                f"world trigger) -> justified presentation panel")
+    for comp in WORLD_BIAS.get(kit_id, ()):
+        if comp in world_prefs:
+            return (comp, f"kit '{kit_id}' prefers {comp} "
+                          f"(no narration trigger)")
+    return (world_prefs[0], f"domain '{domain}' default {world_prefs[0]}")
+
+
+def visual_grammar_domain_compositions(domain: str) -> tuple:
+    """STORY_DOMAINS ordered compositions (lazy import avoids a cycle)."""
+    from engine import visual_grammar as vg
+    return vg.compositions_for(domain)
+
+
+def world_canvas(shot: dict, beat: dict, domain_rec: dict,
+                 composition: str, justification: str,
+                 family_kit_id: str = "") -> dict:
+    """The per-shot canvas dict for a world/panel composition — same field
+    shape as shot_canvas output, so antitemplate / caption_place consumers
+    read it unchanged.  Panel compositions carry their justification."""
+    if composition == "universal_presentation_panel":
+        canvas = shot_canvas(shot, beat, "universal_presentation_panel")
+        canvas["composition_justification"] = justification
+        return canvas
+    kit = WORLD_KITS[composition]
+    fn = str(beat.get("function") or "").upper()
+    canvas = {
+        "grammar": composition,
+        "composition": composition,
+        "background": kit["background"],
+        "panel_usage": kit["panel_usage"],
+        "chrome_density": kit["chrome_density"],
+        "caption_architecture": kit["caption_architecture"],
+        "transition": _transition_for(shot, kit),
+        "primary_transformation": _world_transform(shot, beat,
+                                                    family_kit_id),
+        "beat_function": fn,
+        "full_bleed": True,
+        "covers": kit["covers"],
+        "camera": kit["camera"],
+        "composition_justification": justification,
+    }
+    if kit["caption_architecture"] == "edge_band":
+        canvas["caption_zone"] = "below_card"
+    elif kit["caption_architecture"] == "top_band":
+        canvas["caption_zone"] = "top_band"
+    return canvas
+
+
+def _world_transform(shot: dict, beat: dict, family_kit_id: str = "") -> str:
+    """A valid primary transformation for a world shot: the beat's declared
+    transformation wins, else the legacy KITS family default for the beat
+    function (family = the plan-header kit_id), else cause_to_consequence."""
+    declared = str(beat.get("transformation") or "").strip()
+    if declared and declared in VALID_TRANSFORMATIONS:
+        return declared
+    family = KITS.get(family_kit_id or "", {})
+    return (family.get("default_transform") or {}).get(
+        str(beat.get("function") or "").upper(), "cause_to_consequence")
+
+
 def beat_function_of(shot: dict, beats: dict) -> str:
     return str((beats.get(str(shot.get("beat_id"))) or {}).get("function") or "")
 
@@ -426,7 +851,9 @@ def kit_covers(kit_id: str) -> str:
 def validate() -> list:
     """Registry self-check: every kit declares all required fields, every
     default_transform is a VALID transformation, and the six stress
-    categories are covered."""
+    categories are covered.  V13B M2: every world kit declares the required
+    profile fields and every non-panel domain preference resolves to a
+    registered world kit."""
     problems = []
     required = ("covers", "composition", "background", "panel_usage",
                 "chrome_density", "caption_architecture", "transition_vocab",
@@ -444,4 +871,27 @@ def validate() -> list:
                 "engineering", "counterintuitive"):
         if not any(cat in c for c in covered):
             problems.append(f"no kit covers stress category '{cat}'")
+    # V13B M2 — world kits + domain preference integrity (lazy import:
+    # visual_grammar has no import-time dependency on canvas_grammar).
+    from engine import visual_grammar as vg
+    w_required = ("covers", "background", "panel_usage", "chrome_density",
+                  "caption_architecture", "camera", "transition_vocab",
+                  "triggers")
+    for wid, kit in WORLD_KITS.items():
+        for f in w_required:
+            if f not in kit:
+                problems.append(f"world kit {wid}: missing field {f}")
+        if kit.get("panel_usage") != "none":
+            problems.append(f"world kit {wid}: must be full-bleed "
+                            f"(panel_usage 'none')")
+    for dom, spec in vg.STORY_DOMAINS.items():
+        for comp in spec["compositions"]:
+            if comp != "panel" and comp not in WORLD_KITS:
+                problems.append(f"domain {dom}: preference '{comp}' has no "
+                                f"world kit")
+        if dom != "general" and spec["compositions"][-1] != "panel":
+            problems.append(f"domain {dom}: 'panel' must be the LAST "
+                            f"preference")
+        if dom != "general" and (spec["accent"].get("rgb") or "") == (194, 91, 51):
+            problems.append(f"domain {dom}: accent defaults to RUST/orange")
     return problems
