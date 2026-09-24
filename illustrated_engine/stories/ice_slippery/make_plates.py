@@ -238,8 +238,17 @@ def card_b4() -> Image.Image:
     side = 230
     row_step = int(side * math.sqrt(3))          # 398: true honeycomb pitch
     rows = 4
+    # row styling: the dense ink node-dots + 8px outlines in the lower rows
+    # land in the caption band / below-card region at S04's zoom and read as
+    # glyph texture (measured band_frac 0.032-0.045 vs 0.02 limit, leak
+    # probes at t=26.5/30.6) — lower rows fade to ghost context
+    ROW_STYLE = {0: (INK + (255,), 6, 10, INK + (200,), 235),
+                 1: (SEPIA + (140,), 4, 0, None, 200),
+                 2: (SEPIA + (100,), 3, 0, None, 90),
+                 3: (SEPIA + (95,), 3, 0, None, 70)}
     for row in range(rows):
         cy = 2380 + row * row_step
+        edge_c, edge_w, node_r, node_c, fill_a = ROW_STYLE[row]
         broken = (row == 0)
         for i in range(6):
             cx = 260 + i * int(1.5 * side) + (int(0.75 * side) if row % 2 else 0)
@@ -248,13 +257,14 @@ def card_b4() -> Image.Image:
                 # topmost row breaking open: dashed edges + loose nodes
                 for a, b in zip(hexs, hexs[1:] + hexs[:1]):
                     if rng.random() < 0.55:
-                        d.line([a, b], fill=INK + (255,), width=8)
+                        d.line([a, b], fill=edge_c, width=edge_w)
             else:
-                d.polygon(hexs, fill=(224, 204, 167, 235))
-                d.line(hexs + [hexs[0]], fill=INK + (255,), width=8)
-            for (vx, vy) in hexs:
-                d.ellipse([vx - 15, vy - 15, vx + 15, vy + 15],
-                          fill=INK + (255,))
+                d.polygon(hexs, fill=(224, 204, 167, fill_a))
+                d.line(hexs + [hexs[0]], fill=edge_c, width=edge_w)
+            if node_r:
+                for (vx, vy) in hexs:
+                    d.ellipse([vx - node_r, vy - node_r, vx + node_r, vy + node_r],
+                              fill=node_c)
     # loose molecules: few, sepia, soft — ink stipple clusters read as
     # dot-matrix text in caption-band probes
     for _ in range(10):

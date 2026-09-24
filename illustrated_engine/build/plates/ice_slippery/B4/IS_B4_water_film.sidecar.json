@@ -30,7 +30,7 @@
       "seed": null,
       "status": "derived",
       "depth_map": null,
-      "seconds": 1.19,
+      "seconds": 1.28,
       "note": "V13 M3 real-mask 2.5D derivation (CPU, deterministic)"
     }
   },
