@@ -1,0 +1,49 @@
+{
+  "schema_version": "v14.scene_ir/1.0",
+  "scene_id": "bench_C_scale_dive",
+  "visual_grammar": "SCALE_DIVE",
+  "style_bible_ref": "bench_default",
+  "duration_s": 8.0,
+  "fps": 30,
+  "size": [1080, 1920],
+  "seed": 20260926,
+  "layers": [
+    { "id": "bg", "type": "background", "semantic_role": "world_ground",
+      "source": "generated_gradient", "payload": { "kind": "radial", "stops": ["#12405C", "#0A1D33"], "focus": [0.5, 0.48] } },
+    { "id": "eye", "type": "subject", "semantic_role": "surface_world",
+      "source": "procedural_svg", "payload": { "shape": "eye", "iris_r": 210, "pupil_r": 64, "striations": 26 }, "depth": 0.5, "z": 10 },
+    { "id": "pupil_aperture", "type": "mask", "semantic_role": "zoom_portal",
+      "source": "vector", "payload": { "shape": "circle", "world_r": 64, "grows_with_camera": true }, "z": 20 },
+    { "id": "tissue", "type": "scientific_layer", "semantic_role": "epithelial_structure",
+      "source": "procedural_svg", "payload": { "cells": 12, "local_scale": 0.25, "junctions": true, "seed_ref": "scene" }, "depth": 0.7, "z": 21 },
+    { "id": "nucleus_aperture", "type": "mask", "semantic_role": "second_zoom_portal",
+      "source": "vector", "payload": { "shape": "circle", "world_r": 18, "grows_with_camera": true }, "z": 30 },
+    { "id": "dna", "type": "scientific_layer", "semantic_role": "heredity_molecule",
+      "source": "procedural_svg", "payload": { "helix": { "amplitude": 150, "period": 110, "length": 1400, "rungs_every": 100 }, "local_scale": 0.05 }, "depth": 0.9, "z": 31 },
+    { "id": "anchor_ring", "type": "semantic_annotation", "semantic_role": "persistent_scale_anchor",
+      "source": "vector", "payload": { "shape": "dashed_ring", "screen_r": 46, "note": "stays constant while world dives" }, "z": 60 },
+    { "id": "mag_readout", "type": "text", "semantic_role": "scale_indicator",
+      "source": "vector", "payload": { "format": "×{S}", "position": [990, 1700], "anchor": "end" }, "z": 61 },
+    { "id": "stage_label", "type": "semantic_annotation", "semantic_role": "dive_stage_caption",
+      "source": "vector", "payload": { "stages": [
+        { "until_scale": 3.2, "title": "SURFACE — THE EYE", "sub": "a lens built for focus" },
+        { "until_scale": 9.0, "title": "INSIDE — EPITHELIAL TISSUE", "sub": "cells locked edge to edge" },
+        { "until_scale": null, "title": "CORE — DNA HELIX", "sub": "two meters, coiled" }
+      ], "position": [90, 1700] }, "z": 62 }
+  ],
+  "camera": {
+    "type": "scale_dive",
+    "purpose": "one continuous dive carries the story from macro to molecular — transformation replaces cuts",
+    "easing": "ease_in_out_cubic",
+    "keyframes": [ { "t": 0.0, "value": 1.0 }, { "t": 8.0, "value": 30.0 } ],
+    "value_space": "linear_scale",
+    "aperture_layers": ["pupil_aperture", "nucleus_aperture"]
+  },
+  "animations": [
+    { "target_layer": "stage_label", "property": "position", "purpose": "stage titles slide in as scale thresholds are crossed",
+      "keyframes": [ { "t": 2.0, "value": [0, 20] }, { "t": 3.0, "value": [0, 0] }, { "t": 5.0, "value": [0, 20] }, { "t": 6.0, "value": [0, 0] } ] }
+  ],
+  "annotations": [],
+  "caption_safe_regions": [ { "x": 90, "y": 1560, "w": 900, "h": 260 } ],
+  "meta": { "benchmark": "C", "backend_hint": "remotion", "no_crossfade": true }
+}

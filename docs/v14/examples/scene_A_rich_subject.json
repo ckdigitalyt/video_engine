@@ -1,0 +1,44 @@
+{
+  "schema_version": "v14.scene_ir/1.0",
+  "scene_id": "bench_A_rich_subject",
+  "visual_grammar": "RICH_ILLUSTRATED_SCENE",
+  "style_bible_ref": "bench_default",
+  "duration_s": 7.0,
+  "fps": 30,
+  "size": [1080, 1920],
+  "seed": 20260926,
+  "layers": [
+    { "id": "bg", "type": "background", "semantic_role": "world_ground",
+      "source": "generated_gradient", "payload": { "kind": "radial", "stops": ["#12405C", "#0A1D33"], "focus": [0.5, 0.42] }, "depth": 0.0 },
+    { "id": "atmo", "type": "atmosphere", "semantic_role": "depth_cues",
+      "source": "generated_shape", "payload": { "blobs": 3, "blur": 34, "opacity": [0.08, 0.16] }, "depth": 0.3 },
+    { "id": "cell_membrane", "type": "subject", "semantic_role": "protagonist_body",
+      "source": "generated_shape", "payload": { "shape": "circle", "r": 380, "stroke": "#2A4E6E" }, "depth": 0.55, "z": 10 },
+    { "id": "cell_texture", "type": "texture", "semantic_role": "material_detail",
+      "source": "procedural_svg", "payload": { "squiggles": 9, "seed_ref": "scene" }, "depth": 0.55, "z": 11 },
+    { "id": "nucleus", "type": "subject", "semantic_role": "protagonist_core",
+      "source": "generated_gradient", "payload": { "shape": "circle", "r": 150, "stops": ["#F2A65A", "#04101E"] }, "depth": 0.6, "z": 12 },
+    { "id": "shadow", "type": "lighting", "semantic_role": "ground_contact",
+      "source": "generated_shape", "payload": { "shape": "ellipse", "r": [330, 54], "blur": 34 }, "depth": 0.5, "z": 5 },
+    { "id": "ann_nucleus", "type": "semantic_annotation", "semantic_role": "key_fact_label",
+      "source": "vector", "payload": { "title": "NUCLEUS", "sub": "the control center", "leader_from": [646, 878], "elbow": [760, 700], "text_at": [950, 700], "window_s": [2.4, 7.0] },
+      "visibility": [2.4, 7.0], "z": 50 },
+    { "id": "fg_arcs", "type": "foreground", "semantic_role": "depth_frame",
+      "source": "generated_shape", "payload": { "arcs": 2, "opacity": 0.5 }, "depth": 0.95 }
+  ],
+  "camera": {
+    "type": "push_in",
+    "purpose": "slowly enter the cell to make the subject feel present, not displayed",
+    "easing": "ease_in_out_cubic",
+    "keyframes": [ { "t": 0.0, "value": 1.0 }, { "t": 6.3, "value": 1.15 } ]
+  },
+  "animations": [
+    { "target_layer": "cell_membrane", "property": "position", "purpose": "idle drift keeps the subject alive between beats",
+      "keyframes": [ { "t": 0.0, "value": [0, 0] }, { "t": 3.5, "value": [0, 8] }, { "t": 7.0, "value": [0, 0] } ] },
+    { "target_layer": "ann_nucleus", "property": "opacity", "purpose": "annotation appears only once the subject is established",
+      "keyframes": [ { "t": 2.4, "value": 0.0 }, { "t": 3.4, "value": 1.0 } ] }
+  ],
+  "annotations": [],
+  "caption_safe_regions": [ { "x": 90, "y": 1560, "w": 900, "h": 260 } ],
+  "meta": { "benchmark": "A", "backend_hint": "remotion" }
+}
