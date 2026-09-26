@@ -1,0 +1,32 @@
+{
+  "schema": "v14.scene_ir/0.1",
+  "scene_id": "bench",
+  "visual_grammar": "RICH_ILLUSTRATED_SCENE",
+  "style_bible": {
+    "palette": {
+      "bg_deep": "#0A1D33",
+      "bg_mid": "#12405C",
+      "accent_warm": "#F2A65A",
+      "accent_cool": "#7FD1C7",
+      "ink": "#EAF4F4",
+      "ink_dim": "#9FB8C8",
+      "line": "#2A4E6E",
+      "shadow": "#04101E"
+    },
+    "typography": { "family": "DejaVu Sans", "label_weight": 700, "letterspacing": 2 },
+    "line_treatment": "rounded caps, 2-3px",
+    "grain": false
+  },
+  "fps": 30,
+  "size": [1080, 1920],
+  "durations_s": { "A": 7, "B": 7, "C": 8, "D": 7 },
+  "camera": {
+    "A": "push-in 1.0->1.15 eased, per-layer parallax multipliers",
+    "B": "static frame, animated vector reveal",
+    "C": "continuous scale dive 1->30, nested clip apertures, no crossfade",
+    "D": "lateral pan -180px, 5-band parallax"
+  },
+  "seed": 20260926,
+  "layers_A": ["background", "atmosphere", "subject_shadow", "subject", "texture", "semantic_annotations", "foreground"],
+  "caption_safe_regions": [{ "x": 90, "y": 1560, "w": 900, "h": 260 }]
+}

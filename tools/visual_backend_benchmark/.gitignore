@@ -1,0 +1,5 @@
+remotion_bench/node_modules/
+remotion_bench/out/
+remotion_bench/public/
+results/*.log
+results/*.time.log
