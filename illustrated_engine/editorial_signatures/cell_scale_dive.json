@@ -1,9 +1,9 @@
 {
  "v2": true,
- "story_id": "ice_slippery",
- "built_utc": "2026-09-24T04:08:13Z",
+ "story_id": "cell_scale_dive",
+ "built_utc": "2026-09-24T02:06:54Z",
  "n_shots": 6,
- "avg_shot_dur": 7.94,
+ "avg_shot_dur": 8.95,
  "role_sequence": [
   "HERO",
   "DETAIL",
@@ -13,20 +13,20 @@
   "PAYOFF"
  ],
  "grammar_sequence": [
-  "object_contact",
-  "object_contact",
-  "macro_reveal",
-  "macro_reveal",
-  "object_contact",
-  "object_contact"
+  "macro_world",
+  "process_zoom",
+  "process_zoom",
+  "macro_world",
+  "process_zoom",
+  "macro_world"
  ],
  "composition_sequence": [
-  "object_contact",
-  "object_contact",
-  "macro_reveal",
-  "macro_reveal",
-  "object_contact",
-  "object_contact"
+  "macro_world",
+  "process_zoom",
+  "process_zoom",
+  "macro_world",
+  "process_zoom",
+  "macro_world"
  ],
  "panel_usage_sequence": [
   "none",
@@ -37,12 +37,12 @@
   "none"
  ],
  "background_sequence": [
-  "environment_field",
-  "environment_field",
+  "depth_field",
   "depth_gradient",
   "depth_gradient",
-  "environment_field",
-  "environment_field"
+  "depth_field",
+  "depth_gradient",
+  "depth_field"
  ],
  "caption_architecture": [
   "edge_band",
@@ -67,15 +67,18 @@
   "ESTABLISH",
   "FOCUS",
   "TRANSFORM",
-  "CONSEQUENCE",
-  "ESTABLISH",
-  "FOCUS",
   "ESTABLISH",
   "FOCUS",
   "TRANSFORM",
   "CONSEQUENCE",
   "ESTABLISH",
   "FOCUS",
+  "TRANSFORM",
+  "CONSEQUENCE",
+  "ESTABLISH",
+  "FOCUS",
+  "TRANSFORM",
+  "CONSEQUENCE",
   "ESTABLISH",
   "FOCUS",
   "TRANSFORM",
@@ -93,38 +96,42 @@
  "title_behavior": "opening_title",
  "chrome_usage": "none",
  "accent_usage": "",
- "duration_profile": "n6_s0_l3",
+ "duration_profile": "n6_s0_l4",
  "diagram_ratio": 0.0,
- "cinematic_ratio": 0.141,
+ "cinematic_ratio": 0.133,
  "asset_class_mix": [
-  "DIAGRAM:0.1",
-  "PLATE:0.9"
+  "DIAGRAM:0.2",
+  "PLATE:0.8"
  ],
  "composition_architecture": [
-  "object_contact",
-  "object_contact",
-  "macro_reveal",
-  "macro_reveal",
-  "object_contact",
-  "object_contact"
+  "macro_world",
+  "process_zoom",
+  "process_zoom",
+  "macro_world",
+  "process_zoom",
+  "macro_world"
  ],
  "background_architecture": [
-  "photographic",
-  "photographic",
+  "depth_field",
   "gradient",
   "gradient",
-  "photographic",
-  "photographic"
+  "depth_field",
+  "gradient",
+  "depth_field"
  ],
  "motif": {
-  "plate": {},
-  "plan": {
-   "circle_plan": 7,
-   "panel_plan": 5,
-   "strip_plan": 1
+  "plate": {
+   "circle_other": 9,
+   "polygon_other": 2,
+   "strip_other": 4
   },
-  "subject": "physics",
-  "story_type": "science_process",
+  "plan": {
+   "circle_plan": 9,
+   "panel_plan": 5,
+   "strip_plan": 2
+  },
+  "subject": "biology",
+  "story_type": "",
   "justification": ""
  }
 }

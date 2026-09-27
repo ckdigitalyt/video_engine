@@ -56,7 +56,10 @@ hash: `python3 illustrated_engine/engine/scene_ir.py hash <spec.json>`.
 ## Cache integration (§24)
 
 `spec_hash(spec)` — sha256 over canonical JSON (sorted keys, floats rounded to 1e-6),
-first 16 hex chars. Scene render cache key = f(story hash, beat hash, **scene-spec hash**,
+first 16 hex chars. **Hash the normalized spec:** `spec_hash(normalize_scene_spec(spec))`
+— normalization fills optional defaults, so two planner outputs that differ only in
+explicit defaults collide to one hash (desired), and normalization is idempotent
+(verified). Scene render cache key = f(story hash, beat hash, **scene-spec hash**,
 style-bible hash, asset hashes, **renderer backend + version**, camera choreography,
 narration timing where relevant). Spec change ⇒ new hash ⇒ automatic invalidation.
 

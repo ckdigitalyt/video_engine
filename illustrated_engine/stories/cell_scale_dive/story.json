@@ -4,6 +4,7 @@
  "title": "How Big Is a Cell, Really?",
  "subject": "biology",
  "pad_s": 0.7,
+ "payoff_image": {"image": "a single hair against warm light with a faint glowing universe of cells beneath it", "beat": "B6"},
  "beats": [
   {
    "beat_id": "B1",
@@ -40,7 +41,7 @@
   },
   {
    "beat_id": "B4",
-   "function": "EXPLANATION",
+   "function": "ESCALATION",
    "narration": "Inside that power plant, folded cristae burn your sugar into usable energy, machinery 80 times thinner than the hair it hides under.",
    "claim": "a mitochondrion about 1 micrometer wide burns sugar into ATP inside folded cristae membranes",
    "visual_question": "what is doing the work down there?",
@@ -66,7 +67,7 @@
    "narration": "So next time you brush your hair, remember the universe in its shadow: 30 trillion cells, each carrying machines you will never see.",
    "claim": "the human body holds roughly 30 trillion cells, each a nested universe of unseen machines",
    "visual_question": "what should you see when you look at your own hair now?",
-   "visual_answer": "a single hair against warm light with a faint glowing universe of cells beneath it",
+   "visual_answer": "the machines doing the work down there — 30 trillion glowing cells beneath a single hair, each one a hidden universe",
    "fact_ids": ["f_trillion_cells"],
    "start": 42.0,
    "end": 50.0
