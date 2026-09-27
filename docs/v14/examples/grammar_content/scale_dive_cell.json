@@ -1,0 +1,18 @@
+{
+  "scene_id": "cell_scale_dive_beat2",
+  "duration_s": 8.0,
+  "seed": 3,
+  "title": "INSIDE THE EYE",
+  "dive": {"to_scale": 30.0},
+  "outer_subject": {"kind": "eye", "iris_r": 210, "pupil_r": 64},
+  "inner_subject": {"kind": "cells", "count": 12, "junctions": true},
+  "aperture_r": 430,
+  "stages": [
+    {"until_scale": 3.0, "title": "THE EYE", "sub": "1x - observable"},
+    {"until_scale": 12.0, "title": "TISSUE", "sub": "12x - cellular"},
+    {"title": "DNA SCALE", "sub": "30x - molecular"}
+  ],
+  "annotations": [
+    {"at": [720, 1180], "title": "CELL WALL", "sub": "lipid bilayer", "side": "left"}
+  ]
+}

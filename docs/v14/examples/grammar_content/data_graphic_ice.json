@@ -1,0 +1,19 @@
+{
+  "scene_id": "ice_slippery_beat4",
+  "duration_s": 7.0,
+  "seed": 5,
+  "title": "SLIPPERIEST NEAR 0C",
+  "chart": {
+    "type": "bars",
+    "fill": "#F2A65A",
+    "values": [
+      {"label": "-20C", "value": 0.32},
+      {"label": "-10C", "value": 0.18},
+      {"label": "0C", "value": 0.06},
+      {"label": "+2C", "value": 0.11}
+    ]
+  },
+  "annotations": [
+    {"index": 2, "title": "MELT FILM", "sub": "water layer", "side": "right"}
+  ]
+}

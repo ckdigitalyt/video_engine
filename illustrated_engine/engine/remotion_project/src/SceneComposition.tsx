@@ -269,11 +269,77 @@ function warnUnhandled(layer: CompiledLayer): void {
   );
 }
 
+// ---------- generic primitive lists (grammar-emitted geometry) ----------
+
+function renderPrimitives(pr: any, pal: Pal): JSX.Element {
+  const out: JSX.Element[] = [];
+  (pr.rects ?? []).forEach((r: any, i: number) =>
+    out.push(
+      <rect key={`r${i}`} x={r.x} y={r.y} width={r.w} height={r.h}
+        fill={r.fill ?? pal.accent_cool} fillOpacity={r.fill_opacity ?? 0.85}
+        stroke={r.stroke} strokeWidth={r.stroke_w ?? 2} rx={r.rx ?? 0}
+        opacity={r.opacity ?? 1} />
+    )
+  );
+  (pr.ellipses ?? []).forEach((e: any, i: number) =>
+    out.push(
+      <ellipse key={`e${i}`} cx={e.x} cy={e.y} rx={e.rx} ry={e.ry}
+        fill={e.fill ?? pal.accent_cool} fillOpacity={e.fill_opacity ?? 0.85}
+        stroke={e.stroke} strokeWidth={e.stroke_w ?? 2} opacity={e.opacity ?? 1}
+        transform={e.rot ? `rotate(${e.rot} ${e.x} ${e.y})` : undefined} />
+    )
+  );
+  (pr.circles ?? []).forEach((c: any, i: number) =>
+    out.push(
+      <circle key={`c${i}`} cx={c.x} cy={c.y} r={c.r}
+        fill={c.fill ?? pal.accent_cool} fillOpacity={c.fill_opacity ?? 0.85}
+        stroke={c.stroke} strokeWidth={c.stroke_w ?? 2} opacity={c.opacity ?? 1} />
+    )
+  );
+  (pr.lines ?? []).forEach((l: any, i: number) =>
+    out.push(
+      <line key={`l${i}`} x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2}
+        stroke={l.stroke ?? pal.ink} strokeWidth={l.width ?? 3}
+        opacity={l.opacity ?? 1} strokeDasharray={l.dash} strokeLinecap="round" />
+    )
+  );
+  (pr.paths ?? []).forEach((q: any, i: number) =>
+    out.push(
+      <path key={`p${i}`} d={q.d} fill={q.fill ?? "none"} fillOpacity={q.fill_opacity ?? 1}
+        stroke={q.stroke} strokeWidth={q.width ?? 3} opacity={q.opacity ?? 1}
+        strokeDasharray={q.dash} strokeLinecap="round" strokeLinejoin="round" />
+    )
+  );
+  (pr.polylines ?? []).forEach((q: any, i: number) =>
+    out.push(
+      <polyline key={`pl${i}`} points={q.points} fill={q.fill ?? "none"}
+        fillOpacity={q.fill_opacity ?? 1} stroke={q.stroke ?? pal.ink}
+        strokeWidth={q.width ?? 4} opacity={q.opacity ?? 1}
+        strokeLinecap="round" strokeLinejoin="round" />
+    )
+  );
+  (pr.texts ?? []).forEach((t: any, i: number) =>
+    out.push(
+      <text key={`t${i}`} x={t.x} y={t.y} textAnchor={t.anchor ?? "middle"}
+        fill={t.fill ?? pal.ink} fontFamily={FONT} fontWeight={t.weight ?? 700}
+        fontSize={t.size ?? 40} letterSpacing={t.spacing ?? 0}
+        opacity={t.opacity ?? 1}>
+        {t.text}
+      </text>
+    )
+  );
+  return <g key="prims">{out}</g>;
+}
+
 function renderBody(layer: CompiledLayer, ctx: Ctx): JSX.Element | null {
   const p: any = layer.payload ?? {};
   const { pal, cx, cy, w, h } = ctx;
   const gid = `grad-${layer.id}`;
   const blid = `blur-${layer.id}`;
+
+  if (p.primitives) {
+    return renderPrimitives(p.primitives, pal);
+  }
 
   // background / environment gradients
   if (layer.source === "generated_gradient" && p.kind === "radial" && !p.shape) {
@@ -527,11 +593,11 @@ function renderBody(layer: CompiledLayer, ctx: Ctx): JSX.Element | null {
         />
         <g opacity={prog}>
           {p.title ? (
-            <text x={ta[0]} y={ta[1] - 12} textAnchor="end" fill={pal.ink} fontFamily={FONT}
+            <text x={ta[0]} y={ta[1] - 12} textAnchor={p.text_anchor ?? "end"} fill={pal.ink} fontFamily={FONT}
               fontWeight={700} fontSize={40} letterSpacing={3}>{p.title}</text>
           ) : null}
           {p.sub ? (
-            <text x={ta[0]} y={ta[1] + 36} textAnchor="end" fill={pal.ink_dim} fontFamily={FONT}
+            <text x={ta[0]} y={ta[1] + 36} textAnchor={p.text_anchor ?? "end"} fill={pal.ink_dim} fontFamily={FONT}
               fontSize={28} letterSpacing={2}>{p.sub}</text>
           ) : null}
         </g>

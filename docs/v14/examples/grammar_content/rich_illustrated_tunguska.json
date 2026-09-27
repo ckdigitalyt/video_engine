@@ -1,0 +1,13 @@
+{
+  "scene_id": "tunguska_airburst_beat3",
+  "duration_s": 7.0,
+  "seed": 11,
+  "title": "THE SKY SPLIT OPEN",
+  "subject": {"kind": "rings", "label": "airburst", "center": [540, 880], "r": 130, "count": 4, "gap": 78},
+  "atmosphere_blobs": 5,
+  "annotations": [
+    {"at": [700, 720], "title": "AIRBURST", "sub": "5-10 km up", "side": "right"},
+    {"at": [480, 1010], "title": "SHOCKWAVE", "sub": "2,150 km2", "side": "left"}
+  ],
+  "camera": {"from_scale": 1.0, "to_scale": 1.14}
+}

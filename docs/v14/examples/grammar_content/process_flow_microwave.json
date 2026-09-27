@@ -1,0 +1,12 @@
+{
+  "scene_id": "microwave_dielectric_beat2",
+  "duration_s": 8.0,
+  "seed": 9,
+  "title": "HOW MICROWAVES HEAT",
+  "stages": [
+    {"title": "MAGNETRON", "sub": "2.45 GHz microwaves"},
+    {"title": "WAVEGUIDE", "sub": "channeled into chamber"},
+    {"title": "DIPOLES FLIP", "sub": "water molecules rotate 2.45B times per second"},
+    {"title": "HEAT", "sub": "molecular friction warms the food"}
+  ]
+}

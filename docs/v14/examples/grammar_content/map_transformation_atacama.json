@@ -1,0 +1,11 @@
+{
+  "scene_id": "atacama_bloom_beat5",
+  "duration_s": 7.0,
+  "seed": 21,
+  "crossfade_s": 3.2,
+  "before": {"label": "ATACAMA - DRY", "fill": "#6B5D45"},
+  "after": {"label": "ATACAMA - IN BLOOM", "fill": "#3E7CB1", "blooms": 14},
+  "markers": [
+    {"at": [620, 900], "title": "EL NINO RAIN", "sub": "2024 flowering", "side": "left"}
+  ]
+}
