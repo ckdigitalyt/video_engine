@@ -151,6 +151,7 @@ def _vision_glm(image_path, question: str, max_tokens: int):
             "model": GLM_MODEL,
             "temperature": 0,
             "max_tokens": max(512, max_tokens),
+            "reasoning": {"effort": "low"},  # see _text_glm (V15)
             "messages": [{
                 "role": "user",
                 "content": [
@@ -228,14 +229,19 @@ def _text_glm(prompt: str, temperature: float, max_tokens: int):
     try:
         import urllib.request
 
+        # V15: GLM-5.3-flash is a reasoning model — without a budget it can
+        # spend the WHOLE max_tokens on hidden reasoning and return empty
+        # content (verified: 6000/6000 reasoning tokens, content ""), which
+        # silently turned the fallback judge into a no-op for long prompts.
         body = {"model": GLM_MODEL, "temperature": temperature,
                 "max_tokens": max(512, max_tokens),
+                "reasoning": {"effort": "low"},
                 "messages": [{"role": "user", "content": prompt}]}
         req = urllib.request.Request(
             GLM_URL, data=json.dumps(body).encode(),
             headers={"Content-Type": "application/json",
                      "Authorization": f"Bearer {key}"})
-        with urllib.request.urlopen(req, timeout=120) as r:
+        with urllib.request.urlopen(req, timeout=300) as r:
             data = json.loads(r.read())
         return (data["choices"][0]["message"].get("content") or "").strip() or None
     except Exception:

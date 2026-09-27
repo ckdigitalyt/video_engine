@@ -40,7 +40,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 CACHE_DIR = ROOT / "build" / "cache" / "v15_plans"
-PROMPT_VERSION = "bvp/1.3"
+PROMPT_VERSION = "bvp/1.4"
 
 SHOT_KINDS = ("plate", "zoom_through", "process")
 CAMERAS = ("push_in", "pull_out", "pan_left", "pan_right", "rise", "descend")
@@ -50,6 +50,10 @@ MIN_SHOT_WORDS = 4  # a shot shorter than ~4 words (~1.3 s) is a flicker
 WORDS_PER_SHOT = 13  # ~4 s of speech: longer beats need another shot
 
 _NUM = re.compile(r"\d+(?:[.,]\d+)*")
+_NUMWORD = re.compile(r"(?i)\b(one|two|three|four|five|six|seven|eight|nine|"
+                      r"ten|twelve|twenty|thirty|forty|fifty|hundred|"
+                      r"thousand|million|billion|trillion|half|tenth|"
+                      r"hundredth|thousandth|dozen)\b")
 _TEXTY = re.compile(r"\b(text|caption|label(?:led|s)?|title|words?|letters?|"
                     r"typography|infographic|chart)\b", re.I)
 
@@ -176,10 +180,9 @@ def validate_plan(plan: dict, story: dict) -> list:
         if not isinstance(shots, list) or not (1 <= len(shots) <= MAX_SHOTS):
             errs.append(f"{bid}: needs 1-{MAX_SHOTS} shots")
             continue
-        need = min(MAX_SHOTS, max(1, -(-n // WORDS_PER_SHOT)))
-        if len(shots) < need:
-            errs.append(f"{bid}: {n} words need >= {need} shots (picture "
-                        f"must change about every {WORDS_PER_SHOT} words)")
+        # shot count vs length is prompt GUIDANCE, not a hard error: the
+        # pipeline's punch-in split (v15_pipeline.split_long_holds) enforces
+        # the <= 4.5 s visual-hold rule deterministically for plate shots
         prev = -1
         for si, sh in enumerate(shots):
             w = f"{bid}.shots[{si}]"
@@ -208,7 +211,7 @@ def validate_plan(plan: dict, story: dict) -> list:
                     errs.append(f"{w}: composition must be one of {COMPOSITIONS}")
                 if sh.get("headline") is not None:
                     _check_copy(sh["headline"], 5, digits, f"{w}.headline", errs)
-                for key, mx in (("number", 3), ("label", 3)):
+                for key, mx in (("number", 4), ("label", 3)):
                     el = sh.get(key)
                     if el is None:
                         continue
@@ -218,9 +221,7 @@ def validate_plan(plan: dict, story: dict) -> list:
                     _check_copy(el.get("text"), mx, digits, f"{w}.{key}", errs)
                     _check_word(el.get("word"), n, f"{w}.{key}.word", errs)
                     if key == "number" and not _digits(el.get("text", "")) \
-                            and not re.search(r"(?i)\b(thousand|million|"
-                                              r"billion|trillion|half)\b",
-                                              str(el.get("text"))):
+                            and not _NUMWORD.search(str(el.get("text"))):
                         errs.append(f"{w}.number: must contain a figure")
             elif kind == "zoom_through":
                 lv = sh.get("levels")
@@ -377,6 +378,86 @@ def fallback_plan(story: dict) -> dict:
     return {"beats": beats}
 
 
+def salvage(plan: dict, story: dict) -> tuple:
+    """Deterministic salvage of an LLM plan that failed validation twice:
+    DROP (never invent) whatever is invalid — an unspoken number, an
+    over-long copy line, a 4th shot, a cut too close to the previous one —
+    strip figures from image subjects, fill a missing beat or hook headline
+    from the deterministic fallback. -> (plan, dropped[])."""
+    fb = {b["beat_id"]: b for b in fallback_plan(story)["beats"]}
+    by_id = {b.get("beat_id"): b for b in (plan.get("beats") or [])
+             if isinstance(b, dict)}
+    dropped, beats = [], []
+    for beat in story["beats"]:
+        bid = beat["beat_id"]
+        ws = _words(beat["narration"])
+        n, digits = len(ws), set(_digits(beat["narration"]))
+        pb = by_id.get(bid)
+        shots = [sh for sh in (pb or {}).get("shots") or []
+                 if isinstance(sh, dict) and sh.get("kind") in SHOT_KINDS]
+        if not shots:
+            dropped.append(f"{bid}: beat replaced by fallback")
+            beats.append(fb[bid])
+            continue
+        keep, prev = [], None
+        for sh in shots[:MAX_SHOTS]:
+            sw = sh.get("start_word") if not keep else sh.get("start_word")
+            if not keep:
+                sh["start_word"] = 0
+            elif not isinstance(sw, int) or sw >= n or \
+                    sw - prev < MIN_SHOT_WORDS:
+                dropped.append(f"{bid}: shot at word {sw} dropped")
+                continue
+            prev = sh["start_word"]
+            for key in ("subject",):
+                if isinstance(sh.get(key), str):
+                    sh[key] = _image_safe(sh[key])
+            for key, mx in (("headline", 5), ("number", 4), ("label", 3)):
+                el = sh.get(key)
+                if el is None:
+                    continue
+                e = []
+                if key == "headline":
+                    _check_copy(el, mx, digits, key, e)
+                elif isinstance(el, dict):
+                    _check_copy(el.get("text"), mx, digits, key, e)
+                    _check_word(el.get("word"), n, key, e)
+                else:
+                    e.append("bad")
+                if e:
+                    sh.pop(key)
+                    dropped.append(f"{bid}: {key} dropped ({e[0][:60]})")
+            for coll, fld, mx in (("levels", "label", 4), ("steps", "text", 4)):
+                if isinstance(sh.get(coll), list):
+                    good = []
+                    for el in sh[coll]:
+                        e = []
+                        if isinstance(el, dict):
+                            _check_copy(el.get(fld), mx, digits, fld, e)
+                            _check_word(el.get("word"), n, fld, e)
+                            if coll == "levels":
+                                el["subject"] = _image_safe(el.get("subject", ""))
+                                _check_subject(el.get("subject"), fld, e)
+                        if isinstance(el, dict) and not e and (
+                                not good or el["word"] > good[-1]["word"]):
+                            good.append(el)
+                        else:
+                            dropped.append(f"{bid}: {coll[:-1]} dropped")
+                    sh[coll] = good
+            keep.append(sh)
+        beats.append({"beat_id": bid, "shots": keep})
+    out = _repair({"beats": beats}, story)
+    first = out["beats"][0]["shots"][0]
+    if first.get("kind") != "plate" or not first.get("headline"):
+        hook = fb[story["beats"][0]["beat_id"]]["shots"][0]
+        if first.get("kind") != "plate":
+            out["beats"][0]["shots"][0] = hook
+        else:
+            first["headline"] = hook["headline"]
+        dropped.append("hook headline from story title")
+    return out, dropped
+
+
 # ------------------------------------------------------------------ API --
 
 def _parse_json(text: str):
@@ -414,7 +495,7 @@ def make_plan(story: dict, bible: dict, *, use_llm: bool = True,
         data = json.loads(cp.read_text())
         if not validate_plan(data["plan"], story):
             return dict(data, source="cache", llm_calls=0)
-    calls, errors = 0, []
+    calls, errors, plan_last = 0, [], None
     if use_llm:
         if ask is None:
             from engine.director import text_ask as ask
@@ -425,12 +506,15 @@ def make_plan(story: dict, bible: dict, *, use_llm: bool = True,
                 "them and return the full JSON again:\n- "
                 + "\n- ".join(errors[:25]))
             calls += 1
-            raw = ask(p, 0.0, 4000)
+            raw = ask(p, 0.0, 6000)
+            (CACHE_DIR / f"{key}.attempt{attempt}.txt").write_text(
+                str(raw))  # diagnosis trail (no secrets: model output only)
             plan = _parse_json(raw)
             if plan is None:
                 errors = ["response was not parseable JSON"]
                 continue
             plan = _repair(plan, story)
+            plan_last = plan
             errors = validate_plan(plan, story)
             if not errors:
                 src = "llm" if attempt == 0 else "llm_retry"
@@ -438,6 +522,14 @@ def make_plan(story: dict, bible: dict, *, use_llm: bool = True,
                         "errors": [], "prompt_version": PROMPT_VERSION}
                 cp.write_text(json.dumps(data, indent=1))
                 return dict(data, llm_calls=calls)
+    if use_llm and plan_last is not None:
+        sal, dropped = salvage(json.loads(json.dumps(plan_last)), story)
+        if not validate_plan(sal, story):
+            data = {"plan": sal, "source": "llm_salvaged", "key": key,
+                    "errors": errors, "dropped": dropped,
+                    "prompt_version": PROMPT_VERSION}
+            cp.write_text(json.dumps(data, indent=1))
+            return dict(data, llm_calls=calls)
     plan = fallback_plan(story)
     fb_errs = validate_plan(plan, story)
     if fb_errs:  # the floor itself must be valid — loud, never silent

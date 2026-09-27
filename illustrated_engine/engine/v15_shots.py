@@ -55,6 +55,22 @@ class ShotError(ValueError):
     pass
 
 
+PORTAL = ROOT / "build" / "cache" / "v15_portal_mask.png"
+
+
+def portal_mask() -> str:
+    """Feathered elliptical luminance mask: a zoom-through level arrives as
+    a soft portal instead of a hard-edged picture-in-picture rectangle."""
+    if not PORTAL.exists():
+        PORTAL.parent.mkdir(parents=True, exist_ok=True)
+        yy, xx = np.mgrid[0:480, 0:270].astype(np.float32)
+        d = np.hypot((xx - 134.5) / 135.0, (yy - 239.5) / 240.0)
+        a = np.clip((1.12 - d) / 0.34, 0.0, 1.0) ** 1.5
+        Image.fromarray((a * 255).astype("uint8"), "L").resize(
+            (int(WORLD_W), int(WORLD_H)), Image.BICUBIC).save(PORTAL)
+    return str(PORTAL)
+
+
 def grain_path() -> str:
     if not GRAIN.exists():
         GRAIN.parent.mkdir(parents=True, exist_ok=True)
@@ -66,13 +82,31 @@ def grain_path() -> str:
 
 # ------------------------------------------------------------ typography --
 
+def lighten(hex_: str, min_lum: float = 150.0) -> str:
+    """Raise HLS lightness (saturation kept >= 0.6) until luminance >=
+    min_lum: a readable accent on dark zones/scrims that is still the bible
+    hue and still distinct from light body text. Deterministic."""
+    import colorsys
+    h = hex_.lstrip("#")
+    r, g, b = (int(h[i:i + 2], 16) / 255 for i in (0, 2, 4))
+    hh, ll, ss = colorsys.rgb_to_hls(r, g, b)
+    ss = max(ss, 0.6)
+    for _ in range(40):
+        r, g, b = colorsys.hls_to_rgb(hh, ll, ss)
+        if 255 * (0.299 * r + 0.587 * g + 0.114 * b) >= min_lum or ll >= 0.9:
+            break
+        ll += 0.02
+    return "#" + "".join(f"{round(c * 255):02X}" for c in (r, g, b))
+
+
 def _inks(bible: dict, zone_lum: float) -> dict:
     p = bible["palette"]
     light_text = p["text"] if _lum(p["text"]) > _lum(p["primary"]) else p["primary"]
     dark_text = p["primary"] if _lum(p["primary"]) < _lum(p["text"]) else p["text"]
     if zone_lum >= 135:
         return {"fill": dark_text, "halo": light_text, "accent": p["accent"]}
-    return {"fill": light_text, "halo": dark_text, "accent": p["accent"]}
+    return {"fill": light_text, "halo": dark_text,
+            "accent": lighten(p["accent"])}
 
 
 def _text_layer(lid: str, text: str, *, y: float, size: int, ink: dict,
@@ -122,7 +156,7 @@ def _scrim(lid: str, zone: str, ink: dict, strength: float = 0.45) -> dict:
     if zone == "top":
         y0, y1, a0, a1 = 0.0, 620.0, strength, 0.0
     else:
-        y0, y1, a0, a1 = 940.0, 1480.0, 0.0, strength
+        y0, y1, a0, a1 = 900.0, WORLD_H, 0.0, strength  # no hard edge
     steps = 12
     rects = []
     for i in range(steps):
@@ -330,8 +364,11 @@ def compile_zoom_shot(sc: dict, bible: dict, boxes: list, events: list) -> tuple
         pl = plates[i] if i < len(plates) else None
         lid = f"L{i}"
         if pl:
-            layers += _plate_layers(pl, prefix=lid, vis=vis, z=10 + 2 * i,
-                                    cutout=False)
+            pls = _plate_layers(pl, prefix=lid, vis=vis, z=10 + 2 * i,
+                                cutout=False)
+            if i > 0:
+                pls[0]["payload"]["mask"] = portal_mask()
+            layers += pls
         else:
             layers.append(layer(f"{lid}_world", "subject", "procedural_level",
                                 "generated_shape", depth=BG_DEPTH, z=10 + 2 * i,
@@ -371,7 +408,8 @@ def compile_zoom_shot(sc: dict, bible: dict, boxes: list, events: list) -> tuple
                                   y=LOW_ZONE_BOTTOM, size=120, ink=ink,
                                   boxes=boxes, max_lines=2, anchor_bottom=True,
                                   pop=True, accent=(i == n - 1),
-                                  vis=[max(0.05, lt), vis[1] if i + 1 < n else dur]))
+                                  vis=[max(0.05, lt), ts[i + 1] if i + 1 < n
+                                       else dur]))
         events.append({"t": max(0.05, lt), "kind": "tick" if i < n - 1
                        else "pulse", "gain": 0.55})
         if i > 0:
@@ -406,8 +444,12 @@ def compile_process_shot(sc: dict, bible: dict, boxes: list, events: list) -> tu
     y0, y1 = 420.0, 1250.0
     gap = (y1 - y0) / max(1, n - 1) if n > 1 else 0
     prev_t = 0.0
+    span = max(0.5, dur - 0.9)
     for i, st in enumerate(steps):
-        t = max(prev_t + (0.0 if i == 0 else 0.7), sc["t_of"](st["word"]))
+        # on the step's word, but never clustered: reveals are spread so no
+        # stretch of the shot holds > ~span/n without a change
+        t = max(prev_t + (0.0 if i == 0 else 0.7), sc["t_of"](st["word"]),
+                i * span / n)
         t = min(t, dur - 0.6)
         prev_t = t
         y = y0 + gap * i if n > 1 else (y0 + y1) / 2

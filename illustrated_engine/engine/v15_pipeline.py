@@ -398,8 +398,12 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
                     sc["sfx"].insert(0, {"t": 0.0, "kind": "whoosh",
                                          "gain": 0.55})
             scenes.append(sc)
+        from engine.v15_shots import lighten
+        cap_bible = json.loads(json.dumps(bible))  # readable active word
+        cap_bible["palette"]["accent"] = lighten(bible["palette"]["accent"],
+                                                 165.0)
         arep = assemble({"story_id": sid, "story_dir": str(story_dir),
-                         "bible": bible, "scenes": scenes,
+                         "bible": cap_bible, "scenes": scenes,
                          "music": {"gain": 0.9}, "single_pass": True,
                          "out": str(out_final)}, work)
         (work / "assembly_report.json").write_text(json.dumps(arep, indent=1))

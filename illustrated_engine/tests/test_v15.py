@@ -122,6 +122,20 @@ def test_plan_validation_and_fallback():
         assert validate_plan(fallback_plan(s), s) == [], sd
 
 
+def test_salvage_drops_never_invents():
+    from engine.v15_plan import fallback_plan, salvage, validate_plan
+    story = json.loads((ROOT / "stories/cell_scale_dive/story.json").read_text())
+    plan = fallback_plan(story)
+    b2 = plan["beats"][1]["shots"]
+    b2[0]["number"] = {"text": "0.1 MM", "word": 6}       # not spoken
+    b2.append(dict(b2[-1], start_word=b2[-1]["start_word"] + 1))  # too close
+    assert validate_plan(plan, story)
+    fixed, dropped = salvage(plan, story)
+    assert validate_plan(fixed, story) == [], validate_plan(fixed, story)
+    assert "number" not in fixed["beats"][1]["shots"][0]
+    assert len(dropped) == 2, dropped
+
+
 def test_timing_on_synthetic_speech():
     from engine.procedural_audio import SR, save_wav
     from engine.v15_timing import align

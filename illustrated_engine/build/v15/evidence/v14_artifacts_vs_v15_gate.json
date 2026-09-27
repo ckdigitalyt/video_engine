@@ -1,0 +1,208 @@
+{
+ "ice_slippery": {
+  "info_floor": {
+   "ok": false,
+   "fails": [
+    "t~1.0s low information (std 14.08, edge 1.17)",
+    "t~3.0s low information (std 14.05, edge 1.17)",
+    "t~5.0s low information (std 13.98, edge 1.17)",
+    "t~7.0s low information (std 13.96, edge 1.17)",
+    "t~8.4s low information (std 9.19, edge 0.62)",
+    "t~10.4s low information (std 9.19, edge 0.62)",
+    "t~12.4s low information (std 12.46, edge 1.19)",
+    "t~14.4s low information (std 12.67, edge 1.23)",
+    "t~16.4s low information (std 14.87, edge 1.69)",
+    "t~18.4s low information (std 14.91, edge 1.69)"
+   ]
+  },
+  "audio": {
+   "ok": false,
+   "fails": [
+    "integrated loudness -23.5 LUFS outside (-16.5, -11.5)"
+   ],
+   "lufs": -23.5,
+   "voice_rms": 0.0454
+  },
+  "judge": {
+   "ok": false,
+   "fails": [
+    "judge flagged 15/15 frames",
+    "critical frame issues: #1 empty_or_flat, #3 text_unreadable, #4 text_unreadable, #5 text_unreadable, #6 text_unreadable, #7 empty_or_flat",
+    "judge: first frame would not stop a scroll",
+    "judge: scenes feel templated (noun-swap reusable)"
+   ],
+   "frames_flagged": [
+    {
+     "n": 1,
+     "issue": "empty_or_flat"
+    },
+    {
+     "n": 2,
+     "issue": "no_change"
+    },
+    {
+     "n": 3,
+     "issue": "text_unreadable"
+    },
+    {
+     "n": 4,
+     "issue": "text_unreadable"
+    },
+    {
+     "n": 5,
+     "issue": "text_unreadable"
+    },
+    {
+     "n": 6,
+     "issue": "text_unreadable"
+    },
+    {
+     "n": 7,
+     "issue": "empty_or_flat"
+    },
+    {
+     "n": 8,
+     "issue": "no_change"
+    },
+    {
+     "n": 9,
+     "issue": "text_unreadable"
+    },
+    {
+     "n": 10,
+     "issue": "no_change"
+    },
+    {
+     "n": 11,
+     "issue": "empty_or_flat"
+    },
+    {
+     "n": 12,
+     "issue": "no_change"
+    },
+    {
+     "n": 13,
+     "issue": "not_story_specific"
+    },
+    {
+     "n": 14,
+     "issue": "no_change"
+    },
+    {
+     "n": 15,
+     "issue": "no_change"
+    }
+   ],
+   "hook_stops_scroll": false,
+   "ending_resolves": false,
+   "template_feel": true,
+   "notes": "Nearly every frame is a dim empty circle or a flowchart with unreadably tiny node text, so the visuals never show ice, a blade, or a molecular lattice specifically, and the ending merely restates the opening question.",
+   "sheet": "build/v15/evidence/v14_gate_ice_slippery/judge_sheet.jpg"
+  }
+ },
+ "cell_scale_dive": {
+  "info_floor": {
+   "ok": false,
+   "fails": [
+    "t~1.0s low information (std 17.23, edge 1.72)",
+    "t~3.0s low information (std 17.2, edge 1.72)",
+    "t~5.0s low information (std 17.14, edge 1.72)",
+    "t~7.0s low information (std 17.12, edge 1.72)",
+    "t~8.5s low information (std 8.99, edge 0.6)",
+    "t~10.5s low information (std 11.93, edge 1.14)",
+    "t~12.5s low information (std 14.5, edge 1.7)",
+    "t~14.5s low information (std 14.78, edge 1.73)",
+    "t~26.9s low information (std 17.52, edge 1.78)",
+    "t~28.9s low information (std 17.5, edge 1.78)"
+   ]
+  },
+  "audio": {
+   "ok": false,
+   "fails": [
+    "integrated loudness -23.1 LUFS outside (-16.5, -11.5)"
+   ],
+   "lufs": -23.1,
+   "voice_rms": 0.0483
+  },
+  "judge": {
+   "ok": false,
+   "fails": [
+    "judge flagged 16/16 frames",
+    "critical frame issues: #1 empty_or_flat, #2 empty_or_flat, #3 empty_or_flat, #4 text_unreadable, #8 empty_or_flat, #9 empty_or_flat",
+    "judge: first frame would not stop a scroll",
+    "judge: scenes feel templated (noun-swap reusable)"
+   ],
+   "frames_flagged": [
+    {
+     "n": 1,
+     "issue": "empty_or_flat"
+    },
+    {
+     "n": 2,
+     "issue": "empty_or_flat"
+    },
+    {
+     "n": 3,
+     "issue": "empty_or_flat"
+    },
+    {
+     "n": 4,
+     "issue": "text_unreadable"
+    },
+    {
+     "n": 5,
+     "issue": "not_story_specific"
+    },
+    {
+     "n": 6,
+     "issue": "not_story_specific"
+    },
+    {
+     "n": 7,
+     "issue": "not_story_specific"
+    },
+    {
+     "n": 8,
+     "issue": "empty_or_flat"
+    },
+    {
+     "n": 9,
+     "issue": "empty_or_flat"
+    },
+    {
+     "n": 10,
+     "issue": "empty_or_flat"
+    },
+    {
+     "n": 11,
+     "issue": "not_story_specific"
+    },
+    {
+     "n": 12,
+     "issue": "not_story_specific"
+    },
+    {
+     "n": 13,
+     "issue": "not_story_specific"
+    },
+    {
+     "n": 14,
+     "issue": "too_dark"
+    },
+    {
+     "n": 15,
+     "issue": "too_dark"
+    },
+    {
+     "n": 16,
+     "issue": "too_dark"
+    }
+   ],
+   "hook_stops_scroll": false,
+   "ending_resolves": false,
+   "template_feel": true,
+   "notes": "Nearly every frame is a dim abstract blob or generic circle/grid diagram with no cell-specific imagery, the scale-diagram labels are unreadably small, the final three frames cut to black, and the interchangeable circle motifs would fit any topic with swapped nouns.",
+   "sheet": "build/v15/evidence/v14_gate_cell_scale_dive/judge_sheet.jpg"
+  }
+ }
+}
