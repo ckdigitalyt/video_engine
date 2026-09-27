@@ -1,5 +1,12 @@
 import React from "react";
-import { AbsoluteFill, Audio, staticFile, useCurrentFrame } from "remotion";
+import {
+  AbsoluteFill,
+  Audio,
+  continueRender,
+  delayRender,
+  staticFile,
+  useCurrentFrame,
+} from "remotion";
 
 /**
  * V14 Stage 5 — generic scene renderer driven by compiled Scene IR props.
@@ -77,7 +84,31 @@ export const DEFAULT_PAL = {
 };
 type Pal = typeof DEFAULT_PAL;
 
-const FONT = "Inter, 'Helvetica Neue', Arial, sans-serif";
+const FONT = "JadeBody, Inter, 'Helvetica Neue', Arial, sans-serif";
+// V15: bible typography staged into public/fonts by the Python adapter and
+// loaded before the first frame (no system fonts exist in headless Chrome).
+const DISPLAY_FONT = "JadeDisplay, 'Bebas Neue', Impact, sans-serif";
+const FONT_FACES: [string, string][] = [
+  ["JadeDisplay", "fonts/display.ttf"],
+  ["JadeBody", "fonts/body.ttf"],
+];
+const fontOf = (name?: string): string =>
+  name === "body" ? FONT : name === "display" ? DISPLAY_FONT : FONT;
+
+function useJadeFonts(): void {
+  const [handle] = React.useState(() => delayRender("jade-fonts"));
+  React.useEffect(() => {
+    Promise.all(
+      FONT_FACES.map(([fam, file]) =>
+        new FontFace(fam, `url(${staticFile(file)})`).load().then((f) => {
+          (document as any).fonts.add(f);
+        })
+      )
+    )
+      .catch((e) => console.warn(`[SceneComposition] font load failed: ${e}`))
+      .finally(() => continueRender(handle));
+  }, [handle]);
+}
 
 const clamp01 = (x: number): number => Math.min(1, Math.max(0, x));
 
@@ -331,12 +362,89 @@ function renderPrimitives(pr: any, pal: Pal): JSX.Element {
   return <g key="prims">{out}</g>;
 }
 
+// ---------- V15: world typography (fitted lines, stroke/shadow, pop) ----------
+
+function renderText(layer: CompiledLayer, p: any, ctx: Ctx): JSX.Element {
+  const { pal, cx, cy, fps, frame, v0 } = ctx;
+  const pos = p.position ?? [cx, cy];
+  const size = p.size ?? 44;
+  const lines: string[] = p.lines ?? [String(p.text ?? p.title)];
+  const lh = size * (p.line_gap ?? 1.05);
+  const fam = fontOf(p.font);
+  const weight = p.weight ?? (p.bold === false ? 400 : 700);
+  let shadow: string | undefined;
+  if (p.shadow) {
+    const sid = `tsh-${layer.id}`;
+    ctx.defs.push(
+      <filter key={sid} id={sid} x="-20%" y="-40%" width="140%" height="180%">
+        <feDropShadow dx={0} dy={size * 0.04} stdDeviation={size * 0.08}
+          floodColor={p.shadow === true ? "#000000" : p.shadow} floodOpacity={0.55} />
+      </filter>
+    );
+    shadow = `url(#${sid})`;
+  }
+  // number/headline "pop": scale 0.82 -> 1 over 0.35 s about the block centre
+  let tr: string | undefined;
+  if (p.pop) {
+    const u = easeOf("ease_out_cubic")(clamp01((frame - v0) / (0.35 * fps)));
+    const k = 0.82 + 0.18 * u;
+    const by = pos[1] + ((lines.length - 1) * lh) / 2 - size * 0.3;
+    tr = `translate(${pos[0]} ${by}) scale(${k}) translate(${-pos[0]} ${-by})`;
+  }
+  return (
+    <g key="text" transform={tr} filter={shadow}>
+      <text x={pos[0]} y={pos[1]} textAnchor={p.anchor ?? "middle"}
+        fill={p.fill ?? pal.ink} fontFamily={fam} fontWeight={weight}
+        fontSize={size} letterSpacing={p.spacing ?? 0}
+        stroke={p.stroke} strokeWidth={p.stroke ? p.stroke_w ?? size * 0.06 : 0}
+        strokeLinejoin="round" paintOrder="stroke" opacity={p.opacity ?? 1}>
+        {lines.map((ln, i) => (
+          <tspan key={i} x={pos[0]} dy={i === 0 ? 0 : lh}>{ln}</tspan>
+        ))}
+      </text>
+    </g>
+  );
+}
+
+// ---------- V15: finish layer (bible grain + vignette) ----------
+
+function renderFinish(layer: CompiledLayer, f: any, ctx: Ctx): JSX.Element {
+  const { w, h, frame, seed } = ctx;
+  const out: JSX.Element[] = [];
+  if (f.vignette) {
+    const vid = `vig-${layer.id}`;
+    ctx.defs.push(
+      <radialGradient key={vid} id={vid} cx="50%" cy="46%" r="75%">
+        <stop offset="55%" stopColor={f.vignette_color ?? "#000000"} stopOpacity={0} />
+        <stop offset="100%" stopColor={f.vignette_color ?? "#000000"}
+          stopOpacity={Math.min(0.85, f.vignette * 2.2)} />
+      </radialGradient>
+    );
+    out.push(<rect key="vig" width={w} height={h} fill={`url(#${vid})`} />);
+  }
+  if (f.grain && layer.payload?.path) {
+    // static seeded noise tile jittered per frame = living film grain
+    const r = mulberry32(seed * 7919 + frame);
+    const jx = -60 * r();
+    const jy = -60 * r();
+    out.push(
+      <image key="grain" href={staticFile(layer.payload.path)} x={jx} y={jy}
+        width={w + 60} height={h + 60} preserveAspectRatio="none"
+        opacity={Math.min(0.5, f.grain * 18)} style={{ mixBlendMode: "overlay" }} />
+    );
+  }
+  return <g key="finish">{out}</g>;
+}
+
 function renderBody(layer: CompiledLayer, ctx: Ctx): JSX.Element | null {
   const p: any = layer.payload ?? {};
   const { pal, cx, cy, w, h } = ctx;
   const gid = `grad-${layer.id}`;
   const blid = `blur-${layer.id}`;
 
+  if (p.finish) {
+    return renderFinish(layer, p.finish, ctx);
+  }
   if (p.primitives) {
     return renderPrimitives(p.primitives, pal);
   }
@@ -580,12 +688,19 @@ function renderBody(layer: CompiledLayer, ctx: Ctx): JSX.Element | null {
     const prog = easeOf("ease_out_cubic")(clamp01((ctx.frame - ctx.v0) / Math.max(1, ctx.fps)));
     return (
       <g key="ann">
-        <circle cx={lf[0]} cy={lf[1]} r={7} fill={pal.accent_warm} opacity={prog} />
+        <circle cx={lf[0]} cy={lf[1]} r={p.dot_r ?? 7} fill={p.accent ?? pal.accent_warm}
+          stroke={p.halo} strokeWidth={p.halo ? 3 : 0} opacity={prog} />
+        {p.halo ? (
+          <path d={`M ${lf[0]} ${lf[1]} L ${el[0]} ${el[1]} L ${ta[0]} ${ta[1]}`}
+            fill="none" stroke={p.halo} strokeWidth={(p.line_w ?? 2.5) + 4}
+            strokeLinecap="round" pathLength={1} strokeDasharray={1}
+            strokeDashoffset={1 - prog} opacity={0.7} />
+        ) : null}
         <path
           d={`M ${lf[0]} ${lf[1]} L ${el[0]} ${el[1]} L ${ta[0]} ${ta[1]}`}
           fill="none"
-          stroke={pal.ink}
-          strokeWidth={2.5}
+          stroke={p.fill ?? pal.ink}
+          strokeWidth={p.line_w ?? 2.5}
           strokeLinecap="round"
           pathLength={1}
           strokeDasharray={1}
@@ -593,8 +708,10 @@ function renderBody(layer: CompiledLayer, ctx: Ctx): JSX.Element | null {
         />
         <g opacity={prog}>
           {p.title ? (
-            <text x={ta[0]} y={ta[1] - 12} textAnchor={p.text_anchor ?? "end"} fill={pal.ink} fontFamily={FONT}
-              fontWeight={700} fontSize={40} letterSpacing={3}>{p.title}</text>
+            <text x={ta[0]} y={ta[1] - 12} textAnchor={p.text_anchor ?? "end"} fill={p.fill ?? pal.ink}
+              fontFamily={fontOf(p.font) } fontWeight={700} fontSize={p.size ?? 40}
+              letterSpacing={p.spacing ?? 3} stroke={p.halo} strokeWidth={p.halo ? (p.size ?? 40) * 0.08 : 0}
+              strokeLinejoin="round" paintOrder="stroke">{p.title}</text>
           ) : null}
           {p.sub ? (
             <text x={ta[0]} y={ta[1] + 36} textAnchor={p.text_anchor ?? "end"} fill={pal.ink_dim} fontFamily={FONT}
@@ -635,15 +752,9 @@ function renderBody(layer: CompiledLayer, ctx: Ctx): JSX.Element | null {
       </g>
     );
   }
-  if ((layer.source === "vector" || layer.source === "text") && (p.text || p.title)) {
-    const pos = p.position ?? [cx, cy];
-    return (
-      <text key="text" x={pos[0]} y={pos[1]} textAnchor={p.anchor ?? "middle"}
-        fill={p.fill ?? pal.ink} fontFamily={FONT} fontWeight={p.bold === false ? 400 : 700}
-        fontSize={p.size ?? 44} letterSpacing={p.spacing ?? 0}>
-        {p.text ?? p.title}
-      </text>
-    );
+  if ((layer.source === "vector" || layer.source === "text") &&
+      (p.text || p.title || p.lines)) {
+    return renderText(layer, p, ctx);
   }
   if (layer.source === "ai_image" || layer.source === "raster") {
     if (!p.path) return null;
@@ -721,6 +832,7 @@ export const EMPTY_PROPS: CompiledProps = {
 };
 
 const SceneComposition: React.FC<CompiledProps> = (props) => {
+  useJadeFonts();
   const frame = useCurrentFrame();
   const { width, height, fps } = props;
   const cam = evalCam(frame, props.camera.keyframes);
@@ -758,7 +870,9 @@ const SceneComposition: React.FC<CompiledProps> = (props) => {
     }
     const [v0, v1] = layer.visibility;
     if (frame < v0 || frame > v1) continue;
-    const screenSpace = layer.type === "semantic_annotation" || layer.type === "text";
+    const screenSpace =
+      layer.type === "semantic_annotation" || layer.type === "text" ||
+      layer.payload?.screen_space === true || layer.payload?.finish != null;
     const ctx: Ctx = { frame, cam, w: width, h: height, cx, cy, pal, fps, seed: props.seed, v0, v1, defs };
     const inner = renderBody(layer, ctx);
     if (!inner) {
@@ -784,14 +898,20 @@ const SceneComposition: React.FC<CompiledProps> = (props) => {
     const dpos = animVec(layer.animations, "position", frame);
     const ascale = animScalar(layer.animations, "scale", frame);
     const arot = animScalar(layer.animations, "rotation", frame);
+    // V15: layer scale / scale animation / rotation act about the FRAME
+    // CENTRE (FallbackRenderer parity: total = sc*sc_cam about (cx, cy));
+    // V14 scaled about the SVG origin, so a scale animation drifted the
+    // layer toward the top-left corner.
+    const aboutC = (op: string): string =>
+      ` translate(${cx} ${cy}) ${op} translate(${-cx} ${-cy})`;
     const layerT =
       `translate(${layer.position[0]} ${layer.position[1]})` +
-      (layer.rotation ? ` rotate(${layer.rotation})` : "") +
-      (layer.scale !== 1 ? ` scale(${layer.scale})` : "");
+      (layer.rotation ? aboutC(`rotate(${layer.rotation})`) : "") +
+      (layer.scale !== 1 ? aboutC(`scale(${layer.scale})`) : "");
     const animT =
       (dpos ? `translate(${dpos[0].toFixed(2)} ${dpos[1].toFixed(2)})` : "") +
-      (ascale != null ? ` scale(${ascale})` : "") +
-      (arot != null ? ` rotate(${arot})` : "");
+      (ascale != null ? aboutC(`scale(${ascale.toFixed(5)})`) : "") +
+      (arot != null ? aboutC(`rotate(${arot})`) : "");
 
     body.push(
       <g

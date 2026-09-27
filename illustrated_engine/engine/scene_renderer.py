@@ -63,6 +63,38 @@ DEFAULT_CONCURRENCY = 2  # bounded workers (directive §26)
 RENDER_TIMEOUT_S = 900
 
 
+def _source_version(paths: list) -> str:
+    """sha16 over renderer source files — the §24 renderer-version component.
+    Editing the compositor (SceneComposition.tsx, this module) must move
+    every cache key; a constant version reused stale renders (V15 fix)."""
+    h = hashlib.sha256()
+    for p in paths:
+        p = Path(p)
+        h.update(p.name.encode())
+        h.update(p.read_bytes() if p.is_file() else b"<missing>")
+    return h.hexdigest()[:16]
+
+
+_THIS = Path(__file__).resolve()
+_FONT_DIR = _THIS.parent.parent / "assets" / "fonts"
+_DEFAULT_FONTS = {"display": "BebasNeue-Regular.ttf", "body": "Inter-Variable.ttf"}
+
+
+def _stage_fonts(fonts: dict) -> None:
+    """Copy the bible's display/body TTFs to public/fonts/{display,body}.ttf
+    (SceneComposition loads them via FontFace before frame 0). The font
+    choice is in meta.fonts, so it is part of specHash -> cache-correct."""
+    dest = RENDER_PROJECT / "public" / "fonts"
+    dest.mkdir(parents=True, exist_ok=True)
+    for role, default in _DEFAULT_FONTS.items():
+        src = _FONT_DIR / (fonts.get(role) or default)
+        if not src.is_file():
+            src = _FONT_DIR / default
+        out = dest / f"{role}.ttf"
+        if not out.exists() or out.read_bytes() != src.read_bytes():
+            shutil.copyfile(src, out)
+
+
 class BackendUnavailable(RuntimeError):
     """Raised when a requested backend is not installed/wired."""
 
@@ -157,7 +189,9 @@ def compile_spec(spec: dict) -> dict:
             "value_space": cam.get("value_space", "linear_scale"),
         },
         "layers": layers,
-        "palette": None,
+        # V15: the story's bible palette (meta.palette, role -> hex) reaches
+        # the renderer; None keeps the V14 default navy palette.
+        "palette": (norm.get("meta") or {}).get("palette"),
     }
 
 
@@ -197,6 +231,8 @@ class RemotionRenderer(SceneRenderer):
     def capabilities(self) -> dict:
         return {
             "available": True,
+            "version": _source_version(
+                [_THIS] + sorted((RENDER_PROJECT / "src").glob("*.ts*"))),
             "animated_vector": True,
             "layered_composition": True,
             "continuous_camera": True,
@@ -234,6 +270,7 @@ class RemotionRenderer(SceneRenderer):
         # and payload.path rewrites to the served-relative path; the staged
         # spec is what compiles, so specHash binds asset content (§24).
         spec, _staged = stage_assets(spec, RENDER_PROJECT / "public")
+        _stage_fonts((spec.get("meta") or {}).get("fonts") or {})
         props = compile_spec(spec)
         out = Path(out_path).resolve()
         out.parent.mkdir(parents=True, exist_ok=True)
@@ -329,6 +366,7 @@ class FallbackRenderer(SceneRenderer):
     def capabilities(self) -> dict:
         return {
             "available": True,
+            "version": _source_version([_THIS]),
             "animated_vector": False,
             "raster_cinematic": True,
             "simple_diagram": True,
@@ -407,8 +445,10 @@ class FallbackRenderer(SceneRenderer):
         for a, b in zip(kfs, kfs[1:]):
             if a["frame"] <= frame <= b["frame"]:
                 span = max(1, b["frame"] - a["frame"])
+                # segment easing = START keyframe's easing (Remotion
+                # evalCam parity: SceneComposition eases with a.easing)
                 u = self._ease((frame - a["frame"]) / span,
-                               b.get("easing", "linear"))
+                               a.get("easing", "linear"))
                 return (self._lerp(a["scale"], b["scale"], u),
                         self._lerp(a["x"], b["x"], u),
                         self._lerp(a["y"], b["y"], u))
@@ -441,7 +481,7 @@ class FallbackRenderer(SceneRenderer):
                 if ka["frame"] <= frame <= kb["frame"]:
                     span = max(1, kb["frame"] - ka["frame"])
                     u = self._ease((frame - ka["frame"]) / span,
-                                   kb.get("easing", "linear"))
+                                   ka.get("easing", "linear"))
                     return self._lerp(ka["value"], kb["value"], u)
             return kfs[-1]["value"]
         return default

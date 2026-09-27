@@ -313,3 +313,42 @@ def write_underscore_accent(total_s: float, intensities: list, shot_durs: list,
 
 def write_ambience(total_s: float, grammar_key: str, out_path) -> Path:
     return save_wav(out_path, ambience(total_s, grammar_key))
+
+
+# ---------------------------------------------------------------- V15 SFX --
+
+def sfx(kind: str) -> np.ndarray:
+    """Deterministic procedural SFX (float32 (n, 2)) for shot cuts and
+    on-word reveals: whoosh (band-swept air swell, cut), tick (soft wooden
+    click, label/number reveal), pulse (low sine thump, stakes/payoff).
+    Peaks ~0.25 before the mix gain; story-independent so every video in a
+    batch gets sound design without per-story assets."""
+    rng = np.random.default_rng(_SEED + 7)
+    if kind == "whoosh":
+        d = 0.55
+        n = int(d * SR)
+        tt = np.arange(n) / SR
+        noise = rng.standard_normal(n)
+        lo = _fft_bandpass(noise, 300.0, 1400.0)
+        hi = _fft_bandpass(noise, 1400.0, 5000.0)
+        sweep = np.clip(tt / d, 0, 1)
+        y = lo * (1 - sweep) + hi * sweep
+        env = np.sin(np.pi * np.clip(tt / d, 0, 1)) ** 2
+        y = y * env
+    elif kind == "tick":
+        d = 0.09
+        n = int(d * SR)
+        tt = np.arange(n) / SR
+        y = np.sin(2 * np.pi * 1800 * tt) * np.exp(-tt * 70) \
+            + 0.4 * _fft_bandpass(rng.standard_normal(n), 2000, 6000) \
+            * np.exp(-tt * 110)
+    elif kind == "pulse":
+        d = 0.7
+        n = int(d * SR)
+        tt = np.arange(n) / SR
+        y = np.sin(2 * np.pi * 82.0 * tt * (1 + 0.4 * np.exp(-tt * 12))) \
+            * np.exp(-tt * 5.5)
+    else:
+        raise ValueError(f"unknown sfx kind {kind!r} (whoosh|tick|pulse)")
+    y = y / (np.max(np.abs(y)) or 1.0) * 0.25
+    return np.stack([y, y], axis=1).astype(np.float32)

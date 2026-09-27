@@ -26,6 +26,7 @@ WORLD_W, WORLD_H = 1080.0, 1920.0
 DEFAULT_STOPS = ["#12405C", "#0A1D33"]
 INK, INK_DIM, LINE = "#E8EEF4", "#9FB3C8", "#2A4E6E"
 WARM, COOL = "#F2A65A", "#3E7CB1"
+TEXT_MARGIN = 70.0  # min horizontal inset for on-screen text
 CAPTION_SAFE_DEFAULT = [{"x": 90.0, "y": 1560.0, "w": 900.0, "h": 280.0}]
 
 
@@ -114,7 +115,23 @@ def leader_annotation(lid: str, at, title: str, sub: str | None = None, *,
 def title_text(lid: str, text: str, *, y: float = 260.0, size: float = 54.0,
                x: float = WORLD_W / 2, fill: str | None = None, z: int = 45,
                visibility=None, weight: int = 700) -> dict:
-    payload = {"text": text, "position": [x, y], "anchor": "middle",
+    # V15: fit with real font metrics (wrap to 2 lines, shrink); V14 drew a
+    # fixed size with no measurement and titles ran off the frame.
+    from engine.textfit import BODY, TextFitError, fit_text
+    try:
+        # Inter is variable: PIL measures the default instance, the renderer
+        # draws weight 700 (~8% wider) -> shrink the measure accordingly
+        fit = fit_text(text, max_w=(WORLD_W - 2 * TEXT_MARGIN)
+                       / (1.1 if weight >= 600 else 1.0), size=int(size),
+                       min_size=24, max_lines=2, font=BODY)
+        lines, size = fit["lines"], fit["size"]
+    except TextFitError:
+        lines = fit_text(" ".join(str(text).split()[:6]) + "…",
+                         max_w=WORLD_W - 2 * TEXT_MARGIN, size=int(size),
+                         min_size=18, max_lines=2, font=BODY)["lines"]
+        size = 18
+    payload = {"text": text, "lines": lines, "font": "body",
+               "position": [x, y], "anchor": "middle",
                "size": size, "weight": weight}
     if fill:
         payload["fill"] = fill

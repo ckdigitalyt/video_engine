@@ -79,10 +79,11 @@ def _subject_kind(text: str) -> str:
     """Deterministic procedural-subject kind from the beat text (§9 kinds)."""
     t = str(text).lower()
     for keys, kind in (
+        # specific before generic: "DNA" must win over "cell" (V15 fix)
+        (("dna", "spiral", "helix", "coil", "spring"), "helix"),
         (("wave", "shock", "explode", "ring", "layer", "molecular",
           "molecule", "lattice"), "rings"),
-        (("cell", "biolog", "membrane", "dna", "microb"), "cells"),
-        (("spiral", "helix", "coil", "spring"), "helix"),
+        (("cell", "biolog", "membrane", "microb", "mitochond"), "cells"),
         (("see", "look", "observe", "eye", "watch"), "eye"),
     ):
         if any(k in t for k in keys):

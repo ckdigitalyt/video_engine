@@ -280,7 +280,7 @@ def _numeric_camera_path(renderer, norm: dict, fps: int, frames: int) -> tuple:
             if a["frame"] <= frame <= b["frame"]:
                 span = max(1, b["frame"] - a["frame"])
                 u = renderer._ease((frame - a["frame"]) / span,
-                                   b.get("easing", "linear"))
+                                   a.get("easing", "linear"))
                 return (renderer._lerp(a["scale"], b["scale"], u),
                         renderer._lerp(a["x"], b["x"], u),
                         renderer._lerp(a["y"], b["y"], u))

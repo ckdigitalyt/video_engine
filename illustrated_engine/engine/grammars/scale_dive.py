@@ -69,8 +69,13 @@ class ScaleDive(Grammar):
                             payload={"world_r": float(content.get("aperture_r", 430.0)),
                                      "grows_with_camera": True}))
         inner_layer = subject_layer("inner_world", inner, depth=0.95, z=40)
+        # V15 fix: the inner world rides the FULL camera, so it must be
+        # authored at 1/to_scale — it then lands at hero size exactly when
+        # the dive ends. local_scale=1.0 at a 24x camera blew the inner
+        # subject up ~24x (a flat colour field from ~3 s on).
         inner_layer.setdefault("payload", {})["local_scale"] = float(
-            inner.get("local_scale", 1.0))
+            inner.get("local_scale",
+                      float(content.get("inner_fill", 1.0)) / to_scale))
         layers.append(inner_layer)
         layers.append(stage_label("stage_label", content["stages"]))
         layers.append(mag_readout("mag_readout",

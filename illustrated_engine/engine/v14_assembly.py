@@ -90,6 +90,13 @@ def _word_windows(words: list, t0: float, t1: float) -> list:
     return out
 
 
+def _caption_key(words: list, active: int, bible: dict, zone_top) -> str:
+    blob = json.dumps({"w": words, "a": active, "z": zone_top,
+                       "t": bible.get("typography"), "p": bible.get("palette"),
+                       "v": 2}, sort_keys=True)
+    return "cap_" + hashlib.sha256(blob.encode()).hexdigest()[:16]
+
+
 def build_caption_inputs(cues: list, bible: dict, png_dir: Path,
                          offset: float = 0.0) -> tuple:
     """Scene-local cues -> absolute overlay inputs via the V13 state machine.
@@ -120,10 +127,18 @@ def build_caption_inputs(cues: list, bible: dict, png_dir: Path,
         for wi, (wt0, wt1) in enumerate(windows):
             assert wt0 >= prev_end - 1e-9, "caption word windows overlap"
             prev_end = wt1
-            png = png_dir / f"cue{ci:03d}_w{wi:02d}.png"
-            chunk_png(chunk, bible, png, active=wi, zone_top=zone_top)
+            # V15: content-addressed carrier name. The V14 name
+            # cue{ci}_w{wi} restarted per scene in ONE shared dir, so every
+            # scene overwrote the previous scene's PNGs and the whole video
+            # burned the LAST beat's captions. Identical content -> same
+            # file (safe reuse); different content can never collide.
+            png = png_dir / (_caption_key(words, wi, bible, zone_top)
+                             + ".png")
+            if not png.exists():
+                chunk_png(chunk, bible, png, active=wi, zone_top=zone_top)
             inputs.append({"png": str(png), "t0": round(wt0, 3),
-                           "t1": round(wt1, 3), "cue": ci})
+                           "t1": round(wt1, 3), "cue": ci,
+                           "text": " ".join(words), "word": words[wi]})
     return inputs, repairs
 
 
@@ -220,7 +235,12 @@ def build_voice_track(scenes: list, story_dir: Path, total_s: float,
         nar = sc.get("narration") or {}
         if not nar:
             continue
-        start = int(round(float(sc["_start"]) * SR))
+        # V15: narration may start after a lead-in (offset) and may span
+        # several shot-scenes of one beat (span_s) — overrun is judged
+        # against the span, not the first shot alone.
+        start = int(round((float(sc["_start"])
+                           + float(nar.get("offset", 0.0))) * SR))
+        span = float(nar.get("span_s", sc["_dur"]))
         try:
             if nar.get("audio"):
                 wav = Path(nar["audio"])
@@ -236,11 +256,11 @@ def build_voice_track(scenes: list, story_dir: Path, total_s: float,
             voice[start:start + m] += y[:m]
             placements.append({"scene": sc["scene_id"], "file": rel,
                                "duration_s": round(nd, 3)})
-            if nd > float(sc["_dur"]) + 0.05:
+            if nd + float(nar.get("offset", 0.0)) > span + 0.05:
                 warnings.append({"scene": sc["scene_id"],
                                  "warning": "narration_overrun",
                                  "narration_s": round(nd, 3),
-                                 "scene_s": round(float(sc["_dur"]), 3)})
+                                 "scene_s": round(span, 3)})
         except Exception as e:
             warnings.append({"scene": sc["scene_id"],
                              "warning": "narration_skipped",
@@ -248,21 +268,69 @@ def build_voice_track(scenes: list, story_dir: Path, total_s: float,
     return save_wav(out, np.clip(voice, -0.98, 0.98)), placements
 
 
-def mix_audio(bed_path: Path, voice_path: Path, out: Path) -> Path:
-    """Bed ducked under voice (duck_gain envelope) + voice, clipped."""
+def build_underscore_track(scenes: list, total_s: float, out: Path,
+                           music: dict) -> Path:
+    """V15: one continuous procedural underscore (pad + soft pulse) with a
+    per-scene intensity envelope — replaces the per-scene ambience hum whose
+    level (~-54 dBFS) made the V14 bed effectively silent."""
+    from engine.procedural_audio import underscore
+    ints = [float(sc.get("intensity", music.get("default_intensity", 0.6)))
+            for sc in scenes]
+    y = underscore(total_s, ints, [sc["_dur"] for sc in scenes])
+    return save_wav(out, y * float(music.get("gain", 0.9)))
+
+
+def build_sfx_track(scenes: list, total_s: float, out: Path,
+                    warnings: list) -> tuple:
+    """V15: procedural SFX at scene-local times (shot cuts, on-word
+    reveals). Returns (path, placements)."""
+    from engine.procedural_audio import sfx
+    n = int(round(total_s * SR))
+    track = np.zeros((n, 2), dtype=np.float32)
+    placed = []
+    for sc in scenes:
+        for ev in sc.get("sfx") or []:
+            try:
+                y = sfx(ev["kind"]) * float(ev.get("gain", 1.0))
+            except Exception as e:
+                warnings.append({"scene": sc["scene_id"],
+                                 "warning": "sfx_skipped",
+                                 "reason": str(e)[:120]})
+                continue
+            at = float(sc["_start"]) + float(ev["t"])
+            i0 = max(0, int(round(at * SR)))
+            m = min(len(y), n - i0)
+            if m > 0:
+                track[i0:i0 + m] += y[:m]
+                placed.append({"t": round(at, 3), "kind": ev["kind"]})
+    return save_wav(out, np.clip(track, -0.98, 0.98)), placed
+
+
+def mix_audio(bed_path: Path, voice_path: Path, out: Path,
+              sfx_path: Path | None = None) -> Path:
+    """Bed ducked under voice (duck_gain envelope) + voice (+ SFX), clipped."""
     bed = load_wav(bed_path).astype(np.float32)
     voice = load_wav(voice_path).astype(np.float32)
-    n = max(len(bed), len(voice))
+    fx = load_wav(sfx_path).astype(np.float32) if sfx_path else None
+    n = max(len(bed), len(voice), len(fx) if fx is not None else 0)
     b = np.zeros((n, 2), dtype=np.float32)
     v = np.zeros((n, 2), dtype=np.float32)
     b[:len(bed)], v[:len(voice)] = bed, voice
     env = duck_gain(v.mean(axis=1))
-    return save_wav(out, np.clip(b * env[:, None] + v, -0.98, 0.98))
+    mixed = b * env[:, None] + v
+    if fx is not None:
+        mixed[:len(fx)] += fx
+    return save_wav(out, np.clip(mixed, -0.98, 0.98))
+
+
+LOUDNORM = "loudnorm=I=-14:TP=-1.5:LRA=11"  # short-form delivery loudness
 
 
 def _mux(video: Path, audio: Path, out: Path) -> None:
+    # additive filter only (no FFmpeg redesign): loudness-normalize the mix
     _run(["ffmpeg", "-y", "-v", "error", "-i", video, "-i", audio,
           "-map", "0:v", "-map", "1:a", "-c:v", "copy",
+          "-af", LOUDNORM, "-ar", "48000",
           "-c:a", "aac", "-b:a", "192k", out])
 
 
@@ -312,6 +380,9 @@ def assemble(plan: dict, work_dir: Path, plan_dir: Path | None = None) -> dict:
         row.pop("words", None)
     cap_video = work_dir / "captioned.mp4"
     report["captions"] = burn_captions(concat, inputs, cap_video)
+    # V15: exact overlay record (png, text, active word, window) so the gate
+    # can prove caption text == narration per scene from the artifact list
+    report["caption_overlays"] = inputs
     report["caption_repairs"] = all_repairs
     report["scenes"] = [{**row,
                          "caption_words": sum(1 for i in inputs
@@ -321,10 +392,18 @@ def assemble(plan: dict, work_dir: Path, plan_dir: Path | None = None) -> dict:
 
     # 3. audio
     story_dir = rp(plan.get("story_dir", work_dir))
-    bed = build_bed_track(scenes, total_s, work_dir / "bed.wav", warnings)
+    if plan.get("music"):
+        bed = build_underscore_track(scenes, total_s, work_dir / "bed.wav",
+                                     plan["music"])
+    else:
+        bed = build_bed_track(scenes, total_s, work_dir / "bed.wav", warnings)
     voice, placements = build_voice_track(scenes, story_dir, total_s,
                                           work_dir / "voice.wav", warnings)
-    mix = mix_audio(bed, voice, work_dir / "mix.wav")
+    fx_path = None
+    if any(sc.get("sfx") for sc in scenes):
+        fx_path, report["sfx"] = build_sfx_track(
+            scenes, total_s, work_dir / "sfx.wav", warnings)
+    mix = mix_audio(bed, voice, work_dir / "mix.wav", fx_path)
     report["narration"] = placements
     report["audio_mix"] = {"bed": str(bed), "voice": str(voice),
                            "mix": str(mix), "ducked": True}
