@@ -352,7 +352,7 @@ function renderPrimitives(pr: any, pal: Pal): JSX.Element {
   (pr.texts ?? []).forEach((t: any, i: number) =>
     out.push(
       <text key={`t${i}`} x={t.x} y={t.y} textAnchor={t.anchor ?? "middle"}
-        fill={t.fill ?? pal.ink} fontFamily={FONT} fontWeight={t.weight ?? 700}
+        fill={t.fill ?? pal.ink} fontFamily={fontOf(t.font)} fontWeight={t.weight ?? 700}
         fontSize={t.size ?? 40} letterSpacing={t.spacing ?? 0}
         opacity={t.opacity ?? 1}>
         {t.text}
@@ -417,7 +417,7 @@ function renderFinish(layer: CompiledLayer, f: any, ctx: Ctx): JSX.Element {
       <radialGradient key={vid} id={vid} cx="50%" cy="46%" r="75%">
         <stop offset="55%" stopColor={f.vignette_color ?? "#000000"} stopOpacity={0} />
         <stop offset="100%" stopColor={f.vignette_color ?? "#000000"}
-          stopOpacity={Math.min(0.85, f.vignette * 2.2)} />
+          stopOpacity={Math.min(0.6, f.vignette * 1.3)} />
       </radialGradient>
     );
     out.push(<rect key="vig" width={w} height={h} fill={`url(#${vid})`} />);
@@ -710,7 +710,7 @@ function renderBody(layer: CompiledLayer, ctx: Ctx): JSX.Element | null {
           {p.title ? (
             <text x={ta[0]} y={ta[1] - 12} textAnchor={p.text_anchor ?? "end"} fill={p.fill ?? pal.ink}
               fontFamily={fontOf(p.font) } fontWeight={700} fontSize={p.size ?? 40}
-              letterSpacing={p.spacing ?? 3} stroke={p.halo} strokeWidth={p.halo ? (p.size ?? 40) * 0.08 : 0}
+              letterSpacing={p.spacing ?? 3} stroke={p.halo} strokeWidth={p.halo ? (p.size ?? 40) * 0.12 : 0}
               strokeLinejoin="round" paintOrder="stroke">{p.title}</text>
           ) : null}
           {p.sub ? (

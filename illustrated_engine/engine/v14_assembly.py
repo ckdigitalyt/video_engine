@@ -123,6 +123,17 @@ def build_caption_inputs(cues: list, bible: dict, png_dir: Path,
             continue
         chunk = {"lines": [words]}
         windows = _word_windows(words, float(cue["t0"]), float(cue["t1"]))
+        ws = cue.get("word_starts")
+        if isinstance(ws, list) and len(ws) == len(words):
+            # V15: highlight follows the narration's measured word times
+            # (v15_timing), clipped into the (possibly repaired) cue window
+            c0, c1 = float(cue["t0"]), float(cue["t1"])
+            st = [min(max(float(w) + offset, c0), c1) for w in ws]
+            st[0] = c0
+            for k in range(1, len(st)):
+                st[k] = max(st[k], st[k - 1])
+            windows = [(st[k], st[k + 1] if k + 1 < len(st) else c1)
+                       for k in range(len(st))]
         prev_end = -1.0
         for wi, (wt0, wt1) in enumerate(windows):
             assert wt0 >= prev_end - 1e-9, "caption word windows overlap"
@@ -198,6 +209,75 @@ def _concat_scenes(videos: list, out: Path) -> dict:
             "-crf", "18", "-pix_fmt", "yuv420p", "-r", "30", "-an", out]
     _run(cmd)
     return {"scenes": len(videos), "frame": f"{w}x{h}"}
+
+
+def concat_and_burn(videos: list, inputs: list, out: Path,
+                    fps: int = 30) -> dict:
+    """V15 single-encode assembly: scene concat (same concat FILTER, same
+    per-input fps/format normalization) + captions burned AFTER composition
+    in ONE libx264 pass. The caption strip is streamed from Python as raw
+    RGBA (one pre-rendered carrier PNG active per frame, same windows and
+    band as burn_captions) — replaces concat.mp4 + N overlay inputs, which
+    cost two full re-encodes (~4-5 min for a 50 s video on 4 cores)."""
+    from PIL import Image
+    sizes, total = set(), 0.0
+    for v in videos:
+        info = _probe(v)
+        vs = [s for s in info["streams"] if s["codec_type"] == "video"]
+        sizes.add((vs[0]["width"], vs[0]["height"]))
+        total += float(info["format"]["duration"])
+    if len(sizes) != 1:
+        raise RuntimeError(f"scene frame sizes differ: {sorted(sizes)}")
+    (w, h) = sizes.pop()
+    band_y = band_rect()[0]
+    strip_h = 192
+    n_frames = int(round(total * fps))
+    cmd = ["ffmpeg", "-y", "-v", "error"]
+    for v in videos:
+        cmd += ["-i", str(v)]
+    cmd += ["-f", "rawvideo", "-pix_fmt", "rgba", "-s", f"{w}x{strip_h}",
+            "-r", str(fps), "-i", "pipe:0"]
+    k = len(videos)
+    fl = "".join(f"[{i}:v]fps={fps},format=yuv420p[v{i}];" for i in range(k))
+    fl += "".join(f"[v{i}]" for i in range(k)) + f"concat=n={k}:v=1:a=0[cat];"
+    fl += f"[cat][{k}:v]overlay=x=0:y={band_y}:eof_action=pass[out]"
+    cmd += ["-filter_complex", fl, "-map", "[out]", "-c:v", "libx264",
+            "-crf", "18", "-preset", "medium", "-pix_fmt", "yuv420p",
+            "-r", str(fps), "-an", str(out)]
+    proc = subprocess.Popen(cmd, stdin=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
+    blank = bytes(w * strip_h * 4)
+    cache: dict = {}
+    items = sorted(inputs, key=lambda i: i["t0"])
+    j, shown = 0, 0
+    try:
+        for f in range(n_frames):
+            t = f / fps
+            while j < len(items) and items[j]["t1"] < t:
+                j += 1
+            cur = None
+            for it in items[j:j + 3]:  # windows are non-overlapping
+                if it["t0"] <= t <= it["t1"] and it["t1"] > it["t0"]:
+                    cur = it
+            if cur is None:
+                proc.stdin.write(blank)
+                continue
+            b = cache.get(cur["png"])
+            if b is None:
+                im = Image.open(cur["png"]).convert("RGBA")
+                if im.size != (w, strip_h):
+                    im = im.resize((w, strip_h))
+                b = cache[cur["png"]] = im.tobytes()
+            proc.stdin.write(b)
+            shown += 1
+        proc.stdin.close()
+    except BrokenPipeError:
+        pass
+    err = proc.stderr.read().decode(errors="replace")
+    if proc.wait() != 0:
+        raise RuntimeError(f"single-pass assembly failed: {err[-800:]}")
+    return {"scenes": k, "frame": f"{w}x{h}", "frames": n_frames,
+            "caption_frames": shown, "overlays": len(inputs), "passes": 1}
 
 
 def build_bed_track(scenes: list, total_s: float, out: Path,
@@ -358,9 +438,12 @@ def assemble(plan: dict, work_dir: Path, plan_dir: Path | None = None) -> dict:
     report: dict = {"story_id": plan.get("story_id", "v14"),
                     "total_s": round(total_s, 3), "scenes": [], "warnings": []}
 
-    # 1. concat scene renders
+    single = bool(plan.get("single_pass"))
+    # 1. concat scene renders (V15 single_pass: concat happens in step 2)
     concat = work_dir / "concat.mp4"
-    report["concat"] = _concat_scenes([sc["video"] for sc in scenes], concat)
+    if not single:
+        report["concat"] = _concat_scenes([sc["video"] for sc in scenes],
+                                          concat)
 
     # 2. captions AFTER composition
     inputs, all_repairs = [], []
@@ -379,7 +462,11 @@ def assemble(plan: dict, work_dir: Path, plan_dir: Path | None = None) -> dict:
     for row in report["scenes"]:
         row.pop("words", None)
     cap_video = work_dir / "captioned.mp4"
-    report["captions"] = burn_captions(concat, inputs, cap_video)
+    if single:
+        report["captions"] = concat_and_burn([sc["video"] for sc in scenes],
+                                             inputs, cap_video)
+    else:
+        report["captions"] = burn_captions(concat, inputs, cap_video)
     # V15: exact overlay record (png, text, active word, window) so the gate
     # can prove caption text == narration per scene from the artifact list
     report["caption_overlays"] = inputs
