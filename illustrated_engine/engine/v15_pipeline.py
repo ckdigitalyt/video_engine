@@ -56,9 +56,22 @@ RENDER_CONFIG = {"concurrency": 2, "pipeline": "v15"}
 INTENSITY = {"HOOK": 0.75, "CURIOSITY": 0.62, "REVEAL": 0.85,
              "EXPLANATION": 0.66, "ESCALATION": 0.82, "PAYOFF": 0.88}
 _PUNCT_ONLY = re.compile(r"^[\W_]+$")
+_FUNCTION_WORDS = {"a", "an", "the", "of", "to", "in", "on", "at", "by", "for",
+                   "and", "but", "or", "so", "your", "its", "their", "his",
+                   "her", "you", "we", "it", "is", "are", "was", "can",
+                   "that", "this", "with", "from", "into", "than", "as"}
 
 
 # ---------------------------------------------------------------- captions --
+
+def _binds_forward(word: str) -> bool:
+    """Function words and bare figures belong with the NEXT word (a number
+    with its unit, an article with its noun) unless punctuation ends them."""
+    if re.search(r"[,.;:!?\u2014]$", word):
+        return False
+    w = word.lower()
+    return w in _FUNCTION_WORDS or bool(re.fullmatch(r"[\d.,]+", w))
+
 
 def caption_cues(timing: dict, lead: float) -> list:
     """Phrase cues (<= 4 words, break after punctuation or a pause) on the
@@ -74,6 +87,16 @@ def caption_cues(timing: dict, lead: float) -> list:
     for i, w in enumerate(words):
         cur.append(w)
         nxt = words[i + 1] if i + 1 < len(words) else None
+        # a length break never strands a function word at the cue end
+        # ("...STAYS A" / "RUMOR YOU CAN"): it carries into the next cue
+        if len(cur) >= 4 and nxt is not None:
+            k = len(cur)
+            while k > 1 and _binds_forward(cur[k - 1]["w"]):
+                k -= 1
+            if k < len(cur):
+                groups.append(cur[:k])
+                cur = cur[k:]
+                continue
         brk = (len(cur) >= 4
                or re.search(r"[.!?]$", w["w"])
                or re.search(r"[,;:—]$", w["w"]) and len(cur) >= 2
@@ -241,8 +264,10 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
     uniq = sorted({p for s in shots for p in s["prompts"]})
     fail_log: list = []
 
-    def _gen(prompt, salt=0):
-        return prompt, generate_plate(prompt, _seed(prompt, salt), log=fail_log)
+    def _gen(prompt, salt=0, providers=None):
+        kw = {"providers": providers} if providers else {}
+        return prompt, generate_plate(prompt, _seed(prompt, salt),
+                                      log=fail_log, **kw)
 
     with ThreadPoolExecutor(max_workers=3) as ex:
         plates = dict(ex.map(_gen, uniq))
@@ -258,8 +283,15 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
         report["costs"]["vision_calls"] += 1
         if qa.get("fail"):
             regen = [items[i]["prompt"] for i in qa["fail"]]
+            from engine.v15_plates import PROVIDER_ORDER
+
+            def _next_chain(p):  # a different MODEL, not just a new seed
+                used = plates[p].get("provider")
+                i = PROVIDER_ORDER.index(used) if used in PROVIDER_ORDER else -1
+                return list(PROVIDER_ORDER[i + 1:]) + list(PROVIDER_ORDER[:i + 1])
+
             with ThreadPoolExecutor(max_workers=3) as ex:
-                redo = dict(ex.map(lambda p: _gen(p, 1), regen))
+                redo = dict(ex.map(lambda p: _gen(p, 1, _next_chain(p)), regen))
             report["costs"]["image_calls"] += sum(
                 1 for r in redo.values() if r.get("ok") and not r.get("cached"))
             ok_redo = {p: r for p, r in redo.items() if r.get("ok")}

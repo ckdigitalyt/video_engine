@@ -249,6 +249,10 @@ video "{title}" frame by frame (contact sheet: {n} numbered frames, ~{step}s
 apart, with the narration spoken at that moment underneath each).
 For EACH frame answer: does the picture itself communicate something specific
 to this story (not generic decoration), is it visually rich and readable?
+The small caption bar near the bottom is burned-in narration shown a few
+words at a time: a phrase FRAGMENT is expected there and is NOT an issue.
+"text_garbled" means misspelled/illegible lettering (inside the artwork or
+in the large on-screen typography).
 Issue codes: {issues}.
 Then judge the whole: first frame would stop a scroll? ending resolves the
 opening question? would the scenes work unchanged for another topic by only
