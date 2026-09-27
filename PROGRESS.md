@@ -36,3 +36,23 @@ Orchestrator: Jade (Sonnet 5, Discord #illustration-video)
 
 ## Next (blocked on owner approval + answers to §7 open questions)
 - Phase 2 (Opus, research): re-enable WebSearch + WebFetch in tool flags (still no MCP, no Skill, no SendMessage) per owner instruction 2026-09-27.
+
+## Owner decisions received (2026-09-27, post-AUDIT.md)
+1. Fish Audio: keep primary, verify account/commercial terms, add local fallback (Chatterbox/Kokoro benchmark) — in Phase 2 scope.
+2. Brand: must fit @most.amazing.wonders; Phase 2 analyzes channel via existing YouTube Data API OAuth (upload-scope only — see security note below); Phase 3 proposes 2-3 branded options.
+3. NVIDIA NIM: not approved for production; Phase 2 finds zero-cost alternative image source.
+4. OpenRouter GLM: demoted out of the required path; adapter defaults to Claude (Phase 3 design), GLM becomes optional.
+5. DeepSeek: queued as a Phase 4 task — remove references from tracked repo config/code only (~20 files: providers, schemas, configs, CI — NOT .env, NOT server/OpenClaw config). Not done now; needs careful edits + test run, appropriately a Phase 4 (Sonnet, tested commits) task, not a rushed mid-Phase-2 patch.
+
+## Security finding (git history secret scan, done directly, not delegated)
+- Ran a pickaxe scan (`git log --all -S<pattern>`) across all branches for common API key prefixes (sk-or-v1-, AIzaSy, hf_, nvapi-, gsk_, xai-, sk-ant-, sk-proj-).
+- Found ONE real leaked secret: commit `ef77f54` (2026-08-02, "v4: NVIDIA NIM AI imagery provider...") added a full `.env.bak-20260802-065549` file containing 8 keys: DEEPSEEK, GEMINI, NASA, NVIDIA, PEXELS, PIXABAY, SLACK_APP, SLACK_BOT.
+- That file is NOT present at current HEAD on any branch (removed later) — the leak is confined to history, not the working tree.
+- The leaked NVIDIA_API_KEY differs from the one currently in .env, suggesting it was already rotated at some point — NOT independently verified live (didn't want to make an extra network call against a possibly-dead credential without cause).
+- Repo has a real GitHub remote: git@github.com:ckdigitalyt/video_engine.git. Visibility (public/private) not checked from here — recommend the owner confirm, and if any of those 8 keys (esp. GEMINI, PEXELS, PIXABAY, SLACK, and NVIDIA if not yet rotated) are still live, rotate them and consider scrubbing history (git filter-repo / BFG) given it's already pushed.
+- Current untracked `.env.bak*` files in the working tree ARE correctly gitignored (`.env*` pattern) — no fresh leak risk there.
+
+## Status: Phase 2 (Research) — IN PROGRESS
+- Launched in tmux `jade-phase2`, session_id d661add2-9ec7-437b-8dfd-84dd4eb1da3e, log .jade/phase2.log.
+- Tools verified: Bash, Edit, Glob, Grep, Monitor, Read, ReportFindings, TaskStop, ToolSearch, WebFetch, WebSearch, Write. mcp_servers: [].
+- Prompt at .jade/phase2_prompt.txt covers: Fish verification + local TTS fallback benchmark, @most.amazing.wonders channel analysis (with explicit instruction to never print client_secret.json/token.json contents, and not to attempt OAuth scope expansion), zero-cost image source research (NIM excluded from production), Claude-first adapter direction (GLM demoted), one fresh timed E2E run, plus original niche/tool-survey scope. Deliverable: RESEARCH.md. Stops after, does not proceed to Phase 3.
