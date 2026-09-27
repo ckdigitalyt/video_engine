@@ -1,0 +1,15 @@
+{
+ "assets": [
+  {
+   "asset_id": "ice_hero_plate",
+   "bytes": 6646,
+   "height": 960,
+   "path": "ice_plate.png",
+   "role": "hero_subject",
+   "sha256": "c7a55191f2673555d41cad840be806e9c8feee547ed0cd4c070687106822b168",
+   "source": "raster",
+   "width": 640
+  }
+ ],
+ "schema": "v14.asset_manifest/1.0"
+}

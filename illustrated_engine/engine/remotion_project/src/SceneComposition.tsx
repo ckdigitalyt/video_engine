@@ -647,9 +647,14 @@ function renderBody(layer: CompiledLayer, ctx: Ctx): JSX.Element | null {
   }
   if (layer.source === "ai_image" || layer.source === "raster") {
     if (!p.path) return null;
+    // Stage 7: staged assets arrive as served-relative paths (staticFile);
+    // fit defaults to full-bleed cover, contain letterboxes instead.
+    const fit = p.fit === "contain" ? "xMidYMid meet" : "xMidYMid slice";
+    const rx = p.x ?? 0, ry = p.y ?? 0;
+    const rw = p.width ?? w, rh = p.height ?? h;
     return (
-      <image key="img" href={staticFile(p.path)} x={0} y={0} width={w} height={h}
-        preserveAspectRatio="xMidYMid slice" />
+      <image key="img" href={staticFile(p.path)} x={rx} y={ry} width={rw} height={rh}
+        preserveAspectRatio={fit} opacity={p.opacity ?? 1} />
     );
   }
   if (layer.type === "background" || layer.type === "environment") {
