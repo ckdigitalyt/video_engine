@@ -48,7 +48,7 @@ Orchestrator: Jade (Sonnet 5, Discord #illustration-video)
 - Ran a pickaxe scan (`git log --all -S<pattern>`) across all branches for common API key prefixes (sk-or-v1-, AIzaSy, hf_, nvapi-, gsk_, xai-, sk-ant-, sk-proj-).
 - Found ONE real leaked secret: commit `ef77f54` (2026-08-02, "v4: NVIDIA NIM AI imagery provider...") added a full `.env.bak-20260802-065549` file containing 8 keys: DEEPSEEK, GEMINI, NASA, NVIDIA, PEXELS, PIXABAY, SLACK_APP, SLACK_BOT.
 - That file is NOT present at current HEAD on any branch (removed later) — the leak is confined to history, not the working tree.
-- The leaked NVIDIA_API_KEY differs from the one currently in .env, suggesting it was already rotated at some point — NOT independently verified live (didn't want to make an extra network call against a possibly-dead credential without cause).
+- Owner confirmed (2026-09-27) all 8 keys were rotated after this exposure. No further action needed.
 - Repo has a real GitHub remote: git@github.com:ckdigitalyt/video_engine.git. Visibility (public/private) not checked from here — recommend the owner confirm, and if any of those 8 keys (esp. GEMINI, PEXELS, PIXABAY, SLACK, and NVIDIA if not yet rotated) are still live, rotate them and consider scrubbing history (git filter-repo / BFG) given it's already pushed.
 - Current untracked `.env.bak*` files in the working tree ARE correctly gitignored (`.env*` pattern) — no fresh leak risk there.
 
