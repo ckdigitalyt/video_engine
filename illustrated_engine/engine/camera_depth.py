@@ -244,16 +244,64 @@ def scale_transition_plan(small_id: str, large_id: str, duration_s: float, *,
 
 # ---------------------------------------------------------------- §16 continuity
 
+def _numeric_camera_path(renderer, norm: dict, fps: int, frames: int) -> tuple:
+    """§16 continuity for camera types the fallback cannot composite
+    (scale_dive): the SAME keyframe math as _camera_track/_camera_at applied
+    numerically via the renderer's own easing/lerp — the Remotion target
+    receives these same keyframes. Returns (kfs, path)."""
+    cam = norm["camera"]
+    default_easing = cam.get("easing", "linear")
+    kfs = []
+    for kf in cam.get("keyframes", []):
+        v = kf.get("value")
+        if isinstance(v, dict):
+            s, x, y = (float(v.get("scale", 1.0)), float(v.get("x", 0.0)),
+                       float(v.get("y", 0.0)))
+        elif isinstance(v, (int, float)):
+            s, x, y = float(v), 0.0, 0.0
+        else:
+            s = float(kf.get("scale", 1.0))
+            x = float(kf.get("x", 0.0))
+            y = float(kf.get("y", 0.0))
+        kfs.append({"frame": int(round(float(kf["t"]) * fps)),
+                    "scale": s, "x": x, "y": y,
+                    "easing": kf.get("easing", default_easing)})
+    kfs.sort(key=lambda k: k["frame"])
+    if len(kfs) < 2:
+        end = kfs[-1] if kfs else {"scale": 1.0, "x": 0.0, "y": 0.0,
+                                   "easing": default_easing}
+        kfs = [dict(end, frame=0), dict(end, frame=frames)]
+
+    def _at(frame: int) -> tuple:
+        if frame <= kfs[0]["frame"]:
+            k = kfs[0]
+            return k["scale"], k["x"], k["y"]
+        for a, b in zip(kfs, kfs[1:]):
+            if a["frame"] <= frame <= b["frame"]:
+                span = max(1, b["frame"] - a["frame"])
+                u = renderer._ease((frame - a["frame"]) / span,
+                                   b.get("easing", "linear"))
+                return (renderer._lerp(a["scale"], b["scale"], u),
+                        renderer._lerp(a["x"], b["x"], u),
+                        renderer._lerp(a["y"], b["y"], u))
+        k = kfs[-1]
+        return k["scale"], k["x"], k["y"]
+
+    return kfs, [_at(f) for f in range(frames + 1)]
+
+
 def verify_camera_continuity(spec: dict, renderer=None) -> dict:
     """§16 anti-jitter proof. Walks the compiled camera path frame-by-frame
     through the FallbackRenderer interpolator — the same keyframes the
     Remotion target receives — and flags:
-    - tremble: any per-frame step above 25% of that segment's per-frame
-      span (floored at 0.02 scale / 2% of frame width for pans)
+    - cut: one frame consuming >4x the segment's per-frame average
+    - jerk: frame-to-frame velocity changing faster than smooth eased motion
+    - oscillation: signed steps flipping sign above the floor
     - integer snapping: a moving camera whose steps never go sub-pixel
+    Cameras the fallback cannot composite (scale_dive) are verified on the
+    same keyframe math applied numerically (track=numeric_keyframes).
     Returns {frames, max_step_scale, max_step_pan, jumps, float_continuous,
-    ok}. Raises ValueError for cameras the fallback cannot express
-    (scale_dive renders via remotion)."""
+    track, ok}."""
     if renderer is None:
         from engine.scene_renderer import FallbackRenderer
         renderer = FallbackRenderer()
@@ -266,8 +314,15 @@ def verify_camera_continuity(spec: dict, renderer=None) -> dict:
     if dur <= 0:
         raise ValueError("verify_camera_continuity: no meta.duration_s")
     frames = max(2, int(round(dur * fps)))
-    kfs = renderer._camera_track(norm, fps, frames)
-    path = [renderer._camera_at(kfs, f) for f in range(frames + 1)]
+    try:
+        kfs = renderer._camera_track(norm, fps, frames)
+        path = [renderer._camera_at(kfs, f) for f in range(frames + 1)]
+        track = "fallback_interpolator"
+    except ValueError as exc:
+        if "not supported" not in str(exc):
+            raise
+        kfs, path = _numeric_camera_path(renderer, norm, fps, frames)
+        track = "numeric_keyframes"
 
     jumps = []
     max_ss = max_sp = 0.0
@@ -275,24 +330,38 @@ def verify_camera_continuity(spec: dict, renderer=None) -> dict:
         f0, f1 = int(a["frame"]), int(b["frame"])
         span = max(1, f1 - f0)
         seg = path[f0:f1 + 1]
-        s_span = max(p[0] for p in seg) - min(p[0] for p in seg)
-        x_span = max(max(p[1] for p in seg), abs(a["x"]), abs(b["x"]))
-        y_span = max(max(p[2] for p in seg), abs(a["y"]), abs(b["y"]))
-        for i in range(len(seg) - 1):
-            ds = abs(seg[i + 1][0] - seg[i][0])
-            dx = abs(seg[i + 1][1] - seg[i][1])
-            dy = abs(seg[i + 1][2] - seg[i][2])
-            max_ss = max(max_ss, ds)
-            max_sp = max(max_sp, dx, dy)
-            if s_span > 1e-9 and ds > max(0.25 * s_span / span, 0.02):
-                jumps.append({"frame": f0 + i, "kind": "scale",
-                              "step": round(ds, 5)})
-            if x_span > 1e-9 and dx > max(0.25 * x_span / span, 0.02 * w):
-                jumps.append({"frame": f0 + i, "kind": "pan_x",
-                              "step": round(dx, 5)})
-            if y_span > 1e-9 and dy > max(0.25 * y_span / span, 0.02 * w):
-                jumps.append({"frame": f0 + i, "kind": "pan_y",
-                              "step": round(dy, 5)})
+        for axis, kind, floor in ((0, "scale", 0.02),
+                                  (1, "pan_x", 0.02 * w),
+                                  (2, "pan_y", 0.02 * w)):
+            vals = [p[axis] for p in seg]
+            s_span = max(vals) - min(vals)
+            if s_span <= 1e-9:
+                continue
+            ds = [vals[i + 1] - vals[i] for i in range(len(vals) - 1)]
+            peak = max(abs(v) for v in ds)
+            if axis == 0:
+                max_ss = max(max_ss, peak)
+            else:
+                max_sp = max(max_sp, peak)
+            avg = s_span / span
+            # (1) cut: one frame consuming far more than an eased peak
+            #     (cubic easings peak at 3x the per-frame average -> 4x headroom)
+            for i, d in enumerate(ds):
+                if abs(d) > max(4.0 * avg, floor):
+                    jumps.append({"frame": f0 + i, "kind": kind,
+                                  "step": round(abs(d), 5)})
+            # (2) velocity discontinuity inside the segment (tremble/jerk);
+            #     smooth eased paths vary velocity by ~4/n of peak per frame
+            for i in range(len(ds) - 1):
+                dvel = abs(ds[i + 1] - ds[i])
+                if dvel > max(8.0 * peak / span, 1e-6):
+                    jumps.append({"frame": f0 + i, "kind": f"{kind}_jerk",
+                                  "step": round(dvel, 5)})
+            # (3) oscillation: signed steps flipping sign above the floor
+            for i in range(len(ds) - 1):
+                if ds[i] * ds[i + 1] < 0 and min(abs(ds[i]), abs(ds[i + 1])) > floor:
+                    jumps.append({"frame": f0 + i, "kind": f"{kind}_osc",
+                                  "step": round(min(abs(ds[i]), abs(ds[i + 1])), 5)})
     moving = max_ss > 1e-9 or max_sp > 1e-9
     nonzero = [abs(b[i] - a[i]) for a, b in zip(path, path[1:])
                for i in range(3) if abs(b[i] - a[i]) > 1e-12]
@@ -303,6 +372,7 @@ def verify_camera_continuity(spec: dict, renderer=None) -> dict:
             "max_step_pan": round(max_sp, 6),
             "jumps": jumps,
             "float_continuous": float_continuous,
+            "track": track,
             "ok": not jumps and float_continuous}
 
 
