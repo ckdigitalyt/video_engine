@@ -39,7 +39,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-from PIL import Image, ImageDraw
+from PIL import Image, ImageChops, ImageDraw
 
 try:
     from engine.asset_pipeline import stage_assets
@@ -311,10 +311,12 @@ class FallbackRenderer(SceneRenderer):
     limits (§23): no text/annotation rendering, no mask apertures, no
     scale_dive camera — mask layers and unsupported cameras raise; auto
     routing sends those specs to Remotion. Supported: raster layers (fit
-    cover/contain), generated gradients, primitives payloads (rects,
+    cover/contain, payload.mask luminance cutouts — Stage 8 §15 depth bands),
+    generated gradients, primitives payloads (rects,
     ellipses, circles, lines, straight-segment paths, polylines), per-layer
     opacity/position/scale animations, visibility windows, and the
-    uniform-scale+pan cameras (static/push_in/pull_out/pan/travel plus the
+    per-band-parallax cameras (§15: pf = 0.3 + 0.7*depth per layer,
+    SceneComposition parity; static/push_in/pull_out/pan/travel plus the
     keyframe-driven reveal/focus_shift). Frames composite in PIL and pipe
     rawvideo to FFmpeg; asset staging reuses asset_pipeline.stage_assets so
     specHash binds asset content identically across backends.
@@ -332,9 +334,12 @@ class FallbackRenderer(SceneRenderer):
             "simple_diagram": True,
             "text_annotations": False,
             "masks_apertures": False,
+            "raster_depth_masks": True,
+            "per_band_parallax": True,
             "deterministic": True,
-            "notes": "PIL+FFmpeg raster/gradient/primitive compositor; "
-                     "scale_dive, masks and text render via remotion",
+            "notes": "PIL+FFmpeg raster/gradient/primitive compositor with "
+                     "raster luminance depth masks and per-band parallax; "
+                     "scale_dive, aperture-mask and text render via remotion",
         }
 
     def available(self) -> bool:
@@ -459,12 +464,29 @@ class FallbackRenderer(SceneRenderer):
         sc = max(w / sw, h / sh) if fit == "cover" else min(w / sw, h / sh)
         nw, nh = max(1, int(round(sw * sc))), max(1, int(round(sh * sc)))
         img = img.resize((nw, nh), Image.LANCZOS)
+        left, top = (nw - w) // 2, (nh - h) // 2
         base = Image.new("RGBA", (w, h), (0, 0, 0, 0))
         if fit == "cover":
-            left, top = (nw - w) // 2, (nh - h) // 2
             base.alpha_composite(img.crop((left, top, left + w, top + h)))
         else:
-            base.alpha_composite(img, ((w - nw) // 2, (h - nh) // 2))
+            base.alpha_composite(img, (left, top))
+        # Stage 8 (§15): depth-band layers carry a luminance mask cutout —
+        # white = visible, mapped to the identical fit rect as the image.
+        mask_p = p.get("mask")
+        if mask_p:
+            mcand = Path(mask_p)
+            if not mcand.is_file():
+                mcand = RENDER_PROJECT / "public" / mask_p
+            if not mcand.is_file():
+                raise FileNotFoundError(
+                    f"layer {lay['id']!r} mask missing: {mask_p}")
+            m = Image.open(mcand).convert("L").resize((nw, nh), Image.LANCZOS)
+            mfull = Image.new("L", (w, h), 0)
+            if fit == "cover":
+                mfull.paste(m.crop((left, top, left + w, top + h)), (0, 0))
+            else:
+                mfull.paste(m, (left, top))
+            base.putalpha(ImageChops.multiply(base.getchannel("A"), mfull))
         return base
 
     def _gradient_canvas(self, p: dict, w: int, h: int) -> Image.Image:
@@ -619,12 +641,22 @@ class FallbackRenderer(SceneRenderer):
                          "opacity": float(lay.get("opacity", 1.0)),
                          "position": [float(c) for c in lay.get("position", [0.0, 0.0])],
                          "scale": float(lay.get("scale", 1.0)),
+                         "depth": float(lay.get("depth", 0.0)),
+                         "screen_space": lay.get("type") in
+                         ("semantic_annotation", "text"),
                          "v0": v0, "v1": v1,
                          "anims": anims_by_layer.get(lay["id"], [])})
         return prep, skipped
 
     def _composite_frame(self, prep: list[dict], cam_kfs: list[dict],
                          frame: int, w: int, h: int) -> Image.Image:
+        """§15 per-band parallax: the camera distributes per layer by depth
+        (pf = 0.3 + 0.7*depth, SceneComposition parity). Composing the band
+        camera after the layer transform gives total = sc*sc_cam and offset
+        sc_cam*pos + pan*pf, which reduces to the previous uniform behavior
+        at pf = 1. Screen-space layers (pf = 0) ignore the camera."""
+        s, px, py = self._camera_at(cam_kfs, frame)
+        cx, cy = w / 2.0, h / 2.0
         world = Image.new("RGBA", (w, h), (0, 0, 0, 0))
         for st in prep:
             if not (st["v0"] <= frame < st["v1"]):
@@ -633,33 +665,30 @@ class FallbackRenderer(SceneRenderer):
                 self._anim_at(st["anims"], "opacity", frame, 1.0))
             if op <= 0.005:
                 continue
+            pf = 0.0 if st["screen_space"] else 0.3 + 0.7 * max(
+                0.0, min(1.0, st["depth"]))
             pos = list(st["position"])
             ap = self._anim_at(st["anims"], "position", frame, None)
             if ap is not None:
                 pos = [pos[0] + float(ap[0]), pos[1] + float(ap[1])]
             sc = st["scale"] * float(
                 self._anim_at(st["anims"], "scale", frame, 1.0))
+            sc_cam = 1.0 + (s - 1.0) * pf
+            total = sc * sc_cam
+            tx = sc_cam * pos[0] + px * pf
+            ty = sc_cam * pos[1] + py * pf
             img = st["canvas"]
-            if sc != 1.0 or pos != [0.0, 0.0]:
-                cx, cy = w / 2.0, h / 2.0
+            if total != 1.0 or tx != 0.0 or ty != 0.0:
                 img = img.transform(
                     (w, h), Image.AFFINE,
-                    (1.0 / sc, 0.0, cx - (cx + pos[0]) / sc,
-                     0.0, 1.0 / sc, cy - (cy + pos[1]) / sc),
+                    (1.0 / total, 0.0, cx - (cx + tx) / total,
+                     0.0, 1.0 / total, cy - (cy + ty) / total),
                     resample=Image.BILINEAR)
             if op < 0.995:
                 img = img.copy()
                 img.putalpha(img.getchannel("A").point(
                     lambda v, _op=op: int(v * _op + 0.5)))
             world.alpha_composite(img)
-        s, px, py = self._camera_at(cam_kfs, frame)
-        if s != 1.0 or px != 0.0 or py != 0.0:
-            cx, cy = w / 2.0, h / 2.0
-            world = world.transform(
-                (w, h), Image.AFFINE,
-                (1.0 / s, 0.0, cx - (cx + px) / s,
-                 0.0, 1.0 / s, cy - (cy + py) / s),
-                resample=Image.BILINEAR)
         return world
 
     @staticmethod

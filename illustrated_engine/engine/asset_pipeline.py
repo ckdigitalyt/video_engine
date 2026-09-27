@@ -169,24 +169,27 @@ def stage_assets(spec: dict, public_dir: str | Path) -> tuple[dict, list[dict]]:
     staged: list[dict] = []
     for lay in out.get("layers", []):
         p = lay.get("payload") or {}
-        src = p.get("path")
-        if not src:
-            continue
-        src_p = Path(src)
-        if not src_p.is_file():
-            raise FileNotFoundError(f"layer {lay['id']!r} asset missing: {src_p}")
-        sha = sha256_file(src_p)
-        dest_dir = public / _STAGED_DIR
-        dest_dir.mkdir(parents=True, exist_ok=True)
-        dest = dest_dir / f"{sha[:12]}{src_p.suffix.lower()}"
-        if not dest.exists():
-            shutil.copyfile(src_p, dest)
-        elif sha256_file(dest) != sha:
-            dest.unlink()
-            shutil.copyfile(src_p, dest)
-        p["path"] = f"{_STAGED_DIR}/{dest.name}"
-        staged.append({"layer": lay["id"], "sha256": sha,
-                       "served_path": p["path"], "bytes": dest.stat().st_size})
+        for field in ("path", "mask"):  # mask = Stage 8 §15 depth-band cutout
+            src = p.get(field)
+            if not src:
+                continue
+            src_p = Path(src)
+            if not src_p.is_file():
+                raise FileNotFoundError(
+                    f"layer {lay['id']!r} asset missing ({field}): {src_p}")
+            sha = sha256_file(src_p)
+            dest_dir = public / _STAGED_DIR
+            dest_dir.mkdir(parents=True, exist_ok=True)
+            dest = dest_dir / f"{sha[:12]}{src_p.suffix.lower()}"
+            if not dest.exists():
+                shutil.copyfile(src_p, dest)
+            elif sha256_file(dest) != sha:
+                dest.unlink()
+                shutil.copyfile(src_p, dest)
+            p[field] = f"{_STAGED_DIR}/{dest.name}"
+            staged.append({"layer": lay["id"], "field": field, "sha256": sha,
+                           "served_path": p[field],
+                           "bytes": dest.stat().st_size})
     return out, staged
 
 

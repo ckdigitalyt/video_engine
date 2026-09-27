@@ -652,6 +652,24 @@ function renderBody(layer: CompiledLayer, ctx: Ctx): JSX.Element | null {
     const fit = p.fit === "contain" ? "xMidYMid meet" : "xMidYMid slice";
     const rx = p.x ?? 0, ry = p.y ?? 0;
     const rw = p.width ?? w, rh = p.height ?? h;
+    if (p.mask) {
+      // Stage 8 (§15): depth-band raster layers carry a luminance mask
+      // cutout (derived plate masks) — white = visible, same rect + fit
+      // as the image so the cutout stays aligned.
+      const mid = `mask-${layer.id}`;
+      return (
+        <g key="imgm">
+          <defs>
+            <mask id={mid} maskUnits="userSpaceOnUse" x={rx} y={ry} width={rw} height={rh}>
+              <image href={staticFile(p.mask)} x={rx} y={ry} width={rw} height={rh}
+                preserveAspectRatio={fit} />
+            </mask>
+          </defs>
+          <image href={staticFile(p.path)} x={rx} y={ry} width={rw} height={rh}
+            preserveAspectRatio={fit} opacity={p.opacity ?? 1} mask={`url(#${mid})`} />
+        </g>
+      );
+    }
     return (
       <image key="img" href={staticFile(p.path)} x={rx} y={ry} width={rw} height={rh}
         preserveAspectRatio={fit} opacity={p.opacity ?? 1} />
