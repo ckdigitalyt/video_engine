@@ -98,5 +98,18 @@ Orchestrator: Jade (Sonnet 5, Discord #illustration-video)
 
 ### WP status
 - WP0: DONE f3022a7 (baseline.md/json + bench/quality; topic packs 1 and 3 unverified)
-- WP1: IN PROGRESS (run 1)
+- WP1: DONE cacb1c4 (adapter) + be12e92 (DeepSeek removal) + 250d4bd (CHANGELOG) + d0a6c36 (acceptance report bench/ab/wp1.md)
 - WP2–WP14: pending
+
+## Phase 4 run 1 summary (2026-09-28) — WP0 + WP1 done, stopped before WP2
+1. Commits: WP0 f3022a7; WP1 cacb1c4 (llm/ adapter, configs/llm.yaml, director shims), be12e92 (DeepSeek removal from tracked code/config), 250d4bd (CHANGELOG), d0a6c36 (acceptance report).
+2. Tests: tests/test_llm_adapter.py (28) + tests/test_bench_quality.py (3) pass; illustrated_engine/tests 20/20 pass; pre-existing failures unchanged before/after (test_provider_interfaces 2F+3E, test_subtitles/test_engine_hardening 5F). mission_run.py --help and engine.v15_pipeline import OK.
+3. Adapter: Claude CLI default (sonnet; plate_qa chain sonnet->haiku); Gemini/OpenRouter ported but enabled:false; structured payload field pinned as `structured_output` (recorded fixture). Quota cooldown/repair/retry/cache/ledger per DESIGN 2.4.
+4. Acceptance (blackhole, 5 Claude calls, ~$0.12 list-price equiv., no retries): visual_plan, plate_qa x2, final_judge all via adapter; ledger at illustrated_engine/build/llm_ledger.jsonl (copy ~/phase4_out/wp1/ledger.jsonl).
+5. Result is HOLD, correctly: with plate QA actually running, the watermark/garbled-text plates that shipped in the Phase 2 baseline are caught and regeneration does not fix them; judge also flags a weak hook frame. See bench/ab/wp1.md.
+6. Samples: ~/phase4_out/wp1/{judge_sheet,plate_sheet,plate_sheet_regen}.jpg, frame_{1,17,40}s.jpg, report.json, pipeline_run.log (work dir ~/phase4_out/wp1/blackhole is 766 MB, deletable).
+7. WP0 baseline (bench/ab/baseline.md): V15 ice/cell/blackhole all PASS, but blackhole had plate QA skipped; topic packs 1 (birds) and 3 (time crystals) are worker-curated with verified:false claims (no web in Phase 4) — need a source check before WP4 scoring.
+8. OWNER FLAG (AGENTS.md 15.3 item 1): V15 judge/plan default chain changed from Gemini->GLM to Claude CLI; no fallback to expensive models (only haiku, cheaper). mission_run.py's own src/providers chain is untouched.
+9. Kept deliberately: leak_scan MODEL_TOKENS still contains DEEPSEEK (it blocks the name from being drawn on screen); historical .md/logs mention DeepSeek and were not edited. Fixed a latent KeyError in `cli.py semqa` (read res["deepseek"], key is "judges").
+10. Open issues: research/phase2/llm_compare.py uses removed private helpers (one-off script); WP2 must make "plate QA did not run" a HOLD; Claude quota use per video (about 5-9 calls) is shared with the owner's Pro plan; next up WP2 (not started).
+
