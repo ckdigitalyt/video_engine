@@ -113,3 +113,13 @@ Orchestrator: Jade (Sonnet 5, Discord #illustration-video)
 9. Kept deliberately: leak_scan MODEL_TOKENS still contains DEEPSEEK (it blocks the name from being drawn on screen); historical .md/logs mention DeepSeek and were not edited. Fixed a latent KeyError in `cli.py semqa` (read res["deepseek"], key is "judges").
 10. Open issues: research/phase2/llm_compare.py uses removed private helpers (one-off script); WP2 must make "plate QA did not run" a HOLD; Claude quota use per video (about 5-9 calls) is shared with the owner's Pro plan; next up WP2 (not started).
 
+
+## Owner standing go (2026-09-28 10:18 UTC)
+- Standing go for every Phase 4 WP in plan order; no approval between packages unless a stop condition applies (new unfixable test failure; .env/secrets/new paid services/accounts; destructive git or deletes outside phase4_out; scope/plan change; same failure 3x).
+- Gate to advance: full suite passes apart from known baseline failures, secret scan clean, commits pushed, PROGRESS + bench/ab acceptance report written. HOLD on a sample video is fine when correct.
+- Usage limit hit: pause, schedule one-shot resume after reset, post one line, no retry before. Minimum Claude calls per acceptance run. Clean large work dirs after each acceptance run. Chained 45-min one-shot check-ins (never recurring). Fresh session per WP after PROGRESS + check-in.
+- Carried into plan: (a) WP2: "plate QA did not run" = HOLD. (b) Source-check topic packs 1 (birds) and 3 (time crystals) BEFORE any WP4 scoring.
+
+## Subtitle test baseline (verified 2026-09-28)
+- tests/test_subtitles.py at 3f77256 (pre-WP0, separate worktree) vs 77f28c8 (HEAD): IDENTICAL 4 failures / 33 pass: TestGenerate::test_line_assignment, TestRendererClips::test_long_line_splits_into_phrase_clips, TestEdgeCases::test_very_long_narration, TestConfig::test_default_config_keys_exist. Not caused by WP1. (Earlier "5F" was a combined subtitles+engine_hardening count.) These are the known baseline.
+- Housekeeping: ~/phase4_out/wp1/blackhole deleted (samples kept); research/phase2/llm_compare.py header-marked broken since WP1.

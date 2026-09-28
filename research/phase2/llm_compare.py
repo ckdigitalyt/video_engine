@@ -1,3 +1,5 @@
+# BROKEN since WP1 (2026-09-28): relies on private director helpers that the WP1 LLM adapter removed.
+# Kept as a historical one-off; intentionally not fixed.
 """Phase 2: Claude CLI vs Gemini vs GLM on two real V15 calls, scored with V15's
 own validators. (1) Beat Visual Plan for blackhole_clocks; (2) plate QA on the
 e2e contact sheet (the call that came back 'unparseable' in the timed run)."""
