@@ -1,0 +1,149 @@
+[
+ {
+  "story": "ice_slippery",
+  "verdict": "PASS",
+  "gate_checks": {
+   "caption_identity": true,
+   "text_bounds": true,
+   "info_floor": true,
+   "visual_hold": true,
+   "asset_tier": true,
+   "audio": true,
+   "av": true,
+   "judge": true
+  },
+  "gate_failures": {},
+  "video": {
+   "duration_s": 50.4,
+   "size": "1080x1920",
+   "fps": "30/1"
+  },
+  "shots": 11,
+  "median_shot_s": 4.39,
+  "max_shot_s": 7.13,
+  "max_hold_s": 3.86,
+  "lufs": -14.3,
+  "judge": {
+   "hook_stops_scroll": true,
+   "ending_resolves": true,
+   "template_feel": false,
+   "frames_flagged": [
+    {
+     "n": 4,
+     "issue": "text_garbled"
+    }
+   ],
+   "notes": "Strong story-specific visuals throughout, but frame 4's label reads 'MELTS AND SQUEEZED OUT' \u2014 garbled phrasing that must be fixed."
+  },
+  "plate_qa_checked": true,
+  "plate_providers": {
+   "nvidia_nim": 12
+  },
+  "timings_s": {
+   "plan_s": 0.0,
+   "plates_s": 46.0,
+   "render_s": 0.3,
+   "assembly_s": 164.4,
+   "gate_s": 44.7,
+   "total_s": 255.9
+  }
+ },
+ {
+  "story": "cell_scale_dive",
+  "verdict": "PASS",
+  "gate_checks": {
+   "caption_identity": true,
+   "text_bounds": true,
+   "info_floor": true,
+   "visual_hold": true,
+   "asset_tier": true,
+   "audio": true,
+   "av": true,
+   "judge": true
+  },
+  "gate_failures": {},
+  "video": {
+   "duration_s": 54.5,
+   "size": "1080x1920",
+   "fps": "30/1"
+  },
+  "shots": 15,
+  "median_shot_s": 2.84,
+  "max_shot_s": 10.52,
+  "max_hold_s": 3.78,
+  "lufs": -14.1,
+  "judge": {
+   "hook_stops_scroll": true,
+   "ending_resolves": true,
+   "template_feel": false,
+   "frames_flagged": [
+    {
+     "n": 4,
+     "issue": "no_change"
+    },
+    {
+     "n": 12,
+     "issue": "no_change"
+    }
+   ],
+   "notes": "Strong watercolor visuals tied to the scale narrative with a punchy hook and payoff, but frames 4 and 12 linger on near-identical imagery from the preceding beats and need a visual beat change."
+  },
+  "plate_qa_checked": true,
+  "plate_providers": {
+   "nvidia_nim": 16
+  },
+  "timings_s": {
+   "plan_s": 0.0,
+   "plates_s": 18.0,
+   "render_s": 79.7,
+   "assembly_s": 190.6,
+   "gate_s": 56.8,
+   "total_s": 345.5
+  }
+ },
+ {
+  "story": "blackhole_clocks",
+  "verdict": "PASS",
+  "gate_checks": {
+   "caption_identity": true,
+   "text_bounds": true,
+   "info_floor": true,
+   "visual_hold": true,
+   "asset_tier": true,
+   "audio": true,
+   "av": true,
+   "judge": true
+  },
+  "gate_failures": {},
+  "video": {
+   "duration_s": 56.4,
+   "size": "1080x1920",
+   "fps": "30/1"
+  },
+  "shots": 17,
+  "median_shot_s": 3.41,
+  "max_shot_s": 5.14,
+  "max_hold_s": 4.26,
+  "lufs": -14.2,
+  "judge": {
+   "hook_stops_scroll": true,
+   "ending_resolves": true,
+   "template_feel": false,
+   "frames_flagged": [],
+   "notes": "Every frame carries story-specific imagery (black hole, warped grid, GPS satellites, falling clock at the horizon) with clean legible labels, the opening question is answered by the frozen-clock finale, and the visuals are too topic-bound to reuse as a template."
+  },
+  "plate_qa_checked": false,
+  "plate_providers": {
+   "nvidia_nim": 13,
+   "pollinations": 1
+  },
+  "timings_s": {
+   "plan_s": 86.6,
+   "plates_s": 271.1,
+   "render_s": 431.5,
+   "assembly_s": 169.5,
+   "gate_s": 47.0,
+   "total_s": 1032.8
+  }
+ }
+]

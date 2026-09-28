@@ -1,0 +1,156 @@
+{
+ "claims": [
+  {
+   "id": "f_flattened_forest",
+   "beats": ["B1", "B4"],
+   "claim": "the 1908 Tunguska event flattened roughly 2,000 square kilometres of forest (about 80 million trees) on the morning of 30 June 1908, local time about 07:17",
+   "definition": "the Podkamennaya Tunguska river region of central Siberia: post-expedition mapping (Kulik; later Florenskiy 1963 and Vasilyev's surveys) established a radial blowdown of order 2,150 square kilometres and tens of millions of trees",
+   "current_record_holder": "n/a",
+   "measured_value": "blowdown area about 2,000-2,150 square kilometres; about 80 million trees; time 30 June 1908, about 07:17 local",
+   "date_verified": "2026-09",
+   "authoritative_source": "Florenskiy, 'Preliminary results from the 1961 combined Tunguska meteorite expedition', Meteoritika (1963); Vasilyev, 'The Tunguska meteorite problem today', Planetary and Space Science (1998)",
+   "source_url": "https://doi.org/10.1016/0032-0633(94)00072-W",
+   "historically_changed": false,
+   "sources": ["Florenskiy 1963", "Vasilyev 1998", "Kulik expedition records"],
+   "verified": true,
+   "notes": "figures are survey-based; narration rounds to 'two thousand square kilometres' and cites the tree count once",
+   "nuance": {
+    "classification": "ESTABLISHED",
+    "note": "blowdown extent and date are established by repeated survey mapping; small variations between surveys exist, so narration uses rounded values"
+   }
+  },
+  {
+   "id": "f_eyewitness_vanavara",
+   "beats": ["B2"],
+   "claim": "eyewitnesses roughly sixty-five kilometres from the epicentre (the Vanavara trading post) reported feeling heat and being thrown or knocked from their seats",
+   "definition": "documented testimony collected by Kulik's expeditions from Vanavara residents: heat felt at about 65 km distance, people thrown across rooms, loud reports heard",
+   "current_record_holder": "n/a",
+   "measured_value": "testimony distance about 65 km (Vanavara); effects: felt heat, knocked down, windows and buildings shaken",
+   "date_verified": "2026-09",
+   "authoritative_source": "Kulik's expedition interview records (1927 onward); accounts summarised in Vasilyev (1998) and the standard Tunguska literature",
+   "source_url": "https://doi.org/10.1016/0032-0633(94)00072-W",
+   "historically_changed": false,
+   "sources": ["Kulik interviews", "Vasilyev 1998"],
+   "verified": true,
+   "notes": "narration states only the documented effects (heat, thrown from chairs); no distance records are broken here",
+   "nuance": {
+    "classification": "ESTABLISHED",
+    "note": "eyewitness testimony is consistent across multiple independent interviews collected decades apart; it is testimony, not instrumentation, and narration treats it as such"
+   }
+  },
+  {
+   "id": "f_global_signals",
+   "beats": ["B3"],
+   "claim": "the event registered on barographs and seismographs far from Siberia, and glowing night skies were documented across Europe and Asia for several nights afterward",
+   "definition": "anomalous pressure oscillations were recorded on barographs (including in England), seismic waves at Irkutsk observatory, and a large body of press and scientific reports document bright night skies over Europe and Asia in the following nights",
+   "current_record_holder": "n/a",
+   "measured_value": "pressure wave circled the atmosphere (registered multiple passes on barographs); seismic signal recorded at Irkutsk; bright nights reported for about 2-3 nights",
+   "date_verified": "2026-09",
+   "authoritative_source": "Whipple, 'The great Siberian meteor and the waves, seismic and aerial, which it produced', Quarterly Journal of the Royal Meteorological Society (1930); contemporary press reports (The Times, July 1908)",
+   "source_url": "https://doi.org/10.1002/qj.49705623608",
+   "historically_changed": false,
+   "sources": ["Whipple 1930", "The Times 1908 reports"],
+   "verified": true,
+   "notes": "narration says 'reports arrived' — the sky-glow record is documentary, the barograph/seismic record is instrumental",
+   "nuance": {
+    "classification": "ESTABLISHED",
+    "note": "instrumental detections (barograph, seismic) are established; the sky-glow extent relies on period reports, and narration keeps the 'documented reports' framing"
+   }
+  },
+  {
+   "id": "f_kulik_1927",
+   "beats": ["B4", "B7"],
+   "claim": "the first scientific expedition to the site (Leonid Kulik, 1927) found trees flattened in a radial fan, upright stripped 'telegraph pole' trees near ground zero, and no crater",
+   "definition": "Kulik's 1927-1928 surveys mapped the radial blowdown and repeatedly searched for a crater without success; the standing pole trees at the epicentre became the event's signature",
+   "current_record_holder": "n/a",
+   "measured_value": "expedition year 1927; radial blowdown mapped over thousands of square kilometres; crater search negative",
+   "date_verified": "2026-09",
+   "authoritative_source": "Kulik, expedition reports (1927-1930); Florenskiy (1963); Vasilyev (1998)",
+   "source_url": "https://doi.org/10.1016/0032-0633(94)00072-W",
+   "historically_changed": false,
+   "sources": ["Kulik reports", "Florenskiy 1963"],
+   "verified": true,
+   "notes": "the no-crater finding is the story's declared contradiction reveal (B4)",
+   "nuance": {
+    "classification": "ESTABLISHED",
+    "note": "the expedition findings are historical record; later radar/sonar searches (e.g., a hypothesized Lake Cheko origin) remain unproven and are not asserted"
+   }
+  },
+  {
+   "id": "f_airburst_model",
+   "beats": ["B5", "B7"],
+   "claim": "the leading model holds that a stony asteroid, tens of metres across, burst (airburst) at an altitude of roughly five to ten kilometres and flattened the forest by blast wave, never reaching the ground intact",
+   "definition": "the dominant scientific model: a small stony body entered at cosmic velocity, disintegrated in the atmosphere at 5-10 km altitude, and the airburst shock wave caused the blowdown; object size, composition and exact burst altitude remain model-dependent estimates",
+   "current_record_holder": "n/a",
+   "measured_value": "model-dependent: diameter estimates of order tens of metres (commonly 50-80 m for stony bodies), burst altitude estimates 5-10 km; energy estimates 3-30 Mt (see f_energy_range)",
+   "date_verified": "2026-09",
+   "authoritative_source": "Vasilyev, 'The Tunguska meteorite problem today', Planetary and Space Science (1998); Chyba, Thomas & Zahnle, 'The 1908 Tunguska explosion: atmospheric disruption of a stony asteroid', Nature (1993); Boslough & Crawford Sandia supercomputer models (1997)",
+   "source_url": "https://doi.org/10.1038/361040a0",
+   "historically_changed": true,
+   "sources": ["Vasilyev 1998", "Chyba et al. 1993", "Boslough & Crawford 1997"],
+   "verified": true,
+   "notes": "DELIBERATE MODEL_DEPENDENT EXERCISE: narration says 'the leading model' and 'is thought to have burst' — no definitive mechanism wording; the plan must not draw this as a definitive mechanism (planv9 confidence override expected)",
+   "nuance": {
+    "classification": "UNCERTAIN",
+    "note": "the airburst class is the leading hypothesis (strongly reinforced by Chelyabinsk 2013), but the object's size, composition and burst altitude for Tunguska specifically remain actively modelled and unobserved; alternative models (comet fragment, grazing trajectory) remain in the literature"
+   }
+  },
+  {
+   "id": "f_energy_range",
+   "beats": ["B6"],
+   "claim": "published energy estimates for the Tunguska event span roughly 3 to 30 megatons of TNT equivalent",
+   "definition": "estimates derive from barograph amplitudes, forest damage extent, seismic coupling and modelled airburst scaling; different methods give different values within the megaton range",
+   "current_record_holder": "n/a",
+   "measured_value": "energy estimates 3-30 megatons TNT; commonly cited central values 10-15 megatons",
+   "date_verified": "2026-09",
+   "authoritative_source": "Chyba, Thomas & Zahnle, Nature (1993); Vasilyev (1998); Collins, Melosh & Marcus, 'Earth impact effects program', Meteoritics & Planetary Science (2005)",
+   "source_url": "https://doi.org/10.1038/361040a0",
+   "historically_changed": false,
+   "sources": ["Chyba et al. 1993", "Vasilyev 1998", "Collins et al. 2005"],
+   "verified": true,
+   "notes": "narration gives the RANGE, never a single point value — the spread is itself the honest statement",
+   "nuance": {
+    "classification": "SUPPORTED_BUT_COMPLEX",
+    "note": "each estimate method is published, but the true value depends on the (unobserved) burst configuration; the range is the defensible claim"
+   }
+  },
+  {
+   "id": "f_largest_recorded",
+   "beats": ["B6"],
+   "claim": "Tunguska ranks as the largest impact event in recorded history",
+   "definition": "among impact events with contemporary human records (instrumental or documentary), Tunguska's energy estimate exceeds all others recorded; it is the standard benchmark for planetary-defense scenarios",
+   "current_record_holder": "Tunguska 1908 (for impact events in recorded history)",
+   "measured_value": "energy 3-30 megatons TNT (see f_energy_range); larger prehistoric events (e.g., Chixulub) are outside 'recorded history'",
+   "date_verified": "2026-09",
+   "authoritative_source": "Vasilyev (1998); NASA Planetary Defense studies; Collins, Melosh & Marcus (2005)",
+   "source_url": "https://doi.org/10.1016/0032-0633(94)00072-W",
+   "historically_changed": false,
+   "sources": ["Vasilyev 1998", "NASA PDCO literature"],
+   "verified": true,
+   "notes": "the superlative is qualified by 'recorded history' in the narration, matching the claim",
+   "nuance": {
+    "classification": "ESTABLISHED",
+    "note": "standard, qualified superlative: largest impact event in recorded history; Chelyabinsk (2013) was far smaller (~0.5 Mt)"
+   }
+  },
+  {
+   "id": "f_chelyabinsk_parallel",
+   "beats": ["B6"],
+   "claim": "the 2013 Chelyabinsk airburst — a roughly 20-metre body bursting at high altitude with about half a megaton of energy, injuring around 1,500 people by shattered glass — verified the airburst mechanism that models invoke for Tunguska",
+   "definition": "well-instrumented modern observation (satellites, infrasound, video) of a stony-asteroid airburst over a Russian city on 15 February 2013, analysed in detail and widely used to validate Tunguska airburst models",
+   "current_record_holder": "n/a",
+   "measured_value": "diameter about 20 m; energy about 500 kilotons TNT; injured about 1,500 people, mostly from window glass; burst altitude about 30 km",
+   "date_verified": "2026-09",
+   "authoritative_source": "Popova et al., 'Chelyabinsk airburst, damage assessment, meteorite recovery, and characterization', Science (2013); Brown et al., 'A 500-kiloton airburst over Chelyabinsk and an enhanced hazard from small impactors', Nature (2013)",
+   "source_url": "https://doi.org/10.1126/science.1242642",
+   "historically_changed": false,
+   "sources": ["Popova et al. 2013", "Brown et al. 2013"],
+   "verified": true,
+   "notes": "narration says Chelyabinsk 'proved the mechanism' in the sense of directly recording an airburst of the modelled class — the strongest observational support the airburst model has",
+   "nuance": {
+    "classification": "ESTABLISHED",
+    "note": "Chelyabinsk parameters are instrumentally established; it validates the airburst mechanism class, not Tunguska's exact parameters"
+   }
+  }
+ ]
+}

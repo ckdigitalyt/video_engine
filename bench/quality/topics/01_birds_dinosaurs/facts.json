@@ -1,0 +1,15 @@
+{
+  "topic_id": "01_birds_dinosaurs",
+  "title": "Birds are living dinosaurs",
+  "cluster": "deep_time",
+  "provenance": "WP0 worker-curated from general paleontology consensus; NO web access in Phase 4. Every claim needs a source check before WP4 uses this pack for scoring.",
+  "claims": [
+    {"id": "f_theropod_descent", "claim": "Birds are a living branch of theropod dinosaurs, so by modern classification birds are dinosaurs.", "nuance": "ESTABLISHED", "verified": false, "source_hint": "Gauthier 1986; Brusatte et al., Current Biology 2015 'The Origin and Diversification of Birds'"},
+    {"id": "f_k_pg_survival", "claim": "Only some beaked birds survived the end-Cretaceous extinction about 66 million years ago; all non-avian dinosaurs died out.", "nuance": "ESTABLISHED", "verified": false, "source_hint": "Field et al., Current Biology 2018"},
+    {"id": "f_archaeopteryx", "claim": "Archaeopteryx, from about 150 million years ago, had feathers together with teeth and a long bony tail.", "nuance": "ESTABLISHED", "verified": false, "source_hint": "Solnhofen fossils, 1861 onward"},
+    {"id": "f_feathered_dinos", "claim": "Feathered non-avian dinosaurs such as Sinosauropteryx have been found in Liaoning, China.", "nuance": "ESTABLISHED", "verified": false, "source_hint": "Chen et al., Nature 1998"},
+    {"id": "f_wishbone", "claim": "The bird wishbone (furcula) is a fused pair of collarbones that theropod dinosaurs such as Tyrannosaurus also had.", "nuance": "ESTABLISHED", "verified": false, "source_hint": "Nesbitt et al. 2009"},
+    {"id": "f_medullary", "claim": "Tyrannosaurus rex bone tissue contained medullary bone-like tissue, a feature otherwise known from female birds forming eggshell.", "nuance": "DEBATED_DETAIL", "verified": false, "source_hint": "Schweitzer et al., Science 2005"}
+  ],
+  "honesty_note": "Say 'birds ARE dinosaurs', not 'descended from something like dinosaurs'; do not call Tyrannosaurus 'a chicken'."
+}
