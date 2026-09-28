@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "required": ["frames", "hook_stops_scroll", "ending_resolves", "template_feel"],
+  "properties": {
+    "frames": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["n", "ok", "issue"],
+        "properties": {
+          "n": {"type": "integer", "minimum": 1},
+          "ok": {"type": "boolean"},
+          "issue": {"enum": ["none", "empty_or_flat", "subject_unrecognizable", "not_story_specific",
+                             "text_garbled", "text_unreadable", "no_change", "too_dark"]}
+        }
+      }
+    },
+    "hook_stops_scroll": {"type": "boolean"},
+    "ending_resolves": {"type": "boolean"},
+    "template_feel": {"type": "boolean"},
+    "notes": {"type": "string"}
+  }
+}

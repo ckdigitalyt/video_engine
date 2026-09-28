@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "required": ["plates"],
+  "properties": {
+    "plates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["n", "fail"],
+        "properties": {
+          "n": {"type": "integer", "minimum": 1},
+          "shows": {"type": "string"},
+          "fail": {"enum": [null, "text", "wrong_subject", "broken"]}
+        }
+      }
+    }
+  }
+}

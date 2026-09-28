@@ -21,7 +21,7 @@ Per plate:
     (provider, model, seconds, prompt) shared by every story in a batch
 
 plate_qa(): ONE vision call per story on a labelled contact sheet of all its
-plates (director.vision_ask judge chain) -> failing plates (garbled text,
+plates (director.vision_ask -> llm adapter, stage plate_qa) -> failing plates (garbled text,
 wrong subject, off-style, empty) regenerate once with a new seed. Bounded:
 one QA call + <= one regeneration round.
 """
@@ -211,7 +211,7 @@ def plate_qa(items: list, style: str, sheet_path: Path) -> dict:
                         for i, it in enumerate(items))
     ans = vision_ask(sheet_path, QA_QUESTION.format(
         style=style[:200], n=len(items), items=listing),
-        max_tokens=60 * len(items) + 200)
+        max_tokens=60 * len(items) + 200, stage="plate_qa")
     if not isinstance(ans, dict) or "plates" not in ans:
         return {"checked": False, "fail": {}, "raw": ans,
                 "reason": "judge unavailable or unparseable"}

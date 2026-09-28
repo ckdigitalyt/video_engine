@@ -310,7 +310,8 @@ def run_judge(video: Path, story: dict, beat_windows: dict, work: Path,
                             step)
     ans = vision_ask(sheet, JUDGE_Q.format(
         title=story.get("title", story["story_id"]), n=n, step=step,
-        issues=", ".join(JUDGE_ISSUES)), max_tokens=900)
+        issues=", ".join(JUDGE_ISSUES)), max_tokens=900,
+        stage="final_judge")
     if not isinstance(ans, dict) or "frames" not in ans:
         return {"ok": False, "unverified": True, "raw": ans,
                 "fails": ["judge unavailable/unparseable -> unverified"]}

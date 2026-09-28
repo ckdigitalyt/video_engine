@@ -1,0 +1,26 @@
+# llm.yaml — the ONE LLM adapter's routing (DESIGN §2.2). Callers name a stage,
+# never a provider or model. Switching providers is a change to this file only.
+version: 1
+defaults: {provider: claude_cli, model: sonnet, effort: medium, timeout_s: 240, max_attempts: 2}
+providers:
+  claude_cli: {type: claude_cli, bin: claude, fallback_model: haiku}
+  # Implemented but OFF (owner decisions 2026-09-27/28): Claude CLI is the only default provider.
+  gemini:     {type: gemini, key_env: GEMINI_API_KEY, enabled: false, model: gemini-2.5-flash}
+  openrouter: {type: openrouter, key_env: OPENROUTER_API_KEY, enabled: false, model: z-ai/glm-5.3-flash}
+stages:
+  topic_ideate:     {model: sonnet}
+  topic_score:      {model: sonnet}
+  research_extract: {model: sonnet}
+  script_write:     {model: opus, effort: high}
+  script_critic:    {model: opus}
+  fact_check:       {model: sonnet}
+  metadata_pack:    {model: sonnet}
+  visual_plan:      {model: sonnet}
+  plate_qa:         {model: sonnet, vision: true, required: true}
+  final_judge:      {model: sonnet, vision: true, required: true}
+  # Generic stages for legacy engine callers that go through the director.py shims.
+  text_misc:        {model: sonnet}
+  vision_misc:      {model: sonnet, vision: true}
+  bench_judge:      {provider: claude_cli, model: opus, pinned: true}   # never follows defaults
+chains:                          # optional ordered fallbacks; empty = provider default only
+  plate_qa: [claude_cli:sonnet, claude_cli:haiku]

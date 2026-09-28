@@ -29,7 +29,8 @@ import re
 from pathlib import Path
 
 from engine.facts import SUPERLATIVE_RE, load_facts
-from engine.director import _env_key, text_ask
+from engine.director import text_ask
+from llm.client import available as llm_available
 
 _QUALIFIER_RE = re.compile(
     r"\b(loaded|unloaded|up to|at least|at most|about|roughly|approximately|"
@@ -131,8 +132,8 @@ def check_story(story: dict, facts: dict) -> dict:
 
 # ------------------------------------------------------------------- R4 (LLM)
 def semantic_verify(story: dict, facts: dict) -> dict:
-    if not (_env_key("GEMINI_API_KEY") or _env_key("OPENROUTER_API_KEY")):
-        return {"status": "skipped", "reason": "no judge key (GEMINI/OPENROUTER)"}
+    if not llm_available("fact_check"):
+        return {"status": "skipped", "reason": "no enabled LLM provider for fact_check"}
     claims = facts.get("claims", [])
     if not claims:
         return {"status": "skipped", "reason": "no facts.json claims"}
@@ -151,7 +152,8 @@ def semantic_verify(story: dict, facts: dict) -> dict:
         '"reason": "<one line>"}]\n\n'
         f"NARRATION BEATS:\n{beats_txt}\n\nCLAIM ENTRIES:\n"
         f"{json.dumps(claims, indent=1)}")
-    content = text_ask(prompt, temperature=0.1, max_tokens=2000)
+    content = text_ask(prompt, temperature=0.1, max_tokens=2000,
+                       stage="fact_check")
     if content is None:
         return {"status": "error", "reason": "all judge providers failed"}
     try:

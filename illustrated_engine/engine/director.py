@@ -7,8 +7,8 @@ EDITORIAL visual choice explicit and gate-able:
   §2  one_second_comprehension for diagram/comparison/explanatory frames
   §5  visual mode selection (CINEMATIC never the default)
   §8  hero-asset semantic contract; subject_correctness > style_score
-  §9  optional semantic asset validation via a vision model (DeepSeek
-      vision endpoint); if no key, caller falls back to human inspection
+  §9  optional semantic asset validation via a vision model (llm adapter,
+      stage vision_misc); if unavailable, caller falls back to human inspection
   §12 narration-visual evidence type; ATMOSPHERIC/DECORATIVE never carry
       a factual claim unless justified
   §13 motion classification; explanatory beats prefer INFORMATION_MOTION
@@ -20,10 +20,8 @@ No new QA subsystems; nothing here duplicates technical/visual/editorial QA.
 
 from __future__ import annotations
 
-import base64
-import json
-import os
 import re
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -48,245 +46,67 @@ EXPLANATORY_MOTION = ("INFORMATION_MOTION", "REVEAL", "TRANSFORMATION",
 ONE_SECOND_MODES = ("DIAGRAM", "COMPARISON", "SPLIT", "SCALE", "TIMELINE",
                     "TRANSFORMATION")
 
-GEMINI_MODEL = "gemini-2.5-flash"  # judge primary (free tier)
-# Judge fallback: GLM 5.3 Flash via OpenRouter — owner directive 2026-09-12
-# retired DeepSeek from the judge stack entirely (dead 401 key).
-GLM_MODEL = "z-ai/glm-5.3-flash"
-GLM_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 _ONE_SECOND_GATE = 70.0
 _CINEMATIC_SHARE_MAX = 0.5  # §5: cinematic must not become the default
 
 
 # ----------------------------------------------------------- vision (§9) ----
+# WP1: every LLM call goes through the ONE adapter (llm.client.ask); provider,
+# model and fallbacks live in configs/llm.yaml, never here. text_ask/vision_ask
+# keep their legacy contract (None on failure, callers treat that as an explicit
+# error/skip, never a pass) so the engine modules that import them are unchanged.
 
-def _env_key(name: str) -> str:
-    """Named key from env or repo .env (same pattern as tts.py)."""
-    v = os.environ.get(name)
-    if v:
-        return v
-    envp = REPO / ".env"
-    if not envp.exists():
-        return ""
-    for line in envp.read_text().splitlines():
-        line = line.strip()
-        if not line or line.startswith("#") or "=" not in line:
-            continue
-        k, val = line.split("=", 1)
-        if k.strip() == name and val.strip().strip("\"'"):
-            return val.strip().strip("\"'")
-    return ""
+if str(REPO) not in sys.path:
+    sys.path.insert(0, str(REPO))
+
+from llm import client as _llm  # noqa: E402
+from llm.env import env_key as _env_key  # noqa: E402,F401  (re-exported; semantic_qa imports it)
+from llm.jsonutil import extract_json as _extract_json  # noqa: E402
+from llm.types import LLMSchemaError, LLMUnavailable  # noqa: E402
+
+# stages whose output has a schema in llm/schemas/
+_STAGE_SCHEMAS = {"plate_qa": "plate_qa", "final_judge": "final_judge"}
 
 
-_LAST_GEMINI_CALL = {"t": 0.0}
-_GEMINI_COOLDOWN = {"until": 0.0}  # on quota 429: skip Gemini 1h, GLM carries
+def text_ask(prompt: str, temperature: float = 0.1, max_tokens: int = 2000,
+             stage: str = "text_misc"):
+    """Text judge via the adapter -> raw text, or None when unavailable.
 
-
-def _vision_gemini(image_path, question: str, max_tokens: int):
-    """Gemini free-tier fallback (approved alternative). -> text or None.
-
-    Rate-limited politely: >=4 s between calls, backoff on 429/5xx —
-    the free tier rejects bursts and an UNVERIFIED storm helps nobody.
+    temperature/max_tokens only affect API providers (the Claude CLI has neither).
     """
-    key = _env_key("GEMINI_API_KEY")
-    if not key:
-        return None
-    import time as _t
-    from urllib.error import HTTPError
-    if _t.time() < _GEMINI_COOLDOWN["until"]:
-        return None
-
     try:
-        import urllib.request
-
-        gap = _t.time() - _LAST_GEMINI_CALL["t"]
-        if gap < 4.0:
-            _t.sleep(4.0 - gap)
-        b64 = base64.b64encode(Path(image_path).read_bytes()).decode()
-        body = {"contents": [{"parts": [
-            {"text": question},
-            {"inline_data": {"mime_type": "image/png", "data": b64}},
-        ]}],
-            "generationConfig": {"temperature": 0,
-                                 "maxOutputTokens": max(1024, max_tokens * 3),
-                                 # 2.5-flash is a thinking model — without an
-                                 # explicit budget the answer arrives empty
-                                 "thinkingConfig": {"thinkingBudget": 0}}}
-        url = ("https://generativelanguage.googleapis.com/v1beta/models/"
-               f"{GEMINI_MODEL}:generateContent?key={key}")
-        for attempt in range(3):
-            _LAST_GEMINI_CALL["t"] = _t.time()
-            req = urllib.request.Request(
-                url, data=json.dumps(body).encode(),
-                headers={"Content-Type": "application/json"})
-            try:
-                with urllib.request.urlopen(req, timeout=90) as r:
-                    data = json.loads(r.read())
-                parts = data["candidates"][0]["content"]["parts"]
-                return " ".join(p.get("text", "") for p in parts).strip() or None
-            except HTTPError as e:
-                if e.code in (429, 500, 503) and attempt < 2:
-                    _t.sleep(12.0 * (attempt + 1))
-                    continue
-                if e.code == 429:
-                    _GEMINI_COOLDOWN["until"] = _t.time() + 3600.0
-                raise
-    except Exception:
+        res = _llm.ask(stage, prompt, schema=_STAGE_SCHEMAS.get(stage),
+                       temperature=temperature, max_tokens=max_tokens)
+    except (LLMUnavailable, LLMSchemaError) as e:
+        _llm.warn(f"{stage}: {type(e).__name__}: {str(e)[:200]}")
         return None
-    return None
+    return res.text or None
 
 
-def _vision_glm(image_path, question: str, max_tokens: int):
-    """GLM 5.3 Flash judge via OpenRouter (OpenAI-compatible). -> text or None."""
-    key = _env_key("OPENROUTER_API_KEY")
-    if not key:
-        return None
-    try:
-        import time as _t
-        import urllib.request
-        from urllib.error import HTTPError
+def vision_ask(image_path, question: str, max_tokens: int = 400,
+               stage: str = "vision_misc"):
+    """One vision question -> parsed JSON dict, or None if unavailable/failed.
 
-        b64 = base64.b64encode(Path(image_path).read_bytes()).decode()
-        body = {
-            "model": GLM_MODEL,
-            "temperature": 0,
-            "max_tokens": max(512, max_tokens),
-            "reasoning": {"effort": "low"},  # see _text_glm (V15)
-            "messages": [{
-                "role": "user",
-                "content": [
-                    {"type": "text", "text": question},
-                    {"type": "image_url",
-                     "image_url": {"url": f"data:image/png;base64,{b64}"}},
-                ],
-            }],
-        }
-        req = urllib.request.Request(
-            GLM_URL, data=json.dumps(body).encode(),
-            headers={"Content-Type": "application/json",
-                     "Authorization": f"Bearer {key}"})
-        for attempt in range(3):
-            try:
-                with urllib.request.urlopen(req, timeout=120) as r:
-                    data = json.loads(r.read())
-                msg = data["choices"][0]["message"]
-                return ((msg.get("content") or "").strip()
-                        or None)
-            except HTTPError as e:
-                if e.code in (429, 500, 502, 503) and attempt < 2:
-                    _t.sleep(8.0 * (attempt + 1))
-                    continue
-                raise
-    except Exception:
-        return None
-    return None
-
-
-def _text_gemini(prompt: str, temperature: float, max_tokens: int):
-    """Gemini text judge (generateContent). -> text or None."""
-    key = _env_key("GEMINI_API_KEY")
-    if not key:
-        return None
-    try:
-        import time as _t
-        import urllib.request
-        from urllib.error import HTTPError
-        if _t.time() < _GEMINI_COOLDOWN["until"]:
-            return None
-
-        body = {"contents": [{"parts": [{"text": prompt}]}],
-                "generationConfig": {"temperature": temperature,
-                                     "maxOutputTokens": max(1024, max_tokens * 3),
-                                     "thinkingConfig": {"thinkingBudget": 0}}}
-        url = ("https://generativelanguage.googleapis.com/v1beta/models/"
-               f"{GEMINI_MODEL}:generateContent?key={key}")
-        for attempt in range(3):
-            try:
-                req = urllib.request.Request(
-                    url, data=json.dumps(body).encode(),
-                    headers={"Content-Type": "application/json"})
-                with urllib.request.urlopen(req, timeout=120) as r:
-                    data = json.loads(r.read())
-                parts = data["candidates"][0]["content"]["parts"]
-                return " ".join(p.get("text", "") for p in parts).strip() or None
-            except HTTPError as e:
-                if e.code in (429, 500, 503) and attempt < 2:
-                    _t.sleep(12.0 * (attempt + 1))
-                    continue
-                if e.code == 429:
-                    _GEMINI_COOLDOWN["until"] = _t.time() + 3600.0
-                raise
-    except Exception:
-        return None
-    return None
-
-
-def _text_glm(prompt: str, temperature: float, max_tokens: int):
-    """GLM 5.3 Flash text judge via OpenRouter. -> text or None."""
-    key = _env_key("OPENROUTER_API_KEY")
-    if not key:
-        return None
-    try:
-        import urllib.request
-
-        # V15: GLM-5.3-flash is a reasoning model — without a budget it can
-        # spend the WHOLE max_tokens on hidden reasoning and return empty
-        # content (verified: 6000/6000 reasoning tokens, content ""), which
-        # silently turned the fallback judge into a no-op for long prompts.
-        body = {"model": GLM_MODEL, "temperature": temperature,
-                "max_tokens": max(512, max_tokens),
-                "reasoning": {"effort": "low"},
-                "messages": [{"role": "user", "content": prompt}]}
-        req = urllib.request.Request(
-            GLM_URL, data=json.dumps(body).encode(),
-            headers={"Content-Type": "application/json",
-                     "Authorization": f"Bearer {key}"})
-        with urllib.request.urlopen(req, timeout=300) as r:
-            data = json.loads(r.read())
-        return (data["choices"][0]["message"].get("content") or "").strip() or None
-    except Exception:
-        return None
-
-
-def text_ask(prompt: str, temperature: float = 0.1, max_tokens: int = 2000):
-    """Text judge chain: Gemini primary, GLM 5.3 Flash fallback.
-
-    None only when both judges fail — callers must treat that as an explicit
-    error/skip, never as a pass.
+    Used ONLY as an acceptance check on high-value assets/frames (§9). If it
+    returns None the caller keeps the explicit human-inspection path.
+    Stages with a schema (plate_qa, final_judge) are schema-validated by the
+    adapter; other stages get the V13 M6 tolerant-parse ladder.
     """
-    return (_text_gemini(prompt, temperature, max_tokens)
-            or _text_glm(prompt, temperature, max_tokens))
-
-
-def vision_ask(image_path, question: str, max_tokens: int = 400):
-    """One vision question -> parsed JSON dict, or None if no path/failure.
-
-    Judge chain (2026-09-12 owner directive): Gemini primary, GLM 5.3 Flash
-    (OpenRouter) fallback; DeepSeek retired. Used ONLY as an acceptance check
-    on high-value assets/frames (§9). If it returns None the caller keeps the
-    explicit human-inspection path.
-    """
-    text = _vision_gemini(image_path, question, max_tokens)
-    if text is None:
-        text = _vision_glm(image_path, question, max_tokens)
+    try:
+        res = _llm.ask(stage, question, images=[Path(image_path)],
+                       schema=_STAGE_SCHEMAS.get(stage), max_tokens=max_tokens)
+    except (LLMUnavailable, LLMSchemaError) as e:
+        _llm.warn(f"{stage}: {type(e).__name__}: {str(e)[:200]}")
+        return None
+    if res.data is not None:
+        return res.data
+    text = res.text
     if not text:
         return None
-    # V13 M6 judge-robustness: models return fenced, prose-wrapped,
-    # trailing-comma or truncated JSON; a brittle parse turns a reachable
-    # judge into a phantom UNVERIFIED. Repair ladder, then prose fallback.
-    m = re.search(r"\{.*\}", text, re.S)
-    if m:
-        for cand in (m.group(), re.sub(r",\s*([}\]])", r"\1", m.group())):
-            try:
-                return json.loads(cand)
-            except Exception:
-                pass
-    m2 = re.search(r"\{[^{}]*\}", text, re.S)
-    if m2:
-        try:
-            return json.loads(m2.group())
-        except Exception:
-            pass
+    parsed = _extract_json(text)
+    if isinstance(parsed, dict):
+        return parsed
     um = re.search(r"\b(PASS|FAIL)\b", text, re.I)
     if um:
         return {"verdict": um.group(1).upper(), "raw": text}

@@ -3,8 +3,8 @@
 V14 derived visuals from keyword `if`s (`_subject_kind`), clause-chopped the
 image-prompt field into process nodes, and put raw `visual_question` /
 `visual_answer` prompt text on screen. The BVP replaces that with ONE cached
-LLM call per story (director.text_ask judge chain: Gemini 2.5-flash ->
-GLM-5.3-flash) that returns, per beat, 1-3 SHOTS:
+LLM call per story (director.text_ask -> llm adapter, stage visual_plan)
+that returns, per beat, 1-3 SHOTS:
 
   plate         {subject, composition, camera, headline?, number?, label?}
   zoom_through  {levels: [{subject, label, word}] x2-4}   (scale descent)
@@ -498,7 +498,10 @@ def make_plan(story: dict, bible: dict, *, use_llm: bool = True,
     calls, errors, plan_last = 0, [], None
     if use_llm:
         if ask is None:
-            from engine.director import text_ask as ask
+            from functools import partial
+
+            from engine.director import text_ask
+            ask = partial(text_ask, stage="visual_plan")
         prompt = build_prompt(story, bible)
         for attempt in range(2):
             p = prompt if attempt == 0 else (
