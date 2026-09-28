@@ -99,7 +99,8 @@ Orchestrator: Jade (Sonnet 5, Discord #illustration-video)
 ### WP status
 - WP0: DONE f3022a7 (baseline.md/json + bench/quality; topic packs 1 and 3 unverified)
 - WP1: DONE cacb1c4 (adapter) + be12e92 (DeepSeek removal) + 250d4bd (CHANGELOG) + d0a6c36 (acceptance report bench/ab/wp1.md)
-- WP2–WP14: pending
+- WP2: DONE cf70724 (code+tests+CHANGELOG) + acceptance report bench/ab/wp2.md
+- WP3–WP14: pending
 
 ## Phase 4 run 1 summary (2026-09-28) — WP0 + WP1 done, stopped before WP2
 1. Commits: WP0 f3022a7; WP1 cacb1c4 (llm/ adapter, configs/llm.yaml, director shims), be12e92 (DeepSeek removal from tracked code/config), 250d4bd (CHANGELOG), d0a6c36 (acceptance report).
@@ -123,3 +124,15 @@ Orchestrator: Jade (Sonnet 5, Discord #illustration-video)
 ## Subtitle test baseline (verified 2026-09-28)
 - tests/test_subtitles.py at 3f77256 (pre-WP0, separate worktree) vs 77f28c8 (HEAD): IDENTICAL 4 failures / 33 pass: TestGenerate::test_line_assignment, TestRendererClips::test_long_line_splits_into_phrase_clips, TestEdgeCases::test_very_long_narration, TestConfig::test_default_config_keys_exist. Not caused by WP1. (Earlier "5F" was a combined subtitles+engine_hardening count.) These are the known baseline.
 - Housekeeping: ~/phase4_out/wp1/blackhole deleted (samples kept); research/phase2/llm_compare.py header-marked broken since WP1.
+
+## Phase 4 run 2 summary (2026-09-28) — WP2 done, stopped before WP3
+1. Commits: cf70724 (WP2 code, tests, CHANGELOG), then a docs commit with bench/ab/wp2.md + this summary.
+2. Tests: new illustrated_engine/tests/test_wp2_gate.py 11/11; test_v15 all pass; illustrated_engine/tests 31 pass; root suite 58F+5E, IDENTICAL to HEAD before WP2 (diffed in a clean worktree), no new failures.
+3. Known-baseline correction: the pre-existing root-suite failures span 17 files (visual_director 16, pixabay 7, effects 6, renderer 6, timeline_builder 5, subtitles 4, ...), far more than the earlier list. test_llm_adapter shim test fails in the full run only (order dependence, also before WP2).
+4. Verdict: PASS. "checked:false" => HOLD; Phase 2 watermark plate fixture => FAIL (even if vision QA passed or was skipped); Phase 2 blackhole re-gated PASS -> FAIL (stamped plate + 9 boxes in right rail).
+5. Behaviour: verdicts PASS/HOLD/FAIL; gate OCRs every plate itself (tesseract CLI, edge strips, stamp tokens/domains, sidecar-cached); one critical judge frame (garbled text/watermark/overlap) fails; right-rail + caption safe-zone checks.
+6. No fallback/retry path removed or narrowed (regen round, provider and judge chains untouched).
+7. Samples (~/phase4_out/wp2/): regate_phase2_blackhole.json, run_gate_phase2_blackhole.json, phase2_blackhole_plates_montage.jpg, suite_{before,after}.txt. No Claude calls, no renders, no large work dirs.
+8. Deviations: kept v15_gate.py/v15_plates.py names (no v16 rename); top-220/bottom-1440 insets, 84 px caption size and 1 s/2 s judge cadence deferred to WP6/WP5/S11.
+9. OWNER FLAG: every V15 render now HOLDs on the right rail (labels sit at x~1010, y~800) until WP6/WP7 re-layout. OCR only catches known stamps; other watermarks need the vision call.
+10. Open: research/phase2/llm_compare.py still broken; topic packs 1 and 3 still need source-check before WP4 scoring; next is WP3 (voice layer, needs faster-whisper install).
