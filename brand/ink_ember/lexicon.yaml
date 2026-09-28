@@ -22,3 +22,4 @@ furcula:         {respell: "furkyula", heard_as: ["fercula", "firkula"]}
 theropod:        {respell: "theer-uh-pod", heard_as: ["therapod"]}
 betelgeuse:      {respell: "beetel-jooss", heard_as: ["beetlejuice", "beetle juice"]}
 olbers:          {respell: "ollberz", heard_as: ["albers"]}
+kulik:           {phonemes: "kˈuːlɪk", respell: "koo-lik", heard_as: ["koolik"]}   # WP4: Leonid Kulik (Tunguska); ASR-checked only, not listened to

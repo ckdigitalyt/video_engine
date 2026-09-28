@@ -174,6 +174,17 @@ def test_hook_rules():
     assert any("hook_headline" in e for e in S.check_script(sc))
 
 
+def test_narration_digits_are_voice_safe():
+    sc = good_script()
+    assert S.check_script(sc) == []                       # "30 June 1908" (a date/year) is fine
+    sc["sentences"][2]["text"] = "Roughly 2,000 square kilometres of forest went flat."
+    assert any(e.startswith("digits") for e in S.check_script(sc))
+    sc["sentences"][2]["text"] = "About 80000000 trees fell."
+    assert any(e.startswith("digits") for e in S.check_script(sc))
+    sc["sentences"][2]["text"] = "It was 2.5 times bigger."
+    assert any(e.startswith("digits") for e in S.check_script(sc))
+
+
 def test_role_and_loop_rules():
     sc = good_script()
     sc["sentences"][3]["role"] = "hook"

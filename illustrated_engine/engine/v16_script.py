@@ -75,6 +75,10 @@ def check_script(script: dict) -> list:
         errs.append("roles: exactly one hook role, on the first sentence")
     if roles[-1] != "payoff":
         errs.append("roles: the last sentence must have role payoff")
+    bad = [t for t in re.findall(r"\d[\d,.]*\d|\d", narration(script))
+           if "," in t or "." in t or len(t) > 4]
+    if bad:
+        errs.append(f"digits: write quantities as words, the voice misreads {bad}")
     if CTA.search(sents[-1]["text"]):
         errs.append("loop: the last sentence is a goodbye/call to action; it must flow into the first")
     if sents[-1]["text"].rstrip().endswith("?"):
