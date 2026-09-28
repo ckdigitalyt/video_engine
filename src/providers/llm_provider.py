@@ -23,7 +23,7 @@ from src.utils.config import get_config
 
 
 # ── ZAI GLM stable leading prompt (cost/prompt hygiene) ─────────────────────
-# GLM-5.3-flash replaces DeepSeek (2026-08-30, user directive). A stable
+# GLM-5.3-flash is the paid last resort. A stable
 # leading system message keeps the input prefix byte-identical across calls
 # and runs — keep this constant byte-identical: no timestamps, no topic, no
 # dynamic content.

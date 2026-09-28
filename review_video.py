@@ -150,7 +150,7 @@ def _upload_and_review(video_path: str, script_text: str, model: str = "gemini-2
     raise RuntimeError(
         "Video review failed: all Gemini flash variants unavailable "
         f"(last error: {last_err}). Vision-required review will NOT fall back "
-        "to text-only models (Mistral/DeepSeek cannot see video)."
+        "to text-only models (text-only models cannot see video)."
     )
 
 

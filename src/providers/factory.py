@@ -73,8 +73,7 @@ class ProviderFactory:
         (whichever have keys) -> zai glm last.  Lets the pipeline use
         Gemini/Grok as much as possible so paid-chain cost stays minimal.
         Chain order (configured): primary first, then roles.chain, with
-        zai always last. (2026-08-30: the final link was deepseek, now
-        zai glm-5.3-flash — chain length unchanged by the swap.)
+        zai always last. (zai glm-5.3-flash is the final link.)
         """
         from src.providers.llm_provider import ChainLLMProvider
 

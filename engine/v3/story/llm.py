@@ -1,7 +1,7 @@
 """llm.py — Thin LLM client with an ordered fallback chain (Wave 3).
 
 Chain (2026-08-30: ZAI GLM-5.3-flash first, then Gemini → OpenRouter →
-Groq → Mistral — GLM replaces DeepSeek in the head slot; the chain keeps
+Groq → Mistral — GLM holds the head slot; the chain keeps
 its length). Every caller must ALSO provide a deterministic offline
 fallback — this module raises :class:`LLMError` when every provider fails
 so callers can degrade.
@@ -163,7 +163,7 @@ def _groq(messages: list[dict], temperature: float, max_tokens: int) -> str:
 
 # Ordered fallback chain (ZAI GLM first, 2026-08-30; Mistral
 # added 2026-08-30 when balances ran dry mid-production). GLM-5.3-flash
-# replaces DeepSeek in the head slot — chain length preserved.
+# holds the head slot — chain length preserved.
 CHAIN: list[tuple[str, Any]] = [
     ("zai", _zai),
     ("gemini", _gemini),

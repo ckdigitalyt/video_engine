@@ -24,18 +24,18 @@ from src.planner.editorial_planner import EditorialPlanner
 print("=" * 60)
 print("BLACK HOLE DOCUMENTARY")
 print("Pipeline: EditorialPlanner → VisualDirector → TimelineBuilder → Render")
-print(f"LLM: Gemini (primary), DeepSeek (fallback)")
+print(f"LLM: Gemini (primary), ZAI GLM (fallback)")
 print(f"Motion=OFF | Transitions=CUT | Beat mode ON")
 print("=" * 60)
 
 topic = "Black Holes"
 lib = VisualKnowledgeLibrary()
 lib.load_all()
-# Use DeepSeek for editorial planning since Gemini free tier is quota-exhausted
+# Use ZAI GLM for editorial planning since Gemini free tier is quota-exhausted
 from src.providers.factory import ProviderFactory
 ep = EditorialPlanner(
     knowledge_library=lib,
-    provider=ProviderFactory().get_llm_provider("deepseek"),
+    provider=ProviderFactory().get_llm_provider("zai"),
 )
 
 scenes_data = [

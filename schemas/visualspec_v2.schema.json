@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "VisualSpec v2",
-  "description": "The semantic visual specification for the autonomous engine (JADE_TO_DO v0.3 §4–§10). Adds the world model, representation, hero mechanism, semantic actions and per-beat visual explanation scores on top of v1. DeepSeek decides WHAT/WHY/WHEN; the deterministic compiler decides HOW.",
+  "description": "The semantic visual specification for the autonomous engine (JADE_TO_DO v0.3 §4–§10). Adds the world model, representation, hero mechanism, semantic actions and per-beat visual explanation scores on top of v1. The LLM decides WHAT/WHY/WHEN; the deterministic compiler decides HOW.",
   "type": "object",
   "required": ["version", "beats"],
   "properties": {

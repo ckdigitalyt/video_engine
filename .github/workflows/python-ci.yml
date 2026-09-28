@@ -32,7 +32,6 @@ jobs:
         env:
           # Provide dummy API keys so provider imports do not fail.
           # Real keys are never used — all external APIs are mocked in tests.
-          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY || 'ci-dummy-key' }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY || 'ci-dummy-key' }}
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY || 'ci-dummy-key' }}
         run: |

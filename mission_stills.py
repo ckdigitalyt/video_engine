@@ -235,7 +235,7 @@ def _wikimedia_still_title(query: str, out_path: str) -> tuple[str, str]:
     return "", ""
 
 
-# v25 (Gemini/DeepSeek review CRITICAL — 'AI-generated female faces',
+# v25 (dual-model review CRITICAL — 'AI-generated female faces',
 # 'man with a microchip'): subject guards for AI still prompts.  Generic
 # prompts let the generator invent people/faces for spacecraft scenes;
 # append a hard no-people/no-text guard unless the scene is explicitly
@@ -331,7 +331,7 @@ _AI_BREAKER_COOLDOWN_S = 300.0
 
 def _ai_still(prompt: str, out_path: str, seed: Optional[int] = None) -> str:
     from src.providers.image_gen import NvidiaNimProvider, PollinationsProvider
-    # v25 (Gemini/DeepSeek review CRITICAL — 'AI-generated female faces',
+    # v25 (dual-model review CRITICAL — 'AI-generated female faces',
     # 'man with a microchip'): subject guards for documentary stills.
     # Generic prompts let the generator invent people; keep people OUT of
     # planetary/spacecraft scenes unless the narration is explicitly about
@@ -389,7 +389,7 @@ PINNED_STILLS_BY_TOPIC = {
 def _auto_crop_borders(image_path: str, out_path: str) -> str:
     """Auto-crop empty/jagged black border bands from extreme-aspect mosaics.
 
-    DeepSeek pro 88 review (CRITICAL): the Andromeda Hubble M31 mosaic
+    model review (score 88) (CRITICAL): the Andromeda Hubble M31 mosaic
     (wikimedia 42208x9870) showed jagged black edges when the Ken Burns pan
     moved into empty border territory.  Wide mosaics/panoramas often carry
     large near-black border bands; crop to the content bounding box so the
@@ -448,7 +448,7 @@ def _auto_crop_borders(image_path: str, out_path: str) -> str:
 def _crop_mirror_bands(image_path: str, out_path: str) -> str:
     """Crop baked-in mirrored border bands from a still at INGEST time.
 
-    v32 (DeepSeek-validated): AI image providers occasionally emit a
+    v32 (review-validated): AI image providers occasionally emit a
     mirrored/outpainted border band (the classic "inpaint seam").  The
     corrected detector (:func:`src.qa.visual_artifact_check.mirror_band_scan`)
     finds contiguous pixel-faithful flip runs at any depth 4..32px; any
@@ -852,7 +852,7 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                     style_bible.placed_style_tokens[os.path.basename(got)] = query
             if not got:
                 continue
-            # ── BORDER GATE (v19n, DeepSeek 88 CRITICAL) ─────────────
+            # ── BORDER GATE (v19n, review 88 CRITICAL) ─────────────
             # Wide mosaics/panoramas (e.g. the 42208x9870 Andromeda Hubble
             # M31 mosaic) carry jagged empty borders that the Ken Burns pan
             # exposes as black edges.  Auto-crop to the content bbox before
@@ -871,7 +871,7 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                 elif cropped and cropped != got:
                     got = cropped
                     print(f"  [border] using cropped {os.path.basename(got)}")
-            # ── MIRROR GATE (v32, DeepSeek-validated) ────────────────
+            # ── MIRROR GATE (v32, review-validated) ────────────────
             # AI stills occasionally carry a baked-in mirrored border band
             # (outpainting/inpaint seam).  The v13 video-level metric
             # false-positived on smooth content (Wow! Signal v31 rerun:
@@ -1053,7 +1053,7 @@ def stage_stills_visuals(scenes_data: list[dict], out_dir: str,
                 else:
                     vcam["zoom_start"], vcam["zoom_end"] = vcam.get("zoom_start", 1.0) or 1.0, 1.22
                     vmove = "push_in"
-                # v22 (DeepSeek root-cause review): resolve a compatible move
+                # v22 (root-cause review): resolve a compatible move
                 # BEFORE rendering — the clip must be rendered with the
                 # corrected camera params.  v21 computed safe_v AFTER
                 # _kenburns(), so the rendered clip kept the jarring move and
@@ -1240,7 +1240,7 @@ def _pace_pad_scenes(scenes_data: list[dict], audio_dir: str,
         words = len(text.split())
         if words == 0:
             continue
-        # v25 (Gemini/DeepSeek review CRITICAL — 'voice jitter / abrupt
+        # v25 (dual-model review CRITICAL — 'voice jitter / abrupt
         # stutter'): anchor pauses to the ORIGINAL file.  The old code
         # re-read the already-padded file every pass and recomputed
         # ``idx = n * frac`` on the GROWN length, so pass 2+ drifted past
@@ -1356,7 +1356,7 @@ def _smooth_stem_audio(audio_dir: str, scenes_data: list[dict],
                        audio_durations: list[float]) -> list[float]:
     """v25: gentle amplitude smoothing on narration stems.
 
-    Gemini/DeepSeek review (Venus v3): \"voice is jittery and abruptly
+    dual-model review (Venus v3): \"voice is jittery and abruptly
     stuttering\" — amplitude jitter (sharp RMS transitions) inside Fish
     TTS stems, flagged at 38.8-54.3s in the mix.  Deterministic fix:
     light 2:1 compressor with fast attack / slow release evens the
@@ -2120,7 +2120,7 @@ def main():
     # facts).  Deterministic fix for "narration feels too fast".
     audio_durations = _pace_pad_scenes(scenes_data, "cache/audio", audio_durations)
 
-    # v25 (Gemini/DeepSeek review: "voice jittery / abruptly stuttering"):
+    # v25 (dual-model review: "voice jittery / abruptly stuttering"):
     # gentle amplitude smoothing on the narration stems AFTER pacing (so
     # the compressor evens the TTS loudness spikes without fighting the
     # inserted pauses), then record final voice hashes on the bytes that
@@ -2440,7 +2440,7 @@ def main():
 
     # ── v27 (Oumuamua feedback req 4): DUAL-MODEL REVIEW ─────────────
     # The per-iteration review above is Gemini Flash only.  Oumuamua
-    # feedback: "get the video reviewed by Gemini AND DeepSeek Pro".
+    # feedback: "get the video reviewed by Gemini AND a second model".
     # Run the detailed dual review (Gemini vision on sampled frames +
     # ZAI GLM on script + visual transcript) once on the FINAL
     # video, save review_gemini.json / review_zai.json into out_dir,

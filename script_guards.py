@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """script_guards.py — Algorithm-level script quality guards (v40).
 
-Implemented from the 2026-08-16 dual review (Gemini 53 + DeepSeek 68 on
+Implemented from the 2026-08-16 dual review (Gemini 53 + a second model 68 on
 the Betelgeuse cartoon video).  These run on EVERY video, not just that
 one:
 
@@ -11,7 +11,7 @@ one:
    Detects consecutive-scene sentence overlap and rewrites the later
    scene so the second half never stalls.
 
-2. hedge_uncertain_claims   — DeepSeek high finding: "548 light-years"
+2. hedge_uncertain_claims   — second-model high finding: "548 light-years"
    stated as fact, "radiation shreds the ozone layer" too definitive.
    Hedges distance/measurement claims with "about/approximately" and
    softens definitive effect verbs with "could" when the research pack
@@ -119,7 +119,7 @@ _MEASURE_RE = re.compile(
     re.IGNORECASE,
 )
 # Definite effect verbs on systems/structures -> soften with "could" when
-# they directly follow a radiation/heat cause (DeepSeek: too assertive).
+# they directly follow a radiation/heat cause (review: too assertive).
 _EFFECT_RE = re.compile(
     r"\b(radiation|ultraviolet|uv|heat|blast|shockwave)\s+"
     r"(shreds|floods|tears|burns|strips|destroys|kills|erases)\b",

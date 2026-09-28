@@ -86,10 +86,8 @@ pipeline:
     # the next provider in the chain on each call.
     # v37 (ckdigital direction 2026-08-13): default is GEMINI37 (gemini-3.7-flash, free).
     # 3.7 verified live (model listed + completion OK; intermittent 503 high-demand).
-    # ZAI glm-5.3-flash replaced paid DeepSeek (2026-08-30, user directive:
-    # "Don't use deepseek at all anywhere") — the free chain (3.7 -> 2.5 ->
-    # groq/openrouter) is tried FIRST and zai glm is appended LAST by the
-    # factory (paid last resort). Chain length unchanged by the swap.
+    # The free chain (3.7 -> 2.5 -> groq/openrouter) is tried FIRST and zai glm
+    # is appended LAST by the factory (paid last resort).
     default: "gemini37"
     # Fallback provider when the default is unavailable (zai last resort)
     fallback: "zai"

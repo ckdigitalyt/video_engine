@@ -13,7 +13,7 @@ narration wording is verified, not just the general concept:
   R3 PERSPECTIVE_REQUIRED     perspective-sensitive predicates ("time runs
                               slower", "appears") without an observer
                               qualifier ("as seen by", "as measured by")
-  R4 EXACT_WORDING            DeepSeek verifies each claim entry against the
+  R4 EXACT_WORDING            the LLM judge (stage fact_check) verifies each claim entry against the
                               narration wording: a source supporting the
                               general concept is insufficient if the exact
                               narration overstates it

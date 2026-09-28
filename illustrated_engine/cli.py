@@ -746,11 +746,11 @@ def cmd_semqa(args):
     print(f"semqa {args.story} -> {out}")
     d = res["deterministic"]
     print(f"  deterministic: {'PASS' if d['deterministic_pass'] else 'FAIL'} (FAILs {d['counts']['FAIL']}, WARNs {d['counts']['WARN']})")
-    ds = res["deepseek"]
+    ds = res["judges"]
     if ds.get("status") == "ok":
-        print(f"  exact-wording (DeepSeek): {'PASS' if ds.get('exact_wording_pass') else 'FAIL'} - overstated {ds.get('n_overstated')}/{ds.get('n_claims')}")
+        print(f"  exact-wording (LLM judge): {'PASS' if ds.get('exact_wording_pass') else 'FAIL'} - overstated {ds.get('n_overstated')}/{ds.get('n_claims')}")
     else:
-        print(f"  exact-wording (DeepSeek): {ds.get('status')} ({ds.get('reason', '')})")
+        print(f"  exact-wording (LLM judge): {ds.get('status')} ({ds.get('reason', '')})")
     for f in d["findings"][:8]:
         print(f"  [{f['severity']}] {f['rule']} {f['beat_id']}: {f['match']} | {f['sentence'][:70]}")
     print(f"  SEMANTIC_PASS: {res['SEMANTIC_PASS']}")
@@ -1004,8 +1004,8 @@ def cmd_qa7full(args):
         "V7_EDITORIAL_PASS": qa7_res["V7_EDITORIAL_PASS"],
         "semantic_factual": {"deterministic_pass": sem["deterministic"]["deterministic_pass"],
                              "counts": sem["deterministic"]["counts"],
-                             "deepseek_status": sem["deepseek"].get("status"),
-                             "exact_wording_pass": sem["deepseek"].get("exact_wording_pass")},
+                             "judge_status": sem["judges"].get("status"),
+                             "exact_wording_pass": sem["judges"].get("exact_wording_pass")},
         "SEMANTIC_PASS": sem["SEMANTIC_PASS"],
         "CAN_PUBLISH_V7": bool(qa5.get("CAN_PUBLISH")) and qa7_res["V7_EDITORIAL_PASS"] and sem["SEMANTIC_PASS"],
     }

@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "StyleSpec v1",
-  "description": "Centralized visual style — one aesthetic for the whole channel.  DeepSeek never invents its own palette.",
+  "description": "Centralized visual style — one aesthetic for the whole channel.  The LLM never invents its own palette.",
   "type": "object",
   "required": ["version", "background", "primary_text", "accent_colors"],
   "properties": {

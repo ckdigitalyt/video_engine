@@ -13,7 +13,7 @@
         "type": "object",
         "required": ["id", "kind", "enabled", "priority"],
         "properties": {
-          "id": {"type": "string", "minLength": 1, "description": "e.g. minimax_h3, wan22, ltx, hf_zerogpu__space_name, pexels, pixabay, siliconflow, nvidia_nim, deepseek"},
+          "id": {"type": "string", "minLength": 1, "description": "e.g. minimax_h3, wan22, ltx, hf_zerogpu__space_name, pexels, pixabay, siliconflow, nvidia_nim"},
           "kind": {
             "type": "string",
             "enum": ["image", "video", "image_to_video", "stock", "vision", "audio"]

@@ -24,7 +24,7 @@ llm:
   # v37 (ckdigital 2026-08-13): gemini-3.7-flash verified live (model listed +
   # completion OK, intermittent 503 high-demand).  Used as pipeline PRIMARY so
   # the paid chain only runs when the free chain (3.7 -> 2.5 -> groq/openrouter)
-  # all fail. (2026-08-30: paid DeepSeek retired; ZAI glm-5.3-flash replaced it.)
+  # all fail.
   gemini37:
     model: "models/gemini-3.7-flash"
     script_model: "models/gemini-3.7-flash"

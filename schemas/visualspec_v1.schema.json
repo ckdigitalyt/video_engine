@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "VisualSpec v1",
-  "description": "The semantic visual specification — the strict JSON contract DeepSeek emits and the deterministic compiler turns into Manim.  DeepSeek decides WHAT/WHY/WHEN; the trusted renderer decides HOW.",
+  "description": "The semantic visual specification — the strict JSON contract the LLM emits and the deterministic compiler turns into Manim.  The LLM decides WHAT/WHY/WHEN; the trusted renderer decides HOW.",
   "type": "object",
   "required": ["version", "beats"],
   "properties": {

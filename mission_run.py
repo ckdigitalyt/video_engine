@@ -666,7 +666,7 @@ _AI_STYLE_SUFFIX = ", " + _BRAND_SUFFIX
 def _still_to_kenburns(image_path: str, out_path: str, duration: float = 9.0) -> str:
     """Convert a still image to a Ken Burns motion clip (1920x1080@30).
 
-    v40 (DeepSeek review 2026-08-16: "Ken Burns effect is too subtle"):
+    v40 (model review 2026-08-16: "Ken Burns effect is too subtle"):
     deeper zoom range (1.0 -> 1.30) and faster start so every still visibly
     moves; the old 1.25 ceiling read as near-static on long holds.
     """
@@ -1439,7 +1439,7 @@ def build_sfx_timeline(scenes: list[dict], audio_durations: list[float],
                 except Exception as _e:
                     print(f"  [sfx] !! authentic fetch failed: {str(_e)[:80]}")
             # map phrase -> WORD-BOUNDARY position in narration
-            # v31 (DeepSeek-validated): the old code used a CHARACTER-
+            # v31 (review-validated): the old code used a CHARACTER-
             # fraction (idx / len(joined)), which lands mid-phrase — the
             # Wow! Signal 'whoosh' at 28.04s sat 0.7s into the phrase and
             # sounded random.  Count words BEFORE the matched phrase so the
@@ -1624,7 +1624,7 @@ def stage_narration_dynamic(scenes: list[dict], cache_audio: str,
                     "explanation": "heavy", "climax": "medium",
                     "conclusion": "heavy",
                 }.get(role, "medium")
-                # v31 (DeepSeek-validated): Fish renders scripted
+                # v31 (review-validated): Fish renders scripted
                 # paralinguistic tags like [chuckle] as LONG dead-air
                 # silence (Wow! Signal scene_2: 0.70s gap at ~20.5-21.2s).
                 # Convert them to a bounded pause marker ("...") so the
@@ -1964,7 +1964,7 @@ def stage_music_mix(video_path: str, music_path: str, out_path: str,
     # the mid-range of the bed (500 Hz - 4 kHz, the voice's frequency home)
     # with a fast attack (10-30 ms) and medium release (50-100 ms) so the
     # bed "breathes" around speech instead of broadband pumping.  Ratio 3-4:1.
-    # v31 (DeepSeek-validated): the old HARD-CODED threshold=0.0625 (-24 dB)
+    # v31 (review-validated): the old HARD-CODED threshold=0.0625 (-24 dB)
     # sat ABOVE the narration mean (~-31 dB in the Wow! Signal run), so the
     # compressor almost never engaged (audio-qa ducking_depth=False, bed ~15 dB
     # louder than voice).  Measure the ACTUAL narration level and place the
@@ -2166,16 +2166,16 @@ def stage_video_review_dual(video_path: str, scenes: list[dict], out_dir: str,
                             script_path: str = "",
                             interval_s: float | None = None) -> dict:
     """Dual-model detailed review of the FINAL video (Oumuamua feedback
-    req 4: the video must be reviewed by BOTH Gemini and DeepSeek Pro).
+    req 4: the video must be reviewed by BOTH Gemini and ZAI GLM).
 
     Gemini (vision) reviews sampled frames + script + timeline and writes
-    per-frame descriptions; DeepSeek Pro (text-only) reviews the same rubric
+    per-frame descriptions; ZAI GLM (text-only) reviews the same rubric
     with script + timeline + the Gemini visual transcript.  Saves
-    review_gemini.json / review_deepseek.json / frame_descriptions.json into
+    review_gemini.json / review_zai.json / frame_descriptions.json into
     out_dir.  Non-fatal: provider failures return a partial dict with an
     "error" key instead of raising (the pipeline continues).
     """
-    print("\n[14b/16] DUAL-MODEL VIDEO REVIEW (Gemini vision + DeepSeek Pro)", flush=True)
+    print("\n[14b/16] DUAL-MODEL VIDEO REVIEW (Gemini vision + ZAI GLM)", flush=True)
     t0 = time.time()
     from src.utils.config import get_config as _gc
     if not _gc("pipeline.dual_review_enabled", True):

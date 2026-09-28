@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Render V4 — DeepSeek review algorithm improvements integrated:
+Render V4 — model review algorithm improvements integrated:
 1. Motion Grammar — archetypal sequences, direction validation
 2. Parallel provider chain with diversity pooling (max 50% per provider)
 3. Adaptive shot duration via PaceProfiler (3.5-6.0s breath-matched)

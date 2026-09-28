@@ -1,4 +1,4 @@
-"""V8 semantic matching without an LLM (DeepSeek key is 401).
+"""V8 semantic matching without an LLM (deterministic, no LLM).
 
 Deterministic semantic resolution for the curiosity ladder (brief §9) and
 the payoff metric (brief §13): "Do NOT use lexical overlap as the primary
