@@ -20,17 +20,22 @@ Per plate:
   - global content-addressed cache build/cache/v15_plates/<key>.png + .json
     (provider, model, seconds, prompt) shared by every story in a batch
 
-plate_qa(): ONE vision call per story on a labelled contact sheet of all its
+plate_qa(): a free OCR pre-filter (tesseract, watermark/signature strips)
+then ONE vision call per story on a labelled contact sheet of all its
 plates (director.vision_ask -> llm adapter, stage plate_qa) -> failing plates (garbled text,
-wrong subject, off-style, empty) regenerate once with a new seed. Bounded:
-one QA call + <= one regeneration round.
+wrong subject, off-style, empty, watermark) regenerate once with a new seed. Bounded:
+one QA call + <= one regeneration round. WP2: fail-closed — the result says
+whether QA actually ran (`checked`, `ocr_checked`) and the gate treats "did
+not run" as HOLD.
 """
 from __future__ import annotations
 
 import hashlib
 import json
 import re
+import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 
@@ -161,6 +166,56 @@ def analyze_subject(plate_path) -> dict:
     return info
 
 
+# ------------------------------------------------------------ OCR filter --
+
+# Providers stamp their name in a plate corner (Pollinations: "pollinations.ai",
+# bottom-left; seen shipping in the Phase 2 blackhole). Full-plate OCR of
+# textured illustration is mostly noise, so only the top/bottom edge strips are
+# read and only a known stamp token or a domain-like string counts as a hit.
+OCR_STRIPS = ((0.90, 1.0), (0.0, 0.07))     # (top, bottom) fractions of height
+WATERMARK_TOKENS = ("pollinations", "shutterstock", "gettyimages", "istock",
+                    "alamy", "adobestock", "depositphotos", "dreamstime",
+                    "midjourney", "watermark")
+_DOMAIN = re.compile(r"[a-z0-9-]{4,}\.(?:ai|com|net|io|org|co)\b")
+OCR_VERSION = "ocr/1"
+
+
+def _ocr_strip(im: Image.Image) -> str:
+    im = im.convert("L")
+    im = im.resize((im.width * 3, im.height * 3), Image.LANCZOS)
+    with tempfile.NamedTemporaryFile(suffix=".png") as f:
+        im.save(f.name)
+        p = subprocess.run(["tesseract", f.name, "-", "--psm", "6"],
+                           capture_output=True, text=True, timeout=60)
+    if p.returncode != 0:
+        raise RuntimeError(p.stderr.strip()[:120])
+    return p.stdout
+
+
+def ocr_watermark(plate_path) -> dict:
+    """-> {checked, hits}. checked=False when tesseract is missing/failed
+    (unverified, never a silent pass). Cached beside the plate."""
+    plate_path = Path(plate_path)
+    side = plate_path.with_suffix(".ocr.json")
+    if side.exists():
+        cached = json.loads(side.read_text())
+        if cached.get("version") == OCR_VERSION:
+            return cached
+    try:
+        im = Image.open(plate_path)
+        w, h = im.size
+        text = " ".join(_ocr_strip(im.crop((0, int(h * a), w, int(h * b))))
+                        for a, b in OCR_STRIPS).lower()
+    except (OSError, RuntimeError, subprocess.SubprocessError) as e:
+        return {"checked": False, "hits": [], "reason": f"ocr failed: {e}"[:160]}
+    squashed = re.sub(r"[^a-z0-9]", "", text)
+    hits = sorted({t for t in WATERMARK_TOKENS if t in squashed}
+                  | set(_DOMAIN.findall(re.sub(r"[:;,]", ".", text))))
+    res = {"checked": True, "hits": hits, "version": OCR_VERSION}
+    side.write_text(json.dumps(res))
+    return res
+
+
 # ---------------------------------------------------------------- plate QA --
 
 QA_QUESTION = """You are checking AI illustration plates for an explainer video.
@@ -169,7 +224,8 @@ The sheet shows {n} numbered plates. Main subject each plate must show:
 {items}
 For EACH plate first say in <= 8 words what it actually shows, then decide.
 A plate FAILS only for:
- "text": visible letters, words, numbers, signatures or garbled writing;
+ "text": visible letters, words, numbers, signatures, logos, watermarks or
+   garbled writing;
  "wrong_subject": the MAIN object named above is absent (e.g. asked for a
    skate blade, shows a building). Artistic interpretation, missing minor
    details, stylization or a different viewpoint are NOT failures;
@@ -202,9 +258,17 @@ def contact_sheet(paths: list, out: Path, cols: int = 5) -> Path:
 
 
 def plate_qa(items: list, style: str, sheet_path: Path) -> dict:
-    """items: [{path, subject}] -> {checked, fail: {index: reason}, raw}."""
+    """items: [{path, subject}] -> {checked, ocr_checked, fail: {index:
+    reason}, ocr_hits, raw}. `fail` merges the OCR pre-filter (always run,
+    no LLM cost) with the vision verdict; `checked` is True only when the
+    vision call really returned a verdict."""
     if not items:
-        return {"checked": False, "fail": {}, "reason": "no plates"}
+        return {"checked": False, "ocr_checked": False, "fail": {},
+                "reason": "no plates"}
+    ocr = [ocr_watermark(it["path"]) for it in items]
+    ocr_checked = all(o["checked"] for o in ocr)
+    ocr_hits = {i: o["hits"] for i, o in enumerate(ocr) if o["hits"]}
+    fails = {i: "text" for i in ocr_hits}
     from engine.director import vision_ask
     contact_sheet([it["path"] for it in items], sheet_path)
     listing = "\n".join(f"#{i + 1}: {_main_subject(it['subject'])}"
@@ -213,9 +277,9 @@ def plate_qa(items: list, style: str, sheet_path: Path) -> dict:
         style=style[:200], n=len(items), items=listing),
         max_tokens=60 * len(items) + 200, stage="plate_qa")
     if not isinstance(ans, dict) or "plates" not in ans:
-        return {"checked": False, "fail": {}, "raw": ans,
+        return {"checked": False, "ocr_checked": ocr_checked, "fail": fails,
+                "ocr_hits": ocr_hits, "raw": ans,
                 "reason": "judge unavailable or unparseable"}
-    fails = {}
     for f in ans.get("plates") or []:
         try:
             n = int(f.get("n")) - 1
@@ -224,4 +288,5 @@ def plate_qa(items: list, style: str, sheet_path: Path) -> dict:
         if 0 <= n < len(items) and f.get("fail") in ("text", "wrong_subject",
                                                      "broken"):
             fails[n] = f["fail"]
-    return {"checked": True, "fail": fails, "raw": ans}
+    return {"checked": True, "ocr_checked": ocr_checked, "fail": fails,
+            "ocr_hits": ocr_hits, "raw": ans}

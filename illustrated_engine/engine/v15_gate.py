@@ -8,8 +8,15 @@ plus ONE vision-judge call (directive §28/§29 — lightweight, no metric zoo):
   caption_identity  burned overlay texts, in time order, == the narration
                     word sequence; each cue lies inside its own beat; every
                     overlay PNG exists and is unique per (text, word)
-  text_bounds       every fitted on-screen text box inside the safe frame and
-                    clear of the caption band (spec.meta.text_boxes)
+  text_bounds       every fitted on-screen text box inside the safe frame,
+                    clear of the caption band and of the right-hand UI rail
+                    (spec.meta.text_boxes)
+  caption_safe      every burned caption box inside the safe frame and clear
+                    of the right rail (measured from the overlay PNGs)
+  plates            WP2, fail-closed: plate QA must have RUN (checked:true);
+                    no plate may still fail it; every plate used is OCR-read
+                    for provider watermarks/domains by the gate itself, so
+                    even a --no-plate-qa run cannot ship a stamped plate
   info_floor        sampled pre-caption frames (every 2 s, caption band
                     excluded) must carry visual information: luminance std
                     and edge density above floors (a flat field fails)
@@ -21,10 +28,13 @@ plus ONE vision-judge call (directive §28/§29 — lightweight, no metric zoo):
   av                final has h264 + aac, duration == scene sum (+-0.1 s)
   judge             1 call on a labelled contact sheet: §28 questions per
                     frame (closed issue enum) + §29 hook/ending/template;
-                    critical failures HOLD. Judge unavailable -> HOLD
-                    ("unverified"), never a silent pass.
+                    ONE critical frame (garbled text, watermark, overlap)
+                    fails. Judge unavailable -> HOLD ("unverified"), never a
+                    silent pass.
 
-verdict: PASS only when every check passes; else HOLD with reasons.
+verdict: PASS only when every check passes. FAIL when a check ran and found a
+confirmed defect (`critical`); HOLD when a check could not run
+(`unverified`) or found a soft problem. Reasons are always listed.
 """
 from __future__ import annotations
 
@@ -40,11 +50,18 @@ ROOT = Path(__file__).resolve().parent.parent
 MAX_HOLD_S = 4.5
 CAPTION_BAND = (1440.0, 1680.0)
 SAFE = (40.0, 60.0, 1040.0)          # x0, y0, x1
+# Right-hand Shorts button rail (DESIGN §7 safe_zones.right_rail; exact
+# insets vary [U]): nothing readable may sit at x > RAIL_X below RAIL_Y0.
+# The design's top 220 / bottom 1440 insets move captions and headlines in
+# WP6 (brand bible) and are enforced then, not against the V15 layout.
+RAIL_X, RAIL_Y0 = 930.0, 760.0
 FLOOR_STD, FLOOR_EDGE = 14.0, 2.2    # calibrated: V14 flat navy fails
 LUFS_RANGE = (-16.5, -11.5)
 JUDGE_ISSUES = ("none", "empty_or_flat", "subject_unrecognizable",
                 "not_story_specific", "text_garbled", "text_unreadable",
-                "no_change", "too_dark")
+                "no_change", "too_dark", "watermark", "overlap")
+# ONE frame with any of these fails the video (V15 needed two).
+CRITICAL_ISSUES = ("text_garbled", "text_unreadable", "watermark", "overlap")
 _W = re.compile(r"[^\w.%°'-]+")
 
 
@@ -106,20 +123,98 @@ def check_caption_identity(overlays: list, story: dict, beat_windows: dict) -> d
             "words": len(burned)}
 
 
+def _box_problems(box) -> list:
+    x0, y0, x1, y1 = box
+    out = []
+    if x0 < SAFE[0] or x1 > SAFE[2] or y0 < SAFE[1]:
+        out.append(f"outside safe frame {[round(v) for v in box]}")
+    if x1 > RAIL_X and y1 > RAIL_Y0:
+        out.append(f"inside the right UI rail (x>{RAIL_X:.0f}, y>{RAIL_Y0:.0f}) "
+                   f"{[round(v) for v in box]}")
+    return out
+
+
 def check_text_bounds(specs: dict) -> dict:
     fails = []
     n = 0
     for key, spec in specs.items():
         for tb in (spec.get("meta") or {}).get("text_boxes") or []:
             n += 1
-            x0, y0, x1, y1 = tb["box"]
-            if x0 < SAFE[0] or x1 > SAFE[2] or y0 < SAFE[1]:
-                fails.append(f"{key}.{tb['id']} {tb['text']!r} outside safe "
-                             f"frame {[round(v) for v in tb['box']]}")
+            fails += [f"{key}.{tb['id']} {tb['text']!r} {m}"
+                      for m in _box_problems(tb["box"])]
+            y0, y1 = tb["box"][1], tb["box"][3]
             if y1 > CAPTION_BAND[0] and y0 < CAPTION_BAND[1]:
                 fails.append(f"{key}.{tb['id']} {tb['text']!r} overlaps the "
                              f"caption band")
     return {"ok": not fails, "fails": fails[:10], "boxes": n}
+
+
+def check_caption_safe(overlays: list, top: float) -> dict:
+    """Ink bbox of each distinct caption overlay PNG (placed at y=top) must
+    sit inside the safe frame and clear of the right rail."""
+    if not overlays:
+        return {"ok": False, "fails": ["no caption overlays recorded"]}
+    fails, seen = [], {}
+    for o in overlays:
+        if o["png"] in seen:
+            continue
+        try:
+            a = np.asarray(Image.open(o["png"]).convert("RGBA"))[:, :, 3]
+        except OSError:
+            seen[o["png"]] = None
+            fails.append(f"caption overlay unreadable: {Path(o['png']).name}")
+            continue
+        ys, xs = np.nonzero(a > 20)
+        seen[o["png"]] = None
+        if not len(xs):
+            continue
+        box = [float(xs.min()), top + float(ys.min()),
+               float(xs.max()) + 1, top + float(ys.max()) + 1]
+        seen[o["png"]] = box
+        fails += [f"caption {o.get('text')!r} {m}" for m in _box_problems(box)]
+    return {"ok": not fails, "fails": fails[:10], "captions": len(seen)}
+
+
+def _plate_paths(specs: dict) -> list:
+    out = []
+    for spec in specs.values():
+        for lay in spec.get("layers") or []:
+            path = (lay.get("payload") or {}).get("path")
+            if lay.get("source") == "ai_image" and path and path not in out:
+                out.append(path)
+    return out
+
+
+def check_plates(specs: dict, plate_qa: dict | None) -> dict:
+    """Fail-closed plate QA. `plate_qa` is the pipeline's plate_qa report
+    (None = never ran). Confirmed defects are `critical` (FAIL); QA that did
+    not run is `unverified` (HOLD)."""
+    from engine.v15_plates import ocr_watermark
+    qa = plate_qa or {}
+    critical, unverified = [], []
+    if not qa.get("checked"):
+        unverified.append("plate QA did not run: " + str(
+            qa.get("reason") or "no result recorded"))
+    if qa.get("still_failing"):
+        critical.append(f"{len(qa['still_failing'])} plate(s) still fail plate "
+                        f"QA after regeneration: {qa['still_failing'][:3]}")
+    elif qa.get("regenerated") and not qa.get("second_check"):
+        unverified.append("regenerated plates were never re-checked")
+    elif qa.get("fail") and not qa.get("regenerated"):
+        critical.append(f"plate QA failed {len(qa['fail'])} plate(s), none "
+                        f"regenerated")
+    paths = _plate_paths(specs)
+    for path in paths:
+        o = ocr_watermark(path)
+        if not o["checked"]:
+            unverified.append(f"{Path(path).name}: OCR unavailable "
+                              f"({o.get('reason')})")
+        elif o["hits"]:
+            critical.append(f"{Path(path).name}: watermark/text {o['hits']}")
+    fails = critical + unverified
+    return {"ok": not fails, "fails": fails[:10], "critical": bool(critical),
+            "unverified": bool(unverified) and not critical,
+            "plates_ocr": len(paths)}
 
 
 def _frames(video: Path, every: float, out_dir: Path) -> list:
@@ -193,13 +288,16 @@ def check_visual_hold(meta: dict, specs: dict) -> dict:
 
 def check_assets(meta: dict) -> dict:
     fails, warns = [], []
+    critical = False
     for key, m in meta.items():
         if m.get("qa_fail"):
             fails.append(f"{key}: plate still fails plate QA after regeneration")
+            critical = True
         if m["tier"] != "plate":
             msg = f"{key}: asset tier {m['tier']}"
             (fails if m.get("function") in ("HOOK", "PAYOFF") else warns).append(msg)
-    return {"ok": not fails, "fails": fails, "warnings": warns}
+    return {"ok": not fails, "fails": fails, "warnings": warns,
+            "critical": critical}
 
 
 def check_audio(final: Path, voice_wav: Path) -> dict:
@@ -252,7 +350,9 @@ to this story (not generic decoration), is it visually rich and readable?
 The small caption bar near the bottom is burned-in narration shown a few
 words at a time: a phrase FRAGMENT is expected there and is NOT an issue.
 "text_garbled" means misspelled/illegible lettering (inside the artwork or
-in the large on-screen typography).
+in the large on-screen typography). "watermark" means a provider stamp, logo
+or website name anywhere in the picture. "overlap" means on-screen text
+colliding with other text or hiding the subject.
 Issue codes: {issues}.
 Then judge the whole: first frame would stop a scroll? ending resolves the
 opening question? would the scenes work unchanged for another topic by only
@@ -320,18 +420,23 @@ def run_judge(video: Path, story: dict, beat_windows: dict, work: Path,
            and f.get("issue") not in (None, "none")]
     crit = [f for f in bad if f.get("issue") in (
         "empty_or_flat", "subject_unrecognizable", "text_garbled",
-        "text_unreadable", "too_dark")]
+        "text_unreadable", "too_dark", "watermark", "overlap")]
+    hard = [f for f in bad if f.get("issue") in CRITICAL_ISSUES]
     fails = []
     if frames and len(bad) / len(frames) > 0.25:
         fails.append(f"judge flagged {len(bad)}/{len(frames)} frames")
-    if len(crit) >= 2:
+    if hard:
+        fails.append("critical frame (one is enough): " + ", ".join(
+            f"#{f.get('n')} {f.get('issue')}" for f in hard[:6]))
+    elif len(crit) >= 2:
         fails.append("critical frame issues: " + ", ".join(
             f"#{f.get('n')} {f.get('issue')}" for f in crit[:6]))
     if ans.get("hook_stops_scroll") is False:
         fails.append("judge: first frame would not stop a scroll")
     if ans.get("template_feel") is True:
         fails.append("judge: scenes feel templated (noun-swap reusable)")
-    return {"ok": not fails, "fails": fails, "frames_flagged": [
+    return {"ok": not fails, "fails": fails, "critical": bool(hard),
+            "frames_flagged": [
         {"n": f.get("n"), "issue": f.get("issue")} for f in bad],
         "hook_stops_scroll": ans.get("hook_stops_scroll"),
         "ending_resolves": ans.get("ending_resolves"),
@@ -341,8 +446,21 @@ def run_judge(video: Path, story: dict, beat_windows: dict, work: Path,
 
 # ---------------------------------------------------------------- run --
 
+def verdict_of(checks: dict) -> str:
+    bad = [c for c in checks.values() if not c["ok"]]
+    if any(c.get("critical") for c in bad):
+        return "FAIL"
+    return "HOLD" if bad else "PASS"
+
+
+def _caption_top() -> float:
+    from engine.captions import carrier_y
+    return float(carrier_y())
+
+
 def run_gate(work: Path, story: dict, meta: dict, specs: dict, timing: dict,
-             captions: dict, lead: float, *, use_judge: bool = True) -> dict:
+             captions: dict, lead: float, *, use_judge: bool = True,
+             plate_qa: dict | None = None) -> dict:
     work = Path(work)
     arep = json.loads((work / "assembly_report.json").read_text()) \
         if (work / "assembly_report.json").exists() else {}
@@ -356,6 +474,9 @@ def run_gate(work: Path, story: dict, meta: dict, specs: dict, timing: dict,
         "caption_identity": check_caption_identity(
             arep.get("caption_overlays") or [], story, beat_windows),
         "text_bounds": check_text_bounds(specs),
+        "caption_safe": check_caption_safe(
+            arep.get("caption_overlays") or [], _caption_top()),
+        "plates": check_plates(specs, plate_qa),
         "info_floor": check_info_floor(
             [work / "scenes" / f"{k}.mp4" for k in meta], work),
         "visual_hold": check_visual_hold(meta, specs),
@@ -372,7 +493,7 @@ def run_gate(work: Path, story: dict, meta: dict, specs: dict, timing: dict,
         checks["judge"] = {"ok": False, "unverified": True,
                            "fails": ["judge disabled (--no-judge) -> unverified"]}
     failures = {k: v["fails"] for k, v in checks.items() if not v["ok"]}
-    return {"verdict": "PASS" if not failures else "HOLD",
+    return {"verdict": verdict_of(checks),
             "failures": failures, "checks": checks, "judge_calls": calls,
             "beat_windows": {k: [round(a, 2), round(b, 2)]
                              for k, (a, b) in beat_windows.items()}}

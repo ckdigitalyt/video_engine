@@ -11,7 +11,8 @@
           "n": {"type": "integer", "minimum": 1},
           "ok": {"type": "boolean"},
           "issue": {"enum": ["none", "empty_or_flat", "subject_unrecognizable", "not_story_specific",
-                             "text_garbled", "text_unreadable", "no_change", "too_dark"]}
+                             "text_garbled", "text_unreadable", "no_change", "too_dark",
+                             "watermark", "overlap"]}
         }
       }
     },

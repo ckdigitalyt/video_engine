@@ -302,7 +302,7 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
             report["costs"]["vision_calls"] += 1 if ok_redo else 0
             still = set()
             for j, (p, r) in enumerate(ok_redo.items()):
-                if qa2.get("checked") and j in qa2.get("fail", {}):
+                if j in qa2.get("fail", {}):  # incl. OCR hits (no LLM needed)
                     still.add(p)
                 plates[p] = r  # regenerated plate replaces the failed one
             for p in regen:
@@ -314,8 +314,11 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
             for p in still:
                 plates[p] = dict(plates[p], qa_fail=True)
     report["plate_qa"] = {k: qa.get(k) for k in
-                          ("checked", "fail", "regenerated", "still_failing",
-                           "second_check", "reason")}
+                          ("checked", "ocr_checked", "fail", "ocr_hits",
+                           "regenerated", "still_failing", "second_check",
+                           "reason")}
+    if not plate_qa_on:
+        report["plate_qa"]["reason"] = "plate QA disabled (--no-plate-qa)"
     report["plate_failures"] = fail_log
     providers = {}
     for r in plates.values():
@@ -448,7 +451,7 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
     from engine.v15_gate import run_gate
     t0 = time.time()
     gate = run_gate(work, story, meta, specs, timing, captions, LEAD_S,
-                    use_judge=use_judge)
+                    use_judge=use_judge, plate_qa=report["plate_qa"])
     report["costs"]["vision_calls"] += gate.get("judge_calls", 0)
     report["gate"] = gate
     report["publish_gate"] = gate["verdict"]
