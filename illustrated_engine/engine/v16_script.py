@@ -217,6 +217,8 @@ def _facts_block(facts: dict, with_quote: bool = False) -> str:
             continue
         rows.append(f"{f['id']} | {f['claim']} | {f['evidence']}" if with_quote
                     else f"{f['id']}: {f['claim']} | {f.get('nuance', 'ESTABLISHED')}")
+    # for a quote-checked fact `evidence` is the verbatim source quote (it governs the
+    # claim wording); for a curated fact it is the pack's measured values beside the vetted claim
     return "\n".join(rows)
 
 
@@ -269,7 +271,7 @@ def write_story(topic: str, facts: dict, *, series_note: str = "", batch_titles:
                 ask=None) -> dict:
     run = _Run(ask or llm.ask)
     story = {"topic": topic, "verdict": "HOLD", "holds": [], "script": None, "critic": None,
-             "fact_check": None, "metadata": None, "calls": run.calls}
+             "fact_check": None, "metadata": None, "calls": run.calls, "drafts": []}
     try:
         _pipeline(run, story, topic, facts, series_note, list(batch_titles))
     except (LLMUnavailable, LLMSchemaError) as e:
@@ -287,6 +289,7 @@ def _pipeline(run: _Run, story: dict, topic: str, facts: dict, series_note: str,
     hold = story["holds"].append
     script = _write(run, topic, facts, series_note)
     story["script"] = script
+    story["drafts"].append({"script": script})           # every draft + its critic scores, for review
 
     # ---- script quality: ONE rewrite shared by code errors and the critic
     rewrote = False
@@ -294,6 +297,7 @@ def _pipeline(run: _Run, story: dict, topic: str, facts: dict, series_note: str,
     if errs:
         script = story["script"] = _write(run, topic, facts, series_note,
                                           "\n".join(errs), script)
+        story["drafts"].append({"script": script, "after": "code errors"})
         rewrote = True
         errs = code_checks(script, facts)
         if errs:
@@ -302,12 +306,17 @@ def _pipeline(run: _Run, story: dict, topic: str, facts: dict, series_note: str,
     for _ in (1, 2):
         prompt, ver = render("script_critic", script=_numbered(script))
         crit = story["critic"] = run.call("script_critic", prompt, ver)
+        story["drafts"][-1]["critic"] = crit
         if critic_pass(crit["scores"]):
             break
         if rewrote:
             hold(f"critic below bar after the rewrite: {crit['scores']}")
             return
-        script = story["script"] = _write(run, topic, facts, series_note, crit["critique"], script)
+        bar = (f"Critic scores: {crit['scores']}. The bar is a mean of {CRITIC_MEAN_MIN} or "
+               f"better with no score below {CRITIC_FLOOR}; lift every score under 4.")
+        script = story["script"] = _write(run, topic, facts, series_note,
+                                          crit["critique"] + "\n" + bar, script)
+        story["drafts"].append({"script": script})
         rewrote = True
         errs = code_checks(script, facts)
         if errs:

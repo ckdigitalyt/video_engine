@@ -359,7 +359,8 @@ def test_critic_fail_one_rewrite_then_pass():
     assert st["verdict"] == "PASS"
     assert stages(f) == ["script_write", "script_critic", "script_write", "script_critic",
                          "fact_check", "metadata_pack"]
-    assert "sharpen the hook" in f.prompts[2][1]
+    assert "sharpen the hook" in f.prompts[2][1] and "mean of 4.0" in f.prompts[2][1]
+    assert len(st["drafts"]) == 2 and st["drafts"][0]["critic"]["scores"] == BAD_SCORES
 
 
 def test_critic_fail_twice_holds():
