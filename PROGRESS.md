@@ -100,7 +100,8 @@ Orchestrator: Jade (Sonnet 5, Discord #illustration-video)
 - WP0: DONE f3022a7 (baseline.md/json + bench/quality; topic packs 1 and 3 unverified)
 - WP1: DONE cacb1c4 (adapter) + be12e92 (DeepSeek removal) + 250d4bd (CHANGELOG) + d0a6c36 (acceptance report bench/ab/wp1.md)
 - WP2: DONE cf70724 (code+tests+CHANGELOG) + acceptance report bench/ab/wp2.md
-- WP3–WP14: pending
+- WP3: IN PROGRESS (run 3, started 2026-09-28) — voice layer (Kokoro sole voice, Fish disabled by default, lexicon, whisper round-trip, 3-voice sample set)
+- WP4–WP14: pending
 
 ## Phase 4 run 1 summary (2026-09-28) — WP0 + WP1 done, stopped before WP2
 1. Commits: WP0 f3022a7; WP1 cacb1c4 (llm/ adapter, configs/llm.yaml, director shims), be12e92 (DeepSeek removal from tracked code/config), 250d4bd (CHANGELOG), d0a6c36 (acceptance report).
