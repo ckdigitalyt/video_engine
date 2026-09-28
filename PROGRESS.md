@@ -63,3 +63,9 @@ Orchestrator: Jade (Sonnet 5, Discord #illustration-video)
 - Verified no stray processes or partial artifacts were left behind by the killed background task — clean state.
 - Resumed via `claude -p --resume <session-id>` (same locked-down flags) at 02:36:53 UTC. Session picked back up mid-task: found the backgrounded e2e run had actually completed (tunguska_1908 story, 17m13s wall, all 17 scenes PASS) before the parent got killed — reusing that result rather than re-rendering.
 - Currently continuing toward RESEARCH.md. Will report when done or if it hits the limit again.
+
+## Phase 2 COMPLETE (2026-09-28)
+- RESEARCH.md written (evidence-labelled, one recommendation per component). Scripts in research/phase2/ (untracked, not committed); outputs in ~/phase2_out/, models in ~/models/. No pipeline code modified.
+- Fresh cold e2e (blackhole_clocks): 17 min 13 s total, PASS — but plate QA was silently skipped (Gemini 20 RPD quota) and a watermarked + a garbled-text plate shipped (RESEARCH §2.3).
+- Owner actions raised (RESEARCH §11): Fish commercial clearance; approve Fish→Kokoro fallback; approve replacing dead plate links (SiliconFlow 401, HF 410); optional Cloudflare account; YouTube OAuth re-consent (token invalid_grant); rotate GEMINI_API_KEY (partially echoed into the session log).
+- Stopped before Phase 3 as instructed.
