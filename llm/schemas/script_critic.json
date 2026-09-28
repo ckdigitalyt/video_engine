@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "required": ["scores", "critique"],
+  "properties": {
+    "scores": {
+      "type": "object",
+      "required": ["hook_strength", "curiosity_gap", "escalation", "payoff_clarity",
+                   "loop_coherence", "human_voice", "emotional_charge", "one_idea_only"],
+      "properties": {
+        "hook_strength": {"type": "integer", "minimum": 0, "maximum": 5},
+        "curiosity_gap": {"type": "integer", "minimum": 0, "maximum": 5},
+        "escalation": {"type": "integer", "minimum": 0, "maximum": 5},
+        "payoff_clarity": {"type": "integer", "minimum": 0, "maximum": 5},
+        "loop_coherence": {"type": "integer", "minimum": 0, "maximum": 5},
+        "human_voice": {"type": "integer", "minimum": 0, "maximum": 5},
+        "emotional_charge": {"type": "integer", "minimum": 0, "maximum": 5},
+        "one_idea_only": {"type": "integer", "minimum": 0, "maximum": 5}
+      },
+      "additionalProperties": false
+    },
+    "critique": {"type": "string"}
+  }
+}

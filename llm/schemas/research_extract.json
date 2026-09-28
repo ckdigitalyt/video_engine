@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "required": ["claims"],
+  "properties": {
+    "claims": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 12,
+      "items": {
+        "type": "object",
+        "required": ["id", "claim", "quote", "source_id", "nuance"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^f_[a-z0-9_]{2,40}$"},
+          "claim": {"type": "string", "minLength": 8},
+          "quote": {"type": "string", "minLength": 12},
+          "source_id": {"type": "string"},
+          "nuance": {"enum": ["ESTABLISHED", "CONTESTED", "HYPOTHESIS"]}
+        }
+      }
+    }
+  }
+}

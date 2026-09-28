@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "required": ["hook_headline", "sentences"],
+  "properties": {
+    "hook_headline": {"type": "string", "minLength": 3},
+    "sentences": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 16,
+      "items": {
+        "type": "object",
+        "required": ["text", "role", "fact_ids"],
+        "properties": {
+          "text": {"type": "string", "minLength": 2},
+          "role": {"enum": ["hook", "normal", "payoff"]},
+          "fact_ids": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+          "on_screen": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    },
+    "length_justification": {"type": "string"}
+  }
+}
