@@ -97,6 +97,6 @@ Orchestrator: Jade (Sonnet 5, Discord #illustration-video)
 - Resume rule: read this file + DESIGN.md §15.2, continue with the first WP not marked DONE below.
 
 ### WP status
-- WP0: pending
-- WP1: pending
+- WP0: DONE f3022a7 (baseline.md/json + bench/quality; topic packs 1 and 3 unverified)
+- WP1: IN PROGRESS (run 1)
 - WP2–WP14: pending
