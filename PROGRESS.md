@@ -56,3 +56,10 @@ Orchestrator: Jade (Sonnet 5, Discord #illustration-video)
 - Launched in tmux `jade-phase2`, session_id d661add2-9ec7-437b-8dfd-84dd4eb1da3e, log .jade/phase2.log.
 - Tools verified: Bash, Edit, Glob, Grep, Monitor, Read, ReportFindings, TaskStop, ToolSearch, WebFetch, WebSearch, Write. mcp_servers: [].
 - Prompt at .jade/phase2_prompt.txt covers: Fish verification + local TTS fallback benchmark, @most.amazing.wonders channel analysis (with explicit instruction to never print client_secret.json/token.json contents, and not to attempt OAuth scope expansion), zero-cost image source research (NIM excluded from production), Claude-first adapter direction (GLM demoted), one fresh timed E2E run, plus original niche/tool-survey scope. Deliverable: RESEARCH.md. Stops after, does not proceed to Phase 3.
+
+## Phase 2 usage-limit hit + resumed (2026-09-28)
+- Phase 2 hit the Claude 5-hour session limit at 2026-09-27 18:56 UTC, ~4 min into the run, while waiting on a backgrounded e2e render task. Exit: is_error=true, "You've hit your session limit · resets 7:30pm (UTC)" (i.e. 2026-09-27 19:30 UTC). Cost to that point: $1.23, 33 turns.
+- Gap: this wasn't caught until the owner asked for a progress update at 2026-09-28 02:35 UTC (~7.5h after the limit reset) — no monitoring/check-in was scheduled for Phase 2 specifically. Noting this so future phases get an explicit check-in scheduled at launch, not just Phase 1.
+- Verified no stray processes or partial artifacts were left behind by the killed background task — clean state.
+- Resumed via `claude -p --resume <session-id>` (same locked-down flags) at 02:36:53 UTC. Session picked back up mid-task: found the backgrounded e2e run had actually completed (tunguska_1908 story, 17m13s wall, all 17 scenes PASS) before the parent got killed — reusing that result rather than re-rendering.
+- Currently continuing toward RESEARCH.md. Will report when done or if it hits the limit again.
