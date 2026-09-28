@@ -83,3 +83,20 @@ Orchestrator: Jade (Sonnet 5, Discord #illustration-video)
 - Cloudflare creds added to .env (CLOUDFLARE_ACCOUNT_ID/CLOUDFLARE_API_TOKEN) from tmp/tempenv.txt; user-token verify OK; Workers AI call OK. tmp/tempenv.txt still on disk (gitignored) — owner to delete.
 - Watcher could not be armed (background bash denied); Phase 3 finished before it mattered.
 - Awaiting: brand choice (A/B/C), voice decision (Fish-paid vs Kokoro), DESIGN §15.3 sign-offs, then approval for Phase 4 (Sonnet).
+
+## Owner decisions round 3 (2026-09-28 04:54 UTC) — Phase 4 greenlit
+1. Brand: A "Ink & Ember" + C's high-contrast boxed keyword labels for hook text at t=0-1s only + dark-plate variant for space topics; NO mascot; B rejected. All brand params config-driven (brand/<name>/ yaml, no literals in code).
+2. Voice: Kokoro is the sole channel voice; Fish disabled by default (code kept, FISH_PLAN gate). Owed to owner: render the same 73-word script in 3 Kokoro voices (am_michael + 2 best male alternatives) at 1.0x and 1.1x for selection. Build pronunciation lexicon (Tyrannosaurus etc.) + whisper round-trip check flagging mispronounced keywords. (Part of WP3.)
+3. §15.3: approve item 1 (Claude default) and 2 (drop SiliconFlow/HF, NIM benchmark-only). Item 3 superseded by decision 2. Item 4 (retire Python caption overlay / per-scene Remotion) ONLY after A/B parity; git-tag old paths BEFORE removal (e.g. pre-wp5-caption-overlay).
+4. Secrets: tmp/tempenv.txt DELETED (shredded) 2026-09-28. Rule: never print secret values; verify with masked output only (e.g. len/prefix-4 or "set/unset"). Owner rotates Cloudflare token and edits .env himself — do not touch .env.
+5. Owed: OpenClaw compaction config proposal (sent in chat; config not modified).
+6. Phase 4 (Sonnet) in DESIGN.md §15.2 order: small tested commits, A/B checkpoints. Update PROGRESS.md BEFORE each package. After each package that changes visible output, post short status + sample render to owner. DeepSeek reference removal from tracked files is part of WP1.
+
+## Phase 4 launched (2026-09-28)
+- Run 1 scope: WP0 (baseline + bench harness) then WP1 (LLM adapter + Claude CLI). Stop after WP1 and report. Prompt .jade/phase4_run1_prompt.txt, script .jade/run_phase4.sh, log .jade/phase4_run1.log.
+- Resume rule: read this file + DESIGN.md §15.2, continue with the first WP not marked DONE below.
+
+### WP status
+- WP0: pending
+- WP1: pending
+- WP2–WP14: pending
