@@ -100,7 +100,7 @@ Orchestrator: Jade (Sonnet 5, Discord #illustration-video)
 - WP0: DONE f3022a7 (baseline.md/json + bench/quality; topic packs 1 and 3 unverified)
 - WP1: DONE cacb1c4 (adapter) + be12e92 (DeepSeek removal) + 250d4bd (CHANGELOG) + d0a6c36 (acceptance report bench/ab/wp1.md)
 - WP2: DONE cf70724 (code+tests+CHANGELOG) + acceptance report bench/ab/wp2.md
-- WP3: IN PROGRESS (run 3, started 2026-09-28) — voice layer (Kokoro sole voice, Fish disabled by default, lexicon, whisper round-trip, 3-voice sample set)
+- WP3: DONE 45e69b5 (voice layer) + acceptance report bench/ab/wp3.md
 - WP4–WP14: pending
 
 ## Phase 4 run 1 summary (2026-09-28) — WP0 + WP1 done, stopped before WP2
@@ -137,3 +137,15 @@ Orchestrator: Jade (Sonnet 5, Discord #illustration-video)
 8. Deviations: kept v15_gate.py/v15_plates.py names (no v16 rename); top-220/bottom-1440 insets, 84 px caption size and 1 s/2 s judge cadence deferred to WP6/WP5/S11.
 9. OWNER FLAG: every V15 render now HOLDs on the right rail (labels sit at x~1010, y~800) until WP6/WP7 re-layout. OCR only catches known stamps; other watermarks need the vision call.
 10. Open: research/phase2/llm_compare.py still broken; topic packs 1 and 3 still need source-check before WP4 scoring; next is WP3 (voice layer, needs faster-whisper install).
+
+## Phase 4 run 4 summary (2026-09-28) — WP3 done, stopped before WP4
+1. Resumed run 3's uncommitted WP3 tree, kept it (reviewed, sound), fixed one wrong live test input (bare Kokoro misreads "Tyrannosaurus rex" only sentence-initially). Commit 45e69b5 + docs commit.
+2. New: engine/voice/ (Kokoro fp32 am_michael, Fish paid-gated + disabled by default, lexicon phonemes, faster-whisper base.en timing aligned to script, round-trip QA WER<=0.03 + hard tokens, whole-video fallback), configs/voice.yaml, brand/ink_ember/lexicon.yaml (15 entries), gate check `voice` (QA not run/failed/not commercial -> HOLD). faster-whisper 1.2.1 in venv + requirements (local, no credentials).
+3. Tests: test_wp3_voice.py 18 new, illustrated_engine/tests 49/49. Root suite 58F+5E identical failing ids before (clean worktree of 6576602) and after. Secret scan of diff clean. .env untouched.
+4. Acceptance: topic-1 script WER 0.000 PASS (RTF 0.68); forced Fish failure -> whole-video Kokoro (unit test); lexicon fixes Tyrannosaurus (live).
+5. Caption timing: sentence onset p90 0.024 s vs synthesis truth (partly circular); word starts vs whisper small.en p90 0.16 s (model disagreement, not ground truth). The 0.12 s target is NOT verified; needs Fish paid timestamps or hand labels. Old silence_v1 was p90 0.34 s.
+6. OWNER SAMPLES (need your ears): ~/phase4_out/wp3/samples/{am_michael,am_onyx,bm_lewis}_{1.0x,1.1x}.wav, -14 LUFS. onyx/lewis chosen from F0 + WER numbers only, out of 9 shortlisted voices.
+7. OWNER FLAG: V15's "Fish only, STOP" replaced by Kokoro-first; chain holds only Kokoro. Removed the Fish free-tier-pinned path in engine/tts.py (not a fallback chain); silence_v1 kept as offline last resort. No fallback/retry narrowed.
+8. Not done: full V15 render with the new voice (needs Claude calls); lexicon phonemes never listened to; 6 lexicon entries have respelling only.
+9. Housekeeping: /tmp/wt_prev worktree removed, ~/phase4_out/wp3/tmp deleted (15 MB left).
+10. Open: llm_compare.py still broken; topic packs 1 and 3 source-check before WP4 scoring; next is WP4.
