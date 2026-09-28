@@ -77,3 +77,9 @@ Orchestrator: Jade (Sonnet 5, Discord #illustration-video)
 - Credential rule: never try a key against a service it was not issued for. Gemini key redacted from .jade/phase2.log and the Claude session jsonl (verified no 16-char fragment remains). Owner to rotate GEMINI_API_KEY regardless.
 - OpenClaw compaction: config NOT touched; proposal sent to owner.
 - Phase 3 (Opus, no web tools) launched 04:26 UTC in tmux jade-phase3, session in .jade/phase3_session_id.txt, log .jade/phase3.log. Deliverables: DESIGN.md, 2-3 brand options with sample frames, Fish vs Kokoro voice samples. Background watcher armed for completion/limit.
+
+## Phase 3 COMPLETE (2026-09-28 04:42 UTC) — awaiting owner approval
+- DESIGN.md (815 lines, 15 Phase-4 work packages), research/phase3/ scripts. Media in ~/phase3_out/ (brand/{A_ink_ember,B_deep_signal,C_wonder_almanac}, comparison.jpg, voice/{fish,kokoro}.wav). Opus cost $3.39, 38 turns, 16.6 min, no limit hit.
+- Cloudflare creds added to .env (CLOUDFLARE_ACCOUNT_ID/CLOUDFLARE_API_TOKEN) from tmp/tempenv.txt; user-token verify OK; Workers AI call OK. tmp/tempenv.txt still on disk (gitignored) — owner to delete.
+- Watcher could not be armed (background bash denied); Phase 3 finished before it mattered.
+- Awaiting: brand choice (A/B/C), voice decision (Fish-paid vs Kokoro), DESIGN §15.3 sign-offs, then approval for Phase 4 (Sonnet).
