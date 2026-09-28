@@ -1,4 +1,9 @@
-"""V15 — narration word timing from the TTS audio (no ASR dependency).
+"""V15 — narration word timing from the TTS audio (silence_v1 fallback).
+
+WP3: the primary timing is now faster-whisper word timestamps aligned to the
+script (engine.voice.align); this module keeps silence_v1 as the offline last
+resort and owns the per-beat cache. Original design notes follow.
+
 
 V14 spread captions evenly over the scene and started them at 0.25 s while
 the voice started at 0.0, so captions drifted up to ~1 s from speech and no
@@ -153,12 +158,17 @@ def align(wav_path, text: str) -> dict:
             "words": out}
 
 
+def timing_key(wav_path, text: str) -> str:
+    return hashlib.sha256(Path(wav_path).read_bytes()
+                          + text.encode("utf-8")).hexdigest()[:16]
+
+
 def beat_timing(wav_path, text: str) -> dict:
-    """Cached align(): <wav>.timing.json keyed by wav bytes + text."""
+    """<wav>.timing.json keyed by wav bytes + text (the voice layer writes it
+    when it synthesises). On a miss: faster-whisper word timing aligned to the
+    script, else silence_v1 (offline last resort)."""
     wav_path = Path(wav_path)
-    key = hashlib.sha256(wav_path.read_bytes()
-                         + text.encode("utf-8")
-                         + METHOD.encode()).hexdigest()[:16]
+    key = timing_key(wav_path, text)
     cache = wav_path.with_suffix(".timing.json")
     if cache.exists():
         try:
@@ -167,7 +177,13 @@ def beat_timing(wav_path, text: str) -> dict:
                 return data
         except Exception:
             pass
-    data = dict(align(wav_path, text), key=key)
+    try:
+        from engine.voice import align as voice_align
+        data = voice_align.timing_from_asr(
+            text, voice_align.transcribe(wav_path), wav_path)
+    except Exception:
+        data = align(wav_path, text)
+    data = dict(data, key=key)
     cache.write_text(json.dumps(data, indent=1))
     return data
 

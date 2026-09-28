@@ -1,0 +1,40 @@
+# voice.yaml — channel voice for the V15/V16 pipeline (WP3, DESIGN.md §5).
+# Owner decision 2026-09-28 (round 3): Kokoro is the sole channel voice; Fish
+# is disabled by default and only runs with FISH_PLAN=paid AND commercial_ok.
+# (configs/voices.yaml is the legacy mission_run.py/src/ config; unchanged.)
+channel_voice: kokoro_michael
+voices:
+  kokoro_michael:
+    provider: kokoro
+    model: ~/models/kokoro/kokoro-v1.0.onnx
+    voices_bin: ~/models/kokoro/voices-v1.0.bin
+    voice: am_michael
+    lang: en-us
+    speed: 1.0
+    commercial_ok: true
+    license_ref: Apache-2.0
+  fish_narrator:
+    provider: fish
+    model: s2.1-pro            # never s2.1-pro-free: its ToS is non-commercial
+    reference_id: 0327fdb5da9e4fd782899a8058c8ae2b
+    speed: 1.0
+    requires_plan: paid
+    commercial_ok: false       # flip only after FISH_PLAN=paid AND voice rights are confirmed
+    license_ref: fish-audio-paid-plan
+# whole-video fallback chain after channel_voice (voices are never mixed)
+fallback: [kokoro_michael]
+publish_requires_commercial_ok: true
+
+lexicon: brand/ink_ember/lexicon.yaml
+
+# per-sentence synthesis joined with designed gaps (ms): after a hook
+# sentence, before a payoff sentence, otherwise
+gaps_ms: {hook: 80, payoff: 300, normal: 150}
+# speed multiplier per role, each within 0.95-1.08 (validated on load)
+speed_by_role: {hook: 1.03, normal: 1.0, payoff: 0.96}
+# beat function -> role for V15 beats (anything else is "normal")
+role_by_function: {HOOK: hook, PAYOFF: payoff}
+
+qa:
+  max_wer: 0.03
+  asr_model: base.en

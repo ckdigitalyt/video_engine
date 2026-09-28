@@ -17,6 +17,9 @@ plus ONE vision-judge call (directive §28/§29 — lightweight, no metric zoo):
                     no plate may still fail it; every plate used is OCR-read
                     for provider watermarks/domains by the gate itself, so
                     even a --no-plate-qa run cannot ship a stamped plate
+  voice             WP3: narration round-trip QA (WER <= 0.03 and every hard
+                    token heard) must have run and passed; voice must be
+                    cleared for commercial use. Not run / failed -> HOLD
   info_floor        sampled pre-caption frames (every 2 s, caption band
                     excluded) must carry visual information: luminance std
                     and edge density above floors (a flat field fails)
@@ -215,6 +218,30 @@ def check_plates(specs: dict, plate_qa: dict | None) -> dict:
     return {"ok": not fails, "fails": fails[:10], "critical": bool(critical),
             "unverified": bool(unverified) and not critical,
             "plates_ocr": len(paths)}
+
+
+def check_voice(voice: dict | None) -> dict:
+    """Narration round-trip QA (WP3). QA that did not run, a failed WER/hard
+    token check, or a voice not cleared for commercial use all HOLD."""
+    if not voice:
+        return {"ok": False, "unverified": True,
+                "fails": ["voice QA did not run -> unverified"]}
+    qa = voice.get("qa") or {}
+    fails = []
+    if qa.get("unchecked_beats"):
+        fails.append(f"round-trip ASR did not run on beats "
+                     f"{qa['unchecked_beats']}")
+    held = [b for b in qa.get("held_beats") or []
+            if b not in (qa.get("unchecked_beats") or [])]
+    if held:
+        fails.append(f"round-trip QA failed on beats {held} "
+                     f"(WER {qa.get('wer')}, limit {qa.get('max_wer')})")
+    if not voice.get("publishable"):
+        fails.append(f"voice {voice.get('provider')}/{voice.get('voice_id')} "
+                     f"is not cleared for commercial use")
+    return {"ok": not fails, "fails": fails, "unverified": bool(fails),
+            "wer": qa.get("wer"), "provider": voice.get("provider"),
+            "switches": voice.get("switches") or []}
 
 
 def _frames(video: Path, every: float, out_dir: Path) -> list:
@@ -460,7 +487,8 @@ def _caption_top() -> float:
 
 def run_gate(work: Path, story: dict, meta: dict, specs: dict, timing: dict,
              captions: dict, lead: float, *, use_judge: bool = True,
-             plate_qa: dict | None = None) -> dict:
+             plate_qa: dict | None = None,
+             voice: dict | None = None) -> dict:
     work = Path(work)
     arep = json.loads((work / "assembly_report.json").read_text()) \
         if (work / "assembly_report.json").exists() else {}
@@ -477,6 +505,7 @@ def run_gate(work: Path, story: dict, meta: dict, specs: dict, timing: dict,
         "caption_safe": check_caption_safe(
             arep.get("caption_overlays") or [], _caption_top()),
         "plates": check_plates(specs, plate_qa),
+        "voice": check_voice(voice),
         "info_floor": check_info_floor(
             [work / "scenes" / f"{k}.mp4" for k in meta], work),
         "visual_hold": check_visual_hold(meta, specs),

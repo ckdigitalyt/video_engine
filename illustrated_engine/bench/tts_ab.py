@@ -26,7 +26,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))          # engine package lives here
 sys.path.append(str(ROOT.parent))      # repo root: src.providers lives there
 
-from engine import tts as eng_tts  # noqa: E402  (loads repo .env for FISH)
+from engine.voice.fish import _load_env_keys  # noqa: E402  (loads repo .env for FISH)
 
 LINE_PICKER = ("hook_first", "escalation_first", "payoff_last")
 
@@ -71,6 +71,13 @@ def build_providers(pairs: list[str]) -> dict:
     return out
 
 
+def _ffprobe_duration(path) -> float:
+    import subprocess
+    return float(subprocess.run(
+        ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of",
+         "csv=p=0", str(path)], capture_output=True, text=True).stdout.strip())
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--story", default="sahara_greening")
@@ -86,7 +93,7 @@ def main():
               "(ElevenLabs is rollback-only, disabled by config)")
         return
 
-    eng_tts._ensure_env_key()
+    _load_env_keys()
     story = json.loads(
         (ROOT / "stories" / a.story / "story.json").read_text())
     lines = pick_lines(story, a.beats)
@@ -138,7 +145,7 @@ def main():
                     p.generate_voice(text, str(dest))
                     signal.alarm(0)
                     rec["duration"] = round(
-                        eng_tts.ffprobe_duration(dest), 3)
+                        _ffprobe_duration(dest), 3)
                     rec["synth_s"] = round(time.time() - t0, 1)
                 except _Timeout:
                     signal.alarm(0)

@@ -1,8 +1,8 @@
 """Phase 2: live test of Fish /v1/tts/stream/with-timestamp on the FREE model."""
 import base64, json, os, sys, time, urllib.request
 sys.path.insert(0, "/home/ubuntu/video_engine/illustrated_engine")
-from engine.tts import _ensure_env_key
-_ensure_env_key()
+from engine.voice.fish import _load_env_keys
+_load_env_keys()
 text = "GPS satellites feel this every day. Their clocks run 38 microseconds fast."
 payload = {"text": text, "reference_id": "0327fdb5da9e4fd782899a8058c8ae2b", "temperature": 0.6, "top_p": 0.9,
            "prosody": {"speed": 0.95, "volume": 0, "normalize_loudness": True},

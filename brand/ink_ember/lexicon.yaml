@@ -1,0 +1,24 @@
+# Pronunciation lexicon for the Kokoro voice (WP3, DESIGN.md §5.3).
+# phonemes: IPA in Kokoro's alphabet, used on the first attempt.
+# respell:  plain-text respelling, substituted on the one QA retry (any provider).
+#           MUST be lowercase: espeak spells UPPERCASE syllables letter by letter.
+# heard_as: how faster-whisper spells a *plausible* pronunciation of a rare
+#           word; the QA maps it back so a correct read is not flagged.
+# Every phoneme string below was checked by ASR round trip (Kokoro am_michael,
+# sentence-initial and mid-sentence). Nobody has LISTENED to them: owner ears
+# decide (bench/ab/wp3.md lists which entries rely on an alias).
+tyrannosaurus:   {phonemes: "taɪɹˌænəsˈɔːɹəs",  respell: "tie-ran-uh-sawr-us", heard_as: ["tyranosaurus"]}
+carnotaurus:     {phonemes: "kˈɑːɹnoʊtˌɔːɹəs",  respell: "kar-no-tawr-us"}
+sinosauropteryx: {phonemes: "sˌaɪnəsɔːɹˈɑːptɚɪks", respell: "sigh-nuh-sawr-op-ter-iks"}
+ediacaran:       {phonemes: "ˌiːdiˈækəɹən",     respell: "ee-dee-ak-uh-ran"}
+chandrasekhar:   {phonemes: "tʃˌʌndɹəsˈeɪkɑːɹ", respell: "chun-druh-say-kar"}
+schwarzschild:   {phonemes: "ʃwˈɔːɹtsʃˌɪld",    respell: "shworts-shild"}
+liaoning:        {phonemes: "lˌiːˈaʊnɪŋ",       respell: "lee-ow-ning", heard_as: ["leowning"]}
+pterodactyl:     {phonemes: "tˌɛɹədˈæktəl",     respell: "terr-uh-dak-til", heard_as: ["terradactyl"]}
+chicxulub:       {phonemes: "tʃˈɪkʃulˌuːb",     respell: "chik-shoo-loob", heard_as: ["chickshuleub", "chicks who looped"]}
+cenozoic:        {respell: "seenozoic", heard_as: ["senozoic", "seen ozoic", "cinozoic", "sinozoic"]}
+cepheid:         {respell: "seffeeid", heard_as: ["sephiid"]}
+furcula:         {respell: "furkyula", heard_as: ["fercula", "firkula"]}
+theropod:        {respell: "theer-uh-pod", heard_as: ["therapod"]}
+betelgeuse:      {respell: "beetel-jooss", heard_as: ["beetlejuice", "beetle juice"]}
+olbers:          {respell: "ollberz", heard_as: ["albers"]}

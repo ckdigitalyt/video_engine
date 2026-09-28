@@ -221,11 +221,14 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
                     "costs": {"llm_calls": 0, "image_calls": 0,
                               "vision_calls": 0}}
 
-    # 1. narration audio + measured word timing
-    from engine.tts import tts_beat
+    # 1. narration audio (voice layer: ONE voice for the whole video, lexicon,
+    #    round-trip QA) + measured word timing
+    from engine.voice import synthesize_video
+    vo = synthesize_video(story_dir, story["beats"])
+    report["voice"] = vo["voice"]
     tts, timing = {}, {}
     for b in story["beats"]:
-        res = tts_beat(story_dir, b["beat_id"], b["narration"])
+        res = vo["beats"][b["beat_id"]]
         tts[b["beat_id"]] = float(res["duration"])
         timing[b["beat_id"]] = beat_timing(story_dir / res["file"],
                                            b["narration"])
@@ -451,7 +454,8 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
     from engine.v15_gate import run_gate
     t0 = time.time()
     gate = run_gate(work, story, meta, specs, timing, captions, LEAD_S,
-                    use_judge=use_judge, plate_qa=report["plate_qa"])
+                    use_judge=use_judge, plate_qa=report["plate_qa"],
+                    voice=report["voice"])
     report["costs"]["vision_calls"] += gate.get("judge_calls", 0)
     report["gate"] = gate
     report["publish_gate"] = gate["verdict"]

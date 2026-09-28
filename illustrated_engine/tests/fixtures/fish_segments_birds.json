@@ -1,0 +1,372 @@
+[
+ {
+  "text": "That",
+  "start": 0.08,
+  "end": 0.32
+ },
+ {
+  "text": "pigeon",
+  "start": 0.32,
+  "end": 0.72
+ },
+ {
+  "text": "is",
+  "start": 0.72,
+  "end": 0.8
+ },
+ {
+  "text": "a",
+  "start": 0.8,
+  "end": 0.88
+ },
+ {
+  "text": "dinosaur",
+  "start": 0.88,
+  "end": 1.6
+ },
+ {
+  "text": "Not",
+  "start": 2.0,
+  "end": 2.24
+ },
+ {
+  "text": "related",
+  "start": 2.24,
+  "end": 2.72
+ },
+ {
+  "text": "to",
+  "start": 2.72,
+  "end": 2.8
+ },
+ {
+  "text": "one",
+  "start": 2.8,
+  "end": 3.2
+ },
+ {
+  "text": "It",
+  "start": 3.68,
+  "end": 3.76
+ },
+ {
+  "text": "is",
+  "start": 3.76,
+  "end": 3.92
+ },
+ {
+  "text": "one",
+  "start": 3.92,
+  "end": 4.32
+ },
+ {
+  "text": "Sixty",
+  "start": 5.04,
+  "end": 5.44
+ },
+ {
+  "text": "six",
+  "start": 5.44,
+  "end": 5.76
+ },
+ {
+  "text": "million",
+  "start": 5.76,
+  "end": 6.08
+ },
+ {
+  "text": "years",
+  "start": 6.08,
+  "end": 6.32
+ },
+ {
+  "text": "ago",
+  "start": 6.32,
+  "end": 6.72
+ },
+ {
+  "text": "a",
+  "start": 7.04,
+  "end": 7.12
+ },
+ {
+  "text": "rock",
+  "start": 7.12,
+  "end": 7.52
+ },
+ {
+  "text": "ten",
+  "start": 7.52,
+  "end": 7.76
+ },
+ {
+  "text": "kilometres",
+  "start": 7.76,
+  "end": 8.24
+ },
+ {
+  "text": "wide",
+  "start": 8.24,
+  "end": 8.72
+ },
+ {
+  "text": "slammed",
+  "start": 8.72,
+  "end": 9.12
+ },
+ {
+  "text": "into",
+  "start": 9.12,
+  "end": 9.36
+ },
+ {
+  "text": "Mexico",
+  "start": 9.36,
+  "end": 10.0
+ },
+ {
+  "text": "and",
+  "start": 10.4,
+  "end": 10.48
+ },
+ {
+  "text": "the",
+  "start": 10.48,
+  "end": 10.56
+ },
+ {
+  "text": "age",
+  "start": 10.64,
+  "end": 10.88
+ },
+ {
+  "text": "of",
+  "start": 10.88,
+  "end": 11.04
+ },
+ {
+  "text": "giants",
+  "start": 11.04,
+  "end": 11.44
+ },
+ {
+  "text": "ended",
+  "start": 11.52,
+  "end": 11.92
+ },
+ {
+  "text": "Tyrannosaurus",
+  "start": 12.08,
+  "end": 13.12
+ },
+ {
+  "text": "gone",
+  "start": 13.36,
+  "end": 13.76
+ },
+ {
+  "text": "Triceratops",
+  "start": 14.08,
+  "end": 15.04
+ },
+ {
+  "text": "gone",
+  "start": 15.12,
+  "end": 15.6
+ },
+ {
+  "text": "But",
+  "start": 16.16,
+  "end": 16.32
+ },
+ {
+  "text": "a",
+  "start": 16.32,
+  "end": 16.32
+ },
+ {
+  "text": "few",
+  "start": 16.32,
+  "end": 16.64
+ },
+ {
+  "text": "small",
+  "start": 16.64,
+  "end": 17.12
+ },
+ {
+  "text": "feathered",
+  "start": 17.12,
+  "end": 17.52
+ },
+ {
+  "text": "dinosaurs",
+  "start": 17.52,
+  "end": 18.08
+ },
+ {
+  "text": "made",
+  "start": 18.08,
+  "end": 18.24
+ },
+ {
+  "text": "it",
+  "start": 18.24,
+  "end": 18.4
+ },
+ {
+  "text": "through",
+  "start": 18.4,
+  "end": 18.72
+ },
+ {
+  "text": "They",
+  "start": 19.461,
+  "end": 19.541
+ },
+ {
+  "text": "were",
+  "start": 19.541,
+  "end": 19.621
+ },
+ {
+  "text": "tiny",
+  "start": 19.621,
+  "end": 20.181
+ },
+ {
+  "text": "and",
+  "start": 20.501,
+  "end": 20.661
+ },
+ {
+  "text": "they",
+  "start": 20.661,
+  "end": 20.741
+ },
+ {
+  "text": "could",
+  "start": 20.741,
+  "end": 20.901
+ },
+ {
+  "text": "live",
+  "start": 20.901,
+  "end": 21.141
+ },
+ {
+  "text": "on",
+  "start": 21.141,
+  "end": 21.301
+ },
+ {
+  "text": "seeds",
+  "start": 21.301,
+  "end": 21.861
+ },
+ {
+  "text": "Their",
+  "start": 22.501,
+  "end": 22.581
+ },
+ {
+  "text": "descendants",
+  "start": 22.581,
+  "end": 23.141
+ },
+ {
+  "text": "are",
+  "start": 23.141,
+  "end": 23.221
+ },
+ {
+  "text": "outside",
+  "start": 23.221,
+  "end": 23.701
+ },
+ {
+  "text": "your",
+  "start": 23.701,
+  "end": 23.861
+ },
+ {
+  "text": "window",
+  "start": 23.861,
+  "end": 24.181
+ },
+ {
+  "text": "right",
+  "start": 24.181,
+  "end": 24.341
+ },
+ {
+  "text": "now",
+  "start": 24.341,
+  "end": 24.821
+ },
+ {
+  "text": "So",
+  "start": 25.301,
+  "end": 25.461
+ },
+ {
+  "text": "the",
+  "start": 25.461,
+  "end": 25.541
+ },
+ {
+  "text": "next",
+  "start": 25.541,
+  "end": 25.861
+ },
+ {
+  "text": "time",
+  "start": 25.861,
+  "end": 26.021
+ },
+ {
+  "text": "a",
+  "start": 26.021,
+  "end": 26.101
+ },
+ {
+  "text": "pigeon",
+  "start": 26.101,
+  "end": 26.421
+ },
+ {
+  "text": "stares",
+  "start": 26.421,
+  "end": 26.821
+ },
+ {
+  "text": "at",
+  "start": 26.821,
+  "end": 26.901
+ },
+ {
+  "text": "you",
+  "start": 26.901,
+  "end": 27.221
+ },
+ {
+  "text": "remember",
+  "start": 27.381,
+  "end": 27.781
+ },
+ {
+  "text": "what",
+  "start": 27.781,
+  "end": 27.941
+ },
+ {
+  "text": "it",
+  "start": 27.941,
+  "end": 28.021
+ },
+ {
+  "text": "is",
+  "start": 28.021,
+  "end": 28.421
+ }
+]

@@ -3,7 +3,7 @@ NOT for publication) and Kokoro am_michael fp32 (local), then loudness-normalise
 
   venv/bin/python research/phase3/voice_samples.py [fish|kokoro|norm|all]
 
-The Fish key is read from the repo .env via engine.tts._ensure_env_key and is never printed."""
+The Fish key is read from the repo .env via engine.voice.fish._load_env_keys and is never printed."""
 import base64, json, os, re, subprocess, sys, time, urllib.request, wave
 from pathlib import Path
 import numpy as np
@@ -29,8 +29,8 @@ def dur(p):
 
 def fish():
     sys.path.insert(0, str(REPO / "illustrated_engine"))
-    from engine.tts import _ensure_env_key
-    _ensure_env_key()
+    from engine.voice.fish import _load_env_keys
+    _load_env_keys()
     payload = {"text": SCRIPT, "reference_id": FISH_VOICE, "temperature": 0.7, "top_p": 0.9,
                "prosody": {"speed": 1.0, "volume": 0, "normalize_loudness": True},
                "format": "mp3", "sample_rate": 44100, "mp3_bitrate": 128, "latency": "normal"}

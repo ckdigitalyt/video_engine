@@ -1,4 +1,5 @@
-"""Phase 2: minimal live Fish Audio check (uses the repo provider, free tier pin)."""
+"""Phase 2: minimal live Fish Audio check (uses the repo provider, free tier pin).
+BROKEN since WP3: engine.tts._get_provider / ffprobe_duration were removed (Fish is paid-gated in engine/voice/fish.py). One-off script, kept for the record."""
 import json, os, sys, time, urllib.request
 sys.path.insert(0, "/home/ubuntu/video_engine")
 sys.path.insert(0, "/home/ubuntu/video_engine/illustrated_engine")
