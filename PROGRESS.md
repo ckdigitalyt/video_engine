@@ -101,7 +101,7 @@ Orchestrator: Jade (Sonnet 5, Discord #illustration-video)
 - WP1: DONE cacb1c4 (adapter) + be12e92 (DeepSeek removal) + 250d4bd (CHANGELOG) + d0a6c36 (acceptance report bench/ab/wp1.md)
 - WP2: DONE cf70724 (code+tests+CHANGELOG) + acceptance report bench/ab/wp2.md
 - WP3: DONE 45e69b5 (voice layer) + acceptance report bench/ab/wp3.md
-- WP4: IN PROGRESS (run 5, started 2026-09-28; story engine S1-S4; A/B scoring gated on source_check for topics 1 and 3)
+- WP4: code DONE 81812b3 + 411d5be + 487f95a (story engine S1-S4, 29 tests) + acceptance report bench/ab/wp4.md. A/B #1 PENDING: topic 2 script-level run HOLDs at the critic (3.75 < 4.0); topics 1 and 3 not run (source check only partly applied); no renders
 - WP5–WP14: pending
 
 ## Phase 4 run 1 summary (2026-09-28) — WP0 + WP1 done, stopped before WP2
@@ -150,3 +150,15 @@ Orchestrator: Jade (Sonnet 5, Discord #illustration-video)
 8. Not done: full V15 render with the new voice (needs Claude calls); lexicon phonemes never listened to; 6 lexicon entries have respelling only.
 9. Housekeeping: /tmp/wt_prev worktree removed, ~/phase4_out/wp3/tmp deleted (15 MB left).
 10. Open: llm_compare.py still broken; topic packs 1 and 3 source-check before WP4 scoring; next is WP4.
+
+## Phase 4 run 5 summary (2026-09-28) — WP4 code done, A/B #1 PENDING, stopped before WP5
+1. Commits: 81812b3 (S1-S4 modules, 5 prompts + schemas, tests), 411d5be, 487f95a (voice-safe digits rule, script_write v2, `kulik` lexicon entry, CHANGELOG), then bench/ab/wp4.md + this summary. Pushed.
+2. New: engine/v16_research.py (quote-exists check, claim-adds-number check, curated packs), engine/v16_script.py (length/hook/role/loop/digit/title rules, critic->rewrite->fact_check->metadata, PASS/HOLD), llm/prompts.py + llm/prompts/*.md + llm/schemas/*.json. No fallback or retry path removed.
+3. Tests: test_wp4_story.py 29 new; illustrated_engine/tests 78 pass. Root suite 58F+5E, IDENTICAL 63 failing ids before (clean worktree of 6c8ec87) and after. Secret scan clean, .env untouched.
+4. Live (topic 2 tunguska, script level, no render): 3 runs, all HOLD at the critic (mean 3.5 -> 3.75 after rewrite, bar 4.0). Draft passes every code rule: 136 words, 9-word claim hook, Kokoro 57.95 s, voice onset 0.021 s (V15: 199 words, 78 s). Metadata and fact_check smoke-tested live.
+5. Source check: bench/ab/source_check.md + source_check fields appeared UNCOMMITTED mid-run; only 4/6 claims per pack verified:true, corrections pending. Topics 1 and 3 NOT run; I did not commit those files. Once final: run `python -m engine.v16_script --curated bench/quality/topics/0N_... --topic ... --out ...` from illustrated_engine/ with venv python.
+6. Calls: 15 fresh Claude calls (10 Opus, 5 Sonnet, ~$0.77 list-price equiv.); a clean pass is 4 calls. Samples: ~/phase4_out/wp4/{tunguska,tunguska_run2,tunguska_v1}, suite_{before,after}.txt (5.7 MB, no large work dirs).
+7. OWNER DECISION: the critic bar (mean >= 4.0, none < 3, one rewrite) HOLDs 3/3 on tunguska; options: second rewrite, bar 3.75, or review HOLDs. I did not change the bar. Critic scores are uncalibrated against channel winners.
+8. WP3 gaps found: round-trip QA HOLDs on "fifteen hundred" (Whisper "1500") and "2 ,000"; Kokoro misreads "2,000". WP4 forbids comma/decimal/5+ digit numbers in narration; the QA normaliser is not fixed.
+9. Deviations: title honesty is code-only (cited fact ids + numbers + trope ban), no extra LLM call; loop coherence left to the critic (lexical overlap fails DESIGN's own example); fact_check is noisy and uncalibrated (prompt v3 asks for the note first). S1 build_facts never saw a real fetched page (no web).
+10. Open: llm_compare.py still broken; A/B #1 for topics 1-3 (render + scoring) PENDING; next is WP5 once the owner rules on item 7.
