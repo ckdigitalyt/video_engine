@@ -69,3 +69,11 @@ Orchestrator: Jade (Sonnet 5, Discord #illustration-video)
 - Fresh cold e2e (blackhole_clocks): 17 min 13 s total, PASS — but plate QA was silently skipped (Gemini 20 RPD quota) and a watermarked + a garbled-text plate shipped (RESEARCH §2.3).
 - Owner actions raised (RESEARCH §11): Fish commercial clearance; approve Fish→Kokoro fallback; approve replacing dead plate links (SiliconFlow 401, HF 410); optional Cloudflare account; YouTube OAuth re-consent (token invalid_grant); rotate GEMINI_API_KEY (partially echoed into the session log).
 - Stopped before Phase 3 as instructed.
+
+## Owner decisions round 2 (2026-09-28) + Phase 3 launch
+- Voice: provider-agnostic (Fish API + Kokoro am_michael); design must not rely on Fish free tier for monetized output; Phase 3 renders same script in both for owner comparison. Kokoro fallback approved.
+- Approved replacing dead SiliconFlow/HF with local klein + Cloudflare Workers AI. Owner creates account; env file /home/ubuntu/video_engine/.env, vars CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN.
+- Topic engine driven by channel data (dinosaur/deep-time + single-spectacle physics ~18x V15 Shorts).
+- Credential rule: never try a key against a service it was not issued for. Gemini key redacted from .jade/phase2.log and the Claude session jsonl (verified no 16-char fragment remains). Owner to rotate GEMINI_API_KEY regardless.
+- OpenClaw compaction: config NOT touched; proposal sent to owner.
+- Phase 3 (Opus, no web tools) launched 04:26 UTC in tmux jade-phase3, session in .jade/phase3_session_id.txt, log .jade/phase3.log. Deliverables: DESIGN.md, 2-3 brand options with sample frames, Fish vs Kokoro voice samples. Background watcher armed for completion/limit.
