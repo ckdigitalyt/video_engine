@@ -174,3 +174,5 @@ Orchestrator: Jade (Sonnet 5, Discord #illustration-video)
 8. Report: bench/ab/wp6.md.
 9. Pushed.
 10. Next: WP7 (templates + pacing) - including the deferred full-pipeline right-rail proof.
+
+## Status: Phase 4 WP7 (Templates + pacing) - IN PROGRESS (2026-09-29)
