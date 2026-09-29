@@ -42,6 +42,8 @@ from pathlib import Path
 import numpy as np
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
+from engine.brand import apply_lut
+
 ROOT = Path(__file__).resolve().parent.parent
 REPO = ROOT.parent
 CACHE_DIR = ROOT / "build" / "cache" / "v15_plates"
@@ -49,7 +51,10 @@ W, H = 1080, 1920
 REQ_W, REQ_H = 720, 1280  # providers snap to their nearest 9:16-ish size
 PROVIDER_ORDER = ("nvidia_nim", "siliconflow", "hf_serverless",
                   "pollinations", "gemini_image")
-PLATE_VERSION = "plate/1"
+# plate/2 (WP6): every cached plate is now brand-graded at ingest (below),
+# so plate/1 cache entries (ungraded) must miss and regenerate, not be
+# silently served as if they carried the brand look.
+PLATE_VERSION = "plate/2"
 
 for _p in (REPO, ROOT):
     if str(_p) not in sys.path:
@@ -104,12 +109,18 @@ def generate_plate(prompt: str, seed: int, *, providers=PROVIDER_ORDER,
                           seed=seed)
             _normalize(raw, out)
             raw.unlink(missing_ok=True)
+            # WP6 plate ingest: grade through the brand LUT in place, once,
+            # before caching — every cached plate carries the brand look and
+            # its cube hash, so the gate can prove it (the "LUT-hash test").
+            graded = CACHE_DIR / f"{key}.graded.png"
+            lut_sha256 = apply_lut(out, graded)
+            graded.replace(out)
             meta = {"key": key, "provider": name,
                     "model": getattr(prov, "model", None)
                     or getattr(prov, "_model", None) or name,
                     "seconds": round(time.time() - t0, 2), "seed": seed,
                     "prompt": prompt, "attempts": attempts,
-                    "version": PLATE_VERSION}
+                    "version": PLATE_VERSION, "lut_sha256": lut_sha256}
             meta_p.write_text(json.dumps(meta, indent=1))
             return dict(meta, ok=True, path=str(out), cached=False)
         except Exception as e:  # descend the chain, record why

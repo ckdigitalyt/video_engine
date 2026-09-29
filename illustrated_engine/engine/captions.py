@@ -199,17 +199,20 @@ def chunk_cues(shot: dict, cues: list | None = None) -> list:
     return chunks
 
 
-def _chunk_font(chunk, bible) -> tuple:
+def _chunk_font(chunk) -> tuple:
     """-> (font, display_words, width). Steps down until the chunk fits its
-    lines (max MAX_LINES) in both width and carrier height."""
-    from engine import bible as B
-    typ = bible.get("typography", {})
+    lines (max MAX_LINES) in both width and carrier height.
+
+    WP6 brand caption style: the caption font is the brand's `caption` role
+    font (ArchivoBlack, DESIGN §7.1), not the per-story bible typography."""
+    from engine.brand import font_path, load_brand
+    cap_font = font_path(load_brand(), "caption").name
     per_line = chunk.get("lines") or [chunk["words"]]
     words = [w.upper() for line in per_line for w in line]
     n_lines = min(max(1, len(per_line)), MAX_LINES)
     size = BASE_SIZE if n_lines == 1 else 56  # 2 lines must fit KIN_CAP_H
     for _ in range(10):
-        f = _font(typ.get("display", "BebasNeue-Regular.ttf"), size)
+        f = _font(cap_font, size)
         probe = Image.new("RGBA", (8, 8))
         d = ImageDraw.Draw(probe)
         widths = []
@@ -235,8 +238,8 @@ def chunk_png(chunk: dict, bible: dict, out: Path, active: int,
     `zone_top` from caption_place, V11 P1 §5) so downstream anchoring keeps
     working. Declared 2-line chunks stack their lines centered — still ONE
     caption state on ONE carrier window."""
-    from engine import bible as B
-    f, per_line, width = _chunk_font(chunk, bible)
+    from engine.brand import load_brand, role_rgb
+    f, per_line, width = _chunk_font(chunk)
     cy_off = int(zone_top) if zone_top is not None else carrier_y()
     img = Image.new("RGBA", (FRAME_W, KIN_CAP_H), (0, 0, 0, 0))
     d = ImageDraw.Draw(img, "RGBA")
@@ -245,11 +248,15 @@ def chunk_png(chunk: dict, bible: dict, out: Path, active: int,
     n_lines = len(per_line)
     block_h = n_lines * (asc + desc)
     y0 = int(min(max(KIN_CAP_H // 2 - block_h / 2.0, 0), KIN_CAP_H - block_h))
-    text_rgb = B.rgb255(bible, "text")
+    # WP6 brand caption style: colour comes from the brand roles
+    # (caption_fill/caption_active), never the per-story bible — captions
+    # are a fixed channel identity element, not a per-topic "look".
+    brand = load_brand()
+    text_rgb = role_rgb(brand, "caption_fill")
     if 0.299 * text_rgb[0] + 0.587 * text_rgb[1] + 0.114 * text_rgb[2] < 140:
         text_rgb = (245, 242, 235)  # dark ink is unreadable on the scrim
     text_col = text_rgb + (235,)
-    accent = B.rgb255(bible, "accent") + (255,)
+    accent = role_rgb(brand, "caption_active") + (255,)
     # pass 1 — word positions only, so the scrim can go UNDER the text
     boxes = []  # (x, y, x1, y1, word, flat_index)
     wi = 0

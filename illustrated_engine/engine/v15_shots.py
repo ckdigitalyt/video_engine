@@ -33,6 +33,7 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
+from engine.brand import rail_safe_x1
 from engine.grammars.base import (WORLD_H, WORLD_W, animation, base_spec,
                                   camera_track, layer)
 from engine.textfit import (DISPLAY, TextFitError, fit_text, text_bbox,
@@ -109,17 +110,37 @@ def _inks(bible: dict, zone_lum: float) -> dict:
             "accent": lighten(p["accent"])}
 
 
+def _fit_centered(text: str, y: float, size: int, min_size: int,
+                  max_lines: int, spacing: float, anchor_bottom: bool,
+                  max_w: float) -> tuple:
+    fit = fit_text(text, max_w=max_w, size=size, min_size=min_size,
+                   max_lines=max_lines, font=DISPLAY, spacing=spacing)
+    lines, s = fit["lines"], fit["size"]
+    yy = y - s * 1.05 * (len(lines) - 1) if anchor_bottom else y
+    box = text_bbox(lines, s, WORLD_W / 2, yy, "middle", DISPLAY, spacing)
+    return lines, s, yy, box
+
+
 def _text_layer(lid: str, text: str, *, y: float, size: int, ink: dict,
                 boxes: list, vis=None, pop: bool = False, accent: bool = False,
                 max_lines: int = 3, min_size: int = 44, spacing: float = 1.5,
                 anchor_bottom: bool = False) -> dict:
-    fit = fit_text(text, max_w=SAFE_X1 - SAFE_X0 - 20, size=size,
-                   min_size=min_size, max_lines=max_lines, font=DISPLAY,
-                   spacing=spacing)
-    lines, s = fit["lines"], fit["size"]
-    if anchor_bottom:  # y is the LAST baseline -> shift up for extra lines
-        y = y - s * 1.05 * (len(lines) - 1)
-    box = text_bbox(lines, s, WORLD_W / 2, y, "middle", DISPLAY, spacing)
+    max_w = SAFE_X1 - SAFE_X0 - 20
+    y0 = y  # baseline reference (last baseline when anchor_bottom)
+    lines, s, y, box = _fit_centered(text, y0, size, min_size, max_lines,
+                                     spacing, anchor_bottom, max_w)
+    # A box whose y-range dips into the right UI rail (DESIGN §7.1
+    # safe_zones.right_rail) must not cross it: re-fit narrower, centred,
+    # rather than clip — a clipped headline is worse than a smaller one.
+    cap_x1 = rail_safe_x1(box[1], box[3], SAFE_X1)
+    if box[2] > cap_x1:
+        narrower = max(200.0, 2 * (cap_x1 - WORLD_W / 2) - 20)
+        try:
+            lines, s, y, box = _fit_centered(text, y0, size, min_size,
+                                             max_lines, spacing,
+                                             anchor_bottom, narrower)
+        except TextFitError:
+            pass  # keep the wider fit; the gate still catches a real breach
     boxes.append({"id": lid, "box": [round(v, 1) for v in box],
                   "text": " ".join(lines)})
     payload = {"lines": lines, "position": [WORLD_W / 2, y], "size": s,
@@ -266,13 +287,18 @@ def _label(lid: str, text: str, info: dict, t: float, dur: float,
     size = 74
     tw = text_width(text, DISPLAY, size, 3)
     tx = ax - 170 if side == "left" else ax + 170
+    y0b, y1b = ay - 90 - size, ay - 90 + 10
+    # cap the box's right edge to the UI rail (DESIGN §7.1 safe_zones.
+    # right_rail) whenever it dips into the rail's y-range, on EITHER side —
+    # a left-anchored label's right edge can breach the rail just as easily.
+    rail_x1 = rail_safe_x1(y0b, y1b, SAFE_X1)
     if side == "left":
-        tx = max(SAFE_X0 + tw, tx)
-        box = (tx - tw, ay - 90 - size, tx, ay - 90 + 10)
+        tx = max(SAFE_X0 + tw, min(tx, rail_x1))
+        box = (tx - tw, y0b, tx, y1b)
     else:
-        tx = min(SAFE_X1 - tw, tx)
-        box = (tx, ay - 90 - size, tx + tw, ay - 90 + 10)
-    if box[0] < SAFE_X0 - 1 or box[2] > SAFE_X1 + 1:
+        tx = min(rail_x1 - tw, tx)
+        box = (tx, y0b, tx + tw, y1b)
+    if box[0] < SAFE_X0 - 1 or box[2] > rail_x1 + 1:
         return None
     boxes.append({"id": lid, "box": [round(v, 1) for v in box], "text": text})
     return layer(lid, "semantic_annotation", "key_callout", "vector", z=58,
@@ -453,8 +479,13 @@ def compile_process_shot(sc: dict, bible: dict, boxes: list, events: list) -> tu
         t = min(t, dur - 0.6)
         prev_t = t
         y = y0 + gap * i if n > 1 else (y0 + y1) / 2
+        # cap the chip width so it clears the right UI rail (DESIGN §7.1)
+        # whenever this row's estimated y-range dips into it; 120 px is a
+        # conservative half-height bound for a 2-line, size-88 chip.
+        rail_x1 = rail_safe_x1(y - 120.0, y + 120.0, WORLD_W / 2 + 425.0)
+        max_w = min(760.0, 2 * (rail_x1 - WORLD_W / 2) - 90.0)
         try:
-            fit = fit_text(st["text"], max_w=760, size=88, min_size=48,
+            fit = fit_text(st["text"], max_w=max_w, size=88, min_size=48,
                            max_lines=2, font=DISPLAY, spacing=2)
         except TextFitError as e:
             raise ShotError(str(e))
