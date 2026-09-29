@@ -162,3 +162,15 @@ Orchestrator: Jade (Sonnet 5, Discord #illustration-video)
 8. WP3 gaps found: round-trip QA HOLDs on "fifteen hundred" (Whisper "1500") and "2 ,000"; Kokoro misreads "2,000". WP4 forbids comma/decimal/5+ digit numbers in narration; the QA normaliser is not fixed.
 9. Deviations: title honesty is code-only (cited fact ids + numbers + trope ban), no extra LLM call; loop coherence left to the critic (lexical overlap fails DESIGN's own example); fact_check is noisy and uncalibrated (prompt v3 asks for the note first). S1 build_facts never saw a real fetched page (no web).
 10. Open: llm_compare.py still broken; A/B #1 for topics 1-3 (render + scoring) PENDING; next is WP5 once the owner rules on item 7.
+
+## Phase 4 run 6 summary (2026-09-29) - WP6 done (WP5 deferred), commit 62be5eb
+1. Owner re-sequenced the plan (scripts/phase4_driver.sh, untracked): WP6 -> WP7 -> WP9 -> WP10 first (fastest publishable Short), WP5/WP8/WP11-14 later. This run picked up WP6 code already written but uncommitted in the tree, verified it, filled in the acceptance report, and committed.
+2. New: brand/ink_ember/ (brand.yaml, grade.cube), engine/brand.py (roles, LUT, props lint, sting/outro/cover generators), fonts+OFL licences. No fallback/retry path removed.
+3. Right-rail fix: v15_shots.py _text_layer/_label/compile_process_shot now call brand.rail_safe_x1 and re-fit narrower instead of overflowing into the UI rail (x>930,y>760). Reproduces the exact WP2 "THE BLACK HOLE" case + 3 more scenarios, unit-tested.
+4. Tests: test_wp6_brand.py 19/19; illustrated_engine/tests 97/98 (1 known order-dependent flake, passes isolated). Root suite: 63/63 failing ids identical before/after (clean worktree of aceeee6 vs this commit) - zero new failures. Secret scan clean (one hf_ substring false-positive in unrelated pre-existing code), .env untouched.
+5. Deviations (flagged, not silent): v15_style.py's 5 per-story palette decks are NOT yet roles-only (bigger change, deferred); sting/outro/cover generators exist and are tested but not yet wired into the render/assembly timeline (no WP touches assembly yet).
+6. Not proven this pass: a fresh end-to-end render + re-gate of a real story through the fixed compiler (deferred to WP7 per its own prompt, to avoid extra image-provider/Claude calls in WP6).
+7. Samples: ~/phase4_out/wp6/ (sting/cover/bloom pngs, suite_before.txt/suite_after.txt).
+8. Report: bench/ab/wp6.md.
+9. Pushed.
+10. Next: WP7 (templates + pacing) - including the deferred full-pipeline right-rail proof.
