@@ -4,12 +4,78 @@
   "cluster": "deep_time",
   "provenance": "WP0 worker-curated from general paleontology consensus; NO web access in Phase 4. Every claim needs a source check before WP4 uses this pack for scoring.",
   "claims": [
-    {"id": "f_theropod_descent", "claim": "Birds are a living branch of theropod dinosaurs, so by modern classification birds are dinosaurs.", "nuance": "ESTABLISHED", "verified": false, "source_hint": "Gauthier 1986; Brusatte et al., Current Biology 2015 'The Origin and Diversification of Birds'"},
-    {"id": "f_k_pg_survival", "claim": "Only some beaked birds survived the end-Cretaceous extinction about 66 million years ago; all non-avian dinosaurs died out.", "nuance": "ESTABLISHED", "verified": false, "source_hint": "Field et al., Current Biology 2018"},
-    {"id": "f_archaeopteryx", "claim": "Archaeopteryx, from about 150 million years ago, had feathers together with teeth and a long bony tail.", "nuance": "ESTABLISHED", "verified": false, "source_hint": "Solnhofen fossils, 1861 onward"},
-    {"id": "f_feathered_dinos", "claim": "Feathered non-avian dinosaurs such as Sinosauropteryx have been found in Liaoning, China.", "nuance": "ESTABLISHED", "verified": false, "source_hint": "Chen et al., Nature 1998"},
-    {"id": "f_wishbone", "claim": "The bird wishbone (furcula) is a fused pair of collarbones that theropod dinosaurs such as Tyrannosaurus also had.", "nuance": "ESTABLISHED", "verified": false, "source_hint": "Nesbitt et al. 2009"},
-    {"id": "f_medullary", "claim": "Tyrannosaurus rex bone tissue contained medullary bone-like tissue, a feature otherwise known from female birds forming eggshell.", "nuance": "DEBATED_DETAIL", "verified": false, "source_hint": "Schweitzer et al., Science 2005"}
+    {
+      "id": "f_theropod_descent",
+      "claim": "Birds are a living branch of theropod dinosaurs, so by modern classification birds are dinosaurs.",
+      "nuance": "ESTABLISHED",
+      "verified": true,
+      "source_hint": "Gauthier 1986; Brusatte et al., Current Biology 2015 'The Origin and Diversification of Birds'",
+      "source_check": {
+        "verdict": "SUPPORTED",
+        "url": "https://doi.org/10.1016/j.cub.2015.08.003",
+        "checked": "2026-09-28"
+      }
+    },
+    {
+      "id": "f_k_pg_survival",
+      "claim": "Only some lineages of birds (the ancestors of today's crown-group birds, Neornithes) survived the end-Cretaceous extinction ~66 Mya; all non-avian dinosaurs and other early bird lineages (e.g. enantiornithines) died out. Source does not say 'beaked'.",
+      "nuance": "ESTABLISHED",
+      "verified": true,
+      "source_hint": "Field et al., Current Biology 2018",
+      "source_check": {
+        "verdict": "SUPPORTED_WITH_CORRECTION",
+        "url": "https://doi.org/10.1016/j.cub.2018.04.062",
+        "checked": "2026-09-28"
+      }
+    },
+    {
+      "id": "f_archaeopteryx",
+      "claim": "Archaeopteryx, from about 150 million years ago, had feathers together with teeth and a long bony tail.",
+      "nuance": "ESTABLISHED",
+      "verified": true,
+      "source_hint": "Solnhofen fossils, 1861 onward",
+      "source_check": {
+        "verdict": "SUPPORTED",
+        "url": "https://en.wikipedia.org/wiki/Archaeopteryx",
+        "checked": "2026-09-28"
+      }
+    },
+    {
+      "id": "f_feathered_dinos",
+      "claim": "Feathered non-avian dinosaurs such as Sinosauropteryx have been found in Liaoning, China.",
+      "nuance": "ESTABLISHED",
+      "verified": true,
+      "source_hint": "Chen et al., Nature 1998",
+      "source_check": {
+        "verdict": "SUPPORTED",
+        "url": "https://en.wikipedia.org/wiki/Sinosauropteryx",
+        "checked": "2026-09-28"
+      }
+    },
+    {
+      "id": "f_wishbone",
+      "claim": "The bird wishbone (furcula) is formed by midline fusion of the clavicles; furculae occur in nearly all major theropod clades, including many non-avian theropods. Source does not specifically confirm Tyrannosaurus.",
+      "nuance": "ESTABLISHED",
+      "verified": true,
+      "source_hint": "Nesbitt et al. 2009",
+      "source_check": {
+        "verdict": "SUPPORTED_WITH_CORRECTION",
+        "url": "https://doi.org/10.1002/jmor.10724",
+        "checked": "2026-09-28"
+      }
+    },
+    {
+      "id": "f_medullary",
+      "claim": "Schweitzer et al. 2005 reported endosteal bone tissue in T. rex marrow cavities and hypothesized it is homologous to avian medullary bone (debated); not established as identical.",
+      "nuance": "DEBATED_DETAIL",
+      "verified": true,
+      "source_hint": "Schweitzer et al., Science 2005",
+      "source_check": {
+        "verdict": "SUPPORTED_WITH_CORRECTION",
+        "url": "https://doi.org/10.1126/science.1112158",
+        "checked": "2026-09-28"
+      }
+    }
   ],
   "honesty_note": "Say 'birds ARE dinosaurs', not 'descended from something like dinosaurs'; do not call Tyrannosaurus 'a chicken'."
 }

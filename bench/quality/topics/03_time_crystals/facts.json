@@ -4,12 +4,78 @@
   "cluster": "spectacle_physics",
   "provenance": "WP0 worker-curated from general physics consensus; NO web access in Phase 4. Every claim needs a source check before WP4 uses this pack for scoring.",
   "claims": [
-    {"id": "f_wilczek", "claim": "Physicist Frank Wilczek proposed time crystals in 2012 as systems whose lowest-energy state repeats in time.", "nuance": "ESTABLISHED", "verified": false, "source_hint": "Wilczek, Phys. Rev. Lett. 109, 160401 (2012)"},
-    {"id": "f_no_go", "claim": "Wilczek's original equilibrium version was later ruled out by a no-go theorem (Watanabe and Oshikawa, 2015).", "nuance": "ESTABLISHED", "verified": false, "source_hint": "Watanabe & Oshikawa, PRL 114, 251603"},
-    {"id": "f_floquet", "claim": "Discrete time crystals are driven (Floquet) systems that respond at a multiple of the drive period, so they repeat more slowly than the push that drives them.", "nuance": "ESTABLISHED", "verified": false, "source_hint": "Else, Bauer, Nayak, PRL 117, 090402 (2016)"},
-    {"id": "f_2017_labs", "claim": "In 2016-2017 two labs (Monroe's trapped ytterbium ions at Maryland, Lukin's diamond nitrogen-vacancy spins at Harvard) reported observing discrete time crystals.", "nuance": "ESTABLISHED", "verified": false, "source_hint": "Zhang et al., Nature 543, 217 (2017); Choi et al., Nature 543, 221 (2017)"},
-    {"id": "f_google_2021", "claim": "In 2021 a time-crystal phase was reported on Google's Sycamore quantum processor with 20 qubits.", "nuance": "ESTABLISHED", "verified": false, "source_hint": "Mi et al., Nature 601, 531 (2022)"},
-    {"id": "f_no_perpetual_motion", "claim": "A time crystal is not a perpetual-motion machine: it takes energy from the drive and does not produce free energy.", "nuance": "ESTABLISHED", "verified": false, "source_hint": "review literature"}
+    {
+      "id": "f_wilczek",
+      "claim": "Physicist Frank Wilczek proposed time crystals in 2012 as systems whose lowest-energy state repeats in time.",
+      "nuance": "ESTABLISHED",
+      "verified": true,
+      "source_hint": "Wilczek, Phys. Rev. Lett. 109, 160401 (2012)",
+      "source_check": {
+        "verdict": "SUPPORTED",
+        "url": "https://doi.org/10.1103/physrevlett.109.160401",
+        "checked": "2026-09-28"
+      }
+    },
+    {
+      "id": "f_no_go",
+      "claim": "Wilczek's original equilibrium version was later ruled out by a no-go theorem (Watanabe and Oshikawa, 2015).",
+      "nuance": "ESTABLISHED",
+      "verified": true,
+      "source_hint": "Watanabe & Oshikawa, PRL 114, 251603",
+      "source_check": {
+        "verdict": "SUPPORTED",
+        "url": "https://doi.org/10.1103/physrevlett.114.251603",
+        "checked": "2026-09-28"
+      }
+    },
+    {
+      "id": "f_floquet",
+      "claim": "Discrete time crystals are driven (Floquet) systems that respond at a multiple of the drive period, so they repeat more slowly than the push that drives them.",
+      "nuance": "ESTABLISHED",
+      "verified": true,
+      "source_hint": "Else, Bauer, Nayak, PRL 117, 090402 (2016)",
+      "source_check": {
+        "verdict": "SUPPORTED",
+        "url": "https://doi.org/10.1103/physrevlett.117.090402",
+        "checked": "2026-09-28"
+      }
+    },
+    {
+      "id": "f_2017_labs",
+      "claim": "In 2016-2017 two labs (Monroe's trapped ytterbium ions at Maryland, Lukin's diamond nitrogen-vacancy spins at Harvard) reported observing discrete time crystals.",
+      "nuance": "ESTABLISHED",
+      "verified": true,
+      "source_hint": "Zhang et al., Nature 543, 217 (2017); Choi et al., Nature 543, 221 (2017)",
+      "source_check": {
+        "verdict": "SUPPORTED",
+        "url": "https://doi.org/10.1038/nature21413",
+        "checked": "2026-09-28"
+      }
+    },
+    {
+      "id": "f_google_2021",
+      "claim": "In 2021 (arXiv July 2021; Nature 601, 531, published 2022) Google reported an eigenstate-ordered discrete time crystal on a superconducting-qubit processor. The '20 qubits' figure was NOT confirmed by the abstract.",
+      "nuance": "ESTABLISHED",
+      "verified": true,
+      "source_hint": "Mi et al., Nature 601, 531 (2022)",
+      "source_check": {
+        "verdict": "SUPPORTED_WITH_CORRECTION",
+        "url": "https://arxiv.org/abs/2107.13571",
+        "checked": "2026-09-28"
+      }
+    },
+    {
+      "id": "f_no_perpetual_motion",
+      "claim": "A time crystal is not a perpetual-motion machine or free-energy source: it needs a periodic drive and does no useful work. Do not say it 'takes energy from the drive' - in the many-body-localized versions it does not continuously absorb net energy (it avoids heating).",
+      "nuance": "ESTABLISHED",
+      "verified": true,
+      "source_hint": "review literature",
+      "source_check": {
+        "verdict": "SUPPORTED_WITH_CORRECTION",
+        "url": "https://en.wikipedia.org/wiki/Time_crystal",
+        "checked": "2026-09-28"
+      }
+    }
   ],
   "honesty_note": "Never imply free energy or a perpetual-motion machine; the pattern is driven."
 }
