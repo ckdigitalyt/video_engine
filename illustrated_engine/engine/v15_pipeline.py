@@ -43,7 +43,9 @@ from engine.v14_cache import (bed_plan_hash, caption_plan_hash,  # noqa: E402
                               plan_production, record_assembly, record_scene,
                               save_index, scene_cache_key, style_hash)
 from engine.v15_plan import make_plan  # noqa: E402
-from engine.v15_plates import analyze_subject, generate_plate, plate_qa  # noqa: E402
+from engine.v15_plates import (analyze_subject, generate_plate,  # noqa: E402
+                               image_chain_report, plate_qa,
+                               providers_for_beat_function)
 from engine.v15_shots import compile_shot  # noqa: E402
 from engine.v15_style import image_prompt, load_style  # noqa: E402
 from engine.v15_timing import beat_timing  # noqa: E402
@@ -293,8 +295,17 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
     t0 = time.time()
     uniq = sorted({p for s in shots for p in s["prompts"]})
     fail_log: list = []
+    report["image_chain"] = image_chain_report()  # WP8/DESIGN §6.2 preflight visibility
+    # WP8/DESIGN §6.1: "Pollinations ... never for hero shots" — a prompt is
+    # hero when ANY shot using it belongs to a HOOK/PAYOFF beat (the same
+    # function field v15_gate.check_assets already treats as the hero
+    # signal for asset_tier).
+    hero_prompts = {p for s in shots if s["beat"].get("function") in ("HOOK", "PAYOFF")
+                    for p in s["prompts"]}
 
     def _gen(prompt, salt=0, providers=None):
+        if providers is None and prompt in hero_prompts:
+            providers = providers_for_beat_function("HOOK")
         kw = {"providers": providers} if providers else {}
         return prompt, generate_plate(prompt, _seed(prompt, salt),
                                       log=fail_log, **kw)

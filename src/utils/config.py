@@ -31,6 +31,7 @@ _CONFIG_FILES = [
     "search_planner.yaml",
     "visual_director.yaml",
     "visual_quality.yaml",
+    "images.yaml",
 ]
 
 _cache = None

@@ -35,28 +35,60 @@ HISTORY_CAP = 30
 # provider defaults to False so the License hard gate (DESIGN §10.1) HOLDs
 # instead of silently shipping an asset nobody actually cleared for
 # monetised use. Sources: RESEARCH.md §5/§6; Phase-1 owner decision 3 (NIM
-# "not approved for production"). OWNER FLAG: as of WP10 every entry here is
-# False — WP8 (image chain overhaul, not yet done) is what is expected to
-# either get a real clearance or replace these providers.
+# "not approved for production"). WP8 (image chain overhaul, DESIGN §6.1)
+# added the two entries below marked True: `cloudflare_workers_ai` (paid
+# Cloudflare account, standard commercial API terms, model itself
+# Apache-2.0 — RESEARCH.md §5.1) and `sdcpp_local` (fully self-hosted,
+# Apache-2.0 model/TE/VAE, no third-party service terms apply at all —
+# RESEARCH.md §5.3). `archive` is also marked True: `ArchiveProvider`
+# (src/providers/image_gen.py) never returns anything BUT a source-
+# confirmed item (NASA: not copyrighted per NASA media guidelines; Met:
+# gated on the API's own `isPublicDomain: true` flag) — it raises rather
+# than fall back to an unconfirmed image, so "archive" here means the same
+# thing as every other provider-wide entry in this table, not a weaker
+# blanket claim. OWNER FLAG: two archive sources only (NASA + Met); if a
+# future WP adds Smithsonian/LoC/BHL, each needs its own per-item PD/CC0
+# check before this entry can honestly cover it too.
 IMAGE_PROVIDER_LICENSE: dict = {
     "nvidia_nim": {"model_license": "Apache-2.0 (FLUX.2-klein-4B)",
                   "service_terms_ref": "NVIDIA NIM trial/evaluation terms "
                                        "[owner decision: not approved for "
-                                       "production]",
+                                       "production; benchmark_only]",
                   "commercial_ok": False},
     "siliconflow": {"model_license": "unknown [U]",
-                    "service_terms_ref": "SiliconFlow API terms [U]",
+                    "service_terms_ref": "SiliconFlow API terms [U] "
+                                         "[dead: HTTP 401; benchmark_only]",
                     "commercial_ok": False},
     "hf_serverless": {"model_license": "unknown [U]",
-                      "service_terms_ref": "HF Inference API terms [U]",
+                      "service_terms_ref": "HF Inference API terms [U] "
+                                           "[dead: HTTP 410; benchmark_only]",
                       "commercial_ok": False},
     "pollinations": {"model_license": "unknown [U]",
                      "service_terms_ref": "Pollinations anonymous API "
-                                          "[U, watermarked - RESEARCH.md §6]",
+                                          "[U, watermark-cropped WP8 - "
+                                          "RESEARCH.md §6]",
                      "commercial_ok": False},
     "gemini_image": {"model_license": "unknown [U]",
                      "service_terms_ref": "Google Generative AI terms [U]",
                      "commercial_ok": False},
+    "cloudflare_workers_ai": {"model_license": "Apache-2.0 (FLUX.2-klein-4B)",
+                              "service_terms_ref": "Cloudflare Workers AI "
+                                                   "standard API terms, paid "
+                                                   "account (no trial/eval-"
+                                                   "only clause found) "
+                                                   "[S: owner to confirm]",
+                              "commercial_ok": True},
+    "sdcpp_local": {"model_license": "Apache-2.0 (FLUX.2-klein-4B + "
+                                     "Qwen3-4B text encoder + VAE)",
+                    "service_terms_ref": "self-hosted, no third-party "
+                                         "service terms apply",
+                    "commercial_ok": True},
+    "archive": {"model_license": "n/a (archival photograph, not AI-generated)",
+               "service_terms_ref": "NASA media guidelines / Met Museum "
+                                    "Open Access (CC0) - ArchiveProvider "
+                                    "only ever returns a source-confirmed "
+                                    "PD/CC0 item or raises",
+               "commercial_ok": True},
 }
 
 DISCLOSURE_NOTE = ("Illustrations are AI-generated in our house style; "
@@ -103,10 +135,16 @@ def plate_asset_rows(plates: dict, plate_realistic: dict | None = None) -> list:
             "service_terms_ref": "unknown provider [U]",
             "commercial_ok": False})
         realistic = plate_realistic.get(r["path"])
+        # WP8: "archive" plates are real archival photographs (NASA/Met),
+        # not model output — ai_generated=False so DESIGN §11's
+        # `ai_generated_imagery` disclosure signal stays honest once the
+        # chain can actually pick this provider. Every other provider is
+        # a generator, unchanged.
+        ai_generated = r.get("provider") != "archive"
         rows.append({"kind": "plate", "sha256": _sha256(r["path"]),
                      "file": r["path"], "provider": r.get("provider"),
                      "model": r.get("model"), **lic, "prompt": prompt,
-                     "seed": r.get("seed"), "ai_generated": True,
+                     "seed": r.get("seed"), "ai_generated": ai_generated,
                      "realistic": True if realistic is None else realistic,
                      "lut_applied": r.get("lut_sha256")})
     return rows
@@ -160,7 +198,10 @@ def build_manifest(*, video_id: str, brand: dict, voice: dict | None,
     assets = plate_rows + list(audio_rows or []) + font_asset_rows(brand)
     voice = voice or {}
     any_realistic = any(r["realistic"] for r in plate_rows)
-    disclosure = {"ai_generated_imagery": bool(plate_rows),
+    # WP8: archive rows are real photographs (ai_generated=False), so this
+    # must check the per-row flag, not just "any plate row at all" — a
+    # video built entirely from archive plates has no AI imagery to disclose.
+    disclosure = {"ai_generated_imagery": any(r["ai_generated"] for r in plate_rows),
                  "realistic_synthetic": any_realistic,
                  "synthetic_voice": True,
                  "youtube_altered_content": any_realistic,

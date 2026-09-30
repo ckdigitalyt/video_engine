@@ -33,10 +33,13 @@ from __future__ import annotations
 import base64
 import json
 import os
+import subprocess
 import sys
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
+import uuid
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Optional
@@ -128,10 +131,41 @@ def _write_verified(raw: bytes, out: str, name: str) -> str:
 # ═══════════════════════════════════════════════════════════════════════ #
 
 
+def _multipart_post(url: str, fields: dict, *, headers: dict,
+                    timeout: int = 120) -> tuple[bytes, str]:
+    """POST fields as multipart/form-data; return (body, content_type).
+
+    Used by providers whose endpoint rejects a plain JSON body (WP8: the
+    Cloudflare Workers AI flux-2-klein-4b endpoint 400s on JSON with
+    "required properties at '/' are 'multipart'" — verified live 2026-09-30).
+    """
+    boundary = uuid.uuid4().hex
+    parts = []
+    for k, v in fields.items():
+        if v is None:
+            continue
+        parts.append(
+            f'--{boundary}\r\nContent-Disposition: form-data; name="{k}"\r\n\r\n{v}\r\n'
+            .encode())
+    body = b"".join(parts) + f"--{boundary}--\r\n".encode()
+    req = urllib.request.Request(
+        url, data=body,
+        headers={**headers, "Content-Type": f"multipart/form-data; boundary={boundary}"},
+    )
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        return resp.read(), resp.headers.get("Content-Type", "")
+
+
 class ImageGenProvider(ABC):
     """Interface for AI image generation providers."""
 
     name: str = "base"
+
+    # WP8: True for providers the owner has NOT approved for production use
+    # (trial/evaluation-only service terms). ImageGenFactory/v15_plates keep
+    # the class importable and directly selectable (scripts/benchmark_image_gen.py,
+    # tools/image_capability_audit.py) but exclude it from the default chain.
+    benchmark_only: bool = False
 
     @abstractmethod
     def generate(self, prompt: str, output_path: str,
@@ -184,6 +218,12 @@ class NvidiaNimProvider(ImageGenProvider):
     """
 
     name = "nvidia_nim"
+    # Owner decision (Phase 1, PROGRESS.md 2026-09-27): "NVIDIA NIM: not
+    # approved for production" — trial/evaluation terms only. WP8 (DESIGN
+    # §6.1/§15.3 item 2) removes it from the default production chain;
+    # kept fully implemented for scripts/benchmark_image_gen.py and
+    # tools/image_capability_audit.py, which pass the name explicitly.
+    benchmark_only = True
 
     # flux.1-dev valid dimensions (multiples of 64, min 768).  VERIFIED
     # against the live API 2026-08-12: BOTH axes are capped at 1344 — the
@@ -372,6 +412,10 @@ class SiliconFlowProvider(ImageGenProvider):
     """SiliconFlow hosted FLUX image generation (OpenAI-compatible)."""
 
     name = "siliconflow"
+    # WP8/DESIGN §6.1: dead (401 as of RESEARCH.md §5.1) and replaced in the
+    # production chain by cloudflare_workers_ai/sdcpp_local. Kept implemented
+    # (not deleted) in case the key is ever rotated back to life.
+    benchmark_only = True
 
     def __init__(self, api_key: Optional[str] = None,
                  base_url: Optional[str] = None):
@@ -622,6 +666,10 @@ class HFServerlessProvider(ImageGenProvider):
     """Hugging Face Inference API (serverless) image generation."""
 
     name = "hf_serverless"
+    # WP8/DESIGN §6.1: dead (410 Gone as of RESEARCH.md §5.1) and replaced in
+    # the production chain by cloudflare_workers_ai/sdcpp_local. Kept
+    # implemented (not deleted) in case a working endpoint/model returns.
+    benchmark_only = True
 
     def __init__(self, api_key: Optional[str] = None,
                  model: Optional[str] = None):
@@ -719,6 +767,274 @@ class PollinationsProvider(ImageGenProvider):
 
 
 # ═══════════════════════════════════════════════════════════════════════ #
+# Cloudflare Workers AI (FLUX.2-klein-4B) — WP8
+# ═══════════════════════════════════════════════════════════════════════ #
+
+
+class CloudflareWorkersAIProvider(ImageGenProvider):
+    """Cloudflare Workers AI, ``@cf/black-forest-labs/flux-2-klein-4b``.
+
+    Same base model as NVIDIA NIM's primary (Apache-2.0), served from a
+    Cloudflare Workers AI account with a permanent free daily neuron
+    allocation (RESEARCH.md §5.1/§5.4) — the DESIGN §6.1 fast primary of the
+    production chain, ahead of nvidia_nim (now ``benchmark_only``).
+
+    Request shape verified LIVE 2026-09-30 (no prior fixture existed —
+    DESIGN §6.2 flagged this as [U]): the endpoint 400s on a plain JSON body
+    ("required properties at '/' are 'multipart'"); it wants
+    ``multipart/form-data`` fields and returns ``{"result": {"image":
+    "<base64 jpeg>"}}``. ``width``/``height``/``seed``/``steps`` are all
+    honoured as given (confirmed: a 720x1280 request returns an exact
+    720x1280 image) — no client-side dimension snapping needed, unlike NIM.
+    """
+
+    name = "cloudflare_workers_ai"
+    MODEL = "@cf/black-forest-labs/flux-2-klein-4b"
+
+    def __init__(self, account_id: Optional[str] = None,
+                 api_token: Optional[str] = None):
+        self._account_id = account_id or os.environ.get("CLOUDFLARE_ACCOUNT_ID", "")
+        self._api_token = api_token or os.environ.get("CLOUDFLARE_API_TOKEN", "")
+
+    def is_available(self) -> bool:
+        # DESIGN §6.2: absent creds must skip cleanly, never crash, never
+        # prompt for/invent a key — a plain bool check, nothing more.
+        return bool(self._account_id and self._api_token)
+
+    def generate(self, prompt: str, output_path: str,
+                 width: int = 1024, height: int = 576,
+                 seed: Optional[int] = None) -> str:
+        if not self.is_available():
+            raise RuntimeError(
+                "cloudflare_workers_ai: CLOUDFLARE_ACCOUNT_ID/CLOUDFLARE_API_TOKEN not set")
+        url = (f"https://api.cloudflare.com/client/v4/accounts/"
+              f"{self._account_id}/ai/run/{self.MODEL}")
+        fields = {"prompt": prompt, "width": width, "height": height}
+        if seed is not None:
+            fields["seed"] = seed
+        body, ctype = _multipart_post(
+            url, fields,
+            headers={"Authorization": f"Bearer {self._api_token}"},
+            timeout=120)
+        payload = json.loads(body)
+        if not payload.get("success", True) and not payload.get("result"):
+            raise RuntimeError(f"cloudflare_workers_ai: {payload.get('errors')}")
+        b64 = (payload.get("result") or {}).get("image")
+        if not b64:
+            raise RuntimeError(
+                f"cloudflare_workers_ai: unexpected response shape {list(payload)[:5]}")
+        raw = base64.b64decode(b64)
+        Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+        Path(output_path).write_bytes(raw)
+        if not _looks_like_image(output_path):
+            try:
+                Path(output_path).unlink()
+            except OSError:
+                pass
+            raise RuntimeError(
+                f"cloudflare_workers_ai returned a non-image payload ({len(raw)} bytes)")
+        return output_path
+
+
+# ═══════════════════════════════════════════════════════════════════════ #
+# Local stable-diffusion.cpp (FLUX.2-klein-4B) — WP8, owned floor
+# ═══════════════════════════════════════════════════════════════════════ #
+
+
+class SDCppLocalProvider(ImageGenProvider):
+    """Local FLUX.2-klein-4B via ``stable-diffusion.cpp`` (MIT tool,
+    Apache-2.0 weights) — the owned emergency floor (DESIGN §6.1 tier 5):
+    always available (no account, no network), but slow (RESEARCH.md §5.3
+    measured ~1,237 s / image at 576x1024 on this CPU), so callers should
+    treat it as a last-resort/budget-capped tier, not a per-shot default.
+
+    Paths default to the layout the RESEARCH.md §5.3 benchmark already
+    built under ``~/models`` (built from source, weights downloaded there);
+    override via ``configs/images.yaml`` (``image_gen.sdcpp.*``) or the
+    constructor for a different machine.
+    """
+
+    name = "sdcpp_local"
+
+    def __init__(self, bin_path: Optional[str] = None,
+                 diffusion_model: Optional[str] = None,
+                 vae: Optional[str] = None, llm: Optional[str] = None,
+                 steps: Optional[int] = None, cfg_scale: Optional[float] = None,
+                 timeout_s: Optional[int] = None):
+        home = str(Path.home())
+        self._bin = Path(bin_path or get_config(
+            "image_gen.sdcpp.bin", f"{home}/models/sdcpp/build/bin/sd-cli")
+            ).expanduser()
+        self._diffusion_model = Path(diffusion_model or get_config(
+            "image_gen.sdcpp.diffusion_model",
+            f"{home}/models/flux2klein/flux-2-klein-4b-Q4_0.gguf")).expanduser()
+        self._vae = Path(vae or get_config(
+            "image_gen.sdcpp.vae", f"{home}/models/flux2klein/vae.safetensors")
+            ).expanduser()
+        self._llm = Path(llm or get_config(
+            "image_gen.sdcpp.llm",
+            f"{home}/models/flux2klein/Qwen3-4B-Q4_K_M.gguf")).expanduser()
+        self._steps = steps or get_config("image_gen.sdcpp.steps", 4)
+        self._cfg_scale = cfg_scale or get_config("image_gen.sdcpp.cfg_scale", 1.0)
+        self._timeout_s = timeout_s or get_config("image_gen.sdcpp.timeout_s", 1800)
+
+    def is_available(self) -> bool:
+        return (self._bin.exists() and self._diffusion_model.exists()
+                and self._vae.exists() and self._llm.exists())
+
+    def generate(self, prompt: str, output_path: str,
+                 width: int = 1024, height: int = 576,
+                 seed: Optional[int] = None) -> str:
+        if not self.is_available():
+            raise RuntimeError(
+                "sdcpp_local: binary or model files not found under "
+                f"{self._bin.parent} / {self._diffusion_model.parent} "
+                "(see configs/images.yaml image_gen.sdcpp.*)")
+        Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+        cmd = [str(self._bin),
+              "--diffusion-model", str(self._diffusion_model),
+              "--vae", str(self._vae), "--llm", str(self._llm),
+              "-p", prompt,
+              "--cfg-scale", str(self._cfg_scale),
+              "--steps", str(self._steps),
+              "--offload-to-cpu", "--diffusion-fa",
+              "-W", str(width), "-H", str(height),
+              "-s", str(seed if seed is not None else 42),
+              "-o", str(output_path)]
+        proc = subprocess.run(cmd, capture_output=True, text=True,
+                              timeout=self._timeout_s)
+        if proc.returncode != 0 or not _looks_like_image(output_path):
+            raise RuntimeError(
+                f"sdcpp_local generation failed (rc={proc.returncode}): "
+                f"{proc.stderr[-300:] if proc.stderr else proc.stdout[-300:]}")
+        return output_path
+
+
+# ═══════════════════════════════════════════════════════════════════════ #
+# Public-domain / CC0 archive tier — WP8
+# ═══════════════════════════════════════════════════════════════════════ #
+
+
+class ArchiveProvider(ImageGenProvider):
+    """Public-domain / CC0 archive search, keyless: NASA Images + the Met
+    Open Access API (DESIGN §6.1 tier 2). Only ever returns an item the
+    source API itself marks PD/CC0; every other outcome (no query match, no
+    cleared item) raises so the chain descends to generation — this NEVER
+    silently substitutes an unrelated or unlicensed image.
+
+    DESIGN §6.1 gates this tier on ``shot.kind == "artefact/real object/
+    place"``, a classification that does not exist anywhere in the current
+    plan/shot schema (`v16_plan.py` has template kinds like HOOK_PLATE, not
+    a subject-type field — confirmed by inspection, not assumed). Pending
+    that classifier (candidate for a future WP touching `v16_plan.py`), this
+    uses a keyword heuristic on the shot SUBJECT clause of the plate prompt
+    (the same clause `engine.v15_plates._main_subject`/`plate_qa` already
+    extract) as a stand-in: OWNER FLAG, not a full fix.
+    """
+
+    name = "archive"
+
+    # Concrete real-object/place nouns worth an archive search. Deliberately
+    # narrow (recall over precision doesn't help here: a miss just falls
+    # through to generation, exactly as intended) — extend via
+    # configs/images.yaml `image_gen.archive.subject_hints` without a code change.
+    _DEFAULT_HINTS = (
+        "meteorite", "fossil", "skeleton", "specimen", "engraving",
+        "photograph", "photo", "artifact", "artefact", "museum",
+        "telescope", "spacecraft", "satellite", "instrument", "statue",
+        "monument", "manuscript", "mineral", "crater", "ruins", "temple",
+        "tomb", "ship", "vessel", "aircraft", "meteor", "comet", "fragment",
+        "relic", "coin", "map", "diagram", "painting", "sculpture",
+    )
+
+    def __init__(self, max_results: Optional[int] = None,
+                 subject_hints: Optional[tuple] = None):
+        self._max_results = max_results or get_config(
+            "image_gen.archive.max_results", 5)
+        self._hints = tuple(subject_hints or get_config(
+            "image_gen.archive.subject_hints", self._DEFAULT_HINTS))
+
+    def is_available(self) -> bool:
+        return True  # keyless public APIs
+
+    def _subject(self, prompt: str) -> str:
+        return prompt.split(". ")[1] if ". " in prompt else prompt
+
+    def _looks_archival(self, subject: str) -> bool:
+        low = subject.lower()
+        return any(h in low for h in self._hints)
+
+    def _query_terms(self, subject: str) -> str:
+        words = [w for w in subject.lower().replace(",", " ").split()
+                if w in self._hints or len(w) > 4]
+        return " ".join(words[:6]) or subject
+
+    def _search_nasa(self, query: str) -> Optional[str]:
+        url = ("https://images-api.nasa.gov/search?media_type=image&q="
+              + urllib.parse.quote(query))
+        try:
+            with urllib.request.urlopen(url, timeout=20) as resp:
+                data = json.loads(resp.read())
+        except Exception:
+            return None
+        for item in (data.get("collection", {}).get("items") or [])[:self._max_results]:
+            best = None
+            for link in item.get("links") or []:
+                if link.get("render") != "image":
+                    continue
+                if best is None or (link.get("width") or 0) > (best.get("width") or 0):
+                    best = link
+            if best:
+                return best["href"]  # NASA media: not copyrighted (NASA media guidelines)
+        return None
+
+    def _search_met(self, query: str) -> Optional[str]:
+        search_url = ("https://collectionapi.metmuseum.org/public/collection/"
+                     "v1/search?hasImages=true&q=" + urllib.parse.quote(query))
+        try:
+            with urllib.request.urlopen(search_url, timeout=20) as resp:
+                ids = json.loads(resp.read()).get("objectIDs") or []
+        except Exception:
+            return None
+        for oid in ids[:self._max_results]:
+            try:
+                obj_url = (f"https://collectionapi.metmuseum.org/public/"
+                          f"collection/v1/objects/{oid}")
+                with urllib.request.urlopen(obj_url, timeout=20) as resp:
+                    obj = json.loads(resp.read())
+            except Exception:
+                continue
+            if obj.get("isPublicDomain") and obj.get("primaryImage"):
+                return obj["primaryImage"]
+        return None
+
+    def generate(self, prompt: str, output_path: str,
+                 width: int = 1024, height: int = 576,
+                 seed: Optional[int] = None) -> str:
+        subject = self._subject(prompt)
+        if not self._looks_archival(subject):
+            raise RuntimeError(
+                f"archive: {subject!r} has no concrete real-object/place "
+                "keyword hint (see image_gen.archive.subject_hints)")
+        query = self._query_terms(subject)
+        url = self._search_nasa(query) or self._search_met(query)
+        if not url:
+            raise RuntimeError(f"archive: no PD/CC0 match for {query!r}")
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            raw = resp.read()
+        Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+        Path(output_path).write_bytes(raw)
+        if not _looks_like_image(output_path):
+            try:
+                Path(output_path).unlink()
+            except OSError:
+                pass
+            raise RuntimeError(f"archive: downloaded file from {url} failed sanity check")
+        return output_path
+
+
+# ═══════════════════════════════════════════════════════════════════════ #
 # Factory
 # ═══════════════════════════════════════════════════════════════════════ #
 
@@ -728,6 +1044,9 @@ _PROVIDERS: dict[str, type[ImageGenProvider]] = {
     "hf_serverless": HFServerlessProvider,
     "pollinations": PollinationsProvider,
     "gemini_image": GeminiImageProvider,
+    "cloudflare_workers_ai": CloudflareWorkersAIProvider,
+    "sdcpp_local": SDCppLocalProvider,
+    "archive": ArchiveProvider,
 }
 
 
@@ -747,6 +1066,12 @@ class ImageGenFactory:
     def available(self) -> list[ImageGenProvider]:
         """Providers with credentials present."""
         return [self.get(n) for n in _PROVIDERS if self.get(n).is_available()]
+
+    def production_available(self) -> list[ImageGenProvider]:
+        """Providers with credentials present, excluding benchmark_only
+        (WP8: nvidia_nim/siliconflow/hf_serverless — owner decision, not
+        approved / dead) — what the live render chain should ever pick."""
+        return [p for p in self.available() if not p.benchmark_only]
 
     def default(self) -> Optional[ImageGenProvider]:
         """Configured default, or first available provider."""

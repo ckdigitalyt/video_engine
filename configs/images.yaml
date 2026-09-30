@@ -1,0 +1,65 @@
+# configs/images.yaml — WP8 image-source chain (DESIGN.md §6).
+#
+# `image_gen.chain.production` is the ordered list `engine.v15_plates`
+# reads for `PROVIDER_ORDER` (illustrated_engine pipeline). Cache hit (tier
+# 0) and the V14 procedural fallback (tier 7) are not providers here — they
+# live in v15_plates.generate_plate and v15_shots respectively.
+#
+# `image_gen.chain.benchmark_only` mirrors each provider class's own
+# `benchmark_only` attribute (src/providers/image_gen.py) — listed here too
+# so the config is a readable single source of truth for "why isn't X in
+# production": nvidia_nim = owner decision (trial/eval terms, not approved
+# for production, PROGRESS.md 2026-09-27); siliconflow/hf_serverless = dead
+# endpoints (401 / 410, RESEARCH.md §5.1).
+
+image_gen:
+  default_provider: cloudflare_workers_ai
+
+  chain:
+    # DESIGN §6.1 order: archive (2) -> cloudflare (3) -> gemini (4) ->
+    # sdcpp_local (5) -> pollinations (6). NIM (was tier 0 pre-WP8) is gone.
+    production:
+      - archive
+      - cloudflare_workers_ai
+      - gemini_image
+      - sdcpp_local
+      - pollinations
+    benchmark_only:
+      - nvidia_nim
+      - siliconflow
+      - hf_serverless
+
+  cloudflare:
+    model: "@cf/black-forest-labs/flux-2-klein-4b"
+    timeout_s: 120
+    # neuron cost per 720x1280 image: still [U] (RESEARCH.md §6.2 flagged
+    # this; a real bench run's numbers are in bench/ab/wp8.md, not repeated
+    # here so this file doesn't go stale on the next benchmark).
+
+  sdcpp:
+    bin: "~/models/sdcpp/build/bin/sd-cli"
+    diffusion_model: "~/models/flux2klein/flux-2-klein-4b-Q4_0.gguf"
+    vae: "~/models/flux2klein/vae.safetensors"
+    llm: "~/models/flux2klein/Qwen3-4B-Q4_K_M.gguf"
+    steps: 4
+    cfg_scale: 1.0
+    timeout_s: 1800          # RESEARCH.md §5.3: ~1,237s measured at 576x1024
+    max_plates_per_video: 3  # DESIGN §6.1 tier 5: "owned floor: <=3 plates/video"
+
+  archive:
+    max_results: 5
+    # Extend the built-in keyword hints without a code change by adding a
+    # `subject_hints: [...]` list here (absent/commented-out = built-in
+    # default in src/providers/image_gen.py ArchiveProvider._DEFAULT_HINTS).
+
+  pollinations:
+    watermark_crop_frac: 0.08   # crop this fraction off the bottom edge
+                                 # before normalize (stamp is bottom-left,
+                                 # v15_plates.py OCR_STRIPS bottom 7%)
+    never_for_beat_functions: [HOOK, PAYOFF]
+
+  low_plate_mode:
+    # DESIGN §6.2: "When Cloudflare credentials are absent ... the plan
+    # switches to low-plate mode: <=6 generated hero plates per video."
+    trigger: cloudflare_unavailable
+    max_generated_plates: 6

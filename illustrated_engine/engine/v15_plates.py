@@ -3,11 +3,22 @@
 Directive §11: "AI image = one visual asset/layer/source for a scene". V14
 rendered no plates at all (primitives on a navy gradient). V15 generates one
 still per shot through the EXISTING image-generation fallback chain
-(src/providers/image_gen): NIM FLUX.2-klein -> SiliconFlow -> HF serverless
--> Pollinations -> Gemini image — first success wins, every failure recorded.
+(src/providers/image_gen) — first success wins, every failure recorded.
 The chain only ADDS a tier above V14's procedural grammars: when every
 provider fails the shot compiler falls back to the V14 procedural subject
 (asset_tier="procedural", visible to the gate), never a silent downgrade.
+
+WP8 (DESIGN §6.1) reordered the production chain to try a `commercial_ok`
+source before the ones that are not: archive (PD/CC0) -> Cloudflare Workers
+AI flux-2-klein-4b -> Gemini image -> local flux-2-klein-4b via
+stable-diffusion.cpp -> Pollinations (watermark-cropped last resort). NIM
+left the production chain (owner decision, PROGRESS.md 2026-09-27: "not
+approved for production") and is now `benchmark_only` on its provider class
+— WP10's real tunguska render used it 16/18 times before this change,
+which is why every plate on that render was `commercial_ok: false`
+(bench/ab/wp10.md). The order lives in `configs/images.yaml`
+(`image_gen.chain.production`), read once at import with the same order as
+a hardcoded fallback so this module still works if the config is missing.
 
 Per plate:
   - prompt = bible prefix + shot subject + composition hint + no-text suffix
@@ -49,21 +60,52 @@ REPO = ROOT.parent
 CACHE_DIR = ROOT / "build" / "cache" / "v15_plates"
 W, H = 1080, 1920
 REQ_W, REQ_H = 720, 1280  # providers snap to their nearest 9:16-ish size
-PROVIDER_ORDER = ("nvidia_nim", "siliconflow", "hf_serverless",
-                  "pollinations", "gemini_image")
-# plate/2 (WP6): every cached plate is now brand-graded at ingest (below),
-# so plate/1 cache entries (ungraded) must miss and regenerate, not be
-# silently served as if they carried the brand look.
-PLATE_VERSION = "plate/2"
 
 for _p in (REPO, ROOT):
     if str(_p) not in sys.path:
         sys.path.insert(0, str(_p))
 
+# WP8/DESIGN §6.1 production order (see module docstring). Read from
+# configs/images.yaml so "switching providers is a config change only"
+# (the WP1 principle) also holds for the image chain; the tuple below is
+# the fallback if the config key is missing, not a second source of truth.
+_DEFAULT_PROVIDER_ORDER = ("archive", "cloudflare_workers_ai", "gemini_image",
+                          "sdcpp_local", "pollinations")
+
+
+def _load_provider_order() -> tuple:
+    from src.utils.config import get_config
+    order = get_config("image_gen.chain.production", None)
+    return tuple(order) if order else _DEFAULT_PROVIDER_ORDER
+
+
+PROVIDER_ORDER = _load_provider_order()
+# plate/2 (WP6): every cached plate is now brand-graded at ingest (below),
+# so plate/1 cache entries (ungraded) must miss and regenerate, not be
+# silently served as if they carried the brand look.
+PLATE_VERSION = "plate/2"
+
 
 def _key(prompt: str, seed: int) -> str:
     return hashlib.sha256(f"{PLATE_VERSION}|{prompt}|{seed}|{W}x{H}"
                           .encode()).hexdigest()[:16]
+
+
+def _crop_watermark(path: Path, frac: float | None = None) -> None:
+    """Crop the bottom strip off *path* in place (WP8/DESIGN §6.1: "Pollinations
+    ... watermark detector + crop"). Pollinations stamps its watermark
+    bottom-left (module docstring OCR_STRIPS below, seen shipping live in
+    the Phase 2 blackhole run); OCR-detect-and-regenerate alone let 2 of
+    those ship anyway on WP10's real tunguska render (bench/ab/wp10.md) —
+    this removes the stamp's pixels before OCR/QA ever sees them, rather
+    than only detecting it after the fact."""
+    if frac is None:
+        from src.utils.config import get_config
+        frac = get_config("image_gen.pollinations.watermark_crop_frac", 0.08)
+    im = Image.open(path).convert("RGB")
+    w, h = im.size
+    cropped = im.crop((0, 0, w, max(1, round(h * (1 - frac)))))
+    cropped.save(path)
 
 
 def _normalize(src: Path, out: Path) -> None:
@@ -107,6 +149,8 @@ def generate_plate(prompt: str, seed: int, *, providers=PROVIDER_ORDER,
             raw = CACHE_DIR / f"{key}.{name}.raw.png"
             prov.generate(prompt, str(raw), width=REQ_W, height=REQ_H,
                           seed=seed)
+            if name == "pollinations":
+                _crop_watermark(raw)
             _normalize(raw, out)
             raw.unlink(missing_ok=True)
             # WP6 plate ingest: grade through the brand LUT in place, once,
@@ -128,6 +172,54 @@ def generate_plate(prompt: str, seed: int, *, providers=PROVIDER_ORDER,
     if log is not None:
         log.append({"prompt": prompt[:120], "attempts": attempts})
     return {"ok": False, "key": key, "attempts": attempts, "path": None}
+
+
+# ------------------------------------------------------- WP8 chain helpers --
+
+def providers_for_beat_function(function: str | None,
+                                base: tuple = PROVIDER_ORDER) -> tuple:
+    """DESIGN §6.1: "Pollinations ... never for hero shots". `function` is
+    the beat's `function` field (HOOK/PAYOFF/... — the same field
+    `v15_gate.check_assets` already reads as the hero signal, not a new
+    concept). Drops `pollinations` from the chain when
+    the shot belongs to a HOOK or PAYOFF beat; every other function is
+    unaffected."""
+    from src.utils.config import get_config
+    never_for = set(get_config("image_gen.pollinations.never_for_beat_functions",
+                               ["HOOK", "PAYOFF"]))
+    if function in never_for:
+        return tuple(p for p in base if p != "pollinations")
+    return base
+
+
+def cloudflare_available() -> bool:
+    from src.providers.image_gen import CloudflareWorkersAIProvider
+    return CloudflareWorkersAIProvider().is_available()
+
+
+def low_plate_mode() -> bool:
+    """DESIGN §6.2: Cloudflare absent -> low-plate mode. Pure predicate; see
+    `image_chain_report` for the budget it implies. Callers that skip
+    generation entirely when this is True still have a working chain
+    (archive/gemini/sdcpp_local/pollinations) — this only says whether the
+    fast, high-quota primary is up."""
+    return not cloudflare_available()
+
+
+def image_chain_report() -> dict:
+    """DESIGN §6.2: "The batch preflight reports the expected plate
+    throughput." One cheap, no-network(*) summary of chain state for a
+    pipeline/batch report. (*cloudflare_available() is a credential check,
+    not a live call.)"""
+    from src.utils.config import get_config
+    low = low_plate_mode()
+    return {
+        "provider_order": list(PROVIDER_ORDER),
+        "cloudflare_available": not low,
+        "low_plate_mode": low,
+        "max_generated_plates": (get_config(
+            "image_gen.low_plate_mode.max_generated_plates", 6) if low else None),
+    }
 
 
 # ------------------------------------------------------- subject analysis --
