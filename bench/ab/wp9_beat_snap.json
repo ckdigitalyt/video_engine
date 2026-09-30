@@ -1,0 +1,52 @@
+{
+ "ice_slippery": {
+  "mood": "mystery",
+  "mood_weights": {
+   "wonder": 0.11625955845338833,
+   "tension": 0.14576791236186687,
+   "mystery": 0.3652947239734401,
+   "triumph": 0.19740153894095933,
+   "calm": 0.17527626627034543
+  },
+  "track": "/home/ubuntu/video_engine/assets/music/mystery/southern_gothic.ogg",
+  "bpm": 63.0,
+  "n_beats": 153,
+  "n_cuts": 34,
+  "n_snapped": 0,
+  "max_move_s": 0.0,
+  "within_tolerance": true
+ },
+ "cell_scale_dive": {
+  "mood": "tension",
+  "mood_weights": {
+   "wonder": 0.1712750651919792,
+   "tension": 0.3632991637442676,
+   "mystery": 0.2872268680874022,
+   "triumph": 0.17819890297635105
+  },
+  "track": "/home/ubuntu/video_engine/assets/music/tension/shadowlands_7_codex.ogg",
+  "bpm": 156.6,
+  "n_beats": 549,
+  "n_cuts": 34,
+  "n_snapped": 0,
+  "max_move_s": 0.0,
+  "within_tolerance": true
+ },
+ "blackhole_clocks": {
+  "mood": "wonder",
+  "mood_weights": {
+   "wonder": 0.2994767207835771,
+   "tension": 0.1428507536115211,
+   "mystery": 0.26506104924191604,
+   "triumph": 0.15662596717205599,
+   "calm": 0.13598550919092983
+  },
+  "track": "/home/ubuntu/video_engine/assets/music/wonder/equatorial_complex.ogg",
+  "bpm": 120.2,
+  "n_beats": 477,
+  "n_cuts": 35,
+  "n_snapped": 0,
+  "max_move_s": 0.0,
+  "within_tolerance": true
+ }
+}

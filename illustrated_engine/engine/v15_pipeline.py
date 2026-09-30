@@ -419,8 +419,34 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
     cap_h = caption_plan_hash({"c": captions, "e": events}, bible)
     nar_h = narration_plan_hash({b["beat_id"]: b["narration"]
                                  for b in story["beats"]})
-    bed_h = bed_plan_hash({k: INTENSITY.get(m["function"], 0.6)
-                           for k, m in meta.items()})
+
+    # V16 (WP9): mood-tagged music selected from the story arc (per-shot
+    # "function" weighted by duration), library SFX, and the WP6 brand
+    # sting — each with a load-bearing fallback to the existing procedural
+    # bed/SFX when the on-disk library has nothing for a mood/kind.
+    from engine.v16_audio import load_sfx_library, select_music_for_story
+    from engine import brand as brand_mod
+    music_sel = select_music_for_story(
+        [m["function"] for m in meta.values()],
+        [m["dur"] for m in meta.values()], REPO / "assets" / "music",
+        seed=sid)
+    sfx_lib = load_sfx_library(REPO / "assets" / "sfx")
+    audio_brand = brand_mod.load_brand()
+    sting_path = work / "sting.wav"
+    brand_mod.sting_audio(sting_path, audio_brand)
+    report["audio_v16"] = {"mood": music_sel["mood"],
+                           "mood_weights": music_sel["weights"],
+                           "track": (str(music_sel["track"]["path"])
+                                     if music_sel["track"] else None),
+                           "sfx_kinds": sorted(sfx_lib.keys())}
+
+    bed_h = bed_plan_hash({
+        "intensity": {k: INTENSITY.get(m["function"], 0.6)
+                      for k, m in meta.items()},
+        "track": report["audio_v16"]["track"],
+        "sfx": {k: str(v["path"]) for k, v in sfx_lib.items()},
+        "brand_sting": {"version": audio_brand.get("version"),
+                        "sting": audio_brand.get("sting")}})
     out_final = work / "final.mp4"
     plan = plan_production(index, scene_inputs, cap_h, nar_h, bed_h, out_final)
     report["production"] = {k: plan[k] for k in ("render", "reuse", "reasons",
@@ -467,11 +493,21 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
         cap_bible = json.loads(json.dumps(bible))  # readable active word
         cap_bible["palette"]["accent"] = lighten(bible["palette"]["accent"],
                                                  165.0)
+        music_dict = {"track": music_sel["track"]["path"], "gain": 0.16} \
+            if music_sel["track"] else {"gain": 0.9}
         arep = assemble({"story_id": sid, "story_dir": str(story_dir),
                          "bible": cap_bible, "scenes": scenes,
-                         "music": {"gain": 0.9}, "single_pass": True,
+                         "music": music_dict, "sfx_library": sfx_lib,
+                         "sting_audio": str(sting_path),
+                         "single_pass": True,
                          "out": str(out_final)}, work)
         (work / "assembly_report.json").write_text(json.dumps(arep, indent=1))
+        kinds_used = {ev["kind"] for sc in scenes for ev in (sc.get("sfx") or [])}
+        from engine.v16_audio import manifest_rows
+        report["audio_v16"]["manifest_rows"] = manifest_rows(
+            music_sel["track"],
+            {k: v for k, v in sfx_lib.items() if k in kinds_used},
+            sting_path)
         record_assembly(index, plan["assembly_key"], out_final, cap_h, nar_h,
                         bed_h)
         save_index(work, index)

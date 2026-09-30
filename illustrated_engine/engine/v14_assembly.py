@@ -352,7 +352,17 @@ def build_underscore_track(scenes: list, total_s: float, out: Path,
                            music: dict) -> Path:
     """V15: one continuous procedural underscore (pad + soft pulse) with a
     per-scene intensity envelope — replaces the per-scene ambience hum whose
-    level (~-54 dBFS) made the V14 bed effectively silent."""
+    level (~-54 dBFS) made the V14 bed effectively silent.
+
+    V16 (WP9): if `music["track"]` is set (a mood-tagged library file chosen
+    by engine.v16_audio from the story arc), use it instead — trimmed/looped
+    to length, peak-normalised. Falls back to the procedural pad above
+    whenever no library track was found for the story's mood (load-bearing
+    fallback, per AGENTS.md; never removed)."""
+    if music.get("track"):
+        from engine.v16_audio import build_library_bed
+        return save_wav(out, build_library_bed(
+            music["track"], total_s, gain=float(music.get("gain", 0.16))))
     from engine.procedural_audio import underscore
     ints = [float(sc.get("intensity", music.get("default_intensity", 0.6)))
             for sc in scenes]
@@ -361,9 +371,14 @@ def build_underscore_track(scenes: list, total_s: float, out: Path,
 
 
 def build_sfx_track(scenes: list, total_s: float, out: Path,
-                    warnings: list) -> tuple:
+                    warnings: list, sfx_library: dict | None = None) -> tuple:
     """V15: procedural SFX at scene-local times (shot cuts, on-word
-    reveals). Returns (path, placements)."""
+    reveals). Returns (path, placements).
+
+    V16 (WP9): `sfx_library` (kind -> {"path", "licence"}, from
+    engine.v16_audio.load_sfx_library) is tried first per event kind; a kind
+    missing from the library falls back to the procedural synth below
+    (load-bearing fallback, per AGENTS.md; never removed)."""
     from engine.procedural_audio import sfx
     n = int(round(total_s * SR))
     track = np.zeros((n, 2), dtype=np.float32)
@@ -371,7 +386,12 @@ def build_sfx_track(scenes: list, total_s: float, out: Path,
     for sc in scenes:
         for ev in sc.get("sfx") or []:
             try:
-                y = sfx(ev["kind"]) * float(ev.get("gain", 1.0))
+                if sfx_library and ev["kind"] in sfx_library:
+                    from engine.v16_audio import load_sfx_clip
+                    y = load_sfx_clip(sfx_library[ev["kind"]]["path"]) \
+                        * float(ev.get("gain", 1.0))
+                else:
+                    y = sfx(ev["kind"]) * float(ev.get("gain", 1.0))
             except Exception as e:
                 warnings.append({"scene": sc["scene_id"],
                                  "warning": "sfx_skipped",
@@ -489,11 +509,20 @@ def assemble(plan: dict, work_dir: Path, plan_dir: Path | None = None) -> dict:
     fx_path = None
     if any(sc.get("sfx") for sc in scenes):
         fx_path, report["sfx"] = build_sfx_track(
-            scenes, total_s, work_dir / "sfx.wav", warnings)
+            scenes, total_s, work_dir / "sfx.wav", warnings,
+            sfx_library=plan.get("sfx_library"))
     mix = mix_audio(bed, voice, work_dir / "mix.wav", fx_path)
+    # V16 (WP9): overlay the brand sting (procedural, engine.brand.
+    # sting_audio) at t=0 of the mix — additive, does not shift the
+    # timeline (design: sting is an overlay, not a pre-roll).
+    sting_audio = plan.get("sting_audio")
+    if sting_audio:
+        from engine.v16_audio import overlay_sting
+        mix = overlay_sting(mix, rp(sting_audio), work_dir / "mix_sting.wav")
     report["narration"] = placements
     report["audio_mix"] = {"bed": str(bed), "voice": str(voice),
-                           "mix": str(mix), "ducked": True}
+                           "mix": str(mix), "ducked": True,
+                           "sting": str(sting_audio) if sting_audio else None}
 
     # 4. mux
     out = rp(plan["out"])
