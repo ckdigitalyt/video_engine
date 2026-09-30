@@ -304,6 +304,7 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
     report["costs"]["image_calls"] += sum(1 for r in plates.values()
                                           if r.get("ok") and not r.get("cached"))
     qa = {"checked": False}
+    plate_realistic_by_prompt: dict = {}   # DESIGN §11 disclosure (WP10)
     if plate_qa_on:
         items = [{"path": plates[p]["path"], "subject": p.split(". ")[1]
                   if ". " in p else p, "prompt": p}
@@ -311,6 +312,9 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
         qa = plate_qa(items, bible.get("illustration_style", ""),
                       work / "plate_sheet.jpg")
         report["costs"]["vision_calls"] += 1
+        for i, it in enumerate(items):
+            plate_realistic_by_prompt[it["prompt"]] = (qa.get("realistic")
+                                                        or {}).get(i)
         if qa.get("fail"):
             regen = [items[i]["prompt"] for i in qa["fail"]]
             from engine.v15_plates import PROVIDER_ORDER
@@ -335,6 +339,8 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
                 if j in qa2.get("fail", {}):  # incl. OCR hits (no LLM needed)
                     still.add(p)
                 plates[p] = r  # regenerated plate replaces the failed one
+                plate_realistic_by_prompt[p] = (qa2.get("realistic")
+                                                or {}).get(j)
             for p in regen:
                 if p not in ok_redo:
                     still.add(p)
@@ -347,6 +353,12 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
                           ("checked", "ocr_checked", "fail", "ocr_hits",
                            "regenerated", "still_failing", "second_check",
                            "reason")}
+    # final prompt -> path map, AFTER any regeneration replaced a path;
+    # None (unknown/unanswered) is kept as None, never defaulted here —
+    # engine.v16_manifest treats None conservatively (assume realistic).
+    report["plate_realistic"] = {
+        plates[p]["path"]: v for p, v in plate_realistic_by_prompt.items()
+        if plates.get(p, {}).get("ok")}
     if not plate_qa_on:
         report["plate_qa"]["reason"] = "plate QA disabled (--no-plate-qa)"
     report["plate_failures"] = fail_log
@@ -502,28 +514,66 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
                          "single_pass": True,
                          "out": str(out_final)}, work)
         (work / "assembly_report.json").write_text(json.dumps(arep, indent=1))
-        kinds_used = {ev["kind"] for sc in scenes for ev in (sc.get("sfx") or [])}
-        from engine.v16_audio import manifest_rows
-        report["audio_v16"]["manifest_rows"] = manifest_rows(
-            music_sel["track"],
-            {k: v for k, v in sfx_lib.items() if k in kinds_used},
-            sting_path)
         record_assembly(index, plan["assembly_key"], out_final, cap_h, nar_h,
                         bed_h)
         save_index(work, index)
     report["timings"]["assembly_s"] = round(time.time() - t0, 1)
+    # manifest_rows computed unconditionally (not just on a fresh composite
+    # rebuild): `events` (step 5) carries every shot's sfx kinds regardless
+    # of the render/assembly cache state, so a cache-hit run still gets a
+    # complete audio asset list for the manifest (WP10).
+    kinds_used = {ev["kind"] for evs in events.values() for ev in (evs or [])}
+    if len(story["beats"]) > 1:
+        kinds_used.add("whoosh")  # per-beat whoosh, inserted at assembly time
+    from engine.v16_audio import manifest_rows
+    report["audio_v16"]["manifest_rows"] = manifest_rows(
+        music_sel["track"], {k: v for k, v in sfx_lib.items() if k in kinds_used},
+        sting_path)
 
     # 8. gate (recomputed from artifacts; composite cache hit gated alike)
-    from engine.v15_gate import run_gate
+    #    + WP10: distinctness + §10.2 scorecard, + the license manifest.
+    from engine.v16_gate import run_gate
+    from engine.v16_manifest import (build_manifest, check_manifest_complete,
+                                     llm_calls_since, load_distinctness_history,
+                                     record_distinctness)
     t0 = time.time()
+    history = load_distinctness_history()
     gate = run_gate(work, story, meta, specs, timing, captions, LEAD_S,
                     use_judge=use_judge, plate_qa=report["plate_qa"],
-                    voice=report["voice"])
+                    voice=report["voice"], brand=audio_brand,
+                    plates=plates, sting_present=sting_path.exists(),
+                    video_id=sid, history=history)
     report["costs"]["vision_calls"] += gate.get("judge_calls", 0)
     report["gate"] = gate
     report["publish_gate"] = gate["verdict"]
     report["timings"]["gate_s"] = round(time.time() - t0, 1)
     report["shots"] = meta
+
+    # manifest (DESIGN §11, WP10): built from the same provenance the gate
+    # just checked, saved regardless of verdict (a HOLD/FAIL still needs an
+    # explainable manifest) and cross-checked against the render asset log.
+    from engine.v15_gate import _plate_paths
+    plate_paths_used = _plate_paths(specs)
+    manifest = build_manifest(
+        video_id=sid, brand=audio_brand, voice=report["voice"], plates=plates,
+        plate_realistic=report.get("plate_realistic"),
+        audio_rows=report["audio_v16"].get("manifest_rows") or [],
+        llm_calls=llm_calls_since(t_start, time.time()), verdict=gate["verdict"])
+    manifest["completeness"] = check_manifest_complete(
+        manifest, plate_paths=plate_paths_used, voice_wav=work / "voice.wav",
+        audio_rows=report["audio_v16"].get("manifest_rows") or [])
+    manifest_dir = ROOT / "build" / "v16" / sid
+    manifest_dir.mkdir(parents=True, exist_ok=True)
+    manifest_path = manifest_dir / "manifest.json"
+    manifest_path.write_text(json.dumps(manifest, indent=1))
+    (work / "manifest.json").write_text(json.dumps(manifest, indent=1))
+    report["manifest_path"] = str(manifest_path)
+    report["manifest"] = manifest
+    record_distinctness({
+        "video_id": sid,
+        "signature": gate["checks"]["distinctness"]["signature"],
+        "plate_hashes": gate["checks"]["distinctness"]["plate_hashes"]})
+
     report["timings"]["total_s"] = round(time.time() - t_start, 1)
     (work / "pipeline_report.json").write_text(json.dumps(report, indent=1))
     return report

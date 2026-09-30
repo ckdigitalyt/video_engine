@@ -241,7 +241,11 @@ A plate FAILS only for:
    skate blade, shows a building). Artistic interpretation, missing minor
    details, stylization or a different viewpoint are NOT failures;
  "broken": empty, corrupted, or incoherent image.
-Return ONLY JSON: {{"plates": [{{"n": 1, "shows": "...", "fail": null}}]}}
+Also answer, for EACH plate: could a viewer mistake it for a real photo or
+real footage of a real event or person (not an illustration)? Stylised
+illustration in the required style should almost always be false.
+Return ONLY JSON:
+{{"plates": [{{"n": 1, "shows": "...", "fail": null, "realistic": false}}]}}
 with "fail" one of null, "text", "wrong_subject", "broken"."""
 
 
@@ -270,9 +274,13 @@ def contact_sheet(paths: list, out: Path, cols: int = 5) -> Path:
 
 def plate_qa(items: list, style: str, sheet_path: Path) -> dict:
     """items: [{path, subject}] -> {checked, ocr_checked, fail: {index:
-    reason}, ocr_hits, raw}. `fail` merges the OCR pre-filter (always run,
-    no LLM cost) with the vision verdict; `checked` is True only when the
-    vision call really returned a verdict."""
+    reason}, ocr_hits, realistic, raw}. `fail` merges the OCR pre-filter
+    (always run, no LLM cost) with the vision verdict; `checked` is True
+    only when the vision call really returned a verdict. `realistic`
+    (DESIGN §11 disclosure signal, WP10) is index -> bool|None, None for any
+    plate the vision call didn't answer for (e.g. QA unavailable) — callers
+    treat None conservatively (assume realistic) rather than silently
+    defaulting to False."""
     if not items:
         return {"checked": False, "ocr_checked": False, "fail": {},
                 "reason": "no plates"}
@@ -280,6 +288,7 @@ def plate_qa(items: list, style: str, sheet_path: Path) -> dict:
     ocr_checked = all(o["checked"] for o in ocr)
     ocr_hits = {i: o["hits"] for i, o in enumerate(ocr) if o["hits"]}
     fails = {i: "text" for i in ocr_hits}
+    realistic = {i: None for i in range(len(items))}
     from engine.director import vision_ask
     contact_sheet([it["path"] for it in items], sheet_path)
     listing = "\n".join(f"#{i + 1}: {_main_subject(it['subject'])}"
@@ -289,7 +298,7 @@ def plate_qa(items: list, style: str, sheet_path: Path) -> dict:
         max_tokens=60 * len(items) + 200, stage="plate_qa")
     if not isinstance(ans, dict) or "plates" not in ans:
         return {"checked": False, "ocr_checked": ocr_checked, "fail": fails,
-                "ocr_hits": ocr_hits, "raw": ans,
+                "ocr_hits": ocr_hits, "realistic": realistic, "raw": ans,
                 "reason": "judge unavailable or unparseable"}
     for f in ans.get("plates") or []:
         try:
@@ -299,5 +308,7 @@ def plate_qa(items: list, style: str, sheet_path: Path) -> dict:
         if 0 <= n < len(items) and f.get("fail") in ("text", "wrong_subject",
                                                      "broken"):
             fails[n] = f["fail"]
+        if 0 <= n < len(items) and isinstance(f.get("realistic"), bool):
+            realistic[n] = f["realistic"]
     return {"checked": True, "ocr_checked": ocr_checked, "fail": fails,
-            "ocr_hits": ocr_hits, "raw": ans}
+            "ocr_hits": ocr_hits, "realistic": realistic, "raw": ans}
