@@ -202,3 +202,6 @@ Orchestrator: Jade (Sonnet 5, Discord #illustration-video)
 8. No fallback or retry path removed or narrowed: procedural underscore/SFX synths unchanged and remain default whenever the library has nothing for a mood/kind (regression-tested byte-identical); image-provider chain, TTS chain, gate regeneration round, LLM adapter all untouched.
 9. Housekeeping: /tmp/wt_wp9_baseline worktree removed, /tmp/wp9_ice_rerun (1.1GB) deleted after extracting samples, /tmp/kenney scratch download dir removed, incidental regenerated `stories/ice_slippery/audio/beat_*.timing.json`/`.voice.json` (a side effect of re-running voice synth against the tracked story dir) reverted/deleted before commit - not part of WP9's diff.
 10. Pushed. Report `bench/ab/wp9.md`. Next per scripts/phase4_driver.sh re-sequencing: WP10 (manifest/scorecard).
+
+## Owner decision (2026-09-30 10:23 UTC): cap final video generation at 2
+- Any end-of-plan render acceptance (WP12 batch, WP13 full benchmark, WP10's first-publishable-Short render) generates at most 2 full videos total, not 5 or 7. Scale WP12's "5 videos from one command" acceptance down to 2; scale WP13's "all 7 topics" down to 2 representative topics. Code/gates must still work generically; only the *number of full renders actually produced* is capped at 2 for quota.
