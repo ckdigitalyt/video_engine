@@ -150,44 +150,71 @@ def shot_timeline(beat: dict, bplan: dict, timing: dict, tts_s: float) -> list:
 MAX_HOLD_S = 4.4  # gate allows 4.5 s between visual changes
 
 
-def split_long_holds(tl: list, timing: dict) -> list:
+def _split_one(s: dict, wt: list, bt: list, max_hold_s: float,
+               margin_s: float) -> list | None:
+    """One shot -> [first, second] split at its single worst gap, or None
+    if it's already within max_hold_s or has no valid split word (every
+    candidate would land within `margin_s` of a gap edge, producing a
+    sliver shot)."""
+    sh = s["shot"]
+    if sh["kind"] != "plate":
+        return None
+    ev = [s["t0"]] + sorted(LEAD_S + wt[min(sh[k]["word"], len(wt) - 1)]
+                            for k in ("number", "label") if sh.get(k)) \
+        + [s["t1"]]
+    gaps = [(ev[i], ev[i + 1]) for i in range(len(ev) - 1)]
+    a, b = max(gaps, key=lambda g: g[1] - g[0])
+    if b - a <= max_hold_s:
+        return None
+    mid = (a + b) / 2
+    cands = [i for i, t in enumerate(bt) if a + margin_s <= t <= b - margin_s
+             and s["t0"] + margin_s <= t <= s["t1"] - margin_s]
+    if not cands:
+        return None
+    wi = min(cands, key=lambda i: abs(bt[i] - mid))
+    first = {k: v for k, v in sh.items()}
+    second = {"kind": "plate", "subject": sh["subject"],
+              "composition": sh.get("composition", "centered"),
+              "camera": "punch_in", "start_word": wi, "derived": "punch_in"}
+    for k in ("number", "label"):
+        if sh.get(k) and sh[k]["word"] >= wi:
+            second[k] = first.pop(k)
+    return [dict(s, shot=first, t1=round(bt[wi], 3)),
+            {"shot": second, "t0": round(bt[wi], 3), "t1": s["t1"]}]
+
+
+def split_long_holds(tl: list, timing: dict, max_hold_s: float = MAX_HOLD_S,
+                     margin_s: float | None = None) -> list:
     """Plate shots whose longest stretch without a visual change exceeds
-    MAX_HOLD_S are split at the word nearest the gap's middle into a CUT to
-    a tighter framing of the same plate (camera punch_in) — an editorial
-    punch-in, not new content; planned elements move with their words."""
+    `max_hold_s` (default MAX_HOLD_S=4.4, the V15 gate floor) are split at
+    the word nearest the gap's middle into a CUT to a tighter framing of
+    the same plate (camera punch_in) — an editorial punch-in, not new
+    content; planned elements move with their words. Splitting repeats
+    (each half re-checked) so a shot with more than one long gap gets more
+    than one cut, not just its single worst one. `margin_s` bounds how
+    close a split word may sit to either edge of the gap it's splitting
+    (no sliver shots); it defaults to min(1.5, max_hold_s/3) so it scales
+    down with a tighter threshold instead of making splitting impossible
+    for gaps only slightly over a small max_hold_s. WP7 callers pass the
+    tighter engine.v15_gate.MAX_HOLD_1_8_S=1.8 target (DESIGN §8.2); the
+    V15 pipeline itself keeps calling this with the default."""
+    if margin_s is None:
+        margin_s = min(1.5, max_hold_s / 3)
     wt = [w["t0"] for w in timing["words"]]
     bt = [LEAD_S + t - CUT_EARLY_S for t in wt]  # beat-time cut per word
-    out = []
-    for s in tl:
-        sh = s["shot"]
-        if sh["kind"] != "plate":
-            out.append(s)
-            continue
-        ev = [s["t0"]] + sorted(LEAD_S + wt[min(sh[k]["word"], len(wt) - 1)]
-                                for k in ("number", "label") if sh.get(k)) \
-            + [s["t1"]]
-        gaps = [(ev[i], ev[i + 1]) for i in range(len(ev) - 1)]
-        a, b = max(gaps, key=lambda g: g[1] - g[0])
-        if b - a <= MAX_HOLD_S:
-            out.append(s)
-            continue
-        mid = (a + b) / 2
-        cands = [i for i, t in enumerate(bt) if a + 1.5 <= t <= b - 1.5
-                 and s["t0"] + 1.5 <= t <= s["t1"] - 1.5]
-        if not cands:
-            out.append(s)
-            continue
-        wi = min(cands, key=lambda i: abs(bt[i] - mid))
-        first = {k: v for k, v in sh.items()}
-        second = {"kind": "plate", "subject": sh["subject"],
-                  "composition": sh.get("composition", "centered"),
-                  "camera": "punch_in", "start_word": wi, "derived": "punch_in"}
-        for k in ("number", "label"):
-            if sh.get(k) and sh[k]["word"] >= wi:
-                second[k] = first.pop(k)
-        out.append(dict(s, shot=first, t1=round(bt[wi], 3)))
-        out.append({"shot": second, "t0": round(bt[wi], 3), "t1": s["t1"]})
-    return out
+    changed = True
+    while changed:
+        changed = False
+        out = []
+        for s in tl:
+            split = _split_one(s, wt, bt, max_hold_s, margin_s)
+            if split is None:
+                out.append(s)
+            else:
+                out.extend(split)
+                changed = True
+        tl = out
+    return tl
 
 
 def _prompts_for(shot: dict, bible: dict) -> list:

@@ -28,6 +28,7 @@ recorded in meta — never silent.
 """
 from __future__ import annotations
 
+import hashlib
 from pathlib import Path
 
 import numpy as np
@@ -49,7 +50,20 @@ SAFE_X0, SAFE_X1 = 70.0, WORLD_W - 70.0
 TOP_ZONE_Y = 230.0       # first baseline of top-zone copy
 LOW_ZONE_BOTTOM = 1390.0  # last baseline of bottom-zone copy
 GRAMMAR = {"plate": "RICH_ILLUSTRATED_SCENE", "zoom_through": "SCALE_DIVE",
-           "process": "PROCESS_FLOW"}
+           "process": "PROCESS_FLOW",
+           # WP7 (DESIGN §8.2): the additional template-library shot kinds,
+           # mapped onto Scene IR's existing §9 grammar enum (scene_ir.py) —
+           # COMPARISON/DATA_GRAPHIC/MAP_TRANSFORMATION/TIMELINE were already
+           # in that library, just never wired up by a v15_shots compiler.
+           # KINETIC_CLAIM/PARALLAX_25D/LOOP_BRIDGE are RICH_ILLUSTRATED_SCENE
+           # variants (same plate+typography grammar, different camera/wash)
+           # — DESIGN §8's "template" is the editorial/pacing layer, one
+           # level above Scene IR's lower-level rendering "grammar".
+           "kinetic_claim": "RICH_ILLUSTRATED_SCENE",
+           "big_number": "DATA_GRAPHIC", "map_pin": "MAP_TRANSFORMATION",
+           "timeline": "TIMELINE", "scale_compare": "COMPARISON",
+           "parallax": "RICH_ILLUSTRATED_SCENE",
+           "loop_bridge": "RICH_ILLUSTRATED_SCENE"}
 
 
 class ShotError(ValueError):
@@ -312,6 +326,39 @@ def _label(lid: str, text: str, info: dict, t: float, dur: float,
                           "size": size, "line_w": 6, "dot_r": 14})
 
 
+def _rail_capped_text(lid: str, text: str, cx: float, y: float, size: int,
+                      ink: dict, boxes: list) -> dict:
+    """Centered, rail-safe point label for templates that place short text
+    at an ad-hoc screen point (map pin, timeline tick, scale-compare
+    caption) rather than in the headline/number zones _text_layer owns.
+    Registers its own box (gate text_bounds) and shifts left/right to clear
+    the right UI rail and the left safe margin — same contract as _label."""
+    txt = str(text).upper()
+    tw = text_width(txt, DISPLAY, size, 2)
+    box = [cx - tw / 2, y - size, cx + tw / 2, y + 10]
+    rail_x1 = rail_safe_x1(box[1], box[3], SAFE_X1)
+    if box[2] > rail_x1:
+        shift = box[2] - rail_x1
+        box[0] -= shift
+        box[2] -= shift
+        cx -= shift
+    if box[0] < SAFE_X0:
+        shift = SAFE_X0 - box[0]
+        box[0] += shift
+        box[2] += shift
+        cx += shift
+    boxes.append({"id": lid, "box": [round(v, 1) for v in box], "text": txt})
+    return {"x": cx, "y": y, "text": txt, "size": size, "fill": ink["fill"],
+            "anchor": "middle", "font": "display"}
+
+
+def _hash_pick(key: str, options: tuple) -> str:
+    """Deterministic choice among `options`, keyed by `key` — DESIGN §8.1:
+    'ties are broken by hashing story_id, never by a random choice'."""
+    idx = int(hashlib.sha256(key.encode()).hexdigest(), 16) % len(options)
+    return options[idx]
+
+
 # ------------------------------------------------------------- compilers --
 
 def compile_plate_shot(sc: dict, bible: dict, boxes: list, events: list) -> tuple:
@@ -532,13 +579,319 @@ def compile_process_shot(sc: dict, bible: dict, boxes: list, events: list) -> tu
     return layers, cam, []
 
 
+def compile_kinetic_claim_shot(sc: dict, bible: dict, boxes: list,
+                               events: list) -> tuple:
+    """KINETIC_CLAIM (§8.2 #6): full-frame kinetic type on a graded
+    texture — the claim IS the shot ("type slam" interrupt). Heavier dim
+    wash than a plain plate shot + a punch-in camera give it a distinct
+    motion signature from PLATE_PUSH even though it reuses the same
+    plate/text machinery."""
+    dur, shot = sc["duration"], sc["shot"]
+    plate = sc["plates"][0] if sc["plates"] else None
+    info = (plate or {}).get("info") or {}
+    layers = _plate_layers(plate, cutout=False) if plate else _procedural_world(
+        bible, shot.get("subject", ""))
+    zone = _zone(shot, info)
+    ink = _inks(bible, _zone_lum(info, zone) if plate else 60.0)
+    p = bible["palette"]
+    wash_fill = p["primary"] if _lum(p["primary"]) < _lum(p["text"]) else p["text"]
+    layers.append(layer("dim", "effect", "focus_dim", "vector", z=40,
+                        payload={"primitives": {"rects": [
+                            {"x": 0, "y": 0, "w": WORLD_W, "h": WORLD_H,
+                             "fill": wash_fill, "fill_opacity": 0.4,
+                             "stroke_w": 0}]}, "screen_space": True}))
+    text = shot.get("headline") or shot.get("claim") or shot.get("subject", "")
+    y = TOP_ZONE_Y + 60 if zone == "top" else LOW_ZONE_BOTTOM
+    layers.append(_text_layer("claim", text, y=y, size=170, ink=ink,
+                              boxes=boxes, max_lines=3, min_size=60,
+                              anchor_bottom=(zone == "bottom"), pop=True,
+                              accent=True))
+    events.append({"t": 0.05, "kind": "pulse", "gain": 0.7})
+    layers.append(_finish(bible))
+    cam = _camera("punch_in", dur, info if plate else None)
+    return layers, cam, []
+
+
+def compile_big_number_shot(sc: dict, bible: dict, boxes: list,
+                            events: list) -> tuple:
+    """BIG_NUMBER (§8.2 #7): count-up figure + unit, with a comparison bar
+    that reveals alongside it ("number pop" interrupt)."""
+    dur, shot = sc["duration"], sc["shot"]
+    plate = sc["plates"][0] if sc["plates"] else None
+    info = (plate or {}).get("info") or {}
+    layers = _plate_layers(plate, cutout=False) if plate else _procedural_world(
+        bible, shot.get("subject", ""))
+    number = shot.get("number") or {"text": "", "word": 0}
+    zone = _zone(shot, info)
+    ink = _inks(bible, _zone_lum(info, zone) if plate else 60.0)
+    if plate:
+        layers.append(_scrim("wash", zone, ink, 0.5))
+    t = sc["t_of"](number.get("word", 0)) if isinstance(
+        number.get("word"), int) else 0.2
+    # No headline shares this shot, so (unlike compile_plate_shot's number,
+    # which dodges into the OTHER zone when a headline is present) the
+    # number sits in its OWN zone: top-zone text grows down from y_top,
+    # bottom-zone text grows up so it ends at LOW_ZONE_BOTTOM.
+    y = (TOP_ZONE_Y + 60) if zone == "top" else LOW_ZONE_BOTTOM
+    layers.append(_text_layer("number", number.get("text", ""), y=y,
+                              size=260, ink=ink, boxes=boxes, max_lines=2,
+                              anchor_bottom=(zone != "top"), pop=True,
+                              accent=True, min_size=80, vis=[t, dur]))
+    events.append({"t": t, "kind": "tick", "gain": 0.75})
+    # Comparison bar: the reveal (visibility-triggered fade-in, the same
+    # idiom compile_process_shot's step chips use) IS the "count-up" beat —
+    # there is no second, narration-verified figure to size a fill against
+    # without inventing one, so the bar itself does not encode a magnitude.
+    # Positioned from the number's OWN fitted box (not a guessed offset) so
+    # it never overlaps the text regardless of zone/line-count.
+    num_box = boxes[-1]["box"]
+    bar_y = (num_box[3] + 30) if zone == "top" else (num_box[1] - 40)
+    bw = 560.0
+    bx0 = WORLD_W / 2 - bw / 2
+    layers.append(layer("bar_track", "effect", "compare_bar_track", "vector",
+                        z=57, payload={"primitives": {"rects": [
+                            {"x": bx0, "y": bar_y, "w": bw, "h": 10, "rx": 5,
+                             "fill": ink["halo"], "fill_opacity": 0.35,
+                             "stroke_w": 0}]}, "screen_space": True}))
+    layers.append(layer("bar_fill", "effect", "compare_bar_fill", "vector",
+                        z=58, visibility=[round(t, 3) + 0.15, dur],
+                        payload={"primitives": {"rects": [
+                            {"x": bx0, "y": bar_y, "w": bw, "h": 10, "rx": 5,
+                             "fill": ink["accent"], "stroke_w": 0}]},
+                                 "screen_space": True}))
+    layers.append(_finish(bible))
+    cam = _camera("punch_in", dur, info if plate else None)
+    return layers, cam, []
+
+
+def compile_map_pin_shot(sc: dict, bible: dict, boxes: list,
+                         events: list) -> tuple:
+    """MAP_PIN (§8.2 #9): place marker + leader label, "map zoom" interrupt.
+    Deviation: no Natural Earth basemap this pass (§8.2 lists it as the
+    asset source) — the pin drops onto the story's own plate/subject rather
+    than a real cartographic layer; flag if a true basemap is wanted."""
+    dur, shot = sc["duration"], sc["shot"]
+    plate = sc["plates"][0] if sc["plates"] else None
+    info = (plate or {}).get("info") or {}
+    layers = _plate_layers(plate) if plate else _procedural_world(
+        bible, shot.get("subject", ""))
+    zone = _zone(shot, info)
+    ink = _inks(bible, _zone_lum(info, zone) if plate else 60.0)
+    label = shot.get("label")
+    if not label and shot.get("headline"):
+        label = {"text": shot["headline"], "word": 0}
+    if label:
+        # A real subject bbox drives the pin position when a plate exists;
+        # without one there is no "place" to pin to, but the shot must
+        # still degrade to on-screen content (never a blank frame, same
+        # floor every other compiler here holds to) — a default centred
+        # bbox stands in, same fallback _label() itself is built around.
+        t = sc["t_of"](label.get("word", 0)) if isinstance(
+            label.get("word"), int) else 0.2
+        bb = info.get("bbox") or [WORLD_W * 0.3, WORLD_H * 0.42,
+                                  WORLD_W * 0.6, WORLD_H * 0.58]
+        px, py = (bb[0] + bb[2]) / 2, (bb[1] + bb[3]) / 2
+        layers.append(layer("pin", "semantic_annotation", "map_pin",
+                            "vector", z=57, visibility=[round(t, 3), dur],
+                            payload={"primitives": {
+                                "circles": [
+                                    {"x": px, "y": py, "r": 34,
+                                     "fill": ink["accent"], "fill_opacity": 0.18,
+                                     "stroke": ink["accent"], "stroke_w": 3},
+                                    {"x": px, "y": py, "r": 12,
+                                     "fill": ink["accent"], "stroke": ink["halo"],
+                                     "stroke_w": 3}],
+                                "lines": [{"x1": px, "y1": py - 12,
+                                          "x2": px, "y2": py - 46,
+                                          "stroke": ink["accent"], "width": 4}]},
+                                     "screen_space": True}))
+        lab = _label("label", label["text"], {**info, "bbox": bb}, t, dur,
+                     ink, boxes, zone)
+        if lab:
+            layers.append(lab)
+        events.append({"t": t, "kind": "tick", "gain": 0.5})
+    layers.append(_finish(bible))
+    cam = _camera("punch_in", dur, info if plate else None)
+    return layers, cam, []
+
+
+def compile_timeline_shot(sc: dict, bible: dict, boxes: list,
+                          events: list) -> tuple:
+    """TIMELINE_DEEPTIME (§8.2 #10): a horizontal scroll with a highlighted
+    "you are here" marker, "scroll" interrupt. Reuses the zoom_through
+    shot's `levels` field (2-5 {label, word}) as the era ticks when present;
+    otherwise falls back to a 2-point THEN/NOW line from headline/label."""
+    dur, shot = sc["duration"], sc["shot"]
+    plate = sc["plates"][0] if sc["plates"] else None
+    info = (plate or {}).get("info") or {}
+    layers = _plate_layers(plate, cutout=False) if plate else _procedural_world(
+        bible, shot.get("subject", ""))
+    ink = _inks(bible, 60.0)
+    layers.append(_scrim("wash", "bottom", ink, 0.4))
+    eras = [e for e in (shot.get("levels") or []) if isinstance(e, dict)][:5]
+    if len(eras) < 2:
+        then = (shot.get("label") or {}).get("text") if isinstance(
+            shot.get("label"), dict) else None
+        eras = [{"label": then or "THEN"}, {"label": shot.get("headline") or "NOW"}]
+    n = len(eras)
+    y = LOW_ZONE_BOTTOM - 60
+    x0, x1 = SAFE_X0 + 40, min(SAFE_X1 - 40, WORLD_W / 2 + 300)
+    layers.append(layer("track", "effect", "timeline_track", "vector", z=55,
+                        payload={"primitives": {"lines": [
+                            {"x1": x0, "y1": y, "x2": x1, "y2": y,
+                             "stroke": ink["halo"], "width": 5}]},
+                                 "screen_space": True}))
+    here = n - 1
+    for i, era in enumerate(eras):
+        ex = x0 + (x1 - x0) * (i / max(1, n - 1))
+        w = era.get("word")
+        t = sc["t_of"](w) if isinstance(w, int) else min(dur - 0.4, 0.3 + 0.5 * i)
+        r = 18 if i == here else 9
+        fill = ink["accent"] if i == here else ink["fill"]
+        layers.append(layer(f"tick{i}", "effect", "timeline_tick", "vector",
+                            z=56, visibility=[round(t, 3), dur],
+                            payload={"primitives": {"circles": [
+                                {"x": ex, "y": y, "r": r, "fill": fill,
+                                 "stroke": ink["halo"], "stroke_w": 3}]},
+                                     "screen_space": True}))
+        label = era.get("label")
+        if label:
+            txt = "YOU ARE HERE" if i == here else str(label)
+            prim = _rail_capped_text(f"lbl{i}", txt, ex, y - 44,
+                                     34 if i == here else 26, ink, boxes)
+            layers.append(layer(f"lbltxt{i}", "text", "timeline_label",
+                                "vector", z=57, visibility=[round(t, 3), dur],
+                                payload={"primitives": {"texts": [prim]},
+                                         "screen_space": True}))
+        events.append({"t": round(t, 3), "kind": "tick", "gain": 0.5})
+    layers.append(_finish(bible))
+    cam = _camera("pan_right", dur, info if plate else None)
+    return layers, cam, []
+
+
+def compile_scale_compare_shot(sc: dict, bible: dict, boxes: list,
+                               events: list) -> tuple:
+    """SCALE_COMPARE (§8.2 #8): two silhouettes to scale, "split" interrupt.
+    Deviation: no sourced silhouette art this pass (§8.2 lists real
+    illustrations, e.g. "bird vs T. rex") — proportion-accurate rounded
+    rectangles stand in, sized by `shot["compare"]["a"/"b"]["scale"]` when
+    the plan supplies it (else a flagged default ratio)."""
+    dur, shot = sc["duration"], sc["shot"]
+    plate = sc["plates"][0] if sc["plates"] else None
+    info = (plate or {}).get("info") or {}
+    layers = _plate_layers(plate, cutout=False) if plate else _procedural_world(
+        bible, shot.get("subject", ""))
+    ink = _inks(bible, 60.0)
+    layers.append(_scrim("wash", "bottom", ink, 0.35))
+    cmp_ = shot.get("compare") if isinstance(shot.get("compare"), dict) else {}
+    a = cmp_.get("a") or {"text": (shot.get("label") or {}).get("text", "A")
+                          if isinstance(shot.get("label"), dict) else "A",
+                          "scale": 1.0}
+    b = cmp_.get("b") or {"text": shot.get("headline") or "B", "scale": 2.2}
+    scale_a = max(0.3, min(3.0, float(a.get("scale", 1.0))))
+    scale_b = max(0.3, min(3.0, float(b.get("scale", 2.2))))
+    norm = max(scale_a, scale_b)
+    base_h = 420.0
+    ha, hb = base_h * scale_a / norm, base_h * scale_b / norm
+    y_floor = LOW_ZONE_BOTTOM - 20
+    cx_a, cx_b = WORLD_W * 0.28, WORLD_W * 0.72
+    wa, wb = ha * 0.55, hb * 0.55
+    w = cmp_.get("word")
+    t = sc["t_of"](w) if isinstance(w, int) else 0.3
+    for lid, cx, h, ww, fill, tt in (
+            ("sil_a", cx_a, ha, wa, ink["halo"], t),
+            ("sil_b", cx_b, hb, wb, ink["accent"], t + 0.4)):
+        layers.append(layer(lid, "effect", "scale_silhouette", "vector",
+                            z=56, visibility=[round(tt, 3), dur],
+                            payload={"primitives": {"rects": [
+                                {"x": cx - ww / 2, "y": y_floor - h, "w": ww,
+                                 "h": h, "rx": min(24.0, ww / 3),
+                                 "fill": fill, "fill_opacity": 0.9}]},
+                                     "screen_space": True}))
+    layers.append(layer("floor", "effect", "scale_floor", "vector", z=55,
+                        payload={"primitives": {"lines": [
+                            {"x1": SAFE_X0, "y1": y_floor, "x2": SAFE_X1,
+                             "y2": y_floor, "stroke": ink["halo"],
+                             "width": 4}]}, "screen_space": True}))
+    for lid, txt, cx, hh, tt in (("lbl_a", a.get("text", "A"), cx_a, ha, t),
+                                 ("lbl_b", b.get("text", "B"), cx_b, hb, t + 0.4)):
+        prim = _rail_capped_text(lid, txt, cx, y_floor - hh - 24, 40, ink, boxes)
+        layers.append(layer(f"{lid}_t", "text", "scale_label", "vector", z=58,
+                            visibility=[round(tt, 3), dur],
+                            payload={"primitives": {"texts": [prim]},
+                                     "screen_space": True}))
+    events.append({"t": round(t, 3), "kind": "tick", "gain": 0.5})
+    events.append({"t": round(t + 0.4, 3), "kind": "tick", "gain": 0.55})
+    layers.append(_finish(bible))
+    cam = _camera("pull_out", dur, info if plate else None)
+    return layers, cam, []
+
+
+def compile_parallax_shot(sc: dict, bible: dict, boxes: list,
+                          events: list) -> tuple:
+    """PARALLAX_25D (§8.2 #5): depth drift on a hero plate, "depth move"
+    interrupt. Reuses compile_plate_shot's plate/text layers in full (§8.1
+    "one plate can drive three templates") but forces a continuous
+    lateral/vertical drift camera instead of a push/pull, so the existing
+    background/subject depth differential (BG_DEPTH/SUBJ_DEPTH) reads as
+    parallax rather than a straight zoom."""
+    layers, _cam, anims = compile_plate_shot(sc, bible, boxes, events)
+    plate = sc["plates"][0] if sc["plates"] else None
+    info = (plate or {}).get("info") or {}
+    kind = _hash_pick(sc.get("scene_id", "parallax"),
+                      ("pan_left", "pan_right", "rise", "descend"))
+    cam = _camera(kind, sc["duration"], info if plate else None)
+    return layers, cam, anims
+
+
+def compile_loop_bridge_shot(sc: dict, bible: dict, boxes: list,
+                             events: list) -> tuple:
+    """LOOP_BRIDGE (§8.2 #15): return to the hook's plate and camera for a
+    visually matched loop close (the mandatory last shot, §8.1). Pipeline
+    integration point: pass the hook scene's plate dict as sc['hook_plate']
+    and its camera kind as sc['hook_camera'] for a real matched bridge;
+    without them this degrades to a plain closing plate shot (still valid
+    Scene IR, just not guaranteed to match frame 0 — flagged, not wired
+    into v15_pipeline this pass)."""
+    dur, shot = sc["duration"], sc["shot"]
+    hook_plate = sc.get("hook_plate")
+    plate = hook_plate or (sc["plates"][0] if sc["plates"] else None)
+    info = (plate or {}).get("info") or {}
+    layers = _plate_layers(plate, cutout=False) if plate else _procedural_world(
+        bible, shot.get("subject", ""))
+    zone = _zone(shot, info)
+    ink = _inks(bible, _zone_lum(info, zone) if plate else 60.0)
+    text = shot.get("headline") or shot.get("claim") or ""
+    if text:
+        if plate:
+            layers.append(_scrim("wash", zone, ink))
+        y = TOP_ZONE_Y + 60 if zone == "top" else LOW_ZONE_BOTTOM
+        layers.append(_text_layer("closing", text, y=y, size=140, ink=ink,
+                                  boxes=boxes, max_lines=3,
+                                  anchor_bottom=(zone == "bottom"), pop=True))
+    layers.append(_finish(bible))
+    hook_kind = sc.get("hook_camera", "push_in")
+    reverse = {"push_in": "pull_out", "pull_out": "push_in",
+              "pan_left": "pan_right", "pan_right": "pan_left",
+              "rise": "descend", "descend": "rise", "punch_in": "pull_out"}
+    cam = _camera(reverse.get(hook_kind, "pull_out"), dur, info if plate else None)
+    return layers, cam, []
+
+
 def compile_shot(sc: dict, bible: dict) -> dict:
     """sc: {scene_id, duration, shot, plates:[{path, info}], t_of(word)->s,
     first}. -> {spec, events, asset_tier}."""
     kind = sc["shot"]["kind"]
     boxes, events = [], []
     fn = {"plate": compile_plate_shot, "zoom_through": compile_zoom_shot,
-          "process": compile_process_shot}[kind]
+          "process": compile_process_shot,
+          "kinetic_claim": compile_kinetic_claim_shot,
+          "big_number": compile_big_number_shot,
+          "map_pin": compile_map_pin_shot,
+          "timeline": compile_timeline_shot,
+          "scale_compare": compile_scale_compare_shot,
+          "parallax": compile_parallax_shot,
+          "loop_bridge": compile_loop_bridge_shot}[kind]
     layers, cam, anims = fn(sc, bible, boxes, events)
     spec = base_spec(GRAMMAR[kind], {"scene_id": sc["scene_id"],
                                      "duration_s": round(sc["duration"], 3)},

@@ -285,15 +285,12 @@ def check_info_floor(scene_videos: list, work: Path, every: float = 2.0) -> dict
     return {"ok": not fails, "fails": fails[:10], "frames": rows}
 
 
-def check_visual_hold(meta: dict, specs: dict) -> dict:
+def _hold_gaps(meta: dict, specs: dict) -> list:
     """State changes = shot starts + on-word reveals (layers with a
-    visibility start > 0.05 s inside the shot)."""
+    visibility start > 0.05 s inside the shot). -> [(start_s, gap_s), ...]."""
     events = []
-    t_end = 0.0
-    starts = {}
     t = 0.0
     for key, m in meta.items():  # insertion order == timeline order
-        starts[key] = t
         events.append(t)
         for lay in specs[key]["layers"]:
             vis = lay.get("visibility")
@@ -302,15 +299,48 @@ def check_visual_hold(meta: dict, specs: dict) -> dict:
                     vis and vis[0] > 0.05 and lay["id"].endswith("_world")):
                 events.append(t + float(vis[0]))
         t += float(specs[key]["duration_s"])
-    t_end = t
-    events = sorted(set(round(e, 2) for e in events)) + [round(t_end, 2)]
-    gaps = [(events[i], events[i + 1] - events[i])
+    events = sorted(set(round(e, 2) for e in events)) + [round(t, 2)]
+    return [(events[i], events[i + 1] - events[i])
             for i in range(len(events) - 1)]
+
+
+def check_visual_hold(meta: dict, specs: dict) -> dict:
+    gaps = _hold_gaps(meta, specs)
     worst = max(gaps, key=lambda g: g[1]) if gaps else (0, 0)
     fails = [f"{g:.1f}s without a visual change from t={a:.1f}s"
              for a, g in gaps if g > MAX_HOLD_S]
     return {"ok": not fails, "fails": fails, "max_hold_s": round(worst[1], 2),
-            "changes": len(events) - 1}
+            "changes": len(gaps)}
+
+
+# WP7 (DESIGN §8.2 pacing targets): a stricter, additive pacing check on top
+# of check_visual_hold's MAX_HOLD_S=4.5 "never a frozen frame" floor. The
+# template library's own motion signatures target <=1.0s; this is the
+# harder gate DESIGN wants enforced ("the gate hard-fails any hold over
+# 1.8s"). Kept as its OWN function (not a change to MAX_HOLD_S/
+# check_visual_hold) because every V15-path plate/zoom_through/process shot
+# accepted through WP1-WP6 was built and gated against the 4.5s floor —
+# retargeting that check now would newly FAIL every prior acceptance run.
+# This is the check WP7's new templates are held to (bench/ab/wp7.md A/B #3)
+# and it is available for the pipeline to adopt wholesale once every shot
+# kind meets it.
+MAX_HOLD_1_8_S = 1.8
+
+
+def check_pattern_interrupt(meta: dict, specs: dict) -> dict:
+    """Same event model as check_visual_hold, at DESIGN's tighter §8.2
+    threshold (1.8s). Also reports the median shot length (§8.2 target
+    1.2-2.0s), computed from the same specs in the same pass."""
+    durs = sorted(float(specs[key]["duration_s"]) for key in meta)
+    gaps = _hold_gaps(meta, specs)
+    worst = max(gaps, key=lambda g: g[1]) if gaps else (0, 0)
+    fails = [f"{g:.1f}s without a visual change from t={a:.1f}s"
+             for a, g in gaps if g > MAX_HOLD_1_8_S]
+    n = len(durs)
+    med = 0.0 if not n else (durs[n // 2] if n % 2 else
+                             (durs[n // 2 - 1] + durs[n // 2]) / 2)
+    return {"ok": not fails, "fails": fails, "max_hold_s": round(worst[1], 2),
+            "median_shot_s": round(med, 2), "shots": n}
 
 
 def check_assets(meta: dict) -> dict:

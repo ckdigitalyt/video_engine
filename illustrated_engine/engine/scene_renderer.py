@@ -318,8 +318,13 @@ class RemotionRenderer(SceneRenderer):
             raise ValueError("invalid scene spec: " + "; ".join(errors[:5]))
         props, pf = self._props_file(spec, out_path)
         out = Path(out_path).resolve()
+        # `--frame` is a `still` option, not a `render` option (this
+        # @remotion/cli version rejects it on `render`: "did you mean
+        # --frames?"). WP7 fix — this contract method (module docstring:
+        # "render_frame(spec, frame, out_path) single frame still (png)")
+        # was unused until WP7 needed real per-template Remotion stills.
         proc, secs = self._run([
-            "render", COMPOSITION_ID, str(out),
+            "still", COMPOSITION_ID, str(out),
             "--props", str(pf), "--frame", str(int(frame)),
         ])
         return self._result(proc, secs, props, pf, out)
