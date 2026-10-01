@@ -23,7 +23,7 @@ WP status table, the current baseline) stays here in full.
 - WP10: DONE `6ef2cc0`+`98a3267` — scorecard/manifest + real end-to-end render proof (FAIL, honest — see below)
 - WP8: DONE `7a27899`+`b12c301` — image-provider chain reordered so a commercial_ok:true source (Cloudflare) runs first
 - WP11: DONE `7b911a1` — topic engine (clusters/ideation/dedupe/scoring/series planner/`data/topic_history.jsonl`)
-- WP5: DONE `<pending commit>` — one-composition Remotion render code landed and tested; **real parity gate FAILed honestly** (SSIM 0.93 vs 0.98 required, root cause found and documented), Python caption/assembly pass stays default, `v16_compose` has zero live-pipeline callers
+- WP5: DONE `520d9df` — one-composition Remotion render code landed and tested; **real parity gate FAILed honestly** (SSIM 0.93 vs 0.98 required, root cause found and documented), Python caption/assembly pass stays default, `v16_compose` has zero live-pipeline callers
 - WP12, WP13, WP14: pending, in that order
 
 ## Owner decisions (binding, all still in force)
@@ -98,7 +98,7 @@ project files, `test_wp5_compose.py`, `bench/ab/wp5_parity.py`,
 earlier session that hit a usage limit mid-WP5 — left untouched (out of
 this run's WP11-only scope), not evaluated or tested as part of this run.
 
-### WP5 (2026-10-01, `<pending commit>`)
+### WP5 (2026-10-01, `520d9df`)
 Reviewed and committed the uncommitted WP5 work flagged by WP11
 (`v16_compose.py`, `Short/Captions/Sting/Outro.tsx`, `render_short.mjs`,
 `Root.tsx`'s 2nd composition, `test_wp5_compose.py`, `wp5_parity.py`,
