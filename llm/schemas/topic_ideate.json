@@ -1,0 +1,41 @@
+{
+  "type": "object",
+  "required": ["candidates"],
+  "properties": {
+    "candidates": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 40,
+      "items": {
+        "type": "object",
+        "required": ["title", "cluster", "claim", "entities", "hooks", "templates", "evergreen"],
+        "properties": {
+          "title": {"type": "string", "minLength": 8, "maxLength": 100},
+          "cluster": {"enum": ["deep_time", "spectacle_physics", "exotic_space_travel",
+                               "space_discovery", "general_explainer"]},
+          "claim": {"type": "string", "minLength": 20},
+          "entities": {
+            "type": "object",
+            "properties": {
+              "subject": {"type": "string"},
+              "place": {"type": "string"},
+              "era": {"type": "string"},
+              "phenomenon": {"type": "string"}
+            }
+          },
+          "hooks": {
+            "type": "array", "minItems": 3, "maxItems": 3,
+            "items": {"type": "string", "minLength": 5}
+          },
+          "templates": {
+            "type": "array", "minItems": 1, "maxItems": 4,
+            "items": {"type": "string"}
+          },
+          "series_id": {"type": ["string", "null"]},
+          "series_part": {"type": ["integer", "null"], "minimum": 1},
+          "evergreen": {"type": "boolean"}
+        }
+      }
+    }
+  }
+}
