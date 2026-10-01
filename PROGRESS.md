@@ -23,7 +23,8 @@ WP status table, the current baseline) stays here in full.
 - WP10: DONE `6ef2cc0`+`98a3267` — scorecard/manifest + real end-to-end render proof (FAIL, honest — see below)
 - WP8: DONE `7a27899`+`b12c301` — image-provider chain reordered so a commercial_ok:true source (Cloudflare) runs first
 - WP11: DONE `7b911a1` — topic engine (clusters/ideation/dedupe/scoring/series planner/`data/topic_history.jsonl`)
-- WP5, WP12, WP13, WP14: pending, in that order (re-sequenced, see below) — **WP5 has uncommitted work already in the tree from an earlier session that hit a usage limit, needs its own run to review/test/commit, see Next**
+- WP5: DONE `<pending commit>` — one-composition Remotion render code landed and tested; **real parity gate FAILed honestly** (SSIM 0.93 vs 0.98 required, root cause found and documented), Python caption/assembly pass stays default, `v16_compose` has zero live-pipeline callers
+- WP12, WP13, WP14: pending, in that order
 
 ## Owner decisions (binding, all still in force)
 1. **Brand (2026-09-28):** "Ink & Ember" + boxed keyword hook labels (t=0-1s) + dark-plate variant for space topics; no mascot; brand params config-driven, no literals in code.
@@ -97,7 +98,25 @@ project files, `test_wp5_compose.py`, `bench/ab/wp5_parity.py`,
 earlier session that hit a usage limit mid-WP5 — left untouched (out of
 this run's WP11-only scope), not evaluated or tested as part of this run.
 
+### WP5 (2026-10-01, `<pending commit>`)
+Reviewed and committed the uncommitted WP5 work flagged by WP11
+(`v16_compose.py`, `Short/Captions/Sting/Outro.tsx`, `render_short.mjs`,
+`Root.tsx`'s 2nd composition, `test_wp5_compose.py`, `wp5_parity.py`,
+`requirements.txt` scikit-image) — sound, additive-only (`v16_compose` has
+zero live-pipeline callers). Ran the real frame-parity test for real
+(no new Claude calls/plates): **FAIL, mean SSIM 0.93059 / min 0.91455 vs
+the 0.98 gate.** Root-caused, not just measured: `CAPTION_COMBINE_MS=40`'s
+own "always ≥50ms between cues" assumption is false on the real track
+(83/118 gaps ≤40ms), so `@remotion/captions` collapses all 119 words into
+one 49s page and `Captions.tsx` shows the same wrong text for the whole
+video. Python caption/assembly pass stays default per DESIGN; Short.tsx
+landed with no runtime wiring (nothing calls it). Tests:
+illustrated_engine 216/216, root 63/63 failing IDs identical to baseline.
+Report `bench/ab/wp5.md`. Fix (group by the Python pass's own `cue` id,
+not timing gaps) left for a future run — out of this run's "report the
+gap" scope.
+
 ## Next
-WP5 needs its own run first: review/test/commit (or discard, owner's call)
-the uncommitted work already sitting in the tree before resuming the
-re-sequenced order. Then WP12 (2-video cap) → WP13 (2-topic cap) → WP14.
+WP12 (2-video cap) → WP13 (2-topic cap) → WP14. If WP5's caption-grouping
+bug is ever picked up, re-run `bench/ab/wp5_parity.py` before considering
+`v16_compose` for live wiring.
