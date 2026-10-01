@@ -24,7 +24,8 @@ WP status table, the current baseline) stays here in full.
 - WP8: DONE `7a27899`+`b12c301` — image-provider chain reordered so a commercial_ok:true source (Cloudflare) runs first
 - WP11: DONE `7b911a1` — topic engine (clusters/ideation/dedupe/scoring/series planner/`data/topic_history.jsonl`)
 - WP5: DONE `520d9df` — one-composition Remotion render code landed and tested; **real parity gate FAILed honestly** (SSIM 0.93 vs 0.98 required, root cause found and documented), Python caption/assembly pass stays default, `v16_compose` has zero live-pipeline callers
-- WP12, WP13, WP14: pending, in that order
+- WP12: DONE `bd9482f` — batch runner (preflight, topic selection, quota pause/resume, packaging); **real 2-video render acceptance deliberately deferred** (see below), machinery proven with fixtures + real-but-cheap pieces instead
+- WP13, WP14: pending, in that order
 
 ## Owner decisions (binding, all still in force)
 1. **Brand (2026-09-28):** "Ink & Ember" + boxed keyword hook labels (t=0-1s) + dark-plate variant for space topics; no mascot; brand params config-driven, no literals in code.
@@ -34,7 +35,7 @@ WP status table, the current baseline) stays here in full.
 5. **Standing go (2026-09-28):** standing go for every Phase 4 WP in plan order, no approval needed between packages unless a stop condition applies: a new test failure you can't fix within the package; a change needing `.env`/secrets/new paid services/accounts; destructive git ops or deletes outside `phase4_out`; a change beyond the plan's scope; the same failure 3x in a row.
 6. **Gate to advance:** full test suite passes apart from the known baseline failures (see below), secret scan clean, commits pushed, PROGRESS.md + a `bench/ab/*.md` acceptance report written. A HOLD/FAIL verdict on a sample video is fine when it's the correct, honest result.
 7. **Re-sequencing (2026-09-29, then adjusted 2026-09-30):** plan order re-sequenced for fastest publishable Short: **WP6 → WP7 → WP9 → WP10 → WP8 → WP5 → WP11 → WP12 → WP13 → WP14**. WP8 was pulled ahead of WP5/WP11-14 on 2026-09-30 because WP10's real render proved every plate was `commercial_ok:false` — WP8 is a genuine license-gate blocker, not just robustness work.
-8. **Video-render cap (2026-09-30):** at most **2 full video renders total** for the rest of Phase 4 (WP10's render used 1; 1 remains for WP12/WP13). Scale WP12's "5 videos" acceptance down to 2, WP13's "7 topics" down to 2 representative topics. Code/gates must still work generically — only the count of renders actually produced is capped.
+8. **Video-render cap (2026-09-30):** at most **2 full video renders total** for the rest of Phase 4 (WP10's render used 1; 1 remains — WP12 deliberately did not spend it, see its PROGRESS entry below; still available for WP13 or a future WP12 real-batch follow-up). Scale WP12's "5 videos" acceptance down to 2, WP13's "7 topics" down to 2 representative topics. Code/gates must still work generically — only the count of renders actually produced is capped.
 9. **Driver / check-ins (2026-09-30):** LLM check-ins replaced by a deterministic driver, `scripts/phase4_driver.sh` (untracked infra, not a WP deliverable) — gates each WP with pytest-diff-vs-baseline + a secret-scan grep (key-prefix/assignment patterns only, not narrative word matches), handles usage-limit resets (both 5-hour session and weekly limits) by sleeping and resuming, posts to Discord via the `openclaw message` CLI only (no model call for status posts).
 10. **Token optimization (2026-09-30):** keep PROGRESS.md lean going forward — append new WP summaries in the condensed style below (facts + flags + numbers, no repeated boilerplate), and fold anything older than the 2 most recent WPs into PROGRESS_ARCHIVE.md periodically.
 
@@ -116,7 +117,26 @@ Report `bench/ab/wp5.md`. Fix (group by the Python pass's own `cue` id,
 not timing gaps) left for a future run — out of this run's "report the
 gap" scope.
 
+### WP12 (2026-10-01, `bd9482f`)
+Batch runner (DESIGN §13): `v16_batch.py` — preflight (real Claude-CLI
+quota/voice/image-tier/music-SFX/disk checks, no secrets), topic
+selection (≤2/cluster cap over `v16_topics`), quota pause/resume (gates
+*before* a video starts on `llm.available()`, since `text_ask`/`vision_ask`
+already swallow `LLMUnavailable` into a fallback by design — real
+"resume after a simulated quota at S6" test proven), per-video packaging
+(final/proxy/cover/metadata/manifest/scorecard). **Deliberately did not
+spend the last render-cap slot**: `LEAD_S=0.30` in `v15_pipeline.py` is
+still > the hook-timing gate's 0.25s bound (story-independent, the exact
+failure mode WP10's real render hit), and WP10's voice-WER/caption-safe-zone
+failures are on shared code no WP since has touched — a real run would
+very likely reproduce an already-diagnosed FAIL. Proved real instead:
+live preflight, one real `select_topics(2)` call ($0.061), real `ffmpeg`
+packaging against an existing `final.mp4`. Tests: 11 new, 227/227 full
+suite, root 63/63 unchanged. Report `bench/ab/wp12.md`.
+
 ## Next
-WP12 (2-video cap) → WP13 (2-topic cap) → WP14. If WP5's caption-grouping
-bug is ever picked up, re-run `bench/ab/wp5_parity.py` before considering
+WP13 (2-topic cap) → WP14. The 1 remaining render-cap slot is still
+available — recommend reconciling `LEAD_S` vs. the hook-timing gate bound
+before spending it (see WP12's report). If WP5's caption-grouping bug is
+ever picked up, re-run `bench/ab/wp5_parity.py` before considering
 `v16_compose` for live wiring.
