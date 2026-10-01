@@ -22,7 +22,8 @@ WP status table, the current baseline) stays here in full.
 - WP9: DONE `a4cf967` — music/SFX/sting, live-wired into v15_pipeline
 - WP10: DONE `6ef2cc0`+`98a3267` — scorecard/manifest + real end-to-end render proof (FAIL, honest — see below)
 - WP8: DONE `7a27899`+`b12c301` — image-provider chain reordered so a commercial_ok:true source (Cloudflare) runs first
-- WP5, WP11, WP12, WP13, WP14: pending, in that order (re-sequenced, see below)
+- WP11: DONE `7b911a1` — topic engine (clusters/ideation/dedupe/scoring/series planner/`data/topic_history.jsonl`)
+- WP5, WP12, WP13, WP14: pending, in that order (re-sequenced, see below) — **WP5 has uncommitted work already in the tree from an earlier session that hit a usage limit, needs its own run to review/test/commit, see Next**
 
 ## Owner decisions (binding, all still in force)
 1. **Brand (2026-09-28):** "Ink & Ember" + boxed keyword hook labels (t=0-1s) + dark-plate variant for space topics; no mascot; brand params config-driven, no literals in code.
@@ -81,8 +82,22 @@ typical topics — license gate can still legitimately HOLD in that case.
 No full render spent (proof was unit/fixture + 2 individual generations).
 Report `bench/ab/wp8.md`.
 
+### WP11 (2026-10-01, `7b911a1`)
+Topic engine (DESIGN §9): clusters/ideation/dedupe/scoring/series planner,
+`v16_topics.py` + `topic_ideate`/`topic_score` prompts+schemas, `data/
+topic_history.jsonl` seeded from the real channel CSV + 28 V15 stories (110
+rows). Tests: 18 new, dedupe fixtures from the real CSV + score
+reproducibility both directly proven. Live proof (2 real Claude calls,
+$0.149): 20 candidates → 0 duplicates of an existing upload, 4 rejected, 16
+ranked (history now 130 rows). illustrated_engine/tests 216/216; root
+tests/ 63/63 failing IDs identical to baseline (diffed). Report
+`bench/ab/wp11.md`. **OWNER FLAG:** found WP5 (`v16_compose.py`, Remotion
+project files, `test_wp5_compose.py`, `bench/ab/wp5_parity.py`,
+`requirements.txt` scikit-image) already uncommitted in the tree from an
+earlier session that hit a usage limit mid-WP5 — left untouched (out of
+this run's WP11-only scope), not evaluated or tested as part of this run.
+
 ## Next
-WP5 (one-composition Remotion render) is running. Scoped to prove itself
-via a frame-parity fixture test (SSIM>=0.98 on 20 sampled frames on `ice`),
-not a full render, to preserve the owner's last render-cap slot. Then
-WP11 → WP12 (2-video cap) → WP13 (2-topic cap) → WP14.
+WP5 needs its own run first: review/test/commit (or discard, owner's call)
+the uncommitted work already sitting in the tree before resuming the
+re-sequenced order. Then WP12 (2-video cap) → WP13 (2-topic cap) → WP14.
