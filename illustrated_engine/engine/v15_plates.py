@@ -336,9 +336,22 @@ A plate FAILS only for:
 Also answer, for EACH plate: could a viewer mistake it for a real photo or
 real footage of a real event or person (not an illustration)? Stylised
 illustration in the required style should almost always be false.
-Return ONLY JSON:
-{{"plates": [{{"n": 1, "shows": "...", "fail": null, "realistic": false}}]}}
-with "fail" one of null, "text", "wrong_subject", "broken"."""
+{anatomy_block}Return ONLY JSON:
+{{"plates": [{{"n": 1, "shows": "...", "fail": null, "realistic": false{anatomy_field}}}]}}
+with "fail" one of null, "text", "wrong_subject", "broken".{anatomy_note}"""
+
+ANATOMY_BLOCK = """Some plates name a specific real animal with required
+anatomy (listed below as "anatomy:"). For ONLY those plates also answer
+"anatomy_ok": does the plate get that animal's listed anatomy right (e.g. a
+Stegosaurus must show back plates and tail spikes, NOT a frill; a
+Tyrannosaurus must show two-fingered forelimbs, NOT three)? A plate with
+wrong anatomy for its named animal FAILS "bad_anatomy" even if the species
+is otherwise recognizable.
+{anatomy_items}
+"""
+ANATOMY_FIELD = ', "anatomy_ok": true'
+ANATOMY_NOTE = (' "bad_anatomy" is also a valid "fail" value, for the '
+                "anatomy-checked plates only.")
 
 
 def _main_subject(subject: str) -> str:
@@ -382,11 +395,25 @@ def plate_qa(items: list, style: str, sheet_path: Path) -> dict:
     fails = {i: "text" for i in ocr_hits}
     realistic = {i: None for i in range(len(items))}
     from engine.director import vision_ask
+    from engine.species import species_for
     contact_sheet([it["path"] for it in items], sheet_path)
     listing = "\n".join(f"#{i + 1}: {_main_subject(it['subject'])}"
                         for i, it in enumerate(items))
+    # B2 (VIS): anatomy-checked plate indices, for the judge's checklist and
+    # for interpreting its "anatomy_ok" answers afterwards.
+    species_hits = {i: species_for(it["subject"]) for i, it in enumerate(items)}
+    species_hits = {i: v for i, v in species_hits.items() if v}
+    anatomy_block = anatomy_field = anatomy_note = ""
+    if species_hits:
+        anatomy_items = "\n".join(
+            f"#{i + 1} anatomy: " + " / ".join(a for _, a in hits)
+            for i, hits in species_hits.items())
+        anatomy_block = ANATOMY_BLOCK.format(anatomy_items=anatomy_items)
+        anatomy_field, anatomy_note = ANATOMY_FIELD, ANATOMY_NOTE
     ans = vision_ask(sheet_path, QA_QUESTION.format(
-        style=style[:200], n=len(items), items=listing),
+        style=style[:200], n=len(items), items=listing,
+        anatomy_block=anatomy_block, anatomy_field=anatomy_field,
+        anatomy_note=anatomy_note),
         max_tokens=60 * len(items) + 200, stage="plate_qa")
     if not isinstance(ans, dict) or "plates" not in ans:
         return {"checked": False, "ocr_checked": ocr_checked, "fail": fails,
@@ -397,10 +424,13 @@ def plate_qa(items: list, style: str, sheet_path: Path) -> dict:
             n = int(f.get("n")) - 1
         except Exception:
             continue
-        if 0 <= n < len(items) and f.get("fail") in ("text", "wrong_subject",
-                                                     "broken"):
+        if 0 <= n < len(items) and f.get("fail") in (
+                "text", "wrong_subject", "broken", "bad_anatomy"):
             fails[n] = f["fail"]
         if 0 <= n < len(items) and isinstance(f.get("realistic"), bool):
             realistic[n] = f["realistic"]
+        if (0 <= n < len(items) and n in species_hits
+                and f.get("anatomy_ok") is False and n not in fails):
+            fails[n] = "bad_anatomy"
     return {"checked": True, "ocr_checked": ocr_checked, "fail": fails,
             "ocr_hits": ocr_hits, "realistic": realistic, "raw": ans}

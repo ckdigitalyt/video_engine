@@ -1,0 +1,53 @@
+# Species anatomy library (B2, VIS package). Anatomically-correct
+# descriptive fragments spliced into the image-generation prompt whenever a
+# shot's subject names one of these animals, and used as the vision judge's
+# anatomical-accuracy checklist (engine.v15_plates.plate_qa). Keyed by a
+# short id; `match` lists the subject-text substrings (lowercased) that
+# trigger it — add an entry here, never a literal description in code, when
+# a new recurring deep-time subject shows up in stories/ or
+# bench/quality/topics/.
+species:
+  stegosaurus:
+    match: ["stegosaurus"]
+    anatomy: "Stegosaurus anatomy: two parallel rows of alternating large
+      kite-shaped bony back plates running down the spine, four long sharp
+      tail spikes at the tail tip (the thagomizer), small narrow low-slung
+      head with no crest or frill, short forelegs with a tall arched back,
+      quadrupedal stance"
+  tyrannosaurus:
+    match: ["tyrannosaurus", "t-rex", "t. rex", "t rex"]
+    anatomy: "Tyrannosaurus rex anatomy: massive deep skull with large
+      banana-shaped serrated teeth, two small clawed fingers on each tiny
+      forelimb (never three), long thick muscular tail held off the ground
+      for balance, bipedal stance, huge heavily muscled hind legs"
+  triceratops:
+    match: ["triceratops"]
+    anatomy: "Triceratops anatomy: one short nose horn plus two long brow
+      horns above the eyes, a wide solid bony neck frill with a scalloped
+      edge, parrot-like beak, quadrupedal stance"
+  velociraptor:
+    match: ["velociraptor"]
+    anatomy: "Velociraptor anatomy: small feathered theropod, long stiff
+      counterbalancing tail, one large curved sickle-shaped killing claw
+      held raised off the ground on each hind foot, long low snout with
+      many small teeth"
+  archaeopteryx:
+    match: ["archaeopteryx"]
+    anatomy: "Archaeopteryx anatomy: crow-sized feathered theropod with
+      broad feathered wings, a long bony reptilian tail with feather vanes
+      down its length, jaws lined with small teeth, clawed fingers on each
+      wing"
+  sinosauropteryx:
+    match: ["sinosauropteryx"]
+    anatomy: "Sinosauropteryx anatomy: small fox-sized theropod covered in
+      a coat of short fuzzy proto-feathers (not a smooth reptile hide),
+      long slender banded tail, short forelimbs"
+  carnotaurus:
+    match: ["carnotaurus"]
+    anatomy: "Carnotaurus anatomy: short deep skull with a pair of thick
+      blunt horns above the eyes, extremely short vestigial forelimbs, long
+      deep tail, bipedal stance, bumpy armored skin"
+  woolly_mammoth:
+    match: ["woolly mammoth", "mammoth"]
+    anatomy: "Woolly mammoth anatomy: long shaggy brown fur coat, high
+      domed forehead, long curved tusks, small ears, humped shoulder"

@@ -225,10 +225,11 @@ def split_long_holds(tl: list, timing: dict, max_hold_s: float = MAX_HOLD_S,
 
 
 def _prompts_for(shot: dict, bible: dict) -> list:
+    from engine.species import augment_subject
     if shot["kind"] == "zoom_through":
-        return [image_prompt(bible, lv["subject"], "centered")
+        return [image_prompt(bible, augment_subject(lv["subject"]), "centered")
                 for lv in shot["levels"]]
-    return [image_prompt(bible, shot["subject"],
+    return [image_prompt(bible, augment_subject(shot["subject"]),
                          shot.get("composition", "centered"))]
 
 
@@ -321,6 +322,12 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
                                           if r.get("ok") and not r.get("cached"))
     qa = {"checked": False}
     plate_realistic_by_prompt: dict = {}   # DESIGN §11 disclosure (WP10)
+    # B2 (VIS): a plate QA fail (text/wrong_subject/broken/bad_anatomy, the
+    # last one new — see v15_plates.QA_QUESTION) gets up to MAX_PLATE_REGEN
+    # regeneration rounds, each through the NEXT model in the fallback chain
+    # (never the same model twice in a row), before it falls through and
+    # ships still flagged (qa_fail, caught by v15_gate's asset_tier check).
+    MAX_PLATE_REGEN = 3
     if plate_qa_on:
         items = [{"path": plates[p]["path"], "subject": p.split(". ")[1]
                   if ". " in p else p, "prompt": p}
@@ -331,44 +338,52 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
         for i, it in enumerate(items):
             plate_realistic_by_prompt[it["prompt"]] = (qa.get("realistic")
                                                         or {}).get(i)
-        if qa.get("fail"):
-            regen = [items[i]["prompt"] for i in qa["fail"]]
-            from engine.v15_plates import PROVIDER_ORDER
+        from engine.v15_plates import PROVIDER_ORDER
 
-            def _next_chain(p):  # a different MODEL, not just a new seed
-                used = plates[p].get("provider")
-                i = PROVIDER_ORDER.index(used) if used in PROVIDER_ORDER else -1
-                return list(PROVIDER_ORDER[i + 1:]) + list(PROVIDER_ORDER[:i + 1])
+        def _next_chain(p):  # a different MODEL, not just a new seed
+            used = plates[p].get("provider")
+            i = PROVIDER_ORDER.index(used) if used in PROVIDER_ORDER else -1
+            return list(PROVIDER_ORDER[i + 1:]) + list(PROVIDER_ORDER[:i + 1])
 
+        still = {items[i]["prompt"] for i in qa.get("fail") or {}}
+        regenerated_total, rounds = 0, 0
+        while still and rounds < MAX_PLATE_REGEN:
+            rounds += 1
+            regen = sorted(still)
             with ThreadPoolExecutor(max_workers=3) as ex:
-                redo = dict(ex.map(lambda p: _gen(p, 1, _next_chain(p)), regen))
+                redo = dict(ex.map(lambda p: _gen(p, rounds, _next_chain(p)),
+                                   regen))
             report["costs"]["image_calls"] += sum(
                 1 for r in redo.values() if r.get("ok") and not r.get("cached"))
             ok_redo = {p: r for p, r in redo.items() if r.get("ok")}
-            qa2 = plate_qa([{"path": r["path"], "subject": p.split(". ")[1]
-                             if ". " in p else p} for p, r in ok_redo.items()],
-                           bible.get("illustration_style", ""),
-                           work / "plate_sheet_regen.jpg") if ok_redo else {}
+            qa_round = plate_qa(
+                [{"path": r["path"], "subject": p.split(". ")[1]
+                  if ". " in p else p} for p, r in ok_redo.items()],
+                bible.get("illustration_style", ""),
+                work / f"plate_sheet_regen{rounds}.jpg") if ok_redo else {}
             report["costs"]["vision_calls"] += 1 if ok_redo else 0
-            still = set()
+            regenerated_total += len(regen)
+            next_still = set()
             for j, (p, r) in enumerate(ok_redo.items()):
-                if j in qa2.get("fail", {}):  # incl. OCR hits (no LLM needed)
-                    still.add(p)
                 plates[p] = r  # regenerated plate replaces the failed one
-                plate_realistic_by_prompt[p] = (qa2.get("realistic")
+                plate_realistic_by_prompt[p] = (qa_round.get("realistic")
                                                 or {}).get(j)
+                if j in (qa_round.get("fail") or {}):  # incl. OCR hits
+                    next_still.add(p)
             for p in regen:
                 if p not in ok_redo:
-                    still.add(p)
-            qa["regenerated"] = len(regen)
+                    next_still.add(p)
+            still = next_still
+            qa["regenerated"] = regenerated_total
+            qa["regen_rounds"] = rounds
             qa["still_failing"] = sorted(x[:100] for x in still)
-            qa["second_check"] = bool(qa2.get("checked"))
-            for p in still:
-                plates[p] = dict(plates[p], qa_fail=True)
+            qa["second_check"] = bool(qa_round.get("checked"))
+        for p in still:
+            plates[p] = dict(plates[p], qa_fail=True)
     report["plate_qa"] = {k: qa.get(k) for k in
                           ("checked", "ocr_checked", "fail", "ocr_hits",
-                           "regenerated", "still_failing", "second_check",
-                           "reason")}
+                           "regenerated", "regen_rounds", "still_failing",
+                           "second_check", "reason")}
     # final prompt -> path map, AFTER any regeneration replaced a path;
     # None (unknown/unanswered) is kept as None, never defaulted here —
     # engine.v16_manifest treats None conservatively (assume realistic).
