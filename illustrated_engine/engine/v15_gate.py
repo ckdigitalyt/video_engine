@@ -98,18 +98,28 @@ def check_caption_identity(overlays: list, story: dict, beat_windows: dict) -> d
         else:
             cue_seq[-1][2] = o["t1"]
     burned = [w for c in cue_seq for w in _norm_words(c[0])]
-    spoken = [w for b in story["beats"] for w in _norm_words(b["narration"])]
+    # B1 (VIS): captions show DIGITS, narration keeps spelled-out numbers —
+    # normalize the spoken side through the same merge the caption builder
+    # used, so a correct digit caption isn't flagged as a mismatch.
+    from engine.voice.text import numeralize_cue_words
+    spoken = []
+    for b in story["beats"]:
+        ws = [{"w": w, "t0": 0.0, "t1": 0.0} for w in str(b["narration"]).split()]
+        spoken += [w for u in numeralize_cue_words(ws) for w in _norm_words(u["w"])]
     if burned != spoken:
         i = next((k for k, (a, b) in enumerate(zip(burned, spoken)) if a != b),
                  min(len(burned), len(spoken)))
         fails.append(f"caption words != narration at word {i}: burned "
                      f"{burned[i:i + 5]} vs spoken {spoken[i:i + 5]} "
                      f"({len(burned)} vs {len(spoken)} words)")
-    # each cue inside the beat that speaks it
+    # each cue inside the beat that speaks it (word indices counted on the
+    # SAME numeralized tally as `burned`/`spoken`, so a merged digit caption
+    # doesn't drift the beat boundaries it's compared against)
     wi = 0
     bounds = []
     for b in story["beats"]:
-        n = len(_norm_words(b["narration"]))
+        ws = [{"w": w, "t0": 0.0, "t1": 0.0} for w in str(b["narration"]).split()]
+        n = sum(len(_norm_words(u["w"])) for u in numeralize_cue_words(ws))
         bounds.append((wi, wi + n, b["beat_id"]))
         wi += n
     wi = 0
@@ -176,6 +186,61 @@ def check_caption_safe(overlays: list, top: float) -> dict:
         seen[o["png"]] = box
         fails += [f"caption {o.get('text')!r} {m}" for m in _box_problems(box)]
     return {"ok": not fails, "fails": fails[:10], "captions": len(seen)}
+
+
+# Function words that must never END a caption cue — the same closed set
+# v15_pipeline.caption_cues' _binds_forward uses to keep one off a cue's
+# trailing edge (it grammatically attaches to whatever word comes next,
+# e.g. "...STAYS A" / "RUMOR YOU CAN"). One at a cue's LEADING edge is not
+# a defect: it attaches forward to the rest of the SAME cue ("The time.",
+# "In the late Jurassic." are both complete phrases).
+_CAPTION_FUNCTION_WORDS = {"a", "an", "the", "of", "to", "in", "on", "at", "by",
+                           "for", "and", "but", "or", "so", "your", "its",
+                           "their", "his", "her", "you", "we", "it", "is",
+                           "are", "was", "can", "that", "this", "with",
+                           "from", "into", "than", "as"}
+# Scale words are kept as the on-screen UNIT next to a numeralized digit
+# ("155-145 million") — only bare spelled-out ones/tens/hundred are a fail.
+_SPELLED_NUMBER_WORDS_EXCL_SCALE = {"thousand", "million", "billion"}
+
+
+def check_caption_numerals(overlays: list) -> dict:
+    """B1 (VIS): on-screen captions must show DIGITS ("155-145 million"),
+    never a spelled-out number word — the narration keeps those (see
+    check_caption_identity's numeralized-spoken comparison). "million" etc.
+    stay as the digit's unit label, per the spec's own example captions."""
+    from engine.voice.text import NUMBER_WORDS
+    spelled = NUMBER_WORDS - _SPELLED_NUMBER_WORDS_EXCL_SCALE
+    fails, seen = [], set()
+    for o in overlays or []:
+        text = o.get("text")
+        if text is None or text in seen:
+            continue
+        seen.add(text)
+        hit = [w for w in _norm_words(text) if w in spelled]
+        if hit:
+            fails.append(f"caption {text!r} has a spelled-out number {hit}")
+    return {"ok": not fails, "fails": fails[:10], "captions": len(seen)}
+
+
+def check_caption_clause_breaks(overlays: list) -> dict:
+    """B1 (VIS): a cue may never END on a function word — it would strand a
+    word that grammatically attaches to whatever comes next in a DIFFERENT
+    cue, i.e. the cue broke a clause mid-phrase instead of at a natural
+    boundary."""
+    fails, seen, order = [], set(), []
+    for o in sorted(overlays or [], key=lambda x: x["t0"]):
+        text = o.get("text")
+        if text is None or text in seen:
+            continue
+        seen.add(text)
+        order.append(text)
+    for text in order:
+        ws = _norm_words(text)
+        if ws and ws[-1] in _CAPTION_FUNCTION_WORDS:
+            fails.append(f"cue {text!r} ends on a function word "
+                        "(mid-clause break)")
+    return {"ok": not fails, "fails": fails[:10], "cues": len(order)}
 
 
 def _plate_paths(specs: dict) -> list:
@@ -534,6 +599,10 @@ def run_gate(work: Path, story: dict, meta: dict, specs: dict, timing: dict,
         "text_bounds": check_text_bounds(specs),
         "caption_safe": check_caption_safe(
             arep.get("caption_overlays") or [], _caption_top()),
+        "caption_numerals": check_caption_numerals(
+            arep.get("caption_overlays") or []),
+        "caption_clause_breaks": check_caption_clause_breaks(
+            arep.get("caption_overlays") or []),
         "plates": check_plates(specs, plate_qa),
         "voice": check_voice(voice),
         "info_floor": check_info_floor(

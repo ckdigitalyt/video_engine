@@ -206,11 +206,19 @@ def _chunk_font(chunk) -> tuple:
     WP6 brand caption style: the caption font is the brand's `caption` role
     font (ArchivoBlack, DESIGN §7.1), not the per-story bible typography."""
     from engine.brand import font_path, load_brand
+    from engine.v15_gate import RAIL_X
     cap_font = font_path(load_brand(), "caption").name
     per_line = chunk.get("lines") or [chunk["words"]]
     words = [w.upper() for line in per_line for w in line]
     n_lines = min(max(1, len(per_line)), MAX_LINES)
     size = BASE_SIZE if n_lines == 1 else 56  # 2 lines must fit KIN_CAP_H
+    # B1 (VIS): a centered caption box must clear the right UI rail
+    # (v15_gate's RAIL_X/RAIL_Y0) — every caption sits well below RAIL_Y0,
+    # so the binding bound is always the box's right edge, not just the
+    # frame's own margins. BOX_PAD mirrors chunk_png's own pad_x below.
+    BOX_PAD = 26
+    max_w = min(FRAME_W - 2 * MARGIN_X,
+               2 * (RAIL_X - 6 - FRAME_W / 2.0) - 2 * BOX_PAD)
     for _ in range(10):
         f = _font(cap_font, size)
         probe = Image.new("RGBA", (8, 8))
@@ -222,7 +230,7 @@ def _chunk_font(chunk) -> tuple:
                           + d.textlength(" ", font=f) * (len(ws) - 1))
         width = max(widths)
         asc, desc = f.getmetrics()
-        if (width <= FRAME_W - 2 * MARGIN_X
+        if (width <= max_w
                 and n_lines * (asc + desc) <= KIN_CAP_H - 28) or size <= 30:
             return f, per_line, width
         size -= 4

@@ -20,9 +20,9 @@ BIBLE = {"typography": {"display": "BebasNeue-Regular.ttf"},
 STORY = {"story_id": "t", "beats": [
     {"beat_id": "B1", "narration": "One two three four five six."},
     {"beat_id": "B2", "narration": "Seven eight nine ten."}]}
-CUES = {"B1": [{"t0": 0.2, "t1": 1.2, "text": "One two three"},
-               {"t0": 1.3, "t1": 2.4, "text": "four five six."}],
-        "B2": [{"t0": 0.2, "t1": 1.5, "text": "Seven eight nine ten."}]}
+CUES = {"B1": [{"t0": 0.2, "t1": 1.2, "text": "1 2 3"},
+               {"t0": 1.3, "t1": 2.4, "text": "4 5 6."}],
+        "B2": [{"t0": 0.2, "t1": 1.5, "text": "7 8 9 10."}]}
 WIN = {"B1": (0.0, 3.0), "B2": (3.0, 5.0)}
 
 

@@ -77,9 +77,14 @@ def _binds_forward(word: str) -> bool:
 
 def caption_cues(timing: dict, lead: float) -> list:
     """Phrase cues (<= 4 words, break after punctuation or a pause) on the
-    measured word times; per-word starts drive the active-word highlight."""
+    measured word times; per-word starts drive the active-word highlight.
+    B1 (VIS): on-screen text shows DIGITS ("155-145 million years ago")
+    while the narration/TTS text keeps the spelled-out words a TTS model
+    reads reliably — captions are built from a numeralized copy of the
+    measured word timing, never from the narration string itself."""
+    from engine.voice.text import numeralize_cue_words
     words = []
-    for w in timing["words"]:
+    for w in numeralize_cue_words(timing["words"]):
         if _PUNCT_ONLY.match(w["w"]) and words:
             words[-1] = dict(words[-1], w=words[-1]["w"] + " " + w["w"],
                              t1=w["t1"])

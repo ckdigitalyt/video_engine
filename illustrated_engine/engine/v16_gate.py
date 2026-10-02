@@ -214,7 +214,8 @@ def _score_pacing(meta: dict, specs: dict) -> float:
 
 
 def _score_captions(checks: dict) -> float:
-    names = ("caption_identity", "text_bounds", "caption_safe")
+    names = ("caption_identity", "text_bounds", "caption_safe",
+             "caption_numerals", "caption_clause_breaks")
     present = [checks[n]["ok"] for n in names if n in checks]
     if not present:
         return 50.0
