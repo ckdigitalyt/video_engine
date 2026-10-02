@@ -28,6 +28,7 @@ WP status table, the current baseline) stays here in full.
 - WP13, WP14: DEFERRED (owner decision #11, 2026-10-02) — replaced by the Q1-Q5+PR queue below
 - Q1 (voice WER): DONE (2026-10-02) — see run summary below.
 - Q2-Q5, PR: PAUSED (owner decision #12, 2026-10-02) — replaced by the VIS package below, pending owner verdict on the first real sample.
+- VIS (B1-B5): DONE (2026-10-02) — see run summary below. Q2-Q5/PR, part C (new sample) still pending.
 
 ## Owner decisions (binding, all still in force)
 1. **Brand (2026-09-28):** "Ink & Ember" + boxed keyword hook labels (t=0-1s) + dark-plate variant for space topics; no mascot; brand params config-driven, no literals in code.
@@ -156,6 +157,27 @@ number. Measured on real cached beat audio (no new renders): `tunguska_1908`/
 227/227), root `tests/` 63/63 failing IDs identical to baseline (diffed via
 clean worktree). Report `bench/ab/q1.md` (also flags residual ASR-noise gaps
 on 2 other scripts, out of this package's 3-script scope, not fixed).
+
+### VIS (2026-10-02, B1-B5, `3e6b98e`+`92b385a`+`809a244`+`af7411a`+`9cf7190`)
+Fixed every failure in the real `t_humans_closer_trex` sample's gate report
+without spending a new render. B1 captions: digits on screen
+("155-145 million") via `numeralize_cue_words`, narration keeps spelled-out
+numbers; 3 new gate checks (numerals/clause-breaks/safe-zone); fixed the
+real root cause of the rail overlap (caption box width wasn't capped
+against the rail, only the frame margin). B2 species: `species.yaml`
+anatomy library + prompt injection + an `anatomy_ok` judge question
+(extends the existing plate_qa call, not a new one) + regen loop widened
+1->3 rounds. B3: fixed the real cause of the judge's 5 "no_change" frames —
+punch-in splits were reusing the identical cached plate; now request a
+distinct tight-crop image. B4: `LEAD_S` 0.30->0.18 (hook gate bound is
+0.25s; Q2 never ran — checked git log, confirmed). B5: real LLM call
+(`v16_metadata.build_metadata`) into pipeline_report.json + manifest.json.
+Tests: illustrated_engine 227/227 (baseline), root `tests/` 63/63 failing
+IDs identical (1 unrelated pre-existing untracked-dir difference, not from
+this change). Report `bench/ab/vis.md` (residuals honestly flagged: no new
+full render to prove B2's regen loop or B3's shot-count target live; B4's
+hook-both-subjects prompt change unproven on a story that wouldn't already
+do it by luck).
 
 ## Next
 Q2 (hook timing) → Q3 (caption safe zone) → Q4 (plates) → Q5 (re-render
