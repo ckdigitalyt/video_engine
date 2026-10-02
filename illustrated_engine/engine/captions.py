@@ -217,9 +217,10 @@ def _chunk_font(chunk) -> tuple:
     # so the binding bound is always the box's right edge, not just the
     # frame's own margins. BOX_PAD mirrors chunk_png's own pad_x below.
     BOX_PAD = 26
+    RAIL_MARGIN = 20  # antialiased glyph ink can overshoot textlength() a bit
     max_w = min(FRAME_W - 2 * MARGIN_X,
-               2 * (RAIL_X - 6 - FRAME_W / 2.0) - 2 * BOX_PAD)
-    for _ in range(10):
+               2 * (RAIL_X - RAIL_MARGIN - FRAME_W / 2.0) - 2 * BOX_PAD)
+    for _ in range(13):
         f = _font(cap_font, size)
         probe = Image.new("RGBA", (8, 8))
         d = ImageDraw.Draw(probe)
@@ -231,7 +232,7 @@ def _chunk_font(chunk) -> tuple:
         width = max(widths)
         asc, desc = f.getmetrics()
         if (width <= max_w
-                and n_lines * (asc + desc) <= KIN_CAP_H - 28) or size <= 30:
+                and n_lines * (asc + desc) <= KIN_CAP_H - 28) or size <= 20:
             return f, per_line, width
         size -= 4
     return f, per_line, width
