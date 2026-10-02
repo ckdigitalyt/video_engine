@@ -22,9 +22,14 @@ _SPELLING = {
     "realise": "realize", "recognise": "recognize", "organise": "organize",
     "programme": "program", "tyre": "tire", "whilst": "while",
     "ageing": "aging", "sulphur": "sulfur", "aluminium": "aluminum",
+    "travelling": "traveling", "travelled": "traveled",
 }
 _SENT_SPLIT = re.compile(r"(?<=[.!?])[\"'”’)]*\s+(?=[\"'“‘(]*[A-Z0-9])")
-_NUM = re.compile(r"\d[\d,]*(?:\.\d+)?")
+# trailing ordinal suffix (30th, 1st, 2nd, 3rd) is dropped, not spelled out as
+# a separate "th" token: faster-whisper itself writes ordinals in speech back
+# out as bare digits ("30th" heard -> transcribed "30,"), so the ordinal
+# marker is never a token either side can actually match on.
+_NUM = re.compile(r"\d[\d,]*(?:\.\d+)?(?:st|nd|rd|th)?\b", re.I)
 
 
 def int_to_words(n: int) -> str:
@@ -44,7 +49,7 @@ def int_to_words(n: int) -> str:
 
 
 def _num_words(m: re.Match) -> str:
-    s = m.group(0).replace(",", "")
+    s = re.sub(r"(?i:st|nd|rd|th)$", "", m.group(0)).replace(",", "")
     whole, _, frac = s.partition(".")
     out = int_to_words(int(whole))
     if frac:

@@ -23,3 +23,6 @@ theropod:        {respell: "theer-uh-pod", heard_as: ["therapod"]}
 betelgeuse:      {respell: "beetel-jooss", heard_as: ["beetlejuice", "beetle juice"]}
 olbers:          {respell: "ollberz", heard_as: ["albers"]}
 kulik:           {phonemes: "kˈuːlɪk", respell: "koo-lik", heard_as: ["koolik"]}   # WP4: Leonid Kulik (Tunguska); ASR-checked only, not listened to
+airburst:        {heard_as: ["air burst"]}   # Q1: ASR writes this compound as two common words even on a correct read
+barographs:      {heard_as: ["barrographs"]}   # Q1: faster-whisper's plausible spelling of a correct read (Tunguska)
+meltwater:       {heard_as: ["melt water"]}   # Q1: ASR writes this compound as two common words even on a correct read (ice_slippery)

@@ -26,7 +26,7 @@ WP status table, the current baseline) stays here in full.
 - WP5: DONE `520d9df` — one-composition Remotion render code landed and tested; **real parity gate FAILed honestly** (SSIM 0.93 vs 0.98 required, root cause found and documented), Python caption/assembly pass stays default, `v16_compose` has zero live-pipeline callers
 - WP12: DONE `bd9482f` — batch runner (preflight, topic selection, quota pause/resume, packaging); **real 2-video render acceptance deliberately deferred** (see below), machinery proven with fixtures + real-but-cheap pieces instead
 - WP13, WP14: DEFERRED (owner decision #11, 2026-10-02) — replaced by the Q1-Q5+PR queue below
-- Q1 (voice WER) → Q2 (hook timing) → Q3 (caption safe zone) → Q4 (plates) → Q5 (re-render Tunguska) → PR (daily_run.sh + cron): pending, in that order
+- Q1 (voice WER): DONE (2026-10-02) — see run summary below. Q2 (hook timing) → Q3 (caption safe zone) → Q4 (plates) → Q5 (re-render Tunguska) → PR (daily_run.sh + cron): pending, in that order
 - WP13, WP14: pending, in that order
 
 ## Owner decisions (binding, all still in force)
@@ -137,9 +137,28 @@ live preflight, one real `select_topics(2)` call ($0.061), real `ffmpeg`
 packaging against an existing `final.mp4`. Tests: 11 new, 227/227 full
 suite, root 63/63 unchanged. Report `bench/ab/wp12.md`.
 
+### Q1 (2026-10-02, voice WER)
+Audited the metric before touching the pipeline (owner's step 1): found
+`qa.asr_model` was `base.en` (confirmed too weak — hallucinated a name +
+inserted a phantom word on a real beat) and two real tokenisation bugs
+double-penalizing *correct* transcripts (thousands-grouped numbers split by
+ASR into fragments that mis-normalise to "zero"; ordinal suffixes like
+"30th" expecting a literal unspoken "th" token). Fixed: `asr_model` →
+`small.en`, `_merge_number_fragments()` in `align.py`, ordinal-suffix
+stripping in `text.py`'s `_NUM` regex, `travelling`/`travelled` added to the
+spelling table, 3 lexicon `heard_as` entries (`airburst`, `barographs`,
+`meltwater`) for ASR-plausible-spelling misses on real audio. No Kokoro/
+pronunciation/pacing changes — the metric itself accounted for WP10's 0.0542
+number. Measured on real cached beat audio (no new renders): `tunguska_1908`/
+`venus_day`/`fever_thermostat` all 0.0 WER (was 0.0542 FAIL on tunguska).
+`bench/checks/Q1.sh` exits 0. Tests: illustrated_engine 227/227 (baseline
+227/227), root `tests/` 63/63 failing IDs identical to baseline (diffed via
+clean worktree). Report `bench/ab/q1.md` (also flags residual ASR-noise gaps
+on 2 other scripts, out of this package's 3-script scope, not fixed).
+
 ## Next
-WP13 (2-topic cap) → WP14. The 1 remaining render-cap slot is still
-available — recommend reconciling `LEAD_S` vs. the hook-timing gate bound
-before spending it (see WP12's report). If WP5's caption-grouping bug is
-ever picked up, re-run `bench/ab/wp5_parity.py` before considering
-`v16_compose` for live wiring.
+Q2 (hook timing) → Q3 (caption safe zone) → Q4 (plates) → Q5 (re-render
+Tunguska) → PR. WP13 (2-topic cap) → WP14 still pending behind the Q-queue
+per owner decision #11. If WP5's caption-grouping bug is ever picked up,
+re-run `bench/ab/wp5_parity.py` before considering `v16_compose` for live
+wiring.

@@ -26,13 +26,45 @@ def _model(name: str = "base.en"):
     return _MODELS[name]
 
 
+_NUM_HEAD = re.compile(r"^\d{1,3}$")
+_NUM_GROUP = re.compile(r"^,\d{3}$")
+_NUM_FRAC = re.compile(r"^\.\d+$")
+
+
+def _merge_number_fragments(words: list) -> list:
+    """faster-whisper sometimes writes a thousands-grouped number as separate
+    word tokens ("2" then ",000") instead of one "2,000" token; normalising
+    each fragment on its own turns the second one into a bogus standalone
+    "zero"/"thousand" instead of completing the first number. Glue the run
+    back into one token (and span its timestamps) before anything else sees
+    it, both sides of the round trip are a single formatted numeral."""
+    out, i = [], 0
+    while i < len(words):
+        w = words[i]
+        if _NUM_HEAD.match(w["w"]):
+            j = i + 1
+            while j < len(words) and _NUM_GROUP.match(words[j]["w"]):
+                j += 1
+            if j < len(words) and _NUM_FRAC.match(words[j]["w"]):
+                j += 1
+            if j > i + 1:
+                out.append({"w": "".join(x["w"] for x in words[i:j]),
+                            "t0": w["t0"], "t1": words[j - 1]["t1"]})
+                i = j
+                continue
+        out.append(w)
+        i += 1
+    return out
+
+
 def transcribe(wav, model: str = "base.en") -> list:
     """[{w, t0, t1}] as heard (no script knowledge)."""
     segs, _ = _model(model).transcribe(
         str(wav), language="en", word_timestamps=True, beam_size=5,
         condition_on_previous_text=False)
-    return [{"w": w.word.strip(), "t0": float(w.start), "t1": float(w.end)}
-            for s in segs for w in (s.words or []) if w.word.strip()]
+    words = [{"w": w.word.strip(), "t0": float(w.start), "t1": float(w.end)}
+             for s in segs for w in (s.words or []) if w.word.strip()]
+    return _merge_number_fragments(words)
 
 
 def align_to_script(script: str, asr: list) -> tuple:

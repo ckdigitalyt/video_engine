@@ -37,4 +37,9 @@ role_by_function: {HOOK: hook, PAYOFF: payoff}
 
 qa:
   max_wer: 0.03
-  asr_model: base.en
+  # small.en, not base.en: a real Tunguska beat round-trip showed base.en
+  # hallucinating a rare proper noun + inserting a trailing word that never
+  # happened ("Kulik's" -> "coolix ... raider") while small.en transcribed it
+  # clean (bench/ab/q1.md) -- base.en's own error rate was large enough to
+  # fail a correct narration.
+  asr_model: small.en
