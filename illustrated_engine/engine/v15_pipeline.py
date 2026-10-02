@@ -596,11 +596,19 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
     # explainable manifest) and cross-checked against the render asset log.
     from engine.v15_gate import _plate_paths
     plate_paths_used = _plate_paths(specs)
+    # B5 (VIS): title/description/tags via a real LLM call (cached by story
+    # content; falls through to a deterministic story-fields metadata floor
+    # on an adapter outage, same convention as the plan/plate-QA calls above).
+    from engine.v16_metadata import build_metadata
+    metadata = build_metadata(story, use_llm=use_llm)
+    report["costs"]["llm_calls"] += metadata.get("llm_calls", 0)
+    report["metadata"] = metadata
     manifest = build_manifest(
         video_id=sid, brand=audio_brand, voice=report["voice"], plates=plates,
         plate_realistic=report.get("plate_realistic"),
         audio_rows=report["audio_v16"].get("manifest_rows") or [],
-        llm_calls=llm_calls_since(t_start, time.time()), verdict=gate["verdict"])
+        llm_calls=llm_calls_since(t_start, time.time()), verdict=gate["verdict"],
+        metadata=metadata)
     manifest["completeness"] = check_manifest_complete(
         manifest, plate_paths=plate_paths_used, voice_wav=work / "voice.wav",
         audio_rows=report["audio_v16"].get("manifest_rows") or [])

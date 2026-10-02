@@ -192,7 +192,8 @@ def llm_calls_since(t_start: float, t_end: float | None = None,
 
 def build_manifest(*, video_id: str, brand: dict, voice: dict | None,
                    plates: dict, plate_realistic: dict | None,
-                   audio_rows: list, llm_calls: dict, verdict: str) -> dict:
+                   audio_rows: list, llm_calls: dict, verdict: str,
+                   metadata: dict | None = None) -> dict:
     from engine.brand import cube_path, cube_sha256
     plate_rows = plate_asset_rows(plates, plate_realistic)
     assets = plate_rows + list(audio_rows or []) + font_asset_rows(brand)
@@ -223,6 +224,8 @@ def build_manifest(*, video_id: str, brand: dict, voice: dict | None,
         "llm_calls": llm_calls,
         "disclosure": disclosure,
         "attribution_block": "\n".join(attribution),
+        # B5 (VIS): title/description/tags, engine.v16_metadata.build_metadata
+        "metadata": metadata or {},
     }
 
 
