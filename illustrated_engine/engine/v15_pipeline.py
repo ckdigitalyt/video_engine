@@ -154,7 +154,7 @@ def shot_timeline(beat: dict, bplan: dict, timing: dict, tts_s: float) -> list:
     return out
 
 
-MAX_HOLD_S = 4.4  # gate allows 4.5 s between visual changes
+MAX_HOLD_S = 3.0  # B3 (VIS): <=3s per shot (the gate itself still allows 4.5s)
 
 
 def _split_one(s: dict, wt: list, bt: list, max_hold_s: float,
@@ -180,7 +180,15 @@ def _split_one(s: dict, wt: list, bt: list, max_hold_s: float,
         return None
     wi = min(cands, key=lambda i: abs(bt[i] - mid))
     first = {k: v for k, v in sh.items()}
-    second = {"kind": "plate", "subject": sh["subject"],
+    # B3 (VIS): the split-off shot must be a GENUINELY different image (the
+    # deterministic seed is a hash of this subject text) — a bare copy of
+    # `subject` here reused the exact same cached plate under a new camera
+    # move, which is what the vision judge's "no_change" frame flags were
+    # catching (bench/ab/vis.md). A tight-crop framing of the same subject
+    # is still the right follow-on shot, just backed by its own plate.
+    second = {"kind": "plate",
+              "subject": sh["subject"].rstrip(". ")
+                        + ", tight close-up detail crop",
               "composition": sh.get("composition", "centered"),
               "camera": "punch_in", "start_word": wi, "derived": "punch_in"}
     for k in ("number", "label"):
