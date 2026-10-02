@@ -1,0 +1,7 @@
+# publish.yaml — upload gating, separate from pipeline/render config.
+# Owner decision (2026-10-02): auto-upload is on hold; the owner uploads to
+# YouTube manually. This flag turns the upload STEP off without touching
+# the uploader code or OAuth setup (tools/youtube_upload.py, credentials
+# untouched) - any script that would call it must check this first.
+upload:
+  enabled: false

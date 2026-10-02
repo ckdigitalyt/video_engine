@@ -98,7 +98,10 @@ fi
 case "$STATUS" in
   PUBLISH_READY)
     echo "✅ PUBLISH_READY"
-    if [[ "$UPLOAD" == "yes" && -n "$VIDEO" ]]; then
+    PUBLISH_ENABLED=$(python3 -c "import yaml; print(yaml.safe_load(open('configs/publish.yaml')).get('upload',{}).get('enabled', False))" 2>/dev/null || echo False)
+    if [[ "$UPLOAD" == "yes" && "$PUBLISH_ENABLED" != "True" ]]; then
+      echo "  upload requested but configs/publish.yaml upload.enabled=false (owner decision 2026-10-02: manual upload only) - skipping"
+    elif [[ "$UPLOAD" == "yes" && -n "$VIDEO" ]]; then
       echo "  uploading (unlisted): $VIDEO"
       ./venv/bin/python tools/youtube_upload.py "$VIDEO" --title "$TOPIC" || {
         echo "  !! upload failed (non-fatal for pipeline)" >&2; }
