@@ -50,7 +50,10 @@ from engine.v15_shots import compile_shot  # noqa: E402
 from engine.v15_style import image_prompt, load_style  # noqa: E402
 from engine.v15_timing import beat_timing  # noqa: E402
 
-LEAD_S = 0.30      # silence before a beat's narration (breath + first frame)
+LEAD_S = 0.18      # silence before a beat's narration (breath + first frame)
+# B4 (VIS): v16_gate.HOOK_MAX_FIRST_WORD_S=0.25 bounds LEAD_S + the first
+# measured word's t0 (typically 0.01-0.05s) — 0.30 alone already missed it
+# (WP10/real sample: first word at 0.31-0.32s); 0.18 leaves margin.
 TAIL_S = 0.55      # hold after the narration ends
 CUT_EARLY_S = 0.12  # cut slightly BEFORE the word that starts a shot
 MIN_SHOT_S = 1.4

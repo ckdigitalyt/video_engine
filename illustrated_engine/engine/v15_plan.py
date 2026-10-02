@@ -119,7 +119,11 @@ Field rules:
  word fields: index of the narration word where that element should appear.
 
 The FIRST beat's first shot must be a striking "plate" with a headline that
-poses the question. The last beat should resolve it with a headline.
+poses the question. If that beat's narration contrasts or compares two or
+more named things, the hook shot's subject must show ALL of them together
+in frame 0 (not just one) — the contradiction IS the hook. The last beat
+should resolve it with a headline that echoes the hook's own wording or
+imagery (the viewer should recognize the hook again, now resolved).
 
 Beats:
 {chr(10).join(beats_txt)}
