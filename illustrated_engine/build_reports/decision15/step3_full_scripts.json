@@ -1,0 +1,350 @@
+[
+ {
+  "topic": "Mount Everest Was Once Buried Under an Ancient Ocean Floor",
+  "status": "scored",
+  "mean": 3.125,
+  "min": 2,
+  "critic_scores": {
+   "hook_strength": 4,
+   "curiosity_gap": 4,
+   "escalation": 2,
+   "payoff_clarity": 3,
+   "loop_coherence": 4,
+   "human_voice": 3,
+   "emotional_charge": 2,
+   "one_idea_only": 3
+  },
+  "critique": "Escalation stalls in sentences 2-3, which read like a textbook. Cut sentence 3 because the 2020 survey has nothing to do with the main idea, and merge sentence 2 into sentence 4 so the \"counted from the sea\" twist comes in sentence 2 or 3. Emotional charge is flat because sentences 5-7 only state facts. Make the viewer feel the trek of nearly 700 km from the Bay of Bengal: show the shift from tropical shore to death zone, the weeks on foot and the full 8,800+ metres climbed, so that sentence 7 lands as awe rather than trivia. The reveal comes in sentence 7, which leaves sentences 8-9 as afterthought. Hold back the team's name or the 'only once' until later, and make sentence 8 the hardest line in the script: everyone else started thousands of metres up. Sentence 9 already sets up a loop back into sentence 1, so keep it, but cut the throwaway \"next time someone says\" phrasing so it reads less like a clich\u00e9 before the replay.",
+  "script_text": "Only one team has ever truly climbed all of Everest. Everest is the highest mountain on Earth above sea level. In 2020, a joint Nepalese and Chinese survey measured it again. But that height is counted from the sea. And the closest sea, the Bay of Bengal, is almost seven hundred kilometres from the summit. Climbing every one of those metres means starting at the shore. That's been done only once, by Tim Macartney-Snape's team in 1990. Every other climber who's reached the top skipped part of the mountain. So next time someone says they climbed Everest, remember this:",
+  "sentences": [
+   {
+    "text": "Only one team has ever truly climbed all of Everest.",
+    "role": "hook",
+    "fact_ids": [
+     "f_sea_level_climb"
+    ],
+    "on_screen": []
+   },
+   {
+    "text": "Everest is the highest mountain on Earth above sea level.",
+    "role": "normal",
+    "fact_ids": [
+     "f_highest_mountain"
+    ],
+    "on_screen": [
+     "Highest on Earth"
+    ]
+   },
+   {
+    "text": "In 2020, a joint Nepalese and Chinese survey measured it again.",
+    "role": "normal",
+    "fact_ids": [
+     "f_height_measured_2020"
+    ],
+    "on_screen": []
+   },
+   {
+    "text": "But that height is counted from the sea.",
+    "role": "normal",
+    "fact_ids": [
+     "f_highest_mountain"
+    ],
+    "on_screen": []
+   },
+   {
+    "text": "And the closest sea, the Bay of Bengal, is almost seven hundred kilometres from the summit.",
+    "role": "normal",
+    "fact_ids": [
+     "f_sea_distance"
+    ],
+    "on_screen": [
+     "Bay of Bengal"
+    ]
+   },
+   {
+    "text": "Climbing every one of those metres means starting at the shore.",
+    "role": "normal",
+    "fact_ids": [
+     "f_sea_level_climb",
+     "f_sea_distance"
+    ],
+    "on_screen": []
+   },
+   {
+    "text": "That's been done only once, by Tim Macartney-Snape's team in 1990.",
+    "role": "normal",
+    "fact_ids": [
+     "f_sea_level_climb"
+    ],
+    "on_screen": [
+     "Macartney-Snape, 1990"
+    ]
+   },
+   {
+    "text": "Every other climber who's reached the top skipped part of the mountain.",
+    "role": "payoff",
+    "fact_ids": [
+     "f_sea_level_climb"
+    ],
+    "on_screen": []
+   },
+   {
+    "text": "So next time someone says they climbed Everest, remember this:",
+    "role": "payoff",
+    "fact_ids": [
+     "f_sea_level_climb"
+    ],
+    "on_screen": []
+   }
+  ],
+  "hook_headline": "Only One Team Climbed Everest"
+ },
+ {
+  "topic": "Earth's Core Spins Faster Than the Surface Above It",
+  "status": "scored",
+  "mean": 2.75,
+  "min": 2,
+  "critic_scores": {
+   "hook_strength": 3,
+   "curiosity_gap": 3,
+   "escalation": 2,
+   "payoff_clarity": 2,
+   "loop_coherence": 4,
+   "human_voice": 3,
+   "emotional_charge": 2,
+   "one_idea_only": 3
+  },
+  "critique": "Escalation peaks at the record short day in sentences 6-7, then sentences 9-10 drift into unrelated core trivia: the Sun-surface temperature and the deforming inner core. Cut them, or tie them directly to day length, so the stakes keep rising up to the reveal. Sentence 8 gives the answer away too early, and in a hedged, textbook tone (\"Part of the reason is thought to be the complex churning\"). Hold the core mechanism back and replace sentence 8 with a sharper, spoken image of molten metal pushing on the planet's spin. Sentence 11 doesn't resolve anything by itself because it relies entirely on the loop. Sharpen it into one clear setup line that lands on sentence 1 as the answer. Sentence 1 is also weak: \"may be tweaking\" is hedged and flat. Lead with a vivid, concrete claim, and replace the clich\u00e9s \"flipped the script\" (6) and \"incredibly fast\" (2) with a specific number or a felt image to add some awe.",
+  "script_text": "Earth's molten core may be tweaking the length of your day. Right now, the ground at the equator is spinning you incredibly fast. That spin feels perfectly steady. It isn't. A modern day runs about one point seven milliseconds longer than a century ago. But on June 29, 2022, Earth flipped the script. It finished one turn one point five nine milliseconds under twenty-four hours, a record short day. Part of the reason is thought to be the complex churning of molten metal deep below. Beneath that sits a solid inner core, roughly as hot as the Sun's surface. And it may not be rigid at all, but slowly deforming. So your twenty-four hours aren't fixed, and here's what's partly setting them:",
+  "sentences": [
+   {
+    "text": "Earth's molten core may be tweaking the length of your day.",
+    "role": "hook",
+    "fact_ids": [
+     "f_rotation_speed_cause"
+    ],
+    "on_screen": []
+   },
+   {
+    "text": "Right now, the ground at the equator is spinning you incredibly fast.",
+    "role": "normal",
+    "fact_ids": [
+     "f_equatorial_speed"
+    ],
+    "on_screen": []
+   },
+   {
+    "text": "That spin feels perfectly steady.",
+    "role": "normal",
+    "fact_ids": [
+     "f_equatorial_speed"
+    ],
+    "on_screen": []
+   },
+   {
+    "text": "It isn't.",
+    "role": "normal",
+    "fact_ids": [
+     "f_day_length_increase"
+    ],
+    "on_screen": []
+   },
+   {
+    "text": "A modern day runs about one point seven milliseconds longer than a century ago.",
+    "role": "normal",
+    "fact_ids": [
+     "f_day_length_increase"
+    ],
+    "on_screen": [
+     "Days getting longer"
+    ]
+   },
+   {
+    "text": "But on June 29, 2022, Earth flipped the script.",
+    "role": "normal",
+    "fact_ids": [
+     "f_2022_shortest_day"
+    ],
+    "on_screen": []
+   },
+   {
+    "text": "It finished one turn one point five nine milliseconds under twenty-four hours, a record short day.",
+    "role": "normal",
+    "fact_ids": [
+     "f_2022_shortest_day"
+    ],
+    "on_screen": [
+     "Record short day"
+    ]
+   },
+   {
+    "text": "Part of the reason is thought to be the complex churning of molten metal deep below.",
+    "role": "normal",
+    "fact_ids": [
+     "f_rotation_speed_cause"
+    ],
+    "on_screen": []
+   },
+   {
+    "text": "Beneath that sits a solid inner core, roughly as hot as the Sun's surface.",
+    "role": "normal",
+    "fact_ids": [
+     "f_core_temp_sun",
+     "f_discovery_1936"
+    ],
+    "on_screen": [
+     "Sun-hot inner core"
+    ]
+   },
+   {
+    "text": "And it may not be rigid at all, but slowly deforming.",
+    "role": "normal",
+    "fact_ids": [
+     "f_core_deformable_2025"
+    ],
+    "on_screen": []
+   },
+   {
+    "text": "So your twenty-four hours aren't fixed, and here's what's partly setting them:",
+    "role": "payoff",
+    "fact_ids": [
+     "f_rotation_speed_cause",
+     "f_2022_shortest_day",
+     "f_day_length_increase"
+    ],
+    "on_screen": []
+   }
+  ],
+  "hook_headline": "Core Tweaks Your Day"
+ },
+ {
+  "topic": "A Newly Spotted Exoplanet Has Metal Clouds That Rain Iron",
+  "status": "scored",
+  "mean": 3.125,
+  "min": 2,
+  "critic_scores": {
+   "hook_strength": 4,
+   "curiosity_gap": 3,
+   "escalation": 2,
+   "payoff_clarity": 3,
+   "loop_coherence": 4,
+   "human_voice": 3,
+   "emotional_charge": 2,
+   "one_idea_only": 4
+  },
+  "critique": "Escalation is flat. Sentences 4-7 are a numbers comparison, and the four-percent rule in sentences 8-9 is an abstract add-on. Make sentences 8-10 build to one specific world: name a real object that counts as a planet in NASA's archive and drops out under the IAU, so 'vanish' in sentence 10 lands as a concrete loss and not a category note. Emotional charge is neutral. Sentence 11 sums things up without feeling, so replace it with an image that hits harder, like a world that blinks in and out of existence depending on who's holding the pen. Cut the 'You'd think' setup in sentence 2 and fix the mismatch between 'one rulebook' and 'There isn't' in sentence 3. Make sentence 4 sound less like a textbook by dropping 'archive' and 'minimum mass' and saying something like 'NASA counts anything up to thirty Jupiters.' Keep the sentence 12 \u2192 sentence 1 loop, but make sure sentence 11 alone fully pays off the 'why'.",
+  "script_text": "Some giant worlds are only planets if NASA's doing the counting. You'd think a planet is just a planet, with one rulebook for all. There isn't. NASA's archive takes anything with a minimum mass under thirty Jupiters. The IAU's working definition stops at thirteen. So a world between thirteen and thirty Jupiters is a planet to one. To the other, it's not a planet at all. And the IAU adds a second, stricter test. It must weigh under four percent of whatever it orbits. So one giant can sit in NASA's count and simply vanish from the IAU's. The edge of a planet isn't drawn by nature, it's drawn by us. And that's why, right now,",
+  "sentences": [
+   {
+    "text": "Some giant worlds are only planets if NASA's doing the counting.",
+    "role": "hook",
+    "fact_ids": [
+     "f_exoplanet_mass_limit_nasa",
+     "f_exoplanet_mass_limit_iau"
+    ],
+    "on_screen": []
+   },
+   {
+    "text": "You'd think a planet is just a planet, with one rulebook for all.",
+    "role": "normal",
+    "fact_ids": [
+     "f_exoplanet_mass_limit_nasa",
+     "f_exoplanet_mass_limit_iau"
+    ],
+    "on_screen": []
+   },
+   {
+    "text": "There isn't.",
+    "role": "normal",
+    "fact_ids": [
+     "f_exoplanet_mass_limit_nasa",
+     "f_exoplanet_mass_limit_iau"
+    ],
+    "on_screen": []
+   },
+   {
+    "text": "NASA's archive takes anything with a minimum mass under thirty Jupiters.",
+    "role": "normal",
+    "fact_ids": [
+     "f_exoplanet_mass_limit_nasa"
+    ],
+    "on_screen": [
+     "NASA: under 30 Jupiters"
+    ]
+   },
+   {
+    "text": "The IAU's working definition stops at thirteen.",
+    "role": "normal",
+    "fact_ids": [
+     "f_exoplanet_mass_limit_iau"
+    ],
+    "on_screen": [
+     "IAU: up to 13"
+    ]
+   },
+   {
+    "text": "So a world between thirteen and thirty Jupiters is a planet to one.",
+    "role": "normal",
+    "fact_ids": [
+     "f_exoplanet_mass_limit_nasa",
+     "f_exoplanet_mass_limit_iau"
+    ],
+    "on_screen": []
+   },
+   {
+    "text": "To the other, it's not a planet at all.",
+    "role": "normal",
+    "fact_ids": [
+     "f_exoplanet_mass_limit_iau"
+    ],
+    "on_screen": []
+   },
+   {
+    "text": "And the IAU adds a second, stricter test.",
+    "role": "normal",
+    "fact_ids": [
+     "f_exoplanet_mass_limit_iau"
+    ],
+    "on_screen": []
+   },
+   {
+    "text": "It must weigh under four percent of whatever it orbits.",
+    "role": "normal",
+    "fact_ids": [
+     "f_exoplanet_mass_limit_iau"
+    ],
+    "on_screen": [
+     "Under 4% of host"
+    ]
+   },
+   {
+    "text": "So one giant can sit in NASA's count and simply vanish from the IAU's.",
+    "role": "normal",
+    "fact_ids": [
+     "f_exoplanet_mass_limit_nasa",
+     "f_exoplanet_mass_limit_iau"
+    ],
+    "on_screen": []
+   },
+   {
+    "text": "The edge of a planet isn't drawn by nature, it's drawn by us.",
+    "role": "payoff",
+    "fact_ids": [
+     "f_exoplanet_mass_limit_nasa",
+     "f_exoplanet_mass_limit_iau"
+    ],
+    "on_screen": []
+   },
+   {
+    "text": "And that's why, right now,",
+    "role": "payoff",
+    "fact_ids": [
+     "f_exoplanet_mass_limit_nasa",
+     "f_exoplanet_mass_limit_iau"
+    ],
+    "on_screen": []
+   }
+  ],
+  "hook_headline": "Planets Only to NASA"
+ }
+]

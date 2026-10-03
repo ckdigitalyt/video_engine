@@ -1,0 +1,72 @@
+{
+ "topics_tried": [
+  "Mount Everest Was Once Buried Under an Ancient Ocean Floor",
+  "Earth's Core Spins Faster Than the Surface Above It",
+  "A Newly Spotted Exoplanet Has Metal Clouds That Rain Iron"
+ ],
+ "status": "hold",
+ "picked_topic": null,
+ "reason": "rank-not-block: no candidate cleared the floor: Mount Everest Was Once Buried Under an Ancient Ocean Floor: mean 3.12 min 2 below floor; Earth's Core Spins Faster Than the Surface Above It: mean 2.75 min 2 below floor; A Newly Spotted Exoplanet Has Metal Clouds That Rain Iron: mean 3.12 min 2 below floor",
+ "candidates": [
+  {
+   "topic": "Mount Everest Was Once Buried Under an Ancient Ocean Floor",
+   "status": "scored",
+   "critic": {
+    "scores": {
+     "hook_strength": 4,
+     "curiosity_gap": 4,
+     "escalation": 2,
+     "payoff_clarity": 3,
+     "loop_coherence": 4,
+     "human_voice": 3,
+     "emotional_charge": 2,
+     "one_idea_only": 3
+    },
+    "critique": "Escalation stalls in sentences 2-3, which read like a textbook. Cut sentence 3 because the 2020 survey has nothing to do with the main idea, and merge sentence 2 into sentence 4 so the \"counted from the sea\" twist comes in sentence 2 or 3. Emotional charge is flat because sentences 5-7 only state facts. Make the viewer feel the trek of nearly 700 km from the Bay of Bengal: show the shift from tropical shore to death zone, the weeks on foot and the full 8,800+ metres climbed, so that sentence 7 lands as awe rather than trivia. The reveal comes in sentence 7, which leaves sentences 8-9 as afterthought. Hold back the team's name or the 'only once' until later, and make sentence 8 the hardest line in the script: everyone else started thousands of metres up. Sentence 9 already sets up a loop back into sentence 1, so keep it, but cut the throwaway \"next time someone says\" phrasing so it reads less like a clich\u00e9 before the replay."
+   },
+   "mean": 3.125,
+   "min": 2,
+   "rewrites": 1
+  },
+  {
+   "topic": "Earth's Core Spins Faster Than the Surface Above It",
+   "status": "scored",
+   "critic": {
+    "scores": {
+     "hook_strength": 3,
+     "curiosity_gap": 3,
+     "escalation": 2,
+     "payoff_clarity": 2,
+     "loop_coherence": 4,
+     "human_voice": 3,
+     "emotional_charge": 2,
+     "one_idea_only": 3
+    },
+    "critique": "Escalation peaks at the record short day in sentences 6-7, then sentences 9-10 drift into unrelated core trivia: the Sun-surface temperature and the deforming inner core. Cut them, or tie them directly to day length, so the stakes keep rising up to the reveal. Sentence 8 gives the answer away too early, and in a hedged, textbook tone (\"Part of the reason is thought to be the complex churning\"). Hold the core mechanism back and replace sentence 8 with a sharper, spoken image of molten metal pushing on the planet's spin. Sentence 11 doesn't resolve anything by itself because it relies entirely on the loop. Sharpen it into one clear setup line that lands on sentence 1 as the answer. Sentence 1 is also weak: \"may be tweaking\" is hedged and flat. Lead with a vivid, concrete claim, and replace the clich\u00e9s \"flipped the script\" (6) and \"incredibly fast\" (2) with a specific number or a felt image to add some awe."
+   },
+   "mean": 2.75,
+   "min": 2,
+   "rewrites": 1
+  },
+  {
+   "topic": "A Newly Spotted Exoplanet Has Metal Clouds That Rain Iron",
+   "status": "scored",
+   "critic": {
+    "scores": {
+     "hook_strength": 4,
+     "curiosity_gap": 3,
+     "escalation": 2,
+     "payoff_clarity": 3,
+     "loop_coherence": 4,
+     "human_voice": 3,
+     "emotional_charge": 2,
+     "one_idea_only": 4
+    },
+    "critique": "Escalation is flat. Sentences 4-7 are a numbers comparison, and the four-percent rule in sentences 8-9 is an abstract add-on. Make sentences 8-10 build to one specific world: name a real object that counts as a planet in NASA's archive and drops out under the IAU, so 'vanish' in sentence 10 lands as a concrete loss and not a category note. Emotional charge is neutral. Sentence 11 sums things up without feeling, so replace it with an image that hits harder, like a world that blinks in and out of existence depending on who's holding the pen. Cut the 'You'd think' setup in sentence 2 and fix the mismatch between 'one rulebook' and 'There isn't' in sentence 3. Make sentence 4 sound less like a textbook by dropping 'archive' and 'minimum mass' and saying something like 'NASA counts anything up to thirty Jupiters.' Keep the sentence 12 \u2192 sentence 1 loop, but make sure sentence 11 alone fully pays off the 'why'."
+   },
+   "mean": 3.125,
+   "min": 2,
+   "rewrites": 1
+  }
+ ]
+}
