@@ -248,6 +248,83 @@ def test_duration_gate():
     assert S.check_duration(61.0, {"length_justification": "two-part reveal"}) == []
 
 
+# -------------------------------- decision #16 item 2: absolute-claim check --
+
+# decision #15 step 3's real Everest script (build_reports/decision15/step3_full_scripts.json):
+# "That's been done only once, by Tim Macartney-Snape's team in 1990." cites
+# f_sea_level_climb. In reality Macartney-Snape's 1990 climb was solo/unsupported but
+# NOT unique -- Reinhold Kropp (sic: the real other sea-to-summit climber) also made a
+# full ascent from sea level in 1996 -- so a fact that only describes Macartney-Snape's
+# climb, without itself asserting nobody else has done one, must NOT satisfy the
+# absolute claim "only once". Facts.json fixture matches the research-stage shape from
+# engine.v16_research.build_facts (id/claim/evidence/quote/source_id/nuance).
+EVEREST_FACT_UNSUPPORTED = {
+    "id": "f_sea_level_climb",
+    "claim": "Tim Macartney-Snape's team climbed Everest from the Bay of Bengal to the "
+             "summit without supplemental oxygen in 1990.",
+    "evidence": "Macartney-Snape's 1990 sea-to-summit ascent is documented as unsupported "
+               "and without bottled oxygen.",
+    "quote": "Macartney-Snape walked from the Bay of Bengal to the summit of Everest",
+    "source_id": "src1", "quote_verified": True, "curated": False, "verified": True,
+    "nuance": "ESTABLISHED",
+}
+EVEREST_FACT_SUPPORTED = {
+    **EVEREST_FACT_UNSUPPORTED,
+    "claim": "Tim Macartney-Snape's team is the only climbing party ever documented "
+             "making a full, unsupported sea-to-summit ascent of Everest.",
+}
+EVEREST_FACTS_UNSUPPORTED = {"claims": [EVEREST_FACT_UNSUPPORTED]}
+EVEREST_FACTS_SUPPORTED = {"claims": [EVEREST_FACT_SUPPORTED]}
+EVEREST_SENTENCE = "That's been done only once, by Tim Macartney-Snape's team in 1990."
+
+
+def test_absolute_claim_everest_only_once_fails_without_exclusivity_support():
+    sc = {"hook_headline": "The Solo Climb", "sentences": [
+        {"text": EVEREST_SENTENCE, "role": "hook", "fact_ids": ["f_sea_level_climb"]}]}
+    errs = S.check_absolute_claims(sc, EVEREST_FACTS_UNSUPPORTED)
+    assert errs and "only" in errs[0].lower() and "sentence 1" in errs[0]
+
+
+def test_absolute_claim_everest_only_once_passes_with_exclusivity_support():
+    sc = {"hook_headline": "The Solo Climb", "sentences": [
+        {"text": EVEREST_SENTENCE, "role": "hook", "fact_ids": ["f_sea_level_climb"]}]}
+    assert S.check_absolute_claims(sc, EVEREST_FACTS_SUPPORTED) == []
+
+
+def test_absolute_claim_softened_everest_sentence_has_no_claim_to_support():
+    sc = {"hook_headline": "The Solo Climb", "sentences": [
+        {"text": "That was done solo, by Tim Macartney-Snape's team in 1990, though "
+                 "others have since made similar sea-to-summit climbs.",
+         "role": "hook", "fact_ids": ["f_sea_level_climb"]}]}
+    assert S.check_absolute_claims(sc, EVEREST_FACTS_UNSUPPORTED) == []
+
+
+def test_absolute_claim_detector_catches_common_superlatives_and_never_always():
+    base = {"id": "f_y", "claim": "x", "evidence": "x", "quote": None,
+           "curated": True, "verified": True}
+    facts = {"claims": [base]}
+    for text in ("This is the biggest blast ever recorded.",
+                "No one has ever seen anything like it.",
+                "The forest never grew back the same way.",
+                "Scientists always assumed it was an asteroid."):
+        sc = {"hook_headline": "H", "sentences": [
+            {"text": text, "role": "hook", "fact_ids": ["f_y"]}]}
+        errs = S.check_absolute_claims(sc, facts)
+        assert errs, text
+
+
+def test_absolute_claim_check_feeds_into_code_checks():
+    # f_eyewitness_vanavara's claim text (bench/quality/topics/02_tunguska/facts.json)
+    # carries no absolute/superlative marker of its own, so citing it for an "only"
+    # claim must still fail -- unlike f_kulik_1927, whose real claim text happens to
+    # contain "the first" and would otherwise accidentally "support" any absolute claim.
+    sc = good_script()
+    sc["sentences"][0]["text"] = "Only one blast like this has ever been recorded."
+    sc["sentences"][0]["fact_ids"] = ["f_eyewitness_vanavara"]
+    errs = S.code_checks(sc, FACTS)
+    assert any("absolute/superlative" in e or "only" in e.lower() for e in errs)
+
+
 # ---------------------------------------------------------------- S4 -----
 
 def test_title_rules():

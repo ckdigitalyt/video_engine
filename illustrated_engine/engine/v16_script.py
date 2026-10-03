@@ -76,6 +76,14 @@ CTA = re.compile(r"\b(subscribe|follow|like and|thanks for watching|see you|"
                  r"next time on|link in|comment below|goodbye)\b", re.I)
 TITLE_TROPES = re.compile(r"shocked|you won'?t believe|scientists baffled|baffled|mind-?blowing|"
                           r"gone wrong|will blow your mind|what happens next|jaw-?dropping", re.I)
+# decision #16 item 2: absolute/superlative claim words. Multi-word phrases first
+# (alternation is first-match, not longest-match) so "no one"/"the first" aren't
+# shadowed by a later single-word alternative matching part of them first.
+ABSOLUTE_CLAIM_RE = re.compile(
+    r"\b(no\s+one|nobody|the\s+only|the\s+first|only\s+one|"
+    r"only|sole|solely|first|never|always|every\s+time|everyone|"
+    r"biggest|largest|smallest|tallest|shortest|fastest|slowest|"
+    r"best|worst|most|least|unique|uniquely|unprecedented)\b", re.I)
 ACRONYMS = {"DNA", "RNA", "NASA", "ESA", "UFO", "GPS", "AI", "USA", "UK", "US", "UN",
             "TV", "CERN", "LIGO", "CO2", "LED", "MRI", "CT", "PH"}
 QUESTION_WORDS = ("how", "why", "what")
@@ -157,8 +165,48 @@ def check_digits(script: dict, facts: dict) -> list:
     return errs
 
 
+def check_absolute_claims(script: dict, facts: dict) -> list:
+    """decision #16 item 2: a sentence making an absolute/superlative claim
+    ("only", "first", "never", "always", "biggest", "no one", ...) must be
+    backed by one of its OWN cited facts explicitly stating that specific
+    uniqueness/exclusivity -- the same "the support has to actually say it"
+    bar `check_digits` applies to numbers, not just a related fact in the
+    topic. Pure-code heuristic (no LLM): the cited fact's own claim/evidence/
+    quote text must itself carry a matching absolute marker. Worked example
+    (decision #15 step 3's real Everest script): "That's been done only
+    once, by Tim Macartney-Snape's team in 1990" cites a fact about
+    Macartney-Snape's 1990 climb -- but that fact (correctly) does not claim
+    nobody else has done a full sea-level ascent (Kropp did one in 1996), so
+    the fact doesn't carry an exclusivity marker and this check fails,
+    forcing a rewrite that softens the claim (e.g. to "solo") instead of
+    asserting exclusivity the facts don't support."""
+    by_id = {f["id"]: f for f in facts["claims"]}
+    errs = []
+    for i, s in enumerate(script["sentences"], 1):
+        m = ABSOLUTE_CLAIM_RE.search(s["text"])
+        if not m:
+            continue
+        supported = False
+        for fid in s["fact_ids"]:
+            f = by_id.get(fid)
+            if not f:
+                continue
+            blob = " ".join(str(f.get(k) or "") for k in ("claim", "evidence", "quote"))
+            if ABSOLUTE_CLAIM_RE.search(blob):
+                supported = True
+                break
+        if not supported:
+            errs.append(f"sentence {i}: absolute/superlative claim {m.group(0)!r} has no cited "
+                        f"fact stating that exact uniqueness/exclusivity -- soften it to what's "
+                        f"actually supported (e.g. describe it as a notable/solo instance and "
+                        f"note if others have done something similar) instead of claiming "
+                        f"exclusivity the facts don't back")
+    return errs
+
+
 def code_checks(script: dict, facts: dict) -> list:
-    return check_script(script) + check_facts(script, facts) + check_digits(script, facts)
+    return (check_script(script) + check_facts(script, facts) + check_digits(script, facts)
+           + check_absolute_claims(script, facts))
 
 
 def check_duration(seconds: float, script: dict | None = None) -> list:
