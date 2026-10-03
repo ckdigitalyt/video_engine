@@ -319,6 +319,15 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
     # signal for asset_tier).
     hero_prompts = {p for s in shots if s["beat"].get("function") in ("HOOK", "PAYOFF")
                     for p in s["prompts"]}
+    # decision #13 item 2: first beat whose shot uses this prompt -> its
+    # narration, for plate_qa's per-beat narration-match check. A prompt
+    # shared across shots (global cache) keeps the first beat that asked
+    # for it; the judge call is about catching a misleading image, not
+    # about exhaustively re-checking every reuse.
+    prompt_narration: dict = {}
+    for s in shots:
+        for p in s["prompts"]:
+            prompt_narration.setdefault(p, s["beat"]["narration"])
 
     def _gen(prompt, salt=0, providers=None):
         if providers is None and prompt in hero_prompts:
@@ -341,7 +350,8 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
     MAX_PLATE_REGEN = 3
     if plate_qa_on:
         items = [{"path": plates[p]["path"], "subject": p.split(". ")[1]
-                  if ". " in p else p, "prompt": p}
+                  if ". " in p else p, "prompt": p,
+                  "narration": prompt_narration.get(p)}
                  for p in uniq if plates[p].get("ok")]
         qa = plate_qa(items, bible.get("illustration_style", ""),
                       work / "plate_sheet.jpg")
@@ -369,7 +379,8 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
             ok_redo = {p: r for p, r in redo.items() if r.get("ok")}
             qa_round = plate_qa(
                 [{"path": r["path"], "subject": p.split(". ")[1]
-                  if ". " in p else p} for p, r in ok_redo.items()],
+                  if ". " in p else p, "narration": prompt_narration.get(p)}
+                 for p, r in ok_redo.items()],
                 bible.get("illustration_style", ""),
                 work / f"plate_sheet_regen{rounds}.jpg") if ok_redo else {}
             report["costs"]["vision_calls"] += 1 if ok_redo else 0

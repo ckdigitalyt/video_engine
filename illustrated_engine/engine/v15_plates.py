@@ -336,9 +336,9 @@ A plate FAILS only for:
 Also answer, for EACH plate: could a viewer mistake it for a real photo or
 real footage of a real event or person (not an illustration)? Stylised
 illustration in the required style should almost always be false.
-{anatomy_block}Return ONLY JSON:
-{{"plates": [{{"n": 1, "shows": "...", "fail": null, "realistic": false{anatomy_field}}}]}}
-with "fail" one of null, "text", "wrong_subject", "broken".{anatomy_note}"""
+{anatomy_block}{narration_block}Return ONLY JSON:
+{{"plates": [{{"n": 1, "shows": "...", "fail": null, "realistic": false{anatomy_field}{narration_field}}}]}}
+with "fail" one of null, "text", "wrong_subject", "broken".{anatomy_note}{narration_note}"""
 
 ANATOMY_BLOCK = """Some plates name a specific real animal with required
 anatomy (listed below as "anatomy:"). For ONLY those plates also answer
@@ -352,6 +352,25 @@ is otherwise recognizable.
 ANATOMY_FIELD = ', "anatomy_ok": true'
 ANATOMY_NOTE = (' "bad_anatomy" is also a valid "fail" value, for the '
                 "anatomy-checked plates only.")
+
+# decision #13 item 2: per-beat image-narration match. Some plates carry the
+# line of narration they illustrate (not every plate does — cutaways/b-roll
+# prompts have no 1:1 beat); for those, also ask whether the image depicts
+# the subject AND action actually being narrated, not just the right
+# subject in isolation (same "wrong_subject outranks style" precedent as
+# ANATOMY_BLOCK above).
+NARRATION_BLOCK = """Some plates illustrate a specific line of narration
+(listed below as "narration:"). For ONLY those plates also answer
+"narration_match": does the image depict the SUBJECT and the ACTION being
+narrated (not just a generic/unrelated scene of the same subject)? A plate
+with the right subject but the wrong action, or so ambiguous (e.g. an
+isolated limb/torso close-up) that the action is unclear, FAILS
+"narration_mismatch" even if the subject alone is correct.
+{narration_items}
+"""
+NARRATION_FIELD = ', "narration_match": true'
+NARRATION_NOTE = (' "narration_mismatch" is also a valid "fail" value, for '
+                  "the narration-checked plates only.")
 
 
 def _main_subject(subject: str) -> str:
@@ -378,7 +397,8 @@ def contact_sheet(paths: list, out: Path, cols: int = 5) -> Path:
 
 
 def plate_qa(items: list, style: str, sheet_path: Path) -> dict:
-    """items: [{path, subject}] -> {checked, ocr_checked, fail: {index:
+    """items: [{path, subject, narration?}] (narration optional, per-item) ->
+    {checked, ocr_checked, fail: {index:
     reason}, ocr_hits, realistic, raw}. `fail` merges the OCR pre-filter
     (always run, no LLM cost) with the vision verdict; `checked` is True
     only when the vision call really returned a verdict. `realistic`
@@ -410,10 +430,22 @@ def plate_qa(items: list, style: str, sheet_path: Path) -> dict:
             for i, hits in species_hits.items())
         anatomy_block = ANATOMY_BLOCK.format(anatomy_items=anatomy_items)
         anatomy_field, anatomy_note = ANATOMY_FIELD, ANATOMY_NOTE
+    # decision #13 item 2: per-beat narration-match check, for whichever
+    # items carry a "narration" field (not every plate does).
+    narration_hits = {i: it["narration"] for i, it in enumerate(items)
+                      if it.get("narration")}
+    narration_block = narration_field = narration_note = ""
+    if narration_hits:
+        narration_items = "\n".join(
+            f"#{i + 1} narration: " + n[:200]
+            for i, n in narration_hits.items())
+        narration_block = NARRATION_BLOCK.format(narration_items=narration_items)
+        narration_field, narration_note = NARRATION_FIELD, NARRATION_NOTE
     ans = vision_ask(sheet_path, QA_QUESTION.format(
         style=style[:200], n=len(items), items=listing,
         anatomy_block=anatomy_block, anatomy_field=anatomy_field,
-        anatomy_note=anatomy_note),
+        anatomy_note=anatomy_note, narration_block=narration_block,
+        narration_field=narration_field, narration_note=narration_note),
         max_tokens=60 * len(items) + 200, stage="plate_qa")
     if not isinstance(ans, dict) or "plates" not in ans:
         return {"checked": False, "ocr_checked": ocr_checked, "fail": fails,
@@ -425,12 +457,16 @@ def plate_qa(items: list, style: str, sheet_path: Path) -> dict:
         except Exception:
             continue
         if 0 <= n < len(items) and f.get("fail") in (
-                "text", "wrong_subject", "broken", "bad_anatomy"):
+                "text", "wrong_subject", "broken", "bad_anatomy",
+                "narration_mismatch"):
             fails[n] = f["fail"]
         if 0 <= n < len(items) and isinstance(f.get("realistic"), bool):
             realistic[n] = f["realistic"]
         if (0 <= n < len(items) and n in species_hits
                 and f.get("anatomy_ok") is False and n not in fails):
             fails[n] = "bad_anatomy"
+        if (0 <= n < len(items) and n in narration_hits
+                and f.get("narration_match") is False and n not in fails):
+            fails[n] = "narration_mismatch"
     return {"checked": True, "ocr_checked": ocr_checked, "fail": fails,
             "ocr_hits": ocr_hits, "realistic": realistic, "raw": ans}

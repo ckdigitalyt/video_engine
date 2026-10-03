@@ -106,6 +106,32 @@ def test_plate_qa_merges_ocr_and_reports_whether_vision_ran():
             director.vision_ask = real
 
 
+def test_plate_qa_narration_mismatch():
+    """decision #13 item 2: a plate with the right subject but the wrong
+    narrated action fails narration_mismatch, only for items that carry a
+    narration field, and only when the judge actually says no match."""
+    import engine.director as director
+    from engine.v15_plates import plate_qa
+    real = director.vision_ask
+    with tempfile.TemporaryDirectory() as d:
+        tmp = Path(d)
+        paths = []
+        for f in ("plate_clean.jpg", "plate_clean.jpg"):
+            shutil.copy(FIX / f, tmp / f"{len(paths)}.jpg")
+            paths.append(str(tmp / f"{len(paths)}.jpg"))
+        items = [{"path": paths[0], "subject": "a clock",
+                  "narration": "the clock strikes midnight"},
+                 {"path": paths[1], "subject": "a clock"}]  # no narration
+        try:
+            director.vision_ask = lambda *a, **k: {"plates": [
+                {"n": 1, "fail": None, "narration_match": False},
+                {"n": 2, "fail": None}]}
+            r = plate_qa(items, "ink", tmp / "sheet.jpg")
+            assert r["checked"] and r["fail"] == {0: "narration_mismatch"}, r
+        finally:
+            director.vision_ask = real
+
+
 def test_regeneration_states():
     with tempfile.TemporaryDirectory() as d:
         specs = _specs(Path(d), "plate_clean.jpg")

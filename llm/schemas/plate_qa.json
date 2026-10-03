@@ -10,7 +10,8 @@
         "properties": {
           "n": {"type": "integer", "minimum": 1},
           "shows": {"type": "string"},
-          "fail": {"enum": [null, "text", "wrong_subject", "broken"]}
+          "fail": {"enum": [null, "text", "wrong_subject", "broken",
+                            "bad_anatomy", "narration_mismatch"]}
         }
       }
     }

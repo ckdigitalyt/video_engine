@@ -152,6 +152,14 @@ _BANNED_WORD = re.compile(
     r"technical)\b\s*")
 _ON_SURFACE = re.compile(r"(?i)\s+on\s+(\w+\s+){0,2}(parchment|paper)\b")
 PURE = "Pure image, full-bleed, edge to edge, vertical 9:16"
+# decision #13 item 2: an isolated close-up of just a limb or torso, with no
+# surrounding context, is easy to misread as the wrong subject/action (both
+# for a viewer and for the narration-match vision judge in v15_plates.py) —
+# nudge every prompt toward a framing that keeps the subject/action legible.
+FRAMING_GUIDANCE = ("avoid an isolated close-up of just a limb or torso with "
+                    "nothing else in frame; prefer a full-figure or clear "
+                    "establishing view that makes the subject and action "
+                    "unambiguous")
 
 
 def style_prefix(bible: dict) -> str:
@@ -176,4 +184,5 @@ def image_prompt(bible: dict, subject: str, composition: str = "centered") -> st
             "centered": "single clear focal subject, centered"}.get(
                 composition, "single clear focal subject")
     subj = _BANNED_WORD.sub("", subject.strip().rstrip("."))
-    return ". ".join(x for x in (style_prefix(bible), subj, comp, PURE) if x)
+    return ". ".join(x for x in (style_prefix(bible), subj, comp,
+                                 FRAMING_GUIDANCE, PURE) if x)
