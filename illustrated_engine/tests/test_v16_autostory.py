@@ -166,7 +166,7 @@ class _FakeResp:
 def test_wikipedia_sources_happy_path(monkeypatch):
     calls = []
 
-    def fake_get(url, params=None, timeout=None):
+    def fake_get(url, params=None, timeout=None, headers=None):
         calls.append(params)
         if params["action"] == "query" and "srsearch" in params:
             return _FakeResp({"query": {"search": [{"title": "Tunguska event"}]}})

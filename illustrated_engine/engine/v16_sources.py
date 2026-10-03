@@ -11,6 +11,12 @@ import requests
 API = "https://en.wikipedia.org/w/api.php"
 TIMEOUT_S = 10
 MAX_CHARS = 6000
+# Wikipedia's API 403s a request with no descriptive User-Agent (their API
+# etiquette policy, not an auth wall) — confirmed live during the decision
+# #13 item 6 dry run: every query returned 403/empty until this was added.
+HEADERS = {"User-Agent": "video_engine-research-bot/1.0 "
+                        "(https://github.com/ckdigitalyt/video_engine; "
+                        "contact: ckdigitalyt@gmail.com)"}
 
 
 def wikipedia_sources(query: str, n: int = 3) -> list:
@@ -22,7 +28,8 @@ def wikipedia_sources(query: str, n: int = 3) -> list:
     try:
         r = requests.get(API, params={"action": "query", "list": "search",
                                       "srsearch": query, "format": "json",
-                                      "srlimit": n}, timeout=TIMEOUT_S)
+                                      "srlimit": n}, timeout=TIMEOUT_S,
+                         headers=HEADERS)
         r.raise_for_status()
         hits = r.json().get("query", {}).get("search", [])
     except (requests.RequestException, ValueError):
@@ -35,7 +42,8 @@ def wikipedia_sources(query: str, n: int = 3) -> list:
         try:
             r2 = requests.get(API, params={"action": "query", "prop": "extracts",
                                            "explaintext": 1, "titles": title,
-                                           "format": "json"}, timeout=TIMEOUT_S)
+                                           "format": "json"}, timeout=TIMEOUT_S,
+                             headers=HEADERS)
             r2.raise_for_status()
             pages = r2.json().get("query", {}).get("pages", {})
             text = next(iter(pages.values()), {}).get("extract", "")
