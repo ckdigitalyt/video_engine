@@ -374,12 +374,25 @@ def test_critic_fail_one_rewrite_then_pass():
     assert len(st["drafts"]) == 2 and st["drafts"][0]["critic"]["scores"] == BAD_SCORES
 
 
-def test_critic_fail_twice_holds():
+def test_critic_fail_thrice_holds():
     sc = good_script()
-    f = Fake(script_write=[sc, sc], script_critic=[{"scores": BAD_SCORES, "critique": "x"}] * 2)
+    f = Fake(script_write=[sc, sc, sc], script_critic=[{"scores": BAD_SCORES, "critique": "x"}] * 3)
     st = S.write_story("Tunguska", FACTS, ask=f)
-    assert st["verdict"] == "HOLD" and "critic below bar after the rewrite" in st["holds"][0]
+    assert st["verdict"] == "HOLD" and "critic below bar after 2 rewrite(s)" in st["holds"][0]
+    assert stages(f).count("script_critic") == 3 and stages(f).count("script_write") == 3
     assert "fact_check" not in stages(f)
+
+
+def test_critic_fail_twice_then_pass():
+    sc = good_script()
+    f = Fake(script_write=[sc, sc, sc],
+             script_critic=[{"scores": BAD_SCORES, "critique": "x"},
+                            {"scores": BAD_SCORES, "critique": "y"},
+                            {"scores": GOOD_SCORES, "critique": ""}],
+             fact_check=[fc_ok(sc)], metadata_pack=[dict(META)])
+    st = S.write_story("Tunguska", FACTS, ask=f)
+    assert st["verdict"] == "PASS"
+    assert stages(f).count("script_critic") == 3 and stages(f).count("script_write") == 3
 
 
 def test_fact_check_fail_one_rewrite_then_pass_and_then_hold():
