@@ -53,7 +53,8 @@ def _queue_fixture(clusters):
     from engine import v16_topics as T
     raw = [_cand(i, c) for i, c in enumerate(clusters)]
     row = {"counter_intuitive": 4, "visualisability": 4, "hook_strength": 4,
-           "series_potential": 4, "evidence_strength": 4, "best_hook": "a strong hook"}
+           "series_potential": 4, "evidence_strength": 4, "still_image_fit": 4,
+           "best_hook": "a strong hook"}
     ids, seen = [], set()
     for c in raw:
         cid = T._unique_id(T.slugify(c["title"]), seen)
@@ -131,7 +132,8 @@ def test_select_topics_series_bypasses_cluster_cap(tmp_path, monkeypatch):
     raw = [{**_cand(i, "deep_time"), "series_id": "tunguska", "series_part": p}
           for i, p in enumerate((1, 2))]
     row = {"counter_intuitive": 4, "visualisability": 4, "hook_strength": 4,
-          "series_potential": 4, "evidence_strength": 4, "best_hook": "hook"}
+          "series_potential": 4, "evidence_strength": 4, "still_image_fit": 4,
+          "best_hook": "hook"}
     ids, seen = [], set()
     for c in raw:
         cid = T._unique_id(T.slugify(c["title"]), seen)

@@ -8,7 +8,8 @@
       "items": {
         "type": "object",
         "required": ["id", "counter_intuitive", "visualisability", "hook_strength",
-                     "series_potential", "evidence_strength", "best_hook"],
+                     "series_potential", "evidence_strength", "still_image_fit",
+                     "best_hook"],
         "properties": {
           "id": {"type": "string"},
           "counter_intuitive": {"type": "integer", "minimum": 0, "maximum": 5},
@@ -16,6 +17,7 @@
           "hook_strength": {"type": "integer", "minimum": 0, "maximum": 5},
           "series_potential": {"type": "integer", "minimum": 0, "maximum": 5},
           "evidence_strength": {"type": "integer", "minimum": 0, "maximum": 5},
+          "still_image_fit": {"type": "integer", "minimum": 0, "maximum": 5},
           "best_hook": {"type": "string"}
         }
       }

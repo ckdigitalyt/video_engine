@@ -140,23 +140,41 @@ def dedupe(candidates: list, history: list) -> tuple:
 
 # ---------------------------------------------------------------- score --
 
+_RUBRIC_FIELDS = ("cluster_prior", "counter_intuitive", "visualisability",
+                  "hook_strength", "series_potential", "evidence_strength",
+                  "evergreen", "still_image_fit")
+# decision #13 item 4: a topic whose core payoff only reads correctly IN
+# MOTION (a dynamic physical process/mechanism) can't be carried by this
+# channel's still-image template library, no matter how good the idea is —
+# score_row["still_image_fit"] at or below this is hard-skipped, the same
+# way EXCLUDED_CLUSTERS is, rather than just lightly penalized.
+STILL_IMAGE_FIT_FLOOR = 1
+
+
 def score_candidate(candidate: dict, score_row: dict) -> tuple:
     """-> (score 0-100 int, breakdown dict). Pure function of its inputs: same
     candidate + same rubric scores always reproduce the same score (DESIGN Sec.9.3)."""
     cluster = candidate.get("cluster")
-    if cluster not in CLUSTER_PRIORS or cluster in EXCLUDED_CLUSTERS:
-        zero = dict.fromkeys(
-            ("cluster_prior", "counter_intuitive", "visualisability", "hook_strength",
-             "series_potential", "evidence_strength", "evergreen"), 0.0)
-        return 0, {**zero, "excluded_cluster": cluster not in CLUSTER_PRIORS or cluster in EXCLUDED_CLUSTERS}
+    excluded_cluster = cluster not in CLUSTER_PRIORS or cluster in EXCLUDED_CLUSTERS
+    if excluded_cluster:
+        zero = dict.fromkeys(_RUBRIC_FIELDS, 0.0)
+        return 0, {**zero, "excluded_cluster": True}
+    still_fit = score_row["still_image_fit"]
+    if still_fit <= STILL_IMAGE_FIT_FLOOR:
+        zero = dict.fromkeys(_RUBRIC_FIELDS, 0.0)
+        return 0, {**zero, "excluded_still_unfriendly": True}
     pts = {
         "cluster_prior": round(CLUSTER_PRIORS[cluster] * 25, 2),
         "counter_intuitive": round(score_row["counter_intuitive"] / 5 * 20, 2),
-        "visualisability": round(score_row["visualisability"] / 5 * 15, 2),
-        "hook_strength": round(score_row["hook_strength"] / 5 * 15, 2),
+        "visualisability": round(score_row["visualisability"] / 5 * 10, 2),
+        "hook_strength": round(score_row["hook_strength"] / 5 * 10, 2),
         "series_potential": round(score_row["series_potential"] / 5 * 10, 2),
         "evidence_strength": round(score_row["evidence_strength"] / 5 * 10, 2),
         "evergreen": 5.0 if candidate.get("evergreen") else 0.0,
+        # prefers the channel niche (mysteries/natural wonders/animals/
+        # places/history — static subjects and scenes) over a topic whose
+        # core content is an action a still frame can't convey.
+        "still_image_fit": round(still_fit / 5 * 10, 2),
     }
     return min(round(sum(pts.values())), 100), pts
 

@@ -87,19 +87,20 @@ def test_dedupe_series_exception_bypasses_entity_overlap():
 def test_score_candidate_is_reproducible_and_matches_the_weighted_sum():
     cand = {"cluster": "deep_time", "evergreen": True}
     row = {"counter_intuitive": 5, "visualisability": 5, "hook_strength": 5,
-           "series_potential": 5, "evidence_strength": 5}
+           "series_potential": 5, "evidence_strength": 5, "still_image_fit": 5}
     score1, breakdown1 = T.score_candidate(cand, row)
     score2, breakdown2 = T.score_candidate(cand, row)
     assert score1 == score2 == 100 and breakdown1 == breakdown2        # same inputs -> same output
     assert breakdown1 == {"cluster_prior": 25.0, "counter_intuitive": 20.0,
-                           "visualisability": 15.0, "hook_strength": 15.0,
-                           "series_potential": 10.0, "evidence_strength": 10.0, "evergreen": 5.0}
+                           "visualisability": 10.0, "hook_strength": 10.0,
+                           "series_potential": 10.0, "evidence_strength": 10.0,
+                           "evergreen": 5.0, "still_image_fit": 10.0}
 
 
 def test_score_candidate_excluded_cluster_scores_zero():
     cand = {"cluster": "crypto"}
     row = dict.fromkeys(["counter_intuitive", "visualisability", "hook_strength",
-                         "series_potential", "evidence_strength"], 5)
+                         "series_potential", "evidence_strength", "still_image_fit"], 5)
     score, breakdown = T.score_candidate(cand, row)
     assert score == 0 and breakdown["excluded_cluster"] is True
 
@@ -107,9 +108,20 @@ def test_score_candidate_excluded_cluster_scores_zero():
 def test_score_candidate_partial_rubric_is_below_threshold():
     cand = {"cluster": "general_explainer", "evergreen": False}
     row = dict.fromkeys(["counter_intuitive", "visualisability", "hook_strength",
-                         "series_potential", "evidence_strength"], 2)
+                         "series_potential", "evidence_strength", "still_image_fit"], 2)
     score, _ = T.score_candidate(cand, row)
     assert score < T.MIN_SCORE
+
+
+def test_score_candidate_still_unfriendly_topic_is_hard_skipped():
+    """decision #13 item 4: a dynamic-process/mechanism topic a still frame
+    can't convey is hard-skipped (score 0) even with a perfect rubric
+    otherwise -- same treatment as an excluded cluster."""
+    cand = {"cluster": "deep_time", "evergreen": True}
+    row = {"counter_intuitive": 5, "visualisability": 5, "hook_strength": 5,
+           "series_potential": 5, "evidence_strength": 5, "still_image_fit": 1}
+    score, breakdown = T.score_candidate(cand, row)
+    assert score == 0 and breakdown["excluded_still_unfriendly"] is True
 
 
 # ------------------------------------------------------- series planner --
@@ -174,7 +186,8 @@ def test_ideate_assigns_stable_unique_ids():
 def test_score_candidates_annotates_every_candidate():
     cands = [{**_cand(1), "id": "t_1"}, {**_cand(2), "id": "t_2"}]
     row = {"counter_intuitive": 4, "visualisability": 4, "hook_strength": 4,
-           "series_potential": 4, "evidence_strength": 4, "best_hook": "the strongest hook"}
+           "series_potential": 4, "evidence_strength": 4, "still_image_fit": 4,
+           "best_hook": "the strongest hook"}
     f = Fake(topic_score=[{"scores": [{"id": "t_1", **row}, {"id": "t_2", **row}]}])
     out = T.score_candidates(cands, ask=f)
     assert [c["score"] for c in out] == [86, 86]
@@ -208,7 +221,8 @@ def test_build_queue_20_candidates_no_duplicate_of_existing_uploads(tmp_path):
               "entities": {"subject": "blood falls", "place": "antarctica", "era": "", "phenomenon": ""}}
     ideate_resp = {"candidates": raw}
     good_row = {"counter_intuitive": 4, "visualisability": 4, "hook_strength": 4,
-                "series_potential": 3, "evidence_strength": 4, "best_hook": "a strong hook"}
+                "series_potential": 3, "evidence_strength": 4, "still_image_fit": 4,
+                "best_hook": "a strong hook"}
     scores = {"scores": [{"id": T.slugify(c["title"]) if "id" not in c else c["id"], **good_row}
                          for c in raw]}
     # `ideate` assigns ids before `score_candidates` runs; mirror that id assignment here.
@@ -283,7 +297,7 @@ def test_prompts_render_and_schemas_are_valid():
 
     good_score = {"scores": [{"id": "t_1", "counter_intuitive": 4, "visualisability": 4,
                               "hook_strength": 4, "series_potential": 4, "evidence_strength": 4,
-                              "best_hook": "the chosen hook"}]}
+                              "still_image_fit": 4, "best_hook": "the chosen hook"}]}
     jsonschema.validate(good_score, client.load_schema("topic_score"))
 
 
