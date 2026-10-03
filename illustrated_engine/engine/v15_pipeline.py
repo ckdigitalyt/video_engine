@@ -235,12 +235,16 @@ def split_long_holds(tl: list, timing: dict, max_hold_s: float = MAX_HOLD_S,
     return tl
 
 
-def _prompts_for(shot: dict, bible: dict) -> list:
+def _prompts_for(shot: dict, bible: dict, subject_bible: dict | None = None) -> list:
     from engine.species import augment_subject
+    from engine.subject_bible import inject_subject
+
+    def _augment(subject):
+        return inject_subject(augment_subject(subject), subject_bible or {})
     if shot["kind"] == "zoom_through":
-        return [image_prompt(bible, augment_subject(lv["subject"]), "centered")
+        return [image_prompt(bible, _augment(lv["subject"]), "centered")
                 for lv in shot["levels"]]
-    return [image_prompt(bible, augment_subject(shot["subject"]),
+    return [image_prompt(bible, _augment(shot["subject"]),
                          shot.get("composition", "centered"))]
 
 
@@ -295,6 +299,14 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
     plan_by = {b["beat_id"]: b for b in bvp["plan"]["beats"]}
     report["timings"]["plan_s"] = round(time.time() - t0, 1)
 
+    # decision #13 item 3: one reusable appearance+clothing description for
+    # the video's recurring subject (story["concepts"]' busiest entry), so
+    # the same character/animal doesn't get redesigned shot to shot.
+    from engine.subject_bible import build_subject_bible
+    subj_bible = build_subject_bible(story, use_llm=use_llm)
+    report["subject_bible"] = subj_bible
+    report["costs"]["llm_calls"] += subj_bible.get("llm_calls", 0)
+
     # 3. shot timeline
     shots = []  # flat: {beat, idx, shot, t0, t1, prompts}
     for b in story["beats"]:
@@ -303,7 +315,7 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
                           tts[b["beat_id"]]), timing[b["beat_id"]])
         for k, s in enumerate(tl):
             shots.append({"beat": b, "idx": k, **s,
-                          "prompts": _prompts_for(s["shot"], bible)})
+                          "prompts": _prompts_for(s["shot"], bible, subj_bible)})
         if any(s.get("merged") for s in tl):
             report["warnings"].append({"beat": b["beat_id"],
                                        "warning": "short_shot_merged"})
