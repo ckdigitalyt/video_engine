@@ -272,6 +272,69 @@ the end). No secrets committed, no `--no-verify`, `configs/publish.yaml`
 a Discord-channel delivery, not a platform upload. Owner's verdict call is
 next; no further daily-mode runs until it lands.
 
+### Decision #14 (2026-10-03, `6490d1b`..`9a2e3a1`) — rewrite budget, topic fallback, second dry run
+Five-item follow-up to decision #13's single HOLD: give the pipeline more
+chances to pass before giving up on a night, and re-check the real pass
+rate with a small real sample instead of guessing at it.
+
+1. **Critic scale/threshold** (no change, just documented): `v16_script.py`
+   `CRITIC_MEAN_MIN, CRITIC_FLOOR = 4.0, 3` — 8 dimensions scored 1-5 each;
+   pass requires mean >= 4.0 AND every dimension >= 3.
+2. **Rewrite budget + topic fallback** (`6490d1b`, `9d59673`):
+   `MAX_SCRIPT_REWRITES` 1 -> 2 (shared pool across code-error and critic
+   rewrites). `materialize_candidates` now falls back to the next-ranked
+   topic on a HOLD, up to `MAX_TOPICS_PER_SLOT=3` total per slot, logging
+   every attempt (topic id, title, status, reason) to
+   `materialize_report.json`'s `attempts` list so a HOLD night is fully
+   auditable, not just the final failure.
+3. **Step 3 — real 5-topic sample before any prompt change**
+   (`illustrated_engine/build_reports/decision14/step3_before_prompt_fix.json`):
+   5 real next-ranked topics pulled live off the topic engine's queue, run
+   topic -> `script_write` -> critic, no render. Result: **0/5 passed**.
+   Per-dimension scores showed `escalation` (1-2 across all 5) and
+   `payoff_clarity` (1-2 across 4/5) as the consistent weak dimensions —
+   not `human_voice`, which was the original guess going into this.
+4. **One allowed prompt fix, then step 4 re-check** (`b4cddf1`,
+   `illustrated_engine/build_reports/decision14/step4_after_prompt_fix.json`):
+   `llm/prompts/script_write.md` rule 2 rewritten to target escalation and
+   payoff clarity directly (`prompt_version` 2 -> 3). Re-ran the *same* 5
+   topics end to end (fresh LLM calls, confirmed via new `llm_ledger.jsonl`
+   entries and cache files, not a stale copy). Result: **0/5 passed,
+   unchanged** — every topic's per-dimension scores and failure reasons
+   are byte-identical to the before-fix file. Two of the five topics
+   (oceans, lightning) actually fail on the pure-code `check_digits` rule
+   (narration numbers vs. on-screen numbers), not the critic at all, so a
+   prompt-only fix aimed at critic dimensions couldn't move them regardless.
+   Honest finding: **the one allowed prompt fix did not raise the sampled
+   pass rate.** The 3-topic fallback chain (item 2) is what actually gives
+   a night a better chance to land a render, not the prompt tweak.
+5. **Dry run 2** (real, `./tools/daily_shorts.sh 1`,
+   2026-10-03 14:59 UTC): topic engine selected a slot; first pick ("The
+   Grand Canyon's Rocks Have a Missing Billion-Year Gap") held on
+   `check_digits` number mismatches, fell back to the next topic ("Earth
+   Once Had a Second Moon That Crashed Into the First") which held the
+   same way, fell back to the third and last topic ("This Spacecraft Had
+   to Fly Through the Sun's Atmosphere") which held on critic score
+   (`escalation`/`loop_coherence` 3, mean < 4.0) after 2 rewrites — all 3
+   attempts logged in `materialize_report.json`'s `attempts` list per
+   item 2's design. Nothing materialized into a story dir, so nothing
+   rendered or spent a render budget. Delivered to the Discord channel as
+   the HOLD reason only, no video (message id 1555959337468432547) — the
+   fallback-chain + HOLD-posts-reason-only path both worked exactly as
+   designed, but given step 3/4's 0/5 sampled pass rate a HOLD here is the
+   expected real-world outcome, not a surprise.
+
+Tests: illustrated_engine 248/248; root `tests/` 59 failed + 5 errors = 64
+failing IDs, identical to the known-stale baseline (diffed, not assumed).
+No secrets committed, no `--no-verify`. `tools/daily_shorts.sh` crontab
+entry stays commented out/disabled; `configs/publish.yaml` `upload.enabled`
+stays `false`. Net effect of this package: the pipeline now tries up to 3
+topics and 2 rewrites per slot before giving up (more resilient to a bad
+night), but the underlying script-quality bar is still only clearing on a
+minority of sampled topics — that's a content/prompt problem beyond one
+rule tweak, not a budget/fallback problem, and is the natural next thing
+to dig into before relying on this for unattended nightly output.
+
 ## Next
 Q2 (hook timing) → Q3 (caption safe zone) → Q4 (plates) → Q5 (re-render
 Tunguska) → PR. WP13 (2-topic cap) → WP14 still pending behind the Q-queue
