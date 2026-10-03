@@ -199,6 +199,79 @@ illustrated_engine 227/227; root `tests/` 64 failing IDs diffed identical
 recorded "63" baseline is stale by one test, not a new failure. Report
 `bench/ab/topic_figure_skater_source_check.md`.
 
+### Decision #13 (2026-10-03, `0ecca5a`..`05ec835`) — FINAL package before verdict
+Six-item package the owner asked for before a go/no-go call. All 6 done;
+item 6's real dry run surfaced two real bugs (fixed, not just reported).
+
+1. **Gate fixes** (`0ecca5a`): `check_voice`'s fail message was reporting
+   the whole-video AGGREGATE WER mislabeled as one failing beat's own score
+   (Sample 2's B6 showed "WER 0.0061" when B6 itself actually scored
+   0.0435) — now reports each held beat's real per-beat WER. Root-caused
+   B6 itself: `small.en` ASR voiced a correctly-read "ice" as "eyes"
+   (near-homophone); added to the lexicon's `heard_as`, confirmed via
+   cached audio + `round_trip` simulation (0.0435 FAIL -> 0.0 PASS).
+   `distinctness`/`caption_clause_breaks` demoted HOLD -> warning
+   (`verdict_of` skips `warning=True` checks) — checks unchanged, severity
+   only.
+2. **Image-narration matching** (`1450cb9`): `plate_qa`'s existing batched
+   judge call gained a `narration_match` question (fails
+   `narration_mismatch`, same `MAX_PLATE_REGEN=3` loop already handles any
+   fail reason) + a `FRAMING_GUIDANCE` prompt clause against ambiguous
+   limb/torso close-ups. Found and fixed a real pre-existing bug along the
+   way: `llm/schemas/plate_qa.json`'s `fail` enum never got `bad_anatomy`
+   added when VIS B2 shipped it, so a judge response that actually used it
+   failed strict schema validation and silently degraded the WHOLE
+   `plate_qa` call to `checked:false` — added both `bad_anatomy` and
+   `narration_mismatch`.
+3. **Subject consistency** (`f1a43c6`): `engine/subject_bible.py` — one
+   appearance+clothing description per video (busiest `story["concepts"]`
+   entry), generated once via `text_ask`, cached by content hash
+   (`v16_metadata` convention), spliced into every matching shot's
+   image prompt. Known limitation flagged in the module: plain substring
+   match on the concept id, same class of heuristic as `engine.species`.
+4. **Topic engine** (`d188ebe`): new `still_image_fit` rubric (0-5,
+   weighted 10/100, rebalanced from visualisability/hook_strength) —
+   "can a still image carry this topic's core payoff, or is it a dynamic
+   process/mechanism?" A score <= 1 hard-skips the candidate (score 0),
+   same treatment as an excluded cluster, per the owner's "penalize/skip"
+   wording.
+5. **Daily-mode cron** (`d08dbd4`, `e8e4eb0`, `05ec835`): closed the gap
+   `v16_batch.py`'s own docstring flagged — "turning a freshly ideated
+   topic into a renderable story.json needs the research+script engine
+   wired live, which it is not yet." New `engine/v16_sources.py`
+   (real Wikipedia fetch) + `engine/v16_autostory.py` (topic -> sources ->
+   `build_facts` -> `write_story` -> beat-level story.json, HOLDs honestly
+   at every stage) wired into `v16_batch --n`. `tools/daily_shorts.sh`
+   (cron entry, added to crontab **disabled**, pending this verdict) +
+   `tools/daily_shorts_deliver.py` (Discord delivery, format A on PASS,
+   reason-only on HOLD, idempotent). Two real bugs found live and fixed
+   during the dry run (see item 6): Wikipedia's API 403s without a
+   descriptive User-Agent; a materialize-stage HOLD (before any
+   `batch_report.json` row exists) was never posted at all.
+6. **Dry run** (real, `./tools/daily_shorts.sh 1`, 2026-10-03 10:28 UTC):
+   topic engine selected "Earth's Missing Billion Years Hide in Plain
+   Rock" (spectacle_physics, score — see `topics_queued.json`); real
+   Wikipedia sources fetched, real `research_extract` claims passed the
+   quote-check, real `script_write` ran through code-checks + one critic
+   rewrite — **HOLD**: critic still scored below the quality bar
+   (`hook_strength` 4, `curiosity_gap`/`escalation`/`human_voice`/
+   `emotional_charge` 3, mean < 4.0) after the one allowed rewrite, so it
+   never became a story dir and never spent a render. Delivered to the
+   Discord channel as the HOLD reason, no video (message id
+   1555890142521196666) — proves the "HOLD posts the reason, not the
+   video" path for real, but **not yet proven**: a topic that clears
+   script generation and goes all the way through a real
+   render+gate+package+PASS Discord delivery. That is the next thing a
+   second dry run would need to hit, whenever the owner authorizes one.
+
+Tests: illustrated_engine 245/245 (237 baseline + 8 new); root `tests/`
+1293 passed, 64 failing IDs identical to the known-stale baseline across
+every commit in this package (diffed after each commit, not just once at
+the end). No secrets committed, no `--no-verify`, `configs/publish.yaml`
+`upload.enabled` untouched (still false) — the Discord post in item 5/6 is
+a Discord-channel delivery, not a platform upload. Owner's verdict call is
+next; no further daily-mode runs until it lands.
+
 ## Next
 Q2 (hook timing) → Q3 (caption safe zone) → Q4 (plates) → Q5 (re-render
 Tunguska) → PR. WP13 (2-topic cap) → WP14 still pending behind the Q-queue
