@@ -28,7 +28,8 @@ WP status table, the current baseline) stays here in full.
 - WP13, WP14: DEFERRED (owner decision #11, 2026-10-02) — replaced by the Q1-Q5+PR queue below
 - Q1 (voice WER): DONE (2026-10-02) — see run summary below.
 - Q2-Q5, PR: PAUSED (owner decision #12, 2026-10-02) — replaced by the VIS package below, pending owner verdict on the first real sample.
-- VIS (B1-B5): DONE (2026-10-02) — see run summary below. Q2-Q5/PR, part C (new sample) still pending.
+- VIS (B1-B5): DONE (2026-10-02) — see run summary below.
+- Decision #12 part C (new sample): DONE (2026-10-03) — see run summary below. Q2-Q5/PR still PAUSED pending owner verdict on both samples.
 
 ## Owner decisions (binding, all still in force)
 1. **Brand (2026-09-28):** "Ink & Ember" + boxed keyword hook labels (t=0-1s) + dark-plate variant for space topics; no mascot; brand params config-driven, no literals in code.
@@ -45,9 +46,10 @@ WP status table, the current baseline) stays here in full.
 12. **Plan reset round 2 (2026-10-02):** GitHub Pages / OAuth-verification task CANCELLED (owner: auto-upload on hold, manual upload only, no credentials needed). Q2-Q5/PR PAUSED, replaced by: **A** delivery format (upload step OFF via `configs/publish.yaml` upload.enabled:false, checked in `tools/daily_video.sh`, code/OAuth untouched, commit `add0792`; every finished video gets a <10MB 1080x1920 two-pass H.264/AAC-128k preview posted to Discord + title/description/tags as copyable plain text + one gate-verdict line; full file stays in `results/`), **B** VIS package (captions: on-screen digits not spelled-out numbers, 2-5 word phrase splits at clause boundaries, clear of the right rail/bottom UI, new gates for all three; species-accuracy prompt library + anatomical pass/fail on the vision judge + regen up to 3x; visual variety >=1 unique image/beat ~18-20 per 60s each <=3s, each shot gets pan/zoom, image reuse capped at 1x; hook shows both subjects frame 0 + voice <=0.25s + ending loops to hook; metadata (title/description/5-8 tags) generated into the manifest) — max 2 worker attempts, stop and report if not done in 7 days, **C** one real sample afterward on a new topic (not T-Rex/Stegosaurus) in format A, render through even on HOLD. No new gates beyond B's, no refactors. Status replies capped at 5 lines.
 
 ## Known test-failure baseline
-Root `tests/` suite: 63 failing IDs, pre-existing (confirmed identical
-before/after every WP through WP8 via clean-worktree diffs), unrelated to
-Phase 4 work. `illustrated_engine/tests`: 0 known failures (190/190 as of
+Root `tests/` suite: 64 failing IDs as of 2026-10-03 (was recorded as 63
+through WP8-VIS; corrected via a clean-worktree diff during decision #12
+part C — one extra pre-existing failure, not a Phase 4 regression), unrelated
+to Phase 4 work. `illustrated_engine/tests`: 0 known failures (190/190 as of
 WP8). Any run reporting a *different* failing-ID set has introduced a real
 regression — stop and report, don't just eyeball a count.
 
@@ -178,6 +180,24 @@ this change). Report `bench/ab/vis.md` (residuals honestly flagged: no new
 full render to prove B2's regen loop or B3's shot-count target live; B4's
 hook-both-subjects prompt change unproven on a story that wouldn't already
 do it by luck).
+
+### Decision #12 part C (2026-10-03, `56b4955`)
+Second real sample, new topic: "A Figure Skater Spins Faster Without Any
+Outside Push" (spectacle_physics, score 92 from WP11's real queued set;
+T-Rex/Stegosaurus and anything already used excluded). Quote-exists checked
+against 3 independent Wikipedia sources — corrected the queued title's
+"without adding any energy" overstatement (angular momentum is conserved,
+kinetic energy is not; the extra energy comes from the skater's own
+muscles). Full real `v15_pipeline` render, synchronous, not forced: **HOLD**,
+10/13 gate checks pass (fails: `caption_clause_breaks` 4 cues end on a
+function word, `voice` beat B6 WER over the 0.03 limit, `distinctness` shot/
+template sequence too close to both prior samples). Delivery format A
+preview (5.8MB, two-pass H.264/AAC-128k) + full scorecard in
+`~/phase4_out/sample2/`. No code/gates/upload-config touched. Tests:
+illustrated_engine 227/227; root `tests/` 64 failing IDs diffed identical
+(zero regressions) against a clean worktree of the same HEAD — PROGRESS's
+recorded "63" baseline is stale by one test, not a new failure. Report
+`bench/ab/topic_figure_skater_source_check.md`.
 
 ## Next
 Q2 (hook timing) → Q3 (caption safe zone) → Q4 (plates) → Q5 (re-render
