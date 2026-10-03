@@ -80,6 +80,19 @@ def deliver_one(work: Path, row: dict, channel: str, target: str) -> None:
     post(channel, target, f"**{title}** — {verdict}. {reason_txt}")
 
 
+def deliver_materialize_hold(hold: dict, channel: str, target: str) -> None:
+    """A topic can HOLD before it ever becomes a story dir (research
+    quote-check failed, or the script never cleared its own code/critic/
+    fact-check gates — see engine.v16_autostory.generate_story). That's a
+    real HOLD outcome too, found live during the decision #13 item 6 dry
+    run (the daily-mode entry point otherwise went silent on it since it
+    never reaches a run_batch row) — post it the same way a render/gate
+    HOLD is posted: reason only, no video."""
+    post(channel, target,
+        f"**{hold.get('title') or hold.get('id')}** — HOLD (topic never "
+        f"reached a render). {hold.get('reason', 'unknown')}"[:1600])
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--work", required=True)
@@ -87,12 +100,25 @@ def main() -> int:
     ap.add_argument("--target", required=True)
     a = ap.parse_args()
     work = Path(a.work)
+    delivered = _load_delivered(work)
+
+    mat_path = work / "materialize_report.json"
+    if mat_path.exists():
+        mat = json.loads(mat_path.read_text())
+        for hold in mat.get("holds", []):
+            key = f"materialize:{hold.get('id')}"
+            if key in delivered:
+                continue
+            deliver_materialize_hold(hold, a.channel, a.target)
+            _mark_delivered(work, key, delivered)
+
     report_path = work / "batch_report.json"
     if not report_path.exists():
-        print(f"no batch_report.json at {report_path}", file=sys.stderr)
-        return 1
+        print(f"no batch_report.json at {report_path} "
+             "(nothing materialized into a renderable story this run)",
+             file=sys.stderr)
+        return 0 if mat_path.exists() else 1
     batch = json.loads(report_path.read_text())
-    delivered = _load_delivered(work)
     for row in batch.get("rows", []):
         if row["story"] in delivered:
             continue

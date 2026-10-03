@@ -79,3 +79,34 @@ def test_main_is_idempotent_via_delivered_state(tmp_path):
             assert D.main() == 0
             assert D.main() == 0          # second run: already delivered
     assert m.call_count == 1
+
+
+def test_materialize_hold_is_posted_even_with_no_batch_report(tmp_path):
+    """decision #13 item 6 dry-run finding: a topic that HOLDs during
+    research/script generation never reaches a run_batch row (no
+    batch_report.json at all) — it must still be posted, reason only."""
+    (tmp_path / "materialize_report.json").write_text(json.dumps(
+        {"materialized": [], "holds": [
+            {"id": "t_x", "title": "Earth's Missing Billion Years",
+             "reason": "script: critic below bar after the rewrite"}]}))
+    with patch.object(D.subprocess, "run") as m:
+        m.return_value.returncode = 0
+        with patch("sys.argv", ["prog", "--work", str(tmp_path), "--target", "channel:1"]):
+            assert D.main() == 0
+    assert m.call_count == 1
+    msg = m.call_args[0][0]
+    text = msg[msg.index("--message") + 1]
+    assert "Earth's Missing Billion Years" in text and "HOLD" in text
+    assert "critic below bar" in text
+    assert "--media" not in msg
+
+
+def test_materialize_hold_not_reposted_on_second_run(tmp_path):
+    (tmp_path / "materialize_report.json").write_text(json.dumps(
+        {"materialized": [], "holds": [{"id": "t_x", "title": "X", "reason": "r"}]}))
+    with patch.object(D.subprocess, "run") as m:
+        m.return_value.returncode = 0
+        with patch("sys.argv", ["prog", "--work", str(tmp_path), "--target", "channel:1"]):
+            assert D.main() == 0
+            assert D.main() == 0
+    assert m.call_count == 1
