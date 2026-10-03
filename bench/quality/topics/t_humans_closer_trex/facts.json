@@ -1,0 +1,57 @@
+{
+  "topic_id": "t_humans_closer_trex",
+  "title": "Humans Are Closer to T-Rex Than T-Rex Was to Stegosaurus",
+  "cluster": "deep_time",
+  "provenance": "Owner priority-override run (2026-10-02), topic from data/topic_history.jsonl's queued set (score 93, id t_humans_are_closer_to_t_rex_than_t_rex_wa). Source-checked live against Wikipedia (no web-search API in this session; see bench/ab/topic_trex_source_check.md).",
+  "claims": [
+    {
+      "id": "f_trex_range",
+      "claim": "Tyrannosaurus rex lived from about 69 to 66 million years ago, at the very end of the Cretaceous period.",
+      "nuance": "ESTABLISHED",
+      "verified": true,
+      "source_hint": "Wikipedia: Tyrannosaurus",
+      "source_check": {
+        "verdict": "SUPPORTED",
+        "url": "https://en.wikipedia.org/wiki/Tyrannosaurus",
+        "checked": "2026-10-02"
+      }
+    },
+    {
+      "id": "f_stego_range",
+      "claim": "Stegosaurus lived from about 155 to 145 million years ago, in the Kimmeridgian to Tithonian stages of the Jurassic.",
+      "nuance": "ESTABLISHED",
+      "verified": true,
+      "source_hint": "Wikipedia: Stegosaurus",
+      "source_check": {
+        "verdict": "SUPPORTED",
+        "url": "https://en.wikipedia.org/wiki/Stegosaurus",
+        "checked": "2026-10-02"
+      }
+    },
+    {
+      "id": "f_gap_to_stego",
+      "claim": "The gap in time between the last Stegosaurus and the first Tyrannosaurus rex is roughly 76 to 89 million years.",
+      "nuance": "ESTABLISHED",
+      "verified": true,
+      "source_hint": "computed from f_trex_range and f_stego_range (145-69=76; 155-66=89)",
+      "source_check": {
+        "verdict": "SUPPORTED",
+        "url": "https://en.wikipedia.org/wiki/Tyrannosaurus",
+        "checked": "2026-10-02"
+      }
+    },
+    {
+      "id": "f_gap_to_humans",
+      "claim": "Tyrannosaurus rex went extinct about 66 million years ago, and modern humans are a recent species on that timescale — so T. rex is separated from modern humans by less time than it is separated from Stegosaurus. Do not state a precise 'modern humans appeared X years ago' figure; the claim only needs the human lineage to be far closer to the present than 66 million years, not an exact date.",
+      "nuance": "ESTABLISHED",
+      "verified": true,
+      "source_hint": "Wikipedia: Homo sapiens (human origins placed at 'several million years ago' at most for the broader hominin lineage, far closer to the present than 66 Mya)",
+      "source_check": {
+        "verdict": "SUPPORTED",
+        "url": "https://en.wikipedia.org/wiki/Homo_sapiens",
+        "checked": "2026-10-02"
+      }
+    }
+  ],
+  "honesty_note": "Use the ranges, not invented single numbers: T. rex 69-66 Mya, Stegosaurus 155-145 Mya. Do not claim an exact 'humans appeared N years ago' figure beyond what's needed for the comparison."
+}
