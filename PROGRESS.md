@@ -410,11 +410,111 @@ RANK_FLOOR_DIM check the same way an unreviewed topic does, because both
 land on `min=2`. That is the next thing worth the owner's attention before
 relying on rank-not-block for unattended nightly output.
 
+### Decision #16 (2026-10-03, `ace3c65`..`9a4ac76`) — floor rework, absolute-
+claim check, dry run 4
+Owner called this the last change before a go-live verdict (within the
+2026-10-06 cap), with explicit instruction to still NOT enable the cron —
+that's a separate decision the owner hasn't made yet. Three items.
+
+1. **Per-dimension floor rework** (`ace3c65`): decision #15's floor
+   (`RANK_FLOOR_MEAN = min(3.4, 2.75-0.1) = 2.65`, `RANK_FLOOR_DIM = 3`, a
+   single scalar applied to every dimension) was stricter than the owner's
+   own accepted skater sample (mean 2.75, min 2 on
+   escalation/emotional_charge) and every real sampled script in step 3 —
+   all landed on `min=2`, the exact floor that was supposed to pass them.
+   New floor, per the owner's literal re-spec: **mean >= 3.0, every
+   dimension >= 2, EXCEPT `payoff_clarity` and `one_idea_only` which must
+   each be >= 3.** `RANK_FLOOR_DIM` is now a map
+   (`RANK_FLOOR_DIM_DEFAULT=2`, `RANK_FLOOR_DIM_STRICT={"payoff_clarity":
+   3, "one_idea_only": 3}`), not a single int; new
+   `engine.v16_script.dim_floor()`/`clears_rank_floor()` helpers.
+   `rank_write_story`'s picked-candidate check now calls
+   `clears_rank_floor()` against the real per-dimension critic scores
+   instead of comparing a single scalar `min` to a single scalar floor.
+   The rank-not-block mechanics (3 topics up front, <=1 rewrite each, pick
+   highest mean, HOLD only if none clears the floor) are unchanged — only
+   the floor's values/shape moved. 4 new tests
+   (`test_wp4_story.py`).
+2. **Absolute-claim check** (`9a4ac76`): new
+   `engine.v16_script.check_absolute_claims`, wired into `code_checks`
+   alongside `check_script`/`check_facts`/`check_digits` — same rewrite
+   budget pipeline, not a separate gate. A sentence making an
+   absolute/superlative claim (only, first, never, always, biggest, no
+   one, ...; case-insensitive, word-boundary regex,
+   `ABSOLUTE_CLAIM_RE`) must be backed by one of ITS OWN cited facts that
+   itself states that specific uniqueness/exclusivity — a related fact
+   about the same event is not enough, mirroring the bar `check_digits`
+   already applies to numbers. Pure-code heuristic, no LLM call: the cited
+   fact's own `claim`/`evidence`/`quote` text must carry a matching
+   absolute marker. Worked example (decision #15 step 3's real Everest
+   script, `build_reports/decision15/step3_full_scripts.json`): "That's
+   been done only once, by Tim Macartney-Snape's team in 1990" cites
+   `f_sea_level_climb` — Macartney-Snape's 1990 climb was solo/unsupported
+   but NOT unique (Kropp made a full sea-level ascent too, in 1996), so a
+   fact describing only his climb (without itself claiming nobody else
+   has done one) correctly **fails** the check (forcing a rewrite that
+   softens to e.g. "solo" + a note that others made similar climbs,
+   instead of claiming exclusivity); a fact that *does* explicitly state
+   that exclusivity **passes**. No `facts.json` survived from that
+   decision #15 run (only `script_text`/`sentences` were saved in the
+   build report), so the test fixture
+   (`EVEREST_FACT_UNSUPPORTED`/`EVEREST_FACT_SUPPORTED`) is constructed in
+   the real `v16_research.build_facts` shape
+   (id/claim/evidence/quote/source_id/quote_verified/nuance), not copied
+   from a surviving file. 5 new tests (`test_wp4_story.py`): the Everest
+   case unsupported (fails) and supported (passes), a softened rewrite of
+   the same sentence (no claim left to support), four other
+   absolute-claim phrasings (biggest/no one/never/always), and a
+   `code_checks` integration test deliberately using a real Tunguska fact
+   (`f_eyewitness_vanavara`) chosen because it carries no absolute marker
+   of its own — unlike `f_kulik_1927`, whose real claim text happens to
+   contain "the first" and would otherwise falsely "support" any absolute
+   claim that cited it.
+3. **Dry run 4** (real, `./tools/daily_shorts.sh 1`, 2026-10-03 19:23 UTC):
+   ran the new floor + the new absolute-claim check live through the real
+   cron entry point. Topic engine selected a slot; rank-not-block offered
+   3 real topics up front ("The Oldest Living Tree on Earth Predates the
+   Pyramids", "Astronomers Found a Planet Made Almost Entirely of
+   Diamond", "A Fuel-Free Solar Sail Could Outrun Any Rocket to the
+   Stars"); the `llm_ledger.jsonl` pattern for all 3 (script_write,
+   script_write, script_critic) confirms every candidate's first draft
+   failed a code check (new absolute-claim check live in the mix with the
+   rest of `code_checks`) and used its one rewrite before ever reaching
+   the critic. Real critic scores: 2.75/min 2, 2.625/min 1, 2.75/min 2 —
+   all **below the new RANK_FLOOR_MEAN=3.0** (the per-dimension floor was
+   never reached as the binding constraint this time; the mean floor was).
+   **HOLD** — nothing materialized into a story dir, so nothing rendered
+   or spent a render budget; delivered to the Discord channel as the hold
+   reason only, no video (message id `1556025031358812366`,
+   `materialize_report.json` + `delivered.json` under
+   `illustrated_engine/build/v16/batches/daily_2026-10-03_192311/`). Does
+   NOT reach a real render+gate+package+PASS delivery — still the thing a
+   future dry run would need to hit. Honest finding: the new floor's mean
+   bar (3.0) is now the binding constraint on these 3 real topics, not the
+   per-dimension floor decision #15 flagged — a direct sign the floor
+   rework moved the real bottleneck rather than eliminating it; raising
+   the sampled pass rate itself (prompt/content quality) remains a
+   separate, unstarted problem.
+
+Tests: illustrated_engine 260 total, 259 passed (251 baseline + 4 (item 1)
++ 5 (item 2) = 260; one unrelated pre-existing failure,
+`test_wp3_voice.py::test_live_lexicon_fixes_tyrannosaurus`, a `KeyError`
+reproducing identically on a clean checkout of the prior commit, unrelated
+to this change). Root `tests/`: 59 failed + 5 errors = 64 failing IDs,
+diffed identical to the known-stale baseline after both commits (zero
+regressions). No secrets committed, no `--no-verify`. `tools/
+daily_shorts.sh` crontab entry stays commented out/disabled (confirmed
+unchanged before and after the dry run); `configs/publish.yaml`
+`upload.enabled` stays `false` (confirmed unchanged). Per the owner's
+explicit instruction, the cron was NOT enabled despite this being called
+the last change before go-live — that remains the owner's separate call.
+
 ## Next
 Q2 (hook timing) → Q3 (caption safe zone) → Q4 (plates) → Q5 (re-render
 Tunguska) → PR. WP13 (2-topic cap) → WP14 still pending behind the Q-queue
 per owner decision #11. If WP5's caption-grouping bug is ever picked up,
 re-run `bench/ab/wp5_parity.py` before considering `v16_compose` for live
-wiring. Decision #15's finding: if the critic bar gets revisited again,
-`RANK_FLOOR_DIM` (the per-dimension floor) is the more load-bearing
-constant now, not the mean.
+wiring. Decision #16's finding: the floor rework moved the binding
+constraint from the per-dimension floor to the mean floor (3.0) on real
+sampled topics — the sampled pass rate itself is still the open problem,
+separate from where the floor's bar sits.
