@@ -335,9 +335,86 @@ minority of sampled topics — that's a content/prompt problem beyond one
 rule tweak, not a budget/fallback problem, and is the natural next thing
 to dig into before relying on this for unattended nightly output.
 
+### Decision #15 (2026-10-03, `ace72a8`..`b49f933`) — critic calibration,
+rank-not-block, dry run 3
+Owner's conclusion going in: the script critic itself is miscalibrated
+(not just the sampled scripts), because it was scoring 0/10 real sampled
+scripts across two separate decision #14 tests. Four items to test that
+and build around it.
+
+1. **Calibration** (`ace72a8`, diagnostic only, no code change): ran the
+   CURRENT, unchanged `script_critic` (prompt_version 1) against the two
+   real samples the owner has actually read. Skater (`56b4955`,
+   `t_figure_skater_spin`, owner-rated **ACCEPTABLE**): mean **2.75**, min
+   **2** (`curiosity_gap`, `emotional_charge`) — below the OLD
+   `CRITIC_MEAN_MIN=4.0`/`CRITIC_FLOOR=3` bar on the owner's own accepted
+   sample. T-Rex (`0c7a93f`, `t_humans_closer_trex`, real generated
+   `script.txt`/`story_engine.json` existed — not fabricated): mean
+   **3.75**, min **3**. Confirms the critic is miscalibrated relative to
+   the owner's real bar, not just that the sampled scripts are bad.
+2. **Rank-not-block** (`5a3bc9f`): replaced decision #14's "try one topic,
+   fall back to the next only on a HOLD" chain with generating scripts for
+   up to 3 topics per render slot UP FRONT (≤1 rewrite each if the first
+   draft fails the existing `critic_pass` bar), scoring all 3 with the
+   real critic, and picking the highest-scoring one. That pick is produced
+   only if it clears `RANK_FLOOR_MEAN = min(3.4, 2.75-0.1) = 2.65` with no
+   dimension below `RANK_FLOOR_DIM=3` (owner's literal floor formula,
+   `SKATER_CALIBRATION_MEAN=2.75` from item 1). New
+   `engine.v16_script.rank_write_story` + `engine.v16_autostory.
+   generate_story_ranked`; `v16_batch.materialize_candidates` now offers
+   each slot 3 topics in one call instead of one-at-a-time. `_pipeline`'s
+   fact_check+metadata tail factored into a shared `_finalize` so
+   `write_story` (unchanged, still used elsewhere) and the new flow don't
+   duplicate that logic. Tests: rewrote the two decision #14 fallback-chain
+   tests to the new up-front semantics, added 3 new tests for
+   `generate_story_ranked` (picks + finalizes the winner; holds when none
+   clears the floor; a research-stage hold on one topic doesn't block the
+   other two).
+3. **Real 5-topic-infra rank-not-block run** (`b49f933`, no render): 3
+   fresh topics off the live topic engine's queue through the new flow.
+   Result: **HOLD** — all 3 scored (3.125, 2.75, 3.125 means) but every one
+   failed on `RANK_FLOOR_DIM` (min 2, `escalation`/`emotional_charge`
+   stuck at 2), the same per-dimension floor the owner's own accepted
+   skater sample also fails — not the mean floor. Full critic critiques +
+   full plain-text scripts for all 3 candidates saved (the public
+   `rank_write_story`/`generate_story_ranked` result deliberately strips
+   script text; a standalone re-run hit the same llm-cache keys at zero
+   extra cost to recover it for the owner to read).
+4. **Dry run 3** (real, `./tools/daily_shorts.sh 1`, 2026-10-03 16:27 UTC):
+   ran the new rank-not-block flow through the real cron entry point.
+   Topic engine selected a slot; rank-not-block offered 3 topics up front
+   ("Siberia's Ancient Eruption...", "Earth Was Once Frozen Solid...",
+   "Engineers Once Planned to Ride Nuclear Bombs..."); first two scored
+   (3.125, 3.25 means, both min 2) but neither cleared `RANK_FLOOR_DIM`;
+   the third held on a pure-code `check_digits` rule before ever reaching
+   the critic. Highest scorer (3.25) logged and not picked for render since
+   it didn't clear the floor — **HOLD**, delivered to the Discord channel
+   as the hold reason only, no video (message id 1555981029498552442) —
+   proves rank-not-block's real wiring (3 topics tried up front in one
+   call, all logged, best-but-still-failing one correctly not shipped) but
+   does not change the underlying sampled pass rate: the real blocker
+   across items 3 and 4 is specifically the per-dimension floor
+   (`escalation`/`emotional_charge` near-universally scoring 2), the exact
+   dimensions decision #14 already flagged as the weak spot.
+
+Tests: illustrated_engine 251/251 (248 - 2 rewritten + 5 new, all green).
+Root `tests/`: 59 failed + 5 errors = 64 failing IDs, diffed identical to
+the known-stale baseline (zero regressions). No secrets committed, no
+`--no-verify`. `tools/daily_shorts.sh` crontab entry stays commented
+out/disabled; `configs/publish.yaml` `upload.enabled` stays `false`.
+Honest finding: rank-not-block is real, tested, and wired into the live
+cron entry point, but on this evidence the quality bar's remaining
+blocker is the **per-dimension floor**, not the mean — a script that is
+good enough for the owner (skater, mean 2.75) can still fail every
+RANK_FLOOR_DIM check the same way an unreviewed topic does, because both
+land on `min=2`. That is the next thing worth the owner's attention before
+relying on rank-not-block for unattended nightly output.
+
 ## Next
 Q2 (hook timing) → Q3 (caption safe zone) → Q4 (plates) → Q5 (re-render
 Tunguska) → PR. WP13 (2-topic cap) → WP14 still pending behind the Q-queue
 per owner decision #11. If WP5's caption-grouping bug is ever picked up,
 re-run `bench/ab/wp5_parity.py` before considering `v16_compose` for live
-wiring.
+wiring. Decision #15's finding: if the critic bar gets revisited again,
+`RANK_FLOOR_DIM` (the per-dimension floor) is the more load-bearing
+constant now, not the mean.

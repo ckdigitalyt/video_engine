@@ -1,0 +1,36 @@
+{
+ "materialized": [],
+ "holds": [
+  {
+   "reason": "rank-not-block: no candidate cleared the floor: Siberia's Ancient Eruption Nearly Ended All Life on Earth: mean 3.12 min 2 below floor; Earth Was Once Frozen Solid From Pole to Pole: mean 3.25 min 2 below floor; Engineers Once Planned to Ride Nuclear Bombs Into Deep Space: script rules failing after the critic rewrite: sentence 4: on-screen 'RDS-1, 1949' shows [1.0] never spoken",
+   "topics_tried": [
+    "t_siberia_s_ancient_eruption_nearly_ended_",
+    "t_earth_was_once_frozen_solid_from_pole_to",
+    "t_engineers_once_planned_to_ride_nuclear_b"
+   ]
+  }
+ ],
+ "attempts": [
+  {
+   "title": "Siberia's Ancient Eruption Nearly Ended All Life on Earth",
+   "status": "scored",
+   "mean": 3.125,
+   "min": 2,
+   "reason": null
+  },
+  {
+   "title": "Earth Was Once Frozen Solid From Pole to Pole",
+   "status": "scored",
+   "mean": 3.25,
+   "min": 2,
+   "reason": null
+  },
+  {
+   "title": "Engineers Once Planned to Ride Nuclear Bombs Into Deep Space",
+   "status": "hold",
+   "mean": null,
+   "min": null,
+   "reason": "script rules failing after the critic rewrite: sentence 4: on-screen 'RDS-1, 1949' shows [1.0] never spoken"
+  }
+ ]
+}
