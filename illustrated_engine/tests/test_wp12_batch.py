@@ -146,6 +146,53 @@ def test_select_topics_series_bypasses_cluster_cap(tmp_path, monkeypatch):
     assert sel["picked"], "expected the series group to be picked"
 
 
+# ============================================== decision #14: topic fallback
+
+def _entry(cid, title="t"):
+    return {"id": cid, "title": title, "cluster": "c"}
+
+
+def test_materialize_falls_back_to_next_queue_topic_on_hold(tmp_path, monkeypatch):
+    import engine.v16_batch as batch_mod
+    picked = [_entry("a", "A")]
+    queue = [_entry("a", "A"), _entry("b", "B"), _entry("c", "C")]
+    calls = []
+
+    def fake_generate_story(c, ask=None):
+        calls.append(c["id"])
+        if c["id"] == "a":
+            return {"status": "hold", "reason": "critic below bar after 2 rewrite(s)"}
+        return {"status": "ok", "story": {"story_id": c["id"], "title": c["title"]}}
+
+    import engine.v16_autostory as autostory_mod
+    monkeypatch.setattr(autostory_mod, "generate_story", fake_generate_story)
+    monkeypatch.setattr(autostory_mod, "write_story_dir",
+                        lambda s, d=None: Path(f"/tmp/{s['story_id']}"))
+    mat = batch_mod.materialize_candidates(picked, tmp_path, queue=queue)
+    assert calls == ["a", "b"]
+    assert len(mat["dirs"]) == 1 and not mat["holds"]
+    assert [a["id"] for a in mat["attempts"]] == ["a", "b"]
+
+
+def test_materialize_holds_after_exhausting_three_topics(tmp_path, monkeypatch):
+    import engine.v16_batch as batch_mod
+    import engine.v16_autostory as autostory_mod
+    picked = [_entry("a", "A")]
+    queue = [_entry("a", "A"), _entry("b", "B"), _entry("c", "C"), _entry("d", "D")]
+    calls = []
+
+    def fake_generate_story(c, ask=None):
+        calls.append(c["id"])
+        return {"status": "hold", "reason": f"{c['id']} held"}
+
+    monkeypatch.setattr(autostory_mod, "generate_story", fake_generate_story)
+    mat = batch_mod.materialize_candidates(picked, tmp_path, queue=queue)
+    assert calls == ["a", "b", "c"]            # MAX_TOPICS_PER_SLOT=3, "d" never tried
+    assert not mat["dirs"] and len(mat["holds"]) == 1
+    assert mat["holds"][0]["topics_tried"] == ["a", "b", "c"]
+    assert len(mat["attempts"]) == 3
+
+
 # ====================================================== quota pause/resume
 
 def _fake_report(story_id: str) -> dict:

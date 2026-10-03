@@ -173,28 +173,62 @@ def select_topics(n: int, *, series: str | None = None,
     return {"picked": picked, "queue": queue, "raw_count": result["raw_count"]}
 
 
-def materialize_candidates(picked: list, work: Path, *, ask=None) -> dict:
+MAX_TOPICS_PER_SLOT = 3  # decision #14 item 2: topic-fallback chain
+
+
+def materialize_candidates(picked: list, work: Path, *, queue: list | None = None,
+                           ask=None) -> dict:
     """decision #13 item 5: closes the "queued, not yet materialized" gap —
     each picked candidate (or series part) -> engine.v16_autostory.
     generate_story -> a written stories/<id>/story.json. A candidate that
     HOLDs during research/script generation is recorded, never silently
     dropped or force-shipped; it simply contributes no story dir to render
-    this run."""
+    this run.
+
+    Decision #14 item 2: a slot whose candidate HOLDs (e.g. the script critic
+    still below bar after its rewrites) falls back to the next-ranked,
+    not-yet-used entry in `queue` (the topic engine's full ranked queue, a
+    superset of `picked`) and retries the same generate_story flow there, up
+    to MAX_TOPICS_PER_SLOT topics total for that slot. Only a slot that
+    exhausts every fallback contributes a hold. Every attempt (topic, status,
+    reason) is logged to materialize_report.json's "attempts" list."""
     from engine.v16_autostory import generate_story, write_story_dir
-    dirs, holds = [], []
+
+    def _parts(e):
+        return e["parts"] if "parts" in e else [e]
+
+    used_ids = {c.get("id") for e in picked for c in _parts(e)}
+    fallback_pool = [c for e in (queue or []) for c in _parts(e)
+                    if c.get("id") not in used_ids]
+    fallback_iter = iter(fallback_pool)
+
+    dirs, holds, attempts = [], [], []
     for e in picked:
-        parts = e["parts"] if "parts" in e else [e]
-        for c in parts:
+        for c in _parts(e):
+            tried = [c]
             res = generate_story(c, ask=ask)
+            attempts.append({"id": c.get("id"), "title": c.get("title"),
+                             "attempt": len(tried), "status": res["status"],
+                             "reason": res.get("reason")})
+            while res["status"] != "ok" and len(tried) < MAX_TOPICS_PER_SLOT:
+                nxt = next(fallback_iter, None)
+                if nxt is None:
+                    break
+                tried.append(nxt)
+                res = generate_story(nxt, ask=ask)
+                attempts.append({"id": nxt.get("id"), "title": nxt.get("title"),
+                                 "attempt": len(tried), "status": res["status"],
+                                 "reason": res.get("reason")})
             if res["status"] == "ok":
                 dirs.append(write_story_dir(res["story"]))
             else:
-                holds.append({"id": c.get("id"), "title": c.get("title"),
-                             "reason": res["reason"]})
+                holds.append({"id": tried[-1].get("id"), "title": tried[-1].get("title"),
+                             "reason": res["reason"],
+                             "topics_tried": [x.get("id") for x in tried]})
     (Path(work) / "materialize_report.json").write_text(
-        json.dumps({"materialized": [str(d) for d in dirs], "holds": holds},
-                  indent=1))
-    return {"dirs": dirs, "holds": holds}
+        json.dumps({"materialized": [str(d) for d in dirs], "holds": holds,
+                   "attempts": attempts}, indent=1))
+    return {"dirs": dirs, "holds": holds, "attempts": attempts}
 
 
 # ============================================================ quota gating
@@ -373,7 +407,7 @@ def main() -> int:
         # engine.v16_autostory now closes the "turning a freshly ideated
         # topic into a renderable stories/<id>/story.json" gap this CLI
         # used to flag here (research+script engine wired live).
-        mat = materialize_candidates(sel["picked"], work)
+        mat = materialize_candidates(sel["picked"], work, queue=sel["queue"])
         materialized_dirs = mat["dirs"]
         print(f"materialized {len(materialized_dirs)}/{len(sel['picked'])} "
              f"topics into story dirs ({len(mat['holds'])} held during "
