@@ -190,8 +190,8 @@ def materialize_candidates(picked: list, work: Path, *, queue: list | None = Non
     plus the next not-yet-used entries in `queue` (the topic engine's full
     ranked queue, a superset of `picked`) — generated and scored together
     by `generate_story_ranked`, which picks the single highest-scoring one
-    and only produces it if it clears the calibrated floor
-    (engine.v16_script.RANK_FLOOR_MEAN/RANK_FLOOR_DIM). A slot only holds if
+    and only produces it if it clears the floor
+    (engine.v16_script.RANK_FLOOR_MEAN / per-dimension `clears_rank_floor`). A slot only holds if
     none of its topics clears that floor. Every topic tried, scored or not,
     is logged to materialize_report.json's "attempts" list."""
     from engine.v16_autostory import generate_story_ranked, write_story_dir
