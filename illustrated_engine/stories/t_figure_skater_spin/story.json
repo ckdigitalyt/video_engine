@@ -1,0 +1,118 @@
+{
+ "story_id": "t_figure_skater_spin",
+ "brand": "EVENT HORIZON",
+ "title": "SHE NEVER PUSHES OFF AGAIN",
+ "subject": "spectacle_physics",
+ "story_type": "science_process",
+ "pad_s": 0.4,
+ "v7": {
+  "title_overlay": true
+ },
+ "concepts": [
+  {
+   "id": "skater",
+   "beats": ["B1", "B2", "B3", "B4", "B5", "B6"],
+   "verb": "spin"
+  },
+  {
+   "id": "arms",
+   "beats": ["B1", "B3", "B5", "B6"],
+   "verb": "pull"
+  },
+  {
+   "id": "angular_momentum",
+   "beats": ["B2", "B4", "B6"],
+   "verb": "stay"
+  }
+ ],
+ "beats": [
+  {
+   "beat_id": "B1",
+   "function": "HOOK",
+   "contradiction": {
+    "viewer_thinks": "a skater has to push off the ice again to spin faster",
+    "actually": "she speeds up with no new push at all, just by pulling her arms in",
+    "reveal_beat": "B4"
+   },
+   "narration": "Figure skaters speed up their spin without kicking off the ice again, without any new push at all. They just pull their arms in.",
+   "claim": "a spinning figure skater can speed up without any outside push, just by pulling her arms in",
+   "visual_question": "how does she go faster without pushing again?",
+   "visual_answer": "split screen: the same skater mid-spin, arms stretched wide on one side spinning slowly, arms pulled tight to her chest on the other side spinning fast, same ice, no new push shown",
+   "fact_ids": ["f_am_conserved"],
+   "start": 0.0,
+   "end": 8.0
+  },
+  {
+   "beat_id": "B2",
+   "function": "CURIOSITY",
+   "narration": "What's actually holding steady is called angular momentum, and on frictionless ice, nothing is touching her to change it.",
+   "claim": "angular momentum stays constant when no outside torque acts on the skater",
+   "visual_question": "what's the hidden quantity that isn't allowed to change?",
+   "visual_answer": "the skater's spinning silhouette with a glowing bar labeled angular momentum that stays the exact same length as her pose changes",
+   "fact_ids": ["f_am_conserved"],
+   "start": 8.0,
+   "end": 16.0
+  },
+  {
+   "beat_id": "B3",
+   "function": "ESCALATION",
+   "narration": "The only thing changing is her moment of inertia — basically how far her mass sits from the spin axis. Arms out, that number is big. Arms in, it drops fast.",
+   "claim": "pulling the arms in toward the body reduces the skater's moment of inertia",
+   "visual_question": "what number is actually shrinking?",
+   "visual_answer": "the skater drawn as a spinning disk with radius arrows marking her arm span, the arrows shrinking inward as her arms pull in, labeled moment of inertia",
+   "fact_ids": ["f_moi_arms"],
+   "start": 16.0,
+   "end": 26.0
+  },
+  {
+   "beat_id": "B4",
+   "function": "REVEAL",
+   "narration": "Angular momentum is just that number times her spin rate. If the number drops and the momentum has to stay fixed, the spin rate has to jump up to make up the difference.",
+   "claim": "angular momentum equals moment of inertia times spin rate, so a smaller moment of inertia forces a larger spin rate at constant angular momentum",
+   "visual_question": "where does the lost inertia number go?",
+   "visual_answer": "a balance scale showing moment of inertia times spin rate on each side, the inertia side shrinking while the spin-rate side visibly speeds up to keep both sides equal",
+   "fact_ids": ["f_L_eq_Iw"],
+   "start": 26.0,
+   "end": 36.0
+  },
+  {
+   "beat_id": "B5",
+   "function": "EXPLANATION",
+   "narration": "That part isn't free, though. Spinning faster means more kinetic energy, and that energy has to come from somewhere — it comes from her own arms, working against the spin as she pulls them in.",
+   "claim": "the skater's rotational kinetic energy increases as she pulls her arms in, and that extra energy comes from the work her own muscles do, not from an outside push",
+   "visual_question": "so is this really something for nothing?",
+   "visual_answer": "close on the skater's arms pulling inward, straining against the spin, a small glow of effort at her shoulders as the rest of her body visibly speeds up",
+   "fact_ids": ["f_energy_not_free"],
+   "start": 36.0,
+   "end": 48.0
+  },
+  {
+   "beat_id": "B6",
+   "function": "PAYOFF",
+   "narration": "So the push she never needed came from the ice. The energy she did need came from her own arms the whole time.",
+   "claim": "the skater needs no outside push to spin faster, but the extra energy of the faster spin comes from her own arms, not from nowhere",
+   "visual_question": "so what's the real takeaway?",
+   "visual_answer": "the full split screen resolved: arms-wide slow spin on one side, arms-in fast spin on the other, a small highlighted arrow showing effort flowing from her arms into her spin, no arrow coming from the ice",
+   "fact_ids": ["f_am_conserved", "f_energy_not_free"],
+   "start": 48.0,
+   "end": 58.0
+  }
+ ],
+ "visual_grammars": ["before_after"],
+ "visual_contradiction": {
+  "seems": "a skater has to push off the ice again to spin faster",
+  "actually": "she speeds up with no new push at all, just by pulling her arms in, and the extra spin energy comes from her own arms, not the ice",
+  "reveal": "the balance scale showing moment of inertia shrinking while spin rate rises to keep angular momentum fixed",
+  "beat": "B4"
+ },
+ "hook_plan": {
+  "subject_visible_s": 1.0,
+  "curiosity_s": 2.0,
+  "question_s": 5.0,
+  "no_black_fade_at_0_5": true
+ },
+ "payoff_image": {
+  "image": "the full split screen resolved: arms-wide slow spin on one side, arms-in fast spin on the other, a small highlighted arrow showing effort flowing from her arms into her spin, no arrow coming from the ice",
+  "beat": "B6"
+ }
+}

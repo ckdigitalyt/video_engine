@@ -1,0 +1,33 @@
+{
+ "key": "34fca968d4b8140f",
+ "file": "audio/beat_B6.wav",
+ "duration": 6.498,
+ "provider": "kokoro",
+ "voice_id": "am_michael",
+ "model": "~/models/kokoro/kokoro-v1.0.onnx",
+ "commercial_ok": true,
+ "license_ref": "Apache-2.0",
+ "rtf": 1.094,
+ "qa": {
+  "wer": 0.0435,
+  "errors": 1,
+  "ref_tokens": 23,
+  "max_wer": 0.03,
+  "bad_word_idx": [
+   9
+  ],
+  "hard_missed": [],
+  "hard_missed_idx": [],
+  "heard": "so the push she never needed came from the eyes the energy she did need came from her own arms the whole time",
+  "verdict": "HOLD",
+  "checked": true,
+  "retried_sentences": [
+   0
+  ],
+  "first_pass": {
+   "wer": 0.0435,
+   "hard_missed": []
+  }
+ },
+ "timing_method": "whisper_base_en_v1"
+}

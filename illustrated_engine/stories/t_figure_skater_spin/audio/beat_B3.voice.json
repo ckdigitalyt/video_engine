@@ -1,0 +1,25 @@
+{
+ "key": "af4115de05c8335e",
+ "file": "audio/beat_B3.wav",
+ "duration": 10.378,
+ "provider": "kokoro",
+ "voice_id": "am_michael",
+ "model": "~/models/kokoro/kokoro-v1.0.onnx",
+ "commercial_ok": true,
+ "license_ref": "Apache-2.0",
+ "rtf": 0.646,
+ "qa": {
+  "wer": 0.0,
+  "errors": 0,
+  "ref_tokens": 30,
+  "max_wer": 0.03,
+  "bad_word_idx": [],
+  "hard_missed": [],
+  "hard_missed_idx": [],
+  "heard": "the only thing changing is her moment of inertia basically how far her mass sits from the spin axis arms out that number is big arms in it drops fast",
+  "verdict": "PASS",
+  "checked": true,
+  "retried_sentences": []
+ },
+ "timing_method": "whisper_base_en_v1"
+}

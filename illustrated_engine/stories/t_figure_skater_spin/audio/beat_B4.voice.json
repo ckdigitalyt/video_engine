@@ -1,0 +1,25 @@
+{
+ "key": "86fa0beddd58debe",
+ "file": "audio/beat_B4.wav",
+ "duration": 10.28,
+ "provider": "kokoro",
+ "voice_id": "am_michael",
+ "model": "~/models/kokoro/kokoro-v1.0.onnx",
+ "commercial_ok": true,
+ "license_ref": "Apache-2.0",
+ "rtf": 0.61,
+ "qa": {
+  "wer": 0.0,
+  "errors": 0,
+  "ref_tokens": 33,
+  "max_wer": 0.03,
+  "bad_word_idx": [],
+  "hard_missed": [],
+  "hard_missed_idx": [],
+  "heard": "angular momentum is just that number times her spin rate if the number drops and the momentum has to stay fixed the spin rate has to jump up to make up the difference",
+  "verdict": "PASS",
+  "checked": true,
+  "retried_sentences": []
+ },
+ "timing_method": "whisper_base_en_v1"
+}

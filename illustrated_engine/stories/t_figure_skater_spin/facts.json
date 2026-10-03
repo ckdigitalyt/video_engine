@@ -1,0 +1,57 @@
+{
+  "topic_id": "t_figure_skater_spin",
+  "title": "A Figure Skater Spins Faster Without Any Outside Push",
+  "cluster": "spectacle_physics",
+  "provenance": "Owner decision #12 part C sample run (2026-10-03), topic from data/topic_history.jsonl's queued set (score 92, id t_a_figure_skater_spins_faster_without_add; the higher-scored t_humans_are_closer_to_t_rex_than_t_rex_wa was skipped, already used for t_humans_closer_trex). Source-checked live against Wikipedia (no web-search API in this session; see bench/ab/topic_figure_skater_source_check.md).",
+  "claims": [
+    {
+      "id": "f_am_conserved",
+      "claim": "A spinning figure skater conserves angular momentum when no outside torque acts on her; pulling her arms and legs in decreases her moment of inertia and increases her spin rate.",
+      "nuance": "ESTABLISHED",
+      "verified": true,
+      "source_hint": "Wikipedia: Angular momentum",
+      "source_check": {
+        "verdict": "SUPPORTED",
+        "url": "https://en.wikipedia.org/wiki/Angular_momentum",
+        "checked": "2026-10-03"
+      }
+    },
+    {
+      "id": "f_moi_arms",
+      "claim": "Pulling the arms in toward the body reduces a spinning skater's moment of inertia.",
+      "nuance": "ESTABLISHED",
+      "verified": true,
+      "source_hint": "Wikipedia: Moment of inertia",
+      "source_check": {
+        "verdict": "SUPPORTED",
+        "url": "https://en.wikipedia.org/wiki/Moment_of_inertia",
+        "checked": "2026-10-03"
+      }
+    },
+    {
+      "id": "f_L_eq_Iw",
+      "claim": "Angular momentum equals moment of inertia times angular velocity (L = I*omega); if angular momentum stays fixed, a smaller moment of inertia means a larger angular velocity.",
+      "nuance": "ESTABLISHED",
+      "verified": true,
+      "source_hint": "Simple Wikipedia: Angular momentum",
+      "source_check": {
+        "verdict": "SUPPORTED",
+        "url": "https://simple.wikipedia.org/wiki/Angular_momentum",
+        "checked": "2026-10-03"
+      }
+    },
+    {
+      "id": "f_energy_not_free",
+      "claim": "The spin-up is not energy-free: rotational kinetic energy equals L^2/(2*I), so holding angular momentum fixed while moment of inertia drops means kinetic energy goes up. That extra energy comes from the work the skater's own muscles do pulling her arms inward against the inertial resistance, not from any outside push.",
+      "nuance": "ESTABLISHED, corrects a common overstatement",
+      "verified": true,
+      "source_hint": "Derived from the L=I*omega and KE=L^2/(2I) relations on Wikipedia: Angular momentum",
+      "source_check": {
+        "verdict": "SUPPORTED",
+        "url": "https://en.wikipedia.org/wiki/Angular_momentum",
+        "checked": "2026-10-03"
+      }
+    }
+  ],
+  "honesty_note": "Do not claim the spin-up is free of energy input (it isn't; kinetic energy rises, from the skater's own muscles) — the thing that's actually conserved, and actually surprising, is angular momentum, not energy. Do not invent a specific 'N times faster' multiplier; no reliably sourced figure was found, so narration stays qualitative on magnitude and exact on the mechanism."
+}

@@ -1,0 +1,25 @@
+{
+ "key": "4afb0f02c74e7cdb",
+ "file": "audio/beat_B2.wav",
+ "duration": 7.422,
+ "provider": "kokoro",
+ "voice_id": "am_michael",
+ "model": "~/models/kokoro/kokoro-v1.0.onnx",
+ "commercial_ok": true,
+ "license_ref": "Apache-2.0",
+ "rtf": 0.582,
+ "qa": {
+  "wer": 0.0,
+  "errors": 0,
+  "ref_tokens": 19,
+  "max_wer": 0.03,
+  "bad_word_idx": [],
+  "hard_missed": [],
+  "hard_missed_idx": [],
+  "heard": "whats actually holding steady is called angular momentum and on frictionless ice nothing is touching her to change it",
+  "verdict": "PASS",
+  "checked": true,
+  "retried_sentences": []
+ },
+ "timing_method": "whisper_base_en_v1"
+}
