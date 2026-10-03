@@ -1,0 +1,87 @@
+[
+ {
+  "id": "t_the_footprints_on_the_moon_will_outlast_",
+  "title": "The Footprints on the Moon Will Outlast Humanity",
+  "status": "hold",
+  "verdict": "HOLD",
+  "scores": {
+   "hook_strength": 3,
+   "curiosity_gap": 3,
+   "escalation": 2,
+   "payoff_clarity": 2,
+   "loop_coherence": 4,
+   "human_voice": 3,
+   "emotional_charge": 3,
+   "one_idea_only": 4
+  },
+  "reason": "script: critic below bar after 2 rewrite(s): {'hook_strength': 3, 'curiosity_gap': 3, 'escalation': 2, 'payoff_clarity': 2, 'loop_coherence': 4, 'human_voice': 3, 'emotional_charge': 3, 'one_idea_only': 4}"
+ },
+ {
+  "id": "t_earth_s_oceans_could_boil_away_in_a_bill",
+  "title": "Earth's Oceans Could Boil Away in a Billion Years",
+  "status": "hold",
+  "verdict": "HOLD",
+  "scores": {
+   "hook_strength": 3,
+   "curiosity_gap": 2,
+   "escalation": 2,
+   "payoff_clarity": 2,
+   "loop_coherence": 4,
+   "human_voice": 2,
+   "emotional_charge": 2,
+   "one_idea_only": 1
+  },
+  "reason": "script: script rules failing after the critic rewrite: sentence 5: numbers [70.0] are not in its cited facts; sentence 5: on-screen '70.8% ocean' shows [70.8] never spoken; sentence 8: on-screen '+50% CO2' shows [2.0] never spoken"
+ },
+ {
+  "id": "t_a_day_used_to_be_only_19_hours",
+  "title": "A Day Used to Be Only 19 Hours",
+  "status": "hold",
+  "verdict": "HOLD",
+  "scores": {
+   "hook_strength": 4,
+   "curiosity_gap": 2,
+   "escalation": 1,
+   "payoff_clarity": 1,
+   "loop_coherence": 4,
+   "human_voice": 2,
+   "emotional_charge": 1,
+   "one_idea_only": 2
+  },
+  "reason": "script: script rules failing after the critic rewrite: sentence 5: on-screen '2.4 HOURS EACH' shows [2.4] never spoken"
+ },
+ {
+  "id": "t_lightning_is_hotter_than_the_surface_of_",
+  "title": "Lightning Is Hotter Than the Surface of the Sun",
+  "status": "hold",
+  "verdict": "HOLD",
+  "scores": {
+   "hook_strength": 3,
+   "curiosity_gap": 1,
+   "escalation": 2,
+   "payoff_clarity": 1,
+   "loop_coherence": 4,
+   "human_voice": 3,
+   "emotional_charge": 2,
+   "one_idea_only": 2
+  },
+  "reason": "script: script rules failing after the critic rewrite: sentence 5: numbers [400000.0] are not in its cited facts"
+ },
+ {
+  "id": "t_the_mountain_that_s_still_growing_every_",
+  "title": "The Mountain That's Still Growing Every Year",
+  "status": "hold",
+  "verdict": "HOLD",
+  "scores": {
+   "hook_strength": 4,
+   "curiosity_gap": 3,
+   "escalation": 2,
+   "payoff_clarity": 2,
+   "loop_coherence": 4,
+   "human_voice": 4,
+   "emotional_charge": 3,
+   "one_idea_only": 3
+  },
+  "reason": "script: critic below bar after 2 rewrite(s): {'hook_strength': 4, 'curiosity_gap': 3, 'escalation': 2, 'payoff_clarity': 2, 'loop_coherence': 4, 'human_voice': 4, 'emotional_charge': 3, 'one_idea_only': 3}"
+ }
+]
