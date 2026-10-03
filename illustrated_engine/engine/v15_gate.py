@@ -240,7 +240,10 @@ def check_caption_clause_breaks(overlays: list) -> dict:
         if ws and ws[-1] in _CAPTION_FUNCTION_WORDS:
             fails.append(f"cue {text!r} ends on a function word "
                         "(mid-clause break)")
-    return {"ok": not fails, "fails": fails[:10], "cues": len(order)}
+    # decision #13: demoted HOLD -> warning (owner review of Sample 2's 4
+    # flagged cues judged them readable; still logged for the scorecard).
+    return {"ok": not fails, "fails": fails[:10], "cues": len(order),
+            "warning": True}
 
 
 def _plate_paths(specs: dict) -> list:
@@ -299,8 +302,15 @@ def check_voice(voice: dict | None) -> dict:
     held = [b for b in qa.get("held_beats") or []
             if b not in (qa.get("unchecked_beats") or [])]
     if held:
+        # bug fix (decision #13): this used to report qa["wer"], the WHOLE-
+        # VIDEO aggregate WER, as if it were each failing beat's own score
+        # (e.g. "beats ['B6'] (WER 0.0061...)" when B6 itself actually
+        # scored 0.0435) — misleading when one bad beat sits in an otherwise
+        # clean video. Report each held beat's own per-beat WER instead.
+        beat_wer = qa.get("beat_wer") or {}
+        detail = ", ".join(f"{b}={beat_wer.get(b)}" for b in held)
         fails.append(f"round-trip QA failed on beats {held} "
-                     f"(WER {qa.get('wer')}, limit {qa.get('max_wer')})")
+                     f"(per-beat WER: {detail}, limit {qa.get('max_wer')})")
     if not voice.get("publishable"):
         fails.append(f"voice {voice.get('provider')}/{voice.get('voice_id')} "
                      f"is not cleared for commercial use")
@@ -569,7 +579,10 @@ def run_judge(video: Path, story: dict, beat_windows: dict, work: Path,
 # ---------------------------------------------------------------- run --
 
 def verdict_of(checks: dict) -> str:
-    bad = [c for c in checks.values() if not c["ok"]]
+    # decision #13: a check can be marked "warning" (e.g. distinctness,
+    # caption_clause_breaks) — still reported on failure, never HOLD/FAIL-
+    # causing. The check itself is not removed, only its severity.
+    bad = [c for c in checks.values() if not c["ok"] and not c.get("warning")]
     if any(c.get("critical") for c in bad):
         return "FAIL"
     return "HOLD" if bad else "PASS"

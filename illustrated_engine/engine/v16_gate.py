@@ -144,11 +144,14 @@ def check_distinctness(video_id: str, meta: dict, plate_paths: list,
                 if hamming(ph, hh) <= DHASH_MAX_REUSE_DISTANCE:
                     fails.append(f"plate near-duplicate of one used in "
                                  f"{h['video_id']} (Hamming {hamming(ph, hh)})")
+    # decision #13: demoted HOLD -> warning (sample-set is still small
+    # enough that near-miss shot/template sequences are common; still
+    # logged + scored, no longer HOLD-causing on its own).
     return {"ok": not fails, "fails": sorted(set(fails))[:10],
             "signature": sig, "plate_hashes": hashes,
             "nearest_signature_distance": (round(nearest, 3)
                                            if nearest is not None else None),
-            "history_size": len(history)}
+            "history_size": len(history), "warning": True}
 
 
 # ------------------------------------------------------------- scorecard --

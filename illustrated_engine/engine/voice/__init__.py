@@ -345,5 +345,6 @@ def synthesize_video(story_dir, beats: list, cfg: dict | None = None, *,
         qa={"verdict": "HOLD" if hold else "PASS",
             "wer": round(err / ref, 4) if ref else None,
             "held_beats": hold, "unchecked_beats": unchecked,
+            "beat_wer": {b: i["qa"].get("wer") for b, i in out.items()},
             "max_wer": cfg["qa"]["max_wer"]})}
 
