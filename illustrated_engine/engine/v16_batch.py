@@ -173,6 +173,30 @@ def select_topics(n: int, *, series: str | None = None,
     return {"picked": picked, "queue": queue, "raw_count": result["raw_count"]}
 
 
+def materialize_candidates(picked: list, work: Path, *, ask=None) -> dict:
+    """decision #13 item 5: closes the "queued, not yet materialized" gap —
+    each picked candidate (or series part) -> engine.v16_autostory.
+    generate_story -> a written stories/<id>/story.json. A candidate that
+    HOLDs during research/script generation is recorded, never silently
+    dropped or force-shipped; it simply contributes no story dir to render
+    this run."""
+    from engine.v16_autostory import generate_story, write_story_dir
+    dirs, holds = [], []
+    for e in picked:
+        parts = e["parts"] if "parts" in e else [e]
+        for c in parts:
+            res = generate_story(c, ask=ask)
+            if res["status"] == "ok":
+                dirs.append(write_story_dir(res["story"]))
+            else:
+                holds.append({"id": c.get("id"), "title": c.get("title"),
+                             "reason": res["reason"]})
+    (Path(work) / "materialize_report.json").write_text(
+        json.dumps({"materialized": [str(d) for d in dirs], "holds": holds},
+                  indent=1))
+    return {"dirs": dirs, "holds": holds}
+
+
 # ============================================================ quota gating
 
 def _llm_blocked(stages=LLM_STAGES) -> dict | None:
@@ -338,21 +362,25 @@ def main() -> int:
     a = ap.parse_args()
     work = Path(a.work)
 
+    materialized_dirs = []
     if a.n:
         sel = select_topics(a.n, series=a.series)
         print(f"topic engine selected {len(sel['picked'])}/{a.n} "
               f"({sel['raw_count']} raw candidates)")
-        # DESIGN §13.2's selection step is real above; turning a freshly
-        # ideated topic into a renderable `stories/<id>/story.json` needs
-        # the research+script engine (WP4) wired live, which it is not
-        # yet (module docstring / WP11's own report flag this gap) — so
-        # auto-selected topics are reported/queued here, not rendered.
         work.mkdir(parents=True, exist_ok=True)
         (work / "topics_queued.json").write_text(json.dumps(sel, indent=1, default=str))
-        if not a.stories and not a.all:
-            print("no --stories/--all given: nothing renderable this run "
-                 "(auto-selected topics are queued, not yet materialized "
-                 "into story dirs) — see topics_queued.json")
+        # decision #13 item 5: DESIGN §13.2's selection step is real above;
+        # engine.v16_autostory now closes the "turning a freshly ideated
+        # topic into a renderable stories/<id>/story.json" gap this CLI
+        # used to flag here (research+script engine wired live).
+        mat = materialize_candidates(sel["picked"], work)
+        materialized_dirs = mat["dirs"]
+        print(f"materialized {len(materialized_dirs)}/{len(sel['picked'])} "
+             f"topics into story dirs ({len(mat['holds'])} held during "
+             f"research/script generation — see materialize_report.json)")
+        if not a.stories and not a.all and not materialized_dirs:
+            print("nothing renderable this run: every selected topic held "
+                 "during research/script generation — see materialize_report.json")
             return 0
 
     pf = preflight(work, n_videos=max(a.n, 1))
@@ -365,6 +393,7 @@ def main() -> int:
         dirs = sorted(p.parent for p in (ROOT / "stories").glob("*/story.json"))
     else:
         dirs = [Path(s) for s in a.stories.split(",") if s.strip()]
+    dirs = list(dict.fromkeys(dirs + materialized_dirs))  # dedupe, keep order
     if not dirs and not a.resume:
         ap.error("no stories given (--stories/--all/--resume)")
 
