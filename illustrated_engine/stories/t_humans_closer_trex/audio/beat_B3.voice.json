@@ -1,0 +1,31 @@
+{
+ "key": "8cea97b3e0b97222",
+ "file": "audio/beat_B3.wav",
+ "duration": 8.568,
+ "provider": "kokoro",
+ "voice_id": "am_michael",
+ "model": "~/models/kokoro/kokoro-v1.0.onnx",
+ "commercial_ok": true,
+ "license_ref": "Apache-2.0",
+ "rtf": 1.212,
+ "qa": {
+  "wer": 0.0,
+  "errors": 0,
+  "ref_tokens": 19,
+  "max_wer": 0.03,
+  "bad_word_idx": [],
+  "hard_missed": [],
+  "hard_missed_idx": [],
+  "heard": "tyrannosaurus didnt arrive until the very end of the cretaceous around sixty nine to sixty six million years ago",
+  "verdict": "PASS",
+  "checked": true,
+  "retried_sentences": [
+   0
+  ],
+  "first_pass": {
+   "wer": 0.1053,
+   "hard_missed": []
+  }
+ },
+ "timing_method": "whisper_base_en_v1"
+}

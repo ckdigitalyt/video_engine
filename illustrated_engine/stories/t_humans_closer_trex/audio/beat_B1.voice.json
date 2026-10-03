@@ -1,0 +1,25 @@
+{
+ "key": "7c5b801d58ccf43f",
+ "file": "audio/beat_B1.wav",
+ "duration": 6.126,
+ "provider": "kokoro",
+ "voice_id": "am_michael",
+ "model": "~/models/kokoro/kokoro-v1.0.onnx",
+ "commercial_ok": true,
+ "license_ref": "Apache-2.0",
+ "rtf": 0.65,
+ "qa": {
+  "wer": 0.0,
+  "errors": 0,
+  "ref_tokens": 15,
+  "max_wer": 0.03,
+  "bad_word_idx": [],
+  "hard_missed": [],
+  "hard_missed_idx": [],
+  "heard": "tyrannosaurus rex and stegosaurus get drawn side by side all the time they never met",
+  "verdict": "PASS",
+  "checked": true,
+  "retried_sentences": []
+ },
+ "timing_method": "whisper_base_en_v1"
+}

@@ -1,0 +1,25 @@
+{
+ "key": "35ef48b177a96afd",
+ "file": "audio/beat_B2.wav",
+ "duration": 7.359,
+ "provider": "kokoro",
+ "voice_id": "am_michael",
+ "model": "~/models/kokoro/kokoro-v1.0.onnx",
+ "commercial_ok": true,
+ "license_ref": "Apache-2.0",
+ "rtf": 0.874,
+ "qa": {
+  "wer": 0.0,
+  "errors": 0,
+  "ref_tokens": 19,
+  "max_wer": 0.03,
+  "bad_word_idx": [],
+  "hard_missed": [],
+  "hard_missed_idx": [],
+  "heard": "stegosaurus lived about one hundred fifty five to one hundred forty five million years ago in the late jurassic",
+  "verdict": "PASS",
+  "checked": true,
+  "retried_sentences": []
+ },
+ "timing_method": "whisper_base_en_v1"
+}

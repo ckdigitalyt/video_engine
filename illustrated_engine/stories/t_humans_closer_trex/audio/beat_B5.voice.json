@@ -1,0 +1,25 @@
+{
+ "key": "bcee9573738f7cc5",
+ "file": "audio/beat_B5.wav",
+ "duration": 13.654,
+ "provider": "kokoro",
+ "voice_id": "am_michael",
+ "model": "~/models/kokoro/kokoro-v1.0.onnx",
+ "commercial_ok": true,
+ "license_ref": "Apache-2.0",
+ "rtf": 0.571,
+ "qa": {
+  "wer": 0.0,
+  "errors": 0,
+  "ref_tokens": 29,
+  "max_wer": 0.03,
+  "bad_word_idx": [],
+  "hard_missed": [],
+  "hard_missed_idx": [],
+  "heard": "tyrannosaurus went extinct about sixty six million years ago measured against that same stretch modern humans sit far closer in time to tyrannosaurus than tyrannosaurus ever was to stegosaurus",
+  "verdict": "PASS",
+  "checked": true,
+  "retried_sentences": []
+ },
+ "timing_method": "whisper_base_en_v1"
+}

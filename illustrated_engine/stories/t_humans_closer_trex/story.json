@@ -1,0 +1,123 @@
+{
+ "story_id": "t_humans_closer_trex",
+ "brand": "EVENT HORIZON",
+ "title": "T-REX NEVER MET STEGOSAURUS",
+ "subject": "deep_time",
+ "story_type": "deep_time_comparison",
+ "pad_s": 0.4,
+ "v7": {
+  "title_overlay": true
+ },
+ "concepts": [
+  {
+   "id": "stegosaurus",
+   "beats": ["B1", "B2", "B4"],
+   "verb": "stand"
+  },
+  {
+   "id": "tyrannosaurus",
+   "beats": ["B1", "B3", "B4", "B5"],
+   "verb": "stalk"
+  },
+  {
+   "id": "timeline",
+   "beats": ["B2", "B3", "B4", "B6"],
+   "verb": "stretch"
+  },
+  {
+   "id": "human",
+   "beats": ["B5", "B6"],
+   "verb": "stand"
+  }
+ ],
+ "beats": [
+  {
+   "beat_id": "B1",
+   "function": "HOOK",
+   "contradiction": {
+    "viewer_thinks": "Tyrannosaurus and Stegosaurus are both just old dinosaurs from the same prehistoric scene",
+    "actually": "tens of millions of years separate them, and that gap is wider than the one between Tyrannosaurus and us",
+    "reveal_beat": "B5"
+   },
+   "narration": "Tyrannosaurus rex and Stegosaurus get drawn side by side all the time. They never met.",
+   "claim": "Tyrannosaurus rex and Stegosaurus are separated by a large span of time and did not coexist",
+   "visual_question": "why would two famous dinosaurs never have crossed paths?",
+   "visual_answer": "Stegosaurus standing alone on a Jurassic plain, Tyrannosaurus stalking a separate, much later scene, a gap of empty timeline between them",
+   "fact_ids": ["f_trex_range", "f_stego_range"],
+   "start": 0.0,
+   "end": 8.0
+  },
+  {
+   "beat_id": "B2",
+   "function": "CURIOSITY",
+   "narration": "Stegosaurus lived about one hundred fifty-five to one hundred forty-five million years ago, in the late Jurassic.",
+   "claim": "Stegosaurus lived from about 155 to 145 million years ago",
+   "visual_question": "when exactly did Stegosaurus walk the Earth?",
+   "visual_answer": "a timeline band marking one hundred fifty-five to one hundred forty-five million years ago, Stegosaurus standing on it",
+   "fact_ids": ["f_stego_range"],
+   "start": 8.0,
+   "end": 16.0
+  },
+  {
+   "beat_id": "B3",
+   "function": "ESCALATION",
+   "narration": "Tyrannosaurus didn't arrive until the very end of the Cretaceous — around sixty-nine to sixty-six million years ago.",
+   "claim": "Tyrannosaurus rex lived from about 69 to 66 million years ago",
+   "visual_question": "how much later did Tyrannosaurus actually show up?",
+   "visual_answer": "the same timeline band continuing forward, a long gap, then Tyrannosaurus appearing at sixty-nine to sixty-six million years ago",
+   "fact_ids": ["f_trex_range"],
+   "start": 16.0,
+   "end": 25.0
+  },
+  {
+   "beat_id": "B4",
+   "function": "REVEAL",
+   "narration": "That gap by itself runs at least seventy-six million years — Stegosaurus was already long gone before Tyrannosaurus ever existed.",
+   "claim": "the gap between the last Stegosaurus and the first Tyrannosaurus rex is roughly 76 to 89 million years",
+   "visual_question": "how big is the empty stretch of timeline between them?",
+   "visual_answer": "the timeline band's empty middle section measured out at seventy-six million years, dwarfing both dinosaurs standing at either end",
+   "fact_ids": ["f_gap_to_stego"],
+   "start": 25.0,
+   "end": 34.0
+  },
+  {
+   "beat_id": "B5",
+   "function": "EXPLANATION",
+   "narration": "Tyrannosaurus went extinct about sixty-six million years ago. Measured against that same stretch, modern humans sit far closer in time to Tyrannosaurus than Tyrannosaurus ever was to Stegosaurus.",
+   "claim": "T. rex went extinct about 66 million years ago, and modern humans are far closer to the present than that — closer to T. rex in time than T. rex was to Stegosaurus",
+   "visual_question": "where do we fit on that same timeline?",
+   "visual_answer": "the timeline band extending to the present day, a human figure standing near the Tyrannosaurus end, far from the Stegosaurus end",
+   "fact_ids": ["f_gap_to_humans"],
+   "start": 34.0,
+   "end": 45.0
+  },
+  {
+   "beat_id": "B6",
+   "function": "PAYOFF",
+   "narration": "So the next time they're drawn together, remember: Tyrannosaurus is standing closer to us than it ever stood to Stegosaurus.",
+   "claim": "Tyrannosaurus rex is closer in time to modern humans than it is to Stegosaurus",
+   "visual_question": "so what's the real takeaway?",
+   "visual_answer": "the full timeline band resolved end to end: Stegosaurus, a vast gap, Tyrannosaurus, a much shorter gap, then the present day",
+   "fact_ids": ["f_gap_to_stego", "f_gap_to_humans"],
+   "start": 45.0,
+   "end": 55.0
+  }
+ ],
+ "visual_grammars": ["timeline_band"],
+ "visual_contradiction": {
+  "seems": "Tyrannosaurus and Stegosaurus are both just old dinosaurs from the same prehistoric scene",
+  "actually": "tens of millions of years separate them, and that gap is wider than the one between Tyrannosaurus and us",
+  "reveal": "the timeline band's empty middle section, measured out, dwarfs both dinosaurs standing at either end",
+  "beat": "B4"
+ },
+ "hook_plan": {
+  "subject_visible_s": 1.0,
+  "curiosity_s": 2.0,
+  "question_s": 5.0,
+  "no_black_fade_at_0_5": true
+ },
+ "payoff_image": {
+  "image": "the full timeline band resolved end to end: Stegosaurus, a vast gap, Tyrannosaurus, a much shorter gap, then the present day",
+  "beat": "B6"
+ }
+}

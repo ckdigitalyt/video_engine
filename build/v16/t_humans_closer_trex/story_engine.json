@@ -1,0 +1,420 @@
+{
+ "topic": "Humans Are Closer to T-Rex Than T-Rex Was to Stegosaurus",
+ "verdict": "HOLD",
+ "holds": [
+  "script rules failing after the critic rewrite: sentence 4: numbers [69000000.0] are not in its cited facts; sentence 5: numbers [76000000.0] are not in its cited facts; sentence 5: on-screen '76+ million years' shows [76.0, 1000000.0] never spoken"
+ ],
+ "script": {
+  "hook_headline": "Closer to T. rex",
+  "length_justification": "About 119 words, which is roughly 45 seconds aloud. That leaves room for one number per animal, a gap figure and a walking-distance image without padding.",
+  "sentences": [
+   {
+    "text": "T. rex lived closer to your time than to Stegosaurus.",
+    "role": "hook",
+    "fact_ids": [
+     "f_gap_to_humans",
+     "f_gap_to_stego"
+    ],
+    "on_screen": [
+     "Closer to YOU"
+    ]
+   },
+   {
+    "text": "We picture them together, roaring at each other in one jungle.",
+    "role": "normal",
+    "fact_ids": [
+     "f_trex_range",
+     "f_stego_range"
+    ],
+    "on_screen": []
+   },
+   {
+    "text": "But Stegosaurus was gone by about one hundred forty-five million years ago.",
+    "role": "normal",
+    "fact_ids": [
+     "f_stego_range"
+    ],
+    "on_screen": [
+     "145 million years ago"
+    ]
+   },
+   {
+    "text": "T. rex didn't show up until about sixty-nine million years ago.",
+    "role": "normal",
+    "fact_ids": [
+     "f_trex_range"
+    ],
+    "on_screen": [
+     "69 million years ago"
+    ]
+   },
+   {
+    "text": "That gap? Roughly seventy-six million years or more.",
+    "role": "normal",
+    "fact_ids": [
+     "f_gap_to_stego"
+    ],
+    "on_screen": [
+     "76+ million years"
+    ]
+   },
+   {
+    "text": "If T. rex could dig up fossils, Stegosaurus would've been one.",
+    "role": "normal",
+    "fact_ids": [
+     "f_gap_to_stego"
+    ],
+    "on_screen": []
+   },
+   {
+    "text": "Now flip it. T. rex vanished about sixty-six million years ago.",
+    "role": "normal",
+    "fact_ids": [
+     "f_trex_range",
+     "f_gap_to_humans"
+    ],
+    "on_screen": [
+     "66 million years ago"
+    ]
+   },
+   {
+    "text": "And humans? We're brand new on that clock, a blink at the very end.",
+    "role": "normal",
+    "fact_ids": [
+     "f_gap_to_humans"
+    ],
+    "on_screen": []
+   },
+   {
+    "text": "Walk back in time from today to the last T. rex.",
+    "role": "normal",
+    "fact_ids": [
+     "f_gap_to_humans",
+     "f_trex_range"
+    ],
+    "on_screen": []
+   },
+   {
+    "text": "Then keep walking that same distance again.",
+    "role": "normal",
+    "fact_ids": [
+     "f_trex_range",
+     "f_stego_range"
+    ],
+    "on_screen": []
+   },
+   {
+    "text": "You still wouldn't reach a single Stegosaurus.",
+    "role": "payoff",
+    "fact_ids": [
+     "f_stego_range",
+     "f_gap_to_stego"
+    ],
+    "on_screen": [
+     "Still no Stegosaurus"
+    ]
+   },
+   {
+    "text": "Next time a movie puts them side by side, remember this:",
+    "role": "payoff",
+    "fact_ids": [
+     "f_gap_to_humans",
+     "f_gap_to_stego"
+    ],
+    "on_screen": []
+   }
+  ]
+ },
+ "critic": {
+  "scores": {
+   "hook_strength": 4,
+   "curiosity_gap": 3,
+   "escalation": 2,
+   "payoff_clarity": 3,
+   "loop_coherence": 4,
+   "human_voice": 3,
+   "emotional_charge": 2,
+   "one_idea_only": 5
+  },
+  "critique": "Sentences 3-5 stall the script with back-to-back date ranges in textbook tone. Cut them down to one punchy number per animal, and give sentence 6 a single round gap figure instead of a range. Sentence 9 never says how new humans are, so sentence 10 just repeats the hook. Give a concrete human figure or a vivid scale image, such as a clock or a football field, so the comparison lands as a felt shock. Emotional charge is flat: sentence 7 needs a more striking image, like T. rex being as far from Stegosaurus as we are from... something, to create awe rather than summary. Sentences 10 and 11 both start with \"So\"; merge them so the final line is a single sharp payoff that still runs straight into sentence 1 when the video loops."
+ },
+ "fact_check": null,
+ "metadata": null,
+ "calls": [
+  {
+   "stage": "script_write",
+   "model": "opus",
+   "cached": false,
+   "attempts": 1,
+   "prompt_version": "2",
+   "cost_usd": 0.06346399999999999
+  },
+  {
+   "stage": "script_critic",
+   "model": "opus",
+   "cached": false,
+   "attempts": 1,
+   "prompt_version": "1",
+   "cost_usd": 0.033496
+  },
+  {
+   "stage": "script_write",
+   "model": "opus",
+   "cached": false,
+   "attempts": 1,
+   "prompt_version": "2",
+   "cost_usd": 0.12079680000000001
+  }
+ ],
+ "drafts": [
+  {
+   "script": {
+    "hook_headline": "T. rex: Closer to You",
+    "sentences": [
+     {
+      "text": "T. rex lived closer to your time than to Stegosaurus.",
+      "role": "hook",
+      "fact_ids": [
+       "f_gap_to_humans",
+       "f_gap_to_stego"
+      ],
+      "on_screen": [
+       "Closer to YOU"
+      ]
+     },
+     {
+      "text": "We picture them together, roaring at each other in one jungle.",
+      "role": "normal",
+      "fact_ids": [
+       "f_trex_range",
+       "f_stego_range"
+      ],
+      "on_screen": []
+     },
+     {
+      "text": "But Stegosaurus lived in the Jurassic, about one hundred fifty-five to one hundred forty-five million years ago.",
+      "role": "normal",
+      "fact_ids": [
+       "f_stego_range"
+      ],
+      "on_screen": [
+       "Jurassic"
+      ]
+     },
+     {
+      "text": "T. rex showed up at the very end of the Cretaceous.",
+      "role": "normal",
+      "fact_ids": [
+       "f_trex_range"
+      ],
+      "on_screen": [
+       "Cretaceous"
+      ]
+     },
+     {
+      "text": "About sixty-nine to sixty-six million years ago.",
+      "role": "normal",
+      "fact_ids": [
+       "f_trex_range"
+      ],
+      "on_screen": []
+     },
+     {
+      "text": "Between the last Stegosaurus and the first T. rex? Roughly seventy-six to eighty-nine million years.",
+      "role": "normal",
+      "fact_ids": [
+       "f_gap_to_stego"
+      ],
+      "on_screen": [
+       "76-89 million years"
+      ]
+     },
+     {
+      "text": "Stegosaurus was ancient history to T. rex.",
+      "role": "normal",
+      "fact_ids": [
+       "f_gap_to_stego"
+      ],
+      "on_screen": []
+     },
+     {
+      "text": "Now flip it. T. rex died out about sixty-six million years ago.",
+      "role": "normal",
+      "fact_ids": [
+       "f_gap_to_humans",
+       "f_trex_range"
+      ],
+      "on_screen": [
+       "66 million years ago"
+      ]
+     },
+     {
+      "text": "And humans? We're brand new on that clock.",
+      "role": "normal",
+      "fact_ids": [
+       "f_gap_to_humans"
+      ],
+      "on_screen": []
+     },
+     {
+      "text": "So the gap between you and T. rex is smaller than the gap between T. rex and Stegosaurus.",
+      "role": "payoff",
+      "fact_ids": [
+       "f_gap_to_humans",
+       "f_gap_to_stego"
+      ],
+      "on_screen": [
+       "Smaller gap"
+      ]
+     },
+     {
+      "text": "So when movies put them side by side, remember the truth:",
+      "role": "payoff",
+      "fact_ids": [
+       "f_gap_to_humans",
+       "f_gap_to_stego"
+      ],
+      "on_screen": []
+     }
+    ]
+   },
+   "critic": {
+    "scores": {
+     "hook_strength": 4,
+     "curiosity_gap": 3,
+     "escalation": 2,
+     "payoff_clarity": 3,
+     "loop_coherence": 4,
+     "human_voice": 3,
+     "emotional_charge": 2,
+     "one_idea_only": 5
+    },
+    "critique": "Sentences 3-5 stall the script with back-to-back date ranges in textbook tone. Cut them down to one punchy number per animal, and give sentence 6 a single round gap figure instead of a range. Sentence 9 never says how new humans are, so sentence 10 just repeats the hook. Give a concrete human figure or a vivid scale image, such as a clock or a football field, so the comparison lands as a felt shock. Emotional charge is flat: sentence 7 needs a more striking image, like T. rex being as far from Stegosaurus as we are from... something, to create awe rather than summary. Sentences 10 and 11 both start with \"So\"; merge them so the final line is a single sharp payoff that still runs straight into sentence 1 when the video loops."
+   }
+  },
+  {
+   "script": {
+    "hook_headline": "Closer to T. rex",
+    "length_justification": "About 119 words, which is roughly 45 seconds aloud. That leaves room for one number per animal, a gap figure and a walking-distance image without padding.",
+    "sentences": [
+     {
+      "text": "T. rex lived closer to your time than to Stegosaurus.",
+      "role": "hook",
+      "fact_ids": [
+       "f_gap_to_humans",
+       "f_gap_to_stego"
+      ],
+      "on_screen": [
+       "Closer to YOU"
+      ]
+     },
+     {
+      "text": "We picture them together, roaring at each other in one jungle.",
+      "role": "normal",
+      "fact_ids": [
+       "f_trex_range",
+       "f_stego_range"
+      ],
+      "on_screen": []
+     },
+     {
+      "text": "But Stegosaurus was gone by about one hundred forty-five million years ago.",
+      "role": "normal",
+      "fact_ids": [
+       "f_stego_range"
+      ],
+      "on_screen": [
+       "145 million years ago"
+      ]
+     },
+     {
+      "text": "T. rex didn't show up until about sixty-nine million years ago.",
+      "role": "normal",
+      "fact_ids": [
+       "f_trex_range"
+      ],
+      "on_screen": [
+       "69 million years ago"
+      ]
+     },
+     {
+      "text": "That gap? Roughly seventy-six million years or more.",
+      "role": "normal",
+      "fact_ids": [
+       "f_gap_to_stego"
+      ],
+      "on_screen": [
+       "76+ million years"
+      ]
+     },
+     {
+      "text": "If T. rex could dig up fossils, Stegosaurus would've been one.",
+      "role": "normal",
+      "fact_ids": [
+       "f_gap_to_stego"
+      ],
+      "on_screen": []
+     },
+     {
+      "text": "Now flip it. T. rex vanished about sixty-six million years ago.",
+      "role": "normal",
+      "fact_ids": [
+       "f_trex_range",
+       "f_gap_to_humans"
+      ],
+      "on_screen": [
+       "66 million years ago"
+      ]
+     },
+     {
+      "text": "And humans? We're brand new on that clock, a blink at the very end.",
+      "role": "normal",
+      "fact_ids": [
+       "f_gap_to_humans"
+      ],
+      "on_screen": []
+     },
+     {
+      "text": "Walk back in time from today to the last T. rex.",
+      "role": "normal",
+      "fact_ids": [
+       "f_gap_to_humans",
+       "f_trex_range"
+      ],
+      "on_screen": []
+     },
+     {
+      "text": "Then keep walking that same distance again.",
+      "role": "normal",
+      "fact_ids": [
+       "f_trex_range",
+       "f_stego_range"
+      ],
+      "on_screen": []
+     },
+     {
+      "text": "You still wouldn't reach a single Stegosaurus.",
+      "role": "payoff",
+      "fact_ids": [
+       "f_stego_range",
+       "f_gap_to_stego"
+      ],
+      "on_screen": [
+       "Still no Stegosaurus"
+      ]
+     },
+     {
+      "text": "Next time a movie puts them side by side, remember this:",
+      "role": "payoff",
+      "fact_ids": [
+       "f_gap_to_humans",
+       "f_gap_to_stego"
+      ],
+      "on_screen": []
+     }
+    ]
+   }
+  }
+ ],
+ "llm_calls": 3
+}

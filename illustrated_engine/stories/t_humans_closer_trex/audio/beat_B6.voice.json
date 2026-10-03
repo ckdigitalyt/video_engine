@@ -1,0 +1,33 @@
+{
+ "key": "a52c485189db3327",
+ "file": "audio/beat_B6.wav",
+ "duration": 8.313,
+ "provider": "kokoro",
+ "voice_id": "am_michael",
+ "model": "~/models/kokoro/kokoro-v1.0.onnx",
+ "commercial_ok": true,
+ "license_ref": "Apache-2.0",
+ "rtf": 1.1,
+ "qa": {
+  "wer": 0.1,
+  "errors": 2,
+  "ref_tokens": 20,
+  "max_wer": 0.03,
+  "bad_word_idx": [
+   4
+  ],
+  "hard_missed": [],
+  "hard_missed_idx": [],
+  "heard": "so the next time they are drawn together remember tyrannosaurus is standing closer to us than it ever stood to stegosaurus",
+  "verdict": "HOLD",
+  "checked": true,
+  "retried_sentences": [
+   0
+  ],
+  "first_pass": {
+   "wer": 0.1,
+   "hard_missed": []
+  }
+ },
+ "timing_method": "whisper_base_en_v1"
+}

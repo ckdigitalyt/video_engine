@@ -1,0 +1,25 @@
+{
+ "key": "37937bfa242accfe",
+ "file": "audio/beat_B4.wav",
+ "duration": 9.301,
+ "provider": "kokoro",
+ "voice_id": "am_michael",
+ "model": "~/models/kokoro/kokoro-v1.0.onnx",
+ "commercial_ok": true,
+ "license_ref": "Apache-2.0",
+ "rtf": 0.57,
+ "qa": {
+  "wer": 0.0,
+  "errors": 0,
+  "ref_tokens": 20,
+  "max_wer": 0.03,
+  "bad_word_idx": [],
+  "hard_missed": [],
+  "hard_missed_idx": [],
+  "heard": "that gap by itself runs at least seventy six million years stegosaurus was already long gone before tyrannosaurus ever existed",
+  "verdict": "PASS",
+  "checked": true,
+  "retried_sentences": []
+ },
+ "timing_method": "whisper_base_en_v1"
+}
