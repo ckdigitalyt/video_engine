@@ -1,0 +1,38 @@
+{
+ "trex": {
+  "name": "trex",
+  "scores": {
+   "hook_strength": 4,
+   "curiosity_gap": 3,
+   "escalation": 3,
+   "payoff_clarity": 3,
+   "loop_coherence": 5,
+   "human_voice": 4,
+   "emotional_charge": 3,
+   "one_idea_only": 5
+  },
+  "mean": 3.75,
+  "min": 3,
+  "critique": "Sentences 3\u20135 read like a list of dates. Merge them into one hard-hitting line that ends on the gap, so the numbers don't stall the momentum after the hook. Sentences 7\u20138 sag: 'brand new\u2026 a blink' is vague. Give humans a concrete figure (e.g., a few hundred thousand years) and set it directly against the 66 million so the 'closer to you' claim feels real before the walk analogy. Sentence 11 is the actual payoff, but it lands softly. Make it the strongest line, with a clear, spelled-out comparison that answers sentence 1 (you'd have to walk past T. rex twice and still come up short). Then keep sentence 12 as a short bridge into the replay. To raise emotional charge, make the misconception in sentence 2 a specific, familiar image the viewer has actually seen, and turn sentence 6 into a feeling of deep time ('ancient history to a T. rex') instead of a clever aside.",
+  "model": "opus",
+  "cost_usd": 0.030492800000000004
+ },
+ "skater": {
+  "name": "skater",
+  "scores": {
+   "hook_strength": 3,
+   "curiosity_gap": 2,
+   "escalation": 3,
+   "payoff_clarity": 2,
+   "loop_coherence": 3,
+   "human_voice": 3,
+   "emotional_charge": 2,
+   "one_idea_only": 4
+  },
+  "mean": 2.75,
+  "min": 2,
+  "critique": "Sentence 1 runs past 12 words and gives away the trick ('They just pull their arms in') right away, so the gap closes before it opens. Cut the line to a single punchy contradiction and hold back the arm reveal. Sentence 6 contradicts itself: it says 'the push she never needed came from the ice'. Replace it with one clean line that answers the hook's question, ideally the twist that her own arms are the hidden engine. Sentences 2-4 read like a textbook walk-through ('is called angular momentum', 'that number times her spin rate'), and the stakes stay flat. Move the energy paradox from sentence 5 earlier and frame it as a mystery, like 'so where does the extra energy come from?', so the tension builds toward the payoff. Add some awe or physical sensation, such as how hard her arms strain or how fast the spin gets, so the emotional_charge is above neutral. Also write the final line so it flows directly back into the reworked hook.",
+  "model": "opus",
+  "cost_usd": 0.025932800000000002
+ }
+}
