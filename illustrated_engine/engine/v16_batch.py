@@ -179,20 +179,22 @@ MAX_TOPICS_PER_SLOT = 3  # decision #14 item 2: topic-fallback chain
 def materialize_candidates(picked: list, work: Path, *, queue: list | None = None,
                            ask=None) -> dict:
     """decision #13 item 5: closes the "queued, not yet materialized" gap —
-    each picked candidate (or series part) -> engine.v16_autostory.
-    generate_story -> a written stories/<id>/story.json. A candidate that
-    HOLDs during research/script generation is recorded, never silently
-    dropped or force-shipped; it simply contributes no story dir to render
-    this run.
+    each render slot -> engine.v16_autostory.generate_story_ranked -> a
+    written stories/<id>/story.json. A slot that HOLDs is recorded, never
+    silently dropped or force-shipped; it simply contributes no story dir
+    to render this run.
 
-    Decision #14 item 2: a slot whose candidate HOLDs (e.g. the script critic
-    still below bar after its rewrites) falls back to the next-ranked,
-    not-yet-used entry in `queue` (the topic engine's full ranked queue, a
-    superset of `picked`) and retries the same generate_story flow there, up
-    to MAX_TOPICS_PER_SLOT topics total for that slot. Only a slot that
-    exhausts every fallback contributes a hold. Every attempt (topic, status,
-    reason) is logged to materialize_report.json's "attempts" list."""
-    from engine.v16_autostory import generate_story, write_story_dir
+    Decision #15 item 2 (rank-not-block, replacing decision #14's
+    try-one-move-to-next-on-hold chain): each slot gets up to
+    MAX_TOPICS_PER_SLOT topics up front — the slot's own picked candidate
+    plus the next not-yet-used entries in `queue` (the topic engine's full
+    ranked queue, a superset of `picked`) — generated and scored together
+    by `generate_story_ranked`, which picks the single highest-scoring one
+    and only produces it if it clears the calibrated floor
+    (engine.v16_script.RANK_FLOOR_MEAN/RANK_FLOOR_DIM). A slot only holds if
+    none of its topics clears that floor. Every topic tried, scored or not,
+    is logged to materialize_report.json's "attempts" list."""
+    from engine.v16_autostory import generate_story_ranked, write_story_dir
 
     def _parts(e):
         return e["parts"] if "parts" in e else [e]
@@ -206,25 +208,22 @@ def materialize_candidates(picked: list, work: Path, *, queue: list | None = Non
     for e in picked:
         for c in _parts(e):
             tried = [c]
-            res = generate_story(c, ask=ask)
-            attempts.append({"id": c.get("id"), "title": c.get("title"),
-                             "attempt": len(tried), "status": res["status"],
-                             "reason": res.get("reason")})
-            while res["status"] != "ok" and len(tried) < MAX_TOPICS_PER_SLOT:
+            while len(tried) < MAX_TOPICS_PER_SLOT:
                 nxt = next(fallback_iter, None)
                 if nxt is None:
                     break
                 tried.append(nxt)
-                res = generate_story(nxt, ask=ask)
-                attempts.append({"id": nxt.get("id"), "title": nxt.get("title"),
-                                 "attempt": len(tried), "status": res["status"],
-                                 "reason": res.get("reason")})
+            res = generate_story_ranked(tried, ask=ask)
+            for cand in res.get("candidates", []):
+                attempts.append({"title": cand.get("topic"), "status": cand.get("status"),
+                                 "mean": cand.get("mean"), "min": cand.get("min"),
+                                 "reason": cand.get("reason")})
             if res["status"] == "ok":
+                attempts.append({"title": res.get("picked_topic"), "status": "picked"})
                 dirs.append(write_story_dir(res["story"]))
             else:
-                holds.append({"id": tried[-1].get("id"), "title": tried[-1].get("title"),
-                             "reason": res["reason"],
-                             "topics_tried": [x.get("id") for x in tried]})
+                holds.append({"reason": res["reason"],
+                             "topics_tried": [x.get("id") or x.get("title") for x in tried]})
     (Path(work) / "materialize_report.json").write_text(
         json.dumps({"materialized": [str(d) for d in dirs], "holds": holds,
                    "attempts": attempts}, indent=1))

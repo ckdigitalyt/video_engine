@@ -80,6 +80,69 @@ def generate_story(candidate: dict, *, ask=None, fetch_sources=None) -> dict:
            "script_engine": story_engine}
 
 
+def generate_story_ranked(candidates: list, *, ask=None, fetch_sources=None,
+                          series_note: str = "", batch_titles: list = ()) -> dict:
+    """decision #15 item 2 (rank-not-block): takes up to 3 topic `candidates`
+    for ONE render slot, runs the research stage for each (same
+    source/quote-check HOLD rules as `generate_story`), then hands every
+    topic that reached a `facts` pack to `engine.v16_script.rank_write_story`
+    so scripts for all of them are generated up front, scored by the real
+    critic, and the single highest-scoring one is finalized and returned --
+    replacing the old "try one topic, fall back to the next only on a HOLD"
+    chain. A topic that HOLDs at the research stage (too few sources, failed
+    quote-check) is recorded in "candidates" too, even though it never
+    reaches the critic.
+
+    -> {"status": "ok", "story": {...}, "script_engine": {...}, "picked_topic": str,
+        "candidates": [...]} or {"status": "hold", "reason": "...", "candidates": [...]}
+    """
+    from engine.v16_script import rank_write_story
+    fetch_sources = fetch_sources or wikipedia_sources
+    by_title, topics_facts, research_holds = {}, [], []
+    for c in candidates[:3]:
+        by_title[c["title"]] = c
+        sources = fetch_sources(c["title"], 3)
+        if len(sources) < MIN_SOURCES:
+            research_holds.append({"topic": c["title"], "status": "hold",
+                                   "reason": f"only {len(sources)} usable source(s) for "
+                                             f"{c['title']!r} (need >= {MIN_SOURCES})"})
+            continue
+        try:
+            facts = build_facts(c["title"], sources, ask=ask)
+        except ResearchHold as e:
+            research_holds.append({"topic": c["title"], "status": "hold",
+                                   "reason": f"research: {e}"})
+            continue
+        topics_facts.append((c["title"], facts))
+
+    if not topics_facts:
+        return {"status": "hold",
+               "reason": "no candidate reached script generation: "
+                         + "; ".join(h["reason"] for h in research_holds),
+               "candidates": research_holds}
+
+    result = rank_write_story(topics_facts, series_note=series_note,
+                              batch_titles=batch_titles, ask=ask)
+    all_candidates = research_holds + result["candidates"]
+    if result["verdict"] == "PASS":
+        story = script_to_story(by_title[result["picked_topic"]], result["story"])
+        return {"status": "ok", "story": story, "script_engine": result["story"],
+               "picked_topic": result["picked_topic"], "candidates": all_candidates}
+
+    reasons = []
+    for c in result["candidates"]:
+        if c["status"] == "hold":
+            reasons.append(f"{c['topic']}: {c['reason']}")
+        elif result.get("picked_topic") == c["topic"] and result.get("story"):
+            reasons.append(f"{c['topic']}: mean {c['mean']:.2f} min {c['min']} cleared the "
+                           f"floor but finalize held: {'; '.join(result['story']['holds'])}")
+        else:
+            reasons.append(f"{c['topic']}: mean {c['mean']:.2f} min {c['min']} below floor")
+    return {"status": "hold",
+           "reason": "rank-not-block: no candidate cleared the floor: " + "; ".join(reasons),
+           "candidates": all_candidates}
+
+
 def write_story_dir(story: dict, stories_dir: Path | None = None) -> Path:
     d = Path(stories_dir or STORIES_DIR) / story["story_id"]
     d.mkdir(parents=True, exist_ok=True)

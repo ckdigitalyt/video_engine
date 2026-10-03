@@ -152,42 +152,50 @@ def _entry(cid, title="t"):
     return {"id": cid, "title": title, "cluster": "c"}
 
 
-def test_materialize_falls_back_to_next_queue_topic_on_hold(tmp_path, monkeypatch):
+def test_materialize_offers_up_to_three_topics_up_front_and_picks_the_winner(tmp_path, monkeypatch):
+    """decision #15 item 2 (rank-not-block): one call covering all 3
+    candidates for the slot, not one call per topic with fallback on hold."""
     import engine.v16_batch as batch_mod
     picked = [_entry("a", "A")]
     queue = [_entry("a", "A"), _entry("b", "B"), _entry("c", "C")]
     calls = []
 
-    def fake_generate_story(c, ask=None):
-        calls.append(c["id"])
-        if c["id"] == "a":
-            return {"status": "hold", "reason": "critic below bar after 2 rewrite(s)"}
-        return {"status": "ok", "story": {"story_id": c["id"], "title": c["title"]}}
+    def fake_generate_story_ranked(cands, ask=None):
+        calls.append([c["id"] for c in cands])
+        return {"status": "ok", "story": {"story_id": "b", "title": "B"},
+               "picked_topic": "B",
+               "candidates": [{"topic": "A", "status": "hold", "reason": "below floor"},
+                              {"topic": "B", "status": "scored", "mean": 3.2, "min": 3},
+                              {"topic": "C", "status": "scored", "mean": 2.9, "min": 3}]}
 
     import engine.v16_autostory as autostory_mod
-    monkeypatch.setattr(autostory_mod, "generate_story", fake_generate_story)
+    monkeypatch.setattr(autostory_mod, "generate_story_ranked", fake_generate_story_ranked)
     monkeypatch.setattr(autostory_mod, "write_story_dir",
                         lambda s, d=None: Path(f"/tmp/{s['story_id']}"))
     mat = batch_mod.materialize_candidates(picked, tmp_path, queue=queue)
-    assert calls == ["a", "b"]
+    assert calls == [["a", "b", "c"]]          # all 3 offered up front, one call
     assert len(mat["dirs"]) == 1 and not mat["holds"]
-    assert [a["id"] for a in mat["attempts"]] == ["a", "b"]
+    titles = [a["title"] for a in mat["attempts"]]
+    assert titles == ["A", "B", "C", "B"]      # 3 scored + the picked marker
+    assert mat["attempts"][-1]["status"] == "picked"
 
 
-def test_materialize_holds_after_exhausting_three_topics(tmp_path, monkeypatch):
+def test_materialize_holds_when_no_candidate_clears_the_floor(tmp_path, monkeypatch):
     import engine.v16_batch as batch_mod
     import engine.v16_autostory as autostory_mod
     picked = [_entry("a", "A")]
     queue = [_entry("a", "A"), _entry("b", "B"), _entry("c", "C"), _entry("d", "D")]
     calls = []
 
-    def fake_generate_story(c, ask=None):
-        calls.append(c["id"])
-        return {"status": "hold", "reason": f"{c['id']} held"}
+    def fake_generate_story_ranked(cands, ask=None):
+        calls.append([c["id"] for c in cands])
+        return {"status": "hold", "reason": "rank-not-block: no candidate cleared the floor",
+               "candidates": [{"topic": c["title"], "status": "hold", "reason": "held"}
+                              for c in cands]}
 
-    monkeypatch.setattr(autostory_mod, "generate_story", fake_generate_story)
+    monkeypatch.setattr(autostory_mod, "generate_story_ranked", fake_generate_story_ranked)
     mat = batch_mod.materialize_candidates(picked, tmp_path, queue=queue)
-    assert calls == ["a", "b", "c"]            # MAX_TOPICS_PER_SLOT=3, "d" never tried
+    assert calls == [["a", "b", "c"]]          # MAX_TOPICS_PER_SLOT=3, "d" never offered
     assert not mat["dirs"] and len(mat["holds"]) == 1
     assert mat["holds"][0]["topics_tried"] == ["a", "b", "c"]
     assert len(mat["attempts"]) == 3

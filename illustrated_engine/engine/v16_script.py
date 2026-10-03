@@ -34,6 +34,15 @@ TITLE_WORDS = (4, 8)
 DURATION_S = (30.0, 60.0)
 CRITIC_MEAN_MIN, CRITIC_FLOOR = 4.0, 3
 MAX_SCRIPT_REWRITES = 2  # decision #14: shared pool across code-error + critic rewrites
+RANK_REWRITE_BUDGET = 1  # decision #15 item 2: one rewrite per topic in the rank-not-block flow
+# decision #15 step 1: real critic score (prompt_version 1, unchanged) measured against
+# the owner's own ACCEPTABLE sample (t_figure_skater_spin, commit 56b4955) --
+# illustrated_engine/build_reports/decision15/step1_calibration.json. The old
+# CRITIC_MEAN_MIN=4.0 bar fails the owner's own acceptable sample (2.75 mean), so the
+# rank-not-block floor is calibrated off this real number instead of the old constant.
+SKATER_CALIBRATION_MEAN = 2.75
+RANK_FLOOR_MEAN = min(3.4, SKATER_CALIBRATION_MEAN - 0.1)
+RANK_FLOOR_DIM = 3
 AI_NOTE = "Illustrations are AI-generated in our house style; narration uses a synthetic voice."
 
 BAD_OPENERS = re.compile(r"^\s*(did you know|imagine|let'?s|have you ever|ever wonder|"
@@ -330,6 +339,19 @@ def _pipeline(run: _Run, story: dict, topic: str, facts: dict, series_note: str,
             hold("script rules failing after the critic rewrite: " + "; ".join(errs))
             return
 
+    _finalize(run, story, topic, facts, series_note, batch_titles)
+
+
+def _finalize(run: _Run, story: dict, topic: str, facts: dict, series_note: str,
+              batch_titles: list) -> None:
+    """Fact-check (ONE rewrite) + metadata_pack, given a `story["script"]`
+    that already cleared code-checks + the critic. Mutates `story` in
+    place (holds/fact_check/metadata). Factored out of `_pipeline` so
+    decision #15's rank-not-block flow can reuse the exact same tail for
+    its single winning candidate instead of duplicating it."""
+    hold = story["holds"].append
+    script = story["script"]
+
     # ---- fact check: ONE rewrite, then HOLD
     probs = _fact_check(run, script, facts)
     if probs:
@@ -361,6 +383,94 @@ def _pipeline(run: _Run, story: dict, topic: str, facts: dict, series_note: str,
     cited = list(dict.fromkeys(f for s in script["sentences"] for f in s["fact_ids"]))
     meta["description_full"] = build_description(meta, facts, cited)
     story["metadata"] = meta
+
+
+# ============================================= decision #15: rank, don't block
+
+def rank_write_story(topics_facts: list, *, series_note: str = "", batch_titles: list = (),
+                     ask=None, floor_mean: float | None = None,
+                     floor_dim: int = RANK_FLOOR_DIM) -> dict:
+    """decision #15 item 2: instead of generating one topic's script and
+    falling back to the next topic only on a HOLD, generate scripts for
+    every `(topic, facts)` pair up front (up to RANK_REWRITE_BUDGET=1
+    rewrite each if the first draft fails the critic's own `critic_pass`
+    bar), score all of them with the real script critic, and pick the
+    HIGHEST-scoring one. That pick only gets finalized (fact_check +
+    metadata via `_finalize`) and returned as a producible story if its
+    mean clears `floor_mean` (default `RANK_FLOOR_MEAN`, calibrated in
+    decision #15 step 1 off a real owner-accepted sample) with no single
+    dimension below `floor_dim`. Every candidate's full critic scores (or
+    hold reason, if it never reached the critic) are returned in
+    "candidates" regardless of the outcome, so a HOLD slot stays fully
+    auditable.
+
+    -> {"verdict": "PASS"|"HOLD", "picked_topic": str|None, "story": dict|None,
+        "candidates": [{"topic", "status": "scored"|"hold", ...}]}
+    """
+    floor_mean = RANK_FLOOR_MEAN if floor_mean is None else floor_mean
+    candidates = []
+    for topic, facts in topics_facts:
+        run = _Run(ask or llm.ask)
+        script = _write(run, topic, facts, series_note)
+        rewrites = 0
+        errs = code_checks(script, facts)
+        if errs:
+            script2 = _write(run, topic, facts, series_note, "\n".join(errs), script)
+            rewrites += 1
+            errs2 = code_checks(script2, facts)
+            if errs2:
+                candidates.append({"topic": topic, "status": "hold",
+                                   "reason": "script rules still failing after the rewrite: "
+                                             + "; ".join(errs2), "_run": run})
+                continue
+            script = script2
+        prompt, ver = render("script_critic", script=_numbered(script))
+        crit = run.call("script_critic", prompt, ver)
+        if not critic_pass(crit["scores"]) and rewrites < RANK_REWRITE_BUDGET:
+            bar = (f"Critic scores: {crit['scores']}. The bar is a mean of {CRITIC_MEAN_MIN} or "
+                   f"better with no score below {CRITIC_FLOOR}; lift every score under 4.")
+            script2 = _write(run, topic, facts, series_note, crit["critique"] + "\n" + bar, script)
+            rewrites += 1
+            errs2 = code_checks(script2, facts)
+            if errs2:
+                candidates.append({"topic": topic, "status": "hold",
+                                   "reason": "script rules failing after the critic rewrite: "
+                                             + "; ".join(errs2), "_run": run})
+                continue
+            script = script2
+            prompt, ver = render("script_critic", script=_numbered(script))
+            crit = run.call("script_critic", prompt, ver)
+        scores = crit["scores"]
+        mean = sum(scores.values()) / len(scores)
+        candidates.append({"topic": topic, "status": "scored", "script": script, "facts": facts,
+                           "critic": crit, "mean": mean, "min": min(scores.values()),
+                           "rewrites": rewrites, "_run": run})
+
+    scored = [c for c in candidates if c["status"] == "scored"]
+    picked = max(scored, key=lambda c: c["mean"]) if scored else None
+    public_candidates = [{k: v for k, v in c.items() if k not in ("_run", "script", "facts")}
+                         for c in candidates]
+    result = {"verdict": "HOLD", "picked_topic": None, "story": None,
+              "candidates": public_candidates}
+
+    if picked is not None and picked["mean"] >= floor_mean and picked["min"] >= floor_dim:
+        story = {"topic": picked["topic"], "verdict": "HOLD", "holds": [],
+                 "script": picked["script"], "critic": picked["critic"], "fact_check": None,
+                 "metadata": None, "calls": picked["_run"].calls,
+                 "drafts": [{"script": picked["script"], "critic": picked["critic"]}]}
+        try:
+            _finalize(picked["_run"], story, picked["topic"], picked["facts"], series_note,
+                     list(batch_titles))
+        except (LLMUnavailable, LLMSchemaError) as e:
+            story["holds"].append(f"llm: {type(e).__name__}: {str(e)[:200]}")
+            if isinstance(e, LLMUnavailable) and e.retry_at:
+                story["retry_at"] = e.retry_at.isoformat()
+        story["verdict"] = "PASS" if not story["holds"] else "HOLD"
+        story["llm_calls"] = len(picked["_run"].calls)
+        result["picked_topic"] = picked["topic"]
+        result["story"] = story
+        result["verdict"] = story["verdict"]
+    return result
 
 
 # ------------------------------------------------------------------ CLI --

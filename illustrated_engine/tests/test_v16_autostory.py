@@ -142,6 +142,76 @@ def test_generate_story_happy_path():
     assert len(res["story"]["beats"]) == 8
 
 
+# ------------------------------------------ decision #15: rank, don't block --
+
+CAND_A = {"id": "t_a", "title": "Topic A", "cluster": "deep_time"}
+CAND_B = {"id": "t_b", "title": "Topic B", "cluster": "deep_time"}
+CAND_C = {"id": "t_c", "title": "Topic C", "cluster": "deep_time"}
+
+
+def _critic(hook_bonus):
+    # baseline is a flat 4 on every dimension (mean 4.0, min 4) so every variant
+    # still clears `critic_pass` on the first draft -- only `hook_strength` moves,
+    # so these differ in mean/ranking without ever triggering the 1-rewrite budget.
+    s = {"hook_strength": 4, "curiosity_gap": 4, "escalation": 4, "payoff_clarity": 4,
+        "loop_coherence": 4, "human_voice": 4, "emotional_charge": 4, "one_idea_only": 4}
+    s["hook_strength"] += hook_bonus
+    return {"scores": s, "critique": ""}
+
+
+def test_generate_story_ranked_picks_the_highest_scoring_of_three_and_finalizes_it():
+    # all 3 clear critic_pass on the first draft (no rewrite calls queued needed);
+    # B scores highest and is the only one finalized (fact_check/metadata_pack called once).
+    f = Fake(research_extract=[RESEARCH_CLAIMS, RESEARCH_CLAIMS, RESEARCH_CLAIMS],
+            script_write=[GOOD_SCRIPT, GOOD_SCRIPT, GOOD_SCRIPT],
+            script_critic=[_critic(0.5), _critic(1), _critic(0)],   # A, B, C -> B wins
+            fact_check=[_fact_check_ok(len(GOOD_SCRIPT["sentences"]))],
+            metadata_pack=[GOOD_META])
+    res = A.generate_story_ranked([CAND_A, CAND_B, CAND_C], ask=f,
+                                  fetch_sources=lambda q, n: GOOD_SOURCES)
+    assert res["status"] == "ok", res
+    assert res["picked_topic"] == "Topic B"
+    assert res["story"]["story_id"] == "t_the_blast_with_no_crater"
+    scored = {c["topic"]: c for c in res["candidates"] if c["status"] == "scored"}
+    assert set(scored) == {"Topic A", "Topic B", "Topic C"}
+    assert scored["Topic B"]["mean"] > scored["Topic A"]["mean"] > scored["Topic C"]["mean"]
+
+
+def test_generate_story_ranked_holds_when_every_candidate_is_below_the_floor():
+    from engine.v16_script import RANK_FLOOR_MEAN
+    low = {"hook_strength": 1, "curiosity_gap": 1, "escalation": 1, "payoff_clarity": 1,
+          "loop_coherence": 1, "human_voice": 1, "emotional_charge": 1, "one_idea_only": 1}
+    assert sum(low.values()) / len(low) < RANK_FLOOR_MEAN
+    f = Fake(research_extract=[RESEARCH_CLAIMS, RESEARCH_CLAIMS],
+            script_write=[GOOD_SCRIPT, GOOD_SCRIPT, GOOD_SCRIPT, GOOD_SCRIPT],
+            script_critic=[{"scores": low, "critique": "weak"},
+                           {"scores": low, "critique": "weak"},
+                           {"scores": low, "critique": "still weak"},
+                           {"scores": low, "critique": "still weak"}])
+    res = A.generate_story_ranked([CAND_A, CAND_B], ask=f,
+                                  fetch_sources=lambda q, n: GOOD_SOURCES)
+    assert res["status"] == "hold"
+    assert "no candidate cleared the floor" in res["reason"]
+    assert {c["topic"] for c in res["candidates"]} == {"Topic A", "Topic B"}
+
+
+def test_generate_story_ranked_logs_research_holds_without_blocking_other_topics():
+    f = Fake(research_extract=[RESEARCH_CLAIMS],
+            script_write=[GOOD_SCRIPT], script_critic=[GOOD_CRITIC],
+            fact_check=[_fact_check_ok(len(GOOD_SCRIPT["sentences"]))],
+            metadata_pack=[GOOD_META])
+
+    def sources(title, n):
+        return [] if title == "Topic A" else GOOD_SOURCES
+
+    res = A.generate_story_ranked([CAND_A, CAND_B], ask=f, fetch_sources=sources)
+    assert res["status"] == "ok"
+    assert res["picked_topic"] == "Topic B"
+    holds = [c for c in res["candidates"] if c["status"] == "hold"]
+    assert len(holds) == 1 and holds[0]["topic"] == "Topic A"
+    assert "source" in holds[0]["reason"]
+
+
 def test_write_story_dir_writes_story_json(tmp_path):
     story = {"story_id": "t_demo", "title": "Demo", "subject": "x", "beats": []}
     d = A.write_story_dir(story, stories_dir=tmp_path)
