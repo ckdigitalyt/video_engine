@@ -509,7 +509,7 @@ unchanged before and after the dry run); `configs/publish.yaml`
 explicit instruction, the cron was NOT enabled despite this being called
 the last change before go-live — that remains the owner's separate call.
 
-### Decision #17 (2026-10-04, `282609c`..`<dry-run-5-commit>`) — remove the
+### Decision #17 (2026-10-04, `282609c`..`2d219aa`) — remove the
 critic-score floor, dry run 5
 Owner's conclusion going in: the critic itself is unreliable as a
 pass/fail gate — it scored the owner's own accepted skater script only
