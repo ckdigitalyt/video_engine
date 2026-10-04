@@ -509,12 +509,105 @@ unchanged before and after the dry run); `configs/publish.yaml`
 explicit instruction, the cron was NOT enabled despite this being called
 the last change before go-live — that remains the owner's separate call.
 
+### Decision #17 (2026-10-04, `282609c`..`<dry-run-5-commit>`) — remove the
+critic-score floor, dry run 5
+Owner's conclusion going in: the critic itself is unreliable as a
+pass/fail gate — it scored the owner's own accepted skater script only
+2.75 (decision #15 step 1), and decision #16's dry run 4 showed scores
+trending down on objectively stronger topics, not up. Two items.
+
+1. **Remove the floor** (`282609c`): `engine.v16_script.rank_write_story`
+   no longer calls `clears_rank_floor()` before finalizing the picked
+   candidate — `RANK_FLOOR_MEAN`, `RANK_FLOOR_DIM_DEFAULT`/`STRICT`,
+   `dim_floor()`, `clears_rank_floor()` are all removed. The critic still
+   runs and scores every one of the (up to 3) candidates — those scores
+   are still logged in `candidates`/`materialize_report.json` — but it is
+   now a pure ranker: whichever candidate has the highest mean is always
+   finalized and returned as the producible story. `generate_story_ranked`
+   (`engine/v16_autostory.py`) can now only return `"status": "hold"` if
+   every one of the (up to 3) topics fails a HARD check first — a
+   research-stage hold (too few sources, failed quote-check) or a
+   script-rule `code_checks` failure (`check_script`/`check_facts`/
+   `check_digits`/decision #16's `check_absolute_claims`) surviving its
+   `RANK_REWRITE_BUDGET=1` rewrite — never on critic score alone.
+   Unchanged, confirmed by code inspection: fact verification/sourcing
+   checks, the absolute-claim check, every other `code_checks` rule, and
+   every downstream video/render gate (voice, captions, distinctness,
+   plate_qa/judge, etc.) — none of those are reachable from
+   `rank_write_story`/`clears_rank_floor` and nothing in those modules was
+   touched. Tests: `test_wp4_story.py` — removed the 4 decision #16 tests
+   that directly tested the now-deleted `dim_floor()`/`clears_rank_floor()`
+   helpers (no replacement needed; the functions no longer exist, so there
+   is nothing left to test). `test_v16_autostory.py` — replaced decision
+   #15's `test_generate_story_ranked_holds_when_every_candidate_is_below_
+   the_floor` with `test_generate_story_ranked_holds_only_when_every_
+   candidate_fails_a_hard_check` (both topics' scripts fail `code_checks`
+   twice — bare-question hook — and never reach the critic) plus a new
+   `test_generate_story_ranked_picks_the_lowest_scoring_candidate_when_it_
+   is_the_only_one` (a single candidate scoring a flat 1 on every
+   dimension, mean 1.0, is still picked and finalized — proving there is
+   no floor left to clear).
+2. **Dry run 5** (real, `./tools/daily_shorts.sh 1`, 2026-10-04 03:14-04:16
+   UTC, batch `daily_2026-10-04_031422`): ran the floor-free rank-not-block
+   flow through the real cron entry point end to end. Topic engine offered
+   3 real topics up front ("The Dinosaurs Never Saw the Rocky Mountains
+   Rise", "A Rocket Launched From Earth's Equator Gets a Free Speed
+   Boost", "Astronomers Found a Star That Shouldn't Exist Yet"); all 3
+   reached the critic this time (no research-stage holds, no code-check
+   holds) — scores 2.5/min 1, 2.75/min 2, 3.125/min 2 (recovered verbatim
+   from the `llm_cache` entries the critic calls hit, same technique as
+   decision #15 step 3). The decision #16 floor would still have HELD
+   this exact slot before it ever reached render: the winning candidate's
+   `payoff_clarity` scored 2, below decision #16's `RANK_FLOOR_DIM_STRICT`
+   requirement of >= 3 for that dimension, even though its mean (3.125)
+   cleared `RANK_FLOOR_MEAN=3.0` — a direct demonstration of the floor
+   blocking a candidate that, with the floor gone, made it all the way to
+   a real render and a real (non-critic) HOLD reason instead. With
+   decision #17's floor removed, the highest-scoring candidate
+   ("Astronomers Found a Star That Shouldn't Exist Yet", mean 3.125) was
+   finalized, retitled by the
+   script/metadata stage to "The Dwarf Planet's Disappearing Atmosphere",
+   and reached a REAL render for the first time across dry runs 3-5:
+   22 min of local plate generation (24 image calls), ffmpeg assembly, and
+   the full gate suite (`wall_s=2778.9`). **Real outcome: HOLD at the
+   video gate, not the script stage** — `batch_report.json`'s `failures`:
+   `caption_clause_breaks` (2 cues ending mid-clause on a function word),
+   `judge` (vision judge flagged 6/15 frames, 2 critical frame issues —
+   `subject_unrecognizable`/`empty_or_flat` — plus "scenes feel templated"),
+   and `distinctness` (template sequence too close to 3 prior videos,
+   `t_figure_skater_spin`/`t_humans_closer_trex`/`tunguska_1908`, all under
+   the `distance < 0.3` threshold). None of these three gates were touched
+   by item 1 — this is exactly the "all other downstream gates stay live"
+   behavior the decision called for: removing the critic floor got the
+   pipeline past script generation to a real render for the first time,
+   and the existing video-quality gates still correctly held it there on
+   real defects. Delivered to the Discord channel as the hold reason only,
+   no video (per the owner's standing instruction; `delivered.json` marks
+   `t_the_dwarf_planet_s_disappearing_atmosphe` delivered, delivery script
+   exit 0). Per the owner's instruction for this dry run, full script text
+   + critic scores for the picked (and only scored) candidates are
+   reported alongside this PASS/HOLD outcome in the dry run's own report,
+   not re-litigated here.
+
+Tests: illustrated_engine 257/257 (260 baseline − 4 removed (item 1,
+now-deleted floor helpers) + 1 net new (item 1, hold-vs-pick tests) = 257;
+the one pre-existing unrelated failure flagged in decision #16
+(`test_wp3_voice.py::test_live_lexicon_fixes_tyrannosaurus`) now passes
+clean, confirming it was flaky/environmental, not a regression). Root
+`tests/`: 59 failed + 5 errors = 64 failing IDs, diffed identical to the
+known-stale baseline (zero regressions). No secrets committed, no
+`--no-verify`. `tools/daily_shorts.sh` crontab entry stays commented
+out/disabled (confirmed unchanged before and after the dry run);
+`configs/publish.yaml` `upload.enabled` stays `false` (confirmed
+unchanged). No other changes were made, per the owner's explicit "no
+other changes" instruction — items 1-2 only.
+
 ## Next
 Q2 (hook timing) → Q3 (caption safe zone) → Q4 (plates) → Q5 (re-render
 Tunguska) → PR. WP13 (2-topic cap) → WP14 still pending behind the Q-queue
-per owner decision #11. If WP5's caption-grouping bug is ever picked up,
-re-run `bench/ab/wp5_parity.py` before considering `v16_compose` for live
-wiring. Decision #16's finding: the floor rework moved the binding
-constraint from the per-dimension floor to the mean floor (3.0) on real
-sampled topics — the sampled pass rate itself is still the open problem,
-separate from where the floor's bar sits.
+per owner decision #11. Decision #17's finding: with the critic floor
+gone, rank-not-block reliably reaches a real render (dry run 5), but the
+real render is still held by legitimate, unrelated video-quality gates
+(caption clause breaks, the vision judge, and template distinctness
+across recent videos) — raising the real sampled pass rate now depends on
+those three gates, not on script/critic calibration.
