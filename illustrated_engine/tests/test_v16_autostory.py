@@ -177,22 +177,42 @@ def test_generate_story_ranked_picks_the_highest_scoring_of_three_and_finalizes_
     assert scored["Topic B"]["mean"] > scored["Topic A"]["mean"] > scored["Topic C"]["mean"]
 
 
-def test_generate_story_ranked_holds_when_every_candidate_is_below_the_floor():
-    from engine.v16_script import RANK_FLOOR_MEAN
+def test_generate_story_ranked_picks_the_lowest_scoring_candidate_when_it_is_the_only_one():
+    # decision #17: the critic is a pure ranker now -- a single scored candidate with
+    # weak scores on every dimension still gets picked and finalized, no floor applied.
     low = {"hook_strength": 1, "curiosity_gap": 1, "escalation": 1, "payoff_clarity": 1,
           "loop_coherence": 1, "human_voice": 1, "emotional_charge": 1, "one_idea_only": 1}
-    assert sum(low.values()) / len(low) < RANK_FLOOR_MEAN
-    f = Fake(research_extract=[RESEARCH_CLAIMS, RESEARCH_CLAIMS],
-            script_write=[GOOD_SCRIPT, GOOD_SCRIPT, GOOD_SCRIPT, GOOD_SCRIPT],
+    f = Fake(research_extract=[RESEARCH_CLAIMS],
+            script_write=[GOOD_SCRIPT, GOOD_SCRIPT],
             script_critic=[{"scores": low, "critique": "weak"},
-                           {"scores": low, "critique": "weak"},
-                           {"scores": low, "critique": "still weak"},
-                           {"scores": low, "critique": "still weak"}])
+                           {"scores": low, "critique": "still weak"}],
+            fact_check=[_fact_check_ok(len(GOOD_SCRIPT["sentences"]))],
+            metadata_pack=[GOOD_META])
+    res = A.generate_story_ranked([CAND_A], ask=f, fetch_sources=lambda q, n: GOOD_SOURCES)
+    assert res["status"] == "ok", res
+    assert res["picked_topic"] == "Topic A"
+    scored = {c["topic"]: c for c in res["candidates"] if c["status"] == "scored"}
+    assert scored["Topic A"]["mean"] == 1.0
+
+
+def test_generate_story_ranked_holds_only_when_every_candidate_fails_a_hard_check():
+    # both topics' scripts fail code_checks (bare question hook) on both the first draft
+    # and the one rewrite -- neither ever reaches the critic, so there is nothing to rank.
+    bad_script = {**GOOD_SCRIPT, "sentences": [dict(GOOD_SCRIPT["sentences"][0]),
+                                               *GOOD_SCRIPT["sentences"][1:]]}
+    bad_script["sentences"][0] = {**bad_script["sentences"][0], "text": "Why did a forest fall?"}
+    import copy
+    f = Fake(research_extract=[RESEARCH_CLAIMS, RESEARCH_CLAIMS],
+            script_write=[copy.deepcopy(bad_script), copy.deepcopy(bad_script),
+                          copy.deepcopy(bad_script), copy.deepcopy(bad_script)])
     res = A.generate_story_ranked([CAND_A, CAND_B], ask=f,
                                   fetch_sources=lambda q, n: GOOD_SOURCES)
     assert res["status"] == "hold"
-    assert "no candidate cleared the floor" in res["reason"]
+    assert "all candidates failed a hard check" in res["reason"]
     assert {c["topic"] for c in res["candidates"]} == {"Topic A", "Topic B"}
+    assert all(c["status"] == "hold" for c in res["candidates"])
+    # script_critic was never queued in `f` -- if either candidate had reached the
+    # critic stage, the call above would have raised KeyError instead of returning.
 
 
 def test_generate_story_ranked_logs_research_holds_without_blocking_other_topics():

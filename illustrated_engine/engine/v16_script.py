@@ -38,34 +38,12 @@ RANK_REWRITE_BUDGET = 1  # decision #15 item 2: one rewrite per topic in the ran
 # decision #15 step 1: real critic score (prompt_version 1, unchanged) measured against
 # the owner's own ACCEPTABLE sample (t_figure_skater_spin, commit 56b4955) --
 # illustrated_engine/build_reports/decision15/step1_calibration.json. The old uniform
-# CRITIC_MEAN_MIN=4.0/RANK_FLOOR_DIM=3 bars both failed the owner's own accepted sample
-# (2.75 mean, min 2 on escalation/emotional_charge) and every real sampled script in
-# decision #15 step 3 -- too strict. decision #16 item 1: the owner's literal re-spec,
-# a flat mean floor plus a PER-DIMENSION floor map (most dimensions 2, but
-# payoff_clarity/one_idea_only -- the two dimensions that most directly gate a usable
-# loop/payoff, not just polish -- held to 3).
+# CRITIC_MEAN_MIN=4.0/RANK_FLOOR_DIM=3 bars (decision #15) and the mean+per-dimension
+# floor map (decision #16: mean>=3.0, dims>=2 except payoff_clarity/one_idea_only>=3)
+# both failed the owner's own accepted sample and trended down on objectively stronger
+# topics -- the critic itself is not a reliable pass/fail gate. decision #17: floor
+# removed entirely; the critic is now a pure ranker (see `rank_write_story`).
 SKATER_CALIBRATION_MEAN = 2.75
-RANK_FLOOR_MEAN = 3.0
-RANK_FLOOR_DIM_DEFAULT = 2
-RANK_FLOOR_DIM_STRICT = {"payoff_clarity": 3, "one_idea_only": 3}
-RANK_FLOOR_DIM = {**RANK_FLOOR_DIM_STRICT}  # back-compat name; use dim_floors() for lookups
-
-
-def dim_floor(dim: str, floor_dim: dict | None = None) -> int:
-    """Per-dimension floor for `dim`: `RANK_FLOOR_DIM_DEFAULT` unless `dim` has a
-    stricter entry in `floor_dim` (default `RANK_FLOOR_DIM_STRICT`)."""
-    overrides = RANK_FLOOR_DIM_STRICT if floor_dim is None else floor_dim
-    return overrides.get(dim, RANK_FLOOR_DIM_DEFAULT)
-
-
-def clears_rank_floor(scores: dict, floor_mean: float = RANK_FLOOR_MEAN,
-                      floor_dim: dict | None = None) -> bool:
-    """decision #16 item 1: mean >= `floor_mean` AND every dimension >= its own
-    floor (`dim_floor`) -- not a single scalar per-dimension floor."""
-    mean = sum(scores.values()) / len(scores)
-    if mean < floor_mean:
-        return False
-    return all(v >= dim_floor(d, floor_dim) for d, v in scores.items())
 
 
 AI_NOTE = "Illustrations are AI-generated in our house style; narration uses a synthetic voice."
@@ -461,28 +439,27 @@ def _finalize(run: _Run, story: dict, topic: str, facts: dict, series_note: str,
 # ============================================= decision #15: rank, don't block
 
 def rank_write_story(topics_facts: list, *, series_note: str = "", batch_titles: list = (),
-                     ask=None, floor_mean: float | None = None,
-                     floor_dim: dict | None = None) -> dict:
+                     ask=None) -> dict:
     """decision #15 item 2: instead of generating one topic's script and
     falling back to the next topic only on a HOLD, generate scripts for
     every `(topic, facts)` pair up front (up to RANK_REWRITE_BUDGET=1
     rewrite each if the first draft fails the critic's own `critic_pass`
     bar), score all of them with the real script critic, and pick the
-    HIGHEST-scoring one. That pick only gets finalized (fact_check +
-    metadata via `_finalize`) and returned as a producible story if its
-    mean clears `floor_mean` (default `RANK_FLOOR_MEAN=3.0`) with every
-    dimension clearing its own floor (decision #16 item 1: a per-dimension
-    map, not one scalar -- `RANK_FLOOR_DIM_DEFAULT=2` for most dimensions,
-    `RANK_FLOOR_DIM_STRICT` raises `payoff_clarity`/`one_idea_only` to 3; see
-    `clears_rank_floor`/`dim_floor`). Every candidate's full critic scores (or
-    hold reason, if it never reached the critic) are returned in
-    "candidates" regardless of the outcome, so a HOLD slot stays fully
-    auditable.
+    HIGHEST-scoring one. decision #17: that pick is ALWAYS finalized
+    (fact_check + metadata via `_finalize`) and returned as the producible
+    story -- there is no mean or per-dimension floor on the critic score
+    anymore; the critic is a pure ranker. The only way this can come back
+    with no pick (`picked_topic` None, verdict "HOLD") is if every topic's
+    candidate never reaches "scored" status at all -- it HOLDs on a
+    script-rule code-check failure (`code_checks`: facts, digits,
+    absolute-claims, ...) that survives its rewrite budget. Every
+    candidate's full critic scores (or hold reason, if it never reached a
+    scored state) are returned in "candidates" regardless of the outcome,
+    so a HOLD slot stays fully auditable.
 
     -> {"verdict": "PASS"|"HOLD", "picked_topic": str|None, "story": dict|None,
         "candidates": [{"topic", "status": "scored"|"hold", ...}]}
     """
-    floor_mean = RANK_FLOOR_MEAN if floor_mean is None else floor_mean
     candidates = []
     for topic, facts in topics_facts:
         run = _Run(ask or llm.ask)
@@ -528,7 +505,7 @@ def rank_write_story(topics_facts: list, *, series_note: str = "", batch_titles:
     result = {"verdict": "HOLD", "picked_topic": None, "story": None,
               "candidates": public_candidates}
 
-    if picked is not None and clears_rank_floor(picked["critic"]["scores"], floor_mean, floor_dim):
+    if picked is not None:
         story = {"topic": picked["topic"], "verdict": "HOLD", "holds": [],
                  "script": picked["script"], "critic": picked["critic"], "fact_check": None,
                  "metadata": None, "calls": picked["_run"].calls,

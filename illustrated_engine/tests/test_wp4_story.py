@@ -371,48 +371,6 @@ def test_critic_bar():
     assert S.critic_pass({**ok, "a": 3, "b": 5})                # mean 4.0, floor 3
 
 
-# ------------------------------------------ decision #16 item 1: rank floor ----
-
-RANK_DIMS = ["hook_strength", "curiosity_gap", "escalation", "payoff_clarity",
-            "loop_coherence", "human_voice", "emotional_charge", "one_idea_only"]
-
-
-def test_dim_floor_is_2_except_payoff_clarity_and_one_idea_only():
-    assert S.dim_floor("hook_strength") == 2
-    assert S.dim_floor("escalation") == 2
-    assert S.dim_floor("emotional_charge") == 2
-    assert S.dim_floor("payoff_clarity") == 3
-    assert S.dim_floor("one_idea_only") == 3
-
-
-def test_clears_rank_floor_mean_3_every_dim_2_except_payoff_and_one_idea():
-    # mean exactly 3.0, every dim >= 2, payoff_clarity/one_idea_only at the stricter 3
-    scores = {**dict.fromkeys(RANK_DIMS, 3), "escalation": 2, "emotional_charge": 4}
-    assert sum(scores.values()) / len(scores) == 3.0
-    assert S.clears_rank_floor(scores)
-    # the owner's own accepted skater sample shape (decision #15 step 1): mean 2.75,
-    # escalation/emotional_charge at 2 -- fails the new mean floor too (3.0 > 2.75)
-    skater_shaped = {**dict.fromkeys(RANK_DIMS, 3), "curiosity_gap": 2, "emotional_charge": 2}
-    assert sum(skater_shaped.values()) / len(skater_shaped) == 2.75
-    assert not S.clears_rank_floor(skater_shaped)
-
-
-def test_clears_rank_floor_fails_when_payoff_clarity_or_one_idea_only_below_3():
-    # mean held well above 3.0 so only the per-dimension floor is under test
-    scores_hi = dict.fromkeys(RANK_DIMS, 4)
-    assert S.clears_rank_floor(scores_hi)
-    assert not S.clears_rank_floor({**scores_hi, "payoff_clarity": 2})
-    assert not S.clears_rank_floor({**scores_hi, "one_idea_only": 2})
-    assert S.clears_rank_floor({**scores_hi, "escalation": 2})       # 2 is fine for a non-strict dim
-
-
-def test_clears_rank_floor_fails_below_mean_3():
-    scores = dict.fromkeys(RANK_DIMS, 2)
-    scores["payoff_clarity"] = scores["one_idea_only"] = 3
-    assert sum(scores.values()) / len(scores) < 3.0
-    assert not S.clears_rank_floor(scores)
-
-
 # ------------------------------------------------------ orchestration ----
 
 GOOD_SCORES = dict.fromkeys(["hook_strength", "curiosity_gap", "escalation", "payoff_clarity",

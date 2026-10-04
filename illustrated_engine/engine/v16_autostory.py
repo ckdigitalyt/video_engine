@@ -89,9 +89,15 @@ def generate_story_ranked(candidates: list, *, ask=None, fetch_sources=None,
     so scripts for all of them are generated up front, scored by the real
     critic, and the single highest-scoring one is finalized and returned --
     replacing the old "try one topic, fall back to the next only on a HOLD"
-    chain. A topic that HOLDs at the research stage (too few sources, failed
-    quote-check) is recorded in "candidates" too, even though it never
-    reaches the critic.
+    chain. Decision #17: the critic score is a pure ranker now, not a gate --
+    whichever candidate scores highest is always the one finalized and
+    returned, with no mean or per-dimension floor. The overall slot can only
+    HOLD if every one of the (up to 3) topics fails a hard check first: a
+    research-stage hold (too few sources, failed quote-check), a script-rule
+    code-check failure (`code_checks` -- facts, digits, absolute-claims, ...)
+    surviving its rewrite budget, or an LLM failure during finalize. A topic
+    that HOLDs at the research stage is recorded in "candidates" too, even
+    though it never reaches the critic.
 
     -> {"status": "ok", "story": {...}, "script_engine": {...}, "picked_topic": str,
         "candidates": [...]} or {"status": "hold", "reason": "...", "candidates": [...]}
@@ -134,12 +140,10 @@ def generate_story_ranked(candidates: list, *, ask=None, fetch_sources=None,
         if c["status"] == "hold":
             reasons.append(f"{c['topic']}: {c['reason']}")
         elif result.get("picked_topic") == c["topic"] and result.get("story"):
-            reasons.append(f"{c['topic']}: mean {c['mean']:.2f} min {c['min']} cleared the "
-                           f"floor but finalize held: {'; '.join(result['story']['holds'])}")
-        else:
-            reasons.append(f"{c['topic']}: mean {c['mean']:.2f} min {c['min']} below floor")
+            reasons.append(f"{c['topic']}: mean {c['mean']:.2f} min {c['min']} picked but "
+                           f"finalize held: {'; '.join(result['story']['holds'])}")
     return {"status": "hold",
-           "reason": "rank-not-block: no candidate cleared the floor: " + "; ".join(reasons),
+           "reason": "rank-not-block: all candidates failed a hard check: " + "; ".join(reasons),
            "candidates": all_candidates}
 
 
