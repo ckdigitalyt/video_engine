@@ -603,11 +603,5 @@ unchanged). No other changes were made, per the owner's explicit "no
 other changes" instruction — items 1-2 only.
 
 ## Next
-Q2 (hook timing) → Q3 (caption safe zone) → Q4 (plates) → Q5 (re-render
-Tunguska) → PR. WP13 (2-topic cap) → WP14 still pending behind the Q-queue
-per owner decision #11. Decision #17's finding: with the critic floor
-gone, rank-not-block reliably reaches a real render (dry run 5), but the
-real render is still held by legitimate, unrelated video-quality gates
-(caption clause breaks, the vision judge, and template distinctness
-across recent videos) — raising the real sampled pass rate now depends on
-those three gates, not on script/critic calibration.
+Awaiting owner verdict on the dry-run-5 video. The Q2–Q5, PR, WP13 and
+WP14 queue is cancelled per decisions #12–#17.
