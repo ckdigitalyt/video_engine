@@ -290,6 +290,67 @@ def _prompts_for(shot: dict, bible: dict, subject_bible: dict | None = None) -> 
                          view=shot.get("view"))]
 
 
+def _prompt_parts(shot: dict, subject_bible: dict | None = None) -> list:
+    """Parallel to _prompts_for: the pieces each prompt was built from, so a
+    failed plate's prompt can be REBUILT with steering (decision #18)."""
+    from engine.species import augment_subject
+    from engine.subject_bible import inject_subject
+
+    def _augment(subject):
+        return inject_subject(augment_subject(subject), subject_bible or {})
+    if shot["kind"] == "zoom_through":
+        return [{"subject": _augment(lv["subject"]), "composition": "centered",
+                 "view": None} for lv in shot["levels"]]
+    return [{"subject": _augment(shot["subject"]),
+             "composition": shot.get("composition", "centered"),
+             "view": shot.get("view")}]
+
+
+# decision #18 item 4: a plate that fails QA is regenerated from a prompt
+# STEERED by why it failed (positive phrasing only — FLUX has no negative
+# prompt), not the identical prompt on another provider. Near-duplicates
+# rotate to a different view each round.
+_DUP_VIEWS = ("surface", "close", "cutaway", "medium", "wide")
+_NUMWORDS_RE = re.compile(
+    r"(?i)\b(zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|"
+    r"twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|"
+    r"twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|"
+    r"thousand|million|billion|half|\d[\d.,]*)\b")
+
+
+def steer_prompt(bible: dict, parts: dict, reason: str | None, rnd: int,
+                 identity: dict | None = None,
+                 narration: str | None = None) -> str:
+    subj = parts["subject"].rstrip(". ")
+    comp, view = parts.get("composition", "centered"), parts.get("view")
+    ident = identity or {}
+    if reason in ("wrong_subject", "generic_subject"):
+        if ident.get("description"):
+            name = ident.get("name") or "the main subject"
+            subj = (f"{name}, {ident['description'].rstrip('. ')}, "
+                    f"unmistakably this specific subject. {subj}")
+        else:
+            first = re.split(r"(?<=[.;,])\s", subj, maxsplit=1)[0]
+            subj = f"Clearly and unmistakably showing {first.rstrip('.,;')}. {subj}"
+    elif reason == "empty":
+        subj += (". The main subject is large, richly detailed and fills most "
+                 "of the frame")
+        comp = "centered"
+        if view in (None, "wide"):
+            view = "medium"
+    elif reason == "near_duplicate":
+        opts = [v for v in _DUP_VIEWS if v != view]
+        view = opts[(rnd - 1) % len(opts)]
+    elif reason == "narration_mismatch" and narration:
+        what = " ".join(_NUMWORDS_RE.sub("", narration).split()).strip(" .,")
+        subj += f". The scene clearly depicts: {what}"
+    elif reason == "bad_anatomy":
+        subj += ". Anatomically accurate in every listed detail"
+    elif reason == "text":
+        subj += ", clean unmarked painted surfaces only"
+    return image_prompt(bible, subj, comp, view=view)
+
+
 def _seed(prompt: str, salt: int = 0) -> int:
     from src.providers.image_gen import deterministic_seed
     return deterministic_seed(prompt, salt)
@@ -397,47 +458,71 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
                                           if r.get("ok") and not r.get("cached"))
     qa = {"checked": False}
     plate_realistic_by_prompt: dict = {}   # DESIGN §11 disclosure (WP10)
-    # B2 (VIS): a plate QA fail (text/wrong_subject/broken/bad_anatomy, the
-    # last one new — see v15_plates.QA_QUESTION) gets up to MAX_PLATE_REGEN
-    # regeneration rounds, each through the NEXT model in the fallback chain
-    # (never the same model twice in a row), before it falls through and
-    # ships still flagged (qa_fail, caught by v15_gate's asset_tier check).
+    # B2 (VIS) / decision #18 item 4: a plate QA fail gets up to
+    # MAX_PLATE_REGEN regeneration rounds before it ships still flagged
+    # (qa_fail, caught by v15_gate's asset_tier check). Each round rebuilds
+    # the prompt STEERED by the failure reason (steer_prompt) on the normal
+    # production chain (Cloudflare first). The old rotation to "the next
+    # model" sent dry run 5's one failing plate to sdcpp_local (1709 s after
+    # a gemini 429) and then to pollinations (commercial_ok:false), each
+    # time with the identical prompt.
     MAX_PLATE_REGEN = 3
     if plate_qa_on:
-        items = [{"path": plates[p]["path"], "subject": p.split(". ")[1]
-                  if ". " in p else p, "prompt": p,
-                  "narration": prompt_narration.get(p)}
-                 for p in uniq if plates[p].get("ok")]
+        from engine.v15_plates import PROVIDER_ORDER
+        parts_of: dict = {}
+        order: list = []     # timeline order: "earlier"/"last" mean something
+        for s in shots:
+            for p, pt in zip(s["prompts"], _prompt_parts(s["shot"], subj_bible)):
+                parts_of.setdefault(p, pt)
+                if p not in order:
+                    order.append(p)
+        identity = subj_bible if subj_bible.get("description") else None
+        items = [{"path": plates[p]["path"], "subject": parts_of[p]["subject"],
+                  "prompt": p, "narration": prompt_narration.get(p)}
+                 for p in order if plates[p].get("ok")]
         qa = plate_qa(items, bible.get("illustration_style", ""),
-                      work / "plate_sheet.jpg")
+                      work / "plate_sheet.jpg", identity=identity)
         report["costs"]["vision_calls"] += 1
         for i, it in enumerate(items):
             plate_realistic_by_prompt[it["prompt"]] = (qa.get("realistic")
                                                         or {}).get(i)
-        from engine.v15_plates import PROVIDER_ORDER
+        reason_of = {items[i]["prompt"]: r
+                     for i, r in (qa.get("fail") or {}).items()}
+        shows_of = {items[i]["prompt"]: v
+                    for i, v in (qa.get("shows") or {}).items()}
+        steering: list = []
 
-        def _next_chain(p):  # a different MODEL, not just a new seed
-            used = plates[p].get("provider")
-            i = PROVIDER_ORDER.index(used) if used in PROVIDER_ORDER else -1
-            return list(PROVIDER_ORDER[i + 1:]) + list(PROVIDER_ORDER[:i + 1])
+        def _redo(p, rnd):
+            sp = steer_prompt(bible, parts_of[p], reason_of.get(p), rnd,
+                              identity, prompt_narration.get(p))
+            prov = (providers_for_beat_function("HOOK") if p in hero_prompts
+                    else PROVIDER_ORDER)
+            return p, sp, generate_plate(sp, _seed(sp, rnd), log=fail_log,
+                                         providers=prov)
 
-        still = {items[i]["prompt"] for i in qa.get("fail") or {}}
+        still = set(reason_of)
         regenerated_total, rounds = 0, 0
         while still and rounds < MAX_PLATE_REGEN:
             rounds += 1
-            regen = sorted(still)
+            regen = [p for p in order if p in still]
             with ThreadPoolExecutor(max_workers=3) as ex:
-                redo = dict(ex.map(lambda p: _gen(p, rounds, _next_chain(p)),
-                                   regen))
+                res = list(ex.map(lambda p: _redo(p, rounds), regen))
             report["costs"]["image_calls"] += sum(
-                1 for r in redo.values() if r.get("ok") and not r.get("cached"))
-            ok_redo = {p: r for p, r in redo.items() if r.get("ok")}
+                1 for _, _, r in res if r.get("ok") and not r.get("cached"))
+            for p, sp, r in res:
+                steering.append({"round": rounds, "reason": reason_of.get(p),
+                                 "shows": shows_of.get(p),
+                                 "subject": parts_of[p]["subject"][:90],
+                                 "provider": r.get("provider"),
+                                 "seconds": r.get("seconds")})
+            ok_redo = {p: r for p, _, r in res if r.get("ok")}
             qa_round = plate_qa(
-                [{"path": r["path"], "subject": p.split(". ")[1]
-                  if ". " in p else p, "narration": prompt_narration.get(p)}
+                [{"path": r["path"], "subject": parts_of[p]["subject"],
+                  "narration": prompt_narration.get(p)}
                  for p, r in ok_redo.items()],
                 bible.get("illustration_style", ""),
-                work / f"plate_sheet_regen{rounds}.jpg") if ok_redo else {}
+                work / f"plate_sheet_regen{rounds}.jpg",
+                identity=identity) if ok_redo else {}
             report["costs"]["vision_calls"] += 1 if ok_redo else 0
             regenerated_total += len(regen)
             next_still = set()
@@ -447,6 +532,8 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
                                                 or {}).get(j)
                 if j in (qa_round.get("fail") or {}):  # incl. OCR hits
                     next_still.add(p)
+                    reason_of[p] = qa_round["fail"][j]
+                    shows_of[p] = (qa_round.get("shows") or {}).get(j)
             for p in regen:
                 if p not in ok_redo:
                     next_still.add(p)
@@ -455,12 +542,13 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
             qa["regen_rounds"] = rounds
             qa["still_failing"] = sorted(x[:100] for x in still)
             qa["second_check"] = bool(qa_round.get("checked"))
+        qa["steering"] = steering
         for p in still:
             plates[p] = dict(plates[p], qa_fail=True)
     report["plate_qa"] = {k: qa.get(k) for k in
                           ("checked", "ocr_checked", "fail", "ocr_hits",
                            "regenerated", "regen_rounds", "still_failing",
-                           "second_check", "reason")}
+                           "second_check", "reason", "steering")}
     # final prompt -> path map, AFTER any regeneration replaced a path;
     # None (unknown/unanswered) is kept as None, never defaulted here —
     # engine.v16_manifest treats None conservatively (assume realistic).

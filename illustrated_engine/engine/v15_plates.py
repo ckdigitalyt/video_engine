@@ -34,8 +34,9 @@ Per plate:
 plate_qa(): a free OCR pre-filter (tesseract, watermark/signature strips)
 then ONE vision call per story on a labelled contact sheet of all its
 plates (director.vision_ask -> llm adapter, stage plate_qa) -> failing plates (garbled text,
-wrong subject, off-style, empty, watermark) regenerate once with a new seed. Bounded:
-one QA call + <= one regeneration round. WP2: fail-closed — the result says
+wrong subject, generic stand-in, empty, near-duplicate, watermark) regenerate
+with a prompt steered by the failure reason (engine.v15_pipeline, decision
+#18 item 4). Bounded: <= MAX_PLATE_REGEN rounds. WP2: fail-closed — the result says
 whether QA actually ran (`checked`, `ocr_checked`) and the gate treats "did
 not run" as HOLD.
 """
@@ -332,13 +333,35 @@ A plate FAILS only for:
  "wrong_subject": the MAIN object named above is absent (e.g. asked for a
    skate blade, shows a building). Artistic interpretation, missing minor
    details, stylization or a different viewpoint are NOT failures;
- "broken": empty, corrupted, or incoherent image.
-Also answer, for EACH plate: could a viewer mistake it for a real photo or
+ "broken": corrupted or incoherent image;
+ "empty": mostly empty or featureless picture — the main subject tiny, faint
+   or lost in a large blank area, little for a viewer to look at;
+ "near_duplicate": nearly the same picture (same subject, same viewpoint and
+   framing) as an EARLIER-numbered plate on this sheet. Plates are in story
+   order; the LAST plate may deliberately echo plate #1 — that is not a
+   duplicate.
+{identity_block}Also answer, for EACH plate: could a viewer mistake it for a real photo or
 real footage of a real event or person (not an illustration)? Stylised
 illustration in the required style should almost always be false.
 {anatomy_block}{narration_block}Return ONLY JSON:
 {{"plates": [{{"n": 1, "shows": "...", "fail": null, "realistic": false{anatomy_field}{narration_field}}}]}}
-with "fail" one of null, "text", "wrong_subject", "broken".{anatomy_note}{narration_note}"""
+with "fail" one of null, "text", "wrong_subject", "broken", "empty",
+"near_duplicate".{identity_note}{anatomy_note}{narration_note}"""
+
+# decision #18 item 4: the final video judge (v15_gate.run_judge) fails on
+# not_story_specific / subject_unrecognizable / empty_or_flat / no_change,
+# none of which plate QA used to ask — so dry run 5's Earth-like "dwarf
+# planet" plates all PASSED plate QA and then failed the video. The
+# recurring subject's identity (engine.subject_bible, incl. its `not_like`
+# generic stand-in — used here only, never in an image prompt) is checked.
+IDENTITY_BLOCK = """The video's recurring subject is {name}: {description}.
+For plates whose main subject is {name}: a generic stand-in instead of
+THIS specific thing (for example {not_like}) FAILS "generic_subject", even
+though artistic interpretation is otherwise fine.
+"""
+IDENTITY_NOTE = (' "generic_subject" is also a valid "fail" value.')
+FAIL_CODES = ("text", "wrong_subject", "broken", "empty", "near_duplicate",
+              "generic_subject", "bad_anatomy", "narration_mismatch")
 
 ANATOMY_BLOCK = """Some plates name a specific real animal with required
 anatomy (listed below as "anatomy:"). For ONLY those plates also answer
@@ -396,7 +419,8 @@ def contact_sheet(paths: list, out: Path, cols: int = 5) -> Path:
     return out
 
 
-def plate_qa(items: list, style: str, sheet_path: Path) -> dict:
+def plate_qa(items: list, style: str, sheet_path: Path,
+             identity: dict | None = None) -> dict:
     """items: [{path, subject, narration?}] (narration optional, per-item) ->
     {checked, ocr_checked, fail: {index:
     reason}, ocr_hits, realistic, raw}. `fail` merges the OCR pre-filter
@@ -441,8 +465,17 @@ def plate_qa(items: list, style: str, sheet_path: Path) -> dict:
             for i, n in narration_hits.items())
         narration_block = NARRATION_BLOCK.format(narration_items=narration_items)
         narration_field, narration_note = NARRATION_FIELD, NARRATION_NOTE
+    identity_block = identity_note = ""
+    if identity and identity.get("description"):
+        name = identity.get("name") or str(identity.get("concept_id") or
+                                           "the main subject").replace("_", " ")
+        identity_block = IDENTITY_BLOCK.format(
+            name=name, description=identity["description"],
+            not_like=identity.get("not_like") or "a generic look-alike")
+        identity_note = IDENTITY_NOTE
     ans = vision_ask(sheet_path, QA_QUESTION.format(
         style=style[:200], n=len(items), items=listing,
+        identity_block=identity_block, identity_note=identity_note,
         anatomy_block=anatomy_block, anatomy_field=anatomy_field,
         anatomy_note=anatomy_note, narration_block=narration_block,
         narration_field=narration_field, narration_note=narration_note),
@@ -451,15 +484,17 @@ def plate_qa(items: list, style: str, sheet_path: Path) -> dict:
         return {"checked": False, "ocr_checked": ocr_checked, "fail": fails,
                 "ocr_hits": ocr_hits, "realistic": realistic, "raw": ans,
                 "reason": "judge unavailable or unparseable"}
+    shows = {}
     for f in ans.get("plates") or []:
         try:
             n = int(f.get("n")) - 1
         except Exception:
             continue
-        if 0 <= n < len(items) and f.get("fail") in (
-                "text", "wrong_subject", "broken", "bad_anatomy",
-                "narration_mismatch"):
-            fails[n] = f["fail"]
+        if 0 <= n < len(items) and f.get("fail") in FAIL_CODES:
+            if f["fail"] != "generic_subject" or identity_block:
+                fails[n] = f["fail"]
+        if 0 <= n < len(items) and isinstance(f.get("shows"), str):
+            shows[n] = f["shows"][:120]
         if 0 <= n < len(items) and isinstance(f.get("realistic"), bool):
             realistic[n] = f["realistic"]
         if (0 <= n < len(items) and n in species_hits
@@ -469,4 +504,5 @@ def plate_qa(items: list, style: str, sheet_path: Path) -> dict:
                 and f.get("narration_match") is False and n not in fails):
             fails[n] = "narration_mismatch"
     return {"checked": True, "ocr_checked": ocr_checked, "fail": fails,
-            "ocr_hits": ocr_hits, "realistic": realistic, "raw": ans}
+            "ocr_hits": ocr_hits, "realistic": realistic, "shows": shows,
+            "raw": ans}
