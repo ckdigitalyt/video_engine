@@ -194,11 +194,19 @@ def check_caption_safe(overlays: list, top: float) -> dict:
 # e.g. "...STAYS A" / "RUMOR YOU CAN"). One at a cue's LEADING edge is not
 # a defect: it attaches forward to the rest of the SAME cue ("The time.",
 # "In the late Jurassic." are both complete phrases).
+#
+# decision #18 item 1: this is now the ONE shared set — v15_pipeline imports
+# it (it used to keep its own identical copy, free to drift from the gate).
 _CAPTION_FUNCTION_WORDS = {"a", "an", "the", "of", "to", "in", "on", "at", "by",
                            "for", "and", "but", "or", "so", "your", "its",
                            "their", "his", "her", "you", "we", "it", "is",
                            "are", "was", "can", "that", "this", "with",
                            "from", "into", "than", "as"}
+CAPTION_FUNCTION_WORDS = _CAPTION_FUNCTION_WORDS
+# A cue whose last raw token ends in clause punctuation ends AT a clause
+# boundary ("Here's the part that breaks it:") — the same rule
+# v15_pipeline._binds_forward applies when building cues.
+_CLAUSE_END = re.compile(r"[,.;:!?—…]['\")\]]*$")
 # Scale words are kept as the on-screen UNIT next to a numeralized digit
 # ("155-145 million") — only bare spelled-out ones/tens/hundred are a fail.
 _SPELLED_NUMBER_WORDS_EXCL_SCALE = {"thousand", "million", "billion"}
@@ -237,6 +245,11 @@ def check_caption_clause_breaks(overlays: list) -> dict:
         order.append(text)
     for text in order:
         ws = _norm_words(text)
+        raw = str(text).split()
+        # decision #18 item 1: punctuation-terminated = clause boundary, not
+        # a mid-clause break (dry run 5 flagged "that breaks it:")
+        if raw and _CLAUSE_END.search(raw[-1]):
+            continue
         if ws and ws[-1] in _CAPTION_FUNCTION_WORDS:
             fails.append(f"cue {text!r} ends on a function word "
                         "(mid-clause break)")

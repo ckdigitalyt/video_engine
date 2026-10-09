@@ -159,7 +159,19 @@ def _phrase_value(atoms: list) -> tuple:
             base = (base or 1) * 100
         elif a in _SCALE_WORDS:
             scale = a
+    if scale and base == 0:  # bare "thousand" / "a million" means one of it
+        base = 1
     return base, scale
+
+
+def _fmt_num(base: int, scale: str | None) -> str:
+    """decision #18 item 1: "thousand" is multiplied out into grouped
+    digits ("1,000", "100,000") — "1 thousand" / "100-1 thousand" read
+    badly (the latter as a subtraction). million/billion stay as the unit
+    word next to the digit, per B1's own examples ("155-145 million")."""
+    if scale == "thousand":
+        return f"{base * 1000:,}"
+    return f"{base:,}" + (f" {scale}" if scale else "")
 
 
 def _token_kind(atoms: list) -> str:
@@ -225,11 +237,20 @@ def numeralize_cue_words(words: list) -> list:
     number words, e.g. "one two three") pass through unchanged."""
     out, i, n = [], 0, len(words)
     while i < n:
+        start = i
+        # decision #18 item 1: "a hundred" / "a thousand" -> one digit unit
+        # ("100", "1,000"), not "a 100".
+        if (_BARE.sub("", words[i]["w"].lower()) in ("a", "an") and i + 1 < n
+                and (_num_atoms(words[i + 1]["w"]) or [None])[0]
+                in ("hundred", *_SCALE_WORDS)):
+            i += 1
         if _num_atoms(words[i]["w"]) is None:
             out.append(words[i])
             i += 1
             continue
         idx1, flat1, j = _extend_phrase(words, i, n)
+        if start != i:
+            idx1 = [start] + idx1
         phrase_idx = [idx1]
         bare = _BARE.sub("", words[j]["w"].lower()) if j < n else ""
         if bare == "to" and j + 1 < n and _num_atoms(words[j + 1]["w"]) is not None:
@@ -243,14 +264,30 @@ def numeralize_cue_words(words: list) -> list:
             vals = [_phrase_value(flat1)]
         if len(vals) == 1:
             base, scale = vals[0]
-            text = str(base) + (f" {scale}" if scale else "")
+            text = _fmt_num(base, scale)
+            # "one and a half" -> "1.5" (one unit, not "1 and a half")
+            tail = [_BARE.sub("", words[k]["w"].lower())
+                    for k in range(j, min(j + 3, n))]
+            if not scale and tail == ["and", "a", "half"]:
+                text = f"{base}.5"
+                full_idx = full_idx + [j, j + 1, j + 2]
         else:
             b1, s1 = vals[0]
             b2, s2 = vals[-1]
             if s1 and s2 and s1 != s2:
-                text = f"{b1} {s1}-{b2} {s2}"
+                text = f"{_fmt_num(b1, s1)} to {_fmt_num(b2, s2)}"
+            elif not s1 and s2 and b2 * 10 <= b1:
+                # "one hundred to one thousand" is 100..1,000, NOT a shared
+                # scale ("100-1 thousand"); "fifty to sixty thousand" and
+                # "155 to 145 million" (b2 not << b1) still share it.
+                sep = "-" if s2 == "thousand" else " to "
+                text = f"{b1:,}{sep}{_fmt_num(b2, s2)}"
             else:
-                text = f"{b1}-{b2}" + (f" {s1 or s2}" if s1 or s2 else "")
+                s = s1 or s2
+                if s == "thousand":
+                    text = f"{_fmt_num(b1, s)}-{_fmt_num(b2, s)}"
+                else:
+                    text = f"{b1:,}-{b2:,}" + (f" {s}" if s else "")
         lead = re.match(r"^[^\w]*", words[full_idx[0]]["w"]).group()
         trail = re.search(r"[^\w]*$", words[full_idx[-1]]["w"]).group()
         out.append({"w": lead + text + trail,

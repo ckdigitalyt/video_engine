@@ -61,25 +61,80 @@ RENDER_CONFIG = {"concurrency": 2, "pipeline": "v15"}
 INTENSITY = {"HOOK": 0.75, "CURIOSITY": 0.62, "REVEAL": 0.85,
              "EXPLANATION": 0.66, "ESCALATION": 0.82, "PAYOFF": 0.88}
 _PUNCT_ONLY = re.compile(r"^[\W_]+$")
-_FUNCTION_WORDS = {"a", "an", "the", "of", "to", "in", "on", "at", "by", "for",
-                   "and", "but", "or", "so", "your", "its", "their", "his",
-                   "her", "you", "we", "it", "is", "are", "was", "can",
-                   "that", "this", "with", "from", "into", "than", "as"}
+# decision #18 item 1: one shared set with the gate's clause-break check.
+from engine.v15_gate import CAPTION_FUNCTION_WORDS as _FUNCTION_WORDS  # noqa: E402
+# Quantifier lead-ins bind to a following "to"/figure ("up to 20", "about
+# 430", "over 1.5") \u2014 "dimming it for up" | "to 20 seconds" split the phrase.
+_QUANT_LEADS = {"up", "about", "around", "nearly", "roughly", "almost", "over",
+                "under", "only", "just", "some", "more", "less", "fewer"}
+# decision #18 item 1: cue segmentation is a small per-sentence DP (below),
+# not a greedy 4-word cut — the greedy backtrack stranded lone function
+# words ("to", "up") as their own cues on dry run 5.
+CUE_MAX_WORDS = 7
+CUE_MAX_CHARS = 36   # dry run 5 shipped a 37-char cue inside caption_safe
+_LEN_COST = {1: 5, 2: 1, 3: 0, 4: 0, 5: 1, 6: 3, 7: 5}
+_BIND_COST = 50      # ending a cue on a word that binds forward
+_INNER_CLAUSE_COST = 3  # a clause break (,;:) INSIDE a cue
+_SENT_END = re.compile(r"([.!?]|\.\.\.|\u2026)['\")\]]*$")
+_CLAUSE_END_W = re.compile(r"[,;:\u2014]['\")\]]*$")
 
 
 # ---------------------------------------------------------------- captions --
 
-def _binds_forward(word: str) -> bool:
+def _binds_forward(word: str, nxt: str | None = None) -> bool:
     """Function words and bare figures belong with the NEXT word (a number
-    with its unit, an article with its noun) unless punctuation ends them."""
-    if re.search(r"[,.;:!?\u2014]$", word):
+    with its unit, an article with its noun) unless punctuation ends them.
+    A quantifier lead-in ("up", "about", ...) binds when the next word is
+    "to"/"than" or a figure."""
+    if re.search(r"[,.;:!?\u2014\u2026]$", word):
         return False
     w = word.lower()
-    return w in _FUNCTION_WORDS or bool(re.fullmatch(r"[\d.,]+", w))
+    # a bare figure or digit RANGE ("430-510") binds to its unit
+    if w in _FUNCTION_WORDS or bool(re.fullmatch(r"[\d.,]+(?:-[\d.,]+)?", w)):
+        return True
+    if nxt is not None and w in _QUANT_LEADS:
+        n = nxt.lower()
+        return n in ("to", "than") or bool(re.match(r"\d", n))
+    return False
+
+
+def _segment(words: list) -> list:
+    """Words of ONE sentence -> list of groups minimising the summed cue
+    cost: length (3-4 words ideal), +_BIND_COST when a cue ends on a word
+    that grammatically binds to the next one, -1 for ending on a clause
+    mark or a >0.25 s pause, +_INNER_CLAUSE_COST per clause mark swallowed
+    mid-cue. Hard limits: CUE_MAX_WORDS words and CUE_MAX_CHARS characters
+    (a single over-long word is always allowed)."""
+    n = len(words)
+    best = [0.0] + [float("inf")] * n
+    back = [0] * (n + 1)
+    for j in range(1, n + 1):
+        for i in range(max(0, j - CUE_MAX_WORDS), j):
+            g = words[i:j]
+            if len(g) > 1 and len(" ".join(w["w"] for w in g)) > CUE_MAX_CHARS:
+                continue
+            last = g[-1]["w"]
+            nxt = words[j] if j < n else None
+            c = _LEN_COST[len(g)]
+            if nxt is not None:
+                if _binds_forward(last, nxt["w"]):
+                    c += _BIND_COST
+                if _CLAUSE_END_W.search(last) or nxt["t0"] - g[-1]["t1"] > 0.25:
+                    c -= 1
+            c += _INNER_CLAUSE_COST * sum(
+                1 for w in g[:-1] if _CLAUSE_END_W.search(w["w"]))
+            if best[i] + c < best[j]:
+                best[j], back[j] = best[i] + c, i
+    groups, j = [], n
+    while j > 0:
+        groups.append(words[back[j]:j])
+        j = back[j]
+    return groups[::-1]
 
 
 def caption_cues(timing: dict, lead: float) -> list:
-    """Phrase cues (<= 4 words, break after punctuation or a pause) on the
+    """Phrase cues (ideally 3-4 words, never across a sentence end, never
+    ending on a word that binds to the next — see _segment) on the
     measured word times; per-word starts drive the active-word highlight.
     B1 (VIS): on-screen text shows DIGITS ("155-145 million years ago")
     while the narration/TTS text keeps the spelled-out words a TTS model
@@ -93,32 +148,14 @@ def caption_cues(timing: dict, lead: float) -> list:
                              t1=w["t1"])
             continue
         words.append(dict(w))
-    groups, cur = [], []
-    for i, w in enumerate(words):
-        cur.append(w)
-        nxt = words[i + 1] if i + 1 < len(words) else None
-        # a length break never strands a function word at the cue end
-        # ("...STAYS A" / "RUMOR YOU CAN"): it carries into the next cue
-        if len(cur) >= 4 and nxt is not None:
-            k = len(cur)
-            while k > 1 and _binds_forward(cur[k - 1]["w"]):
-                k -= 1
-            if k < len(cur):
-                groups.append(cur[:k])
-                cur = cur[k:]
-                continue
-        brk = (len(cur) >= 4
-               or re.search(r"[.!?]$", w["w"])
-               or re.search(r"[,;:—]$", w["w"]) and len(cur) >= 2
-               or (nxt is not None and nxt["t0"] - w["t1"] > 0.25
-                   and len(cur) >= 2))
-        if brk or nxt is None:
-            groups.append(cur)
-            cur = []
-    # a 1-word tail group merges back (a lone word flashes too fast)
-    if len(groups) > 1 and len(groups[-1]) == 1:
-        tail = groups.pop()  # (not `groups[-2] += groups.pop()`: the target
-        groups[-1] = groups[-1] + tail  # index resolves before the pop)
+    groups, sent = [], []
+    for w in words:   # sentences are hard cue boundaries
+        sent.append(w)
+        if _SENT_END.search(w["w"]):
+            groups += _segment(sent)
+            sent = []
+    if sent:
+        groups += _segment(sent)
     cues = []
     for gi, g in enumerate(groups):
         t0 = lead + g[0]["t0"]
