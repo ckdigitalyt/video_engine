@@ -105,3 +105,32 @@ def test_derived_punch_in_takes_a_different_view():
     assert second["shot"]["subject"] == "a small icy world in space"
     s["shot"]["view"] = "close"
     assert _split_one(s, words, bt, 3.0, 1.0)[1]["shot"]["view"] == "wide"
+
+
+# ------------------------------- decision #18 item 6: planner robustness --
+
+def test_spelled_out_numbers_count_as_spoken():
+    d = v15_plan._spoken_digits("It's only about four hundred thirty to five "
+                                "hundred ten kilometres across, over 20 m.")
+    assert {"430", "510", "20"} <= d
+
+
+def test_number_overlay_of_spelled_figure_validates():
+    story = {"story_id": "t", "title": "T", "beats": [
+        {"beat_id": "B1", "function": "HOOK",
+         "narration": "It vanishes within one hundred to one thousand years."}]}
+    plan = {"beats": [{"beat_id": "B1", "shots": [
+        {"kind": "plate", "start_word": 0, "view": "wide",
+         "subject": "a small icy world losing its haze", "camera": "push_in",
+         "composition": "centered", "headline": "GONE SOON",
+         "number": {"text": "100-1,000 YEARS", "word": 3}}]}]}
+    assert v15_plan.validate_plan(plan, story) == []
+    plan["beats"][0]["shots"][0]["number"]["text"] = "5,000 YEARS"
+    assert any("not spoken" in e for e in v15_plan.validate_plan(plan, story))
+
+
+def test_repair_fills_first_shot_start_word():
+    p = _plan(["wide", "close"])
+    p["beats"][2]["shots"][0].pop("start_word")
+    v15_plan._repair(p, STORY)
+    assert p["beats"][2]["shots"][0]["start_word"] == 0

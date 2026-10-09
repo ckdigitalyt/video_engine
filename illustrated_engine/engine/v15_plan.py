@@ -70,6 +70,19 @@ def _digits(s: str) -> list:
     return [m.group().replace(",", "") for m in _NUM.finditer(str(s))]
 
 
+def _spoken_digits(narration: str) -> set:
+    """decision #18 item 6: figures SPOKEN in the narration, whether written
+    as digits or spelled out. Auto-generated narration spells numbers for
+    the TTS ("four hundred thirty"), so the old verbatim-digit check
+    rejected every correct on-screen figure ("430") and burned the plan's
+    one retry (dry run 5's plan came from llm_retry for this reason). The
+    caption pipeline's own numeralizer defines what counts as spoken."""
+    from engine.voice.text import numeralize_cue_words
+    words = [{"w": w, "t0": 0.0, "t1": 0.0} for w in str(narration).split()]
+    num = " ".join(w["w"] for w in numeralize_cue_words(words))
+    return set(_digits(narration)) | set(_digits(num))
+
+
 def _words(narration: str) -> list:
     return str(narration).split()
 
@@ -110,13 +123,14 @@ Each shot starts at a word index of that beat ("start_word"); the first shot
 of a beat starts at 0; indices strictly increase; >= {MIN_SHOT_WORDS} words per shot.
 
 Shot kinds:
- "plate": one illustrated image. Fields: subject, composition, camera,
+ "plate": one illustrated image. Fields: subject, view, composition, camera,
     optional headline, optional number, optional label.
  "zoom_through": a continuous dive through 2-4 nested scales (e.g. hair ->
     cell -> mitochondrion -> DNA). Fields: levels=[{{subject, label, word}}].
     Use ONLY when the narration itself moves through sizes/scales.
  "process": a cause->effect chain over a background image. Fields: subject
-    (the background image), steps=[{{text, word}}] (2-4 steps, each <= 4 words).
+    (the background image), view, start_word, steps=[{{text, word}}] (2-4
+    steps, each <= 4 words).
     Use for mechanisms ("X causes Y, so Z").
 
 Field rules:
@@ -144,7 +158,8 @@ Field rules:
     narration verbatim). Use for the hook question and the payoff.
  number: {{"text": "...", "word": i}} — a figure the narration SAYS at word i,
     shown as a giant number with its unit (e.g. "0.1°C", "2 nm", "30 TRILLION").
-    Digits must appear exactly in the narration. Only when a number is spoken.
+    Only a figure the narration actually says (spelled-out numbers count:
+    "four hundred thirty" may be shown as "430").
  label: {{"text": "<= 3 words", "word": i}} names the main subject when spoken.
  levels[].label / steps[].text: <= 4 words; digits only if spoken.
  word fields: index of the narration word where that element should appear.
@@ -217,7 +232,7 @@ def validate_plan(plan: dict, story: dict) -> list:
             continue
         ws = _words(beat["narration"])
         n = len(ws)
-        digits = set(_digits(beat["narration"]))
+        digits = _spoken_digits(beat["narration"])
         shots = pb.get("shots")
         if not isinstance(shots, list) or not (1 <= len(shots) <= MAX_SHOTS):
             errs.append(f"{bid}: needs 1-{MAX_SHOTS} shots")
@@ -345,9 +360,13 @@ def _repair(plan: dict, story: dict) -> dict:
     for pb in plan.get("beats", []) if isinstance(plan, dict) else []:
         if not isinstance(pb, dict) or pb.get("beat_id") not in by_id:
             continue
-        for sh in pb.get("shots") or []:
+        for si, sh in enumerate(pb.get("shots") or []):
             if not isinstance(sh, dict):
                 continue
+            # decision #18 item 6: a beat's first shot always starts at
+            # word 0 — fill an omitted index instead of failing the plan
+            if si == 0 and sh.get("start_word") is None:
+                sh["start_word"] = 0
             # degenerate multi-element shots collapse to a plate (content
             # kept: the single step/level becomes the label/subject)
             if sh.get("kind") == "process" and isinstance(sh.get("steps"), list) \
@@ -473,7 +492,7 @@ def salvage(plan: dict, story: dict) -> tuple:
     for beat in story["beats"]:
         bid = beat["beat_id"]
         ws = _words(beat["narration"])
-        n, digits = len(ws), set(_digits(beat["narration"]))
+        n, digits = len(ws), _spoken_digits(beat["narration"])
         pb = by_id.get(bid)
         shots = [sh for sh in (pb or {}).get("shots") or []
                  if isinstance(sh, dict) and sh.get("kind") in SHOT_KINDS]
