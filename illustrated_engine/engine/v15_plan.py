@@ -68,7 +68,21 @@ def _words(narration: str) -> list:
 
 # --------------------------------------------------------------- prompt --
 
-def build_prompt(story: dict, bible: dict) -> str:
+def _identity_block(subject: dict | None) -> str:
+    """decision #18 item 2: the recurring subject's identity (engine.
+    subject_bible) so the planner writes every shot about THIS specific
+    thing instead of a generic stand-in."""
+    subject = subject or {}
+    if not subject.get("description"):
+        return ""
+    name = subject.get("name") or str(subject.get("concept_id") or "").replace("_", " ")
+    return (f"\nRECURRING SUBJECT: {name} — {subject['description']}\n"
+            f"Whenever a shot shows it, call it \"{name}\" in the subject and "
+            "describe it consistently with that look: it must read as this "
+            "specific thing, never a generic stand-in.\n")
+
+
+def build_prompt(story: dict, bible: dict, subject: dict | None = None) -> str:
     beats_txt = []
     for b in story["beats"]:
         ws = _words(b["narration"])
@@ -80,7 +94,7 @@ def build_prompt(story: dict, bible: dict) -> str:
     return f"""You are the visual director of a vertical (9:16) explainer short.
 Title: {story.get('title', story['story_id'])}
 Illustration style (applied automatically to every image; do NOT repeat it): {style}
-
+{_identity_block(subject)}
 For EACH beat below, plan 1-{MAX_SHOTS} SHOTS that SHOW what the narration says,
 changing picture roughly every 2.5-4 seconds (about every 8-12 words):
 a beat of N words needs at least ceil(N/{WORDS_PER_SHOT}) shots.
@@ -478,8 +492,9 @@ def _parse_json(text: str):
     return None
 
 
-def plan_key(story: dict, bible: dict) -> str:
+def plan_key(story: dict, bible: dict, subject: dict | None = None) -> str:
     blob = json.dumps({
+        "subject": (subject or {}).get("description"),
         "v": PROMPT_VERSION, "title": story.get("title"),
         "beats": [{k: b.get(k) for k in ("beat_id", "function", "narration",
                                           "visual_answer")}
@@ -489,10 +504,11 @@ def plan_key(story: dict, bible: dict) -> str:
 
 
 def make_plan(story: dict, bible: dict, *, use_llm: bool = True,
-              force: bool = False, ask=None) -> dict:
+              force: bool = False, ask=None, subject: dict | None = None) -> dict:
     """-> {"plan", "source": llm|llm_retry|cache|fallback, "errors", "key",
-    "llm_calls"}. `ask` overrides the text judge (tests)."""
-    key = plan_key(story, bible)
+    "llm_calls"}. `ask` overrides the text judge (tests). `subject` is the
+    engine.subject_bible result (decision #18), part of the cache key."""
+    key = plan_key(story, bible, subject)
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     cp = CACHE_DIR / f"{key}.json"
     if cp.exists() and not force:
@@ -506,7 +522,7 @@ def make_plan(story: dict, bible: dict, *, use_llm: bool = True,
 
             from engine.director import text_ask
             ask = partial(text_ask, stage="visual_plan")
-        prompt = build_prompt(story, bible)
+        prompt = build_prompt(story, bible, subject)
         for attempt in range(2):
             p = prompt if attempt == 0 else (
                 prompt + "\n\nYour previous answer had these errors — fix "

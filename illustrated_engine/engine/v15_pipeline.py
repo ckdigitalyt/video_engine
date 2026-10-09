@@ -323,9 +323,18 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
                               "boundaries": t["boundaries"]}
                         for bid, t in timing.items()}
 
+    # decision #13 item 3 / #18 item 2: one reusable identity description
+    # for the video's recurring subject — story["concepts"]' busiest entry,
+    # or (auto-generated stories, no concepts) derived from title+narration.
+    # Built BEFORE the plan so the planner writes about the specific thing.
+    from engine.subject_bible import build_subject_bible
+    subj_bible = build_subject_bible(story, use_llm=use_llm)
+    report["subject_bible"] = subj_bible
+    report["costs"]["llm_calls"] += subj_bible.get("llm_calls", 0)
+
     # 2. Beat Visual Plan
     t0 = time.time()
-    bvp = make_plan(story, bible, use_llm=use_llm)
+    bvp = make_plan(story, bible, use_llm=use_llm, subject=subj_bible)
     report["costs"]["llm_calls"] += bvp["llm_calls"]
     report["plan"] = {"source": bvp["source"], "key": bvp["key"],
                       "errors": bvp["errors"][:10]}
@@ -335,14 +344,6 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
     (work / "visual_plan.json").write_text(json.dumps(bvp["plan"], indent=1))
     plan_by = {b["beat_id"]: b for b in bvp["plan"]["beats"]}
     report["timings"]["plan_s"] = round(time.time() - t0, 1)
-
-    # decision #13 item 3: one reusable appearance+clothing description for
-    # the video's recurring subject (story["concepts"]' busiest entry), so
-    # the same character/animal doesn't get redesigned shot to shot.
-    from engine.subject_bible import build_subject_bible
-    subj_bible = build_subject_bible(story, use_llm=use_llm)
-    report["subject_bible"] = subj_bible
-    report["costs"]["llm_calls"] += subj_bible.get("llm_calls", 0)
 
     # 3. shot timeline
     shots = []  # flat: {beat, idx, shot, t0, t1, prompts}

@@ -5,6 +5,19 @@ appearance+clothing description, generated once via the text judge and
 cached by story content (same convention as engine.v16_metadata), then
 spliced into every image-generation prompt whose shot subject names that
 concept — so the same figure doesn't get redesigned beat to beat.
+
+Decision #18 item 2: stories from engine.v16_autostory carry NO
+`concepts`, so the bible above never ran on any auto-generated video
+(dry run 5: `subject_bible: {}` -> the image model drew its "tiny icy
+world" as Earth, continents and oceans, on 8/21 plates). For those
+stories one cached text call now derives the recurring subject's IDENTITY
+from title + narration: {name, aliases, description, not_like}.
+  - name/description feed the visual planner (engine.v15_plan) so every
+    shot is written about the specific thing, and are spliced into each
+    image prompt whose subject mentions any alias (whole-word match);
+  - not_like (the generic stand-in an illustrator would default to) is
+    used ONLY by plate QA (engine.v15_plates) — never in an image prompt:
+    FLUX has no negative prompt, naming the wrong thing summons it.
 """
 from __future__ import annotations
 
@@ -16,6 +29,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 CACHE_DIR = ROOT / "build" / "cache" / "subject_bible"
 PROMPT_VERSION = "subject_bible/1.0"
+IDENTITY_VERSION = "subject_identity/1.0"
 
 
 def main_concept(story: dict) -> dict | None:
@@ -56,13 +70,84 @@ def _fallback_description(concept: dict) -> str:
     return str(concept.get("id") or "").replace("_", " ")
 
 
+def identity_prompt(story: dict) -> str:
+    lines = "\n".join(f"- {b['narration']}" for b in story["beats"])
+    return f"""You are the art director of an illustrated vertical explainer
+video. Every shot is drawn by a separate AI image call, so the video's ONE
+recurring main visual subject must be described once, concretely, or each
+call will invent a generic stand-in (e.g. a "tiny icy world" drawn as Earth).
+
+Video title: {story.get('title', story['story_id'])}
+Narration:
+{lines}
+
+Identify the recurring main visual subject (the thing most shots must show)
+and return ONLY JSON:
+{{"name": "<short concrete noun phrase, e.g. 'the icy dwarf planet'>",
+ "aliases": ["<every lowercase 1-4 word phrase the narration or a shot
+   description may use for it, e.g. 'tiny world', 'small world', 'dwarf
+   planet' — 3 to 8 entries>"],
+ "description": "<= 30 words, appearance only: shape, surface, colours,
+   texture, scale cues. Positive phrasing only (say what it IS, never
+   'not X'). Scientifically plausible for this exact subject.",
+ "not_like": "<= 12 words: the most likely WRONG generic depiction an
+   illustrator would default to, e.g. 'Earth with blue oceans and green
+   continents'"}}
+If the video truly has no single recurring visual subject, return
+{{"name": null}}."""
+
+
+def _identity_bible(story: dict, *, use_llm: bool, ask) -> dict:
+    """No-concepts path (auto-generated stories). -> {} when there is no
+    LLM, no answer, or no single recurring subject."""
+    blob = json.dumps({"v": IDENTITY_VERSION, "title": story.get("title"),
+                       "narration": [b.get("narration") for b in story["beats"]]},
+                      sort_keys=True)
+    key = hashlib.sha256(blob.encode()).hexdigest()[:16]
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    cp = CACHE_DIR / f"id_{key}.json"
+    if cp.exists():
+        data = json.loads(cp.read_text())
+        if data.get("description"):
+            return dict(data, source="cache", llm_calls=0)
+    if not use_llm:
+        return {}
+    if ask is None:
+        from engine.director import text_ask
+
+        def ask(p):
+            return text_ask(p, 0.2, 500, stage="text_misc")
+    raw = ask(identity_prompt(story))
+    m = re.search(r"\{.*\}", raw or "", re.S)
+    try:
+        ans = json.loads(m.group()) if m else {}
+    except Exception:
+        ans = {}
+    name, desc = ans.get("name"), ans.get("description")
+    if not (isinstance(name, str) and name.strip() and isinstance(desc, str)
+            and desc.strip()):
+        return {"llm_calls": 1}
+    aliases = [a.strip().lower() for a in (ans.get("aliases") or [])
+               if isinstance(a, str) and a.strip()]
+    core = re.sub(r"^(the|a|an)\s+", "", name.strip().lower())
+    if core not in aliases:
+        aliases.insert(0, core)
+    data = {"concept_id": core.replace(" ", "_"), "name": name.strip(),
+            "aliases": aliases[:10], "description": desc.strip(),
+            "not_like": str(ans.get("not_like") or "").strip()}
+    cp.write_text(json.dumps(data, indent=1))
+    return dict(data, source="llm", llm_calls=1)
+
+
 def build_subject_bible(story: dict, *, use_llm: bool = True, ask=None) -> dict:
-    """-> {} when the story has no recurring concept, else {"concept_id",
-    "description", "source": llm|cache|fallback, "llm_calls"}. Cached by
-    story content (same convention as engine.v16_metadata.build_metadata)."""
+    """-> {} when the story has no recurring subject, else {"concept_id",
+    "description", "source": llm|cache|fallback, "llm_calls"} (+ "name",
+    "aliases", "not_like" on the identity path). Cached by story content
+    (same convention as engine.v16_metadata.build_metadata)."""
     concept = main_concept(story)
     if not concept:
-        return {}
+        # decision #18 item 2: auto-generated stories have no concepts
+        return _identity_bible(story, use_llm=use_llm, ask=ask)
     blob = json.dumps({"v": PROMPT_VERSION, "concept": concept,
                        "title": story.get("title"),
                        "narration": [b.get("narration") for b in story["beats"]
@@ -100,11 +185,14 @@ def build_subject_bible(story: dict, *, use_llm: bool = True, ask=None) -> dict:
 
 def inject_subject(subject_text: str, bible: dict) -> str:
     """Append the subject bible's description when `subject_text` plausibly
-    names the recurring concept (its id, underscores as spaces, appears in
-    the shot's subject text — same alias-matching idea as
-    engine.species.augment_subject)."""
-    cid = str((bible or {}).get("concept_id") or "").replace("_", " ").strip()
-    desc = (bible or {}).get("description")
-    if not cid or not desc or cid.lower() not in subject_text.lower():
+    names the recurring subject — its id (underscores as spaces) or any of
+    its `aliases`, matched as whole words (engine.species.alias_in)."""
+    from engine.species import alias_in
+    bible = bible or {}
+    cid = str(bible.get("concept_id") or "").replace("_", " ").strip()
+    desc = bible.get("description")
+    aliases = [a for a in (bible.get("aliases") or []) if a] + ([cid] if cid else [])
+    if not desc or desc in subject_text or \
+            not any(alias_in(a, subject_text) for a in aliases):
         return subject_text
     return subject_text.rstrip(". ") + ". " + desc
