@@ -176,13 +176,34 @@ def style_prefix(bible: dict) -> str:
     return ", ".join(keep)
 
 
-def image_prompt(bible: dict, subject: str, composition: str = "centered") -> str:
-    comp = {"subject_low": "main subject in the lower two thirds, wide quiet "
-                           "open background across the upper third",
+# decision #18 item 3: the shot's view is PREPENDED to the subject — FLUX
+# weighs early tokens; the old trailing ", tight close-up detail crop" on a
+# punch-in subject was ignored (dry run 5's judge "no_change" frames).
+VIEW_PHRASES = {
+    "wide": "Wide establishing view",
+    "medium": "Medium view",
+    "close": "Extreme close-up of surface detail filling the whole frame",
+    "surface": "Low ground-level view from right on the surface",
+    "cutaway": "Cutaway cross-section view",
+    "comparison": "Side-by-side comparison view",
+    "observer": "Human-scale view with small figures observing",
+}
+
+
+def image_prompt(bible: dict, subject: str, composition: str = "centered",
+                 view: str | None = None) -> str:
+    # decision #18 item 3: "wide quiet open background" + a pull_out camera
+    # produced dry run 5's empty_or_flat frame — keep the top third calm for
+    # the headline, but the subject LARGE.
+    comp = {"subject_low": "main subject large, filling the lower two "
+                           "thirds, calm darker background across the top "
+                           "third",
             "subject_high": "main subject in the upper half, quiet plain "
                             "ground across the lower third",
             "centered": "single clear focal subject, centered"}.get(
                 composition, "single clear focal subject")
     subj = _BANNED_WORD.sub("", subject.strip().rstrip("."))
+    if view in VIEW_PHRASES:
+        subj = f"{VIEW_PHRASES[view]}: {subj}"
     return ". ".join(x for x in (style_prefix(bible), subj, comp,
                                  FRAMING_GUIDANCE, PURE) if x)

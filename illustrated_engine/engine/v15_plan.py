@@ -40,11 +40,19 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 CACHE_DIR = ROOT / "build" / "cache" / "v15_plans"
-PROMPT_VERSION = "bvp/1.4"
+PROMPT_VERSION = "bvp/1.5"
 
 SHOT_KINDS = ("plate", "zoom_through", "process")
 CAMERAS = ("push_in", "pull_out", "pan_left", "pan_right", "rise", "descend")
 COMPOSITIONS = ("subject_low", "subject_high", "centered")
+# decision #18 item 3: per-shot VIEW (scale/viewpoint). Dry run 5's plan put
+# 15/21 shots on "a small icy world floating in space" — same scale, same
+# viewpoint, noun-swappable; the judge called it templated. Every plate/
+# process shot now names its view, and variety_errors() enforces spread.
+VIEWS = ("wide", "medium", "close", "surface", "cutaway", "comparison",
+         "observer")
+VARIETY_MAX_SHARE = 0.4     # no view on more than 40% of shots (>= 6 shots)
+VARIETY_MIN_DISTINCT = 4    # at least 4 distinct views (>= 8 shots)
 MAX_SHOTS = 3
 MIN_SHOT_WORDS = 4  # a shot shorter than ~4 words (~1.3 s) is a flicker
 WORDS_PER_SHOT = 13  # ~4 s of speech: longer beats need another shot
@@ -112,14 +120,23 @@ Shot kinds:
     Use for mechanisms ("X causes Y, so Z").
 
 Field rules:
- subject: ONE concrete, drawable scene for an illustrator: the physical
-    thing(s), viewpoint and framing (macro / cross-section / wide / cutaway).
-    Specific to this beat's words. No words, letters, labels or diagram text
+ subject: ONE concrete, physically drawable scene for an illustrator: the
+    real thing(s) and what is happening to them, specific to this beat's
+    words. Never an abstract idea, graph or "comparison of layers" — show
+    the physical thing it happens to. Do not add people/figures unless the
+    narration itself is about people. No words, letters, labels or diagram text
     in the image. NO digits, numbers, text, labels, rulers-with-readings or
     charts in the subject (figures are added as overlay typography).
     No split panels. <= 45 words.
- composition: "subject_low" (leave the top third calm for a headline),
-    "subject_high", or "centered".
+ view: the shot's scale/viewpoint, one of {', '.join(VIEWS)}:
+    wide = establishing view with surroundings; medium = the subject and its
+    immediate context; close = extreme close-up of a surface/detail filling
+    the frame; surface = standing ON or right next to it, ground-level;
+    cutaway = cross-section / inside view; comparison = two things side by
+    side; observer = people observing it (ONLY if the narration mentions
+    people). The view is applied to the image automatically.
+ composition: "subject_low" (subject large in the lower two thirds, top
+    third calm for a headline), "subject_high", or "centered".
  camera: one of {', '.join(CAMERAS)} — choose the move that fits the idea
     (push_in = focus/discover, pull_out = reveal context/scale, pans = travel
     along a process, rise/descend = up/down a structure).
@@ -132,6 +149,13 @@ Field rules:
  levels[].label / steps[].text: <= 4 words; digits only if spoken.
  word fields: index of the narration word where that element should appear.
 
+SHOT VARIETY (checked automatically): consecutive shots never share the
+same view; no view on more than {int(VARIETY_MAX_SHARE * 100)}% of all shots; use at least
+{VARIETY_MIN_DISTINCT} different views across the video. The recurring subject shown whole and
+floating in empty space is ONE view ("wide" or "medium") — do not repeat it
+shot after shot; go to its surface, a close detail, a cutaway, or the
+event/context around it instead.
+
 The FIRST beat's first shot must be a striking "plate" with a headline that
 poses the question. If that beat's narration contrasts or compares two or
 more named things, the hook shot's subject must show ALL of them together
@@ -143,7 +167,7 @@ Beats:
 {chr(10).join(beats_txt)}
 
 Return ONLY JSON:
-{{"beats":[{{"beat_id":"B1","shots":[{{"kind":"plate","start_word":0,"subject":"...","composition":"subject_low","camera":"push_in","headline":"..."}}]}}]}}"""
+{{"beats":[{{"beat_id":"B1","shots":[{{"kind":"plate","start_word":0,"subject":"...","view":"wide","composition":"subject_low","camera":"push_in","headline":"..."}}]}}]}}"""
 
 
 # ------------------------------------------------------------ validation --
@@ -222,6 +246,8 @@ def validate_plan(plan: dict, story: dict) -> list:
                 prev = sw
             if kind in ("plate", "process"):
                 _check_subject(sh.get("subject"), w, errs)
+                if sh.get("view") is not None and sh["view"] not in VIEWS:
+                    errs.append(f"{w}: view must be one of {VIEWS}")
             if kind == "plate":
                 if sh.get("camera") not in CAMERAS:
                     errs.append(f"{w}: camera must be one of {CAMERAS}")
@@ -279,6 +305,38 @@ def validate_plan(plan: dict, story: dict) -> list:
     return errs
 
 
+def variety_errors(plan: dict) -> list:
+    """decision #18 item 3: per-shot visual variety across the whole video
+    (plate/process shots in timeline order). Kept OUT of validate_plan: a
+    plan failing only these is still a valid plan (make_plan accepts it
+    with recorded warnings after the retry rather than dropping to the
+    salvage/fallback floor, which has less variety, not more)."""
+    seq = [(pb.get("beat_id"), sh.get("view"))
+           for pb in (plan.get("beats") or []) if isinstance(pb, dict)
+           for sh in (pb.get("shots") or [])
+           if isinstance(sh, dict) and sh.get("kind") in ("plate", "process")]
+    errs = []
+    missing = [b for b, v in seq if v not in VIEWS]
+    if missing:
+        errs.append(f"every plate/process shot needs a view ({', '.join(VIEWS)}); "
+                    f"missing in {sorted(set(missing))[:6]}")
+    views = [v for _, v in seq if v in VIEWS]
+    for k in range(1, len(seq)):
+        if seq[k][1] in VIEWS and seq[k][1] == seq[k - 1][1]:
+            errs.append(f"{seq[k][0]}: same view '{seq[k][1]}' as the previous "
+                        "shot — change the viewpoint/scale")
+    n = len(views)
+    if n >= 6:
+        for v in sorted(set(views)):
+            if views.count(v) / n > VARIETY_MAX_SHARE:
+                errs.append(f"view '{v}' used on {views.count(v)}/{n} shots "
+                            f"(max {int(VARIETY_MAX_SHARE * 100)}%)")
+    if n >= 8 and len(set(views)) < VARIETY_MIN_DISTINCT:
+        errs.append(f"only {len(set(views))} distinct views across {n} shots "
+                    f"(need >= {VARIETY_MIN_DISTINCT})")
+    return errs
+
+
 def _repair(plan: dict, story: dict) -> dict:
     """Deterministic, meaning-preserving normalizations applied BEFORE
     validation: clamp element words into their shot, uppercase copy, drop
@@ -312,6 +370,10 @@ def _repair(plan: dict, story: dict) -> dict:
             if sh.get("kind") == "plate" and \
                     sh.get("composition") not in COMPOSITIONS:
                 sh["composition"] = "centered"
+            if isinstance(sh.get("view"), str):
+                sh["view"] = sh["view"].strip().lower()
+            if "view" in sh and sh.get("view") not in VIEWS:
+                sh.pop("view")
             for key in ("headline",):
                 if isinstance(sh.get(key), str):
                     sh[key] = sh[key].strip().upper()
@@ -380,7 +442,9 @@ def fallback_plan(story: dict) -> dict:
                                               .split()[:45]),
                           "composition": "subject_low" if (bi == 0 and si == 0)
                           else "centered",
-                          "camera": cams[(bi + si) % len(cams)]})
+                          "camera": cams[(bi + si) % len(cams)],
+                          "view": VIEWS[(len(shots) + sum(
+                              len(x["shots"]) for x in beats)) % 4]})
         if bi == 0:
             shots[0]["headline"] = _cap_words(
                 str(story.get("title") or story["story_id"]).upper(), 5)
@@ -538,11 +602,18 @@ def make_plan(story: dict, bible: dict, *, use_llm: bool = True,
                 continue
             plan = _repair(plan, story)
             plan_last = plan
-            errors = validate_plan(plan, story)
-            if not errors:
+            hard = validate_plan(plan, story)
+            soft = variety_errors(plan) if not hard else []
+            errors = hard + soft
+            if not hard and (not soft or attempt == 1):
+                # decision #18 item 3: variety is asked for twice; a valid
+                # plan still short on variety after the retry ships with
+                # the shortfall recorded (never a silent pass, never a drop
+                # to the less-varied salvage/fallback floor).
                 src = "llm" if attempt == 0 else "llm_retry"
                 data = {"plan": plan, "source": src, "key": key,
-                        "errors": [], "prompt_version": PROMPT_VERSION}
+                        "errors": [], "variety_warnings": soft,
+                        "prompt_version": PROMPT_VERSION}
                 cp.write_text(json.dumps(data, indent=1))
                 return dict(data, llm_calls=calls)
     if use_llm and plan_last is not None:

@@ -226,10 +226,14 @@ def _split_one(s: dict, wt: list, bt: list, max_hold_s: float,
     # move, which is what the vision judge's "no_change" frame flags were
     # catching (bench/ab/vis.md). A tight-crop framing of the same subject
     # is still the right follow-on shot, just backed by its own plate.
-    second = {"kind": "plate",
-              "subject": sh["subject"].rstrip(". ")
-                        + ", tight close-up detail crop",
-              "composition": sh.get("composition", "centered"),
+    # decision #18 item 3: the old ", tight close-up detail crop" SUFFIX was
+    # ignored by the image model (dry run 5: B2_S3/B11_S2 redrew the same
+    # whole-planet picture -> judge "no_change"). The derived shot now takes
+    # a DIFFERENT view than its parent, prepended by image_prompt.
+    parent_view = sh.get("view")
+    second = {"kind": "plate", "subject": sh["subject"],
+              "view": "wide" if parent_view == "close" else "close",
+              "composition": "centered",
               "camera": "punch_in", "start_word": wi, "derived": "punch_in"}
     for k in ("number", "label"):
         if sh.get(k) and sh[k]["word"] >= wi:
@@ -282,7 +286,8 @@ def _prompts_for(shot: dict, bible: dict, subject_bible: dict | None = None) -> 
         return [image_prompt(bible, _augment(lv["subject"]), "centered")
                 for lv in shot["levels"]]
     return [image_prompt(bible, _augment(shot["subject"]),
-                         shot.get("composition", "centered"))]
+                         shot.get("composition", "centered"),
+                         view=shot.get("view"))]
 
 
 def _seed(prompt: str, salt: int = 0) -> int:
@@ -503,6 +508,8 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
         events[key] = res["events"]
         meta[key] = {"beat": b["beat_id"], "t0": s["t0"], "dur": dur,
                      "kind": s["shot"]["kind"], "tier": res["asset_tier"],
+                     "view": s["shot"].get("view"),
+                     "camera": res["spec"].get("camera", {}).get("type"),
                      "qa_fail": any(plates.get(p, {}).get("qa_fail")
                                     for p in s["prompts"]),
                      "function": b.get("function")}
