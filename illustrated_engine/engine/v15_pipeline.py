@@ -778,6 +778,7 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
     record_distinctness({
         "video_id": sid,
         "signature": gate["checks"]["distinctness"]["signature"],
+        "signature_v2": gate["checks"]["distinctness"].get("signature_v2"),
         "plate_hashes": gate["checks"]["distinctness"]["plate_hashes"]})
 
     report["timings"]["total_s"] = round(time.time() - t_start, 1)

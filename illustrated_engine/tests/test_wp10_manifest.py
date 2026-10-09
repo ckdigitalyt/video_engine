@@ -298,3 +298,45 @@ def test_distinctness_history_caps_at_30():
         assert len(hist) == 30
         assert hist[0]["video_id"] == "v5"
         assert hist[-1]["video_id"] == "v34"
+
+
+# ------------------------------------------- decision #18 item 5: v2 sig --
+
+def _spec(kind, cam, boxes=()):
+    return {"camera": {"type": cam},
+            "meta": {"shot_kind": kind,
+                     "text_boxes": [{"id": b} for b in boxes]}}
+
+
+def test_signature_v2_tokens_from_compiled_specs():
+    meta = {"B1_S1": {"kind": "plate"}, "B2_S1": {"kind": "process"}}
+    specs = {"B1_S1": _spec("plate", "push_in", ["headline"]),
+             "B2_S1": _spec("process", "pan", ["step0", "step1"])}
+    assert g.template_signature_v2(meta, specs) == \
+        "plate/push_in/H,process/pan/S"
+
+
+def test_v2_all_plate_videos_differ_by_edit_grammar():
+    meta = {f"B{i}_S1": {"kind": "plate"} for i in range(1, 7)}
+    a = {k: _spec("plate", "push_in", ["label"]) for k in meta}
+    b = {k: _spec("plate", c, bx) for k, c, bx in zip(
+        meta, ("pull_out", "pan", "rise", "travel", "descend", "pull_out"),
+        (["headline"], [], ["number"], [], ["label"], []))}
+    hist = [{"video_id": "old", "signature": g.template_signature(meta),
+             "signature_v2": g.template_signature_v2(meta, a),
+             "plate_hashes": []}]
+    # legacy kind-only comparison: identical (the old false collision)
+    assert not g.check_distinctness("new", meta, [], hist)["ok"]
+    r = g.check_distinctness("new", meta, [], hist, specs=b)
+    assert r["ok"] and r["signature_version"] == 2, r
+    # and a genuinely identical edit grammar is still caught
+    r = g.check_distinctness("new", meta, [], hist, specs=a)
+    assert not r["ok"] and "template sequence" in r["fails"][0]
+
+
+def test_v2_legacy_history_is_reported_not_compared():
+    meta = {"B1_S1": {"kind": "plate"}}
+    hist = [{"video_id": "legacy", "signature": "plate", "plate_hashes": []}]
+    r = g.check_distinctness("new", meta, [], hist,
+                             specs={"B1_S1": _spec("plate", "push_in")})
+    assert r["ok"] and r["legacy_uncomparable"] == ["legacy"]

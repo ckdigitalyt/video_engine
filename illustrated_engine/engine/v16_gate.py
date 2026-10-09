@@ -102,6 +102,56 @@ def template_signature(meta: dict) -> str:
     return ",".join(m["kind"] for m in meta.values())
 
 
+# decision #18 item 5: the kind-only signature above is near-constant for
+# this pipeline (v15_plan only emits plate|zoom_through|process, so every
+# video is ~95% "plate"): dry run 5 "collided" with a skater video and
+# Tunguska at 0.10-0.29 purely because of that. v2 tokens describe the edit
+# grammar actually on screen, read from the COMPILED scene specs (so it can
+# also be backfilled from any saved scenes/*.spec.json):
+#     <shot_kind>/<camera.type>/<overlay classes>
+# overlay classes: H headline, L label, N number, S process steps, other
+# text boxes by their id's first letter, "-" none. Plate CONTENT is the
+# dHash check's job, not this one's.
+SIGNATURE_VERSION = 2
+
+
+def _overlay_class(box_id: str) -> str:
+    b = str(box_id).rstrip("0123456789").lower()
+    return {"headline": "H", "label": "L", "number": "N",
+            "step": "S"}.get(b, (b[:1] or "?").upper())
+
+
+def shot_token(spec: dict, kind: str | None = None) -> str:
+    meta = spec.get("meta") or {}
+    k = meta.get("shot_kind") or kind or "?"
+    cam = (spec.get("camera") or {}).get("type") or "?"
+    ov = "".join(sorted({_overlay_class(t.get("id"))
+                         for t in meta.get("text_boxes") or []})) or "-"
+    return f"{k}/{cam}/{ov}"
+
+
+def template_signature_v2(meta: dict, specs: dict) -> str:
+    """Ordered per-shot edit-grammar tokens (meta order == timeline)."""
+    return ",".join(shot_token(specs.get(key) or {}, m.get("kind"))
+                    for key, m in meta.items())
+
+
+def signature_v2_from_scene_dir(scene_dir) -> str | None:
+    """Backfill helper: rebuild a past video's v2 signature from its saved
+    scenes/<B#_S#>.spec.json files (timeline order = beat, then shot)."""
+    import json
+    import re
+    rows = []
+    for f in Path(scene_dir).glob("B*_S*.spec.json"):
+        m = re.match(r"B(\d+)_S(\d+)\.spec\.json$", f.name)
+        if m:
+            rows.append(((int(m[1]), int(m[2])), f))
+    if not rows:
+        return None
+    return ",".join(shot_token(json.loads(f.read_text()))
+                    for _, f in sorted(rows))
+
+
 def signature_distance(a: str, b: str) -> float:
     """Levenshtein distance on the comma-split token lists, normalised by
     the longer sequence's length -> [0, 1] (0 = identical)."""
@@ -120,35 +170,54 @@ def signature_distance(a: str, b: str) -> float:
 
 
 def check_distinctness(video_id: str, meta: dict, plate_paths: list,
-                       history: list) -> dict:
-    """`history`: [{"video_id", "signature", "plate_hashes": [int, ...]}],
-    already loaded and capped by the caller (pure function, no I/O — the
-    gate never writes history itself; see engine.v16_manifest.
+                       history: list, specs: dict | None = None) -> dict:
+    """`history`: [{"video_id", "signature", "signature_v2"?, "plate_hashes":
+    [int, ...]}], already loaded and capped by the caller (pure function,
+    no I/O — the gate never writes history itself; see engine.v16_manifest.
     record_distinctness for the one place that does, called once per real
-    pipeline run, not on every re-gate)."""
+    pipeline run, not on every re-gate).
+
+    decision #18 item 5: with `specs`, sequences are compared on the v2
+    edit-grammar signature against every history entry that has one; an
+    entry with only the legacy kind-only signature is listed under
+    `legacy_uncomparable` (not compared on a measure known to be
+    near-constant). Without `specs` the legacy kind-only comparison runs
+    exactly as before."""
     sig = template_signature(meta)
+    sig2 = template_signature_v2(meta, specs) if specs is not None else None
     hashes = [dhash(p) for p in plate_paths]
-    fails = []
+    fails, legacy = [], []
     nearest = None
     for h in history:
         if h.get("video_id") == video_id:
             continue
-        d = signature_distance(sig, h.get("signature") or "")
-        if nearest is None or d < nearest:
-            nearest = d
-        if d < SIGNATURE_MIN_DISTANCE:
-            fails.append(f"template sequence too close to {h['video_id']} "
-                         f"(distance {d:.2f} < {SIGNATURE_MIN_DISTANCE})")
+        if sig2 is not None:
+            if not h.get("signature_v2"):
+                legacy.append(h.get("video_id"))
+                d = None
+            else:
+                d = signature_distance(sig2, h["signature_v2"])
+        else:
+            d = signature_distance(sig, h.get("signature") or "")
         for ph in h.get("plate_hashes") or []:
             for hh in hashes:
                 if hamming(ph, hh) <= DHASH_MAX_REUSE_DISTANCE:
                     fails.append(f"plate near-duplicate of one used in "
                                  f"{h['video_id']} (Hamming {hamming(ph, hh)})")
+        if d is None:
+            continue
+        if nearest is None or d < nearest:
+            nearest = d
+        if d < SIGNATURE_MIN_DISTANCE:
+            fails.append(f"template sequence too close to {h['video_id']} "
+                         f"(distance {d:.2f} < {SIGNATURE_MIN_DISTANCE})")
     # decision #13: demoted HOLD -> warning (sample-set is still small
     # enough that near-miss shot/template sequences are common; still
     # logged + scored, no longer HOLD-causing on its own).
     return {"ok": not fails, "fails": sorted(set(fails))[:10],
-            "signature": sig, "plate_hashes": hashes,
+            "signature": sig, "signature_v2": sig2,
+            "signature_version": 2 if sig2 is not None else 1,
+            "legacy_uncomparable": legacy, "plate_hashes": hashes,
             "nearest_signature_distance": (round(nearest, 3)
                                            if nearest is not None else None),
             "history_size": len(history), "warning": True}
@@ -283,7 +352,7 @@ def run_gate(work, story: dict, meta: dict, specs: dict, timing: dict,
     plate_paths = v15_gate._plate_paths(specs)
     checks["distinctness"] = check_distinctness(
         video_id or story.get("story_id", ""), meta, plate_paths,
-        history or [])
+        history or [], specs=specs)
     verdict = v15_gate.verdict_of(checks)
     failures = {k: v["fails"] for k, v in checks.items() if not v["ok"]}
     scorecard = None
