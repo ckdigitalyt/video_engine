@@ -324,17 +324,23 @@ def steer_prompt(bible: dict, parts: dict, reason: str | None, rnd: int,
     subj = parts["subject"].rstrip(". ")
     comp, view = parts.get("composition", "centered"), parts.get("view")
     ident = identity or {}
-    if reason in ("wrong_subject", "generic_subject"):
-        if ident.get("description"):
-            name = ident.get("name") or "the main subject"
-            subj = (f"{name}, {ident['description'].rstrip('. ')}, "
-                    f"unmistakably this specific subject. {subj}")
-        else:
-            first = re.split(r"(?<=[.;,])\s", subj, maxsplit=1)[0]
-            subj = f"Clearly and unmistakably showing {first.rstrip('.,;')}. {subj}"
+    # the plate's OWN named object = first clause of its subject. Steering
+    # leads with it for wrong_subject/empty; only generic_subject (a generic
+    # stand-in for the recurring subject) leads with the identity. Dry run 6
+    # (final): an "empty" land-bridge plate steered toward "the main
+    # subject" became a big beaver (the identity was injected in its
+    # prompt), then identity-led wrong_subject steering kept drawing the
+    # beaver for 2 more rounds -> still failing -> FAIL.
+    first = re.split(r"(?<=[.;,])\s", subj, maxsplit=1)[0].rstrip(".,;")
+    if reason == "generic_subject" and ident.get("description"):
+        name = ident.get("name") or "the main subject"
+        subj = (f"{name}, {ident['description'].rstrip('. ')}, "
+                f"unmistakably this specific subject. {subj}")
+    elif reason in ("wrong_subject", "generic_subject"):
+        subj = f"Clearly and unmistakably showing {first}. {subj}"
     elif reason == "empty":
-        subj += (". The main subject is large, richly detailed and fills most "
-                 "of the frame")
+        subj = (f"{first}, large and richly detailed, filling most of the "
+                f"frame. {subj}")
         comp = "centered"
         if view in (None, "wide"):
             view = "medium"

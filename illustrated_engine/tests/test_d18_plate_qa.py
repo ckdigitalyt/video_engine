@@ -86,7 +86,7 @@ def test_steer_empty_and_near_duplicate_change_framing():
     from engine.v15_style import VIEW_PHRASES
     b = _bible()
     p = steer_prompt(b, PARTS, "empty", 1)
-    assert "fills most of the frame" in p and VIEW_PHRASES["medium"] in p
+    assert "filling most of the frame" in p and VIEW_PHRASES["medium"] in p
     d1 = steer_prompt(b, PARTS, "near_duplicate", 1)
     d2 = steer_prompt(b, PARTS, "near_duplicate", 2)
     assert VIEW_PHRASES["wide"] not in d1 and d1 != d2
@@ -98,3 +98,22 @@ def test_steer_narration_mismatch_strips_numbers():
                      narration="It faded over one and a half seconds.")
     assert "clearly depicts: It faded over and a seconds" in p
     assert "one" not in p.split("depicts:")[1]
+
+
+LAND = {"subject": "A narrow strip of frozen land between two icy coastlines, "
+                   "tiny beavers crossing it. A stocky round-bodied beaver",
+        "composition": "subject_low", "view": "wide"}
+BEAVER = {"name": "the beaver", "description": "stocky round-bodied beaver",
+          "not_like": "a capybara"}
+
+
+def test_steer_wrong_subject_and_empty_lead_with_the_plates_own_object():
+    """Dry run 6 (final): identity-led steering turned a land-bridge plate
+    into a beaver portrait three rounds running."""
+    from engine.v15_pipeline import steer_prompt
+    b = _bible()
+    for reason in ("wrong_subject", "empty"):
+        p = steer_prompt(b, LAND, reason, 2, BEAVER)
+        assert p.index("narrow strip of frozen land") < p.index("stocky"), (reason, p)
+    g = steer_prompt(b, LAND, "generic_subject", 1, BEAVER)
+    assert g.index("the beaver, stocky") < g.index("narrow strip")
