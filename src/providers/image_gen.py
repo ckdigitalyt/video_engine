@@ -747,8 +747,26 @@ class PollinationsProvider(ImageGenProvider):
             params["seed"] = seed
         url = f"{self._base_url}/{urllib.parse.quote(prompt)}?" + urllib.parse.urlencode(params)
         req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-        with urllib.request.urlopen(req, timeout=180) as resp:
-            raw = resp.read()
+        # Owner-observed 2026-10-10: a free/keyless per-IP throttle returns
+        # 402/429 (not a hard quota) when the pipeline's 3-way concurrent
+        # ThreadPoolExecutor fires requests close together — a solo request
+        # succeeds every time, 2-3 simultaneous ones often don't. Retrying
+        # after a short stagger is much cheaper than cascading to
+        # sdcpp_local (~1700-1800s/image on this box).
+        raw = None
+        last_err: Exception | None = None
+        for attempt in range(3):
+            try:
+                with urllib.request.urlopen(req, timeout=180) as resp:
+                    raw = resp.read()
+                break
+            except urllib.error.HTTPError as e:
+                last_err = e
+                if e.code not in (402, 429) or attempt == 2:
+                    raise
+                time.sleep(4 * (attempt + 1))
+        if raw is None:
+            raise last_err
         if not raw or raw[:3] == b"<ht":
             raise RuntimeError(f"Pollinations returned non-image response ({len(raw)} bytes)")
         Path(output_path).parent.mkdir(parents=True, exist_ok=True)
