@@ -294,12 +294,40 @@ def _metadata_txt(report: dict, story: dict) -> str:
     return "\n".join(lines) + "\n"
 
 
-def package_video(story_dir: Path, work_dir: Path, out_dir: Path, *, report: dict) -> dict:
+def _youtube_upload(final_dst: Path, thumb_path: Path | None, report: dict,
+                    story: dict) -> dict:
+    """Owner directive (2026-10-10): every PASS video uploads to
+    @most.amazing.wonders automatically as YouTube-private with SEO
+    title/description/tags + branded thumbnail — the owner reviews on
+    YouTube itself and flips private -> public there, no local gate.
+    Never raises: an upload failure (quota, auth, network) must not fail
+    the render/package step it rides on."""
+    meta = report.get("metadata") or {}
+    title = meta.get("title") or story.get("title", report.get("story_id", ""))
+    description = meta.get("description") or ""
+    tags = [t for t in (meta.get("tags") or []) if isinstance(t, str) and t]
+    try:
+        sys.path.insert(0, str(REPO / "tools"))
+        from youtube_upload import upload_video
+        return upload_video(final_dst, title=title, description=description,
+                            tags=tags, privacy="private", thumbnail=thumb_path)
+    except Exception as e:
+        return {"ok": False, "error": f"{type(e).__name__}: {e}"}
+
+
+def package_video(story_dir: Path, work_dir: Path, out_dir: Path, *, report: dict,
+                  upload: bool = False) -> dict:
     """DESIGN §13.6: final.mp4, proxy.mp4, cover.png, metadata.txt,
     manifest.json, scorecard.json — the per-video package "Phase 5 posts
     to Discord". Pure post-processing on artifacts `run_pipeline` already
     wrote: no new LLM/image/voice call, so this never touches the owner's
-    render-cap budget regardless of how many times it runs."""
+    render-cap budget regardless of how many times it runs.
+
+    `upload`: on a PASS gate verdict, auto-uploads to YouTube as private
+    with a branded thumbnail (owner directive 2026-10-10, see
+    `_youtube_upload`). Defaults OFF here (tests/direct callers must opt
+    in); `run_batch` passes it explicitly since that's the real pipeline
+    path the directive targets."""
     story_dir, work_dir, out_dir = Path(story_dir), Path(work_dir), Path(out_dir)
     final_src = work_dir / "final.mp4"
     if not final_src.exists():
@@ -320,8 +348,27 @@ def package_video(story_dir: Path, work_dir: Path, out_dir: Path, *, report: dic
         (out_dir / "scorecard.json").write_text(json.dumps(scorecard, indent=1))
     story = json.loads((story_dir / "story.json").read_text())
     (out_dir / "metadata.txt").write_text(_metadata_txt(report, story))
+
+    thumb_ok = False
+    thumb_path = out_dir / "thumbnail.jpg"
+    if cover_ok:
+        try:
+            from engine.brand import render_cover
+            meta = report.get("metadata") or {}
+            render_cover(thumb_path, bg_frame=out_dir / "cover.png",
+                        title=meta.get("title") or story.get("title", ""))
+            thumb_ok = True
+        except Exception:
+            thumb_ok = False
+
+    youtube_result = None
+    if upload and report.get("publish_gate") == "PASS":
+        youtube_result = _youtube_upload(
+            final_dst, thumb_path if thumb_ok else None, report, story)
+
     return {"ok": True, "final": str(final_dst), "proxy": proxy_ok, "cover": cover_ok,
-            "manifest": manifest_src.exists(), "scorecard": bool(scorecard)}
+            "thumbnail": thumb_ok, "manifest": manifest_src.exists(),
+            "scorecard": bool(scorecard), "youtube": youtube_result}
 
 
 # ============================================================= batch runner
@@ -331,13 +378,18 @@ def _checkpoint_path(work: Path) -> Path:
 
 
 def run_batch(story_dirs: list, work: Path, *, resume: bool = False,
-             package: bool = True, **kw) -> dict:
+             package: bool = True, upload: bool = True, **kw) -> dict:
     """-> batch report dict, also written to `<work>/batch_report.json`
     after every video (so a kill mid-batch loses at most one in-flight
     video's row). A story that HOLDs or errors never stops the batch — it
     is recorded with its reasons, same as `v15_batch`. A genuine quota
     outage DOES stop the batch (see `_llm_blocked`): checkpoint saved,
-    `paused: True`, `exit_code: 75`."""
+    `paused: True`, `exit_code: 75`.
+
+    `upload`: forwarded to `package_video` — PASS videos auto-upload to
+    YouTube as private (owner directive 2026-10-10). Defaults on here
+    since this is the real batch-production entrypoint; pass False to
+    render without publishing."""
     from engine.v15_pipeline import run_pipeline
     work = Path(work)
     work.mkdir(parents=True, exist_ok=True)
@@ -375,7 +427,8 @@ def run_batch(story_dirs: list, work: Path, *, resume: bool = False,
                 state["totals"][k] += rep["costs"].get(k, 0)
             if package:
                 row["package"] = package_video(
-                    sd, work / sd.name, work / sd.name / "package", report=rep)
+                    sd, work / sd.name, work / sd.name / "package", report=rep,
+                    upload=upload)
         except Exception as e:  # never stop the batch on a per-story error
             row.update(verdict="ERROR", error=f"{type(e).__name__}: {e}"[:400],
                       trace=traceback.format_exc()[-1200:])
@@ -402,6 +455,8 @@ def main() -> int:
     ap.add_argument("--no-llm", action="store_true")
     ap.add_argument("--no-judge", action="store_true")
     ap.add_argument("--no-package", action="store_true")
+    ap.add_argument("--no-upload", action="store_true",
+                    help="skip auto-upload to YouTube (render/package only)")
     a = ap.parse_args()
     work = Path(a.work)
 
@@ -441,7 +496,7 @@ def main() -> int:
         ap.error("no stories given (--stories/--all/--resume)")
 
     rep = run_batch(dirs, work, resume=a.resume, package=not a.no_package,
-                    use_llm=not a.no_llm, use_judge=not a.no_judge)
+                    upload=not a.no_upload, use_llm=not a.no_llm, use_judge=not a.no_judge)
     for r in rep["rows"]:
         print(f"{r['story']:<24} {r.get('verdict', '?'):<6} {r.get('wall_s', 0):>7.1f}s "
               f"score={r.get('scorecard')} "

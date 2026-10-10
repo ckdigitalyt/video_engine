@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
-"""YouTube uploader for Jade Studio videos.
+"""YouTube uploader for Jade Studio / @most.amazing.wonders videos.
 
-STANDING POLICY (S directive, 2026-08-05): uploads are ALWAYS unlisted.
-Public uploads are hard-rejected by design. Do not remove this guard.
+STANDING POLICY (S directive, 2026-08-05): uploads are never public at
+upload time. Public uploads are hard-rejected by design — the owner
+reviews on YouTube and flips private -> public themselves. Do not remove
+this guard.
 
 Usage:
   python tools/youtube_upload.py results/<slug>/<slug>_mixed.mp4 \
-      [--title TITLE] [--description DESC] [--privacy unlisted|private]
+      [--title TITLE] [--description DESC] [--tags a,b,c] \
+      [--thumbnail cover.jpg] [--privacy unlisted|private]
 
 Credentials (OAuth 2.0, YouTube Data API v3):
   - client_secret.json  -> ~/.openclaw/credentials/youtube/client_secret.json
@@ -75,16 +78,68 @@ def load_or_create_credentials():
     return creds
 
 
+def upload_video(video: Path, *, title: str, description: str = "",
+                 tags: list | None = None, privacy: str = "private",
+                 thumbnail: Path | None = None) -> dict:
+    """Upload one video, optionally set a custom thumbnail.
+    -> {"ok": True, "video_id", "url", "privacy", "thumbnail_set"}."""
+    if privacy not in ALLOWED_PRIVACY:
+        raise ValueError("public uploads are forbidden by policy (unlisted/private only).")
+    video = Path(video)
+    if not video.exists():
+        raise FileNotFoundError(f"video not found: {video}")
+
+    creds = load_or_create_credentials()
+
+    from googleapiclient.discovery import build
+    from googleapiclient.http import MediaFileUpload
+
+    youtube = build("youtube", "v3", credentials=creds)
+    snippet = {"title": title, "description": description}
+    if tags:
+        snippet["tags"] = [str(t) for t in tags][:500]
+    body = {
+        "snippet": snippet,
+        "status": {
+            "privacyStatus": privacy,
+            "selfDeclaredMadeForKids": False,
+            # C2PA / synthetic-media disclosure (2026 platform policy):
+            # this pipeline produces AI-generated imagery + synthetic
+            # narration, so the upload is flagged as altered content.
+            "alteredContentInfo": {"alteredContentDisclosed": True},
+        },
+    }
+    media = MediaFileUpload(str(video), chunksize=8 * 1024 * 1024, resumable=True)
+
+    request = youtube.videos().insert(
+        part="snippet,status", body=body, media_body=media
+    )
+    response = None
+    while response is None:
+        status, response = request.next_chunk()
+        if status:
+            print(f"Uploaded {int(status.progress() * 100)}%")
+
+    vid = response.get("id")
+    thumb_set = False
+    if thumbnail and Path(thumbnail).exists():
+        youtube.thumbnails().set(
+            videoId=vid, media_body=MediaFileUpload(str(thumbnail))
+        ).execute()
+        thumb_set = True
+    return {"ok": True, "video_id": vid, "url": f"https://youtu.be/{vid}",
+            "privacy": privacy, "thumbnail_set": thumb_set}
+
+
 def main():
-    ap = argparse.ArgumentParser(description="Upload a video to YouTube (unlisted only).")
+    ap = argparse.ArgumentParser(description="Upload a video to YouTube (unlisted/private only).")
     ap.add_argument("video", help="path to the .mp4 to upload")
     ap.add_argument("--title", default=None)
     ap.add_argument("--description", default="")
-    ap.add_argument("--privacy", default="unlisted", choices=sorted(ALLOWED_PRIVACY))
+    ap.add_argument("--tags", default=None, help="comma-separated SEO tags")
+    ap.add_argument("--thumbnail", default=None, help="path to a thumbnail image")
+    ap.add_argument("--privacy", default="private", choices=sorted(ALLOWED_PRIVACY))
     args = ap.parse_args()
-
-    if args.privacy not in ALLOWED_PRIVACY:
-        sys.exit("ERROR: public uploads are forbidden by policy (unlisted/private only).")
 
     video = Path(args.video)
     if not video.exists():
@@ -109,36 +164,15 @@ def main():
         else:
             title = video.stem
 
-    creds = load_or_create_credentials()
-
-    from googleapiclient.discovery import build
-    from googleapiclient.http import MediaFileUpload
-
-    youtube = build("youtube", "v3", credentials=creds)
-    body = {
-        "snippet": {"title": title, "description": description},
-        "status": {
-            "privacyStatus": args.privacy,
-            "selfDeclaredMadeForKids": False,
-            # C2PA / synthetic-media disclosure (2026 platform policy):
-            # this pipeline produces AI-generated imagery + synthetic
-            # narration, so the upload is flagged as altered content.
-            "alteredContentInfo": {"alteredContentDisclosed": True},
-        },
-    }
-    media = MediaFileUpload(str(video), chunksize=8 * 1024 * 1024, resumable=True)
-
-    request = youtube.videos().insert(
-        part="snippet,status", body=body, media_body=media
-    )
-    response = None
-    while response is None:
-        status, response = request.next_chunk()
-        if status:
-            print(f"Uploaded {int(status.progress() * 100)}%")
-
-    vid = response.get("id")
-    print(f"OK: https://youtu.be/{vid} (privacy={args.privacy})")
+    tags = [t.strip() for t in args.tags.split(",")] if args.tags else None
+    try:
+        result = upload_video(video, title=title, description=description,
+                              tags=tags, privacy=args.privacy,
+                              thumbnail=Path(args.thumbnail) if args.thumbnail else None)
+    except (ValueError, FileNotFoundError) as e:
+        sys.exit(f"ERROR: {e}")
+    print(f"OK: {result['url']} (privacy={result['privacy']}, "
+         f"thumbnail_set={result['thumbnail_set']})")
 
 
 if __name__ == "__main__":
