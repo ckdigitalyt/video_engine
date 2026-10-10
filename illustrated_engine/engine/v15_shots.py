@@ -410,17 +410,37 @@ def compile_plate_shot(sc: dict, bible: dict, boxes: list, events: list) -> tupl
                            info if plate else None), []
 
 
+ZOOM_LEVEL_MIN_S = 1.2   # min time between two dive levels
+ZOOM_TAIL_S = 0.8        # last level stays at least this long
+
+
+def _fit_zoom_levels(levels: list, plates: list, dur: float) -> tuple:
+    """decision #18 item 7: a dive only has room for
+    1 + (dur - ZOOM_TAIL_S) // ZOOM_LEVEL_MIN_S levels. With more, the old
+    code clamped several level starts onto dur - 0.8 and emitted
+    decreasing keyframe times -> invalid Scene IR, which crashed dry run 6
+    (3 levels on a ~2 s "But count their chromosomes." beat). Keep the
+    first and last levels (where the dive starts and lands), drop middle
+    ones, and keep each level's plate aligned with it."""
+    room = 1 + max(0, int((dur - ZOOM_TAIL_S) // ZOOM_LEVEL_MIN_S))
+    n = len(levels)
+    if n <= room:
+        return levels, plates
+    keep = [0] + list(range(n - room + 1, n)) if room > 1 else [n - 1]
+    pl = [plates[i] if i < len(plates) else None for i in keep]
+    return [levels[i] for i in keep], pl
+
+
 def compile_zoom_shot(sc: dict, bible: dict, boxes: list, events: list) -> tuple:
     dur, shot = sc["duration"], sc["shot"]
-    levels = shot["levels"]
-    plates = sc["plates"]
+    levels, plates = _fit_zoom_levels(shot["levels"], sc["plates"], dur)
     n = len(levels)
     tw = 0.45  # half transition window
     # level start times: level 0 at 0, others at their words (min spacing)
     ts = [0.0]
     for lev in levels[1:]:
-        t = max(sc["t_of"](lev["word"]), ts[-1] + 1.2)
-        ts.append(min(t, dur - 0.8))
+        t = max(sc["t_of"](lev["word"]), ts[-1] + ZOOM_LEVEL_MIN_S)
+        ts.append(min(t, dur - ZOOM_TAIL_S))
     layers, anims = [], []
     p = bible["palette"]
     layers.append(layer("void", "background", "world_ground",

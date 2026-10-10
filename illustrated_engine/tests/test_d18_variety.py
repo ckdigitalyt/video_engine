@@ -134,3 +134,29 @@ def test_repair_fills_first_shot_start_word():
     p["beats"][2]["shots"][0].pop("start_word")
     v15_plan._repair(p, STORY)
     assert p["beats"][2]["shots"][0]["start_word"] == 0
+
+
+# ------------------------ decision #18 item 7: zoom_through on short beats --
+
+def test_zoom_through_on_a_short_beat_compiles_valid_scene_ir():
+    """Dry run 6 crashed: 3 dive levels on a ~2 s beat -> decreasing
+    keyframe times -> invalid Scene IR. Middle levels are now dropped."""
+    from engine.scene_ir import validate_scene_spec
+    from engine.v15_shots import _fit_zoom_levels, compile_shot
+    levels = [{"subject": "a beaver on a riverbank", "label": "THE BEAVER", "word": 0},
+              {"subject": "a glowing cell", "label": "CELL", "word": 2},
+              {"subject": "chromosome strands", "label": "CHROMOSOMES", "word": 3}]
+    for dur in (1.6, 2.1, 3.3, 6.0):
+        sc = {"scene_id": f"z{dur}", "duration": dur,
+              "shot": {"kind": "zoom_through", "levels": levels,
+                       "start_word": 0, "camera": "push_in"},
+              "plates": [None, None, None],
+              "t_of": lambda w, _d=dur: min(0.15 + 0.4 * w, _d - 0.35),
+              "first": False}
+        res = compile_shot(sc, BIBLE)
+        ok, errs = validate_scene_spec(res["spec"])
+        assert ok, (dur, errs[:3])
+    kept, pl = _fit_zoom_levels(levels, ["p0", "p1", "p2"], 2.1)
+    assert [k["label"] for k in kept] == ["THE BEAVER", "CHROMOSOMES"]
+    assert pl == ["p0", "p2"]
+    assert _fit_zoom_levels(levels, [1, 2, 3], 6.0)[0] == levels
