@@ -275,8 +275,17 @@ def _metadata_txt(report: dict, story: dict) -> str:
     hook = next((b.get("narration", "") for b in story.get("beats", [])
                 if b.get("function") == "HOOK"), "")
     scorecard = (report.get("gate") or {}).get("scorecard") or {}
-    lines = [f"Title: {story.get('title', report.get('story_id', ''))}", "", hook, "",
-            "--- Disclosure ---"]
+    # decision #18 item 8: use the B5 LLM metadata (title/description/tags,
+    # already in pipeline_report) — this file used to carry only the story
+    # title + hook line and NO tags, though the owner copies it verbatim.
+    meta = report.get("metadata") or {}
+    title = meta.get("title") or story.get("title", report.get("story_id", ""))
+    desc = meta.get("description") or hook
+    tags = [t for t in (meta.get("tags") or []) if isinstance(t, str) and t]
+    lines = [f"Title: {title}", "", desc, ""]
+    if tags:
+        lines += [f"Tags: {', '.join(tags)}", ""]
+    lines += ["--- Disclosure ---"]
     lines += [f"{k}: {v}" for k, v in disclosure.items()]
     if manifest.get("attribution_block"):
         lines += ["", "--- Attribution ---", manifest["attribution_block"]]

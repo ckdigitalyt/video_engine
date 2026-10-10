@@ -320,3 +320,15 @@ def test_package_video_reports_missing_final_mp4_instead_of_crashing(tmp_path):
                              tmp_path / "out", report=_fake_report("ice_slippery"))
     assert result["ok"] is False
     assert "final.mp4" in result["error"]
+
+
+def test_metadata_txt_uses_llm_metadata_with_tags():
+    """decision #18 item 8: the copy-paste file carries the real metadata."""
+    rep = _fake_report("ice_slippery")
+    rep["metadata"] = {"title": "T1", "description": "D1 long text",
+                       "tags": ["ice", "physics"]}
+    story = {"title": "S", "beats": [{"function": "HOOK", "narration": "H"}]}
+    txt = B._metadata_txt(rep, story)
+    assert txt.startswith("Title: T1\n\nD1 long text\n\nTags: ice, physics\n")
+    rep.pop("metadata")
+    assert B._metadata_txt(rep, story).startswith("Title: S\n\nH\n\n--- Disclosure")

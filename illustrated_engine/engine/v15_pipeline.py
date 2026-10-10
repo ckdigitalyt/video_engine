@@ -418,6 +418,15 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
             shot_timeline(b, plan_by[b["beat_id"]], timing[b["beat_id"]],
                           tts[b["beat_id"]]), timing[b["beat_id"]])
         for k, s in enumerate(tl):
+            if s["shot"]["kind"] == "zoom_through":
+                # decision #18 item 8: fit dive levels to the shot's real
+                # duration BEFORE prompts exist, so a level that cannot be
+                # shown never gets a plate (dry run 6: its plate was still
+                # generated and listed in the manifest -> incomplete)
+                from engine.v15_shots import _fit_zoom_levels
+                lv, _ = _fit_zoom_levels(s["shot"]["levels"], [],
+                                         s["t1"] - s["t0"])
+                s = dict(s, shot=dict(s["shot"], levels=lv))
             shots.append({"beat": b, "idx": k, **s,
                           "prompts": _prompts_for(s["shot"], bible, subj_bible)})
         if any(s.get("merged") for s in tl):
