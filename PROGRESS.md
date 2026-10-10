@@ -602,6 +602,163 @@ out/disabled (confirmed unchanged before and after the dry run);
 unchanged). No other changes were made, per the owner's explicit "no
 other changes" instruction — items 1-2 only.
 
+### Decision #18 (2026-10-09/10, `e206853`..`03545a7`) — Opus review + implementation
+Owner directive: review the architecture/algorithm/code until the pipeline's
+videos are publishable, implement the recommendations, then produce one new
+real video. Review doc: `illustrated_engine/OPUS_REVIEW_2026-10-09.md`
+(item 0). It traced each of dry run 5's three HOLD reasons to a specific
+code gap. Items 1-5 implement it. Items 6-9 are real bugs that the new
+dry run itself surfaced.
+
+1. **Captions** (`ae9b973`). `v15_pipeline.caption_cues`:
+   - Was a greedy 4-word cut whose backtrack could emit a lone function word
+     (dry run 5's "to" / "up" cues). It is now a per-sentence DP
+     segmentation: 3-4 words ideal, ≤7 words / 36 chars, +50 for ending on
+     a word that binds forward.
+   - Quantifier lead-ins ("up to", "about 430") and digit ranges bind
+     forward.
+   - The function-word set is now shared with the gate.
+
+   `voice.text.numeralize_cue_words`:
+   - "100-1 thousand" becomes "100-1,000" (thousand is multiplied out).
+   - A range with an inverted scale is no longer read as a shared scale.
+   - "a hundred" becomes "100" and "one and a half" becomes "1.5".
+
+   `v15_gate.check_caption_clause_breaks`: a punctuation-terminated cue is a
+   clause end (dry run 5's "that breaks it:" was a false positive).
+
+   Re-cueing 4 real stories' cached audio gives 0 clause-break flags. The
+   skater sample had 4 under the old builder.
+2. **Subject identity** (`b4643f4`). `subject_bible.main_concept` needs
+   `story["concepts"]`, which `v16_autostory` never emits: dry run 5 logged
+   `subject_bible: {}`, and 8 of 21 plates drew its "tiny icy world" as
+   Earth.
+   - No-concepts stories now get one cached identity call returning
+     `{name, aliases, description, not_like}`.
+   - It is built **before** the visual plan and fed into
+     `v15_plan.build_prompt`; the plan cache key includes it.
+   - Alias matching is whole-word: new `species.alias_in`, also fixing the
+     "plain substring match" limitation flagged in decision #13.
+3. **Per-shot variety** (`1229f2b`).
+   - `view` enum (wide/medium/close/surface/cutaway/comparison/observer) on
+     every plate/process shot.
+   - `v15_plan.variety_errors`: no two consecutive shots with the same view,
+     no view on more than 40% of shots, at least 4 distinct views. It feeds
+     the existing retry; a valid plan still short on variety after the
+     retry ships with `variety_warnings` instead of dropping to
+     salvage/fallback.
+   - The view phrase is **prepended** in `v15_style.image_prompt`.
+   - The B3 punch-in split takes a different view from its parent; the old
+     trailing ", tight close-up detail crop" was ignored and caused the
+     judge's `no_change` frames.
+   - The `subject_low` hint keeps the subject large. The old "wide quiet
+     open background" caused the `empty_or_flat` frame.
+4. **Judge-aligned plate QA + steered regen** (`4e14d3e`).
+   - Plate QA gains `generic_subject` (checked against the identity's
+     `not_like`, which is never put in an image prompt), `empty` and
+     `near_duplicate`.
+   - The sheet is in timeline order, and the codes are added to the schema
+     enum.
+   - Regen rebuilds the prompt from the failure reason (`steer_prompt`) and
+     stays on the production chain. The old "next model" rotation cost dry
+     run 5 1709 s on `sdcpp_local` after a gemini 429, then landed on
+     `commercial_ok:false` pollinations, all with the identical prompt.
+   - Each round's steering, `shows`, provider and seconds are logged in
+     `plate_qa.steering`.
+5. **Distinctness v2** (`39583dc`). The kind-only signature is
+   near-constant here: every video is about 95% `plate`.
+   - New signature: `kind/camera.type/overlay` per shot, read from the
+     compiled scene specs.
+   - Legacy-only history entries are listed as `legacy_uncomparable`
+     instead of being compared.
+   - Backfilled from saved specs: skater and dry run 5. Tunguska and trex
+     specs are gone.
+   - Dry run 5 vs skater measures **0.62** under v2 (0.10 under v1); the
+     0.3 threshold is unchanged.
+6. **Planner robustness** (`7fb772e`).
+   - On-screen figures may be spelled out in the narration ("four hundred
+     thirty" → "430"). The verbatim-digit check rejected every correct
+     figure on auto-stories and burned the plan's one retry.
+   - A missing first-shot `start_word` is repaired.
+7. **zoom_through on short beats** (`40df979`). Dry run 6's first render
+   crashed: 3 dive levels on a ~2 s beat produced decreasing keyframes and
+   invalid Scene IR (`GrammarError`; reproduced against the old compiler).
+   Levels are now fitted to the duration, keeping the first and last.
+8. **Packaging** (`c495cc0`).
+   - `metadata.txt` now carries the LLM title, description **and tags**.
+     Before, it had only the story title and hook line, with no tags.
+   - Zoom levels are fitted before plates are generated (the manifest had
+     listed an unused plate).
+9. **Steering fix** (`03545a7`). In the second dry-run-6 render, an `empty`
+   land-bridge plate was steered toward "the main subject", which, with the
+   beaver identity injected, became a big beaver. Identity-led
+   `wrong_subject` steering then kept drawing the beaver for 2 more rounds,
+   so the plate was still failing and the render FAILed. `wrong_subject` and
+   `empty` now lead with the plate's own named object; only
+   `generic_subject` leads with the identity.
+
+**Dry run 6.** Same path as #17 (`engine.v16_batch`), but invoked directly
+rather than via `tools/daily_shorts.sh`, so nothing was posted to Discord.
+
+- Topic engine pick (fresh topic): "Niagara Falls Is Slowly Eating Its Way
+  Upstream" (`t_niagara_falls_is_slowly_eating_its_way_u`), materialized as
+  story `t_same_beaver_different_chromosomes`, "Same Beaver, Different
+  Chromosomes".
+- **Topic→script drift (not fixed, flagged):** the script is about beavers,
+  not Niagara Falls. Dry run 5 drifted the same way (a star topic became a
+  dwarf-planet story).
+- Runs, all on the same story:
+
+| run | batch dir (`illustrated_engine/build/v16/batches/`) | result |
+|---|---|---|
+| a | `d18_2026-10-10_031338` | first attempt crashed earlier on a Claude session quota; this run hit the item 7 crash: **ERROR** |
+| b | `d18_2026-10-10_033035_render` | **PASS**, scorecard 72.4, `manifest_complete:false` (→ item 8) |
+| c | `d18_2026-10-10_034236_final` | **FAIL** (item 9 bug), plus judge `template_feel:true` on nearly the same frames |
+| d | `d18_2026-10-10_035920_verify` | **PASS**, `failures: {}`, scorecard 69.4 (advisory) |
+
+- Run d details:
+  - judge: 1 frame flagged (`no_change`), `template_feel:false`,
+    `ending_resolves:true`;
+  - distinctness OK, nearest v2 distance 0.714;
+  - 0 clause breaks;
+  - 3 QA fails, all cleared in 2 steered rounds of 20-34 s each;
+  - manifest complete.
+
+**Not fixed, flagged:**
+- **b vs c show the vision judge is not deterministic**: same story,
+  near-identical frames, `template_feel` false then true. A 2-of-3 judge
+  vote is the recommended next step; it is the owner's call because it
+  changes gate cost.
+- **Visible defects the judge passed:** a fused two-beaver figure (frame
+  #8), banding on the zoom transition, and the land-bridge shot is still
+  mostly a beaver.
+- **Video length** is 42.3 s, under the 50-60 s target.
+- **Scorecard `story`=0** because auto-stories don't carry the critic
+  scores into `story.json`.
+- **Proxy** is 640x1138; dry run 5's was the same.
+
+Tests: `illustrated_engine/tests` 257 → **291 passed** (34 new; 1 changed on
+purpose: a no-concepts story with an LLM now derives an identity).
+
+Root `tests/` was diffed against the 64-ID baseline after every item, in a
+clean worktree pinned to that item's commit:
+- items 1-3 and 5-9: identical (zero regressions);
+- item 4: one extra failure, `test_v13_qa_gates.py::
+  test_authentic_audio_qa_speed_mismatch`. It is load-sensitive (that run
+  overlapped another suite), passes 3/3 alone, and the item 5-9 runs,
+  which contain item 4's code, are identical to baseline.
+
+Untouched: `configs/publish.yaml` (`upload.enabled:false`), the commented
+cron entry. No `--no-verify`, no secrets, nothing posted.
+
 ## Next
-Awaiting owner verdict on the dry-run-5 video. The Q2–Q5, PR, WP13 and
-WP14 queue is cancelled per decisions #12–#17.
+Awaiting owner verdict on the dry-run-6 video (run d). Follow-ups from the
+review not done here:
+- judge 2-of-3 vote;
+- topic→script drift guard;
+- critic scores into `story.json`;
+- target length 50-60 s;
+- `kinetic_claim`/`big_number` wiring (R5);
+- a post-composition frame check.
+
+The Q2–Q5, PR, WP13 and WP14 queue is cancelled per decisions #12–#17.
