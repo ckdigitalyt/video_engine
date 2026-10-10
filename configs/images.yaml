@@ -16,14 +16,27 @@ image_gen:
   default_provider: cloudflare_workers_ai
 
   chain:
-    # DESIGN §6.1 order: archive (2) -> cloudflare (3) -> gemini (4) ->
-    # sdcpp_local (5) -> pollinations (6). NIM (was tier 0 pre-WP8) is gone.
+    # DESIGN §6.1 order was archive -> cloudflare -> gemini -> sdcpp_local
+    # -> pollinations (NIM, tier 0 pre-WP8, is gone). Owner directive
+    # (2026-10-10): cloudflare_workers_ai (daily free "10,000 neurons"
+    # allocation) and gemini_image (free-tier limit: 0 for
+    # gemini-2.5-flash-preview-image, confirmed via live API test) were
+    # both exhausted after today's heavy batch testing, so every plate
+    # fell through to sdcpp_local — correct for commercial clearance but
+    # ~1700-1800s/image on this CPU box, vs. pollinations' ~20-30s.
+    # pollinations moved ahead of sdcpp_local so renders stay fast while
+    # cloud quota is down. Tradeoff: pollinations plates are not
+    # commercially cleared (pollinations.never_for_beat_functions below
+    # still keeps it off HOOK/PAYOFF hero shots either way); this isn't
+    # gate-enforced, only tracked in the manifest/disclosure. Revert this
+    # order once cloudflare's daily quota resets if commercial-clean
+    # sourcing should go back to taking priority over speed.
     production:
       - archive
       - cloudflare_workers_ai
       - gemini_image
-      - sdcpp_local
       - pollinations
+      - sdcpp_local
     benchmark_only:
       - nvidia_nim
       - siliconflow
