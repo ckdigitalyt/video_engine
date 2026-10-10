@@ -710,9 +710,6 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
                 sc["narration"] = {"beat_id": bid,
                                    "text": beat_of[bid]["narration"],
                                    "offset": LEAD_S, "span_s": beat_dur}
-                if bid != story["beats"][0]["beat_id"]:
-                    sc["sfx"].insert(0, {"t": 0.0, "kind": "whoosh",
-                                         "gain": 0.55})
             scenes.append(sc)
         from engine.v15_shots import lighten
         cap_bible = json.loads(json.dumps(bible))  # readable active word
@@ -736,8 +733,6 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
     # of the render/assembly cache state, so a cache-hit run still gets a
     # complete audio asset list for the manifest (WP10).
     kinds_used = {ev["kind"] for evs in events.values() for ev in (evs or [])}
-    if len(story["beats"]) > 1:
-        kinds_used.add("whoosh")  # per-beat whoosh, inserted at assembly time
     from engine.v16_audio import manifest_rows
     report["audio_v16"]["manifest_rows"] = manifest_rows(
         music_sel["track"], {k: v for k, v in sfx_lib.items() if k in kinds_used},
