@@ -10,7 +10,6 @@ into Remotion), caption colours, and the finish layer (grain/vignette).
 """
 from __future__ import annotations
 
-import hashlib
 import json
 import re
 from pathlib import Path
@@ -77,9 +76,28 @@ DECKS = {
         "texture": {"grain": 0.01, "vignette": 0.22},
     },
 }
+# Channel house style (decision 2026-10-10, @most.amazing.wonders): one fixed
+# visual identity across every video beats topic-varying decks for feed
+# recognisability. Dark saturated base, bright hero subject, blue/orange
+# complementary contrast — reads on oceans, space, volcanoes and biology
+# alike without a per-topic palette swap. The old DECKS above are no longer
+# selected automatically; a story can still override everything by supplying
+# its own stories/<id>/visual_bible.json (see load_style below).
+HOUSE_DECK = {
+    "illustration_style": "vivid cinematic digital painting, one bold hero "
+                          "subject with an epic sense of scale, dramatic rim "
+                          "lighting and glowing highlights against deep "
+                          "shadow, rich saturated teal and molten orange "
+                          "tones, crisp detail, awe-inspiring atmosphere",
+    "palette": {"primary": "#0A1A2F", "secondary": "#1F6F8B",
+                "accent": "#FF7A1A", "background": "#07111F",
+                "text": "#FFFFFF", "muted": "#8FB3C9",
+                "highlight": "#FFD23F"},
+    "texture": {"grain": 0.008, "vignette": 0.30},
+}
 _BASE = {
     "version": "v15-derived", "lighting": "soft directional light",
-    "contrast": "medium-high", "saturation": 0.9,
+    "contrast": "high", "saturation": 1.15,
     "typography": {"display": "BebasNeue-Regular.ttf",
                    "body": "Inter-Variable.ttf"},
     "transition_style": "hard cut on the word",
@@ -87,16 +105,8 @@ _BASE = {
 
 
 def derive_bible(story: dict) -> dict:
-    words = " ".join(str(story.get(k, "")) for k in
-                     ("subject", "story_type", "title", "story_id")).lower()
-    scores = {name: sum(1 for k in d["keys"] if k in words)
-              for name, d in DECKS.items()}
-    best = max(scores.values())
-    names = sorted(n for n, v in scores.items() if v == best)
-    pick = names[int(hashlib.sha256(story["story_id"].encode()).hexdigest(),
-                     16) % len(names)]
-    d = DECKS[pick]
-    return dict(_BASE, brand=story.get("brand", "JADE"), deck=pick,
+    d = HOUSE_DECK
+    return dict(_BASE, brand=story.get("brand", "JADE"), deck="wonder_cinematic",
                 illustration_style=d["illustration_style"],
                 palette=dict(d["palette"]), texture=dict(d["texture"]),
                 prompt_fragments={"prefix": d["illustration_style"]})
