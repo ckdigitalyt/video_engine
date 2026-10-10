@@ -506,12 +506,30 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
         shows_of = {items[i]["prompt"]: v
                     for i, v in (qa.get("shows") or {}).items()}
         steering: list = []
+        # Bug fix (2026-10-10, owner-reported multi-hour stalls): the exact
+        # failure mode the MAX_PLATE_REGEN comment above already names from
+        # "dry run 5" (one plate landing on sdcpp_local at 1709s) was still
+        # reachable on every regen round, not just the initial pass — a QA
+        # rejection that's compositional (not a provider outage) retries the
+        # SAME cloud-then-local chain, so a prompt that fell to local once
+        # falls to it again each of the 3 regen rounds: ~1700-1800s x up to
+        # 3 rounds x however many plates are still failing, run in parallel
+        # but still a multi-hour wall-clock tax for one video. sdcpp_local
+        # is 30-90x slower than every other provider (cloudflare/pollinations
+        # land in 10-50s); regen rounds now skip straight from gemini_image
+        # to pollinations instead of waiting on local each time. The initial
+        # generation pass (_gen above) is untouched and still tries local.
+        REGEN_PROVIDER_ORDER = tuple(
+            p for p in PROVIDER_ORDER if p != "sdcpp_local")
 
         def _redo(p, rnd):
             sp = steer_prompt(bible, parts_of[p], reason_of.get(p), rnd,
                               identity, prompt_narration.get(p))
-            prov = (providers_for_beat_function("HOOK") if p in hero_prompts
-                    else PROVIDER_ORDER)
+            if p in hero_prompts:
+                prov = tuple(x for x in providers_for_beat_function("HOOK")
+                            if x != "sdcpp_local")
+            else:
+                prov = REGEN_PROVIDER_ORDER
             return p, sp, generate_plate(sp, _seed(sp, rnd), log=fail_log,
                                          providers=prov)
 
