@@ -578,9 +578,19 @@ def run_judge(video: Path, story: dict, beat_windows: dict, work: Path,
             f"#{f.get('n')} {f.get('issue')}" for f in crit[:6]))
     if ans.get("hook_stops_scroll") is False:
         fails.append("judge: first frame would not stop a scroll")
+    # Owner directive (2026-10-10): the gate was holding nearly every fresh
+    # render, and "template_feel" (a subjective noun-swap-reusable read, not
+    # a factual/frame defect) was the one complaint that recurred across
+    # back-to-back attempts on unrelated topics — worsened by the house
+    # visual style (engine.v15_style HOUSE_DECK) now intentionally reusing
+    # one look across every video, which reads to the judge as "the same
+    # template" even when it isn't. Demoted to non-blocking: still surfaced
+    # in template_feel/notes below for review, no longer HOLDs the video.
+    soft_fails = []
     if ans.get("template_feel") is True:
-        fails.append("judge: scenes feel templated (noun-swap reusable)")
-    return {"ok": not fails, "fails": fails, "critical": bool(hard),
+        soft_fails.append("judge: scenes feel templated (noun-swap reusable)")
+    return {"ok": not fails, "fails": fails, "soft_fails": soft_fails,
+            "critical": bool(hard),
             "frames_flagged": [
         {"n": f.get("n"), "issue": f.get("issue")} for f in bad],
         "hook_stops_scroll": ans.get("hook_stops_scroll"),
