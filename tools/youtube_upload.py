@@ -97,16 +97,33 @@ def upload_video(video: Path, *, title: str, description: str = "",
     youtube = build("youtube", "v3", credentials=creds)
     snippet = {"title": title, "description": description}
     if tags:
-        snippet["tags"] = [str(t) for t in tags][:500]
+        # API limit is 500 CHARACTERS total across all tags (commas between
+        # items count, and a tag containing a space counts as if quoted) --
+        # NOT 500 list items. Bug fixed 2026-10-11: the old `[:500]` sliced
+        # to the first 500 tag STRINGS, which is a no-op for any realistic
+        # tag list and did nothing to enforce the real limit. Greedily pack
+        # as many tags as fit under the real budget instead.
+        packed, used = [], 0
+        for t in (str(x) for x in tags):
+            cost = len(t) + (2 if " " in t else 0) + (1 if packed else 0)
+            if used + cost > 500:
+                break
+            packed.append(t)
+            used += cost
+        snippet["tags"] = packed
     body = {
         "snippet": snippet,
         "status": {
             "privacyStatus": privacy,
             "selfDeclaredMadeForKids": False,
-            # C2PA / synthetic-media disclosure (2026 platform policy):
-            # this pipeline produces AI-generated imagery + synthetic
-            # narration, so the upload is flagged as altered content.
-            "alteredContentInfo": {"alteredContentDisclosed": True},
+            # Bug fixed 2026-10-11: "alteredContentInfo.alteredContentDisclosed"
+            # was never a real YouTube Data API v3 field -- confirmed against
+            # the live API reference (developers.google.com/youtube/v3/docs/
+            # videos#status.containsSyntheticMedia). The actual field is the
+            # top-level status.containsSyntheticMedia boolean. This pipeline
+            # produces AI-generated imagery + synthetic narration, so every
+            # upload discloses it.
+            "containsSyntheticMedia": True,
         },
     }
     media = MediaFileUpload(str(video), chunksize=8 * 1024 * 1024, resumable=True)
