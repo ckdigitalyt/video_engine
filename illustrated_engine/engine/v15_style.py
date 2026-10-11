@@ -208,8 +208,27 @@ VIEW_PHRASES = {
 }
 
 
+# The HOOK (frame 0) has to stop a scroll. live_20261011_055858 (ice age)
+# and live_20261010_193759 (rogue planets) both failed the judge's
+# hook_stops_scroll with a "Wide establishing view" of the recurring subject
+# floating alone in space -- the same reusable portrait later beats repeat,
+# drawn small and static; FRAMING_GUIDANCE even asked for an "establishing
+# view". Every hook that passed was a comparison, a macro detail, an action
+# scene or a specific object in its setting. So a hook whose view is
+# generic (none/wide/medium) leads with close, angled, in-tension framing;
+# specific views (comparison, close, surface, cutaway, observer) are kept.
+HOOK_REFRAME_VIEWS = (None, "wide", "medium")
+HOOK_FRAMING = ("Scroll-stopping opening shot, close in from a dramatic low "
+                "angle: the subject looms huge and breaks the frame edges, "
+                "caught mid-change at a moment of visible tension, strong "
+                "foreground depth")
+HOOK_FRAMING_GUIDANCE = ("keep the subject instantly recognisable while it "
+                         "fills the frame; avoid an isolated close-up of just "
+                         "a limb or torso with nothing else in frame")
+
+
 def image_prompt(bible: dict, subject: str, composition: str = "centered",
-                 view: str | None = None) -> str:
+                 view: str | None = None, hook: bool = False) -> str:
     # decision #18 item 3: "wide quiet open background" + a pull_out camera
     # produced dry run 5's empty_or_flat frame — keep the top third calm for
     # the headline, but the subject LARGE.
@@ -221,7 +240,11 @@ def image_prompt(bible: dict, subject: str, composition: str = "centered",
             "centered": "single clear focal subject, centered"}.get(
                 composition, "single clear focal subject")
     subj = _BANNED_WORD.sub("", subject.strip().rstrip("."))
-    if view in VIEW_PHRASES:
+    guidance = FRAMING_GUIDANCE
+    if hook and view in HOOK_REFRAME_VIEWS:
+        subj = f"{HOOK_FRAMING}: {subj}"
+        guidance = HOOK_FRAMING_GUIDANCE
+    elif view in VIEW_PHRASES:
         subj = f"{VIEW_PHRASES[view]}: {subj}"
     return ". ".join(x for x in (style_prefix(bible), subj, comp,
-                                 FRAMING_GUIDANCE, PURE) if x)
+                                 guidance, PURE) if x)

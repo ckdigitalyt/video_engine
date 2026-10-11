@@ -77,3 +77,16 @@ def test_numeral_small_forms():
     assert _nums("up to a hundred times") == ["up", "to", "100", "times"]
     assert _nums("a thousand years") == ["1,000", "years"]
     assert _nums("one two three") == ["1", "2", "3"]
+
+
+def test_thousand_scale_absorbs_a_sub_thousand_remainder():
+    # t_you_re_still_living_in_an_ice_age B8: "eleven thousand seven
+    # hundred years ago" rendered as two separate cues, "11,000" then
+    # "700" -- a visible on-screen split of one number. The remainder
+    # must fold into the same digit total, not stay a scale-less number.
+    assert _nums("began eleven thousand seven hundred years ago.") == \
+        ["began", "11,700", "years", "ago."]
+    assert _nums("one thousand two hundred people") == ["1,200", "people"]
+    # million/billion remainders do NOT fold (B1: the scale stays a unit
+    # word next to the digit, so a bare "thousand" still formats alone)
+    assert _nums("a thousand years") == ["1,000", "years"]

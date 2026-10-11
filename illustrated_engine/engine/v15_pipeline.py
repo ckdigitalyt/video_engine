@@ -276,7 +276,8 @@ def split_long_holds(tl: list, timing: dict, max_hold_s: float = MAX_HOLD_S,
     return tl
 
 
-def _prompts_for(shot: dict, bible: dict, subject_bible: dict | None = None) -> list:
+def _prompts_for(shot: dict, bible: dict, subject_bible: dict | None = None,
+                 hook: bool = False) -> list:
     from engine.species import augment_subject
     from engine.subject_bible import inject_subject
 
@@ -287,10 +288,11 @@ def _prompts_for(shot: dict, bible: dict, subject_bible: dict | None = None) -> 
                 for lv in shot["levels"]]
     return [image_prompt(bible, _augment(shot["subject"]),
                          shot.get("composition", "centered"),
-                         view=shot.get("view"))]
+                         view=shot.get("view"), hook=hook)]
 
 
-def _prompt_parts(shot: dict, subject_bible: dict | None = None) -> list:
+def _prompt_parts(shot: dict, subject_bible: dict | None = None,
+                  hook: bool = False) -> list:
     """Parallel to _prompts_for: the pieces each prompt was built from, so a
     failed plate's prompt can be REBUILT with steering (decision #18)."""
     from engine.species import augment_subject
@@ -303,7 +305,7 @@ def _prompt_parts(shot: dict, subject_bible: dict | None = None) -> list:
                  "view": None} for lv in shot["levels"]]
     return [{"subject": _augment(shot["subject"]),
              "composition": shot.get("composition", "centered"),
-             "view": shot.get("view")}]
+             "view": shot.get("view"), "hook": hook}]
 
 
 # decision #18 item 4: a plate that fails QA is regenerated from a prompt
@@ -354,7 +356,8 @@ def steer_prompt(bible: dict, parts: dict, reason: str | None, rnd: int,
         subj += ". Anatomically accurate in every listed detail"
     elif reason == "text":
         subj += ", clean unmarked painted surfaces only"
-    return image_prompt(bible, subj, comp, view=view)
+    return image_prompt(bible, subj, comp, view=view,
+                        hook=bool(parts.get("hook")))
 
 
 def _seed(prompt: str, salt: int = 0) -> int:
@@ -424,6 +427,9 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
             shot_timeline(b, plan_by[b["beat_id"]], timing[b["beat_id"]],
                           tts[b["beat_id"]]), timing[b["beat_id"]])
         for k, s in enumerate(tl):
+            # frame 0 of the video (HOOK framing, v15_style.HOOK_FRAMING)
+            hook = (b is story["beats"][0] and k == 0
+                    and s["shot"]["kind"] == "plate")
             if s["shot"]["kind"] == "zoom_through":
                 # decision #18 item 8: fit dive levels to the shot's real
                 # duration BEFORE prompts exist, so a level that cannot be
@@ -433,8 +439,9 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
                 lv, _ = _fit_zoom_levels(s["shot"]["levels"], [],
                                          s["t1"] - s["t0"])
                 s = dict(s, shot=dict(s["shot"], levels=lv))
-            shots.append({"beat": b, "idx": k, **s,
-                          "prompts": _prompts_for(s["shot"], bible, subj_bible)})
+            shots.append({"beat": b, "idx": k, **s, "hook": hook,
+                          "prompts": _prompts_for(s["shot"], bible, subj_bible,
+                                                  hook)})
         if any(s.get("merged") for s in tl):
             report["warnings"].append({"beat": b["beat_id"],
                                        "warning": "short_shot_merged"})
@@ -487,7 +494,8 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
         parts_of: dict = {}
         order: list = []     # timeline order: "earlier"/"last" mean something
         for s in shots:
-            for p, pt in zip(s["prompts"], _prompt_parts(s["shot"], subj_bible)):
+            for p, pt in zip(s["prompts"], _prompt_parts(s["shot"], subj_bible,
+                                                         s.get("hook", False))):
                 parts_of.setdefault(p, pt)
                 if p not in order:
                     order.append(p)

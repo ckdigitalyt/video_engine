@@ -120,6 +120,45 @@ def edit_align(ref: list, hyp: list) -> list:
     return ops[::-1]
 
 
+def _edit_dist(ref: list, hyp: list) -> int:
+    prev = list(range(len(hyp) + 1))
+    for i, r in enumerate(ref, 1):
+        cur = [i]
+        for j, h in enumerate(hyp, 1):
+            cur.append(min(prev[j - 1] + (r != h), prev[j] + 1, cur[j - 1] + 1))
+        prev = cur
+    return prev[-1]
+
+
+def rejoin_compounds(ref: list, hyp: list) -> list:
+    """Closed compounds are a spacing choice, not a speech error: faster-whisper
+    writes a correctly-read "icehouse" as "ice house" (and "airburst" as "air
+    burst", "meltwater" as "melt water" -- the same sounds, only a word
+    boundary differs), and can glue a scripted open compound the other way.
+    Re-space hyp to the script's spelling where two adjacent hyp tokens
+    concatenate to one ref token (or one hyp token equals two adjacent ref
+    tokens concatenated) -- only when that strictly lowers the edit distance,
+    so a genuine "a long" is never folded into a scripted "along" elsewhere.
+    Letters must match exactly: a misheard word can never be absorbed."""
+    if not ref or not hyp:
+        return list(hyp)
+    joined_ref = set(ref)
+    split_ref = {a + b: [a, b] for a, b in zip(ref, ref[1:])}
+    out, dist, j = list(hyp), _edit_dist(ref, hyp), 0
+    while j < len(out):
+        cand = None
+        if j + 1 < len(out) and out[j] + out[j + 1] in joined_ref:
+            cand = out[:j] + [out[j] + out[j + 1]] + out[j + 2:]
+        elif out[j] in split_ref and out[j] not in joined_ref:
+            cand = out[:j] + split_ref[out[j]] + out[j + 1:]
+        if cand is not None:
+            d = _edit_dist(ref, cand)
+            if d < dist:
+                out, dist = cand, d
+        j += 1
+    return out
+
+
 # ---------------------------------------------------- caption numerals --
 # B1 (VIS): captions show DIGITS ("155-145 million years ago") while the
 # narration/TTS text (this function's INPUT) keeps the spelled-out words a
@@ -148,19 +187,44 @@ def _num_atoms(word: str) -> list | None:
 
 
 def _phrase_value(atoms: list) -> tuple:
-    """Flat [number-atom, ...] (connectors already dropped) -> (base, scale)."""
-    base, scale = 0, None
+    """Flat [number-atom, ...] (connectors already dropped) -> (base, scale).
+
+    A "thousand" scale atom may be followed by a <1000 remainder ("eleven
+    thousand seven hundred" = 11,700, one number, not "11,000" + "700" as
+    two separate cues -- the bug that produced exactly that split on
+    t_you_re_still_living_in_an_ice_age B8). The remainder accumulates
+    separately and gets folded into one digit total. million/billion
+    remainders are NOT folded: B1's own convention keeps "million"/
+    "billion" as a unit word next to the digit (_fmt_num), so a composite
+    like "two million five hundred thousand" stays two scale phrases, each
+    already handled on its own -- _extend_phrase only opens this
+    continuation after "thousand" (see its _NEXT_OK override), so base/
+    remainder only diverge for that scale."""
+    base, scale, remainder, past_thousand = 0, None, 0, False
     for a in atoms:
+        if a in _SCALE_WORDS:
+            scale, past_thousand = a, a == "thousand"
+            continue
+        target = "remainder" if past_thousand else "base"
         if a in _ONES:
-            base += _ONES.index(a)
+            if target == "remainder":
+                remainder += _ONES.index(a)
+            else:
+                base += _ONES.index(a)
         elif a in _TENS_WORDS:
-            base += _TENS.index(a) * 10
+            if target == "remainder":
+                remainder += _TENS.index(a) * 10
+            else:
+                base += _TENS.index(a) * 10
         elif a == "hundred":
-            base = (base or 1) * 100
-        elif a in _SCALE_WORDS:
-            scale = a
-    if scale and base == 0:  # bare "thousand" / "a million" means one of it
+            if target == "remainder":
+                remainder = (remainder or 1) * 100
+            else:
+                base = (base or 1) * 100
+    if scale and base == 0 and remainder == 0:  # bare "thousand" / "a million"
         base = 1
+    if scale == "thousand" and remainder:
+        return base * 1000 + remainder, None
     return base, scale
 
 
@@ -205,11 +269,21 @@ _NEXT_OK = {"ONES": {"HUNDRED", "SCALE"},
 
 def _extend_phrase(words: list, i: int, n: int) -> tuple:
     """Greedily grow ONE compound number phrase starting at word i (no 'to')
-    -> (word indices used, flat atom list, next unconsumed index)."""
+    -> (word indices used, flat atom list, next unconsumed index). A
+    "thousand" scale atom opens one extra continuation most number-word
+    grammars don't need: a <1000 remainder right after it ("eleven
+    thousand seven hundred" must stay one compound, not stop dead after
+    "thousand" the way million/billion correctly do -- see _phrase_value)."""
     atoms0 = _num_atoms(words[i]["w"])
     run_idx, flat, kind = [i], list(atoms0), _token_kind(atoms0)
+    last_scale = atoms0[-1] if kind == "SCALE" else None
     j = i + 1
-    while j < n and kind in _NEXT_OK:
+    while j < n:
+        allowed = ({"HUNDRED", "ONES", "TENS", "TENS_ONES"}
+                  if kind == "SCALE" and last_scale == "thousand"
+                  else _NEXT_OK[kind])
+        if not allowed:
+            break
         k, bridged_and = j, False
         if kind == "HUNDRED" and _BARE.sub("", words[j]["w"].lower()) == "and" \
                 and j + 1 < n:
@@ -218,13 +292,15 @@ def _extend_phrase(words: list, i: int, n: int) -> tuple:
         if nxt is None:
             break
         nxt_kind = _token_kind(nxt)
-        if nxt_kind not in _NEXT_OK[kind]:
+        if nxt_kind not in allowed:
             break
         if bridged_and:
             run_idx.append(j)
         run_idx.append(k)
         flat += nxt
         kind = nxt_kind
+        if kind == "SCALE":
+            last_scale = nxt[-1]
         j = k + 1
     return run_idx, flat, j
 

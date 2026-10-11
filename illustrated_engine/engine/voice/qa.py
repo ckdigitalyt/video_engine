@@ -6,14 +6,15 @@ failing sentences once, then the video goes to HOLD)."""
 from __future__ import annotations
 
 from engine.voice.lexicon import Lexicon, hard_words
-from engine.voice.text import edit_align, flat_tokens
+from engine.voice.text import edit_align, flat_tokens, rejoin_compounds
 
 
 def round_trip(script: str, asr_words: list, lex: Lexicon,
                max_wer: float = 0.03) -> dict:
     words = script.split()
     ref, owner = flat_tokens(words)
-    hyp = lex.canonical(flat_tokens([w["w"] for w in asr_words])[0])
+    hyp = rejoin_compounds(
+        ref, lex.canonical(flat_tokens([w["w"] for w in asr_words])[0]))
     ops = edit_align(ref, hyp)
     errors = sum(1 for _, _, op in ops if op != "C")
     wer = errors / max(len(ref), 1)

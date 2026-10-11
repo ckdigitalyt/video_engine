@@ -40,7 +40,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 CACHE_DIR = ROOT / "build" / "cache" / "v15_plans"
-PROMPT_VERSION = "bvp/1.5"
+PROMPT_VERSION = "bvp/1.6"
 
 SHOT_KINDS = ("plate", "zoom_through", "process")
 CAMERAS = ("push_in", "pull_out", "pan_left", "pan_right", "rise", "descend")
@@ -174,7 +174,12 @@ event/context around it instead.
 The FIRST beat's first shot must be a striking "plate" with a headline that
 poses the question. If that beat's narration contrasts or compares two or
 more named things, the hook shot's subject must show ALL of them together
-in frame 0 (not just one) — the contradiction IS the hook. The last beat
+in frame 0 (not just one) — the contradiction IS the hook. The hook shot
+must stop a scroll on its own: never the recurring subject shown whole and
+floating in empty space (that is the reusable template shot); show it close,
+from a dramatic angle, at the moment something is happening to it, or right
+beside what contradicts it. Its view is "medium" (framed close and dramatic
+automatically), "comparison", "surface" or "cutaway" — not "wide". The last beat
 should resolve it with a headline that echoes the hook's own wording or
 imagery (the viewer should recognize the hook again, now resolved).
 
@@ -182,7 +187,7 @@ Beats:
 {chr(10).join(beats_txt)}
 
 Return ONLY JSON:
-{{"beats":[{{"beat_id":"B1","shots":[{{"kind":"plate","start_word":0,"subject":"...","view":"wide","composition":"subject_low","camera":"push_in","headline":"..."}}]}}]}}"""
+{{"beats":[{{"beat_id":"B1","shots":[{{"kind":"plate","start_word":0,"subject":"...","view":"medium","composition":"subject_low","camera":"push_in","headline":"..."}}]}}]}}"""
 
 
 # ------------------------------------------------------------ validation --

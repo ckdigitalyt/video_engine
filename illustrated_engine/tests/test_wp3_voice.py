@@ -24,7 +24,8 @@ from engine.voice import align, qa  # noqa: E402
 from engine.voice.fish import FishProvider, parse_segments  # noqa: E402
 from engine.voice.lexicon import Lexicon, hard_words  # noqa: E402
 from engine.voice.text import (edit_align, flat_tokens, int_to_words,  # noqa: E402
-                               norm_tokens, split_sentences)
+                               norm_tokens, rejoin_compounds,
+                               split_sentences)
 
 SCRIPT = ("That pigeon is a dinosaur. Not related to one. It is one. "
           "Sixty-six million years ago, a rock ten kilometres wide slammed "
@@ -133,6 +134,32 @@ def test_hard_token_miss_fails_even_under_wer_limit():
     # a long capitalised sentence opener is a hard token even with no lexicon
     r2 = qa.round_trip(SCRIPT, _asr(heard), Lexicon(), max_wer=0.5)
     assert r2["verdict"] == "FAIL" and r2["hard_missed"], r2
+
+
+def test_split_closed_compound_is_not_an_error():
+    # live_20261011_055858 t_you_re_still_living_in_an_ice_age B4/B5: small.en
+    # wrote a correctly-read "icehouse" as "ice house" -> WER 0.15/0.25 HOLD
+    s4 = "But thirty-four million years ago, Earth flipped into a long icehouse period."
+    asr4 = _asr("But 34 million years ago, Earth flipped into a long ice house period.")
+    r = qa.round_trip(s4, asr4, Lexicon())
+    assert r["wer"] == 0 and r["verdict"] == "PASS", r
+    s5 = "And it's still stuck in that icehouse today."
+    r = qa.round_trip(s5, _asr("and it's still stuck in that ice house today."),
+                      Lexicon())
+    assert r["wer"] == 0 and r["verdict"] == "PASS", r
+    # reverse: scripted open compound heard glued
+    r = qa.round_trip("The ice house melted.", _asr("the icehouse melted."), Lexicon())
+    assert r["wer"] == 0, r
+
+
+def test_compound_rejoin_never_absorbs_a_misheard_word():
+    # letters must match: "ice mouse" is a real miss
+    r = qa.round_trip("that icehouse today", _asr("that ice mouse today"), Lexicon())
+    assert r["verdict"] == "FAIL" and r["errors"] == 2, r
+    # a genuine "a long" is not folded into a scripted "along" elsewhere
+    ref = "walk along a long road".split()
+    assert rejoin_compounds(ref, "walk along a long road".split()) == ref
+    assert rejoin_compounds(ref, "walk a long a long road".split()) == ref
 
 
 def test_wer_over_limit_fails():

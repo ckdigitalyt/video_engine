@@ -92,6 +92,48 @@ def test_view_is_prepended_and_prompt_stays_clean():
         assert bad not in p.lower(), (bad, p)
 
 
+def test_hook_reframes_generic_views_to_scroll_stopping_framing():
+    """live_20261011_055858 (ice age): the hook plate was "Wide establishing
+    view: Earth ... floating alone in space" -> judge hook_stops_scroll=false."""
+    from engine.v15_style import (FRAMING_GUIDANCE, HOOK_FRAMING,
+                                  HOOK_FRAMING_GUIDANCE, VIEW_PHRASES)
+    subj = "Earth as a half-frozen globe floating alone in space"
+    for view in (None, "wide", "medium"):
+        p = image_prompt(BIBLE, subj, "subject_low", view=view, hook=True)
+        assert HOOK_FRAMING in p and p.index(HOOK_FRAMING) < p.index("Earth"), p
+        assert VIEW_PHRASES["wide"] not in p and "establishing" not in p, p
+        assert HOOK_FRAMING_GUIDANCE in p and FRAMING_GUIDANCE not in p
+        assert "main subject large" in p          # headline room kept
+    # non-hook shots are unchanged
+    assert image_prompt(BIBLE, subj, "subject_low", view="wide") == \
+        image_prompt(BIBLE, subj, "subject_low", view="wide", hook=False)
+    assert HOOK_FRAMING not in image_prompt(BIBLE, subj, view="wide")
+    # a specific hook view (e.g. a comparison: the contradiction IS the hook)
+    # keeps its own framing
+    p = image_prompt(BIBLE, "two beavers side by side", view="comparison", hook=True)
+    assert VIEW_PHRASES["comparison"] in p and HOOK_FRAMING not in p
+
+
+def test_hook_framing_survives_plate_regen_steering():
+    from engine.v15_pipeline import _prompt_parts, _prompts_for, steer_prompt
+    from engine.v15_style import HOOK_FRAMING
+    shot = {"kind": "plate", "subject": "a small icy world in space",
+            "view": "wide", "composition": "subject_low", "camera": "push_in"}
+    assert HOOK_FRAMING in _prompts_for(shot, BIBLE, None, hook=True)[0]
+    assert HOOK_FRAMING not in _prompts_for(shot, BIBLE, None)[0]
+    parts = _prompt_parts(shot, None, hook=True)[0]
+    for reason in ("empty", "wrong_subject", "text", None):
+        assert HOOK_FRAMING in steer_prompt(BIBLE, parts, reason, 1), reason
+    assert HOOK_FRAMING not in steer_prompt(
+        BIBLE, _prompt_parts(shot, None)[0], "empty", 1)
+
+
+def test_planner_prompt_hook_rule_and_example():
+    p = v15_plan.build_prompt(STORY, BIBLE)
+    assert "never the recurring subject shown whole" in p
+    assert '"start_word":0,"subject":"...","view":"wide"' not in p
+
+
 def test_derived_punch_in_takes_a_different_view():
     from engine.v15_pipeline import _split_one
     words = [0.3 * i for i in range(30)]
