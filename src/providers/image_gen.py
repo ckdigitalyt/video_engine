@@ -412,9 +412,17 @@ class SiliconFlowProvider(ImageGenProvider):
     """SiliconFlow hosted FLUX image generation (OpenAI-compatible)."""
 
     name = "siliconflow"
-    # WP8/DESIGN §6.1: dead (401 as of RESEARCH.md §5.1) and replaced in the
-    # production chain by cloudflare_workers_ai/sdcpp_local. Kept implemented
-    # (not deleted) in case the key is ever rotated back to life.
+    # WP8/DESIGN §6.1: previously dead (401 as of RESEARCH.md §5.1), kept
+    # benchmark_only. Root cause found 2026-10-11: SiliconFlow runs two
+    # separate platforms/accounts -- the China domain (api.siliconflow.cn,
+    # the old default here) and the international one (api.siliconflow.com,
+    # per docs.siliconflow.com). A key issued on the international platform
+    # gets "401 token invalid" against the .cn API because it's a different
+    # account entirely, not an expired/bad key. Switched the default to
+    # .com (confirmed live: a .com-issued key gets 402 "balance
+    # insufficient" against .com, i.e. the token itself is valid there).
+    # Still benchmark_only until the account has credits -- flip False in
+    # configs/images.yaml once billing is set up.
     benchmark_only = True
 
     def __init__(self, api_key: Optional[str] = None,
@@ -422,7 +430,7 @@ class SiliconFlowProvider(ImageGenProvider):
         self._api_key = api_key or os.environ.get("SILICONFLOW_API_KEY", "")
         self._base_url = base_url or get_config(
             "image_gen.siliconflow.base_url",
-            "https://api.siliconflow.cn/v1/images/generations",
+            "https://api.siliconflow.com/v1/images/generations",
         )
         self._model = get_config("image_gen.siliconflow.model", "black-forest-labs/FLUX.1-schnell")
 
