@@ -78,13 +78,21 @@ DECKS = {
 }
 # Channel house style (decision 2026-10-10, @most.amazing.wonders): one fixed
 # visual identity across every video beats topic-varying decks for feed
-# recognisability. Dark saturated base, bright hero subject, blue/orange
+# recognisability. Dark saturated base, bright focal subject, blue/orange
 # complementary contrast — reads on oceans, space, volcanoes and biology
 # alike without a per-topic palette swap. The old DECKS above are no longer
 # selected automatically; a story can still override everything by supplying
 # its own stories/<id>/visual_bible.json (see load_style below).
 HOUSE_DECK = {
-    "illustration_style": "vivid cinematic digital painting, one bold hero "
+    # Bug fix (2026-10-11): "hero subject" (the original wording) reads to
+    # FLUX as "heroic character" -- confirmed via a failed render's plate_qa
+    # steering log, where landscape-only prompts (swamp forest, glacier,
+    # tundra, ocean basin -- none mentioning a person) repeatedly came back
+    # with an "armored warrior" inserted, across 3 regen rounds and both
+    # nvidia_nim and cloudflare_workers_ai (same underlying FLUX.2-klein-4B
+    # model, so the shared training-data association explains why it wasn't
+    # provider-specific). "Focal subject" has no person/hero connotation.
+    "illustration_style": "vivid cinematic digital painting, one bold focal "
                           "subject with an epic sense of scale, dramatic rim "
                           "lighting and glowing highlights against deep "
                           "shadow, rich saturated teal and molten orange "
