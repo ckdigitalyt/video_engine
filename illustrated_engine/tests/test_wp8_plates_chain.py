@@ -30,20 +30,27 @@ from engine import v15_plates as plates  # noqa: E402
 
 
 class TestProviderOrder:
-    def test_nvidia_nim_not_in_production_chain(self):
-        assert "nvidia_nim" not in plates.PROVIDER_ORDER
+    def test_nvidia_nim_in_production_chain(self):
+        # Owner directive 2026-10-11: explicitly approved NVIDIA NIM for
+        # production (trial/eval API terms accepted) once every other free
+        # image source was exhausted for the day (cloudflare daily quota,
+        # gemini free-tier limit 0, siliconflow balance insufficient,
+        # pollinations throttled). Reverses the prior exclusion
+        # (PROGRESS.md 2026-09-27).
+        assert "nvidia_nim" in plates.PROVIDER_ORDER
 
-    def test_archive_before_cloudflare_before_gemini_before_pollinations_before_sdcpp(self):
+    def test_archive_before_cloudflare_before_gemini_before_nim_before_pollinations_before_sdcpp(self):
         # Owner directive 2026-10-10 (configs/images.yaml): pollinations
         # moved ahead of sdcpp_local for speed while cloudflare/gemini's
         # free-tier image quotas are exhausted -- sdcpp_local is ~60-90x
-        # slower (~1700-1800s/image vs. pollinations' ~20-30s).
+        # slower (~1700-1800s/image vs. pollinations' ~20-30s). nvidia_nim
+        # added 2026-10-11, ahead of pollinations (faster, better quality).
         order = plates.PROVIDER_ORDER
         idx = {name: order.index(name) for name in
               ("archive", "cloudflare_workers_ai", "gemini_image",
-               "sdcpp_local", "pollinations")}
+               "nvidia_nim", "sdcpp_local", "pollinations")}
         assert idx["archive"] < idx["cloudflare_workers_ai"] < idx["gemini_image"] \
-            < idx["pollinations"] < idx["sdcpp_local"]
+            < idx["nvidia_nim"] < idx["pollinations"] < idx["sdcpp_local"]
 
     def test_matches_configs_images_yaml(self):
         """WP1 principle carried into WP8: "switching providers is a config

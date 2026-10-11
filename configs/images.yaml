@@ -8,9 +8,14 @@
 # `image_gen.chain.benchmark_only` mirrors each provider class's own
 # `benchmark_only` attribute (src/providers/image_gen.py) — listed here too
 # so the config is a readable single source of truth for "why isn't X in
-# production": nvidia_nim = owner decision (trial/eval terms, not approved
-# for production, PROGRESS.md 2026-09-27); siliconflow/hf_serverless = dead
-# endpoints (401 / 410, RESEARCH.md §5.1).
+# production": siliconflow = account balance insufficient as of 2026-10-11
+# (the .cn/.com domain bug is fixed — see src/providers/image_gen.py — but
+# the account still needs credits); hf_serverless = dead endpoint (410,
+# RESEARCH.md §5.1). nvidia_nim was owner-excluded for the same reason
+# (trial/eval API terms, not standard commercial terms, PROGRESS.md
+# 2026-09-27) until the owner explicitly approved using it in production
+# anyway (2026-10-11, every other free source exhausted that day) — see
+# production chain below.
 
 image_gen:
   default_provider: cloudflare_workers_ai
@@ -35,10 +40,10 @@ image_gen:
       - archive
       - cloudflare_workers_ai
       - gemini_image
+      - nvidia_nim
       - pollinations
       - sdcpp_local
     benchmark_only:
-      - nvidia_nim
       - siliconflow
       - hf_serverless
 

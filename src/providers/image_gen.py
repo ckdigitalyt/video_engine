@@ -218,12 +218,16 @@ class NvidiaNimProvider(ImageGenProvider):
     """
 
     name = "nvidia_nim"
-    # Owner decision (Phase 1, PROGRESS.md 2026-09-27): "NVIDIA NIM: not
-    # approved for production" — trial/evaluation terms only. WP8 (DESIGN
-    # §6.1/§15.3 item 2) removes it from the default production chain;
-    # kept fully implemented for scripts/benchmark_image_gen.py and
-    # tools/image_capability_audit.py, which pass the name explicitly.
-    benchmark_only = True
+    # Owner decision (Phase 1, PROGRESS.md 2026-09-27): originally excluded
+    # from production — "NVIDIA NIM: not approved for production", trial/
+    # evaluation terms only. Owner explicitly approved production use
+    # anyway on 2026-10-11 (every other free image source exhausted that
+    # day: cloudflare daily quota, gemini free-tier limit 0, siliconflow
+    # balance insufficient, pollinations throttled) — see
+    # configs/images.yaml chain.production. Still fast (~2-3s/image) and
+    # good quality (FLUX.2-klein-4B, same model Cloudflare uses) if this
+    # ever needs re-evaluating.
+    benchmark_only = False
 
     # flux.1-dev valid dimensions (multiples of 64, min 768).  VERIFIED
     # against the live API 2026-08-12: BOTH axes are capped at 1344 — the
