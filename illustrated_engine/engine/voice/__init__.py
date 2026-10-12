@@ -88,14 +88,28 @@ def make_provider(voice_id: str, cfg: dict, lexicon: Lexicon | None = None):
     raise ValueError(f"unknown provider {v['provider']!r}")
 
 
-def _trim(audio: np.ndarray, sr: int, keep_s: float = 0.02) -> tuple:
-    """Trim leading/trailing silence -> (audio, seconds cut from the start)."""
+TRIM_VERSION = "trim/2"  # 150 ms tail (see _trim)
+
+
+def _trim(audio: np.ndarray, sr: int, keep_s: float = 0.02,
+          tail_s: float = 0.15) -> tuple:
+    """Trim leading/trailing silence -> (audio, seconds cut from the start).
+
+    The tail keeps `tail_s` after the last sample above the threshold: a
+    sentence-final stop consonant's release (the /t/ of "light") is a quiet
+    burst that sits BELOW 2% of peak, so the old 20 ms tail cut it off.
+    live_20261011_144155 B7 "...wouldn't sip a star's light." shipped as
+    "...star's life" to both faster-whisper base.en and small.en (and to a
+    listener); the untrimmed Kokoro clip transcribes as "light". Measured
+    on that clip: tail 20/80/120 ms -> "life", 150 ms -> "light"; on 14
+    other sentence-final-stop lines a 150 ms tail introduced no new error.
+    """
     thr = max(0.002, float(np.abs(audio).max()) * 0.02) if len(audio) else 0
     idx = np.nonzero(np.abs(audio) > thr)[0]
     if not len(idx):
         return audio, 0.0
     a = max(0, int(idx[0]) - int(keep_s * sr))
-    b = min(len(audio), int(idx[-1]) + int(keep_s * sr) + 1)
+    b = min(len(audio), int(idx[-1]) + int(tail_s * sr) + 1)
     return audio[a:b], a / sr
 
 
@@ -246,7 +260,9 @@ def sentences_for_beat(text: str, function: str | None,
 def _sidecar_key(voice_id: str, cfg: dict, text: str, role: str,
                  speed: float) -> str:
     v = json.dumps(cfg["voices"][voice_id], sort_keys=True)
-    return hashlib.sha256(f"{v}|{cfg['gaps_ms']}|{cfg['speed_by_role']}|{role}"
+    # TRIM_VERSION: a beat cached with the old 20 ms tail trim (clipped
+    # final consonants) must be re-synthesised, not reused
+    return hashlib.sha256(f"{TRIM_VERSION}|{v}|{cfg['gaps_ms']}|{cfg['speed_by_role']}|{role}"
                           f"|{speed}|{text}".encode()).hexdigest()[:16]
 
 

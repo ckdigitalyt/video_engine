@@ -23,6 +23,13 @@ _SPELLING = {
     "programme": "program", "tyre": "tire", "whilst": "while",
     "ageing": "aging", "sulphur": "sulfur", "aluminium": "aluminum",
     "travelling": "traveling", "travelled": "traveled",
+    # true homophones (identical phonemes from Kokoro: "ours" and "hours"
+    # are both /aʊɚz/) -- no speech can tell them apart, so ASR picking the
+    # other spelling is not an error (live_20261011_153543 moon B8 "one-
+    # sixth of ours" heard "of hours", WER 0.07 -> FAIL)
+    "hours": "ours", "hour": "our",
+    # faster-whisper writes a spoken "Type Two" as "Type II"
+    "ii": "two", "iii": "three",
 }
 _SENT_SPLIT = re.compile(r"(?<=[.!?])[\"'”’)]*\s+(?=[\"'“‘(]*[A-Z0-9])")
 # trailing ordinal suffix (30th, 1st, 2nd, 3rd) is dropped, not spelled out as
@@ -156,6 +163,41 @@ def rejoin_compounds(ref: list, hyp: list) -> list:
             if d < dist:
                 out, dist = cand, d
         j += 1
+    return out
+
+
+# normalised (apostrophe-stripped) 'd contractions; "we'd"/"she'd" are left
+# out on purpose -- they normalise to the real words "wed"/"shed"
+_D_CONTRACT = {"id", "youd", "theyd", "hed", "itd", "thatd", "whod",
+               "thered"}
+_VOWEL_START = re.compile(r"^[aeiou]")
+
+
+def restore_d_elision(ref: list, hyp: list) -> list:
+    """A pronoun + 'd contraction before a consonant ("you'd think", "you'd
+    need") is said with an unreleased /d/ that merges into the next stop
+    or fricative: Kokoro phonemizes it correctly (/juːd θˈɪŋk/), yet both
+    faster-whisper base.en and small.en transcribe the clip as "you think"
+    (live_20261011_153543 frog B2/B6 -> FAIL). Map a hyp pronoun back to
+    the scripted contraction only where (a) the script has that exact
+    contraction, (b) the next script token starts with a consonant (before
+    a vowel the /d/ is released and audible, so a miss there still counts),
+    and (c) it strictly lowers the edit distance. Any other word that is
+    misheard is untouched."""
+    targets = {}
+    for i, r in enumerate(ref):
+        if r in _D_CONTRACT and i + 1 < len(ref) \
+                and not _VOWEL_START.match(ref[i + 1]):
+            targets[r[:-1]] = r
+    if not targets:
+        return list(hyp)
+    out, dist = list(hyp), _edit_dist(ref, hyp)
+    for j, h in enumerate(out):
+        if h in targets:
+            cand = out[:j] + [targets[h]] + out[j + 1:]
+            d = _edit_dist(ref, cand)
+            if d < dist:
+                out, dist = cand, d
     return out
 
 

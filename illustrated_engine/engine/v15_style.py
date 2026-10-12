@@ -92,11 +92,24 @@ HOUSE_DECK = {
     # nvidia_nim and cloudflare_workers_ai (same underlying FLUX.2-klein-4B
     # model, so the shared training-data association explains why it wasn't
     # provider-specific). "Focal subject" has no person/hero connotation.
-    "illustration_style": "vivid cinematic digital painting, one bold focal "
-                          "subject with an epic sense of scale, dramatic rim "
-                          "lighting and glowing highlights against deep "
+    # Bug fix 2 (2026-10-11, later): "hero" was only one trigger. 5/5 fresh
+    # renders after that fix still failed; their plate_qa steering logs show
+    # the same pattern ("Armored warrior standing in lava rain landscape",
+    # "Lizard-like creature monster", "Glowing humanoid figure walking on
+    # road", "Moon over mountains, tiny astronaut figure") on prompts naming
+    # no person. The rest of the old line -- "epic sense of scale", "awe-
+    # inspiring atmosphere", "one bold focal subject" -- is the vocabulary of
+    # fantasy key art, where a lone figure IS the scale reference; figure
+    # hallucinations went from 0 in every pre-house-style run to 6-12 per run
+    # after it. "One bold focal subject" also fought every two-body shot
+    # ("Moon beside Earth" -> Moon alone, 11 narration_mismatch fails in one
+    # run). The look (dark teal/orange, glowing rim light, deep shadow) is
+    # kept verbatim; only the genre/subject-count register is removed.
+    "illustration_style": "vivid cinematic digital painting, glowing rim "
+                          "light and luminous highlights against deep "
                           "shadow, rich saturated teal and molten orange "
-                          "tones, crisp detail, awe-inspiring atmosphere",
+                          "tones, crisp detail, depicting only the objects "
+                          "and places described",
     "palette": {"primary": "#0A1A2F", "secondary": "#1F6F8B",
                 "accent": "#FF7A1A", "background": "#07111F",
                 "text": "#FFFFFF", "muted": "#8FB3C9",
@@ -174,10 +187,12 @@ PURE = "Pure image, full-bleed, edge to edge, vertical 9:16"
 # surrounding context, is easy to misread as the wrong subject/action (both
 # for a viewer and for the narration-match vision judge in v15_plates.py) —
 # nudge every prompt toward a framing that keeps the subject/action legible.
+# (2026-10-11) "prefer a full-figure ... view" was written for animal
+# subjects but is appended to EVERY prompt — on a landscape/planet prompt
+# "full-figure" asks for a figure. Same intent, no person/figure word.
 FRAMING_GUIDANCE = ("avoid an isolated close-up of just a limb or torso with "
-                    "nothing else in frame; prefer a full-figure or clear "
-                    "establishing view that makes the subject and action "
-                    "unambiguous")
+                    "nothing else in frame; show the whole subject in its "
+                    "setting so the subject and action are unambiguous")
 
 
 def style_prefix(bible: dict) -> str:
@@ -227,6 +242,10 @@ HOOK_FRAMING_GUIDANCE = ("keep the subject instantly recognisable while it "
                          "a limb or torso with nothing else in frame")
 
 
+_TWO_THINGS = re.compile(r"(?i)\b(beside|alongside|next to|side by side|"
+                         r"between|versus|compared (?:to|with|against))\b")
+
+
 def image_prompt(bible: dict, subject: str, composition: str = "centered",
                  view: str | None = None, hook: bool = False) -> str:
     # decision #18 item 3: "wide quiet open background" + a pull_out camera
@@ -239,6 +258,14 @@ def image_prompt(bible: dict, subject: str, composition: str = "centered",
                             "ground across the lower third",
             "centered": "single clear focal subject, centered"}.get(
                 composition, "single clear focal subject")
+    if view == "comparison" or _TWO_THINGS.search(subject):
+        # a comparison / "X beside Y" subject names two things; "single
+        # clear focal subject" / "main subject large" made FLUX drop one
+        # (live_20261011_162330: "Moon ... beside Earth" -> Moon alone,
+        # 11 narration_mismatch fails across 3 regen rounds)
+        comp = ("every named thing fully visible together in the same "
+                "frame" + (", calm darker background across the top third"
+                           if composition == "subject_low" else ""))
     subj = _BANNED_WORD.sub("", subject.strip().rstrip("."))
     guidance = FRAMING_GUIDANCE
     if hook and view in HOOK_REFRAME_VIEWS:

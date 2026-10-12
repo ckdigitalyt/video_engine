@@ -40,7 +40,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 CACHE_DIR = ROOT / "build" / "cache" / "v15_plans"
-PROMPT_VERSION = "bvp/1.6"
+PROMPT_VERSION = "bvp/1.7"
 
 SHOT_KINDS = ("plate", "zoom_through", "process")
 CAMERAS = ("push_in", "pull_out", "pan_left", "pan_right", "rise", "descend")
@@ -142,6 +142,20 @@ Field rules:
     in the image. NO digits, numbers, text, labels, rulers-with-readings or
     charts in the subject (figures are added as overlay typography).
     No split panels. <= 45 words.
+    NEVER copy or paraphrase the narration sentence as the subject — the
+    image model cannot draw a sentence and paints it as garbled lettering
+    or invents a random figure. Hardest case: a correction / contrast /
+    aside line with no object in it ("Not meters per second. Kilometers
+    per second.", "That rhythm feels permanent.", "And it's roughly a
+    quarter as wide as Earth."): draw the PHYSICAL THING the line is about,
+    showing the quality it states. E.g. for "Not meters per second.
+    Kilometers per second." -> "glowing rock-vapor winds tearing across the
+    lava planet's terminator, streaked into long motion blurs by their
+    violent speed"; for "roughly a quarter as wide as Earth" -> "the small
+    grey cratered Moon beside the much larger blue Earth, both whole in
+    frame".
+ kind: exactly "plate", "zoom_through" or "process". "comparison",
+    "close", "wide" etc. are VIEWS, never kinds.
  view: the shot's scale/viewpoint, one of {', '.join(VIEWS)}:
     wide = establishing view with surroundings; medium = the subject and its
     immediate context; close = extreme close-up of a surface/detail filling
@@ -374,6 +388,15 @@ def _repair(plan: dict, story: dict) -> dict:
                 sh["start_word"] = 0
             # degenerate multi-element shots collapse to a plate (content
             # kept: the single step/level becomes the label/subject)
+            # 2026-10-11: the planner sometimes writes a VIEW name as the
+            # shot kind ({"kind": "comparison", "view": "comparison", ...}).
+            # The shot is otherwise a perfectly good plate; rejecting it
+            # replaced the whole beat with the fallback (narration-as-
+            # subject) in 2 of that day's 5 fails.
+            if sh.get("kind") in VIEWS:
+                sh.setdefault("view", sh["kind"])
+                sh["kind"] = "plate"
+                sh.setdefault("camera", "push_in")
             if sh.get("kind") == "process" and isinstance(sh.get("steps"), list) \
                     and len(sh["steps"]) < 2:
                 one = (sh.pop("steps") or [None])[0]
@@ -443,19 +466,52 @@ def _splits(ws: list, k: int) -> list:
     return starts
 
 
-def fallback_plan(story: dict) -> dict:
+def _identity_subject(subject: dict | None) -> str | None:
+    """The recurring subject's drawable look (engine.subject_bible) as an
+    image subject, or None."""
+    subject = subject or {}
+    desc = str(subject.get("description") or "").strip().rstrip(".")
+    if not desc:
+        return None
+    name = subject.get("name") or str(subject.get("concept_id") or "") \
+        .replace("_", " ")
+    return _image_safe(f"{name}, {desc}" if name else desc)
+
+
+def fallback_plan(story: dict, subject: dict | None = None) -> dict:
     """Deterministic plan from story fields only (no LLM). Floor tier:
     plate shots split on punctuation near equal spans; subjects from the
     story's own visual fields made image-safe; hook headline = the story
     title; first spoken figure as a number (verbatim from narration, so
-    factual integrity holds by construction). Valid by construction."""
+    factual integrity holds by construction). Valid by construction.
+
+    2026-10-11: auto-generated stories (v16_autostory) carry no visual
+    fields — `claim` IS the narration — so this floor used to send the
+    spoken sentence itself to FLUX as the image subject ("Not meters per
+    second. Kilometers per second", "And it's roughly a quarter as wide as
+    Earth"). With nothing drawable in it the model painted the sentence as
+    garbled lettering or filled the frame with a generic figure (warriors,
+    humanoids) — 3/3 regen rounds failing in live_20261011_150909/162330.
+    Spoken text is now only the LAST resort: the recurring subject's
+    drawable identity (engine.subject_bible, `subject`) comes first."""
     beats = []
     cams = ("push_in", "pull_out", "pan_right", "rise", "pan_left", "descend")
+    ident = _identity_subject(subject)
+    # live_20261011_150909 failed distinctness ("template sequence too close
+    # to t_trillions_of_rogue_planets_with_no_star", 0.29 < 0.3): BOTH were
+    # fallback plans, and the edit-grammar signature (kind/camera/overlay)
+    # of every fallback plan was the same fixed camera cycle. Start the
+    # cycle at a story-specific offset so two floor-tier plans differ.
+    off = int(hashlib.sha256(str(story.get("story_id", "")).encode())
+              .hexdigest()[:8], 16) % len(cams)
     for bi, b in enumerate(story["beats"]):
         ws = _words(b["narration"])
         k = min(MAX_SHOTS, max(1, -(-len(ws) // WORDS_PER_SHOT)))
-        srcs = [b.get("visual_answer"), b.get("claim"), b["narration"],
-                b.get("visual_question")]
+        spoken = {str(b["narration"]).strip()}
+        visual = [t for t in (b.get("visual_answer"), b.get("visual_question"))
+                  if t and str(t).strip() not in spoken]
+        srcs = visual + ([ident] if ident else []) + (
+            [] if (visual or ident) else [b.get("claim"), b["narration"]])
         subjects = [x for x in (_image_safe(t) for t in srcs if t)
                     if len(x.split()) >= 3] or ["an evocative scene of "
                                                 + story.get("title", "the topic")]
@@ -466,7 +522,7 @@ def fallback_plan(story: dict) -> dict:
                                               .split()[:45]),
                           "composition": "subject_low" if (bi == 0 and si == 0)
                           else "centered",
-                          "camera": cams[(bi + si) % len(cams)],
+                          "camera": cams[(bi + si + off) % len(cams)],
                           "view": VIEWS[(len(shots) + sum(
                               len(x["shots"]) for x in beats)) % 4]})
         if bi == 0:
@@ -484,13 +540,13 @@ def fallback_plan(story: dict) -> dict:
     return {"beats": beats}
 
 
-def salvage(plan: dict, story: dict) -> tuple:
+def salvage(plan: dict, story: dict, subject: dict | None = None) -> tuple:
     """Deterministic salvage of an LLM plan that failed validation twice:
     DROP (never invent) whatever is invalid — an unspoken number, an
     over-long copy line, a 4th shot, a cut too close to the previous one —
     strip figures from image subjects, fill a missing beat or hook headline
     from the deterministic fallback. -> (plan, dropped[])."""
-    fb = {b["beat_id"]: b for b in fallback_plan(story)["beats"]}
+    fb = {b["beat_id"]: b for b in fallback_plan(story, subject)["beats"]}
     by_id = {b.get("beat_id"): b for b in (plan.get("beats") or [])
              if isinstance(b, dict)}
     dropped, beats = [], []
@@ -528,6 +584,14 @@ def salvage(plan: dict, story: dict) -> tuple:
                 elif isinstance(el, dict):
                     _check_copy(el.get("text"), mx, digits, key, e)
                     _check_word(el.get("word"), n, key, e)
+                    # same rule validate_plan enforces; missing here meant a
+                    # single "km/s" number survived salvage, the salvaged
+                    # plan still failed validation, and the WHOLE good LLM
+                    # plan was discarded for the fallback
+                    # (live_20261011_150909, t_the_planet_that_rains_rock)
+                    if key == "number" and not _digits(el.get("text", "")) \
+                            and not _NUMWORD.search(str(el.get("text"))):
+                        e.append("number: must contain a figure")
                 else:
                     e.append("bad")
                 if e:
@@ -641,14 +705,15 @@ def make_plan(story: dict, bible: dict, *, use_llm: bool = True,
                 cp.write_text(json.dumps(data, indent=1))
                 return dict(data, llm_calls=calls)
     if use_llm and plan_last is not None:
-        sal, dropped = salvage(json.loads(json.dumps(plan_last)), story)
+        sal, dropped = salvage(json.loads(json.dumps(plan_last)), story,
+                               subject)
         if not validate_plan(sal, story):
             data = {"plan": sal, "source": "llm_salvaged", "key": key,
                     "errors": errors, "dropped": dropped,
                     "prompt_version": PROMPT_VERSION}
             cp.write_text(json.dumps(data, indent=1))
             return dict(data, llm_calls=calls)
-    plan = fallback_plan(story)
+    plan = fallback_plan(story, subject)
     fb_errs = validate_plan(plan, story)
     if fb_errs:  # the floor itself must be valid — loud, never silent
         raise ValueError(f"fallback plan invalid: {fb_errs[:5]}")
