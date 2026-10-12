@@ -221,6 +221,48 @@ def test_render_cover_generates_jpeg():
         assert im.size == (1080, 1920)
 
 
+def test_render_thumbnail_is_full_bleed_no_dead_space():
+    """Owner directive 2026-10-12 ("thumbnails need to be much better to go
+    viral"): the old render_cover-as-thumbnail put the image in the top 62%
+    only, leaving a solid-colour dead zone below once title text fit --
+    render_thumbnail must fill the ENTIRE canvas with the plate, no
+    letterboxing."""
+    b = BR.load_brand("ink_ember")
+    with tempfile.TemporaryDirectory() as d:
+        bg = Path(d) / "plate.png"
+        # distinct bottom-row colour so a letterboxed dead zone would show
+        # up as a flat scrim colour instead of this image content
+        img = Image.new("RGB", (1080, 1920), (80, 60, 40))
+        for y in range(1900, 1920):
+            for x in range(0, 1080, 50):
+                img.putpixel((x, y), (10, 200, 10))
+        img.save(bg)
+        out = BR.render_thumbnail(Path(d) / "thumb.jpg", bg_image=bg,
+                                  title="No Rockets, Just a Cable?", brand=b)
+        im = Image.open(out).convert("RGB")
+        assert im.size == (1080, 1920)
+        # bottom row must show the image's own colour, not a flat scrim
+        assert im.getpixel((0, 1919)) != im.getpixel((500, 50))
+
+
+def test_render_thumbnail_seal_does_not_overlap_headline_band():
+    """The bug that clipped "...JUST" and "...LIFE" behind the old top-right
+    seal: the seal must live in a vertical band a centred multi-line
+    headline never occupies."""
+    b = BR.load_brand("ink_ember")
+    with tempfile.TemporaryDirectory() as d:
+        bg = Path(d) / "plate.png"
+        Image.new("RGB", (1080, 1920), (40, 40, 60)).save(bg)
+        BR.render_thumbnail(Path(d) / "thumb.jpg", bg_image=bg,
+                            title="Silicon Rules, Life Ignores It", brand=b)
+        # headline band (render_thumbnail): starts ~h*0.30 - block_h/2
+        # seal band: bottom-left, 110px + 40px margin from the bottom edge
+        headline_bottom = round(1920 * 0.30 - (148 * 3) / 2) + 148 * 3
+        seal_top = 1920 - 110 - 40
+        assert headline_bottom < seal_top, (
+            "headline band reaches into the seal's vertical band")
+
+
 # ----------------------------------------------------------- captions --
 
 def test_captions_use_brand_roles_not_bible():

@@ -596,6 +596,16 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
     report["plate_realistic"] = {
         plates[p]["path"]: v for p, v in plate_realistic_by_prompt.items()
         if plates.get(p, {}).get("ok")}
+    # Owner directive (2026-10-12): the YouTube thumbnail needs a clean,
+    # caption-free image — the raw hook plate (same "scroll-stopping" art
+    # engine.v15_style.HOOK_FRAMING already optimises for), not a frame
+    # grabbed from the finished video, which always has captions burned
+    # in and produced double/overlapping text on the thumbnail.
+    hook_shot = next((s for s in shots if s.get("hook")), None)
+    if hook_shot and hook_shot.get("prompts"):
+        hp = plates.get(hook_shot["prompts"][0], {})
+        if hp.get("ok"):
+            report["hook_plate_path"] = hp["path"]
     if not plate_qa_on:
         report["plate_qa"]["reason"] = "plate QA disabled (--no-plate-qa)"
     report["plate_failures"] = fail_log

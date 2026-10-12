@@ -368,3 +368,82 @@ def render_cover(out_path, *, bg_frame, title: str, part_label: str = "",
     seal_tmp.unlink(missing_ok=True)
     canvas.save(out_path, "JPEG", quality=92)
     return Path(out_path)
+
+
+def render_thumbnail(out_path, *, bg_image, title: str, brand: dict | None = None,
+                     size=(1080, 1920)):
+    """YouTube custom-thumbnail generator (owner directive 2026-10-12,
+    "thumbnails need to be much better to go viral").
+
+    Fixes two real defects found by eye on the first batch of real
+    thumbnails, both consequences of render_cover()'s title_lower_third
+    template (built for an in-video card, repurposed for the YT thumbnail
+    in engine.v16_batch.package_video before this function existed):
+
+    1. `bg_image` must be the raw hook PLATE (engine.v15_pipeline's
+       report["hook_plate_path"] -- the same "scroll-stopping" art
+       engine.v15_style.HOOK_FRAMING already composes for), never a frame
+       grabbed from the finished video. A video frame always has the
+       in-video caption burned in, and the old template's OWN title text
+       below it produced two independent, sometimes-overlapping text
+       blocks with no coordination between them.
+    2. The old layout put the image in the top 62% and a solid scrim
+       panel below it for text, leaving the bottom ~15-20% empty once a
+       1-2 line title fit -- dead space that shrinks the image for no
+       benefit. This version is full-bleed: the plate fills the ENTIRE
+       canvas, cropped to frame, and the headline sits directly on top of
+       it with a heavy black outline + drop shadow (legible on any
+       artwork without a background panel) -- the modern high-CTR
+       thumbnail convention, not a letterboxed slide.
+
+    Headline sits in the upper-middle band (never the very top strip,
+    which search/related-video UI can crop) and the channel seal is
+    small (110px) and bottom-left, chosen so it can never share a text
+    line's vertical band with a centred multi-line headline regardless
+    of wrap width -- the bug that clipped "...JUST" and "...LIFE" behind
+    the old top-right seal.
+    """
+    brand = brand or load_brand()
+    w, h = size
+    canvas = Image.new("RGB", (w, h), _hex_rgba(role_hex(brand, "scrim"), 255)[:3])
+    bg = Image.open(bg_image).convert("RGB")
+    bw, bh = bg.size
+    sc = max(w / bw, h / bh)
+    bg = bg.resize((round(bw * sc), round(bh * sc)), Image.LANCZOS)
+    ox, oy = (bg.width - w) // 2, (bg.height - h) // 2
+    canvas.paste(bg.crop((ox, oy, ox + w, oy + h)), (0, 0))
+
+    draw = ImageDraw.Draw(canvas, "RGBA")
+    f = ImageFont.truetype(str(font_path(brand, "headline")), 132)
+    words = title.upper().split()
+    lines, cur = [], ""
+    for word in words:
+        trial = (cur + " " + word).strip()
+        if draw.textlength(trial, font=f) > w - 120 and cur:
+            lines.append(cur)
+            cur = word
+        else:
+            cur = trial
+    lines.append(cur)
+    lines = lines[:3]
+    line_h = 148
+    block_h = line_h * len(lines)
+    ty = round(h * 0.30 - block_h / 2)
+    fill = role_hex(brand, "headline")
+    outline = role_hex(brand, "scrim")
+    for ln in lines:
+        bb = draw.textbbox((0, 0), ln, font=f)
+        tx = (w - (bb[2] - bb[0])) / 2 - bb[0]
+        # thick outline (stroke) + soft drop shadow: legible straight on
+        # the artwork, no background panel needed
+        draw.text((tx, ty), ln, font=f, fill=fill,
+                  stroke_width=10, stroke_fill=outline)
+        ty += line_h
+
+    seal_tmp = Path(tempfile.mktemp(suffix=".png"))
+    seal_badge(seal_tmp, brand, diameter=110)
+    seal = Image.open(seal_tmp).convert("RGBA")
+    canvas.paste(seal, (40, h - seal.height - 40), seal)
+    seal_tmp.unlink(missing_ok=True)
+    canvas.save(out_path, "JPEG", quality=94)
+    return Path(out_path)

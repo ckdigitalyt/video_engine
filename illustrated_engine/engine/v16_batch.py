@@ -351,12 +351,25 @@ def package_video(story_dir: Path, work_dir: Path, out_dir: Path, *, report: dic
 
     thumb_ok = False
     thumb_path = out_dir / "thumbnail.jpg"
-    if cover_ok:
+    meta = report.get("metadata") or {}
+    title = meta.get("title") or story.get("title", "")
+    hook_plate = report.get("hook_plate_path")
+    if hook_plate and Path(hook_plate).exists():
+        # Owner directive 2026-10-12 ("thumbnails need to be much better to
+        # go viral"): the raw hook plate, full-bleed, text straight on the
+        # art -- see engine.brand.render_thumbnail's docstring for the two
+        # defects (clipped text behind the seal, ~40% dead space) this
+        # replaces from the old render_cover-on-a-video-frame approach.
+        try:
+            from engine.brand import render_thumbnail
+            render_thumbnail(thumb_path, bg_image=hook_plate, title=title)
+            thumb_ok = True
+        except Exception:
+            thumb_ok = False
+    if not thumb_ok and cover_ok:
         try:
             from engine.brand import render_cover
-            meta = report.get("metadata") or {}
-            render_cover(thumb_path, bg_frame=out_dir / "cover.png",
-                        title=meta.get("title") or story.get("title", ""))
+            render_cover(thumb_path, bg_frame=out_dir / "cover.png", title=title)
             thumb_ok = True
         except Exception:
             thumb_ok = False
