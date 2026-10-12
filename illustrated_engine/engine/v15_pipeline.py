@@ -610,8 +610,15 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
         # CABLE?") is a curiosity-gap question, punchier thumbnail text
         # than the SEO title -- same text already shown on-screen as the
         # video's own hook caption, so the thumbnail doesn't promise
-        # something the video itself doesn't open with.
-        hl = hook_shot.get("shot", {}).get("headline")
+        # something the video itself doesn't open with. Read from the
+        # finalized plan's first shot directly, not hook_shot["shot"]:
+        # split_long_holds can turn the hook into a punch-in CUT pair for a
+        # long first beat, and whichever piece keeps the "hook" flag isn't
+        # guaranteed to be shots[0] from the plan (verified missing on
+        # t_life_ignored_earth_s_most_common_element's B1).
+        hl = (bvp["plan"]["beats"][0]["shots"][0].get("headline")
+              if bvp["plan"]["beats"] and bvp["plan"]["beats"][0].get("shots")
+              else None)
         if hl:
             report["hook_headline"] = hl
     if not plate_qa_on:
