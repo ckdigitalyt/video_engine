@@ -353,6 +353,12 @@ def package_video(story_dir: Path, work_dir: Path, out_dir: Path, *, report: dic
     thumb_path = out_dir / "thumbnail.jpg"
     meta = report.get("metadata") or {}
     title = meta.get("title") or story.get("title", "")
+    # The hook shot's own planner-written headline ("NO ROCKETS, JUST A
+    # CABLE?") is a curiosity-gap question -- punchier thumbnail text than
+    # the SEO title, and it's the same line the video opens on, so the
+    # thumbnail never promises something the video doesn't immediately
+    # deliver. Falls back to the SEO title if the plan has no headline.
+    thumb_title = report.get("hook_headline") or title
     hook_plate = report.get("hook_plate_path")
     if hook_plate and Path(hook_plate).exists():
         # Owner directive 2026-10-12 ("thumbnails need to be much better to
@@ -362,7 +368,7 @@ def package_video(story_dir: Path, work_dir: Path, out_dir: Path, *, report: dic
         # replaces from the old render_cover-on-a-video-frame approach.
         try:
             from engine.brand import render_thumbnail
-            render_thumbnail(thumb_path, bg_image=hook_plate, title=title)
+            render_thumbnail(thumb_path, bg_image=hook_plate, title=thumb_title)
             thumb_ok = True
         except Exception:
             thumb_ok = False

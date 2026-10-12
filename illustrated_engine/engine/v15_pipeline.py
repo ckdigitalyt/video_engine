@@ -606,6 +606,14 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
         hp = plates.get(hook_shot["prompts"][0], {})
         if hp.get("ok"):
             report["hook_plate_path"] = hp["path"]
+        # the hook shot's own planner-written headline ("NO ROCKETS, JUST A
+        # CABLE?") is a curiosity-gap question, punchier thumbnail text
+        # than the SEO title -- same text already shown on-screen as the
+        # video's own hook caption, so the thumbnail doesn't promise
+        # something the video itself doesn't open with.
+        hl = hook_shot.get("shot", {}).get("headline")
+        if hl:
+            report["hook_headline"] = hl
     if not plate_qa_on:
         report["plate_qa"]["reason"] = "plate QA disabled (--no-plate-qa)"
     report["plate_failures"] = fail_log
