@@ -157,6 +157,16 @@ def test_ordinal_digit_matches_scripted_ordinal_word():
     assert int_to_words(30) == "thirty"
 
 
+def test_there_their_homophone_is_not_an_error():
+    # t_stopping_costs_double_the_fuel B10: scripted "stopping there" heard
+    # "stopping their" -- a true homophone, same class as ours/hours above.
+    s = "So actually arriving and stopping there costs double, and remember:"
+    r = qa.round_trip(s, _asr(
+        "so actually arriving and stopping their costs double and remember"),
+        Lexicon())
+    assert r["wer"] == 0 and r["verdict"] == "PASS", r
+
+
 def test_split_closed_compound_is_not_an_error():
     # live_20261011_055858 t_you_re_still_living_in_an_ice_age B4/B5: small.en
     # wrote a correctly-read "icehouse" as "ice house" -> WER 0.15/0.25 HOLD

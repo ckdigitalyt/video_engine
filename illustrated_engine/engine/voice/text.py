@@ -30,6 +30,14 @@ _SPELLING = {
     "hours": "ours", "hour": "our",
     # faster-whisper writes a spoken "Type Two" as "Type II"
     "ii": "two", "iii": "three",
+    # true homophone (t_stopping_costs_double_the_fuel B10: scripted
+    # "stopping there" heard "stopping their", WER 0.1 -> FAIL). NOTE like
+    # "ice"/"eyes" above: these are common words, not rare terms, so a
+    # script that genuinely says "their" could get mis-canonicalized to
+    # "there" -- not a risk for round-trip QA itself (still an exact-token
+    # comparison either way), only if this dict is ever read for something
+    # else.
+    "their": "there",
 }
 _SENT_SPLIT = re.compile(r"(?<=[.!?])[\"'”’)]*\s+(?=[\"'“‘(]*[A-Z0-9])")
 # A trailing ordinal suffix (30th, 1st, 2nd, 3rd) is matched here so
