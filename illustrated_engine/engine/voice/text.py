@@ -32,10 +32,13 @@ _SPELLING = {
     "ii": "two", "iii": "three",
 }
 _SENT_SPLIT = re.compile(r"(?<=[.!?])[\"'”’)]*\s+(?=[\"'“‘(]*[A-Z0-9])")
-# trailing ordinal suffix (30th, 1st, 2nd, 3rd) is dropped, not spelled out as
-# a separate "th" token: faster-whisper itself writes ordinals in speech back
-# out as bare digits ("30th" heard -> transcribed "30,"), so the ordinal
-# marker is never a token either side can actually match on.
+# A trailing ordinal suffix (30th, 1st, 2nd, 3rd) is matched here so
+# _num_words (below) can convert it to the ordinal WORD ("thirtieth") --
+# a scripted "nineteenth century" only matches faster-whisper's heard
+# "19th" if both sides end up as the same ordinal word, not one ordinal
+# and one cardinal. When faster-whisper drops the suffix entirely (it
+# sometimes does: "30th" heard -> transcribed "30,"), there's no marker to
+# act on and _num_words falls back to the cardinal, same as before.
 _NUM = re.compile(r"\d[\d,]*(?:\.\d+)?(?:st|nd|rd|th)?\b", re.I)
 
 
@@ -55,12 +58,43 @@ def int_to_words(n: int) -> str:
     raise ValueError(n)
 
 
+# irregular cardinal -> ordinal word endings; a regular tens word ("twenty")
+# takes "ieth" (-> "twentieth") and everything else just takes "th".
+_ORDINAL_IRREGULAR = {"one": "first", "two": "second", "three": "third",
+                      "five": "fifth", "eight": "eighth", "nine": "ninth",
+                      "twelve": "twelfth"}
+
+
+def int_to_ordinal_words(n: int) -> str:
+    """Only the LAST word of the cardinal phrase takes the ordinal ending
+    ("one hundred first", not "one hundredth first")."""
+    cardinal = int_to_words(n)
+    head, _, last = cardinal.rpartition(" ")
+    ordinal = _ORDINAL_IRREGULAR.get(last, (
+        last[:-1] + "ieth" if last.endswith("y") else last + "th"))
+    return (head + " " + ordinal) if head else ordinal
+
+
 def _num_words(m: re.Match) -> str:
-    s = re.sub(r"(?i:st|nd|rd|th)$", "", m.group(0)).replace(",", "")
+    raw = m.group(0)
+    # t_the_plague_that_never_really_left B9/B10: faster-whisper transcribed
+    # a spoken "nineteenth"/"fourteenth" as digit+suffix ("19th", "14th");
+    # the script spells the ordinal WORD ("nineteenth"). Stripping the
+    # suffix and converting to the CARDINAL ("nineteen") -- the old
+    # behavior -- never matches a scripted ordinal word. A present suffix
+    # now converts to the ordinal word form instead; a bare digit with no
+    # suffix (the case the old comment above was written for: faster-
+    # whisper sometimes drops the suffix entirely, e.g. "30th" -> "30,")
+    # still falls back to cardinal, since there's no marker to act on.
+    has_suffix = bool(re.search(r"(?i:st|nd|rd|th)$", raw))
+    s = re.sub(r"(?i:st|nd|rd|th)$", "", raw).replace(",", "")
     whole, _, frac = s.partition(".")
-    out = int_to_words(int(whole))
-    if frac:
-        out += " point " + " ".join(_ONES[int(c)] for c in frac)
+    if has_suffix and not frac:
+        out = int_to_ordinal_words(int(whole))
+    else:
+        out = int_to_words(int(whole))
+        if frac:
+            out += " point " + " ".join(_ONES[int(c)] for c in frac)
     return " " + out + " "
 
 

@@ -136,6 +136,27 @@ def test_hard_token_miss_fails_even_under_wer_limit():
     assert r2["verdict"] == "FAIL" and r2["hard_missed"], r2
 
 
+def test_ordinal_digit_matches_scripted_ordinal_word():
+    # t_the_plague_that_never_really_left B9/B10: faster-whisper transcribed
+    # a spoken "nineteenth"/"fourteenth" as digit+suffix ("19th", "14th");
+    # the old normalizer stripped the suffix to the CARDINAL ("nineteen"),
+    # which never matches a scripted ordinal word -> WER 0.09/0.15 FAIL.
+    s9 = "Outbreaks kept recurring around the world until the early nineteenth century."
+    r = qa.round_trip(s9, _asr(
+        "outbreaks kept recurring around the world until the early 19th century."),
+        Lexicon())
+    assert r["wer"] == 0 and r["verdict"] == "PASS", r
+    s10 = ("Europe's population didn't return to its fourteenth-century "
+          "level until the sixteenth century.")
+    r = qa.round_trip(s10, _asr(
+        "europe's population didn't return to its 14th century level until "
+        "the 16th century."), Lexicon())
+    assert r["wer"] == 0, r
+    # a bare digit with no ordinal suffix (faster-whisper sometimes drops
+    # it) still falls back to the cardinal, unaffected by this fix
+    assert int_to_words(30) == "thirty"
+
+
 def test_split_closed_compound_is_not_an_error():
     # live_20261011_055858 t_you_re_still_living_in_an_ice_age B4/B5: small.en
     # wrote a correctly-read "icehouse" as "ice house" -> WER 0.15/0.25 HOLD
