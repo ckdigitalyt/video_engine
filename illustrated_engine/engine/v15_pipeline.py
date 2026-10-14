@@ -22,6 +22,7 @@ Exit 0 = publish gate PASS, 1 = HOLD (report says why), 2 = error.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import sys
@@ -169,10 +170,12 @@ def caption_cues(timing: dict, lead: float) -> list:
 
 # ------------------------------------------------------------------ shots --
 
-def shot_timeline(beat: dict, bplan: dict, timing: dict, tts_s: float) -> list:
+def shot_timeline(beat: dict, bplan: dict, timing: dict, tts_s: float,
+                  tail_s: float = TAIL_S) -> list:
     """Beat -> [{shot, t0, t1}] in beat-local seconds; shots shorter than
-    MIN_SHOT_S merge into the previous one (recorded)."""
-    beat_dur = LEAD_S + tts_s + TAIL_S
+    MIN_SHOT_S merge into the previous one (recorded). `tail_s` is the hold
+    after the narration (engine.v15_pipeline.beat_tail in the pipeline)."""
+    beat_dur = LEAD_S + tts_s + tail_s
     wt = [w["t0"] for w in timing["words"]]
     starts = []
     for k, sh in enumerate(bplan["shots"]):
@@ -196,13 +199,96 @@ def shot_timeline(beat: dict, bplan: dict, timing: dict, tts_s: float) -> list:
 
 MAX_HOLD_S = 3.0  # B3 (VIS): <=3s per shot (the gate itself still allows 4.5s)
 
+# ------------------------------------------------------- editorial rhythm --
+# Owner review 2026-10-14 ("feels AI generated"): one global MAX_HOLD_S=3.0
+# with every split cut at the word nearest the gap MIDPOINT turned the
+# average ~4.5 s beat into two near-equal ~2.25 s halves, every time. Across
+# the 11 batch renders of 2026-10-13/14, 39% of all shots (96/246) were such
+# derived halves, 70% of shots were 1.5-2.5 s long, and 2-shot beats had a
+# median shorter/longer ratio of 0.885. A fixed TAIL_S made every sentence-
+# to-sentence pause ~1.0 s +-0.1 (13 identical gaps in a 54 s video).
+# The rhythm is now driven by the beat's ROLE plus a deterministic per-story
+# jitter (sha256 of story_id — reproducible run to run, different per story):
+#   - hold ceiling per beat: fast cuts on the HOOK, a tightening run-up
+#     before the payoff, longer holds where an idea needs to land (PAYOFF,
+#     REVEAL/EXPLANATION), a punchy short line kept as ONE picture;
+#   - the split point lands anywhere in 30-70% of the gap, preferring the
+#     start of a phrase (cut on the clause boundary, as an editor would);
+#   - the pause after a beat depends on what follows it.
+# Every ceiling stays under v15_gate.MAX_HOLD_S (4.5 s, the hard floor).
+HOLD_BY_FUNCTION = {"HOOK": 2.5, "CURIOSITY": 2.8, "ESCALATION": 2.5,
+                    "REVEAL": 3.4, "EXPLANATION": 3.3, "PAYOFF": 3.7}
+HOLD_NORMAL_S = 3.0
+HOLD_JITTER_S = 0.55
+HOLD_SHORT_LINE_WORDS = 7      # a line this short is a single punchy picture
+HOLD_SHORT_LINE_BONUS_S = 0.7
+HOLD_RUNUP_S = 0.3             # NORMAL beats in the run-up to the payoff
+HOLD_MIN_S, HOLD_MAX_S = 2.2, 4.0
+SPLIT_FRAC = (0.30, 0.70)
+SPLIT_PHRASE_BONUS_S = 0.45    # a cut on a phrase start may sit this far off
+TAIL_RANGE_S = (0.28, 0.62)    # ordinary beat-to-beat breath (was 0.55 fixed)
+TAIL_AFTER_HOOK_S = 0.3        # the hook rolls straight into the story
+TAIL_BEFORE_PAYOFF_S = 0.75    # a held beat before the answer lands
+TAIL_QUESTION_S = 0.7          # a spoken question gets a moment
+TAIL_END_S = 0.7               # last line lands before the sting/outro
+_PHRASE_END = re.compile(r"[,.;:!?—…]['\")\]]*$")
+
+
+def _unit(*parts) -> float:
+    """Deterministic uniform [0, 1) from the given parts (DESIGN §8.1: ties
+    broken by hashing story ids, never by a random choice)."""
+    h = hashlib.sha256("|".join(str(p) for p in parts).encode()).hexdigest()
+    return int(h[:12], 16) / float(16 ** 12)
+
+
+def beat_max_hold(beat: dict, bi: int, n_beats: int, seed: str) -> float:
+    """Per-beat ceiling for the longest stretch without a visual change
+    (split_long_holds' max_hold_s), from the beat's role + seeded jitter."""
+    fn = (beat.get("function") or "NORMAL").upper()
+    base = HOLD_BY_FUNCTION.get(fn, HOLD_NORMAL_S)
+    if fn not in HOLD_BY_FUNCTION and n_beats >= 5 \
+            and bi >= 0.65 * (n_beats - 1):
+        base -= HOLD_RUNUP_S
+    if len(str(beat.get("narration", "")).split()) <= HOLD_SHORT_LINE_WORDS \
+            and fn != "HOOK":
+        base += HOLD_SHORT_LINE_BONUS_S
+    h = base + (2 * _unit(seed, "hold", beat.get("beat_id")) - 1) * HOLD_JITTER_S
+    return round(min(HOLD_MAX_S, max(HOLD_MIN_S, h)), 2)
+
+
+def beat_tail(beats: list, bi: int, seed: str) -> float:
+    """Silence held after beat `bi`'s narration (replaces the fixed TAIL_S
+    for the V15 pipeline): depends on what the next beat is."""
+    b = beats[bi]
+    if bi == len(beats) - 1:
+        return TAIL_END_S
+    fn = (b.get("function") or "").upper()
+    nxt = (beats[bi + 1].get("function") or "").upper()
+    if fn == "HOOK":
+        return TAIL_AFTER_HOOK_S
+    if nxt == "PAYOFF" and fn != "PAYOFF":
+        return TAIL_BEFORE_PAYOFF_S
+    if str(b.get("narration", "")).rstrip(" \"')").endswith("?"):
+        return TAIL_QUESTION_S
+    lo, hi = TAIL_RANGE_S
+    return round(lo + (hi - lo) * _unit(seed, "tail", b.get("beat_id")), 3)
+
+
+def split_margin(max_hold_s: float) -> float:
+    """Shortest piece a rhythm split may leave: never a sub-1.2 s flicker
+    of an AI plate, never more than 1.5 s."""
+    return max(1.2, min(1.5, max_hold_s / 3))
+
 
 def _split_one(s: dict, wt: list, bt: list, max_hold_s: float,
-               margin_s: float) -> list | None:
+               margin_s: float, frac: float = 0.5,
+               words: list | None = None) -> list | None:
     """One shot -> [first, second] split at its single worst gap, or None
     if it's already within max_hold_s or has no valid split word (every
     candidate would land within `margin_s` of a gap edge, producing a
-    sliver shot)."""
+    sliver shot). The cut lands nearest `frac` of the way through the gap
+    (0.5 = the old midpoint); with `words` (the measured word strings), a
+    word that starts a new phrase is preferred by SPLIT_PHRASE_BONUS_S."""
     sh = s["shot"]
     if sh["kind"] != "plate":
         return None
@@ -213,12 +299,18 @@ def _split_one(s: dict, wt: list, bt: list, max_hold_s: float,
     a, b = max(gaps, key=lambda g: g[1] - g[0])
     if b - a <= max_hold_s:
         return None
-    mid = (a + b) / 2
+    target = a + (b - a) * frac
     cands = [i for i, t in enumerate(bt) if a + margin_s <= t <= b - margin_s
              and s["t0"] + margin_s <= t <= s["t1"] - margin_s]
     if not cands:
         return None
-    wi = min(cands, key=lambda i: abs(bt[i] - mid))
+
+    def _cost(i):
+        c = abs(bt[i] - target)
+        if words and i > 0 and _PHRASE_END.search(str(words[i - 1])):
+            c -= SPLIT_PHRASE_BONUS_S
+        return c
+    wi = min(cands, key=_cost)
     first = {k: v for k, v in sh.items()}
     # B3 (VIS): the split-off shot must be a GENUINELY different image (the
     # deterministic seed is a hash of this subject text) — a bare copy of
@@ -243,7 +335,8 @@ def _split_one(s: dict, wt: list, bt: list, max_hold_s: float,
 
 
 def split_long_holds(tl: list, timing: dict, max_hold_s: float = MAX_HOLD_S,
-                     margin_s: float | None = None) -> list:
+                     margin_s: float | None = None,
+                     seed: str | None = None) -> list:
     """Plate shots whose longest stretch without a visual change exceeds
     `max_hold_s` (default MAX_HOLD_S=4.4, the V15 gate floor) are split at
     the word nearest the gap's middle into a CUT to a tighter framing of
@@ -256,17 +349,25 @@ def split_long_holds(tl: list, timing: dict, max_hold_s: float = MAX_HOLD_S,
     down with a tighter threshold instead of making splitting impossible
     for gaps only slightly over a small max_hold_s. WP7 callers pass the
     tighter engine.v15_gate.MAX_HOLD_1_8_S=1.8 target (DESIGN §8.2); the
-    V15 pipeline itself keeps calling this with the default."""
+    V15 pipeline itself keeps calling this with the default.
+    `seed` (the V15 pipeline passes story_id + beat_id) turns on the
+    editorial rhythm: each split's cut point is drawn deterministically from
+    SPLIT_FRAC and prefers a phrase start, instead of the exact midpoint
+    (seed=None keeps the old midpoint behaviour)."""
     if margin_s is None:
         margin_s = min(1.5, max_hold_s / 3)
     wt = [w["t0"] for w in timing["words"]]
+    ws = [w.get("w", "") for w in timing["words"]] if seed is not None else None
     bt = [LEAD_S + t - CUT_EARLY_S for t in wt]  # beat-time cut per word
+    lo, hi = SPLIT_FRAC
     changed = True
     while changed:
         changed = False
         out = []
         for s in tl:
-            split = _split_one(s, wt, bt, max_hold_s, margin_s)
+            frac = 0.5 if seed is None else \
+                lo + (hi - lo) * _unit(seed, "split", f"{s['t0']:.3f}")
+            split = _split_one(s, wt, bt, max_hold_s, margin_s, frac, ws)
             if split is None:
                 out.append(s)
             else:
@@ -420,12 +521,22 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
     plan_by = {b["beat_id"]: b for b in bvp["plan"]["beats"]}
     report["timings"]["plan_s"] = round(time.time() - t0, 1)
 
-    # 3. shot timeline
+    # 3. shot timeline — editorial rhythm (see HOLD_BY_FUNCTION): per-beat
+    #    hold ceiling + seeded split points + per-beat tail, all keyed on
+    #    story_id so a re-run reproduces the same cut list.
     shots = []  # flat: {beat, idx, shot, t0, t1, prompts}
-    for b in story["beats"]:
+    n_beats = len(story["beats"])
+    tails = {b["beat_id"]: beat_tail(story["beats"], bi, sid)
+             for bi, b in enumerate(story["beats"])}
+    report["rhythm"] = {"tails": tails, "max_hold": {}}
+    for bi, b in enumerate(story["beats"]):
+        hold = beat_max_hold(b, bi, n_beats, sid)
+        report["rhythm"]["max_hold"][b["beat_id"]] = hold
         tl = split_long_holds(
             shot_timeline(b, plan_by[b["beat_id"]], timing[b["beat_id"]],
-                          tts[b["beat_id"]]), timing[b["beat_id"]])
+                          tts[b["beat_id"]], tails[b["beat_id"]]),
+            timing[b["beat_id"]], max_hold_s=hold, margin_s=split_margin(hold),
+            seed=f"{sid}|{b['beat_id']}")
         for k, s in enumerate(tl):
             # frame 0 of the video (HOOK framing, v15_style.HOOK_FRAMING)
             hook = (b is story["beats"][0] and k == 0
@@ -756,7 +867,7 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
                   "intensity": INTENSITY.get(m["function"], 0.6),
                   "sfx": list(events.get(key) or [])}
             if first_shot[bid] == key:
-                beat_dur = LEAD_S + tts[bid] + TAIL_S
+                beat_dur = LEAD_S + tts[bid] + tails[bid]
                 sc["captions"] = captions[key]
                 sc["narration"] = {"beat_id": bid,
                                    "text": beat_of[bid]["narration"],
