@@ -95,6 +95,12 @@ CAMERA_KINDS = ("plate", "process")   # zoom_through keeps its scale_dive
 # frame 0 must move with energy toward/around the subject (scroll stop) —
 # never a slow vertical travel or a held frame
 HOOK_MOVES = ("settle", "push_in", "push_pan", "drift", "pull_out")
+# travelling straight back the way the previous shot just went, across a
+# cut, reads as a jolt (seen on the first end-to-end run: B6 pan_left ->
+# pan_right) — a push followed by a pull is a normal editorial pair, so
+# only lateral/vertical reversals are excluded
+REVERSAL = {"pan_left": "pan_right", "pan_right": "pan_left",
+            "rise": "descend", "descend": "rise"}
 
 
 def _unit(*parts) -> float:
@@ -133,8 +139,8 @@ def plan_motion(items: list, seed: str) -> list:
         n = len(hist)
         opts = []
         for m in MOVES:
-            if m == last_move:
-                continue                       # never the same move twice
+            if m == last_move or REVERSAL.get(last_move) == m:
+                continue                       # no repeat, no reversal
             if hook and m not in HOOK_MOVES:
                 continue
             if m == "hold" and (dur > HOLD_MAX_DUR_S

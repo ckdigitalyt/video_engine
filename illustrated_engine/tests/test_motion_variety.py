@@ -36,6 +36,15 @@ def test_no_back_to_back_repeat_even_when_planner_repeats():
         assert runs["max_family_run"] <= 2, fam
 
 
+def test_no_direction_reversal_across_a_cut():
+    items = [{"kind": "plate", "camera": ("pan_left", "pan_right", "rise",
+                                          "descend")[i % 4], "dur": 2.4,
+              "function": "NORMAL"} for i in range(60)]
+    for seed in ("t_a", "t_b", "t_c"):
+        mv = [m["move"] for m in M.plan_motion(items, seed)]
+        assert all(M.REVERSAL.get(a) != b for a, b in zip(mv, mv[1:])), mv
+
+
 def test_mix_of_zoom_pan_and_vertical_not_mostly_push_in():
     mv = [m["move"] for m in M.plan_motion(_items(), "t_frog")]
     fam = Counter(M.FAMILY[m] for m in mv)
