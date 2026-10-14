@@ -223,6 +223,8 @@ HOLD_JITTER_S = 0.55
 HOLD_SHORT_LINE_WORDS = 7      # a line this short is a single punchy picture
 HOLD_SHORT_LINE_BONUS_S = 0.7
 HOLD_RUNUP_S = 0.3             # NORMAL beats in the run-up to the payoff
+HOLD_PROGRESS_S = 0.6          # extra hold by the last beat (linear in bi/n)
+HOLD_PROGRESS_SCALE = (0.75, 1.25)  # seeded per-story spread of that ramp
 HOLD_MIN_S, HOLD_MAX_S = 2.2, 4.0
 SPLIT_FRAC = (0.30, 0.70)
 SPLIT_PHRASE_BONUS_S = 0.45    # a cut on a phrase start may sit this far off
@@ -246,6 +248,15 @@ def beat_max_hold(beat: dict, bi: int, n_beats: int, seed: str) -> float:
     (split_long_holds' max_hold_s), from the beat's role + seeded jitter."""
     fn = (beat.get("function") or "NORMAL").upper()
     base = HOLD_BY_FUNCTION.get(fn, HOLD_NORMAL_S)
+    # progressive lengthening (owner follow-up 2026-10-14): a fast open,
+    # then the pace relaxes as the story unfolds -- every beat, whatever its
+    # role, gets up to +HOLD_PROGRESS_S by the last beat, scaled by a seeded
+    # per-story factor. Added BEFORE the run-up subtraction so the run-up
+    # still reads as a dip against the prevailing trend.
+    if n_beats >= 2:
+        lo, hi = HOLD_PROGRESS_SCALE
+        base += HOLD_PROGRESS_S * (bi / (n_beats - 1)) \
+            * (lo + (hi - lo) * _unit(seed, "progress"))
     if fn not in HOLD_BY_FUNCTION and n_beats >= 5 \
             and bi >= 0.65 * (n_beats - 1):
         base -= HOLD_RUNUP_S

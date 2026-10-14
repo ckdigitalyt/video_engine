@@ -275,14 +275,47 @@ def _score_visuals(judge: dict | None) -> float:
     return round(_clamp(100.0 - 20.0 * len(flagged)), 1)
 
 
+# Pacing score targets (owner follow-up 2026-10-14, "scorer target should
+# be upgraded"). The score used to reward the WP7/§8.2 uniform-cut target
+# (100 only for max hold <= v15_gate.MAX_HOLD_1_8_S=1.8 s and a median shot
+# of 1.2-2.0 s) -- which penalised the editorial-rhythm pipeline's
+# deliberate 2.2-4.0 s role-based holds (v15_pipeline.HOLD_MIN_S/HOLD_MAX_S)
+# harder than the metronome cutting it replaced. Now it rewards:
+#   - the longest hold landing inside the per-beat ceiling band
+#     (PACING_HOLD_BAND_S == v15_pipeline HOLD_MIN_S..HOLD_MAX_S): over the
+#     top edge is drifting toward a frozen frame, under the bottom edge
+#     means no image ever gets to land;
+#   - a median shot of 2.0-3.2 s: shots sit BELOW their beat's ceiling
+#     (a split cuts a gap at 30-70%), and replaying the new rhythm on the 11
+#     batch stories of 2026-10-13/14 gives medians of 1.98-3.02 s;
+#   - shot-length variation (coefficient of variation >= 0.30): the
+#     "feels AI generated" renders had CVs as low as 0.16 (near-equal
+#     midpoint-split halves); the new rhythm's replay is 0.26-0.47.
+# check_visual_hold's 4.5 s "never frozen" hard floor is unchanged, and
+# v15_gate.check_pattern_interrupt keeps its 1.8 s semantics (WP7 template
+# tests and bench/ab scripts still hold templates to it).
+PACING_HOLD_BAND_S = (2.2, 4.0)
+PACING_MEDIAN_BAND_S = (2.0, 3.2)
+PACING_MIN_CV = 0.30
+
+
 def _score_pacing(meta: dict, specs: dict) -> float:
     pat = v15_gate.check_pattern_interrupt(meta, specs)
-    hold_c = 100.0 if pat["max_hold_s"] <= v15_gate.MAX_HOLD_1_8_S else _clamp(
-        100.0 - (pat["max_hold_s"] - v15_gate.MAX_HOLD_1_8_S) * 40.0)
+    lo, hi = PACING_HOLD_BAND_S
+    mh = pat["max_hold_s"]
+    hold_c = 100.0 if lo <= mh <= hi else _clamp(
+        100.0 - min(abs(mh - lo), abs(mh - hi)) * 40.0)
     med = pat["median_shot_s"]
-    med_c = 100.0 if 1.2 <= med <= 2.0 else _clamp(
-        100.0 - min(abs(med - 1.2), abs(med - 2.0)) * 60.0)
-    return round((hold_c + med_c) / 2, 1)
+    lo, hi = PACING_MEDIAN_BAND_S
+    med_c = 100.0 if lo <= med <= hi else _clamp(
+        100.0 - min(abs(med - lo), abs(med - hi)) * 60.0)
+    durs = [float(specs[k]["duration_s"]) for k in meta]
+    mean = sum(durs) / len(durs) if durs else 0.0
+    cv = (sum((d - mean) ** 2 for d in durs) / len(durs)) ** 0.5 / mean \
+        if mean > 0 else 0.0
+    var_c = 100.0 if cv >= PACING_MIN_CV else _clamp(
+        100.0 - (PACING_MIN_CV - cv) * 250.0)
+    return round((hold_c + med_c + var_c) / 3, 1)
 
 
 def _score_captions(checks: dict) -> float:

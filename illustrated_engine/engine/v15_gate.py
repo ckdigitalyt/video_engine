@@ -411,7 +411,9 @@ def check_visual_hold(meta: dict, specs: dict) -> dict:
 # retargeting that check now would newly FAIL every prior acceptance run.
 # This is the check WP7's new templates are held to (bench/ab/wp7.md A/B #3)
 # and it is available for the pipeline to adopt wholesale once every shot
-# kind meets it.
+# kind meets it. NOTE (2026-10-14): the v16 scorecard's pacing dimension no
+# longer scores against this 1.8 s / 1.2-2.0 s target -- see
+# engine.v16_gate.PACING_HOLD_BAND_S (the editorial-rhythm 2.2-4.0 s band).
 MAX_HOLD_1_8_S = 1.8
 
 

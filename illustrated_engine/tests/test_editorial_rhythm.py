@@ -136,3 +136,92 @@ def test_seeded_split_prefers_a_phrase_boundary():
 def test_split_margin_never_leaves_a_flicker():
     for h in (2.2, 2.6, 3.0, 4.0):
         assert 1.2 <= P.split_margin(h) <= 1.5
+
+
+# ---------------------------------------------- progressive lengthening --
+# Owner follow-up 2026-10-14: "isn't 2 s too low? fine to start, but later
+# in the video?" -- holds trend longer as the story unfolds, for every role.
+
+def _mean_holds(beats, seeds=200):
+    n = len(beats)
+    return [statistics.mean(P.beat_max_hold(b, i, n, f"t_{k}")
+                            for k in range(seeds))
+            for i, b in enumerate(beats)]
+
+
+def test_holds_trend_longer_as_the_video_progresses():
+    # 14 identical long-line NORMAL beats (same id -> same jitter per
+    # seed): only position differs
+    beats = [_beat("Bx", words=12) for _ in range(14)]
+    n = len(beats)
+    holds = _mean_holds(beats)
+    runup = next(i for i in range(n) if i >= 0.65 * (n - 1))
+    pre = holds[:runup]
+    assert all(b >= a for a, b in zip(pre, pre[1:])), pre
+    assert pre[-1] - pre[0] >= 0.3, pre
+    # the run-up before the payoff still dips against the trend ...
+    assert holds[runup] < holds[runup - 1], holds
+    # ... and the late run-up still sits above the opening beats
+    assert holds[-1] > holds[0], holds
+    # modest: the ramp never pins everything at the ceiling
+    assert max(holds) < P.HOLD_MAX_S, holds
+
+
+def test_progression_applies_to_every_role_not_just_reveal_payoff():
+    for fn in ("CURIOSITY", "ESCALATION", "REVEAL", "EXPLANATION"):
+        b = _beat("B5", fn=fn, words=12)
+        early = statistics.mean(P.beat_max_hold(b, 1, 12, f"t_{k}")
+                                for k in range(100))
+        late = statistics.mean(P.beat_max_hold(b, 10, 12, f"t_{k}")
+                               for k in range(100))
+        assert late > early + 0.2, (fn, early, late)
+
+
+def test_progression_keeps_the_hook_fast_and_is_deterministic():
+    beats = _story()
+    n = len(beats)
+    for seed in ("t_a", "t_b", "t_c"):
+        # bi=0 gets no ramp: the hook ceiling is exactly the role+jitter one
+        old = P.HOLD_PROGRESS_S
+        try:
+            P.HOLD_PROGRESS_S = 0.0
+            flat = P.beat_max_hold(beats[0], 0, n, seed)
+        finally:
+            P.HOLD_PROGRESS_S = old
+        assert P.beat_max_hold(beats[0], 0, n, seed) == flat
+        assert [P.beat_max_hold(b, i, n, seed) for i, b in enumerate(beats)] \
+            == [P.beat_max_hold(b, i, n, seed) for i, b in enumerate(beats)]
+
+
+# -------------------------------------------------------- pacing score --
+# Owner follow-up 2026-10-14: "scorer target should be upgraded" -- the
+# v16 scorecard rewarded the old 1.8 s / 1.2-2.0 s uniform-cut target.
+
+def _shots(durs):
+    meta = {f"s{i}": {} for i in range(len(durs))}
+    specs = {f"s{i}": {"duration_s": d, "layers": []}
+             for i, d in enumerate(durs)}
+    return meta, specs
+
+
+def test_pacing_score_bands_track_the_rhythm_constants():
+    from engine import v16_gate as V
+    assert V.PACING_HOLD_BAND_S == (P.HOLD_MIN_S, P.HOLD_MAX_S)
+
+
+def test_pacing_score_rewards_varied_role_based_holds_over_uniform_cuts():
+    from engine import v16_gate as V
+    varied = _shots([1.6, 2.2, 2.7, 2.0, 1.9, 3.6, 3.3, 3.9, 2.4, 2.6,
+                     1.5, 3.1, 2.8, 3.8])
+    uniform = _shots([2.25] * 14)              # midpoint-split metronome
+    old_target = _shots([1.5, 1.6, 1.7, 1.5, 1.6, 1.8] * 2)  # WP7 1.8 s band
+    assert V._score_pacing(*varied) >= 95.0
+    assert V._score_pacing(*uniform) < V._score_pacing(*varied)
+    assert V._score_pacing(*old_target) < V._score_pacing(*varied)
+
+
+def test_pacing_score_still_penalises_a_hold_past_the_ceiling():
+    from engine import v16_gate as V
+    ok = _shots([2.4, 3.9, 1.8, 3.0, 2.2, 3.4])
+    long_ = _shots([2.4, 4.4, 1.8, 3.0, 2.2, 3.4])
+    assert V._score_pacing(*long_) < V._score_pacing(*ok)
