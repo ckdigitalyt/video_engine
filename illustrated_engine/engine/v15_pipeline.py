@@ -517,6 +517,10 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
     if bvp["source"] == "fallback":
         report["warnings"].append({"warning": "plan_fallback",
                                    "detail": bvp["errors"][:5]})
+    # owner review 2026-10-14: copy-free shots stop repeating the
+    # headline-room layout (deterministic, seeded by story id)
+    from engine.v15_plan import vary_compositions
+    report["plan"]["compositions"] = vary_compositions(bvp["plan"], sid)
     (work / "visual_plan.json").write_text(json.dumps(bvp["plan"], indent=1))
     plan_by = {b["beat_id"]: b for b in bvp["plan"]["beats"]}
     report["timings"]["plan_s"] = round(time.time() - t0, 1)

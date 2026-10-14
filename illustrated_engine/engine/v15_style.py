@@ -256,6 +256,15 @@ def image_prompt(bible: dict, subject: str, composition: str = "centered",
                            "third",
             "subject_high": "main subject in the upper half, quiet plain "
                             "ground across the lower third",
+            # owner review 2026-10-14: rule-of-thirds framings so copy-free
+            # shots stop repeating the headline-room layout (v15_plan.
+            # vary_compositions)
+            "subject_left": "main subject large and off-centre on the left "
+                            "third of the frame, its surroundings visible "
+                            "on the right",
+            "subject_right": "main subject large and off-centre on the right "
+                             "third of the frame, its surroundings visible "
+                             "on the left",
             "centered": "single clear focal subject, centered"}.get(
                 composition, "single clear focal subject")
     if view == "comparison" or _TWO_THINGS.search(subject):

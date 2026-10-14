@@ -40,11 +40,17 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 CACHE_DIR = ROOT / "build" / "cache" / "v15_plans"
-PROMPT_VERSION = "bvp/1.7"
+PROMPT_VERSION = "bvp/1.8"
 
 SHOT_KINDS = ("plate", "zoom_through", "process")
 CAMERAS = ("push_in", "pull_out", "pan_left", "pan_right", "rise", "descend")
-COMPOSITIONS = ("subject_low", "subject_high", "centered")
+COMPOSITIONS = ("subject_low", "subject_high", "centered", "subject_left",
+                "subject_right")
+# compositions that leave a calm zone for headline/number copy (_zone)
+COPY_COMPOSITIONS = ("subject_low", "subject_high", "centered")
+# owner review 2026-10-14: framings rotated through copy-free plate shots
+FREE_COMPOSITIONS = ("centered", "subject_left", "subject_right",
+                     "subject_high")
 # decision #18 item 3: per-shot VIEW (scale/viewpoint). Dry run 5's plan put
 # 15/21 shots on "a small icy world floating in space" — same scale, same
 # viewpoint, noun-swappable; the judge called it templated. Every plate/
@@ -163,8 +169,12 @@ Field rules:
     cutaway = cross-section / inside view; comparison = two things side by
     side; observer = people observing it (ONLY if the narration mentions
     people). The view is applied to the image automatically.
- composition: "subject_low" (subject large in the lower two thirds, top
-    third calm for a headline), "subject_high", or "centered".
+ composition: where the subject sits. "subject_low" (subject large in the
+    lower two thirds, top third calm) ONLY for a shot with a headline or
+    number — it reserves room for that copy; "subject_high" (subject in the
+    upper half), "centered", "subject_left" / "subject_right" (subject
+    off-centre on that third, its surroundings beside it). Vary it from shot
+    to shot like a real photographer — never the same layout on every shot.
  camera: one of {', '.join(CAMERAS)} — choose the move that fits the idea
     (push_in = focus/discover, pull_out = reveal context/scale, pans = travel
     along a process, rise/descend = up/down a structure).
@@ -369,6 +379,41 @@ def variety_errors(plan: dict) -> list:
         errs.append(f"only {len(set(views))} distinct views across {n} shots "
                     f"(need >= {VARIETY_MIN_DISTINCT})")
     return errs
+
+
+def vary_compositions(plan: dict, seed: str) -> dict:
+    """Owner review 2026-10-14 ("feels AI generated"): 151/191 planned
+    plate shots across the 11 batch renders of 2026-10-13/14 were
+    "subject_low" — 99 of them with NO headline or number, so the image
+    model was asked for the same calm-dark-top-third, subject-at-the-bottom
+    layout on nearly every picture for copy that never came. Deterministic
+    pass (in place, timeline order, seeded by story id): a plate shot WITH
+    copy keeps a copy-safe composition; a copy-free plate shot that asked
+    for the headline-room layout, or repeats the previous plate's framing,
+    gets a framing from FREE_COMPOSITIONS that differs from the previous
+    plate's. -> {"changed": n, "counts": {...}}."""
+    prev, changed, counts = None, 0, {}
+    k = 0
+    for pb in plan.get("beats") or []:
+        for sh in pb.get("shots") or []:
+            if not isinstance(sh, dict) or sh.get("kind") != "plate":
+                continue
+            comp = sh.get("composition", "centered")
+            if sh.get("headline") or sh.get("number"):
+                if comp not in COPY_COMPOSITIONS:
+                    sh["composition"] = comp = "subject_low"
+                    changed += 1
+            elif comp == "subject_low" or comp == prev:
+                opts = [c for c in FREE_COMPOSITIONS if c != prev]
+                h = hashlib.sha256(f"{seed}|comp|{k}".encode()).hexdigest()
+                new = opts[int(h[:8], 16) % len(opts)]
+                if new != comp:
+                    sh["composition"] = comp = new
+                    changed += 1
+            counts[comp] = counts.get(comp, 0) + 1
+            prev = comp
+            k += 1
+    return {"changed": changed, "counts": counts}
 
 
 def _repair(plan: dict, story: dict) -> dict:
