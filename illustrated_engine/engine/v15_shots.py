@@ -207,6 +207,16 @@ def _scrim(lid: str, zone: str, ink: dict, strength: float = 0.45) -> dict:
 
 # ---------------------------------------------------------------- camera --
 
+def _shot_camera(sc: dict, kind: str, dur: float, info: dict | None) -> dict:
+    """The pipeline's seeded per-shot motion (engine.v15_motion, in
+    sc["motion"]) when present; otherwise the fixed legacy track for
+    `kind` (WP7 templates, direct callers)."""
+    if sc.get("motion"):
+        from engine.v15_motion import camera_for_motion
+        return camera_for_motion(sc["motion"], dur, info)
+    return _camera(kind, dur, info)
+
+
 def _camera(kind: str, dur: float, info: dict | None) -> dict:
     tx = ty = 0.0
     if info and info.get("centroid"):
@@ -406,8 +416,8 @@ def compile_plate_shot(sc: dict, bible: dict, boxes: list, events: list) -> tupl
             layers.append(lab)
             events.append({"t": t, "kind": "tick", "gain": 0.45})
     layers.append(_finish(bible))
-    return layers, _camera(shot.get("camera", "push_in"), dur,
-                           info if plate else None), []
+    return layers, _shot_camera(sc, shot.get("camera", "push_in"), dur,
+                                info if plate else None), []
 
 
 ZOOM_LEVEL_MIN_S = 1.2   # min time between two dive levels
@@ -593,9 +603,9 @@ def compile_process_shot(sc: dict, bible: dict, boxes: list, events: list) -> tu
                                             {"d": f"M {WORLD_W/2-22} {a1-26:.0f} L {WORLD_W/2} {a1:.0f} L {WORLD_W/2+22} {a1-26:.0f}",
                                              "stroke": p["accent"], "width": 7}]}}))
     layers.append(_finish(bible))
-    cam = _camera(shot.get("camera", "push_in") if shot.get("camera") in
-                  ("pan_left", "pan_right", "rise", "descend") else "push_in",
-                  dur, info if plate else None)
+    cam = _shot_camera(sc, shot.get("camera", "push_in") if shot.get("camera")
+                       in ("pan_left", "pan_right", "rise", "descend")
+                       else "push_in", dur, info if plate else None)
     return layers, cam, []
 
 

@@ -557,6 +557,21 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
             report["warnings"].append({"beat": b["beat_id"],
                                        "warning": "short_shot_merged"})
 
+    # 3b. camera motion for the whole video at once (engine.v15_motion):
+    #     seeded by story_id, planner camera kept as intent, no back-to-back
+    #     repeats, no family dominating — owner review 2026-10-14
+    from engine.v15_motion import describe as describe_motion
+    from engine.v15_motion import plan_motion
+    motions = plan_motion([
+        {"kind": s["shot"]["kind"], "camera": s["shot"].get("camera"),
+         "dur": s["t1"] - s["t0"], "hook": s["hook"],
+         "derived": bool(s["shot"].get("derived")),
+         "copy": bool(s["shot"].get("headline") or s["shot"].get("number")),
+         "function": s["beat"].get("function")} for s in shots], sid)
+    for s, mo in zip(shots, motions):
+        s["motion"] = mo
+    report["motion"] = describe_motion(motions)
+
     # 4. plates (image fallback chain, global cache) + plate QA
     t0 = time.time()
     uniq = sorted({p for s in shots for p in s["prompts"]})
@@ -763,7 +778,8 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
                if plates.get(p, {}).get("ok") else None) for p in s["prompts"]]
         res = compile_shot({"scene_id": scene_id, "duration": dur,
                             "shot": s["shot"], "plates": pl, "t_of": t_of,
-                            "first": b is story["beats"][0] and s["idx"] == 0},
+                            "first": b is story["beats"][0] and s["idx"] == 0,
+                            "motion": s.get("motion")},
                            bible)
         ok, errs = validate_scene_spec(res["spec"])
         if not ok:
@@ -775,6 +791,7 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
                      "kind": s["shot"]["kind"], "tier": res["asset_tier"],
                      "view": s["shot"].get("view"),
                      "camera": res["spec"].get("camera", {}).get("type"),
+                     "move": (s.get("motion") or {}).get("move"),
                      "qa_fail": any(plates.get(p, {}).get("qa_fail")
                                     for p in s["prompts"]),
                      "function": b.get("function")}
