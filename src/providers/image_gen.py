@@ -670,6 +670,79 @@ class GeminiImageProvider(ImageGenProvider):
 
 
 # ═══════════════════════════════════════════════════════════════════════ #
+# OpenRouter (google/gemini-2.5-flash-image, "Nano Banana")
+# ═══════════════════════════════════════════════════════════════════════ #
+
+
+class OpenRouterImageProvider(ImageGenProvider):
+    """OpenRouter chat-completions image generation.
+
+    Owner-funded ($10 credit, 2026-10-14) paid provider: routes to
+    ``google/gemini-2.5-flash-image`` via OpenRouter's unified chat
+    completions endpoint (same OPENROUTER_API_KEY already used for text/
+    vision LLM fallback in configs/llm.yaml). Verified live via curl
+    2026-10-14: the request is a normal chat-completions body with
+    ``modalities: ["image", "text"]``; adding ``image_config.aspect_ratio``
+    (a non-standard field OpenRouter passes through to the backend) is
+    what actually controls output shape — without it every image comes
+    back a fixed 1024x1024 square regardless of width/height requested.
+    The image arrives as a base64 data URL at
+    ``choices[0].message.images[0].image_url.url``, never a plain field.
+    Cost ~$0.0387/image (768x1344), reported in ``usage.cost``.
+    """
+
+    name = "openrouter_image"
+    MODEL = "google/gemini-2.5-flash-image"
+    URL = "https://openrouter.ai/api/v1/chat/completions"
+
+    _AR = {"1:1": 1.0, "4:3": 4 / 3, "3:4": 3 / 4,
+           "16:9": 16 / 9, "9:16": 9 / 16, "21:9": 21 / 9}
+
+    def __init__(self, api_key: Optional[str] = None):
+        self._api_key = api_key or os.environ.get("OPENROUTER_API_KEY", "")
+
+    def is_available(self) -> bool:
+        return bool(self._api_key)
+
+    @classmethod
+    def _nearest_aspect(cls, width: int, height: int) -> str:
+        target = width / max(height, 1)
+        return min(cls._AR, key=lambda a: abs(cls._AR[a] - target))
+
+    def generate(self, prompt: str, output_path: str,
+                 width: int = 1024, height: int = 576,
+                 seed: Optional[int] = None) -> str:
+        if not self._api_key:
+            raise RuntimeError("OPENROUTER_API_KEY not set")
+        payload = {
+            "model": self.MODEL,
+            "messages": [{"role": "user", "content": prompt}],
+            "modalities": ["image", "text"],
+            "image_config": {"aspect_ratio": self._nearest_aspect(width, height)},
+        }
+        req = urllib.request.Request(
+            self.URL, data=json.dumps(payload).encode(),
+            headers={
+                "Authorization": f"Bearer {self._api_key}",
+                "Content-Type": "application/json",
+            },
+        )
+        with urllib.request.urlopen(req, timeout=120) as resp:
+            body = json.loads(resp.read().decode())
+        try:
+            images = body["choices"][0]["message"]["images"]
+            data_url = images[0]["image_url"]["url"]
+        except (KeyError, IndexError, TypeError):
+            raise RuntimeError(
+                f"openrouter_image: no image in response "
+                f"(keys={list(body)[:5]})")
+        if not data_url.startswith("data:"):
+            raise RuntimeError("openrouter_image: unexpected image_url shape (not a data URL)")
+        raw = base64.b64decode(data_url.split(",", 1)[1])
+        return _write_verified(raw, output_path, self.name)
+
+
+# ═══════════════════════════════════════════════════════════════════════ #
 # Hugging Face serverless
 # ═══════════════════════════════════════════════════════════════════════ #
 
@@ -1074,6 +1147,7 @@ _PROVIDERS: dict[str, type[ImageGenProvider]] = {
     "hf_serverless": HFServerlessProvider,
     "pollinations": PollinationsProvider,
     "gemini_image": GeminiImageProvider,
+    "openrouter_image": OpenRouterImageProvider,
     "cloudflare_workers_ai": CloudflareWorkersAIProvider,
     "sdcpp_local": SDCppLocalProvider,
     "archive": ArchiveProvider,

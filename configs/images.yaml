@@ -36,9 +36,17 @@ image_gen:
     # gate-enforced, only tracked in the manifest/disclosure. Revert this
     # order once cloudflare's daily quota resets if commercial-clean
     # sourcing should go back to taking priority over speed.
+    # openrouter_image added 2026-10-14 (owner funded $10 OpenRouter
+    # credit specifically "for image generation for next batches"):
+    # google/gemini-2.5-flash-image via OpenRouter, ~$0.0387/image,
+    # reliable and good quality (verified via live curl test). Placed
+    # after the two free tiers so free quota is used first, but ahead
+    # of gemini_image/nvidia_nim/pollinations so a paid, good-quality
+    # image wins over the free-tier-exhausted/slow fallbacks.
     production:
       - archive
       - cloudflare_workers_ai
+      - openrouter_image
       - gemini_image
       - nvidia_nim
       - pollinations
