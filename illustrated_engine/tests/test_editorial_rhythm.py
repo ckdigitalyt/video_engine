@@ -155,7 +155,7 @@ def test_holds_trend_longer_as_the_video_progresses():
     beats = [_beat("Bx", words=12) for _ in range(14)]
     n = len(beats)
     holds = _mean_holds(beats)
-    runup = next(i for i in range(n) if i >= 0.65 * (n - 1))
+    runup = n - P.HOLD_RUNUP_BEATS
     pre = holds[:runup]
     assert all(b >= a for a, b in zip(pre, pre[1:])), pre
     assert pre[-1] - pre[0] >= 0.3, pre
