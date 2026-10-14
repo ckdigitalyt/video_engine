@@ -670,7 +670,7 @@ class GeminiImageProvider(ImageGenProvider):
 
 
 # ═══════════════════════════════════════════════════════════════════════ #
-# OpenRouter (google/gemini-2.5-flash-image, "Nano Banana")
+# OpenRouter (google/gemini-3.1-flash-image, "Nano Banana 2")
 # ═══════════════════════════════════════════════════════════════════════ #
 
 
@@ -678,21 +678,30 @@ class OpenRouterImageProvider(ImageGenProvider):
     """OpenRouter chat-completions image generation.
 
     Owner-funded ($10 credit, 2026-10-14) paid provider: routes to
-    ``google/gemini-2.5-flash-image`` via OpenRouter's unified chat
-    completions endpoint (same OPENROUTER_API_KEY already used for text/
-    vision LLM fallback in configs/llm.yaml). Verified live via curl
-    2026-10-14: the request is a normal chat-completions body with
-    ``modalities: ["image", "text"]``; adding ``image_config.aspect_ratio``
-    (a non-standard field OpenRouter passes through to the backend) is
-    what actually controls output shape — without it every image comes
-    back a fixed 1024x1024 square regardless of width/height requested.
-    The image arrives as a base64 data URL at
-    ``choices[0].message.images[0].image_url.url``, never a plain field.
-    Cost ~$0.0387/image (768x1344), reported in ``usage.cost``.
+    OpenRouter's unified chat completions endpoint (same
+    OPENROUTER_API_KEY already used for text/vision LLM fallback in
+    configs/llm.yaml). Verified live via curl 2026-10-14: the request is
+    a normal chat-completions body with ``modalities: ["image", "text"]``;
+    adding ``image_config.aspect_ratio`` (a non-standard field OpenRouter
+    passes through to the backend) is what actually controls output shape
+    — without it every image comes back a fixed 1024x1024 square
+    regardless of width/height requested. The image arrives as a base64
+    data URL at ``choices[0].message.images[0].image_url.url``, never a
+    plain field.
+
+    MODEL upgraded 2026-10-14 from gemini-2.5-flash-image ("Nano Banana",
+    $0.0387/image) to gemini-3.1-flash-image ("Nano Banana 2",
+    $0.0672/image) after a live side-by-side test: 3.1 produced visibly
+    sharper detail and better light/composition separation on the same
+    house-style prompt. Owner flagged the newer OpenRouter Gemini models
+    and asked to consider them for images; 3.1-flash is the quality/cost
+    sweet spot (3-pro-image "Nano Banana Pro" costs more again for a
+    reasoning-heavy use case this pipeline doesn't need). ~148
+    images/$10 budget — still 5-6 full videos' worth.
     """
 
     name = "openrouter_image"
-    MODEL = "google/gemini-2.5-flash-image"
+    MODEL = "google/gemini-3.1-flash-image"
     URL = "https://openrouter.ai/api/v1/chat/completions"
 
     _AR = {"1:1": 1.0, "4:3": 4 / 3, "3:4": 3 / 4,
