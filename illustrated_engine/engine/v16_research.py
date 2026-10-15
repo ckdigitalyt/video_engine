@@ -167,6 +167,14 @@ def build_facts(topic: str, sources: list, *, ask=None) -> dict:
     claims, dropped = [], []
     for c in res.data["claims"]:
         why = check_claim(c, by_id)
+        # 2026-10-15 review: the asteroid script's title/hook was the Earth
+        # Chicxulub impact but every escalation number came from a Mars
+        # impact model -- topically similar, different subject. research_
+        # extract (prompt v2) now tags each claim `same_subject`; an
+        # off-subject claim never reaches the script writer's fact list.
+        # (A claim without the tag -- old cache/fake asks -- is kept.)
+        if not why and c.get("same_subject") is False:
+            why = f"off-subject: about {c.get('about') or '?'!r}, not {topic!r}"
         if why:
             dropped.append({"id": c["id"], "reason": why})
             continue

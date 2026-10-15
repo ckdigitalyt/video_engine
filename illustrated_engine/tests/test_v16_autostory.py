@@ -67,12 +67,8 @@ GOOD_SCRIPT = {
         {"text": "Scientists who studied the site years later found no "
                  "crater anywhere in the debris field.", "role": "normal",
          "fact_ids": ["f_shockwave"]},
-        {"text": "The lack of a crater pointed away from a ground impact "
-                 "and toward something stranger.", "role": "normal",
-         "fact_ids": ["f_shockwave"]},
-        {"text": "Instruments on the far side of the world still registered "
-                 "the shockwave rolling through the air.", "role": "normal",
-         "fact_ids": ["f_witness"]},
+        {"text": "Instruments far away still registered the shockwave.",
+         "role": "normal", "fact_ids": ["f_witness"]},
         {"text": "The blast happened high above the forest, and that is "
                  "why the trees fell but the ground stayed whole.",
          "role": "payoff", "fact_ids": ["f_shockwave"]},
@@ -139,7 +135,8 @@ def test_generate_story_happy_path():
     res = A.generate_story(CANDIDATE, ask=f, fetch_sources=lambda q, n: GOOD_SOURCES)
     assert res["status"] == "ok", res
     assert res["story"]["story_id"] == "t_the_blast_with_no_crater"
-    assert len(res["story"]["beats"]) == 8
+    assert len(res["story"]["beats"]) == len(GOOD_SCRIPT["sentences"])
+    assert res["story"]["critic"]["scores"] == GOOD_CRITIC["scores"]
 
 
 # ------------------------------------------ decision #15: rank, don't block --
@@ -178,9 +175,10 @@ def test_generate_story_ranked_picks_the_highest_scoring_of_three_and_finalizes_
 
 
 def test_generate_story_ranked_picks_the_lowest_scoring_candidate_when_it_is_the_only_one():
-    # decision #17: the critic is a pure ranker now -- a single scored candidate with
-    # weak scores on every dimension still gets picked and finalized, no floor applied.
-    low = {"hook_strength": 1, "curiosity_gap": 1, "escalation": 1, "payoff_clarity": 1,
+    # decision #17: the critic is a ranker -- a single scored candidate with weak
+    # scores is still picked and finalized, EXCEPT for the two 2026-10-15 review
+    # floors (hook_strength, payoff_clarity >= 3), which this candidate clears.
+    low = {"hook_strength": 3, "curiosity_gap": 1, "escalation": 1, "payoff_clarity": 3,
           "loop_coherence": 1, "human_voice": 1, "emotional_charge": 1, "one_idea_only": 1}
     f = Fake(research_extract=[RESEARCH_CLAIMS],
             script_write=[GOOD_SCRIPT, GOOD_SCRIPT],
@@ -192,7 +190,34 @@ def test_generate_story_ranked_picks_the_lowest_scoring_candidate_when_it_is_the
     assert res["status"] == "ok", res
     assert res["picked_topic"] == "Topic A"
     scored = {c["topic"]: c for c in res["candidates"] if c["status"] == "scored"}
-    assert scored["Topic A"]["mean"] == 1.0
+    assert scored["Topic A"]["mean"] == 1.5
+
+
+def test_generate_story_ranked_rejects_weak_hook_or_payoff_after_rewrite():
+    # 2026-10-15 review: weak hook / non-resolving payoff must not ship even
+    # when it is the only (or best-ranked) candidate.
+    for dim in ("hook_strength", "payoff_clarity"):
+        weak = dict.fromkeys(GOOD_CRITIC["scores"], 5)
+        weak[dim] = 2
+        f = Fake(research_extract=[RESEARCH_CLAIMS],
+                script_write=[GOOD_SCRIPT, GOOD_SCRIPT],
+                script_critic=[{"scores": weak, "critique": "weak"},
+                               {"scores": weak, "critique": "still weak"}])
+        res = A.generate_story_ranked([CAND_A], ask=f, fetch_sources=lambda q, n: GOOD_SOURCES)
+        assert res["status"] == "hold", res
+        assert f"{dim}=2 < 3" in res["reason"]
+
+
+def test_generate_story_ranked_weak_hook_fixed_by_rewrite_is_picked():
+    weak = dict.fromkeys(GOOD_CRITIC["scores"], 5)
+    weak["hook_strength"] = 2
+    f = Fake(research_extract=[RESEARCH_CLAIMS],
+            script_write=[GOOD_SCRIPT, GOOD_SCRIPT],
+            script_critic=[{"scores": weak, "critique": "weak hook"}, GOOD_CRITIC],
+            fact_check=[_fact_check_ok(len(GOOD_SCRIPT["sentences"]))],
+            metadata_pack=[GOOD_META])
+    res = A.generate_story_ranked([CAND_A], ask=f, fetch_sources=lambda q, n: GOOD_SOURCES)
+    assert res["status"] == "ok", res
 
 
 def test_generate_story_ranked_holds_only_when_every_candidate_fails_a_hard_check():

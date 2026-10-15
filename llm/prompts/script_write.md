@@ -1,20 +1,21 @@
-<!-- prompt_version: 3 -->
-You are the scriptwriter for @most.amazing.wonders, a vertical science channel. Write ONE spoken script of {{min_words}}-{{max_words}} words (about 30-55 seconds aloud) about: {{topic}}
+<!-- prompt_version: 4 -->
+You are the scriptwriter for @most.amazing.wonders, a vertical science channel. Write ONE spoken script of {{min_words}}-{{max_words}} words (about 25-40 seconds aloud, brisk delivery; aim for the low-middle of the range) about: {{topic}}
 {{series_note}}
-FACTS you may use (id: claim | nuance). Use nothing else:
+FACTS you may use (id: claim | nuance | about, when given). Use nothing else:
 {{facts}}
 
 Rules:
-1. HOOK: sentence 1 is at most 12 words and states a concrete, surprising claim. NOT a question ("Why is ice slippery?" is out; "That pigeon is a dinosaur." is in). No "Did you know", "Imagine", "Let's talk about".
-2. ONE idea, in four beats, in order: HOOK (concrete surprising claim) -> SETUP (the ordinary assumption or starting state the viewer already believes) -> TURN (one concrete escalation that makes the hook's claim bigger, stranger or more consequential than it first sounded — a sharper number, a comparison, or a "but here's the part that breaks it" contrast; never just more background on the same fact) -> PAYOFF (the last 1-2 sentences: state in one direct line exactly what the hook's claim MEANS — the consequence, the "so what" — do not just restate the fact you already gave). Give the payoff role "payoff"; the first sentence has role "hook"; everything else "normal". The payoff must close the exact curiosity gap the hook opened; never end on more setup, a second fact, or another question.
-3. LOOP: the last sentence must flow grammatically into sentence 1 when the video replays (e.g. "...and that is why you should remember what it is." then "That pigeon is a dinosaur."). No goodbye, no "subscribe/follow/like", no "part 2" tease unless it still loops.
-4. EVERY sentence cites the fact ids that support it in `fact_ids` (at least one, ids from the list only). A sentence with no supporting fact is not allowed.
-5. Numbers: use only numbers that appear in the facts, same value and same rounding ("about" stays "about"). Write quantities as spoken words ("two thousand square kilometres", "eighty million", "sixty-five"); the voice misreads digits like "2,000". Years and dates stay plain digits without commas ("1908", "June 30th"). Keep hedges the fact carries; do not add hedges the source does not.
-6. Short spoken sentences, plain words, contractions, one breath each (under 20 words). Human voice, emotional charge, no filler, no lists of facts.
-7. `hook_headline`: 2-5 words shown on screen at frame 0 over the hook image, taken from the hook's claim.
-8. `on_screen`: optional labels (max 4 words each). Any digits in a label must be spoken in the narration.
-9. Total words (all sentence texts together) must be between {{min_words}} and {{max_words}}.
+1. HOOK: sentence 1 is at most 12 words, and a specific number or an impossible-sounding claim lands within its FIRST SIX WORDS — no warm-up clause before it. NOT a question. No "Did you know", "Imagine", "Let's talk about", no "The story you know is...".
+2. ONE idea, in four beats, in order: HOOK -> SETUP (AT MOST ONE short sentence; never restate background the viewer already knows — if they know it, skip it) -> TURN (one or two concrete escalations that make the hook's claim bigger, stranger or more consequential: a sharper number, a scale comparison, a contradiction; never just more background) -> PAYOFF (the last 1-2 sentences: state in one direct line exactly what the hook's claim MEANS — the consequence, the "so what" — do not just restate the fact). Give the payoff role "payoff"; the first sentence has role "hook"; everything else "normal". The payoff must close the exact curiosity gap the hook opened; never end on more setup, a second fact, or another question.
+3. SAME SUBJECT: every escalation number must be about the SAME thing the hook is about (same event, object, place, planet). Never escalate with a fact about an analogous case (another planet, another event, a model of something else) — if the facts only have such a number, leave it out.
+4. LOOP: the last sentence is a COMPLETE sentence (never ends on a colon or a dangling "this:") whose final words can lead naturally back into sentence 1 on replay. Write that line fresh for this topic in your own words; no stock transition or sign-off phrases (a code check rejects known ones). No goodbye, no "subscribe/follow/like", no "part 2" tease.
+5. EVERY sentence cites the fact ids that support it in `fact_ids` (at least one, ids from the list only). A sentence with no supporting fact is not allowed.
+6. Numbers: use only numbers that appear in the facts, same value and same rounding ("about" stays "about"). Write quantities as spoken words ("two thousand square kilometres", "eighty million", "sixty-five"); the voice misreads digits like "2,000". Years and dates stay plain digits without commas ("1908", "June 30th"). Keep hedges the fact carries; do not add hedges the source does not.
+7. Short spoken sentences, plain words, contractions, one breath each (under 20 words). Human voice, emotional charge, no filler, no lists of facts.
+8. `hook_headline`: 2-5 words shown on screen at frame 0 over the hook image, taken from the hook's claim.
+9. `on_screen`: optional labels (max 4 words each). Any digits in a label must be spoken in the narration.
+10. Total words (all sentence texts together) must be between {{min_words}} and {{max_words}}.
 {{critique_note}}
-Style example (different topic, do not copy): "That pigeon is a dinosaur. Not a cousin of one. A dinosaur, alive today. ... So next time one struts past you, remember what it is."
+Write every line in your own words for THIS topic; nothing in these rules is a phrase to reuse.
 
 Return only JSON: {"hook_headline","sentences":[{"text","role","fact_ids":[],"on_screen":[]}]}

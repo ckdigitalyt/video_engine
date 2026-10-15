@@ -27,12 +27,25 @@ from llm import client as llm  # noqa: E402
 from llm.prompts import render  # noqa: E402
 from llm.types import LLMSchemaError, LLMUnavailable  # noqa: E402
 
-MIN_WORDS, MAX_WORDS = 75, 140          # DESIGN §4: ~145 wpm => 31-58 s
+# 2026-10-15 review: 125-128-word scripts ran 51-63 s at a measured 122-146
+# wpm and felt slow for the niche. Target is 25-40 s spoken (~60-95 words at
+# the new ~180 wpm delivery); the hard floor stays a little above 60 so a
+# finished cut (lead + gaps + sting) still clears check_duration's floor.
+MIN_WORDS, MAX_WORDS = 65, 100
 HOOK_MAX_WORDS = 12
 HEADLINE_WORDS = (2, 5)
 TITLE_WORDS = (4, 8)
-DURATION_S = (30.0, 60.0)
+# 2026-10-15 review: floor lowered 30 -> 25 s to match the new 25-40 s
+# spoken target (a 30 s floor would HOLD most scripts written to it).
+DURATION_S = (25.0, 60.0)
 CRITIC_MEAN_MIN, CRITIC_FLOOR = 4.0, 3
+# 2026-10-15 review: decision #17 made the critic a pure ranker, so a weak
+# hook or a payoff that never resolves still shipped if it out-ranked its
+# siblings. A narrow floor is restored on ONLY the two dimensions the review
+# names (0-5 scale, 3 = "acceptable" per the critic prompt). Below it, the
+# candidate gets its targeted rewrite; still below after that -> HOLD,
+# never picked. (Mean/other-dimension floors stay removed, per decision #17.)
+CRITIC_HARD_FLOORS = {"hook_strength": 3, "payoff_clarity": 3}
 MAX_SCRIPT_REWRITES = 2  # decision #14: shared pool across code-error + critic rewrites
 RANK_REWRITE_BUDGET = 1  # decision #15 item 2: one rewrite per topic in the rank-not-block flow
 # decision #15 step 1: real critic score (prompt_version 1, unchanged) measured against
@@ -65,6 +78,43 @@ ABSOLUTE_CLAIM_RE = re.compile(
 ACRONYMS = {"DNA", "RNA", "NASA", "ESA", "UFO", "GPS", "AI", "USA", "UK", "US", "UN",
             "TV", "CERN", "LIGO", "CO2", "LED", "MRI", "CT", "PH"}
 QUESTION_WORDS = ("how", "why", "what")
+
+# 2026-10-15 review: two scripts echoed the prompt's OWN example phrasing
+# near-verbatim ("but here's the part that breaks it", "that's why you
+# should remember this:"). The examples are gone from script_write.md; this
+# list is the code-level backstop -- phrases that were (or still read like)
+# prompt scaffolding. Matched after _canon() normalisation (case,
+# punctuation, common contractions), so "That's why you should remember"
+# and "that is why you should remember" both hit.
+PROMPT_ECHO_PHRASES = (
+    "here is the part that breaks it",
+    "the part that breaks it",
+    "that is why you should remember",
+    "why you should remember this",
+    "remember what it is",
+    "that pigeon is a dinosaur",
+    "next time one struts past you",
+    "and that is why you should",
+    "one quiet truth",
+)
+_CONTRACTIONS = (("here's", "here is"), ("that's", "that is"), ("it's", "it is"),
+                 ("what's", "what is"), ("there's", "there is"))
+
+
+def _canon(text: str) -> str:
+    t = unicodedata.normalize("NFKC", text).lower().replace("’", "'")
+    for a, b in _CONTRACTIONS:
+        t = t.replace(a, b)
+    return re.sub(r"\s+", " ", re.sub(r"[^a-z0-9' ]+", " ", t)).strip()
+
+
+def check_prompt_echo(script: dict) -> list:
+    """Flag scripts that copy prompt scaffolding instead of writing their own
+    line (substring match on canonicalised text)."""
+    body = _canon(narration(script))
+    hits = [p for p in PROMPT_ECHO_PHRASES if p in body]
+    return [f"echo: copies stock/prompt phrasing {hits}; write an original line "
+            f"specific to this topic"] if hits else []
 
 
 def words(text: str) -> list:
@@ -105,6 +155,13 @@ def check_script(script: dict) -> list:
         errs.append("loop: the last sentence is a goodbye/call to action; it must flow into the first")
     if sents[-1]["text"].rstrip().endswith("?"):
         errs.append("loop: the last sentence must resolve, not ask a question")
+    # 2026-10-15 review: two shipped scripts ended mid-thought on a colon
+    # ("...remember this:", "...one quiet truth:") -- the loop trick taken
+    # too literally; on screen it reads as a cut-off sentence.
+    if sents[-1]["text"].rstrip().endswith((":", ";", ",", "-", "—")):
+        errs.append("loop: the last sentence ends on a colon/dangling "
+                    "punctuation; end on a complete sentence")
+    errs += check_prompt_echo(script)
     return errs
 
 
@@ -274,6 +331,17 @@ def critic_pass(scores: dict) -> bool:
     return sum(v) / len(v) >= CRITIC_MEAN_MIN and min(v) >= CRITIC_FLOOR
 
 
+def critic_floor_misses(scores: dict) -> list:
+    """-> ["hook_strength=2 < 3", ...] for the CRITIC_HARD_FLOORS dimensions
+    (a missing dimension counts as a miss: the critic schema requires it)."""
+    out = []
+    for dim, lo in CRITIC_HARD_FLOORS.items():
+        v = scores.get(dim)
+        if not isinstance(v, (int, float)) or v < lo:
+            out.append(f"{dim}={v} < {lo}")
+    return out
+
+
 # -------------------------------------------------------- orchestration --
 
 def _facts_block(facts: dict, with_quote: bool = False) -> str:
@@ -282,7 +350,8 @@ def _facts_block(facts: dict, with_quote: bool = False) -> str:
         if not usable(f):
             continue
         rows.append(f"{f['id']} | {f['claim']} | {f['evidence']}" if with_quote
-                    else f"{f['id']}: {f['claim']} | {f.get('nuance', 'ESTABLISHED')}")
+                    else f"{f['id']}: {f['claim']} | {f.get('nuance', 'ESTABLISHED')}"
+                    + (f" | about: {f['about']}" if f.get("about") else ""))
     # for a quote-checked fact `evidence` is the verbatim source quote (it governs the
     # claim wording); for a curated fact it is the pack's measured values beside the vetted claim
     return "\n".join(rows)
@@ -447,8 +516,10 @@ def rank_write_story(topics_facts: list, *, series_note: str = "", batch_titles:
     bar), score all of them with the real script critic, and pick the
     HIGHEST-scoring one. decision #17: that pick is ALWAYS finalized
     (fact_check + metadata via `_finalize`) and returned as the producible
-    story -- there is no mean or per-dimension floor on the critic score
-    anymore; the critic is a pure ranker. The only way this can come back
+    story -- there is no mean floor on the critic score; the critic is a
+    ranker, EXCEPT for the narrow CRITIC_HARD_FLOORS (hook_strength,
+    payoff_clarity >= 3; restored 2026-10-15 review): a candidate below
+    either after its rewrite is a "hold", never picked. The only way this can come back
     with no pick (`picked_topic` None, verdict "HOLD") is if every topic's
     candidate never reaches "scored" status at all -- it HOLDs on a
     script-rule code-check failure (`code_checks`: facts, digits,
@@ -481,6 +552,12 @@ def rank_write_story(topics_facts: list, *, series_note: str = "", batch_titles:
         if not critic_pass(crit["scores"]) and rewrites < RANK_REWRITE_BUDGET:
             bar = (f"Critic scores: {crit['scores']}. The bar is a mean of {CRITIC_MEAN_MIN} or "
                    f"better with no score below {CRITIC_FLOOR}; lift every score under 4.")
+            misses = critic_floor_misses(crit["scores"])
+            if misses:
+                bar += (" HARD REQUIREMENT (the script is rejected otherwise): "
+                        + ", ".join(misses) + ". Make sentence 1 a specific number or "
+                        "impossible-sounding claim in its first six words, and make the "
+                        "last line answer the hook's question directly.")
             script2 = _write(run, topic, facts, series_note, crit["critique"] + "\n" + bar, script)
             rewrites += 1
             errs2 = code_checks(script2, facts)
@@ -494,6 +571,14 @@ def rank_write_story(topics_facts: list, *, series_note: str = "", batch_titles:
             crit = run.call("script_critic", prompt, ver)
         scores = crit["scores"]
         mean = sum(scores.values()) / len(scores)
+        misses = critic_floor_misses(scores)
+        if misses:
+            candidates.append({"topic": topic, "status": "hold",
+                               "reason": "critic floor (weak hook / unresolved payoff) "
+                                         f"after {rewrites} rewrite(s): " + ", ".join(misses),
+                               "critic": crit, "mean": mean, "min": min(scores.values()),
+                               "_run": run})
+            continue
         candidates.append({"topic": topic, "status": "scored", "script": script, "facts": facts,
                            "critic": crit, "mean": mean, "min": min(scores.values()),
                            "rewrites": rewrites, "_run": run})

@@ -28,18 +28,17 @@ FACTS = R.from_curated(PACK)
 TEXTS = [
     ("Something flattened a Siberian forest and left no crater.", "hook", ["f_kulik_1927"]),
     ("It was the morning of 30 June 1908.", "normal", ["f_flattened_forest"]),
-    ("In minutes, roughly two thousand square kilometres of trees went down, about 80 million of them.",
+    ("In minutes, roughly two thousand square kilometres of trees went down.",
      "normal", ["f_flattened_forest"]),
-    ("Sixty-five kilometres away, people felt the heat and were thrown from their chairs.",
+    ("Sixty-five kilometres away, people were thrown from their chairs.",
      "normal", ["f_eyewitness_vanavara"]),
-    ("For nights afterward, skies glowed across Europe and Asia, and instruments far away "
-     "felt the pressure wave.", "normal", ["f_global_signals"]),
-    ("When the first expedition finally arrived in 1927, the trees were flattened in a fan, "
-     "and the ones near the centre still stood, stripped bare.", "normal", ["f_kulik_1927"]),
+    ("For nights afterward, skies glowed across Europe and Asia.", "normal", ["f_global_signals"]),
+    ("When the first expedition arrived in 1927, the trees lay flattened in a fan.",
+     "normal", ["f_kulik_1927"]),
     ("There was no hole in the ground at all.", "normal", ["f_kulik_1927"]),
-    ("The leading explanation is an asteroid that burst in the air, five to ten kilometres up, "
-     "and never reached the ground in one piece.", "payoff", ["f_airburst_model"]),
-    ("So the sky did the damage, and that is why the forest fell and the ground stayed whole.",
+    ("The leading explanation is an asteroid that burst in the air, five to ten kilometres up.",
+     "payoff", ["f_airburst_model"]),
+    ("So the sky did the damage, and the ground stayed whole.",
      "payoff", ["f_airburst_model"]),
 ]
 
@@ -145,7 +144,7 @@ def test_curated_unverified_is_not_usable():
 
 def test_good_script_passes_every_code_check():
     sc = good_script()
-    assert 75 <= wc(sc) <= 140, wc(sc)
+    assert S.MIN_WORDS <= wc(sc) <= S.MAX_WORDS, wc(sc)
     assert S.code_checks(sc, FACTS) == [], S.code_checks(sc, FACTS)
 
 
@@ -243,9 +242,55 @@ def test_on_screen_digits_must_be_spoken():
 
 def test_duration_gate():
     assert S.check_duration(45.0) == []
-    assert S.check_duration(29.9)
+    assert S.check_duration(24.9)    # floor 25 s since the 2026-10-15 review
     assert S.check_duration(61.0)
     assert S.check_duration(61.0, {"length_justification": "two-part reveal"}) == []
+
+
+# ------------------------------ 2026-10-15 review: echo / colon / subject --
+
+def test_last_sentence_ending_on_colon_is_rejected():
+    sc = good_script()
+    sc["sentences"][-1]["text"] = "So the sky did the damage, and here is the proof:"
+    assert any("colon" in e for e in S.check_script(sc))
+
+
+def test_prompt_example_echo_is_rejected():
+    for line in ("But here's the part that breaks it.",
+                 "And that's why you should remember this.",
+                 "It all comes down to one quiet truth."):
+        sc = good_script()
+        sc["sentences"][-2]["text"] = line
+        assert any(e.startswith("echo") for e in S.check_script(sc)), line
+    # the reviewed asteroid ending, verbatim
+    sc = good_script()
+    sc["sentences"][-1]["text"] = ("It turned the ocean into a weapon, and that's why "
+                                   "you should remember this:")
+    errs = S.check_script(sc)
+    assert any(e.startswith("echo") for e in errs) and any("colon" in e for e in errs)
+
+
+def test_prompt_no_longer_carries_copyable_example_phrases():
+    prompt, _ = render("script_write", topic="t", facts="f", series_note="", min_words=65,
+                       max_words=100, critique_note="")
+    canon = S._canon(prompt)
+    for phrase in ("here is the part that breaks it", "remember what it is",
+                   "that pigeon is a dinosaur", "that is why you should remember"):
+        assert phrase not in canon, phrase
+
+
+def test_off_subject_claims_are_dropped_by_research():
+    rows = [("f_a", "About 80 million trees fell.", Q1, "s1"),
+            ("f_b", "People were thrown from chairs.", Q2, "s1"),
+            ("f_c", "No crater was found in 1927.", Q3, "s1"),
+            ("f_d", "Researchers favour an airburst.", Q4, "s1")]
+    res = _claims(*rows)
+    for c in res.data["claims"]:
+        c.update(about="Tunguska event", same_subject=True)
+    res.data["claims"][3].update(about="a Mars impact model", same_subject=False)
+    got = R.build_facts("Tunguska", [SRC], ask=lambda *a, **k: res)
+    assert [c["id"] for c in got["claims"]] == ["f_a", "f_b", "f_c"]
+    assert got["dropped"][0]["id"] == "f_d" and "off-subject" in got["dropped"][0]["reason"]
 
 
 # -------------------------------- decision #16 item 2: absolute-claim check --
@@ -521,7 +566,7 @@ def test_prompts_render_and_schemas_are_valid():
     sc = good_script()
     pieces = {
         "research_extract": dict(topic="t", sources="s"),
-        "script_write": dict(topic="t", facts="f", series_note="", min_words=75, max_words=140,
+        "script_write": dict(topic="t", facts="f", series_note="", min_words=65, max_words=100,
                              critique_note=""),
         "script_critic": dict(script="s"),
         "fact_check": dict(facts="f", sentences="s"),

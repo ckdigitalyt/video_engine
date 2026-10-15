@@ -8,13 +8,15 @@
       "maxItems": 12,
       "items": {
         "type": "object",
-        "required": ["id", "claim", "quote", "source_id", "nuance"],
+        "required": ["id", "claim", "quote", "source_id", "nuance", "about", "same_subject"],
         "properties": {
           "id": {"type": "string", "pattern": "^f_[a-z0-9_]{2,40}$"},
           "claim": {"type": "string", "minLength": 8},
           "quote": {"type": "string", "minLength": 12},
           "source_id": {"type": "string"},
-          "nuance": {"enum": ["ESTABLISHED", "CONTESTED", "HYPOTHESIS"]}
+          "nuance": {"enum": ["ESTABLISHED", "CONTESTED", "HYPOTHESIS"]},
+          "about": {"type": "string", "minLength": 2},
+          "same_subject": {"type": "boolean"}
         }
       }
     }
