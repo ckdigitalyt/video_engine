@@ -79,3 +79,21 @@ def test_bottom_zone_copy_and_labels_stay_above_captions():
     assert len(boxes) == 2
     r = g.check_text_bounds({"s": {"meta": {"text_boxes": boxes}}})
     assert r["ok"], r
+
+
+def test_fast_speech_cues_never_overlap_or_leave_the_beat():
+    from engine import v15_pipeline as P
+    from engine.captions import normalize_cues
+    text = "It left a crater an estimated two hundred kilometers across."
+    ws = text.split()
+    # ~190 wpm: 0.31 s per word
+    timing = {"words": [{"w": w, "t0": 0.31 * i, "t1": 0.31 * i + 0.27}
+                        for i, w in enumerate(ws)]}
+    end = P.LEAD_S + 0.31 * len(ws)
+    cues = P.caption_cues(timing, P.LEAD_S, end=end)
+    norm, repairs = normalize_cues(cues)
+    assert not [r for r in repairs if r["reason"].startswith("dropped")], repairs
+    assert " ".join(c["text"] for c in norm).split() == \
+        " ".join(c["text"] for c in cues).split()
+    assert all(c["t1"] <= end for c in cues)
+    assert all(a["t1"] <= b["t0"] for a, b in zip(cues, cues[1:]))

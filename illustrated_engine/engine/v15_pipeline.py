@@ -153,7 +153,44 @@ def _segment(words: list) -> list:
     return groups[::-1]
 
 
-def caption_cues(timing: dict, lead: float) -> list:
+# 2026-10-15: with the faster delivery a 2-word cue can be on screen for
+# < 0.4 s; the old fixed 0.4 s floor then overlapped the NEXT cue, and the
+# caption state machine shifted / dropped it ("a crater" vanished from the
+# e2e re-render -> caption_identity HOLD). Mid-beat cues no longer extend
+# into the next one, and a cue too short to survive the state machine
+# (engine.captions.MIN_CUE 0.30 + the 0.06 s off-gap) merges into a
+# neighbour in its sentence -- capped at CUE_MERGE_MAX_CHARS so a merge
+# can't build a long, small-font caption.
+CUE_MIN_S = 0.36
+CUE_MERGE_MAX_CHARS = 30
+
+
+def _chars(*gs) -> int:
+    return len(" ".join(w["w"] for g in gs for w in g))
+
+
+def _merge_short_groups(groups: list, lead: float) -> list:
+    out = list(groups)
+    i = 0
+    while i < len(out) - 1:
+        g, nxt = out[i], out[i + 1]
+        same_sentence = not _SENT_END.search(g[-1]["w"])
+        short = nxt[0]["t0"] - g[0]["t0"] < CUE_MIN_S
+        if same_sentence and short and _chars(g, nxt) <= CUE_MERGE_MAX_CHARS:
+            out[i:i + 2] = [g + nxt]
+            continue
+        # a short sentence-FINAL cue folds back into its own sentence
+        if short and not same_sentence and i > 0 \
+                and not _SENT_END.search(out[i - 1][-1]["w"]) \
+                and _chars(out[i - 1], g) <= CUE_MERGE_MAX_CHARS:
+            out[i - 1:i + 1] = [out[i - 1] + g]
+            i -= 1
+            continue
+        i += 1
+    return out
+
+
+def caption_cues(timing: dict, lead: float, end: float | None = None) -> list:
     """Phrase cues (ideally 3-4 words, never across a sentence end, never
     ending on a word that binds to the next — see _segment) on the
     measured word times; per-word starts drive the active-word highlight.
@@ -177,12 +214,17 @@ def caption_cues(timing: dict, lead: float) -> list:
             sent = []
     if sent:
         groups += _segment(sent)
+    groups = _merge_short_groups(groups, lead)
     cues = []
     for gi, g in enumerate(groups):
         t0 = lead + g[0]["t0"]
         nxt_t0 = lead + groups[gi + 1][0]["t0"] if gi + 1 < len(groups) else None
         t1 = (nxt_t0 - 0.06) if nxt_t0 is not None else lead + g[-1]["t1"] + 0.3
-        cues.append({"t0": round(t0, 3), "t1": round(max(t1, t0 + 0.4), 3),
+        if nxt_t0 is None:
+            t1 = max(t1, t0 + 0.4)   # mid-beat cues never run into the next
+        if end is not None:          # never past the beat (tails are short now)
+            t1 = min(t1, end - 0.02)
+        cues.append({"t0": round(t0, 3), "t1": round(t1, 3),
                      "text": " ".join(w["w"] for w in g),
                      "word_starts": [round(lead + w["t0"], 3) for w in g]})
     return cues
@@ -938,7 +980,8 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
         first_shot.setdefault(m["beat"], key)
     for b in story["beats"]:
         bid = b["beat_id"]
-        captions[first_shot[bid]] = caption_cues(timing[bid], LEAD_S)
+        captions[first_shot[bid]] = caption_cues(
+            timing[bid], LEAD_S, end=LEAD_S + tts[bid] + tails[bid])
     from engine import captions as _caps
     # caption geometry/size is part of the composite's identity (2026-10-15
     # caption move/resize must not reuse an old cached composite)
