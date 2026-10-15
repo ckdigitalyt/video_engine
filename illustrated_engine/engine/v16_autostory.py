@@ -47,9 +47,17 @@ def script_to_story(candidate: dict, story_engine: dict) -> dict:
             "claim": s["text"],
             "fact_ids": list(s.get("fact_ids") or []),
         })
-    return {"story_id": slugify(title), "title": title,
-           "subject": candidate.get("cluster", ""), "beats": beats,
-           "topic_id": candidate.get("id")}
+    story = {"story_id": slugify(title), "title": title,
+             "subject": candidate.get("cluster", ""), "beats": beats,
+             "topic_id": candidate.get("id")}
+    # 2026-10-15 review: the real script_critic rubric scores were dropped
+    # here, so v16_gate._score_story could only fall back to a structural
+    # proxy (which scored every auto story 0). Carry them through.
+    crit = story_engine.get("critic") or {}
+    if crit.get("scores"):
+        story["critic"] = {"scores": dict(crit["scores"]),
+                           "critique": crit.get("critique", "")}
+    return story
 
 
 def generate_story(candidate: dict, *, ask=None, fetch_sources=None) -> dict:

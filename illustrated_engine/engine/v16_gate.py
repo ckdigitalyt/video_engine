@@ -239,28 +239,38 @@ def _score_hook(hook: dict) -> float:
 
 
 def _score_story(story: dict) -> float:
-    """v16_script's critic rubric (S2-S4) is not wired into v15_pipeline's
-    input story.json yet (v15_pipeline consumes pre-scripted V15-format
-    stories, same "not yet wired" precedent as v16_plan/v16_audio before
-    their WPs). When `story["critic"]["scores"]` exists, use it directly
-    (DESIGN's actual rubric, 1-5 scale). Otherwise fall back to a
-    code-only structural proxy over the fields the story DOES carry
-    (contradiction/claim/fact_ids per beat, a hook_plan, a payoff_image) —
-    flagged as a proxy, not a silent stand-in for the rubric."""
+    """When `story["critic"]["scores"]` exists (v16_autostory.script_to_story
+    now threads the real script_critic scores into story.json -- 2026-10-15
+    review: before that NO auto-generated story carried them), use it
+    directly (DESIGN's actual rubric, 0-5 scale). Otherwise fall back to a
+    code-only structural proxy, flagged as a proxy, not a stand-in for the
+    rubric:
+
+        40 * fraction of beats that are grounded (claim + fact_ids)
+      + 40 * fraction of beats with a hand-authored `contradiction`
+      + 10 hook_plan + 10 payoff_image
+
+    2026-10-15 review fix: the old proxy only counted a beat when it had
+    ALL of contradiction+claim+fact_ids, and auto-generated stories never
+    carry `contradiction` -- so every one of them scored story=0 by
+    construction (66.6 / 63.2 REJECT scorecards of the asteroid/levitation
+    renders), a bug rather than a quality signal. Grounding now earns
+    credit on its own; the editorial fields still matter (a story without
+    them caps at 40, i.e. it can't carry the scorecard on structure alone)."""
     crit = (story.get("critic") or {}).get("scores")
     if crit:
-        vals = list(crit.values())
-        return round(_clamp(sum(vals) / len(vals) / 5 * 100), 1)
+        vals = [float(v) for v in crit.values() if isinstance(v, (int, float))]
+        if vals:
+            return round(_clamp(sum(vals) / len(vals) / 5 * 100), 1)
     beats = story.get("beats") or []
     if not beats:
         return 0.0
-    complete = sum(1 for b in beats
-                  if b.get("contradiction") and b.get("claim")
-                  and b.get("fact_ids"))
-    frac = complete / len(beats)
+    grounded = sum(1 for b in beats if b.get("claim") and b.get("fact_ids"))
+    contra = sum(1 for b in beats if b.get("contradiction"))
     bonus = (10 if story.get("hook_plan") else 0) + \
         (10 if story.get("payoff_image") else 0)
-    return round(_clamp(frac * 80 + bonus), 1)
+    return round(_clamp(40 * grounded / len(beats) + 40 * contra / len(beats)
+                        + bonus), 1)
 
 
 def _score_visuals(judge: dict | None) -> float:
@@ -367,6 +377,42 @@ def compute_scorecard(*, checks: dict, meta: dict, specs: dict, story: dict,
             "weights": SCORE_WEIGHTS}
 
 
+# ------------------------------------------------- duration / scorecard --
+
+def total_duration_s(meta: dict, specs: dict) -> float:
+    """Timeline length = sum of compiled shot durations (meta order)."""
+    return round(sum(float((specs.get(k) or {}).get("duration_s") or 0.0)
+                     for k in meta), 2)
+
+
+def check_duration_gate(specs: dict, meta: dict, story: dict,
+                        measured_s: float | None = None) -> dict:
+    """v16_script.check_duration (DESIGN §4's 30-60 s hard limit; measured
+    on the rendered file -- v15_gate's `av` probe -- when available, else
+    the compiled timeline) -- defined
+    since WP4 but never called anywhere in the render path (2026-10-15
+    review: a 62.7 s video shipped unchecked). HOLD-causing, not critical:
+    an over-length cut is fixable without re-scripting from scratch."""
+    from engine.v16_script import check_duration
+    secs = (round(float(measured_s), 2) if measured_s
+            else total_duration_s(meta, specs))
+    fails = check_duration(secs, story)
+    return {"ok": not fails, "fails": fails, "duration_s": secs}
+
+
+def check_scorecard(scorecard: dict) -> dict:
+    v = (scorecard or {}).get("verdict")
+    total = (scorecard or {}).get("total")
+    if v == "PASS":
+        return {"ok": True, "fails": [], "total": total, "score_verdict": v}
+    weakest = sorted((scorecard.get("dimensions") or {}).items(),
+                     key=lambda kv: kv[1])[:3]
+    msg = (f"scorecard {v} ({total}/100; PASS needs >=80) -- weakest: "
+           + ", ".join(f"{k}={d}" for k, d in weakest))
+    return {"ok": False, "fails": [msg], "total": total, "score_verdict": v,
+            "critical": v == "REJECT"}
+
+
 # ---------------------------------------------------------------- run --
 
 def run_gate(work, story: dict, meta: dict, specs: dict, timing: dict,
@@ -375,8 +421,10 @@ def run_gate(work, story: dict, meta: dict, specs: dict, timing: dict,
             brand: dict | None = None, plates: dict | None = None,
             sting_present: bool = False, video_id: str | None = None,
             history: list | None = None) -> dict:
-    """v15_gate.run_gate()'s checks + `hook` + `distinctness`, then the
-    §10.2 scorecard when (and only when) the combined verdict is PASS."""
+    """v15_gate.run_gate()'s checks + `hook` + `distinctness` + `duration`,
+    then the §10.2 scorecard when (and only when) the combined verdict is
+    PASS -- and the scorecard's own verdict then GATES (`scorecard` check):
+    only a scorecard PASS (>=80) leaves the final verdict at PASS."""
     base = v15_gate.run_gate(work, story, meta, specs, timing, captions, lead,
                              use_judge=use_judge, plate_qa=plate_qa,
                              voice=voice)
@@ -386,14 +434,23 @@ def run_gate(work, story: dict, meta: dict, specs: dict, timing: dict,
     checks["distinctness"] = check_distinctness(
         video_id or story.get("story_id", ""), meta, plate_paths,
         history or [], specs=specs)
+    checks["duration"] = check_duration_gate(
+        specs, meta, story, (checks.get("av") or {}).get("duration_s"))
     verdict = v15_gate.verdict_of(checks)
-    failures = {k: v["fails"] for k, v in checks.items() if not v["ok"]}
     scorecard = None
     if verdict == "PASS":
         scorecard = compute_scorecard(
             checks=checks, meta=meta, specs=specs, story=story,
             plates=plates or {}, brand=brand or {},
             sting_present=sting_present)
+        # 2026-10-15 review CRITICAL fix: the §10.2 scorecard verdict used
+        # to be computed and saved but never fed back into the gate verdict,
+        # so two REJECT-scored videos (66.6, 63.2) still came out
+        # publish_gate=PASS / publishable=true and auto-uploaded. It is now
+        # a real check: REJECT -> critical (FAIL), HOLD -> HOLD.
+        checks["scorecard"] = check_scorecard(scorecard)
+        verdict = v15_gate.verdict_of(checks)
+    failures = {k: v["fails"] for k, v in checks.items() if not v["ok"]}
     out = dict(base)
     out.update(checks=checks, verdict=verdict, failures=failures,
                scorecard=scorecard)
