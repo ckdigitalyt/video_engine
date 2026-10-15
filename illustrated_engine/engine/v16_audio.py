@@ -197,16 +197,17 @@ def build_library_bed(path, total_s: float, gain: float = 0.16) -> np.ndarray:
 
 # ------------------------------------------------------------------ sting --
 
-def overlay_sting(mix_path, sting_path, out_path):
+def overlay_sting(mix_path, sting_path, out_path, gain: float = 1.0):
     """Additive overlay of the brand sting at t=0 of an already-built mix
     (design: sting is an OVERLAY, not a pre-roll — it does not shift the
     timeline). Reuses procedural_audio.load_wav/save_wav (v14 mix/loudnorm
-    machinery), never reimplements decode/encode."""
+    machinery), never reimplements decode/encode. `gain` scales the sting
+    (2026-10-15 review: at 1.0 it peaked ~7 dB above the body at t=0)."""
     mix = load_wav(mix_path).astype(np.float32)
     sting = load_wav(sting_path).astype(np.float32)
     m = min(len(sting), len(mix))
     out = mix.copy()
-    out[:m] += sting[:m]
+    out[:m] += sting[:m] * float(gain)
     return save_wav(out_path, np.clip(out, -0.98, 0.98))
 
 

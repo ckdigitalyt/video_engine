@@ -70,6 +70,11 @@ LEAD_S = 0.06      # silence before a beat's narration (breath + first frame)
 TAIL_S = 0.55      # hold after the narration ends
 CUT_EARLY_S = 0.12  # cut slightly BEFORE the word that starts a shot
 MIN_SHOT_S = 1.4
+# 2026-10-15 review: the brand sting at t=0 peaked ~7 dB above the body and
+# broke the seamless loop the scripts are written for. Kept at the open
+# (moving it to the end would sit on the last spoken line, which also
+# loops) but at -10.5 dB, i.e. a few dB UNDER the body instead of over it.
+STING_GAIN = 0.3
 RENDER_CONFIG = {"concurrency": 2, "pipeline": "v15"}
 INTENSITY = {"HOOK": 0.75, "CURIOSITY": 0.62, "REVEAL": 0.85,
              "EXPLANATION": 0.66, "ESCALATION": 0.82, "PAYOFF": 0.88}
@@ -443,6 +448,36 @@ def _prompt_parts(shot: dict, subject_bible: dict | None = None,
     return [{"subject": _augment(shot["subject"]),
              "composition": shot.get("composition", "centered"),
              "view": shot.get("view"), "hook": hook}]
+
+
+SFX_MAX_GAP_S = 6.0   # longest stretch allowed without any SFX cue
+
+
+def fill_sfx_gaps(meta: dict, events: dict) -> list:
+    """Cheap SFX density floor (2026-10-15 review, priority 7): a soft
+    whoosh on the first cut after more than SFX_MAX_GAP_S without any SFX,
+    and a pulse accent on the first shot of the first PAYOFF beat if it
+    has none. Content-MATCHED SFX (impact / water / machine hum keyed to
+    what a beat shows) needs new licensed sound assets -- the library only
+    carries pulse/tick (+ procedural whoosh) -- and is deferred.
+    Mutates `events`; -> list of added cues."""
+    added, t, last, payoff_done = [], 0.0, 0.0, False
+    for key, m in meta.items():
+        evs = events.setdefault(key, [])
+        if (m.get("function") == "PAYOFF" and not payoff_done):
+            payoff_done = True
+            if not any(e["kind"] == "pulse" for e in evs):
+                ev = {"t": 0.05, "kind": "pulse", "gain": 0.55}
+                evs.append(ev)
+                added.append({"shot": key, **ev})
+        if t - last > SFX_MAX_GAP_S and not any(e["t"] < 0.3 for e in evs):
+            ev = {"t": 0.0, "kind": "whoosh", "gain": 0.35}
+            evs.append(ev)
+            added.append({"shot": key, **ev})
+        if evs:
+            last = t + max(e["t"] for e in evs)
+        t += float(m["dur"])
+    return added
 
 
 def dedupe_shot_prompts(shots: list, bible: dict,
@@ -877,6 +912,11 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
         (work / "scenes" / f"{key}.spec.json").write_text(
             json.dumps(res["spec"], indent=1))
 
+    # 5b. 2026-10-15 review: SFX only fired on text-overlay events, so long
+    #     copy-free stretches were silent (40 s with no SFX on the
+    #     levitation render) and the payoff had no accent.
+    report["sfx_fill"] = fill_sfx_gaps(meta, events)
+
     # 6. §24 keys + §25 production plan + render
     t0 = time.time()
     index = load_index(work)
@@ -899,7 +939,12 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
     for b in story["beats"]:
         bid = b["beat_id"]
         captions[first_shot[bid]] = caption_cues(timing[bid], LEAD_S)
-    cap_h = caption_plan_hash({"c": captions, "e": events}, bible)
+    from engine import captions as _caps
+    # caption geometry/size is part of the composite's identity (2026-10-15
+    # caption move/resize must not reuse an old cached composite)
+    cap_h = caption_plan_hash({"c": captions, "e": events,
+                               "style": [V15_CAPTION_TOP, _caps.KIN_CAP_H,
+                                         _caps.BASE_SIZE]}, bible)
     nar_h = narration_plan_hash({b["beat_id"]: b["narration"]
                                  for b in story["beats"]})
 
@@ -929,7 +974,8 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
         "track": report["audio_v16"]["track"],
         "sfx": {k: str(v["path"]) for k, v in sfx_lib.items()},
         "brand_sting": {"version": audio_brand.get("version"),
-                        "sting": audio_brand.get("sting")}})
+                        "sting": audio_brand.get("sting"),
+                        "gain": STING_GAIN}})
     out_final = work / "final.mp4"
     plan = plan_production(index, scene_inputs, cap_h, nar_h, bed_h, out_final)
     report["production"] = {k: plan[k] for k in ("render", "reuse", "reasons",
@@ -979,6 +1025,7 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
                          "bible": cap_bible, "scenes": scenes,
                          "music": music_dict, "sfx_library": sfx_lib,
                          "sting_audio": str(sting_path),
+                         "sting_gain": STING_GAIN,
                          "single_pass": True,
                          "caption_top": V15_CAPTION_TOP,
                          "out": str(out_final)}, work)

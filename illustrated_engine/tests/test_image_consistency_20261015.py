@@ -87,3 +87,31 @@ def test_research_context_reaches_planner_prompt():
     prompt = PL.build_prompt(story, derive_bible(story))
     assert "research facts" in prompt and "quartz crystal" in prompt
     assert "SPECIFIC SETTING" in prompt
+
+
+# --------------------------------------- 2026-10-15 review: audio (P7) --
+
+def test_fill_sfx_gaps_breaks_long_silences_and_accents_payoff():
+    meta = {f"B{i}_S1": {"dur": 3.0, "function": "NORMAL"} for i in range(1, 9)}
+    meta["B8_S1"]["function"] = "PAYOFF"
+    events = {"B1_S1": [{"t": 0.1, "kind": "pulse"}]}
+    added = P.fill_sfx_gaps(meta, events)
+    assert any(a["kind"] == "pulse" and a["shot"] == "B8_S1" for a in added)
+    t, last, gaps = 0.0, 0.0, []
+    for k, m in meta.items():
+        for e in events.get(k) or []:
+            gaps.append(t + e["t"] - last)
+            last = t + e["t"]
+        t += m["dur"]
+    assert max(gaps) <= P.SFX_MAX_GAP_S + 3.0, gaps
+
+
+def test_sting_gain_scales_overlay(tmp_path):
+    import numpy as np
+    from engine.procedural_audio import save_wav, load_wav
+    from engine.v16_audio import overlay_sting
+    mix = save_wav(tmp_path / "m.wav", np.zeros((4800, 2), dtype=np.float32))
+    st = save_wav(tmp_path / "s.wav", np.full((480, 2), 0.5, dtype=np.float32))
+    out = overlay_sting(mix, st, tmp_path / "o.wav", gain=P.STING_GAIN)
+    peak = float(np.abs(load_wav(out)).max())
+    assert abs(peak - 0.5 * P.STING_GAIN) < 0.01

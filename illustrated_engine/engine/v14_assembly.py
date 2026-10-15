@@ -525,7 +525,8 @@ def assemble(plan: dict, work_dir: Path, plan_dir: Path | None = None) -> dict:
     sting_audio = plan.get("sting_audio")
     if sting_audio:
         from engine.v16_audio import overlay_sting
-        mix = overlay_sting(mix, rp(sting_audio), work_dir / "mix_sting.wav")
+        mix = overlay_sting(mix, rp(sting_audio), work_dir / "mix_sting.wav",
+                            gain=float(plan.get("sting_gain", 1.0)))
     report["narration"] = placements
     report["audio_mix"] = {"bed": str(bed), "voice": str(voice),
                            "mix": str(mix), "ducked": True,
