@@ -370,8 +370,38 @@ def render_cover(out_path, *, bg_frame, title: str, part_label: str = "",
     return Path(out_path)
 
 
+def _has_role(brand: dict, role: str) -> bool:
+    try:
+        role_hex(brand, role)
+        return True
+    except Exception:
+        return False
+
+
+def _fit_lines(draw, brand: dict, text: str, max_w: int, size: int,
+               max_lines: int) -> tuple:
+    """Greedy-wrap `text` at `size`, shrinking by 8 px until it fits in
+    `max_lines` lines of `max_w` -- every word kept, never truncated."""
+    words = text.split()
+    while True:
+        f = ImageFont.truetype(str(font_path(brand, "headline")), size)
+        lines, cur = [], ""
+        for word in words:
+            trial = (cur + " " + word).strip()
+            if draw.textlength(trial, font=f) > max_w and cur:
+                lines.append(cur)
+                cur = word
+            else:
+                cur = trial
+        lines.append(cur)
+        widest = max(draw.textlength(ln, font=f) for ln in lines)
+        if (len(lines) <= max_lines and widest <= max_w) or size <= 40:
+            return f, lines
+        size -= 8
+
+
 def render_thumbnail(out_path, *, bg_image, title: str, brand: dict | None = None,
-                     size=(1080, 1920)):
+                     size=(1080, 1920), stat: str | None = None):
     """YouTube custom-thumbnail generator (owner directive 2026-10-12,
     "thumbnails need to be much better to go viral").
 
@@ -402,6 +432,14 @@ def render_thumbnail(out_path, *, bg_image, title: str, brand: dict | None = Non
     line's vertical band with a centred multi-line headline regardless
     of wrap width -- the bug that clipped "...JUST" and "...LIFE" behind
     the old top-right seal.
+
+    2026-10-15 review: `stat` (a single bold number, e.g. "930 MILES",
+    picked by engine.v16_batch.thumbnail_stat from the plan's on-screen
+    numbers) becomes the dominant element, huge and in the accent colour,
+    with `title` as a smaller kicker beneath it -- instead of the hook
+    headline verbatim. Text is never truncated: a block that won't fit in
+    3 lines shrinks the font (the old `lines[:3]` silently cut words and
+    could leave a half-sentence on the thumbnail).
     """
     brand = brand or load_brand()
     w, h = size
@@ -414,31 +452,30 @@ def render_thumbnail(out_path, *, bg_image, title: str, brand: dict | None = Non
     canvas.paste(bg.crop((ox, oy, ox + w, oy + h)), (0, 0))
 
     draw = ImageDraw.Draw(canvas, "RGBA")
-    f = ImageFont.truetype(str(font_path(brand, "headline")), 132)
-    words = title.upper().split()
-    lines, cur = [], ""
-    for word in words:
-        trial = (cur + " " + word).strip()
-        if draw.textlength(trial, font=f) > w - 120 and cur:
-            lines.append(cur)
-            cur = word
-        else:
-            cur = trial
-    lines.append(cur)
-    lines = lines[:3]
-    line_h = 148
-    block_h = line_h * len(lines)
-    ty = round(h * 0.30 - block_h / 2)
     fill = role_hex(brand, "headline")
     outline = role_hex(brand, "scrim")
-    for ln in lines:
-        bb = draw.textbbox((0, 0), ln, font=f)
-        tx = (w - (bb[2] - bb[0])) / 2 - bb[0]
-        # thick outline (stroke) + soft drop shadow: legible straight on
-        # the artwork, no background panel needed
-        draw.text((tx, ty), ln, font=f, fill=fill,
-                  stroke_width=10, stroke_fill=outline)
-        ty += line_h
+    accent = role_hex(brand, "headline_2") if _has_role(brand, "headline_2") else fill
+    blocks = []   # (lines, font, line_h, colour, stroke)
+    if stat:
+        f, lines = _fit_lines(draw, brand, stat.upper(), w - 100, 260, 2)
+        blocks.append((lines, f, round(f.size * 1.05), accent, 14))
+    if title:
+        f, lines = _fit_lines(draw, brand, title.upper(), w - 120,
+                              96 if stat else 132, 3)
+        blocks.append((lines, f, round(f.size * 1.12), fill, 10))
+    total_h = sum(lh * len(ls) for ls, _, lh, _, _ in blocks) + \
+        (30 if len(blocks) > 1 else 0)
+    ty = round(h * 0.30 - total_h / 2)
+    for lines, f, line_h, colour, stroke in blocks:
+        for ln in lines:
+            bb = draw.textbbox((0, 0), ln, font=f)
+            tx = (w - (bb[2] - bb[0])) / 2 - bb[0]
+            # thick outline (stroke): legible straight on the artwork,
+            # no background panel needed
+            draw.text((tx, ty), ln, font=f, fill=colour,
+                      stroke_width=stroke, stroke_fill=outline)
+            ty += line_h
+        ty += 30
 
     seal_tmp = Path(tempfile.mktemp(suffix=".png"))
     seal_badge(seal_tmp, brand, diameter=110)

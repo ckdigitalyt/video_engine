@@ -299,6 +299,10 @@ def test_package_video_produces_final_proxy_cover_metadata(tmp_path):
          "color=c=blue:s=64x114:d=1:r=10", "-c:v", "libx264", "-pix_fmt", "yuv420p",
          str(final)], check=True, capture_output=True)
     (work_dir / "manifest.json").write_text(json.dumps({"video_id": "x"}))
+    # 2026-10-15: cover.png comes from the caption-free first scene render
+    (work_dir / "scenes").mkdir()
+    import shutil
+    shutil.copyfile(final, work_dir / "scenes" / "B1_S1.mp4")
 
     report = _fake_report("ice_slippery")
     out = package_dir = tmp_path / "package"
@@ -332,3 +336,47 @@ def test_metadata_txt_uses_llm_metadata_with_tags():
     assert txt.startswith("Title: T1\n\nD1 long text\n\nTags: ice, physics\n")
     rep.pop("metadata")
     assert B._metadata_txt(rep, story).startswith("Title: S\n\nH\n\n--- Disclosure")
+
+
+# ---------------------------------------- 2026-10-15 review: thumbnail --
+
+def test_thumbnail_stat_picks_last_escalation_number_not_year_or_hook():
+    from engine.v16_batch import thumbnail_stat
+    story = {"beats": [{"beat_id": "B1", "function": "HOOK"},
+                       {"beat_id": "B2", "function": "NORMAL"},
+                       {"beat_id": "B3", "function": "NORMAL"},
+                       {"beat_id": "B4", "function": "PAYOFF"}]}
+    plan = {"beats": [
+        {"beat_id": "B1", "shots": [{"number": {"text": "10 KM", "word": 1}}]},
+        {"beat_id": "B2", "shots": [{"number": {"text": "200 KM", "word": 1}},
+                                    {"number": {"text": "1933", "word": 3}}]},
+        {"beat_id": "B3", "shots": [{"number": {"text": "1.5 KM WAVE", "word": 2}}]},
+        {"beat_id": "B4", "shots": [{"headline": "x"}]}]}
+    assert thumbnail_stat(plan, story) == "1.5 KM WAVE"
+    assert thumbnail_stat({"beats": [{"beat_id": "B1", "shots": [
+        {"number": {"text": "10 KM"}}]}]}, story) == "10 KM"
+    assert thumbnail_stat({"beats": []}, story) is None
+
+
+def test_thumbnail_never_truncates_and_cover_is_caption_free(tmp_path):
+    from PIL import Image, ImageDraw
+    from engine.brand import _fit_lines, load_brand, render_thumbnail
+    from engine.v16_batch import _cover_source
+    brand = load_brand()
+    d = ImageDraw.Draw(Image.new("RGB", (8, 8)))
+    long_title = "A VERY LONG HOOK HEADLINE THAT WOULD NEVER FIT IN THREE LINES AT FULL SIZE"
+    f, lines = _fit_lines(d, brand, long_title, 960, 132, 3)
+    assert " ".join(lines) == long_title and len(lines) <= 3
+    bg = tmp_path / "bg.png"
+    Image.new("RGB", (540, 960), (20, 40, 60)).save(bg)
+    out = render_thumbnail(tmp_path / "t.jpg", bg_image=bg, title="ONE ROCK",
+                           stat="930 MILES")
+    assert out.exists()
+    # cover source: first scene render (pre-caption), never final.mp4
+    work = tmp_path / "w"
+    (work / "scenes").mkdir(parents=True)
+    for n in ("B10_S1.mp4", "B1_S2.mp4", "B1_S1.mp4"):
+        (work / "scenes" / n).write_bytes(b"")
+    (work / "final.mp4").write_bytes(b"")
+    assert _cover_source(work, {}).name == "B1_S1.mp4"
+    assert _cover_source(tmp_path / "none", {"hook_plate_path": str(bg)}) == bg

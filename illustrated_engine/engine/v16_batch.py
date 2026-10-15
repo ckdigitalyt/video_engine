@@ -253,6 +253,51 @@ def _llm_blocked(stages=LLM_STAGES) -> dict | None:
 
 # ================================================================ packaging
 
+def thumbnail_stat(plan: dict | None, story: dict | None = None) -> str | None:
+    """2026-10-15 review: the one surprising number for the thumbnail.
+
+    Candidates are the planner's on-screen `number` overlays (already
+    display-ready with their unit, e.g. "930 MILES", "820 FT", and only
+    ever figures the narration actually says -- v15_plan validates that).
+    The strongest escalation fact is taken as the LAST number shown before
+    the payoff (a script's turn escalates, so the latest figure is the
+    biggest stake), falling back to the last number anywhere. HOOK-beat
+    numbers are kept as a last resort. -> None when the plan has none."""
+    if not plan:
+        return None
+    fn = {b["beat_id"]: (b.get("function") or "NORMAL").upper()
+          for b in (story or {}).get("beats") or []}
+    rows = []
+    for b in plan.get("beats") or []:
+        for sh in b.get("shots") or []:
+            num = sh.get("number")
+            txt = (num.get("text") if isinstance(num, dict) else num) or ""
+            # a bare year ("1933") is a date, not a stat
+            if str(txt).strip() and not __import__("re").fullmatch(
+                    r"(1[0-9]|20)\d\d", str(txt).strip()):
+                rows.append((fn.get(b.get("beat_id"), "NORMAL"),
+                             str(txt).strip()))
+    for pool in ([t for f, t in rows if f not in ("HOOK", "PAYOFF")],
+                 [t for f, t in rows if f != "HOOK"], [t for _, t in rows]):
+        if pool:
+            return pool[-1]
+    return None
+
+
+def _cover_source(work_dir: Path, report: dict) -> Path | None:
+    """A CAPTION-FREE source for cover.png: the first scene's own render
+    (pre-caption) or the hook plate. 2026-10-15 review: cover.png used to
+    be grabbed from final.mp4 at 0.8 s, which has the burned-in caption --
+    a half-sentence on the cover/fallback thumbnail."""
+    scenes = sorted((work_dir / "scenes").glob("B*_S*.mp4"),
+                    key=lambda f: [int(x) for x in
+                                   __import__("re").findall(r"\d+", f.stem)])
+    if scenes:
+        return scenes[0]
+    hp = report.get("hook_plate_path")
+    return Path(hp) if hp and Path(hp).exists() else None
+
+
 def _ffmpeg_cover(video: Path, out_png: Path, t: float = 0.8) -> bool:
     p = subprocess.run(
         ["ffmpeg", "-nostdin", "-v", "error", "-y", "-ss", f"{max(0.0, t):.3f}",
@@ -339,7 +384,10 @@ def package_video(story_dir: Path, work_dir: Path, out_dir: Path, *, report: dic
     except OSError:
         shutil.copyfile(final_src, final_dst)
     proxy_ok = _ffmpeg_proxy(final_src, out_dir / "proxy.mp4")
-    cover_ok = _ffmpeg_cover(final_src, out_dir / "cover.png")
+    cover_src = _cover_source(work_dir, report)
+    cover_ok = bool(cover_src) and _ffmpeg_cover(cover_src, out_dir / "cover.png",
+                                                 0.8 if cover_src.suffix == ".mp4"
+                                                 else 0.0)
     manifest_src = work_dir / "manifest.json"
     if manifest_src.exists():
         shutil.copyfile(manifest_src, out_dir / "manifest.json")
@@ -368,7 +416,13 @@ def package_video(story_dir: Path, work_dir: Path, out_dir: Path, *, report: dic
         # replaces from the old render_cover-on-a-video-frame approach.
         try:
             from engine.brand import render_thumbnail
-            render_thumbnail(thumb_path, bg_image=hook_plate, title=thumb_title)
+            plan = None
+            vp = work_dir / "visual_plan.json"
+            if vp.exists():
+                plan = json.loads(vp.read_text())
+            stat = thumbnail_stat(plan, story)
+            render_thumbnail(thumb_path, bg_image=hook_plate, title=thumb_title,
+                             stat=stat)
             thumb_ok = True
         except Exception:
             thumb_ok = False
