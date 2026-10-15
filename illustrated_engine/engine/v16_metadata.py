@@ -20,7 +20,15 @@ CACHE_DIR = ROOT / "build" / "cache" / "v16_metadata"
 # tags; see tools/youtube_upload.py's character-budget packer, fixed the
 # same day the old `[:500]`-on-a-list bug did nothing). bvp bump forces
 # every cached description/tag set to regenerate under the new prompt.
-PROMPT_VERSION = "meta/2.0"
+# 2026-10-15 review: titles read as topic labels ("Sound Waves That Levitate
+# Objects (It's Real)"), descriptions gave away the whole payoff, and the
+# "Source/fact-check: based on peer-reviewed..." line was vague boilerplate.
+# meta/3.0: curiosity-gap title held to v16_script.check_title (the same
+# 4-8 word / no-trope rules the script stage's metadata_pack uses -- the two
+# title paths disagreed before: this one only capped 70 characters), a
+# description that stops short of the answer, and real source URLs from the
+# research stage appended in code instead of an LLM-written source line.
+PROMPT_VERSION = "meta/3.0"
 MIN_TAGS, MAX_TAGS = 15, 30
 
 
@@ -53,18 +61,24 @@ Beats (the whole narration, in order):
 Fact IDs already verified upstream by the research stage: {', '.join(facts) or 'none recorded'}
 
 Write:
- title: <= 70 characters, punchy, matches the hook, no clickbait fabrication.
+ title: 4-8 words, <= 70 characters. It must open a SPECIFIC curiosity gap,
+   not label the topic: either a question about the surprising thing, or an
+   incomplete claim that names the specific thing but withholds what
+   happened / what it means. A viewer should know exactly what they will
+   find out, but not the answer. No parenthetical tags like "(It's Real)",
+   no ALL-CAPS words (acronyms excepted), no "shocked", "you won't
+   believe", "mind-blowing", "baffled", "gone wrong". True to the beats.
  description: optimise for search AND click-through, in this order:
    1. ONE scroll-stopping opening line (shows before "...more" on mobile) that
       restates the hook's curiosity gap -- this line matters most for CTR.
-   2. 2-4 more lines expanding the story, naturally working in the specific
-      named things a viewer would actually search for (places, people,
-      numbers, dates, named phenomena from the beats above) -- written for
-      a human to read, never a bare keyword list.
+   2. 2-3 more lines that build the setup and stakes, naturally working in
+      the specific named things a viewer would search for (places, people,
+      dates, named phenomena from the beats above). DO NOT give away the
+      payoff: never state what the PAYOFF beats reveal or the final answer
+      -- stop short of it so the video is the only place to get it.
    3. A short line inviting the viewer to follow/subscribe for more
       (channel growth, not just this video).
-   4. ONE line starting "Source/fact-check:" naming what kind of sources
-      back it (do not invent a specific citation not in the beats).
+   4. No source line -- real source links are appended automatically.
    5. 3-5 relevant hashtags on their own line at the very end, always
       including #shorts first (critical for the Shorts discovery shelf),
       then 2-4 more specific to this video's actual subject.
@@ -82,6 +96,34 @@ Return ONLY JSON:
 {{"title": "...", "description": "...", "tags": ["...", "..."]}}"""
 
 
+def check_title_rules(title: str) -> list:
+    """The script stage's title rules (engine.v16_script.check_title), so
+    the uploaded title and metadata_pack's title obey ONE rule set."""
+    from engine.v16_script import check_title
+    errs = check_title(title)
+    if re.search(r"\([^)]*\)", title):
+        errs.append("title: parenthetical tag")
+    return errs
+
+
+_SOURCE_LINE = re.compile(r"(?im)^\s*sources?(?:/fact-check)?\s*:.*$\n?")
+
+
+def with_sources(description: str, sources: list) -> str:
+    """Drop any LLM-written "Source/fact-check:" boilerplate; when the
+    story carries real research sources, list them just above the
+    hashtag line."""
+    desc = _SOURCE_LINE.sub("", description).rstrip()
+    urls = list(dict.fromkeys(str(u) for u in sources or [] if u))[:5]
+    if not urls:
+        return desc
+    block = "Sources:\n" + "\n".join(f"- {u}" for u in urls)
+    lines = desc.split("\n")
+    if lines and lines[-1].lstrip().startswith("#"):
+        return "\n".join(lines[:-1]).rstrip() + "\n\n" + block + "\n\n" + lines[-1]
+    return desc + "\n\n" + block
+
+
 def _validate(meta) -> list:
     errs = []
     if not isinstance(meta, dict):
@@ -91,6 +133,8 @@ def _validate(meta) -> list:
         errs.append("title: missing")
     elif len(title) > 100:
         errs.append("title: too long")
+    else:
+        errs += check_title_rules(title)
     desc = meta.get("description")
     if not isinstance(desc, str) or not desc.strip():
         errs.append("description: missing")
@@ -116,9 +160,8 @@ def _fallback_metadata(story: dict) -> dict:
     title = str(story.get("title") or story["story_id"]).title()
     claims = [b.get("claim") for b in story["beats"] if b.get("claim")]
     lines = claims[:2] or [b["narration"] for b in story["beats"][:2]]
-    note = ("Source/fact-check: every claim traces to this video's "
-           "verified fact_ids (see pipeline_report.json).")
-    description = "\n".join(lines[:2] + [note, "", "#shorts #sciencefacts #amazingfacts"])
+    description = with_sources("\n".join(lines[:2] + ["", "#shorts #sciencefacts #amazingfacts"]),
+                               story.get("sources"))
     blob = (str(story.get("subject", "")) + " " + str(story.get("story_type", ""))
            + " " + " ".join(c.get("id", "") for c in story.get("concepts") or [])
            + " " + title)
@@ -143,6 +186,7 @@ def build_metadata(story: dict, *, use_llm: bool = True, ask=None) -> dict:
     "llm_calls"}. Cached by story content (same convention as
     engine.v15_plan.make_plan). `ask` overrides the text judge (tests)."""
     blob = json.dumps({"v": PROMPT_VERSION, "title": story.get("title"),
+                       "sources": story.get("sources"),
                        "beats": [{k: b.get(k) for k in
                                   ("beat_id", "narration", "claim", "fact_ids")}
                                  for b in story["beats"]]}, sort_keys=True)
@@ -163,13 +207,24 @@ def build_metadata(story: dict, *, use_llm: bool = True, ask=None) -> dict:
                 return text_ask(p, t, m, stage="text_misc")
         raw = ask(build_prompt(story), 0.3, 1400)  # longer description + up to 30 tags
         meta = _parse_json(raw)
+        errs = _validate(meta)
+        if errs and isinstance(meta, dict):
+            # one targeted retry (title rules are the usual miss)
+            raw = ask(build_prompt(story) + "\n\nYour previous answer failed "
+                      "these checks; fix them and return the full JSON again:\n"
+                      + "\n".join(errs), 0.3, 1400)
+            meta2 = _parse_json(raw)
+            if isinstance(meta2, dict):
+                meta = meta2
         # Cap, don't reject, a slight over-count: discarding an otherwise
         # good title/description because the model wrote 32 tags instead
         # of <=30 would waste the whole LLM response on the fallback path.
         if isinstance(meta, dict) and isinstance(meta.get("tags"), list):
             meta["tags"] = meta["tags"][:MAX_TAGS]
         if not _validate(meta):
-            data = {"title": meta["title"], "description": meta["description"],
+            data = {"title": meta["title"],
+                    "description": with_sources(meta["description"],
+                                                story.get("sources")),
                     "tags": [str(t) for t in meta["tags"]]}
             cp.write_text(json.dumps(data, indent=1))
             return dict(data, source="llm", llm_calls=1)

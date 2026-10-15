@@ -66,6 +66,11 @@ def script_to_story(candidate: dict, story_engine: dict,
     # 2026-10-15 review: the real script_critic rubric scores were dropped
     # here, so v16_gate._score_story could only fall back to a structural
     # proxy (which scored every auto story 0). Carry them through.
+    cited = [f for b in beats for f in b["fact_ids"]]
+    srcs = list(dict.fromkeys(facts[f].get("source_url") for f in cited
+                              if f in facts and facts[f].get("source_url")))
+    if srcs:
+        story["sources"] = srcs
     crit = story_engine.get("critic") or {}
     if crit.get("scores"):
         story["critic"] = {"scores": dict(crit["scores"]),
