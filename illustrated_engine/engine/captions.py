@@ -34,7 +34,16 @@ BAND_CY = (BAND_TOP + BAND_BOT) // 2          # 1401
 # Carrier canvas: full width, short band strip. Looping a 1080x1920 RGBA
 # input per word overlay makes the ffmpeg graph decode ~30 full-frame
 # layers per frame; the strip keeps the same composite at ~1/10 the cost.
-KIN_CAP_H = 192
+# 2026-10-15 review: 192 -> 240 so a two-line caption at ~88 px fits.
+KIN_CAP_H = 240
+# 2026-10-15 review: the V15/V16 caption strip. The old below-card band
+# (1464..1656, cue centre ~81% down the frame) sat under YouTube's Shorts
+# overlay (title / channel / buttons). This strip spans 1150..1390, cue
+# centre ~66% down. v15_shots keeps all on-screen copy above it
+# (LOW_ZONE_BOTTOM / label clamp) and v15_gate.CAPTION_BAND matches it, so
+# headline/label text and captions cannot overlap by construction (and the
+# gate's text_bounds check fails a render if they ever do).
+V15_CAPTION_TOP = 1150
 # --- caption state machine (Jade_todo_v11 P0) ------------------------------
 # Exactly one ACTIVE_CAPTION semantic state: consecutive states are separated
 # by a >= STATE_GAP off-window (the previous state is fully removed before
@@ -135,7 +144,12 @@ def _cue_lines(cue: dict) -> tuple:
 
 MAX_CHUNK = 4
 MIN_CHUNK = 2
-BASE_SIZE = 64
+# 2026-10-15 review: 64 px (~45 px cap height) was far below the ~90-110 px
+# typical for readable Shorts captions. A cue that won't fit one line at
+# SINGLE_LINE_MIN wraps onto two balanced lines instead of shrinking.
+BASE_SIZE = 96
+SINGLE_LINE_MIN = 84
+TWO_LINE_SIZE = 88
 MARGIN_X = 56
 
 _WORD_RE = re.compile(r"[A-Za-z0-9'\u2019%$.,:;!?+-]+")
@@ -199,6 +213,40 @@ def chunk_cues(shot: dict, cues: list | None = None) -> list:
     return chunks
 
 
+def caption_text_span() -> tuple:
+    """(x0, x1) the caption TEXT may occupy: left frame margin + scrim pad
+    to the right UI rail (v15_gate RAIL_X) - margin - pad. 2026-10-15: a
+    wide caption now shifts left inside this span (caption_center_x)
+    instead of shrinking to stay symmetric about the frame centre."""
+    from engine.v15_gate import RAIL_X
+    box_pad, rail_margin = 26, 20
+    return (MARGIN_X + box_pad, RAIL_X - rail_margin - box_pad)
+
+
+def caption_center_x(width: float) -> float:
+    """Frame centre when the line fits symmetrically, else the centre of
+    caption_text_span (slightly left of frame centre)."""
+    x0, x1 = caption_text_span()
+    half = FRAME_W / 2.0
+    if width / 2.0 <= min(half - x0, x1 - half):
+        return half
+    return (x0 + x1) / 2.0
+
+
+def _balance_two_lines(words: list, d, f) -> list:
+    """Split one caption line into the two lines with the most even widths."""
+    ws = [w.upper() for w in words]
+    sp = d.textlength(" ", font=f)
+    wl = [d.textlength(w, font=f) for w in ws]
+    best, cut = None, 1
+    for k in range(1, len(ws)):
+        a = sum(wl[:k]) + sp * (k - 1)
+        b = sum(wl[k:]) + sp * (len(ws) - k - 1)
+        if best is None or max(a, b) < best:
+            best, cut = max(a, b), k
+    return [list(words[:cut]), list(words[cut:])]
+
+
 def _chunk_font(chunk) -> tuple:
     """-> (font, display_words, width). Steps down until the chunk fits its
     lines (max MAX_LINES) in both width and carrier height.
@@ -209,18 +257,24 @@ def _chunk_font(chunk) -> tuple:
     from engine.v15_gate import RAIL_X
     cap_font = font_path(load_brand(), "caption").name
     per_line = chunk.get("lines") or [chunk["words"]]
-    words = [w.upper() for line in per_line for w in line]
     n_lines = min(max(1, len(per_line)), MAX_LINES)
-    size = BASE_SIZE if n_lines == 1 else 56  # 2 lines must fit KIN_CAP_H
+    size = BASE_SIZE if n_lines == 1 else TWO_LINE_SIZE
     # B1 (VIS): a centered caption box must clear the right UI rail
     # (v15_gate's RAIL_X/RAIL_Y0) — every caption sits well below RAIL_Y0,
     # so the binding bound is always the box's right edge, not just the
     # frame's own margins. BOX_PAD mirrors chunk_png's own pad_x below.
     BOX_PAD = 26
     RAIL_MARGIN = 20  # antialiased glyph ink can overshoot textlength() a bit
-    max_w = min(FRAME_W - 2 * MARGIN_X,
-               2 * (RAIL_X - RAIL_MARGIN - FRAME_W / 2.0) - 2 * BOX_PAD)
-    for _ in range(13):
+    max_w = caption_text_span()[1] - caption_text_span()[0]
+    if n_lines == 1 and len(per_line[0]) >= 2:
+        f = _font(cap_font, SINGLE_LINE_MIN)
+        d = ImageDraw.Draw(Image.new("RGBA", (8, 8)))
+        ws = [w.upper() for w in per_line[0]]
+        if (sum(d.textlength(w, font=f) for w in ws)
+                + d.textlength(" ", font=f) * (len(ws) - 1)) > max_w:
+            per_line = _balance_two_lines(per_line[0], d, f)
+            n_lines, size = 2, TWO_LINE_SIZE
+    for _ in range(18):
         f = _font(cap_font, size)
         probe = Image.new("RGBA", (8, 8))
         d = ImageDraw.Draw(probe)
@@ -269,10 +323,11 @@ def chunk_png(chunk: dict, bible: dict, out: Path, active: int,
     # pass 1 — word positions only, so the scrim can go UNDER the text
     boxes = []  # (x, y, x1, y1, word, flat_index)
     wi = 0
+    cx = caption_center_x(width)
     for li, line in enumerate(per_line):
         lw = sum(d.textlength(w.upper(), font=f) for w in line) \
             + d.textlength(" ", font=f) * (len(line) - 1)
-        x = (FRAME_W - lw) / 2.0
+        x = cx - lw / 2.0
         ly = y0 + li * (asc + desc)
         for w in line:
             ww = d.textlength(w.upper(), font=f)

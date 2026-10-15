@@ -98,7 +98,7 @@ def test_text_bounds_gate():
     bad = {"s": {"meta": {"text_boxes": [{"id": "h", "text": "A",
                                            "box": [-20, 200, 1100, 400]},
                                           {"id": "n", "text": "B",
-                                           "box": [100, 1400, 900, 1500]}]}}}
+                                           "box": [100, 1200, 900, 1300]}]}}}
     assert check_text_bounds(ok)["ok"]
     r = check_text_bounds(bad)
     assert not r["ok"] and len(r["fails"]) == 2, r

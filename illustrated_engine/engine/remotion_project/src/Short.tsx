@@ -40,7 +40,7 @@ export const EMPTY_SHORT_PROPS: ShortProps = {
   height: 1920,
   fps: 30,
   scenes: [],
-  captions: { track: [], combineWithinMs: 40, bandTop: 1344, textColor: "#F5F2EB", activeColor: "#FFC857" },
+  captions: { track: [], combineWithinMs: 40, bandTop: 1150, textColor: "#F5F2EB", activeColor: "#FFC857" },
   sting: null,
   outro: null,
 };

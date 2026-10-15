@@ -389,6 +389,36 @@ def _extend_phrase(words: list, i: int, n: int) -> tuple:
     return run_idx, flat, j
 
 
+# 2026-10-15 review: a lone "one" is usually NOT a quantity in narration
+# ("ONE experimenter", "one quiet truth", "one of the largest") and "1
+# experimenter" reads as a typo on screen. A lone "one" is numeralized only
+# when a unit of measure (or another number word) follows it; any longer
+# phrase ("one hundred", "one and a half", "one to five") is unaffected.
+UNIT_WORDS = {
+    "percent", "per", "km", "kilometer", "kilometers", "kilometre", "kilometres",
+    "meter", "meters", "metre", "metres", "centimeter", "centimeters",
+    "millimeter", "millimeters", "mile", "miles", "foot", "feet", "inch",
+    "inches", "yard", "yards", "kilogram", "kilograms", "kg", "gram", "grams",
+    "ton", "tons", "tonne", "tonnes", "pound", "pounds", "ounce", "ounces",
+    "liter", "liters", "litre", "litres", "gallon", "gallons", "second",
+    "seconds", "minute", "minutes", "hour", "hours", "day", "days", "week",
+    "weeks", "month", "months", "year", "years", "decade", "decades",
+    "century", "centuries", "degree", "degrees", "kelvin", "celsius",
+    "fahrenheit", "watt", "watts", "volt", "volts", "hertz", "decibel",
+    "decibels", "atmosphere", "atmospheres", "mph", "light-year",
+    "light-years", "au", "times", "x"}
+
+
+def _lone_one_is_word(words: list, i: int, j: int) -> bool:
+    """True when the number run words[i:j] is just "one" with no unit or
+    number word after it -> keep it as the word."""
+    if j - i != 1 or _BARE.sub("", words[i]["w"].lower()) != "one":
+        return False
+    nxt = _BARE.sub("", words[j]["w"].lower()) if j < len(words) else ""
+    return nxt not in UNIT_WORDS and _num_atoms(words[j]["w"]) is None \
+        if j < len(words) else True
+
+
 def numeralize_cue_words(words: list) -> list:
     """[{w,t0,t1}, ...] script words -> same shape, with each spoken number
     phrase or range ("one hundred fifty-five to one hundred forty-five
@@ -422,6 +452,12 @@ def numeralize_cue_words(words: list) -> list:
         else:
             full_idx = idx1
             vals = [_phrase_value(flat1)]
+            if start == i and _lone_one_is_word(words, i, j) and not (
+                    [_BARE.sub("", words[k]["w"].lower())
+                     for k in range(j, min(j + 3, n))] == ["and", "a", "half"]):
+                out.append(words[i])
+                i += 1
+                continue
         if len(vals) == 1:
             base, scale = vals[0]
             text = _fmt_num(base, scale)

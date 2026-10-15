@@ -33,7 +33,7 @@ from pathlib import Path
 
 import numpy as np
 
-from engine.captions import band_rect, chunk_png, normalize_cues
+from engine.captions import KIN_CAP_H, band_rect, chunk_png, normalize_cues
 from engine.procedural_audio import (SR, ambience, duck_gain, load_wav,
                                      save_wav)
 
@@ -93,12 +93,13 @@ def _word_windows(words: list, t0: float, t1: float) -> list:
 def _caption_key(words: list, active: int, bible: dict, zone_top) -> str:
     blob = json.dumps({"w": words, "a": active, "z": zone_top,
                        "t": bible.get("typography"), "p": bible.get("palette"),
-                       "v": 2}, sort_keys=True)
+                       "v": 3}, sort_keys=True)  # v3: 2026-10-15 caption size/strip
     return "cap_" + hashlib.sha256(blob.encode()).hexdigest()[:16]
 
 
 def build_caption_inputs(cues: list, bible: dict, png_dir: Path,
-                         offset: float = 0.0) -> tuple:
+                         offset: float = 0.0,
+                         zone_top: int | None = None) -> tuple:
     """Scene-local cues -> absolute overlay inputs via the V13 state machine.
 
     Returns (inputs, repairs). inputs: [{png, t0, t1, cue}] in time order —
@@ -111,7 +112,7 @@ def build_caption_inputs(cues: list, bible: dict, png_dir: Path,
                 for c in (cues or [])]
     norm, repairs = normalize_cues(abs_cues)
     png_dir.mkdir(parents=True, exist_ok=True)
-    zone_top = band_rect()[0]
+    zone_top = band_rect()[0] if zone_top is None else int(zone_top)
     inputs = []
     for ci, cue in enumerate(norm):
         lines = cue.get("lines")
@@ -153,11 +154,12 @@ def build_caption_inputs(cues: list, bible: dict, png_dir: Path,
     return inputs, repairs
 
 
-def _burn_pass(video: Path, inputs: list, out: Path) -> None:
+def _burn_pass(video: Path, inputs: list, out: Path,
+               band_y: int | None = None) -> None:
     cmd = ["ffmpeg", "-y", "-v", "error", "-i", video]
     for item in inputs:
         cmd += ["-i", item["png"]]
-    y = band_rect()[0]
+    y = band_rect()[0] if band_y is None else band_y
     fl, base = "", "0:v"
     for i, item in enumerate(inputs):
         lbl = f"b{i + 1}"
@@ -171,14 +173,15 @@ def _burn_pass(video: Path, inputs: list, out: Path) -> None:
     _run(cmd)
 
 
-def burn_captions(video: Path, inputs: list, out: Path) -> dict:
+def burn_captions(video: Path, inputs: list, out: Path,
+                  band_y: int | None = None) -> dict:
     """Burn caption overlays AFTER composition; >cap inputs -> sequential passes."""
     passes, src, todo = 0, video, list(inputs)
     while todo:
         passes += 1
         chunk, todo = todo[:OVERLAY_PASS_CAP], todo[OVERLAY_PASS_CAP:]
         dst = out if not todo else out.parent / f"{out.stem}_p{passes}.mp4"
-        _burn_pass(src, chunk, dst)
+        _burn_pass(src, chunk, dst, band_y)
         src = dst
     if src != out:
         src.replace(out)
@@ -212,7 +215,7 @@ def _concat_scenes(videos: list, out: Path) -> dict:
 
 
 def concat_and_burn(videos: list, inputs: list, out: Path,
-                    fps: int = 30) -> dict:
+                    fps: int = 30, band_y: int | None = None) -> dict:
     """V15 single-encode assembly: scene concat (same concat FILTER, same
     per-input fps/format normalization) + captions burned AFTER composition
     in ONE libx264 pass. The caption strip is streamed from Python as raw
@@ -229,8 +232,8 @@ def concat_and_burn(videos: list, inputs: list, out: Path,
     if len(sizes) != 1:
         raise RuntimeError(f"scene frame sizes differ: {sorted(sizes)}")
     (w, h) = sizes.pop()
-    band_y = band_rect()[0]
-    strip_h = 192
+    band_y = band_rect()[0] if band_y is None else band_y
+    strip_h = KIN_CAP_H
     n_frames = int(round(total * fps))
     cmd = ["ffmpeg", "-y", "-v", "error"]
     for v in videos:
@@ -467,10 +470,13 @@ def assemble(plan: dict, work_dir: Path, plan_dir: Path | None = None) -> dict:
 
     # 2. captions AFTER composition
     inputs, all_repairs = [], []
+    cap_top = plan.get("caption_top")
+    report["caption_top"] = cap_top if cap_top is not None else band_rect()[0]
     for sc in scenes:
         cin, reps = build_caption_inputs(sc.get("captions"), bible,
                                          work_dir / "captions",
-                                         offset=sc["_start"])
+                                         offset=sc["_start"],
+                                         zone_top=cap_top)
         inputs += cin
         all_repairs += [dict(r, scene=sc["scene_id"]) for r in reps]
         report["scenes"].append({"scene_id": sc["scene_id"],
@@ -484,9 +490,10 @@ def assemble(plan: dict, work_dir: Path, plan_dir: Path | None = None) -> dict:
     cap_video = work_dir / "captioned.mp4"
     if single:
         report["captions"] = concat_and_burn([sc["video"] for sc in scenes],
-                                             inputs, cap_video)
+                                             inputs, cap_video, band_y=cap_top)
     else:
-        report["captions"] = burn_captions(concat, inputs, cap_video)
+        report["captions"] = burn_captions(concat, inputs, cap_video,
+                                           band_y=cap_top)
     # V15: exact overlay record (png, text, active word, window) so the gate
     # can prove caption text == narration per scene from the artifact list
     report["caption_overlays"] = inputs

@@ -45,10 +45,12 @@ ROOT = Path(__file__).resolve().parent.parent
 GRAIN = ROOT / "build" / "cache" / "v15_grain.png"
 OVERSCAN = 1.12          # plate layer scale: camera moves never show edges
 BG_DEPTH, SUBJ_DEPTH = 0.35, 0.6   # small parallax differential (rough masks)
-CAPTION_TOP = 1440.0     # caption carrier band starts at 1464 (captions.py)
+CAPTION_TOP = 1140.0     # caption strip starts at 1150 (captions.V15_CAPTION_TOP)
 SAFE_X0, SAFE_X1 = 70.0, WORLD_W - 70.0
 TOP_ZONE_Y = 230.0       # first baseline of top-zone copy
-LOW_ZONE_BOTTOM = 1390.0  # last baseline of bottom-zone copy
+# 2026-10-15 review: 1390 -> 1090 -- captions moved up to 1150..1390 (out
+# from under the Shorts UI), so bottom-zone copy now ends above them.
+LOW_ZONE_BOTTOM = 1090.0  # last baseline of bottom-zone copy
 GRAMMAR = {"plate": "RICH_ILLUSTRATED_SCENE", "zoom_through": "SCALE_DIVE",
            "process": "PROCESS_FLOW",
            # WP7 (DESIGN §8.2): the additional template-library shot kinds,
@@ -305,7 +307,8 @@ def _label(lid: str, text: str, info: dict, t: float, dur: float,
     if not bb:
         return None
     cx = (bb[0] + bb[2]) / 2
-    ay = min(max((bb[1] + bb[3]) / 2, 640.0), 1260.0)
+    # label box spans ay-164..ay-80; 1210 keeps it above the caption strip
+    ay = min(max((bb[1] + bb[3]) / 2, 640.0), 1210.0)
     side = "left" if cx > WORLD_W / 2 else "right"
     ax = bb[0] + (bb[2] - bb[0]) * (0.3 if side == "left" else 0.7)
     size = 74

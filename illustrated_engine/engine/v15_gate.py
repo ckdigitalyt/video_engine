@@ -51,7 +51,10 @@ from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parent.parent
 MAX_HOLD_S = 4.5
-CAPTION_BAND = (1440.0, 1680.0)
+# 2026-10-15 review: follows engine.captions.V15_CAPTION_TOP (strip
+# 1150..1390, cue centre ~66% down, clear of the Shorts UI overlay).
+from engine.captions import KIN_CAP_H as _CAP_H, V15_CAPTION_TOP as _CAP_TOP  # noqa: E402
+CAPTION_BAND = (float(_CAP_TOP) - 10.0, float(_CAP_TOP + _CAP_H) + 10.0)
 SAFE = (40.0, 60.0, 1040.0)          # x0, y0, x1
 # Right-hand Shorts button rail (DESIGN §7 safe_zones.right_rail; exact
 # insets vary [U]): nothing readable may sit at x > RAIL_X below RAIL_Y0.
@@ -162,9 +165,13 @@ def check_text_bounds(specs: dict) -> dict:
     return {"ok": not fails, "fails": fails[:10], "boxes": n}
 
 
-def check_caption_safe(overlays: list, top: float) -> dict:
+def check_caption_safe(overlays: list, top: float,
+                       band: tuple | None = None) -> dict:
     """Ink bbox of each distinct caption overlay PNG (placed at y=top) must
-    sit inside the safe frame and clear of the right rail."""
+    sit inside the safe frame and clear of the right rail -- and, with
+    `band`, inside the reserved caption band that check_text_bounds keeps
+    every headline/label/number box out of (2026-10-15 review: captions
+    must never render under on-screen copy)."""
     if not overlays:
         return {"ok": False, "fails": ["no caption overlays recorded"]}
     fails, seen = [], {}
@@ -185,6 +192,9 @@ def check_caption_safe(overlays: list, top: float) -> dict:
                float(xs.max()) + 1, top + float(ys.max()) + 1]
         seen[o["png"]] = box
         fails += [f"caption {o.get('text')!r} {m}" for m in _box_problems(box)]
+        if band and (box[1] < band[0] or box[3] > band[1]):
+            fails.append(f"caption {o.get('text')!r} ink {[round(v) for v in box]} "
+                         f"outside the reserved caption band {band}")
     return {"ok": not fails, "fails": fails[:10], "captions": len(seen)}
 
 
@@ -209,7 +219,9 @@ CAPTION_FUNCTION_WORDS = _CAPTION_FUNCTION_WORDS
 _CLAUSE_END = re.compile(r"[,.;:!?—…]['\")\]]*$")
 # Scale words are kept as the on-screen UNIT next to a numeralized digit
 # ("155-145 million") — only bare spelled-out ones/tens/hundred are a fail.
-_SPELLED_NUMBER_WORDS_EXCL_SCALE = {"thousand", "million", "billion"}
+# "one" too (2026-10-15 review): a lone non-quantity "one" ("one quiet
+# truth") is deliberately left as a word by numeralize_cue_words.
+_SPELLED_NUMBER_WORDS_EXCL_SCALE = {"thousand", "million", "billion", "one"}
 
 
 def check_caption_numerals(overlays: list) -> dict:
@@ -613,7 +625,9 @@ def verdict_of(checks: dict) -> str:
     return "HOLD" if bad else "PASS"
 
 
-def _caption_top() -> float:
+def _caption_top(arep: dict | None = None) -> float:
+    if (arep or {}).get("caption_top") is not None:
+        return float(arep["caption_top"])
     from engine.captions import carrier_y
     return float(carrier_y())
 
@@ -636,7 +650,8 @@ def run_gate(work: Path, story: dict, meta: dict, specs: dict, timing: dict,
             arep.get("caption_overlays") or [], story, beat_windows),
         "text_bounds": check_text_bounds(specs),
         "caption_safe": check_caption_safe(
-            arep.get("caption_overlays") or [], _caption_top()),
+            arep.get("caption_overlays") or [], _caption_top(arep),
+            band=CAPTION_BAND),
         "caption_numerals": check_caption_numerals(
             arep.get("caption_overlays") or []),
         "caption_clause_breaks": check_caption_clause_breaks(

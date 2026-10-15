@@ -50,6 +50,7 @@ from engine.v15_plates import (analyze_subject, generate_plate,  # noqa: E402
 from engine.v15_shots import compile_shot  # noqa: E402
 from engine.v15_style import image_prompt, load_style  # noqa: E402
 from engine.v15_timing import beat_timing  # noqa: E402
+from engine.captions import V15_CAPTION_TOP  # noqa: E402
 
 # 2026-10-15 review: inter-sentence silence averaged 0.62-0.69 s (up to 23%
 # of runtime). Measured make-up of that gap on the two reviewed renders:
@@ -82,9 +83,12 @@ _QUANT_LEADS = {"up", "about", "around", "nearly", "roughly", "almost", "over",
 # decision #18 item 1: cue segmentation is a small per-sentence DP (below),
 # not a greedy 4-word cut — the greedy backtrack stranded lone function
 # words ("to", "up") as their own cues on dry run 5.
-CUE_MAX_WORDS = 7
-CUE_MAX_CHARS = 36   # dry run 5 shipped a 37-char cue inside caption_safe
-_LEN_COST = {1: 5, 2: 1, 3: 0, 4: 0, 5: 1, 6: 3, 7: 5}
+# 2026-10-15 review: captions grew 64 -> 96 px, so cues got shorter (was
+# 7 words / 36 chars): 2-3 words is the Shorts norm and keeps the caption
+# big; anything wider than one line wraps to two (engine.captions).
+CUE_MAX_WORDS = 6
+CUE_MAX_CHARS = 26
+_LEN_COST = {1: 5, 2: 0, 3: 0, 4: 2, 5: 5, 6: 9}
 _BIND_COST = 50      # ending a cue on a word that binds forward
 _INNER_CLAUSE_COST = 3  # a clause break (,;:) INSIDE a cue
 _SENT_END = re.compile(r"([.!?]|\.\.\.|\u2026)['\")\]]*$")
@@ -937,6 +941,7 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
                          "music": music_dict, "sfx_library": sfx_lib,
                          "sting_audio": str(sting_path),
                          "single_pass": True,
+                         "caption_top": V15_CAPTION_TOP,
                          "out": str(out_final)}, work)
         (work / "assembly_report.json").write_text(json.dumps(arep, indent=1))
         record_assembly(index, plan["assembly_key"], out_final, cap_h, nar_h,

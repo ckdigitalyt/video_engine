@@ -38,9 +38,13 @@ export interface CaptionsProps {
 }
 
 const FRAME_W = 1080;
-const BAND_H = 192;
+// 2026-10-15 review: kept in step with engine/captions.py (KIN_CAP_H 240,
+// BASE_SIZE 96). NOTE: the live V15/V16 render burns captions via the
+// Python path (engine.v14_assembly + engine.captions.chunk_png, strip at
+// engine.captions.V15_CAPTION_TOP); this component is the WP5 parity path.
+const BAND_H = 240;
 const MARGIN_X = 56;
-const BASE_SIZE = 64;
+const BASE_SIZE = 96;
 const MIN_SIZE = 30;
 const FONT_FAMILY = "JadeCaption";
 
