@@ -104,7 +104,12 @@ def test_unseeded_split_keeps_the_old_midpoint():
     assert abs((tl[0]["t1"] - tl[0]["t0"]) - (tl[1]["t1"] - tl[1]["t0"])) < 0.35
 
 
-def test_seeded_splits_are_not_all_midpoint_halves():
+def test_seeded_splits_are_not_all_midpoint_halves(monkeypatch):
+    # split statistics are calibrated on this synthetic 0.3 s word grid at
+    # the original 0.18 s LEAD_S; LEAD_S only shifts every cut uniformly
+    # (2026-10-15 pacing change 0.18 -> 0.06) and moves the grid alignment,
+    # not the split logic under test.
+    monkeypatch.setattr(P, "LEAD_S", 0.18)
     tim = _words(20)
     ratios = []
     for k in range(16):
@@ -120,7 +125,12 @@ def test_seeded_splits_are_not_all_midpoint_halves():
     assert min(ratios) < 0.6, ratios
 
 
-def test_seeded_split_prefers_a_phrase_boundary():
+def test_seeded_split_prefers_a_phrase_boundary(monkeypatch):
+    # split statistics are calibrated on this synthetic 0.3 s word grid at
+    # the original 0.18 s LEAD_S; LEAD_S only shifts every cut uniformly
+    # (2026-10-15 pacing change 0.18 -> 0.06) and moves the grid alignment,
+    # not the split logic under test.
+    monkeypatch.setattr(P, "LEAD_S", 0.18)
     # word 9 ends a clause -> word 10 starts a phrase; a cut there is
     # preferred over a nearer mid-phrase word.
     tim = _words(20, punct_at={9})

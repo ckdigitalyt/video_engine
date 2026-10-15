@@ -242,7 +242,7 @@ def test_designed_gaps_and_speed_by_role():
     g = cfg["gaps_ms"]
     gaps = [round(b[0] - a[1], 2) for a, b in zip(r.sentence_spans,
                                                   r.sentence_spans[1:])]
-    # after hook 80 ms; normal 150 ms; before payoff 300 ms
+    # after hook / normal / before payoff, per configs/voice.yaml gaps_ms
     assert [round(x * 1000) for x in gaps] == [g["hook"], g["normal"],
                                                g["payoff"]], gaps
     sp = cfg["speed_by_role"]
@@ -254,12 +254,12 @@ def test_designed_gaps_and_speed_by_role():
 def test_speed_by_role_outside_band_is_rejected():
     with tempfile.TemporaryDirectory() as d:
         bad = Path(d) / "v.yaml"
-        bad.write_text((V.CONFIG).read_text().replace("hook: 1.03",
+        bad.write_text((V.CONFIG).read_text().replace("hook: 1.15",
                                                        "hook: 1.4"))
         try:
             V.load_config(bad)
         except ValueError as e:
-            assert "0.95-1.08" in str(e)
+            assert "0.95-1.15" in str(e)
         else:
             raise AssertionError("accepted speed outside band")
 
@@ -440,7 +440,11 @@ def test_live_lexicon_fixes_tyrannosaurus():
     sents = [V.Sentence(s) for s in split_sentences(
         "Tyrannosaurus rex had tiny arms.")]
     with tempfile.TemporaryDirectory() as d:
-        bare = V.synthesize(sents, cfg, Path(d) / "a.wav", lexicon=Lexicon(),
+        # the bare (no-lexicon) mispronunciation is pinned at 1.0x: at the
+        # 2026-10-15 faster delivery (normal 1.13x) Kokoro happens to say
+        # this word right unaided, which is not what this test is about.
+        slow = {**cfg, "speed_by_role": dict.fromkeys(cfg["speed_by_role"], 1.0)}
+        bare = V.synthesize(sents, slow, Path(d) / "a.wav", lexicon=Lexicon(),
                             asr_fn=lambda w: align.transcribe(w, "base.en"))
         fixed = V.synthesize(sents, cfg, Path(d) / "b.wav")
     assert "tyrannosaurus" not in bare.qa["heard"], bare.qa["heard"]

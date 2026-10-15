@@ -62,11 +62,18 @@ class VoiceResult:
     sentence_spans: list = field(default_factory=list)  # [(t0, t1)] truth
 
 
+# 2026-10-15 review: measured 122-146 wpm delivered vs ~170-200 typical for
+# science/facts Shorts; ceiling raised 1.08 -> 1.15 (Kokoro stays clean at
+# 1.15; the voice QA round-trip still guards intelligibility).
+SPEED_BAND = (0.95, 1.15)
+
+
 def load_config(path=None) -> dict:
     cfg = yaml.safe_load(Path(path or CONFIG).read_text())
+    lo, hi = SPEED_BAND
     for role, f in cfg["speed_by_role"].items():
-        if not 0.95 <= f <= 1.08:
-            raise ValueError(f"speed_by_role.{role}={f} outside 0.95-1.08")
+        if not lo <= f <= hi:
+            raise ValueError(f"speed_by_role.{role}={f} outside {lo}-{hi}")
     if cfg["channel_voice"] not in cfg["voices"]:
         raise ValueError("channel_voice is not a defined voice")
     return cfg

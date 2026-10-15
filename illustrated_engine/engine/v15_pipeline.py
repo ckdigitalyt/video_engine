@@ -51,7 +51,18 @@ from engine.v15_shots import compile_shot  # noqa: E402
 from engine.v15_style import image_prompt, load_style  # noqa: E402
 from engine.v15_timing import beat_timing  # noqa: E402
 
-LEAD_S = 0.18      # silence before a beat's narration (breath + first frame)
+# 2026-10-15 review: inter-sentence silence averaged 0.62-0.69 s (up to 23%
+# of runtime). Measured make-up of that gap on the two reviewed renders:
+# ~0.12 s kept clip tail (voice._trim's 150 ms consonant-release guard --
+# NOT shortened, it fixed a real "light"->"life" misread) + LEAD_S 0.18 +
+# ~0.02 s clip lead + beat_tail 0.28-0.75. LEAD_S 0.18 -> 0.06 and the
+# beat_tail magnitudes below cut ~4x; the role-based VARIATION (hook rolls
+# straight on, a held beat before the payoff / after a question, a landing
+# at the end) is unchanged in shape. Typical gap now ~0.2-0.3 s, ~0.45 s
+# before the payoff. NOTE: each beat is still its own TTS clip; synthesising
+# a whole paragraph per clip (more natural prosody across sentences) needs
+# beat timing re-derived from one long clip -- deferred, see report.
+LEAD_S = 0.06      # silence before a beat's narration (breath + first frame)
 # B4 (VIS): v16_gate.HOOK_MAX_FIRST_WORD_S=0.25 bounds LEAD_S + the first
 # measured word's t0 (typically 0.01-0.05s) — 0.30 alone already missed it
 # (WP10/real sample: first word at 0.31-0.32s); 0.18 leaves margin.
@@ -229,11 +240,13 @@ HOLD_PROGRESS_SCALE = (0.75, 1.25)  # seeded per-story spread of that ramp
 HOLD_MIN_S, HOLD_MAX_S = 2.2, 4.0
 SPLIT_FRAC = (0.30, 0.70)
 SPLIT_PHRASE_BONUS_S = 0.45    # a cut on a phrase start may sit this far off
-TAIL_RANGE_S = (0.28, 0.62)    # ordinary beat-to-beat breath (was 0.55 fixed)
-TAIL_AFTER_HOOK_S = 0.3        # the hook rolls straight into the story
-TAIL_BEFORE_PAYOFF_S = 0.75    # a held beat before the answer lands
-TAIL_QUESTION_S = 0.7          # a spoken question gets a moment
-TAIL_END_S = 0.7               # last line lands before the sting/outro
+# 2026-10-15 review: magnitudes cut (were 0.28-0.62 / 0.3 / 0.75 / 0.7 /
+# 0.7); the ordering of the roles is preserved.
+TAIL_RANGE_S = (0.0, 0.10)     # ordinary beat-to-beat breath (was 0.55 fixed)
+TAIL_AFTER_HOOK_S = 0.0        # the hook rolls straight into the story
+TAIL_BEFORE_PAYOFF_S = 0.28    # a held beat before the answer lands
+TAIL_QUESTION_S = 0.22         # a spoken question gets a moment
+TAIL_END_S = 0.35              # last line lands, then loops / sting
 _PHRASE_END = re.compile(r"[,.;:!?—…]['\")\]]*$")
 
 

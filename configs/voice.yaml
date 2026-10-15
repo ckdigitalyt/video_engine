@@ -28,10 +28,14 @@ publish_requires_commercial_ok: true
 lexicon: brand/ink_ember/lexicon.yaml
 
 # per-sentence synthesis joined with designed gaps (ms): after a hook
-# sentence, before a payoff sentence, otherwise
-gaps_ms: {hook: 80, payoff: 300, normal: 150}
-# speed multiplier per role, each within 0.95-1.08 (validated on load)
-speed_by_role: {hook: 1.03, normal: 1.0, payoff: 0.96}
+# sentence, before a payoff sentence, otherwise. 2026-10-15 review: tightened
+# (was 80/300/150) -- silence was up to 23% of runtime; the payoff pause
+# stays the longest so the answer still lands.
+gaps_ms: {hook: 60, payoff: 200, normal: 100}
+# speed multiplier per role, each within 0.95-1.15 (validated on load;
+# was 0.95-1.08 with 1.03/1.0/0.96 -> 122-146 wpm delivered, too slow for
+# the niche). Payoff still a touch slower than the rest.
+speed_by_role: {hook: 1.15, normal: 1.13, payoff: 1.07}
 # beat function -> role for V15 beats (anything else is "normal")
 role_by_function: {HOOK: hook, PAYOFF: payoff}
 
