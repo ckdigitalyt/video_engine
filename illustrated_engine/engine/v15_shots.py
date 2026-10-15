@@ -307,8 +307,12 @@ def _label(lid: str, text: str, info: dict, t: float, dur: float,
     if not bb:
         return None
     cx = (bb[0] + bb[2]) / 2
-    # label box spans ay-164..ay-80; 1210 keeps it above the caption strip
-    ay = min(max((bb[1] + bb[3]) / 2, 640.0), 1210.0)
+    # label box spans ay-164..ay-80 (bottom edge = ay-80); was hardcoded to
+    # 1210 under the OLD caption band (~1500+), which gave huge headroom.
+    # The caption reposition (ee279a9) moved CAPTION_TOP to 1140 but left
+    # this literal untouched -- derive the ceiling from CAPTION_TOP instead
+    # so a future caption-band move can't silently reopen this overlap.
+    ay = min(max((bb[1] + bb[3]) / 2, 640.0), CAPTION_TOP - 15.0 + 80.0)
     side = "left" if cx > WORLD_W / 2 else "right"
     ax = bb[0] + (bb[2] - bb[0]) * (0.3 if side == "left" else 0.7)
     size = 74
@@ -547,7 +551,14 @@ def compile_process_shot(sc: dict, bible: dict, boxes: list, events: list) -> tu
                              "stroke_w": 0}]}, "screen_space": True}))
     steps = shot["steps"]
     n = len(steps)
-    y0, y1 = 420.0, 1250.0
+    # y1 was hardcoded to 1250.0 under the OLD caption band (~1500+); the
+    # caption reposition (ee279a9) moved CAPTION_TOP to 1140 but left this
+    # literal untouched, so the last step chip's box (center +/- up to ~115
+    # for a 2-line size-88 chip) landed inside the new band (confirmed:
+    # t_did_the_asteroid_really_act_alone B2_S2 "CRATER FORMS" at y=1182-
+    # 1318, squarely in the 1140-1400 band). Derive the ceiling from
+    # CAPTION_TOP with headroom for the chip's own half-height instead.
+    y0, y1 = 420.0, CAPTION_TOP - 135.0
     gap = (y1 - y0) / max(1, n - 1) if n > 1 else 0
     prev_t = 0.0
     span = max(0.5, dur - 0.9)

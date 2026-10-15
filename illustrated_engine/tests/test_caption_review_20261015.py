@@ -97,3 +97,24 @@ def test_fast_speech_cues_never_overlap_or_leave_the_beat():
         " ".join(c["text"] for c in cues).split()
     assert all(c["t1"] <= end for c in cues)
     assert all(a["t1"] <= b["t0"] for a, b in zip(cues, cues[1:]))
+
+
+def test_process_step_chips_clear_the_caption_band():
+    """Follow-up to the caption reposition above: CAPTION_TOP moved to 1140
+    but compile_process_shot's step-chip spread kept its own hardcoded
+    y1=1250.0 ceiling (left over from the OLD ~1500+ band). Live render
+    t_did_the_asteroid_really_act_alone/B2_S2 put its last chip ("CRATER
+    FORMS") at y=1182-1318, squarely inside the new 1140-1400 band -- the
+    gate correctly held the video on it. y1 is now derived from
+    CAPTION_TOP; this reproduces that exact 2-step shape and checks the
+    gate clears every chip, not just the rail."""
+    sc = {"duration": 8.0, "shot": {"steps": [
+        {"text": "IMPACT STRIKES", "word": 0},
+        {"text": "CRATER FORMS", "word": 0}]}, "plates": [], "t_of": lambda w: 0.5}
+    boxes = []
+    S.compile_process_shot(sc, {
+        "palette": {"primary": "#15202B", "secondary": "#1F3A56",
+                    "accent": "#C4502A", "text": "#FFF7E8"},
+        "texture": {}}, boxes, [])
+    r = g.check_text_bounds({"s": {"meta": {"text_boxes": boxes}}})
+    assert r["ok"], r
