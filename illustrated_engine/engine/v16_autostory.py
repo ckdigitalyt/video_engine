@@ -26,7 +26,8 @@ MIN_SOURCES = 2
 ROLE_FUNCTION = {"hook": "HOOK", "payoff": "PAYOFF"}
 
 
-def script_to_story(candidate: dict, story_engine: dict) -> dict:
+def script_to_story(candidate: dict, story_engine: dict,
+                    facts_pack: dict | None = None) -> dict:
     """v16_script's sentence-level script -> v15_pipeline's beat-level
     story.json. Deliberately minimal: hook_plan/payoff_image/
     visual_contradiction/concepts are schema-optional everywhere they're
@@ -38,15 +39,27 @@ def script_to_story(candidate: dict, story_engine: dict) -> dict:
     script = story_engine["script"]
     meta = story_engine["metadata"] or {}
     title = meta.get("title") or candidate["title"]
+    # 2026-10-15 review: era/place specifics ("1933", "Space Shuttle
+    # Challenger", "University of Bristol") lived only in the research facts,
+    # which never reached the visual planner -> generic lab/room plates.
+    # Each beat now carries its cited facts' claim text as `context`
+    # (engine.v15_plan shows it to the planner), plus the facts' sources.
+    facts = {f["id"]: f for f in (facts_pack or {}).get("claims") or []}
     beats = []
     for i, s in enumerate(script["sentences"], 1):
-        beats.append({
+        fids = list(s.get("fact_ids") or [])
+        beat = {
             "beat_id": f"B{i}",
             "function": ROLE_FUNCTION.get(s.get("role"), "NORMAL"),
             "narration": s["text"],
             "claim": s["text"],
-            "fact_ids": list(s.get("fact_ids") or []),
-        })
+            "fact_ids": fids,
+        }
+        ctx = "; ".join(facts[f]["claim"] for f in fids
+                        if f in facts and facts[f].get("claim"))
+        if ctx:
+            beat["context"] = ctx[:400]
+        beats.append(beat)
     story = {"story_id": slugify(title), "title": title,
              "subject": candidate.get("cluster", ""), "beats": beats,
              "topic_id": candidate.get("id")}
@@ -83,7 +96,7 @@ def generate_story(candidate: dict, *, ask=None, fetch_sources=None) -> dict:
         return {"status": "hold",
                "reason": "script: " + "; ".join(story_engine["holds"]),
                "facts": facts, "script_engine": story_engine}
-    story = script_to_story(candidate, story_engine)
+    story = script_to_story(candidate, story_engine, facts)
     return {"status": "ok", "story": story, "facts": facts,
            "script_engine": story_engine}
 
@@ -139,7 +152,8 @@ def generate_story_ranked(candidates: list, *, ask=None, fetch_sources=None,
                               batch_titles=batch_titles, ask=ask)
     all_candidates = research_holds + result["candidates"]
     if result["verdict"] == "PASS":
-        story = script_to_story(by_title[result["picked_topic"]], result["story"])
+        story = script_to_story(by_title[result["picked_topic"]], result["story"],
+                                dict(topics_facts).get(result["picked_topic"]))
         return {"status": "ok", "story": story, "script_engine": result["story"],
                "picked_topic": result["picked_topic"], "candidates": all_candidates}
 

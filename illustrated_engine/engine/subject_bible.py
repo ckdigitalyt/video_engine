@@ -29,7 +29,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 CACHE_DIR = ROOT / "build" / "cache" / "subject_bible"
 PROMPT_VERSION = "subject_bible/1.0"
-IDENTITY_VERSION = "subject_identity/1.0"
+IDENTITY_VERSION = "subject_identity/1.1"  # 2026-10-15: one object, look only
 
 
 def main_concept(story: dict) -> dict | None:
@@ -81,15 +81,18 @@ Video title: {story.get('title', story['story_id'])}
 Narration:
 {lines}
 
-Identify the recurring main visual subject (the thing most shots must show)
-and return ONLY JSON:
+Identify the recurring main visual subject: ONE physical object or creature
+you could photograph (e.g. "the asteroid") -- never an event or a compound
+like "the asteroid impact and megatsunami". Return ONLY JSON:
 {{"name": "<short concrete noun phrase, e.g. 'the icy dwarf planet'>",
  "aliases": ["<every lowercase 1-4 word phrase the narration or a shot
    description may use for it, e.g. 'tiny world', 'small world', 'dwarf
    planet' — 3 to 8 entries>"],
- "description": "<= 30 words, appearance only: shape, surface, colours,
-   texture, scale cues. Positive phrasing only (say what it IS, never
-   'not X'). Scientifically plausible for this exact subject.",
+ "description": "<= 30 words, the object's own fixed LOOK only: shape,
+   surface, colours, texture, scale cues -- no action, no surroundings,
+   no event (it is pasted verbatim into every shot, so it must hold in all
+   of them). Positive phrasing only (say what it IS, never 'not X').
+   Scientifically plausible for this exact subject.",
  "not_like": "<= 12 words: the most likely WRONG generic depiction an
    illustrator would default to, e.g. 'Earth with blue oceans and green
    continents'"}}
@@ -192,7 +195,32 @@ def inject_subject(subject_text: str, bible: dict) -> str:
     cid = str(bible.get("concept_id") or "").replace("_", " ").strip()
     desc = bible.get("description")
     aliases = [a for a in (bible.get("aliases") or []) if a] + ([cid] if cid else [])
-    if not desc or desc in subject_text or \
-            not any(alias_in(a, subject_text) for a in aliases):
+    if not desc or desc.rstrip(". ") in subject_text:
         return subject_text
-    return subject_text.rstrip(". ") + ". " + desc
+    # 2026-10-15 review (subject lock): also match each alias without its
+    # leading article ("the asteroid" -> "asteroid" in "A dark asteroid
+    # fragment"), and splice the locked look in RIGHT AFTER the first
+    # mention -- image models weight early tokens, so a description appended
+    # at the end lost to the shot's own adjectives and the subject was
+    # redesigned shot to shot.
+    import re as _re
+    cands = set()
+    for a in aliases:
+        a = str(a).strip().lower()
+        cands.add(a)
+        core = _re.sub(r"^(the|a|an)\s+", "", a)
+        if core:
+            cands.add(core)
+    hits = []
+    low = subject_text.lower()
+    for a in sorted(cands, key=len, reverse=True):
+        if not alias_in(a, subject_text):
+            continue
+        m = _re.search(r"(?<!\w)" + _re.escape(a) + r"(?:e?s)?(?!\w)", low)
+        if m:
+            hits.append((m.start(), m.end()))
+    if not hits:
+        return subject_text
+    start, end = min(hits)
+    return (subject_text[:end] + f" ({desc.rstrip('. ')})"
+            + subject_text[end:])

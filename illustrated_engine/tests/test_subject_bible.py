@@ -71,7 +71,9 @@ def test_identity_path_no_recurring_subject(monkeypatch, tmp_path):
 def test_inject_subject_by_alias_whole_word_once():
     bible = dict(_IDENTITY, concept_id="icy_dwarf_planet")
     out = inject_subject("A small icy world hangs in starlit space", bible)
-    assert out.endswith(_IDENTITY["description"])
+    # 2026-10-15 subject lock: spliced right after the first mention
+    assert out.startswith("A small icy world (" + _IDENTITY["description"].rstrip(". "))
+    assert out.endswith(") hangs in starlit space")
     assert inject_subject(out, bible) == out          # never twice
     # whole words only: "worldly" is not "world"
     assert inject_subject("a worldly tinyness", {"aliases": ["world"],
@@ -100,6 +102,18 @@ def test_build_subject_bible_fallback_when_llm_unavailable():
     story = _story([{"id": "skater", "beats": ["B1", "B2"]}])
     r = build_subject_bible(story, use_llm=True, ask=lambda p: None)
     assert r["source"] == "fallback" and r["concept_id"] == "skater"
+
+
+def test_inject_subject_lock_matches_bare_noun_and_is_reused_verbatim():
+    bible = {"concept_id": "the_asteroid", "aliases": ["the asteroid", "that rock"],
+             "description": "Pitted charcoal-grey potato-shaped rock, glowing orange cracks."}
+    shots = ["A dark jagged asteroid fragment resting beside a crater rim",
+             "The asteroid plunging into open ocean",
+             "Waves rolling over that rock on the seabed"]
+    outs = [inject_subject(t, bible) for t in shots]
+    lock = "(Pitted charcoal-grey potato-shaped rock, glowing orange cracks)"
+    assert all(lock in o for o in outs), outs
+    assert outs[0].startswith("A dark jagged asteroid " + lock)
 
 
 def test_inject_subject_matches_concept_id():

@@ -223,6 +223,85 @@ def check_distinctness(video_id: str, meta: dict, plate_paths: list,
             "history_size": len(history), "warning": True}
 
 
+# ------------------------------------------------- within-video reuse --
+# 2026-10-15 review: the distinctness check above only compares AGAINST
+# OTHER videos; nothing stopped one video from showing the same generated
+# image twice (same plate on two shots) or a near-identical re-crop of it.
+# Crop-robust: each plate's dHash is taken over its full frame AND centred /
+# offset sub-crops (CROP_SCALES x CROP_OFFSETS); two plates whose closest
+# (crop vs full) pair is within INTERNAL_DUP_MAX_HAMMING are one image.
+# Calibrated on the two reviewed renders: 19 + 24 distinct plates, closest
+# genuinely different pair = 11 bits; exact reuse = 0.
+INTERNAL_DUP_MAX_HAMMING = 4
+CROP_SCALES = (1.0, 0.85, 0.7, 0.55)
+CROP_OFFSETS = (0.5, 0.25, 0.75)
+
+
+def _dhash_img(im, hash_size: int = 8) -> int:
+    im = im.convert("L").resize((hash_size + 1, hash_size), Image.LANCZOS)
+    px = list(im.getdata())
+    val = 0
+    for row in range(hash_size):
+        base = row * (hash_size + 1)
+        for col in range(hash_size):
+            val = (val << 1) | int(px[base + col] > px[base + col + 1])
+    return val
+
+
+def crop_hashes(path) -> list:
+    """[full-frame dHash, then sub-crop dHashes]."""
+    im = Image.open(path)
+    W, H = im.size
+    out = [_dhash_img(im)]
+    for sc in CROP_SCALES[1:]:
+        w, h = int(W * sc), int(H * sc)
+        for ox in CROP_OFFSETS:
+            for oy in CROP_OFFSETS:
+                x, y = int((W - w) * ox), int((H - h) * oy)
+                out.append(_dhash_img(im.crop((x, y, x + w, y + h))))
+    return out
+
+
+def shot_plates(meta: dict, specs: dict) -> dict:
+    """shot key -> its first ai_image plate path (timeline order)."""
+    out = {}
+    for key in meta:
+        for lay in (specs.get(key) or {}).get("layers") or []:
+            path = (lay.get("payload") or {}).get("path")
+            if lay.get("source") == "ai_image" and path:
+                out[key] = path
+                break
+    return out
+
+
+def check_internal_reuse(meta: dict, specs: dict) -> dict:
+    """HOLD when one video shows the same generated image on two shots, or
+    two of its plates are crops of one another."""
+    by_shot = shot_plates(meta, specs)
+    fails, users = [], {}
+    for k, p in by_shot.items():
+        users.setdefault(p, []).append(k)
+    for p, ks in users.items():
+        if len(ks) > 1:
+            fails.append(f"one plate shown on {len(ks)} shots {ks}")
+    hashes = {}
+    for p in users:
+        try:
+            hashes[p] = crop_hashes(p)
+        except OSError:
+            continue
+    paths = list(hashes)
+    for i, a in enumerate(paths):
+        for b in paths[i + 1:]:
+            ha, hb = hashes[a], hashes[b]
+            d = min(min(hamming(ha[0], x) for x in hb),
+                    min(hamming(hb[0], x) for x in ha))
+            if d <= INTERNAL_DUP_MAX_HAMMING:
+                fails.append(f"plates of {users[a][0]} and {users[b][0]} are "
+                             f"the same image re-cropped (dHash {d})")
+    return {"ok": not fails, "fails": fails[:10], "plates": len(users)}
+
+
 # ------------------------------------------------------------- scorecard --
 
 def _clamp(v: float, lo: float = 0.0, hi: float = 100.0) -> float:
@@ -434,6 +513,7 @@ def run_gate(work, story: dict, meta: dict, specs: dict, timing: dict,
     checks["distinctness"] = check_distinctness(
         video_id or story.get("story_id", ""), meta, plate_paths,
         history or [], specs=specs)
+    checks["internal_reuse"] = check_internal_reuse(meta, specs)
     checks["duration"] = check_duration_gate(
         specs, meta, story, (checks.get("av") or {}).get("duration_s"))
     verdict = v15_gate.verdict_of(checks)

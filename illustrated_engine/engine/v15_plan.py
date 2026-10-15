@@ -40,7 +40,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 CACHE_DIR = ROOT / "build" / "cache" / "v15_plans"
-PROMPT_VERSION = "bvp/1.8"
+PROMPT_VERSION = "bvp/1.9"  # 2026-10-15: subject lock, era/place, one-frame comparison
 
 SHOT_KINDS = ("plate", "zoom_through", "process")
 CAMERAS = ("push_in", "pull_out", "pan_left", "pan_right", "rise", "descend")
@@ -103,10 +103,17 @@ def _identity_block(subject: dict | None) -> str:
     if not subject.get("description"):
         return ""
     name = subject.get("name") or str(subject.get("concept_id") or "").replace("_", " ")
+    # 2026-10-15 review: the asteroid changed every shot (black sphere ->
+    # spiked mine -> boulder -> faceted rock) because each shot subject
+    # re-described its look. The look is now LOCKED: one description,
+    # spliced verbatim into every prompt that names it
+    # (engine.subject_bible.inject_subject); shots name it, never restyle it.
     return (f"\nRECURRING SUBJECT: {name} — {subject['description']}\n"
-            f"Whenever a shot shows it, call it \"{name}\" in the subject and "
-            "describe it consistently with that look: it must read as this "
-            "specific thing, never a generic stand-in.\n")
+            f"Whenever a shot shows it, call it exactly \"{name}\" in the "
+            "subject and DO NOT describe its appearance (shape, colour, "
+            "surface, size adjectives) — that locked look is added "
+            "automatically, and any re-description makes it change from shot "
+            "to shot. Describe only what is happening to it and around it.\n")
 
 
 def build_prompt(story: dict, bible: dict, subject: dict | None = None) -> str:
@@ -116,7 +123,9 @@ def build_prompt(story: dict, bible: dict, subject: dict | None = None) -> str:
         numbered = " ".join(f"{i}:{w}" for i, w in enumerate(ws))
         beats_txt.append(
             f"- {b['beat_id']} [{b.get('function', '')}] words: {numbered}\n"
-            f"  visual idea (hint, may improve): {b.get('visual_answer', '')}")
+            f"  visual idea (hint, may improve): {b.get('visual_answer', '')}"
+            + (f"\n  research facts (era/place/vehicle details to show): "
+               f"{b['context']}" if b.get("context") else ""))
     style = bible.get("illustration_style", "editorial illustration")
     return f"""You are the visual director of a vertical (9:16) explainer short.
 Title: {story.get('title', story['story_id'])}
@@ -148,6 +157,12 @@ Field rules:
     in the image. NO digits, numbers, text, labels, rulers-with-readings or
     charts in the subject (figures are added as overlay typography).
     No split panels. <= 45 words.
+    SPECIFIC SETTING: when the narration or a beat's research facts name an
+    era, place, institution or vehicle (a year, "University of Bristol",
+    "Space Shuttle", "Siberia"), the subject shows THAT setting with period-
+    and place-accurate detail (e.g. "a 1933 physics laboratory bench with
+    brass instruments", "inside the Space Shuttle mid-deck"), never a
+    generic lab / room / landscape.
     NEVER copy or paraphrase the narration sentence as the subject — the
     image model cannot draw a sentence and paints it as garbled lettering
     or invents a random figure. Hardest case: a correction / contrast /
@@ -166,8 +181,9 @@ Field rules:
     wide = establishing view with surroundings; medium = the subject and its
     immediate context; close = extreme close-up of a surface/detail filling
     the frame; surface = standing ON or right next to it, ground-level;
-    cutaway = cross-section / inside view; comparison = two things side by
-    side; observer = people observing it (ONLY if the narration mentions
+    cutaway = cross-section / inside view; comparison = ONE continuous scene
+    (single frame, shared ground and light) with the subject next to ONE
+    familiar scale reference — never two panels or a split screen; observer = people observing it (ONLY if the narration mentions
     people). The view is applied to the image automatically.
  composition: where the subject sits. "subject_low" (subject large in the
     lower two thirds, top third calm) ONLY for a shot with a headline or
@@ -694,7 +710,7 @@ def plan_key(story: dict, bible: dict, subject: dict | None = None) -> str:
         "subject": (subject or {}).get("description"),
         "v": PROMPT_VERSION, "title": story.get("title"),
         "beats": [{k: b.get(k) for k in ("beat_id", "function", "narration",
-                                          "visual_answer")}
+                                          "visual_answer", "context")}
                   for b in story["beats"]],
         "style": bible.get("illustration_style")}, sort_keys=True)
     return hashlib.sha256(blob.encode()).hexdigest()[:16]

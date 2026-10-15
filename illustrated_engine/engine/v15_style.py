@@ -218,7 +218,11 @@ VIEW_PHRASES = {
     "close": "Extreme close-up of surface detail filling the whole frame",
     "surface": "Low ground-level view from right on the surface",
     "cutaway": "Cutaway cross-section view",
-    "comparison": "Side-by-side comparison view",
+    # 2026-10-15 review: "Side-by-side comparison view" rendered as a
+    # literal two-panel split screen with a hard seam (asteroid render B3,
+    # B9). Same positive-phrasing fix as subject_low/headline-room.
+    "comparison": "Single unified frame, one continuous scene with one "
+                  "scale reference standing beside the subject",
     "observer": "Human-scale view with small figures observing",
 }
 
@@ -272,8 +276,9 @@ def image_prompt(bible: dict, subject: str, composition: str = "centered",
         # clear focal subject" / "main subject large" made FLUX drop one
         # (live_20261011_162330: "Moon ... beside Earth" -> Moon alone,
         # 11 narration_mismatch fails across 3 regen rounds)
-        comp = ("every named thing fully visible together in the same "
-                "frame" + (", calm darker background across the top third"
+        comp = ("every named thing fully visible together in one seamless "
+                "continuous scene, sharing the same ground, sky and light"
+                + (", calm darker background across the top third"
                            if composition == "subject_low" else ""))
     subj = _BANNED_WORD.sub("", subject.strip().rstrip("."))
     guidance = FRAMING_GUIDANCE

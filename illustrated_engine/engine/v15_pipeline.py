@@ -445,6 +445,33 @@ def _prompt_parts(shot: dict, subject_bible: dict | None = None,
              "view": shot.get("view"), "hook": hook}]
 
 
+def dedupe_shot_prompts(shots: list, bible: dict,
+                        subject_bible: dict | None = None) -> list:
+    """2026-10-15 review: a plate shot whose prompt duplicates an EARLIER
+    shot's prompt is re-viewed (next of _DUP_VIEWS that differs from its
+    own view and its neighbour's) and its prompts rebuilt, so every shot
+    gets its own generated image. Mutates `shots`; -> change log."""
+    seen, log = set(), []
+    for i, s in enumerate(shots):
+        if s["shot"]["kind"] != "plate":
+            seen.update(s["prompts"])
+            continue
+        tries = 0
+        while any(p in seen for p in s["prompts"]) and tries < len(_DUP_VIEWS):
+            prev_view = shots[i - 1]["shot"].get("view") if i else None
+            cur = s["shot"].get("view")
+            opts = [v for v in _DUP_VIEWS if v not in (cur, prev_view)]
+            new_view = opts[tries % len(opts)]
+            s["shot"] = dict(s["shot"], view=new_view, dedup_from=cur)
+            s["prompts"] = _prompts_for(s["shot"], bible, subject_bible,
+                                        s.get("hook", False))
+            tries += 1
+            log.append({"shot": f"{s['beat']['beat_id']}_S{s['idx'] + 1}",
+                        "from_view": cur, "to_view": new_view})
+        seen.update(s["prompts"])
+    return log
+
+
 # decision #18 item 4: a plate that fails QA is regenerated from a prompt
 # STEERED by why it failed (positive phrasing only — FLUX has no negative
 # prompt), not the identical prompt on another provider. Near-duplicates
@@ -597,6 +624,18 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
             report["warnings"].append({"beat": b["beat_id"],
                                        "warning": "short_shot_merged"})
 
+    # 3a. 2026-10-15 review: no two shots may resolve to the IDENTICAL
+    #     prompt -- an identical prompt hits the same cached plate, so the
+    #     video showed one generated image twice under a different crop/
+    #     camera move (levitation render: B9_S2/B9_S3 shared one plate).
+    report["prompt_dedup"] = dedupe_shot_prompts(shots, bible, subj_bible)
+
+    # KNOWN FUTURE DIRECTION (2026-10-15 review, deliberately NOT built):
+    # every shot is a still plate animated only by a camera move. Shots
+    # whose subject itself moves (a levitating droplet, a breaking wave)
+    # would need real in-image motion -- a video-generation provider or
+    # layered/masked element animation. Separate R&D effort; out of scope
+    # for the camera vocabulary in engine.v15_motion.
     # 3b. camera motion for the whole video at once (engine.v15_motion):
     #     seeded by story_id, planner camera kept as intent, no back-to-back
     #     repeats, no family dominating — owner review 2026-10-14
