@@ -19,7 +19,7 @@ from pathlib import Path
 
 from engine.v16_research import ResearchHold, build_facts
 from engine.v16_script import write_story
-from engine.v16_sources import wikipedia_sources
+from engine.v16_sources import candidate_sources
 from engine.v16_topics import STORIES_DIR, slugify
 
 MIN_SOURCES = 2
@@ -78,6 +78,16 @@ def script_to_story(candidate: dict, story_engine: dict,
     return story
 
 
+def _sources_for(candidate: dict, fetch_sources=None) -> list:
+    """An injected `fetch_sources(query, n)` (tests, callers) keeps its old
+    title-query contract; the default searches by the candidate's entities
+    first (engine.v16_sources.candidate_sources -- 2026-10-16: title-only
+    queries returned 0-1 or off-subject articles for 4 of 12 topics)."""
+    if fetch_sources is not None:
+        return fetch_sources(candidate["title"], 3)
+    return candidate_sources(candidate, 3)
+
+
 def generate_story(candidate: dict, *, ask=None, fetch_sources=None) -> dict:
     """-> {"status": "ok", "story": {...}, "facts": {...}, "script_engine": {...}}
     or {"status": "hold", "reason": "..."}. Never raises for a research/
@@ -85,9 +95,8 @@ def generate_story(candidate: dict, *, ask=None, fetch_sources=None) -> dict:
     this makes no attempt to swallow beyond what build_facts/write_story
     already handle (LLMUnavailable inside write_story is itself a HOLD, not
     an exception — see v16_script.write_story)."""
-    fetch_sources = fetch_sources or wikipedia_sources
     title = candidate["title"]
-    sources = fetch_sources(title, 3)
+    sources = _sources_for(candidate, fetch_sources)
     if len(sources) < MIN_SOURCES:
         return {"status": "hold",
                "reason": f"only {len(sources)} usable source(s) for "
@@ -129,11 +138,10 @@ def generate_story_ranked(candidates: list, *, ask=None, fetch_sources=None,
         "candidates": [...]} or {"status": "hold", "reason": "...", "candidates": [...]}
     """
     from engine.v16_script import rank_write_story
-    fetch_sources = fetch_sources or wikipedia_sources
     by_title, topics_facts, research_holds = {}, [], []
     for c in candidates[:3]:
         by_title[c["title"]] = c
-        sources = fetch_sources(c["title"], 3)
+        sources = _sources_for(c, fetch_sources)
         if len(sources) < MIN_SOURCES:
             research_holds.append({"topic": c["title"], "status": "hold",
                                    "reason": f"only {len(sources)} usable source(s) for "

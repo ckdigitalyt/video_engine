@@ -137,6 +137,23 @@ def preflight(work: Path, n_videos: int = 1) -> dict:
 
 # =========================================================== topic selection
 
+# 2026-10-16 (zero-publish day): the old headroom max(2n, n+5) was sized on
+# WP11's 20 raw -> 16 queued, but with ~490 topic_history rows the funnel
+# now keeps ~1/3: live batches 2026-10-15/16 went 6->0, 6->2, 6->2, 8->3,
+# 8->2, 10->3 raw->queued (~half dedupe, ~quarter under MIN_SCORE). So a
+# slot that MAX_TOPICS_PER_SLOT=3 should give 3 topic attempts got 1-2
+# (live_20261015_202500: 2 slots, 1 topic each, both held -> nothing).
+# Asking for ~6 raw per slot keeps ~2-3 queued per slot at that yield.
+# Same 2 LLM calls; topic_ideate's schema caps a call at 40 candidates.
+RAW_TOPICS_PER_SLOT = 6
+RAW_TOPICS_MIN_EXTRA = 12
+RAW_TOPICS_MAX = 40
+
+
+def raw_topic_count(n: int) -> int:
+    return min(RAW_TOPICS_MAX, max(n * RAW_TOPICS_PER_SLOT, n + RAW_TOPICS_MIN_EXTRA))
+
+
 def select_topics(n: int, *, series: str | None = None,
                   max_per_cluster: int = MAX_PER_CLUSTER,
                   history_path=None, ask=None) -> dict:
@@ -147,8 +164,8 @@ def select_topics(n: int, *, series: str | None = None,
     already-deduped/scored/ranked output. No new LLM calls beyond
     `build_queue`'s own (2 per call, DESIGN §2.5)."""
     from engine.v16_topics import DEFAULT_HISTORY_PATH, build_queue
-    raw_n = max(n * 2, n + 5)  # headroom: dedupe/MIN_SCORE reject some (WP11: 20 raw -> 16 queued)
-    result = build_queue(n=raw_n, history_path=history_path or DEFAULT_HISTORY_PATH, ask=ask)
+    result = build_queue(n=raw_topic_count(n),
+                         history_path=history_path or DEFAULT_HISTORY_PATH, ask=ask)
     queue = result["queue"]
 
     def _cluster(entry):
