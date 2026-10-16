@@ -36,11 +36,31 @@ _SCALES = {"thousand": 10**3, "million": 10**6, "billion": 10**9, "trillion": 10
 _TOKEN = re.compile(r"\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+(?:\.\d+)?|[A-Za-z]+|-|[^\w\s]")
 
 
+def _canon_num(v: float) -> float:
+    """12 significant digits: float('4.28') * 1e9 is 4280000000.0000005, so
+    a digit-written and a spelled form of the same figure would otherwise
+    compare unequal in the set arithmetic every caller does."""
+    return float(f"{v:.12g}")
+
+
 def numbers_in(text: str, min_spelled: int = 0) -> set:
     """Numeric values mentioned in `text`, digits or spelled ("sixty-five",
-    "eighty million", "80 million"). Spelled values below `min_spelled` are
-    ignored: "one"/"two" are mostly idiom ("one of", "in two ways") in narration.
-    Years and ordinals are read as their digits."""
+    "eighty million", "80 million", "three point eight billion"). Spelled
+    values below `min_spelled` are ignored: "one"/"two" are mostly idiom
+    ("one of", "in two ways") in narration. Years and ordinals are read as
+    their digits.
+
+    2026-10-16 (live_20261015_104500, "The Oldest Rock on Earth..."): two
+    spelled forms were mis-parsed, so a correctly-sourced narration number
+    failed check_digits ("numbers ... are not in its cited facts") and the
+    topic HELD:
+      - "three point eight billion" -> {3, 8e9}: the decimal was dropped and
+        "eight billion" read alone. Now 3.8e9 (matches the fact's "3.8
+        billion"). The script prompt forbids digits, so a spelled decimal is
+        the ONLY way a script can say a sourced "3.8 billion".
+      - "four thousand two hundred eighty million" -> 280,004,000: a larger
+        scale after a smaller one must multiply the running total
+        ((4000 + 280) x 1e6 = 4.28e9), not add to it."""
     toks = _TOKEN.findall(text)
     out, i, n = set(), 0, len(toks)
     while i < n:
@@ -50,12 +70,13 @@ def numbers_in(text: str, min_spelled: int = 0) -> set:
             if i + 1 < n and toks[i + 1].lower() in _SCALES:
                 v *= _SCALES[toks[i + 1].lower()]
                 i += 1
-            out.add(v)
+            out.add(_canon_num(v))
             i += 1
             continue
         w = t.lower()
         if w in _UNITS or w in _TENS or w in _SCALES or w == "hundred":
             total, cur, last, j = 0, 0, None, i
+            last_scale = 0
             while j < n:
                 w = toks[j].lower()
                 if w == "-" and last and j + 1 < n and toks[j + 1].lower() in _UNITS:
@@ -79,14 +100,32 @@ def numbers_in(text: str, min_spelled: int = 0) -> set:
                     cur = max(cur, 1) * 100
                     last = "hundred"
                 elif w in _SCALES:
-                    total += max(cur, 1) * _SCALES[w]
-                    cur, last = 0, "scale"
+                    sc = _SCALES[w]
+                    if total and sc > last_scale:
+                        # "four thousand two hundred eighty MILLION"
+                        total = (total + cur) * sc
+                    else:
+                        total += max(cur, 1) * sc
+                    cur, last, last_scale = 0, "scale", max(last_scale, sc)
                 else:
                     break
                 j += 1
-            v = total + cur
+            v = float(total + cur)
+            # spelled decimal: "three point eight [billion]" -- only on a
+            # plain small integer part (no scale word consumed yet)
+            if (not total and j + 1 < n and toks[j].lower() == "point"
+                    and _UNITS.get(toks[j + 1].lower(), 99) <= 9):
+                digits, k = "", j + 1
+                while k < n and _UNITS.get(toks[k].lower(), 99) <= 9:
+                    digits += str(_UNITS[toks[k].lower()])
+                    k += 1
+                v = float(f"{cur}.{digits}")
+                if k < n and toks[k].lower() in _SCALES:
+                    v *= _SCALES[toks[k].lower()]
+                    k += 1
+                j = k
             if v >= min_spelled:
-                out.add(float(v))
+                out.add(_canon_num(v))
             i = max(j, i + 1)
             continue
         i += 1

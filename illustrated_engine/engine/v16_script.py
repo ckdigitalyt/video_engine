@@ -47,7 +47,10 @@ CRITIC_MEAN_MIN, CRITIC_FLOOR = 4.0, 3
 # never picked. (Mean/other-dimension floors stay removed, per decision #17.)
 CRITIC_HARD_FLOORS = {"hook_strength": 3, "payoff_clarity": 3}
 MAX_SCRIPT_REWRITES = 2  # decision #14: shared pool across code-error + critic rewrites
-RANK_REWRITE_BUDGET = 1  # decision #15 item 2: one rewrite per topic in the rank-not-block flow
+RANK_REWRITE_BUDGET = 1  # decision #15 item 2: one CRITIC rewrite per topic in the rank-not-block flow
+# 2026-10-16: a code-rule fix no longer spends the critic rewrite (see
+# _rank_one) -- one targeted code-fix per draft (first draft, critic rewrite).
+RANK_CODE_FIX_BUDGET = 1
 # decision #15 step 1: real critic score (prompt_version 1, unchanged) measured against
 # the owner's own ACCEPTABLE sample (t_figure_skater_spin, commit 56b4955) --
 # illustrated_engine/build_reports/decision15/step1_calibration.json. The old uniform
@@ -200,6 +203,29 @@ def check_digits(script: dict, facts: dict) -> list:
     return errs
 
 
+def _magnitude_only(text: str, m: "re.Match") -> bool:
+    """True when an "only" is a magnitude qualifier directly on a sourced
+    figure ("rocks only three point seven billion years old") -- not an
+    exclusivity claim. 2026-10-16 (live_20261015_104500, Oldest Rock draft 1)
+    this tripped the absolute-claim rule. Narrow on purpose: the figure must
+    be >= 11 / a decimal / a scale, i.e. one check_digits must itself find in
+    the sentence's cited facts; "only one" / "only two people" (counts) stay
+    absolute claims."""
+    if m.group(0).lower() != "only":
+        return False
+    nxt = " ".join(text[m.end():].split()[:6])
+    first = (nxt.split() or [""])[0].lower().strip(",.;:")
+    if not (first[:1].isdigit() or first in _SPELLED_NUMBER_START):
+        return False
+    return any(v >= 11 or v != int(v) for v in numbers_in(nxt, min_spelled=0))
+
+
+_SPELLED_NUMBER_START = frozenset(
+    "two three four five six seven eight nine ten eleven twelve thirteen "
+    "fourteen fifteen sixteen seventeen eighteen nineteen twenty thirty forty "
+    "fifty sixty seventy eighty ninety hundred thousand million billion".split())
+
+
 def check_absolute_claims(script: dict, facts: dict) -> list:
     """decision #16 item 2: a sentence making an absolute/superlative claim
     ("only", "first", "never", "always", "biggest", "no one", ...) must be
@@ -218,7 +244,8 @@ def check_absolute_claims(script: dict, facts: dict) -> list:
     by_id = {f["id"]: f for f in facts["claims"]}
     errs = []
     for i, s in enumerate(script["sentences"], 1):
-        m = ABSOLUTE_CLAIM_RE.search(s["text"])
+        m = next((x for x in ABSOLUTE_CLAIM_RE.finditer(s["text"])
+                  if not _magnitude_only(s["text"], x)), None)
         if not m:
             continue
         supported = False
@@ -507,13 +534,110 @@ def _finalize(run: _Run, story: dict, topic: str, facts: dict, series_note: str,
 
 # ============================================= decision #15: rank, don't block
 
+def _rank_key(crit: dict) -> tuple:
+    """Draft preference: clears CRITIC_HARD_FLOORS first, then critic mean."""
+    s = crit["scores"]
+    return (not critic_floor_misses(s), sum(s.values()) / len(s))
+
+
+def _critic_bar(crit: dict) -> str:
+    bar = (f"Critic scores: {crit['scores']}. The bar is a mean of {CRITIC_MEAN_MIN} or "
+           f"better with no score below {CRITIC_FLOOR}; lift every score under 4.")
+    misses = critic_floor_misses(crit["scores"])
+    if misses:
+        bar += (" HARD REQUIREMENT (the script is rejected otherwise): "
+                + ", ".join(misses) + ". Make sentence 1 a specific number or "
+                "impossible-sounding claim in its first six words, and make the "
+                "last line answer the hook's question directly.")
+    return crit["critique"] + "\n" + bar
+
+
+def _rank_one(topic: str, facts: dict, series_note: str, ask) -> dict:
+    """One topic's draft -> (code-fix) -> critic -> (critic rewrite ->
+    code-fix) -> best draft. -> a rank_write_story candidate dict.
+
+    2026-10-16 (zero-publish day, 4 batches / ~12 topics): two structural
+    losses in the old single-budget loop, neither a quality call:
+      1. RANK_REWRITE_BUDGET=1 was SHARED: a first draft that needed a code
+         fix (live_20261015_093943 prism: "you'll never see") spent it, so a
+         hook_strength=2 critic score got no rewrite at all -> hold. The
+         code-fix and the critic rewrite now have separate budgets
+         (RANK_CODE_FIX_BUDGET per draft, RANK_REWRITE_BUDGET critic
+         rewrites) -- 2 rewrites total, the same cap decision #14 gives
+         write_story (MAX_SCRIPT_REWRITES=2).
+      2. The critic rewrite is an optional polish (it fires below the
+         critic_pass mean-4 bar, far above the 3/5 floors). When it broke a
+         code rule, the topic HELD and the already-valid draft was thrown
+         away (live_20261015_202500 warp bubble: draft 1 was code-clean with
+         hook 4 / payoff 3 -- above both floors -- and was lost because the
+         rewrite added "never" and an unspoken "Zero g-force"). The rewrite
+         now gets its own code-fix; if it still fails, or scores lower, the
+         previous valid draft is kept. Floors and code checks are unchanged:
+         only a draft that clears both can be "scored"."""
+    run = _Run(ask)
+    rewrites = 0
+
+    def _clean(script):
+        """-> (code-clean script | None, remaining errors)."""
+        nonlocal rewrites
+        errs = code_checks(script, facts)
+        for _ in range(RANK_CODE_FIX_BUDGET):
+            if not errs:
+                break
+            script = _write(run, topic, facts, series_note, "\n".join(errs), script)
+            rewrites += 1
+            errs = code_checks(script, facts)
+        return (None if errs else script), errs
+
+    script, errs = _clean(_write(run, topic, facts, series_note))
+    if script is None:
+        return {"topic": topic, "status": "hold",
+                "reason": "script rules still failing after the rewrite: " + "; ".join(errs),
+                "_run": run}
+
+    def _critic(s):
+        prompt, ver = render("script_critic", script=_numbered(s))
+        return run.call("script_critic", prompt, ver)
+
+    crit = _critic(script)
+    notes = []
+    for _ in range(RANK_REWRITE_BUDGET):
+        if critic_pass(crit["scores"]):
+            break
+        draft = _write(run, topic, facts, series_note, _critic_bar(crit), script)
+        rewrites += 1
+        draft, errs = _clean(draft)
+        if draft is None:
+            notes.append("critic rewrite kept failing script rules ("
+                         + "; ".join(errs)[:300] + "); kept the previous valid draft")
+            break
+        crit2 = _critic(draft)
+        if _rank_key(crit2) >= _rank_key(crit):
+            script, crit = draft, crit2
+        else:
+            notes.append(f"critic rewrite scored lower ({crit2['scores']}); "
+                         "kept the previous draft")
+    scores = crit["scores"]
+    mean = sum(scores.values()) / len(scores)
+    misses = critic_floor_misses(scores)
+    out = {"topic": topic, "critic": crit, "mean": mean, "min": min(scores.values()),
+           "rewrites": rewrites, "_run": run}
+    if notes:
+        out["notes"] = notes
+    if misses:
+        return {**out, "status": "hold",
+                "reason": "critic floor (weak hook / unresolved payoff) "
+                          f"after {rewrites} rewrite(s): " + ", ".join(misses)}
+    return {**out, "status": "scored", "script": script, "facts": facts}
+
+
 def rank_write_story(topics_facts: list, *, series_note: str = "", batch_titles: list = (),
                      ask=None) -> dict:
     """decision #15 item 2: instead of generating one topic's script and
     falling back to the next topic only on a HOLD, generate scripts for
-    every `(topic, facts)` pair up front (up to RANK_REWRITE_BUDGET=1
-    rewrite each if the first draft fails the critic's own `critic_pass`
-    bar), score all of them with the real script critic, and pick the
+    every `(topic, facts)` pair up front (one code-fix rewrite per draft plus
+    up to RANK_REWRITE_BUDGET=1 critic rewrite each if the first draft fails
+    the critic's own `critic_pass` bar -- see `_rank_one`), score all of them with the real script critic, and pick the
     HIGHEST-scoring one. decision #17: that pick is ALWAYS finalized
     (fact_check + metadata via `_finalize`) and returned as the producible
     story -- there is no mean floor on the critic score; the critic is a
@@ -533,55 +657,7 @@ def rank_write_story(topics_facts: list, *, series_note: str = "", batch_titles:
     """
     candidates = []
     for topic, facts in topics_facts:
-        run = _Run(ask or llm.ask)
-        script = _write(run, topic, facts, series_note)
-        rewrites = 0
-        errs = code_checks(script, facts)
-        if errs:
-            script2 = _write(run, topic, facts, series_note, "\n".join(errs), script)
-            rewrites += 1
-            errs2 = code_checks(script2, facts)
-            if errs2:
-                candidates.append({"topic": topic, "status": "hold",
-                                   "reason": "script rules still failing after the rewrite: "
-                                             + "; ".join(errs2), "_run": run})
-                continue
-            script = script2
-        prompt, ver = render("script_critic", script=_numbered(script))
-        crit = run.call("script_critic", prompt, ver)
-        if not critic_pass(crit["scores"]) and rewrites < RANK_REWRITE_BUDGET:
-            bar = (f"Critic scores: {crit['scores']}. The bar is a mean of {CRITIC_MEAN_MIN} or "
-                   f"better with no score below {CRITIC_FLOOR}; lift every score under 4.")
-            misses = critic_floor_misses(crit["scores"])
-            if misses:
-                bar += (" HARD REQUIREMENT (the script is rejected otherwise): "
-                        + ", ".join(misses) + ". Make sentence 1 a specific number or "
-                        "impossible-sounding claim in its first six words, and make the "
-                        "last line answer the hook's question directly.")
-            script2 = _write(run, topic, facts, series_note, crit["critique"] + "\n" + bar, script)
-            rewrites += 1
-            errs2 = code_checks(script2, facts)
-            if errs2:
-                candidates.append({"topic": topic, "status": "hold",
-                                   "reason": "script rules failing after the critic rewrite: "
-                                             + "; ".join(errs2), "_run": run})
-                continue
-            script = script2
-            prompt, ver = render("script_critic", script=_numbered(script))
-            crit = run.call("script_critic", prompt, ver)
-        scores = crit["scores"]
-        mean = sum(scores.values()) / len(scores)
-        misses = critic_floor_misses(scores)
-        if misses:
-            candidates.append({"topic": topic, "status": "hold",
-                               "reason": "critic floor (weak hook / unresolved payoff) "
-                                         f"after {rewrites} rewrite(s): " + ", ".join(misses),
-                               "critic": crit, "mean": mean, "min": min(scores.values()),
-                               "_run": run})
-            continue
-        candidates.append({"topic": topic, "status": "scored", "script": script, "facts": facts,
-                           "critic": crit, "mean": mean, "min": min(scores.values()),
-                           "rewrites": rewrites, "_run": run})
+        candidates.append(_rank_one(topic, facts, series_note, ask or llm.ask))
 
     scored = [c for c in candidates if c["status"] == "scored"]
     picked = max(scored, key=lambda c: c["mean"]) if scored else None

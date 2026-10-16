@@ -1,0 +1,216 @@
+{
+ "_source": "live_20261015_202500 'A Warp Bubble Could Move Space Itself Instead of a Ship' -- real research_extract claims, script_write draft 1, script_critic on draft 1, and the critic-rewrite draft 2 (build/cache/llm)",
+ "claims": [
+  {
+   "id": "f_warp_contract_expand",
+   "claim": "The Alcubierre drive would move a ship by contracting space in front of it and expanding space behind it, rather than accelerating the ship itself.",
+   "quote": "a spacecraft could achieve apparent faster-than-light travel by contracting space in front of it and expanding space behind it",
+   "source_id": "wiki_1"
+  },
+  {
+   "id": "f_proposed_1994",
+   "claim": "The idea was proposed by physicist Miguel Alcubierre in 1994, based on a solution to Einstein's field equations.",
+   "quote": "Proposed by theoretical physicist Miguel Alcubierre in 1994, the Alcubierre drive is based on a solution of Einstein's field equations.",
+   "source_id": "wiki_1"
+  },
+  {
+   "id": "f_no_accel_light",
+   "claim": "Objects can't accelerate to light speed within normal spacetime, but the warp bubble shifts space around the ship so it arrives faster than light would in normal space.",
+   "quote": "Objects cannot accelerate to the speed of light within normal spacetime; instead, the Alcubierre drive shifts space around an object so that the object would arrive at its destination more quickly than light would in normal space without breaking any physical laws.",
+   "source_id": "wiki_1"
+  },
+  {
+   "id": "f_exotic_matter_needed",
+   "claim": "The drive's proposed mechanism implies a negative energy density, meaning it would require exotic matter or manipulation of dark energy to work.",
+   "quote": "The proposed mechanism of the Alcubierre drive implies a negative energy density and therefore requires exotic matter or manipulation of dark energy.",
+   "source_id": "wiki_1"
+  },
+  {
+   "id": "f_inside_bubble_inertial",
+   "claim": "Inside the warp bubble, the reference frame would be inertial, so inhabitants would experience no proper acceleration.",
+   "quote": "The interior of the bubble is an inertial reference frame and inhabitants experience no proper acceleration.",
+   "source_id": "wiki_1"
+  },
+  {
+   "id": "f_proxima_days",
+   "claim": "The original proposal suggested the warp bubble concept could make a trip to Proxima Centauri take only a few days.",
+   "quote": "thereby rendering possible interstellar flight, such as a visit to Proxima Centauri within a few days",
+   "source_id": "wiki_1"
+  },
+  {
+   "id": "f_van_den_broeck_1999",
+   "claim": "In 1999, Chris Van Den Broeck showed that changing the bubble's geometry could lower the total energy needed by many orders of magnitude.",
+   "quote": "In 1999 Chris Van Den Broeck showed that modifying the geometry of the bubble could lower the total energy requirement by many orders of magnitude",
+   "source_id": "wiki_1"
+  },
+  {
+   "id": "f_solitons_loophole",
+   "claim": "Solitons offer a mathematical loophole that could theoretically create a warp bubble using positive energy instead of negative energy.",
+   "quote": "Solitons offer a mathematical \"loophole\" in general relativity to theoretically create a warp bubble with positive energy.",
+   "source_id": "wiki_1"
+  }
+ ],
+ "draft1": {
+  "hook_headline": "Beat Light Without Accelerating",
+  "sentences": [
+   {
+    "text": "A ship could beat light without ever accelerating.",
+    "role": "hook",
+    "fact_ids": [
+     "f_warp_contract_expand",
+     "f_no_accel_light"
+    ],
+    "on_screen": [
+     "Faster than light?"
+    ]
+   },
+   {
+    "text": "Physicist Miguel Alcubierre found it hiding in Einstein's equations back in 1994.",
+    "role": "normal",
+    "fact_ids": [
+     "f_proposed_1994"
+    ],
+    "on_screen": [
+     "Alcubierre, 1994"
+    ]
+   },
+   {
+    "text": "The ship sits still while space squeezes in front of it and stretches behind.",
+    "role": "normal",
+    "fact_ids": [
+     "f_warp_contract_expand"
+    ],
+    "on_screen": [
+     "Space contracts ahead",
+     "Space expands behind"
+    ]
+   },
+   {
+    "text": "Riders inside would feel no push, yet Proxima Centauri could be only a few days away.",
+    "role": "normal",
+    "fact_ids": [
+     "f_inside_bubble_inertial",
+     "f_proxima_days"
+    ],
+    "on_screen": [
+     "Proxima Centauri: days"
+    ]
+   },
+   {
+    "text": "Nothing ever outruns light locally, so physics stays unbroken.",
+    "role": "payoff",
+    "fact_ids": [
+     "f_no_accel_light"
+    ],
+    "on_screen": []
+   },
+   {
+    "text": "The ship stays put, and space itself does the travelling.",
+    "role": "payoff",
+    "fact_ids": [
+     "f_warp_contract_expand",
+     "f_no_accel_light"
+    ],
+    "on_screen": [
+     "Space moves, not ship"
+    ]
+   }
+  ]
+ },
+ "critic1": {
+  "scores": {
+   "hook_strength": 4,
+   "curiosity_gap": 2,
+   "escalation": 2,
+   "payoff_clarity": 3,
+   "loop_coherence": 4,
+   "human_voice": 3,
+   "emotional_charge": 3,
+   "one_idea_only": 5
+  },
+  "critique": "Sentence 3 explains the whole mechanism early, so the gap closes before the halfway point. Hold back the \"space squeezes and stretches\" reveal until near the end, and use sentences 2-4 to deepen the puzzle instead. Escalation peaks at sentence 4 (Proxima in days) and then drops: sentence 5 is a reassuring aside, and sentence 6 just restates sentence 3. Replace them with a higher-stakes beat about the same ship, such as what it would cost or what would happen to whoever is inside, so the stakes keep rising. Sentence 2 reads like a textbook (name, year, \"hiding in Einstein's equations\"). Cut it down or rephrase it as spoken surprise. Make the closing line a fresh, punchy resolution instead of a repeat of sentence 3, and keep it pointing back to \"without ever accelerating\" so the loop still works."
+ },
+ "draft2": {
+  "hook_headline": "Beat Light Without Accelerating",
+  "sentences": [
+   {
+    "text": "A ship could beat light without ever accelerating.",
+    "role": "hook",
+    "fact_ids": [
+     "f_no_accel_light",
+     "f_warp_contract_expand"
+    ],
+    "on_screen": [
+     "Faster than light?"
+    ]
+   },
+   {
+    "text": "Einstein's own equations allow it, a physicist found in 1994.",
+    "role": "normal",
+    "fact_ids": [
+     "f_proposed_1994"
+    ],
+    "on_screen": [
+     "Alcubierre, 1994"
+    ]
+   },
+   {
+    "text": "Whoever's on board would feel no push at all.",
+    "role": "normal",
+    "fact_ids": [
+     "f_inside_bubble_inertial"
+    ],
+    "on_screen": [
+     "Zero g-force"
+    ]
+   },
+   {
+    "text": "Yet Proxima Centauri could be only a few days away.",
+    "role": "normal",
+    "fact_ids": [
+     "f_proxima_days"
+    ],
+    "on_screen": [
+     "Proxima: a few days"
+    ]
+   },
+   {
+    "text": "The catch: it would need negative energy, meaning exotic matter or harnessed dark energy.",
+    "role": "normal",
+    "fact_ids": [
+     "f_exotic_matter_needed"
+    ],
+    "on_screen": [
+     "Negative energy"
+    ]
+   },
+   {
+    "text": "Reshaping the bubble could slash that bill by many orders of magnitude.",
+    "role": "normal",
+    "fact_ids": [
+     "f_van_den_broeck_1999"
+    ],
+    "on_screen": []
+   },
+   {
+    "text": "Because the ship itself never speeds up.",
+    "role": "payoff",
+    "fact_ids": [
+     "f_warp_contract_expand"
+    ],
+    "on_screen": []
+   },
+   {
+    "text": "Space squeezes ahead of it and stretches behind, so it arrives before light would, without ever accelerating.",
+    "role": "payoff",
+    "fact_ids": [
+     "f_warp_contract_expand",
+     "f_no_accel_light"
+    ],
+    "on_screen": [
+     "Space moves, not ship"
+    ]
+   }
+  ]
+ }
+}
