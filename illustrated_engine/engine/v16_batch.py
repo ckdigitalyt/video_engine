@@ -515,6 +515,29 @@ def run_batch(story_dirs: list, work: Path, *, resume: bool = False,
                       manifest_complete=rep["manifest"]["completeness"]["ok"])
             for k in state["totals"]:
                 state["totals"][k] += rep["costs"].get(k, 0)
+            # The pre-video `_llm_blocked()` check can't see a quota that
+            # lands MID-video: run_pipeline's LLM calls then degrade
+            # (fallback plan, plate QA + final judge "unavailable") and the
+            # story HOLDs as unverified — live_20261016_043811's
+            # t_earth_s_poles_have_flipped_183_times did exactly this
+            # ("claude_cli: quota (You've hit your session limit · resets
+            # 8:20am (UTC))" on its first LLM call). That HOLD judges the
+            # outage, not the video, so the story stays pending and re-runs
+            # on --resume instead of being recorded as done. A PASS was
+            # verified before the quota landed and is kept.
+            blocked = (_llm_blocked() if use_llm and rep["publish_gate"] != "PASS"
+                       else None)
+            if blocked:
+                state.setdefault("interrupted", []).append(
+                    {"story": sd.name, "verdict": rep["publish_gate"],
+                     "failures": rep["gate"]["failures"],
+                     "retry_at": blocked["retry_at"]})
+                cp.write_text(json.dumps(state, indent=1))
+                (work / "batch_report.json").write_text(json.dumps(
+                    {**state, "wall_s": round(time.time() - t0, 1)}, indent=1))
+                return {**state, "wall_s": round(time.time() - t0, 1), "paused": True,
+                       "retry_at": blocked["retry_at"],
+                       "blocked_stages": blocked["stages"], "exit_code": 75}
             if package:
                 row["package"] = package_video(
                     sd, work / sd.name, work / sd.name / "package", report=rep,

@@ -10,6 +10,8 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from types import SimpleNamespace
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]      # illustrated_engine
 REPO = ROOT.parent                              # video_engine
 sys.path.insert(0, str(REPO))
@@ -268,6 +270,70 @@ def test_resume_after_simulated_quota_at_s6_visual_plan(tmp_path, monkeypatch):
     assert all(r["verdict"] == "PASS" for r in rep2["rows"])
     assert rep2["totals"]["llm_calls"] == 2
     assert rep2["lanes_overlap"] is False   # DESIGN §13.3, deferred — see module docstring
+
+
+def test_quota_landing_mid_video_keeps_that_story_pending(tmp_path, monkeypatch):
+    """live_20261016_043811: the pre-video check passed, then story A's first
+    LLM call hit 'claude_cli: quota (You've hit your session limit · resets
+    8:20am (UTC))'. The render finished degraded (plate QA + final judge
+    'unavailable') and HOLDed as unverified, yet was recorded as done, so
+    --resume would never re-judge it. It must stay pending, unpackaged."""
+    _env(tmp_path, monkeypatch)
+    work = tmp_path / "batch3"
+    calls = []
+
+    def quota_mid_run(story_dir, out, **kw):
+        calls.append(Path(story_dir).name)
+        if len(calls) == 1:   # the quota lands while A is rendering
+            until = datetime.now(timezone.utc) + timedelta(hours=2)
+            (tmp_path / "llm_state.json").write_text(json.dumps(
+                {"cooldown": {"claude_cli": until.isoformat()}}))
+            rep = _fake_report(Path(story_dir).name)
+            rep["publish_gate"] = "HOLD"
+            rep["gate"]["failures"] = {
+                "plates": ["plate QA did not run: judge unavailable or unparseable"],
+                "judge": ["judge unavailable/unparseable -> unverified"]}
+            return rep
+        return _fake_report(Path(story_dir).name)
+
+    import engine.v15_pipeline as v15p
+    monkeypatch.setattr(v15p, "run_pipeline", quota_mid_run)
+    monkeypatch.setattr(B, "package_video", lambda *a, **k: pytest.fail(
+        "a quota-degraded render must not be packaged/uploaded"))
+
+    story_a, story_b = STORIES_DIR / "ice_slippery", STORIES_DIR / "tunguska_1908"
+    rep1 = B.run_batch([story_a, story_b], work, package=True, upload=False,
+                       use_llm=True)
+    assert rep1["paused"] is True and rep1["exit_code"] == 75
+    assert rep1["pending"] == [str(story_a), str(story_b)]
+    assert rep1["done"] == [] and rep1["rows"] == []
+    assert rep1["interrupted"][0]["story"] == "ice_slippery"
+    assert json.loads((work / "batch_state.json").read_text())["pending"] == \
+        [str(story_a), str(story_b)]
+
+    (tmp_path / "llm_state.json").write_text(json.dumps({"cooldown": {}}))
+    client.reset()
+    rep2 = B.run_batch([], work, resume=True, package=False, use_llm=True)
+    assert rep2["paused"] is False
+    assert calls == ["ice_slippery", "ice_slippery", "tunguska_1908"]
+    assert [r["verdict"] for r in rep2["rows"]] == ["PASS", "PASS"]
+
+
+def test_a_mid_video_quota_after_a_verified_pass_keeps_the_pass(tmp_path, monkeypatch):
+    _env(tmp_path, monkeypatch)
+
+    def pass_then_quota(story_dir, out, **kw):
+        until = datetime.now(timezone.utc) + timedelta(hours=2)
+        (tmp_path / "llm_state.json").write_text(json.dumps(
+            {"cooldown": {"claude_cli": until.isoformat()}}))
+        return _fake_report(Path(story_dir).name)
+
+    import engine.v15_pipeline as v15p
+    monkeypatch.setattr(v15p, "run_pipeline", pass_then_quota)
+    rep = B.run_batch([STORIES_DIR / "ice_slippery"], tmp_path / "b4",
+                      package=False, use_llm=True)
+    assert [r["verdict"] for r in rep["rows"]] == ["PASS"]
+    assert rep["pending"] == [] and "interrupted" not in rep
 
 
 def test_a_story_error_never_stops_the_batch(tmp_path, monkeypatch):
