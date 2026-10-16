@@ -601,6 +601,109 @@ def steer_prompt(bible: dict, parts: dict, reason: str | None, rnd: int,
                         hook=bool(parts.get("hook")))
 
 
+# 2026-10-16 (zero-publish day): one failing plate out of 12-24 FAILs the
+# whole video (plate QA is critical in v15_gate). 8 of the 21 batch renders
+# since 2026-10-13 ended that way. Steering keeps the PLANNER's subject and
+# only appends to it, so when that subject itself is the problem it fails
+# every round: live_20261016_032600 storm B5_S1 was planned as "a
+# hypothetical deep towering column of swirling storm" over the narration
+# "this monster likely isn't a deep tower at all, but a thin spinning
+# sheet" -> generic_subject, narration_mismatch, narration_mismatch. Two
+# last-resort steps, both still judged by the same plate QA / gate:
+#   1. RESUBJECT step -- a plate still failing on a CONTENT reason gets
+#      RESUBJECT_VARIANTS generations whose subject is rebuilt from the
+#      beat's narration (planner subject dropped), in views its beat
+#      siblings don't use, judged in one plate QA call; the first variant
+#      that passes replaces the plate. Live probe on that storm plate: 2/2
+#      such generations passed plate QA.
+#   2. drop_unfixable_shots -- a plate shot that still fails is removed and
+#      its time given to a QA-passed sibling in the SAME beat, only when the
+#      merged shot stays within that beat's own hold ceiling. A failed image
+#      never ships; the beat is still covered by an image that passed QA
+#      against its narration.
+RESUBJECT_REASONS = ("narration_mismatch", "wrong_subject", "generic_subject",
+                     "empty")
+# Re-run of the storm render with ONE resubject generation: its plate (a
+# swirling vortex with a dark centre) was read as a "tunnel" ->
+# narration_mismatch, while the probe's 2 generations both passed: the step
+# is stochastic, so it draws 2 seed/view variants judged in a single QA call.
+RESUBJECT_VARIANTS = 2
+
+
+def resubject_prompt(bible: dict, narration: str, identity: dict | None,
+                     avoid_views=(), variant: int = 0) -> tuple:
+    """-> (prompt, subject): the subject rebuilt from the beat narration
+    (numbers stripped, as narration_mismatch steering does), recurring-
+    subject look injected, in the `variant`-th view no sibling shot of the
+    beat uses. The subject is returned so plate QA judges the plate against
+    what it was actually asked to show."""
+    from engine.subject_bible import inject_subject
+    what = " ".join(_NUMWORDS_RE.sub("", narration).split()).strip(" .,")
+    subj = inject_subject(what, identity or {})
+    views = [v for v in ("cutaway", "wide", "medium", "close", "surface")
+             if v not in set(avoid_views)] or ["medium"]
+    return (image_prompt(bible, subj, "centered", view=views[variant % len(views)]),
+            subj)
+
+
+_COPY_FIELDS = ("headline", "number", "label", "steps")
+
+
+def drop_unfixable_shots(shots: list, failing: set, max_hold: dict) -> tuple:
+    """-> (shots, log). Removes a shot whose ONLY plate is in `failing` when:
+    it is a plain plate shot (not the hook, no on-screen copy), an adjacent
+    shot of the same beat uses only passing plates, and that neighbour
+    extended over the dropped span stays <= max_hold[beat] (the beat's own
+    editorial hold ceiling, beat_max_hold). Otherwise the shot is kept and
+    the plate stays qa_fail (the gate then FAILs, as before)."""
+    out, log = list(shots), []
+    k = 0
+    while k < len(out):
+        s = out[k]
+        sh = s["shot"]
+        if not (set(s["prompts"]) & failing) or s.get("hook") \
+                or sh.get("kind") != "plate" or len(s["prompts"]) != 1 \
+                or any(sh.get(f) for f in _COPY_FIELDS):
+            k += 1
+            continue
+        bid = s["beat"]["beat_id"]
+        cap = float(max_hold.get(bid) or 0.0)
+        best = None
+        for j in (k - 1, k + 1):
+            if not 0 <= j < len(out):
+                continue
+            n = out[j]
+            if n["beat"]["beat_id"] != bid or set(n["prompts"]) & failing:
+                continue
+            merged = (n["t1"] - n["t0"]) + (s["t1"] - s["t0"])
+            if merged <= cap + 1e-6 and (best is None or merged < best[1]):
+                best = (j, merged)
+        if best is None:
+            k += 1
+            continue
+        j, merged = best
+        n = dict(out[j])
+        if j < k:
+            n["t1"] = s["t1"]
+        else:
+            n["t0"] = s["t0"]
+        out[j] = n
+        log.append({"dropped": f"{bid}_S{s['idx'] + 1}",
+                    "covered_by": f"{bid}_S{n['idx'] + 1}",
+                    "merged_s": round(merged, 2), "cap_s": round(cap, 2)})
+        del out[k]
+        k = max(0, k - 1)
+    # re-number shots within each beat (scene keys B#_S# stay contiguous)
+    per_beat: dict = {}
+    for i, s in enumerate(out):
+        bid = s["beat"]["beat_id"]
+        idx = per_beat.get(bid, 0)
+        per_beat[bid] = idx + 1
+        if s["idx"] != idx:
+            out[i] = dict(s, idx=idx)
+    return out, log
+
+
 def _seed(prompt: str, salt: int = 0) -> int:
     from src.providers.image_gen import deterministic_seed
     return deterministic_seed(prompt, salt)
@@ -812,16 +915,25 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
         REGEN_PROVIDER_ORDER = tuple(
             p for p in PROVIDER_ORDER if p != "sdcpp_local")
 
+        beat_views: dict = {}
+        beat_of_prompt: dict = {}
+        for s in shots:
+            bid = s["beat"]["beat_id"]
+            beat_views.setdefault(bid, set()).add(s["shot"].get("view"))
+            for p in s["prompts"]:
+                beat_of_prompt.setdefault(p, bid)
+
+        def _providers(p):
+            if p in hero_prompts:
+                return tuple(x for x in providers_for_beat_function("HOOK")
+                             if x != "sdcpp_local")
+            return REGEN_PROVIDER_ORDER
+
         def _redo(p, rnd):
             sp = steer_prompt(bible, parts_of[p], reason_of.get(p), rnd,
                               identity, prompt_narration.get(p))
-            if p in hero_prompts:
-                prov = tuple(x for x in providers_for_beat_function("HOOK")
-                            if x != "sdcpp_local")
-            else:
-                prov = REGEN_PROVIDER_ORDER
             return p, sp, generate_plate(sp, _seed(sp, rnd), log=fail_log,
-                                         providers=prov)
+                                         providers=_providers(p))
 
         still = set(reason_of)
         regenerated_total, rounds = 0, 0
@@ -865,13 +977,71 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
             qa["regen_rounds"] = rounds
             qa["still_failing"] = sorted(x[:100] for x in still)
             qa["second_check"] = bool(qa_round.get("checked"))
+        # last resort 1: narration-led RESUBJECT, RESUBJECT_VARIANTS seeds/
+        # views per plate judged in ONE plate QA call; first passing wins.
+        resub = [p for p in order if p in still
+                 and reason_of.get(p) in RESUBJECT_REASONS
+                 and prompt_narration.get(p)]
+        if resub:
+            def _resub(job):
+                p, k = job
+                sp, subj = resubject_prompt(
+                    bible, prompt_narration[p], identity,
+                    beat_views.get(beat_of_prompt.get(p), ()), variant=k)
+                return p, k, subj, generate_plate(
+                    sp, _seed(sp, MAX_PLATE_REGEN + 1 + k), log=fail_log,
+                    providers=_providers(p))
+            jobs = [(p, k) for p in resub for k in range(RESUBJECT_VARIANTS)]
+            with ThreadPoolExecutor(max_workers=3) as ex:
+                res = list(ex.map(_resub, jobs))
+            report["costs"]["image_calls"] += sum(
+                1 for *_, r in res if r.get("ok") and not r.get("cached"))
+            ok_res = [x for x in res if x[3].get("ok")]
+            qa_r = plate_qa(
+                [{"path": r["path"], "subject": subj,
+                  "narration": prompt_narration[p]} for p, _, subj, r in ok_res],
+                bible.get("illustration_style", ""),
+                work / "plate_sheet_resubject.jpg",
+                identity=identity) if ok_res else {}
+            report["costs"]["vision_calls"] += 1 if ok_res else 0
+            fixed = set()
+            for j, (p, k, subj, r) in enumerate(ok_res):
+                passed = bool(qa_r.get("checked")) and \
+                    j not in (qa_r.get("fail") or {})
+                steering.append({"round": "resubject", "variant": k,
+                                 "reason": reason_of.get(p),
+                                 "subject": subj[:90], "passed": passed,
+                                 "shows": (qa_r.get("shows") or {}).get(j),
+                                 "provider": r.get("provider"),
+                                 "seconds": r.get("seconds")})
+                if passed and p not in fixed:
+                    fixed.add(p)
+                    plates[p] = r
+                    plate_realistic_by_prompt[p] = (qa_r.get("realistic")
+                                                    or {}).get(j)
+            still -= fixed
+            qa["resubject"] = {"tried": len(resub), "fixed": len(fixed)}
+            qa["still_failing"] = sorted(x[:100] for x in still)
         qa["steering"] = steering
+        # last resort 2: drop a still-failing shot a sibling can cover
+        if still:
+            shots, dropped = drop_unfixable_shots(
+                shots, still, report["rhythm"]["max_hold"])
+            if dropped:
+                used = {p for s in shots for p in s["prompts"]}
+                for p in still - used:
+                    plates.pop(p, None)      # never shown -> not shipped
+                    plate_realistic_by_prompt.pop(p, None)
+                still &= used
+                qa["dropped_shots"] = dropped
+                qa["still_failing"] = sorted(x[:100] for x in still)
         for p in still:
             plates[p] = dict(plates[p], qa_fail=True)
     report["plate_qa"] = {k: qa.get(k) for k in
                           ("checked", "ocr_checked", "fail", "ocr_hits",
                            "regenerated", "regen_rounds", "still_failing",
-                           "second_check", "reason", "steering")}
+                           "second_check", "reason", "steering",
+                           "resubject", "dropped_shots")}
     # final prompt -> path map, AFTER any regeneration replaced a path;
     # None (unknown/unanswered) is kept as None, never defaulted here —
     # engine.v16_manifest treats None conservatively (assume realistic).
