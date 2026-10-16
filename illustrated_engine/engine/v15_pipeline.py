@@ -244,7 +244,10 @@ def shot_timeline(beat: dict, bplan: dict, timing: dict, tts_s: float,
         t = 0.0 if k == 0 else LEAD_S + wt[min(sh["start_word"], len(wt) - 1)] \
             - CUT_EARLY_S
         starts.append((t, sh))
-    out = []
+    def _copy(s):
+        return bool(s.get("headline") or s.get("number") or s.get("label"))
+
+    out, absorbed = [], []
     for i, (t, sh) in enumerate(starts):
         t1 = starts[i + 1][0] if i + 1 < len(starts) else beat_dur
         if out and t1 - t < MIN_SHOT_S:
@@ -252,9 +255,21 @@ def shot_timeline(beat: dict, bplan: dict, timing: dict, tts_s: float,
             out[-1].setdefault("merged", []).append(sh["kind"])
             continue
         if not out and i + 1 < len(starts) and t1 - t < MIN_SHOT_S:
-            starts[i + 1] = (t, starts[i + 1][1])  # first too short -> drop
+            nxt = starts[i + 1][1]
+            if _copy(sh) and not _copy(nxt):
+                # first too short but it carries the on-screen copy (the
+                # hook headline/number): keep it, fold the next shot in.
+                # Dropping it lost "SIX G. LIGHTS OUT." from frame 0 and
+                # HOLDed t_pilots_train_to_pass_out_on_purpose ("no
+                # headline text box on the opening shot", 2026-10-16).
+                starts[i + 1] = (t, sh)
+                absorbed.append(nxt["kind"])
+            else:
+                starts[i + 1] = (t, nxt)  # first too short -> drop
             continue
         out.append({"shot": sh, "t0": round(t, 3), "t1": round(t1, 3)})
+        if absorbed:
+            out[-1]["merged"], absorbed = absorbed, []
     out[-1]["t1"] = round(beat_dur, 3)
     return out
 

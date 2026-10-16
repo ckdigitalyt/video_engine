@@ -83,6 +83,25 @@ def test_shot_timeline_uses_the_given_tail():
     assert b[-1]["t1"] == round(P.LEAD_S + 3.0 + 0.3, 3)
 
 
+def test_too_short_opener_with_the_hook_headline_is_kept():
+    """live_20261016_091344 t_pilots_train_to_pass_out_on_purpose: B1 'Six g
+    can knock you out and into a dream.' planned the headline shot, then a
+    cut at word 6 (< MIN_SHOT_S in). The opener was dropped, frame 0 had no
+    headline and the hook check HOLDed the video."""
+    timing = {"words": [{"w": "w", "t0": 0.18 * i, "t1": 0.18 * i + 0.15}
+                        for i in range(10)]}
+    head = {"kind": "plate", "start_word": 0, "subject": "pilot",
+            "headline": "SIX G. LIGHTS OUT.", "number": {"text": "6 G", "word": 1}}
+    dream = {"kind": "plate", "start_word": 6, "subject": "dream"}
+    tl = P.shot_timeline(_beat("B1", "HOOK"), {"shots": [head, dream]}, timing, 1.8)
+    assert len(tl) == 1 and tl[0]["shot"] is head and tl[0]["t0"] == 0.0
+    assert tl[0]["merged"] == ["plate"]
+    # without copy on the opener the old drop-first behaviour is unchanged
+    plain = dict(head, headline=None, number=None)
+    tl = P.shot_timeline(_beat("B1", "HOOK"), {"shots": [plain, dream]}, timing, 1.8)
+    assert len(tl) == 1 and tl[0]["shot"] is dream and tl[0]["t0"] == 0.0
+
+
 # --------------------------------------------------------------- splits --
 
 def _words(n, punct_at=()):
