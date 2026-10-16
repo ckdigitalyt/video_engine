@@ -396,6 +396,10 @@ def package_video(story_dir: Path, work_dir: Path, out_dir: Path, *, report: dic
         return {"ok": False, "error": "no final.mp4 (HOLD before render, or render failed)"}
     out_dir.mkdir(parents=True, exist_ok=True)
     final_dst = out_dir / "final.mp4"
+    # A re-run (--resume of an interrupted story) re-renders into the same
+    # work_dir; the previous package's hardlink then makes os.link raise
+    # FileExistsError and copyfile SameFileError (live_20261016_043811).
+    final_dst.unlink(missing_ok=True)
     try:
         os.link(final_src, final_dst)
     except OSError:

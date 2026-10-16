@@ -385,6 +385,22 @@ def test_package_video_produces_final_proxy_cover_metadata(tmp_path):
     assert "Gate verdict: PASS" in meta
 
 
+def test_package_video_repackages_a_rerendered_story(tmp_path):
+    """live_20261016_043811: re-running a story into the same work dir hit
+    SameFileError — package/final.mp4 was still a hardlink to final.mp4."""
+    work_dir = tmp_path / "work"
+    work_dir.mkdir()
+    final = work_dir / "final.mp4"
+    final.write_bytes(b"first render")
+    out = tmp_path / "work" / "package"
+    B.package_video(STORIES_DIR / "ice_slippery", work_dir, out,
+                    report=_fake_report("ice_slippery"))
+    final.write_bytes(b"second render")     # in place: same inode as the link
+    result = B.package_video(STORIES_DIR / "ice_slippery", work_dir, out,
+                             report=_fake_report("ice_slippery"))
+    assert result["final"] and (out / "final.mp4").read_bytes() == b"second render"
+
+
 def test_package_video_reports_missing_final_mp4_instead_of_crashing(tmp_path):
     result = B.package_video(STORIES_DIR / "ice_slippery", tmp_path / "nowhere",
                              tmp_path / "out", report=_fake_report("ice_slippery"))
