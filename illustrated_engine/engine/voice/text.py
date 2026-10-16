@@ -38,6 +38,11 @@ _SPELLING = {
     # comparison either way), only if this dict is ever read for something
     # else.
     "their": "there",
+    # true homophones, 2026-10-16 replay of held beats: "And Webb might be
+    # able to prove..." heard "web" (t_lava_worlds B11, WER 0.1); "the Milky
+    # Way's spiral arms" heard "milky weighs" (t_the_star_almost_missing_
+    # its_metals B7). Same phonemes -- no speech can tell them apart.
+    "webb": "web", "weighs": "ways",
 }
 _SENT_SPLIT = re.compile(r"(?<=[.!?])[\"'”’)]*\s+(?=[\"'“‘(]*[A-Z0-9])")
 # A trailing ordinal suffix (30th, 1st, 2nd, 3rd) is matched here so
@@ -117,6 +122,16 @@ def norm_tokens(word: str) -> list:
     """One spoken token as a list of normalised sub-tokens ('66' -> sixty six,
     'Sixty-six' -> sixty six)."""
     w = word.lower().replace("’", "'").replace("%", " percent ")
+    # 2026-10-16 replay of every held beat's stored transcript: spelling-
+    # only differences no re-synthesis can fix (see also _ae_digraph):
+    #  - "they're" scripted, "they are" heard (t_humans_closer_trex B6, WER
+    #    0.1): expand the unambiguous contractions on both sides. ('s and
+    #    'd are ambiguous -- is/has, had/would -- and stay as they were.)
+    #  - "Kepler ten b" scripted, "Kepler 10b" heard (t_lava_worlds B10,
+    #    WER 0.1667): split a digit run from ONE trailing letter (planet /
+    #    star designations); "25th" (two letters) is untouched.
+    w = _CONTRACTION.sub(lambda m: " " + _CONTRACTION_WORD[m.group(1) or m.group(2)], w)
+    w = re.sub(r"\b(\d+)([a-z])\b", r"\1 \2", w)
     w = _NUM.sub(_num_words, w)
     w = re.sub(r"[-‐–—/]", " ", w)
     out = []
@@ -128,8 +143,49 @@ def norm_tokens(word: str) -> list:
             t = _SPELLING[t]
         elif t.endswith("s") and t[:-1] in _SPELLING:
             t = _SPELLING[t[:-1]] + "s"
-        out.append(t)
+        out.append(_ae_digraph(t))
     return out
+
+
+_CONTRACTION = re.compile(r"(?<=[a-z])'(re|ve|ll)\b|(?<=\bi)'(m)\b")
+_CONTRACTION_WORD = {"re": "are", "ve": "have", "ll": "will", "m": "am"}
+
+
+def join_letter_runs(tokens: list, owner: list | None = None) -> tuple:
+    """Runs of >= 2 single-letter tokens are one spelled-out name: the
+    script writes "S-L-V three" / "R-S-One" (so the voice spells it) and
+    faster-whisper writes "SLV" (t_from_soviet_ride_to_own_rocket B8, WER
+    0.1579 -> HOLD with every letter spoken). Joined on both sides, so a
+    wrong letter still mismatches. "a"/"i" are words and never joined.
+    QA-only: caption timing (engine.voice.align) keeps one token per
+    letter. -> (tokens, owner) with a run's owner = its first letter's."""
+    owner = list(owner) if owner is not None else list(range(len(tokens)))
+    out, own, k = [], [], 0
+    while k < len(tokens):
+        j = k
+        while (j < len(tokens) and len(tokens[j]) == 1 and tokens[j].isalpha()
+               and tokens[j] not in ("a", "i")):
+            j += 1
+        if j - k >= 2:
+            out.append("".join(tokens[k:j]))
+            own.append(owner[k])
+            k = j
+        else:
+            out.append(tokens[k])
+            own.append(owner[k])
+            k += 1
+    return out, own
+
+
+def _ae_digraph(t: str) -> str:
+    """Latin/British "ae" vs "e" is spelling, not speech: Pangaea/Pangea,
+    archaeology/archeology, palaeontology/paleontology, encyclopaedia,
+    haemoglobin. live_20261015_104500 t_the_atlantic_ocean_is_actually_a_scar
+    HELD on B5 (WER 0.0667, hard token "Pangea," missed): the narration was
+    right, faster-whisper just spells the word "Pangaea". Applied to script
+    and ASR tokens alike, so it can only merge two spellings that differ
+    by this digraph; >= 6 letters keeps short words ("maes", "aero") out."""
+    return t.replace("ae", "e") if len(t) >= 6 and "ae" in t else t
 
 
 def flat_tokens(words: list) -> tuple:

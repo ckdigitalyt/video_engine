@@ -290,7 +290,12 @@ def synthesize_beat(story_dir, beat_id: str, text: str, function: str | None,
     if not force and wav.exists() and side.exists():
         try:
             info = json.loads(side.read_text())
-            if info.get("key") == key:
+            # 2026-10-16: only a PASSED beat is a cache hit. A held beat is
+            # re-attempted (synthesis + QA + its one targeted retry), so a
+            # QA-comparator fix -- or a lexicon entry added for the misread
+            # word -- reaches a re-render instead of the stale HOLD verdict
+            # being served from the sidecar forever.
+            if info.get("key") == key and (info.get("qa") or {}).get("verdict") == "PASS":
                 return info
         except (OSError, ValueError):
             pass
