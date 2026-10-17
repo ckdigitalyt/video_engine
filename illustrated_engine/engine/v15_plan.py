@@ -539,6 +539,39 @@ def _identity_subject(subject: dict | None) -> str | None:
     return _image_safe(f"{name}, {desc}" if name else desc)
 
 
+_NUMWORDS_ALL = re.compile(
+    r"(?i)\b(zero|one(?=[\s-]+(?:and[\s-]+a[\s-]+half|hundred|thousand|million|billion|tenth|half|third|quarter))|two|three|four|five|six|seven|eight|nine|ten|eleven|"
+    r"twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|"
+    r"twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|"
+    r"thousand|million|billion|trillion|percent)\b(-\w+)?")
+
+
+def _beat_subject(subject: dict, narration: str, max_words: int = 24) -> str:
+    """The recurring subject in this beat's moment: "<name>, <narration
+    without figures>" (see fallback_plan)."""
+    name = str(subject.get("name") or str(subject.get("concept_id") or "")
+               .replace("_", " ")).strip() or "the subject"
+    what = " ".join(_NUMWORDS_ALL.sub("", _image_safe(narration)).split())
+    what = " ".join(what.split()[:max_words]).strip(" ,.;:")
+    # only a narration with something to DRAW: "Not meters per second.
+    # Kilometers per second." has no drawable word and stays out
+    drawable = [w for w in re.findall(r"[a-z]+", what.lower())
+                if len(w) > 3 and w not in _UNDRAWABLE]
+    return f"{name}, {what}" if len(drawable) >= 3 else name
+
+
+_UNDRAWABLE = frozenset((
+    "meter", "meters", "kilometer", "kilometers", "mile", "miles", "second",
+    "seconds", "minute", "minutes", "hour", "hours", "year", "years", "times",
+    "percent", "degrees", "about", "almost", "nearly", "roughly", "around",
+    "that", "this", "these", "those", "there", "their", "they", "them",
+    "what", "when", "where", "which", "while", "with", "from", "into", "than",
+    "then", "just", "only", "even", "still", "every", "much", "more", "most",
+    "less", "least", "very", "really", "actually", "because", "would", "could",
+    "should", "might", "have", "been", "being", "does", "doing", "your",
+    "yours", "it's", "isn't", "here", "over", "under", "after", "before"))
+
+
 def fallback_plan(story: dict, subject: dict | None = None) -> dict:
     """Deterministic plan from story fields only (no LLM). Floor tier:
     plate shots split on punctuation near equal spans; subjects from the
@@ -571,7 +604,21 @@ def fallback_plan(story: dict, subject: dict | None = None) -> dict:
         spoken = {str(b["narration"]).strip()}
         visual = [t for t in (b.get("visual_answer"), b.get("visual_question"))
                   if t and str(t).strip() not in spoken]
-        srcs = visual + ([ident] if ident else []) + (
+        idents = [ident] if ident else []
+        if ident and not visual:
+            # 2026-10-17: an auto-generated story has no visual fields, so
+            # EVERY fallback shot got the identical identity subject and
+            # only the view (4 values) told ~12 shots apart: dedup ran out of
+            # views and live_20261017_121500 t_niagara_is_slowly_eating_the_
+            # border shipped "one plate shown on 4 shots" + "... on 3 shots"
+            # (internal_reuse) and 7/9 judge-flagged frames. Each beat now
+            # draws the subject in ITS OWN moment: the subject's name (the
+            # look is spliced in after it by subject_bible.inject_subject)
+            # plus the beat's figure-free narration as scene context.
+            # Identity first, so the image is still OF the subject, not the
+            # spoken sentence painted as lettering (2026-10-11 lesson).
+            idents = [_beat_subject(subject, b["narration"])] + idents
+        srcs = visual + idents + (
             [] if (visual or ident) else [b.get("claim"), b["narration"]])
         subjects = [x for x in (_image_safe(t) for t in srcs if t)
                     if len(x.split()) >= 3] or ["an evocative scene of "
@@ -587,8 +634,13 @@ def fallback_plan(story: dict, subject: dict | None = None) -> dict:
                           "view": VIEWS[(len(shots) + sum(
                               len(x["shots"]) for x in beats)) % 4]})
         if bi == 0:
-            shots[0]["headline"] = _cap_words(
-                str(story.get("title") or story["story_id"]).upper(), 5)
+            # a figure in the title that B1 never speaks ("This Log Is Only
+            # 10% Wood") made the floor plan itself invalid -> ValueError
+            spoken_b1 = _spoken_digits(b["narration"])
+            title = " ".join(w for w in str(story.get("title")
+                                             or story["story_id"]).split()
+                             if all(d in spoken_b1 for d in _digits(w)))
+            shots[0]["headline"] = _cap_words(title.upper(), 5)
         for i, w in enumerate(ws):
             if _digits(w):
                 owner = [s for s in shots if s["start_word"] <= i][-1]
@@ -635,6 +687,19 @@ def salvage(plan: dict, story: dict, subject: dict | None = None) -> tuple:
             for key in ("subject",):
                 if isinstance(sh.get(key), str):
                     sh[key] = _image_safe(sh[key])
+            if sh.get("kind") == "plate":
+                e = []
+                _check_subject(sh.get("subject"), "subject", e)
+                if e:
+                    # 2026-10-17: ONE bare subject ("Horseshoe Falls", 2
+                    # words) in an otherwise valid 11-shot LLM plan kept
+                    # the salvaged plan invalid, so the whole plan was
+                    # thrown away for the fallback floor (live_20261017_
+                    # 121500 t_niagara -> internal_reuse). Replace just that
+                    # subject with the floor's subject for the beat.
+                    fbs = fb[bid]["shots"]
+                    sh["subject"] = fbs[min(len(keep), len(fbs) - 1)]["subject"]
+                    dropped.append(f"{bid}: subject replaced ({e[0][:50]})")
             for key, mx in (("headline", 5), ("number", 4), ("label", 3)):
                 el = sh.get(key)
                 if el is None:

@@ -44,8 +44,8 @@ from engine.v14_cache import (bed_plan_hash, caption_plan_hash,  # noqa: E402
                               plan_production, record_assembly, record_scene,
                               save_index, scene_cache_key, style_hash)
 from engine.v15_plan import make_plan  # noqa: E402
-from engine.v15_plates import (analyze_subject, generate_plate,  # noqa: E402
-                               image_chain_report, plate_qa,
+from engine.v15_plates import (PROVIDER_ORDER, analyze_subject,  # noqa: E402
+                               generate_plate, image_chain_report, plate_qa,
                                providers_for_beat_function)
 from engine.v15_shots import compile_shot  # noqa: E402
 from engine.v15_style import image_prompt, load_style  # noqa: E402
@@ -569,8 +569,13 @@ def dedupe_shot_prompts(shots: list, bible: dict,
 # prompt), not the identical prompt on another provider. Near-duplicates
 # rotate to a different view each round.
 _DUP_VIEWS = ("surface", "close", "cutaway", "medium", "wide")
+# "one" is NOT stripped (2026-10-17): it is mostly a pronoun in narration,
+# and stripping it broke the sentence the image model was asked to draw --
+# t_your_finger B8 resubject subject "If it stretches too far, it snaps,
+# and a brand-new forms" (narration: "...a brand-new one forms") came back
+# as "reptilian creature standing in a cave".
 _NUMWORDS_RE = re.compile(
-    r"(?i)\b(zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|"
+    r"(?i)\b(zero|one(?=[\s-]+(?:and[\s-]+a[\s-]+half|hundred|thousand|million|billion|tenth|half|third|quarter))|two|three|four|five|six|seven|eight|nine|ten|eleven|"
     r"twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|"
     r"twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|"
     r"thousand|million|billion|half|\d[\d.,]*)\b")
@@ -612,6 +617,13 @@ def steer_prompt(bible: dict, parts: dict, reason: str | None, rnd: int,
         subj += ". Anatomically accurate in every listed detail"
     elif reason == "text":
         subj += ", clean unmarked painted surfaces only"
+    elif reason == "low_information":
+        # see plate_low_information: the house look's "deep shadow" came
+        # back as near-black frames (mean luma 13-30/255) with nothing to read
+        subj += (". Brightly lit scene with fine texture and crisp detail "
+                 "across the entire frame, no large empty, black or blank areas")
+        if view in (None, "wide"):
+            view = "medium"
     return image_prompt(bible, subj, comp, view=view,
                         hook=bool(parts.get("hook")))
 
@@ -655,10 +667,121 @@ def resubject_prompt(bible: dict, narration: str, identity: dict | None,
     from engine.subject_bible import inject_subject
     what = " ".join(_NUMWORDS_RE.sub("", narration).split()).strip(" .,")
     subj = inject_subject(what, identity or {})
+    ident = identity or {}
+    if subj == what and ident.get("description"):
+        # 2026-10-17: narration that never NAMES the recurring subject
+        # ("The fire screams past them, yet they stay put", "If it stretches
+        # too far, it snaps...") gave the image model nothing to draw:
+        # live_20261017_064800 t_the_sky_is_carving_rocket_fire_into_diam
+        # B2 and t_your_finger B8 both failed resubject 0/2 as "empty"
+        # (a silhouetted figure in flames; a reptile in a cave). Lead with
+        # the locked subject the pronouns refer to, then the narration.
+        name = (ident.get("name") or "the main subject").rstrip(". ")
+        subj = (f"{name} ({ident['description'].rstrip('. ')}), "
+                f"shown as the narration describes: {what}")
     views = [v for v in ("cutaway", "wide", "medium", "close", "surface")
              if v not in set(avoid_views)] or ["medium"]
     return (image_prompt(bible, subj, "centered", view=views[variant % len(views)]),
             subj)
+
+
+# 2026-10-17 (zero passes in ~6 batches since the first publish): a plate
+# whose generation FAILED outright (every provider errored) was never
+# retried -- plate QA and its regen rounds only see plates that exist -- so
+# it went straight to the V14 procedural tier. In live_20261017_015400 /
+# _064800 that was 12 procedural shots across 3 stories, B1 (HOOK) and
+# B7/B8 (PAYOFF) most of all: hero prompts may not use pollinations, the
+# one provider that was rescuing the other shots, and Cloudflare's 429s
+# came from 3 workers bursting it at once (the same story's regen rounds
+# got Cloudflare plates minutes later). Those shots then drew "asset tier
+# procedural", judge empty_or_flat and "first frame would not stop a
+# scroll". On top, sdcpp_local sat in the parallel chain: 3 concurrent CPU
+# runs, each past its 1800 s timeout (plates_s 2460-6570 s, 0 plates).
+# Now: cloud providers only in the parallel pass; failures get a cooled-
+# down SEQUENTIAL retry of the same prompt/seed (hero plates first); only
+# what still fails reaches the local floor, one at a time, capped per
+# video (image_gen.sdcpp.max_plates_per_video).
+FLOOR_PROVIDERS = ("sdcpp_local",)
+GEN_RETRY_COOLDOWN_S = 20.0
+
+
+def recover_failed_plates(plates: dict, prompts: list, regen, *, hero=(),
+                          floor=None, floor_cap: int = 0,
+                          cooldown_s: float = GEN_RETRY_COOLDOWN_S,
+                          sleep=time.sleep) -> dict:
+    """Second chance for plates whose generation failed. `plates` maps
+    prompt -> generate_plate result and is updated in place; `prompts` is
+    timeline order; regen(prompt) / floor(prompt) -> a new result. -> log."""
+    failed = list(dict.fromkeys(p for p in prompts
+                                if p in plates and not plates[p].get("ok")))
+    log = {"first_pass_failed": len(failed), "recovered": 0, "floor_tried": 0,
+           "floor_used": 0, "still_failed": 0}
+    if not failed:
+        return log
+    failed.sort(key=lambda p: p not in set(hero))   # hero first, stable
+    sleep(cooldown_s)
+    for p in failed:
+        r = regen(p)
+        if r.get("ok"):
+            plates[p] = r
+            log["recovered"] += 1
+    left = [p for p in failed if not plates[p].get("ok")]
+    if floor is not None:
+        for p in left[:max(0, floor_cap)]:
+            log["floor_tried"] += 1
+            r = floor(p)
+            if r.get("ok"):
+                plates[p] = r
+                log["floor_used"] += 1
+    log["still_failed"] = sum(1 for p in failed if not plates[p].get("ok"))
+    return log
+
+
+# 2026-10-17: info_floor (v15_gate, unchanged) held stories on frames late
+# in the video (t~23-28 s of 30 s). Mapping every hit in live_20261017_*
+# to its shot: the std~18.0 / edge~1.5 hits are all PROCEDURAL-tier shots
+# (B7/B8 PAYOFF, B1 HOOK -- see recover_failed_plates); the rest are real
+# plates that were already below the floor before render, measured the way
+# the gate measures a frame: _are_webb_s_farthest_galaxies B6_S2 / B7_S1 /
+# B7_S2 plate edge 1.61 / 1.37 / 1.43 (gate t~23.8/25.8/27.8), _that_bullet_
+# crack B4_S1 / B4_S2 / B6_S1 1.24 / 1.69 / 1.33 (t~14.1/16.6/27.4), _a_
+# planet_beyond B5_S1 / B6_S2 / B7_S2 1.87 / 1.66 / 1.40 -- near-black
+# paintings (mean luma 13-30/255) the plate judge passed. Nothing measured
+# a plate before render, so they shipped. Now a plate under the gate floor
+# is regenerated with low_information steering inside the normal regen
+# rounds; a take that fails the judge never replaces a judge-passed plate.
+# Margin 1.0: plates at edge 2.25-2.52 cleared the gate in those renders
+# (1.1 would flag 92/400 recent cache plates instead of 62/400).
+PLATE_INFO_MARGIN = 1.0
+
+
+def plate_low_information(path) -> dict | None:
+    """The gate's frame_information on the plate as the 9:16 frame shows
+    it (cover crop, 270x480); the metrics if under the floor x margin."""
+    import io
+
+    from PIL import Image
+
+    from engine.v15_gate import FLOOR_EDGE, FLOOR_STD, frame_information
+    try:
+        im = Image.open(path).convert("RGB")
+    except Exception:  # noqa: BLE001 -- unreadable: plate QA's business
+        return None
+    w, h = im.size
+    if w * 16 > h * 9:                       # too wide: crop the sides
+        cw = h * 9 // 16
+        im = im.crop(((w - cw) // 2, 0, (w - cw) // 2 + cw, h))
+    elif w * 16 < h * 9:
+        ch = w * 16 // 9
+        im = im.crop((0, (h - ch) // 2, w, (h - ch) // 2 + ch))
+    buf = io.BytesIO()
+    im.resize((270, 480)).save(buf, "PNG")
+    buf.seek(0)
+    m = frame_information(buf)
+    if (m["std"] < FLOOR_STD * PLATE_INFO_MARGIN
+            or m["edge"] < FLOOR_EDGE * PLATE_INFO_MARGIN):
+        return m
+    return None
 
 
 _COPY_FIELDS = ("headline", "number", "label", "steps")
@@ -867,15 +990,26 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
         for p in s["prompts"]:
             prompt_narration.setdefault(p, s["beat"]["narration"])
 
+    def _cloud_chain(prompt):
+        base = (providers_for_beat_function("HOOK") if prompt in hero_prompts
+                else PROVIDER_ORDER)
+        return tuple(x for x in base if x not in FLOOR_PROVIDERS)
+
     def _gen(prompt, salt=0, providers=None):
-        if providers is None and prompt in hero_prompts:
-            providers = providers_for_beat_function("HOOK")
-        kw = {"providers": providers} if providers else {}
-        return prompt, generate_plate(prompt, _seed(prompt, salt),
-                                      log=fail_log, **kw)
+        return prompt, generate_plate(prompt, _seed(prompt, salt), log=fail_log,
+                                      providers=providers or _cloud_chain(prompt))
 
     with ThreadPoolExecutor(max_workers=3) as ex:
         plates = dict(ex.map(_gen, uniq))
+    # a plate whose generation failed outright used to go straight to the
+    # V14 procedural tier (see recover_failed_plates)
+    from src.utils.config import get_config
+    report["plate_generation"] = recover_failed_plates(
+        plates, [p for s in shots for p in s["prompts"]],
+        lambda p: _gen(p)[1],
+        hero=hero_prompts,
+        floor=lambda p: _gen(p, providers=FLOOR_PROVIDERS)[1],
+        floor_cap=int(get_config("image_gen.sdcpp.max_plates_per_video", 3)))
     report["costs"]["image_calls"] += sum(1 for r in plates.values()
                                           if r.get("ok") and not r.get("cached"))
     qa = {"checked": False}
@@ -890,7 +1024,6 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
     # time with the identical prompt.
     MAX_PLATE_REGEN = 3
     if plate_qa_on:
-        from engine.v15_plates import PROVIDER_ORDER
         parts_of: dict = {}
         order: list = []     # timeline order: "earlier"/"last" mean something
         for s in shots:
@@ -950,6 +1083,22 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
             return p, sp, generate_plate(sp, _seed(sp, rnd), log=fail_log,
                                          providers=_providers(p))
 
+        # judge-passed plates too dark/flat for the info floor (see
+        # plate_low_information): regenerated in the same rounds, but kept
+        # as they are if no better take passes the judge
+        info_only: set = set()
+        low_info_log: dict = {}
+
+        def _ik(p):
+            return f"{order.index(p)}: {parts_of[p]['subject'][:60]}"
+        for p in order:
+            if p in reason_of or not plates[p].get("ok"):
+                continue
+            m = plate_low_information(plates[p]["path"])
+            if m:
+                reason_of[p] = "low_information"
+                info_only.add(p)
+                low_info_log[_ik(p)] = {"on_file": m}
         still = set(reason_of)
         regenerated_total, rounds = 0, 0
         while still and rounds < MAX_PLATE_REGEN:
@@ -977,13 +1126,35 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
             regenerated_total += len(regen)
             next_still = set()
             for j, (p, r) in enumerate(ok_redo.items()):
+                judged_bad = j in (qa_round.get("fail") or {})  # incl. OCR
+                if p in info_only and judged_bad:
+                    # the plate on file passed the judge; a take that fails
+                    # it never replaces it -- try again next round
+                    next_still.add(p)
+                    continue
+                low = None if judged_bad else plate_low_information(r["path"])
+                if p in info_only and low:
+                    prev = low_info_log.get(_ik(p), {}).get("on_file") or {}
+                    next_still.add(p)
+                    low_info_log.setdefault(_ik(p), {})[f"round{rounds}"] = low
+                    if low["edge"] <= prev.get("edge", 0):
+                        continue             # no better than what is on file
+                    low_info_log[_ik(p)]["on_file"] = low
                 plates[p] = r  # regenerated plate replaces the failed one
                 plate_realistic_by_prompt[p] = (qa_round.get("realistic")
                                                 or {}).get(j)
-                if j in (qa_round.get("fail") or {}):  # incl. OCR hits
+                if judged_bad:
                     next_still.add(p)
                     reason_of[p] = qa_round["fail"][j]
                     shows_of[p] = (qa_round.get("shows") or {}).get(j)
+                elif low and p not in info_only:
+                    # content fixed, but too dark/flat to clear the floor
+                    next_still.add(p)
+                    reason_of[p] = "low_information"
+                    info_only.add(p)
+                    low_info_log.setdefault(_ik(p), {})["on_file"] = low
+                elif p in info_only:
+                    low_info_log.setdefault(_ik(p), {})["fixed_round"] = rounds
             for p in regen:
                 if p not in ok_redo:
                     next_still.add(p)
@@ -992,6 +1163,15 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
             qa["regen_rounds"] = rounds
             qa["still_failing"] = sorted(x[:100] for x in still)
             qa["second_check"] = bool(qa_round.get("checked"))
+        # a judge-passed plate that is only too dark is not a QA failure: it
+        # ships as it is (the gate's info_floor still measures the frame)
+        info_left = still & info_only
+        still -= info_left
+        if low_info_log:
+            qa["low_information"] = {"flagged": len(low_info_log),
+                                     "left": len(info_left),
+                                     "plates": low_info_log}
+        qa["still_failing"] = sorted(x[:100] for x in still)
         # last resort 1: narration-led RESUBJECT, RESUBJECT_VARIANTS seeds/
         # views per plate judged in ONE plate QA call; first passing wins.
         resub = [p for p in order if p in still
@@ -1056,7 +1236,7 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
                           ("checked", "ocr_checked", "fail", "ocr_hits",
                            "regenerated", "regen_rounds", "still_failing",
                            "second_check", "reason", "steering",
-                           "resubject", "dropped_shots")}
+                           "resubject", "dropped_shots", "low_information")}
     # final prompt -> path map, AFTER any regeneration replaced a path;
     # None (unknown/unanswered) is kept as None, never defaulted here —
     # engine.v16_manifest treats None conservatively (assume realistic).
