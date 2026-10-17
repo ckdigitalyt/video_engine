@@ -43,6 +43,11 @@ _SPELLING = {
     # Way's spiral arms" heard "milky weighs" (t_the_star_almost_missing_
     # its_metals B7). Same phonemes -- no speech can tell them apart.
     "webb": "web", "weighs": "ways",
+    # 2026-10-17: same phonemes, different spelling (Kokoro: "tonnes" ->
+    # tˈʌnz, "tuff" -> tˈʌf). t_niagara_is_slowly_eating_the_border B1 HELD
+    # on "sixty tonnes" heard "60 tons" at every speed and retry;
+    # t_the_rain_that_should_ve_erased B6 "rock called tuff" heard "tough".
+    "tonne": "ton", "tuff": "tough",
 }
 _SENT_SPLIT = re.compile(r"(?<=[.!?])[\"'”’)]*\s+(?=[\"'“‘(]*[A-Z0-9])")
 # A trailing ordinal suffix (30th, 1st, 2nd, 3rd) is matched here so
@@ -547,3 +552,68 @@ def numeralize_cue_words(words: list) -> list:
                     "t1": words[full_idx[-1]]["t1"]})
         i = full_idx[-1] + 1
     return out
+
+
+# ------------------------------------------------------- speakable years --
+# 2026-10-17: Kokoro's phonemizer reads every 4-digit number as a cardinal:
+# "On April 25th, 1891, Tesla..." was SPOKEN "one thousand eight hundred
+# ninety one" (phonemes wˈʌn θˈaʊzənd ˈeɪthˈʌndɹɪd nˈaɪnti wˈʌn), likewise
+# "back in 1962" (t_from_soviet_ride B3) and "in 1960, Bussard"
+# (t_the_starship_that_eats_empty_space B4). Round-trip QA cannot see it:
+# whisper writes "1891" for either reading and both sides normalise to the
+# same digits -- a listener hears it. A 4-digit figure is read as a YEAR
+# when the word before it is a time word ("in", "since", "by", a month...)
+# or it is a decade ("1960s"). Synthesis input only: the script, captions
+# and QA reference keep the digits. Measured (Kokoro am_michael -> small.en
+# round trip): "in 1962" / "June 2022" / "in 1960" / "By 1905" all PASS
+# spoken as years, whisper still writing the digits.
+_YEAR_CTX = frozenset((
+    "in", "since", "by", "of", "until", "till", "from", "before", "after",
+    "around", "circa", "year", "during", "between", "and", "to", "through",
+    "late", "early", "mid", "spring", "summer", "autumn", "fall", "winter",
+    "january", "february", "march", "april", "may", "june", "july", "august",
+    "september", "october", "november", "december", "jan", "feb", "mar",
+    "apr", "jun", "jul", "aug", "sep", "sept", "oct", "nov", "dec"))
+_MONTHS = frozenset((
+    "january", "february", "march", "april", "may", "june", "july", "august",
+    "september", "october", "november", "december"))
+_YEAR_TOKEN = re.compile(r"^(1[1-9]\d\d|20\d\d)(s)?([.,;:!?)\"'”’]*)$")
+
+
+def year_words(n: int, decade: bool = False) -> str:
+    """1891 -> 'eighteen ninety-one', 1905 -> 'nineteen oh five', 1900 ->
+    'nineteen hundred', 2007 -> 'two thousand seven', 2022 -> 'twenty
+    twenty-two'; decade=True: 1960 -> 'nineteen sixties'."""
+    def pair(v):
+        return int_to_words(v).replace(" ", "-")
+    if 2000 <= n <= 2009:
+        if decade:
+            return "two thousands"
+        return "two thousand" + (f" {int_to_words(n % 10)}" if n % 10 else "")
+    hi, lo = divmod(n, 100)
+    if lo == 0:
+        return f"{int_to_words(hi)} hundred" + ("s" if decade else "")
+    if decade:
+        last = pair(lo)
+        last = last[:-1] + "ies" if last.endswith("y") else last + "s"
+        return f"{int_to_words(hi)} {last}"
+    if lo < 10:
+        return f"{int_to_words(hi)} oh {int_to_words(lo)}"
+    return f"{int_to_words(hi)} {pair(lo)}"
+
+
+def speakable_years(text: str) -> str:
+    """Spell year-like figures as years for the TTS (see above)."""
+    words = text.split(" ")
+    out = []
+    for i, w in enumerate(words):
+        m = _YEAR_TOKEN.match(w)
+        prev = re.sub(r"[^a-z]", "", words[i - 1].lower()) if i else ""
+        # "April 25th, 1891": a day number right after a month
+        if (i >= 2 and re.fullmatch(r"\d{1,2}(st|nd|rd|th)?,?", words[i - 1])
+                and re.sub(r"[^a-z]", "", words[i - 2].lower()) in _MONTHS):
+            prev = "in"
+        if m and (m.group(2) or prev in _YEAR_CTX):
+            w = year_words(int(m.group(1)), bool(m.group(2))) + m.group(3)
+        out.append(w)
+    return " ".join(out)

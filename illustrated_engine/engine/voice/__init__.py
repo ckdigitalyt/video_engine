@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import time
 import wave
 from dataclasses import dataclass, field
@@ -96,6 +97,9 @@ def make_provider(voice_id: str, cfg: dict, lexicon: Lexicon | None = None):
 
 
 TRIM_VERSION = "trim/2"  # 150 ms tail (see _trim)
+# synthesis-input normalisation: a beat cached before years were spoken as
+# years (text.speakable_years, 2026-10-17) must be re-synthesised
+SPEAK_VERSION = "speak/2"
 
 
 def _trim(audio: np.ndarray, sr: int, keep_s: float = 0.02,
@@ -224,18 +228,30 @@ def synthesize(sentences: list, cfg: dict, out_wav, *, provider=None,
     timing, qa = _asr_timing(out_wav, script, cfg, lex, native, asr_fn,
                                counts, spans)
 
-    if qa["verdict"] == "FAIL":  # one retry of the offending sentences
+    if qa["verdict"] == "FAIL":  # re-attempt the offending sentences
         first, bad = qa, _bad_sentences(script, texts, qa)
-        t1 = time.time()
-        for i in bad:
-            clips[i] = provider.synth(lex.respell(texts[i]),
-                                      max(spd[i] * 0.95, 0.5))
-        synth_s += time.time() - t1
-        audio, sr, spans, native = _join(clips, roles, cfg)
-        _write_wav(out_wav, audio, sr)
-        timing, qa = _asr_timing(out_wav, script, cfg, lex, native, asr_fn,
-                               counts, spans)
+        bad_in = _bad_words_by_sentence(texts, qa)
+        best = (_qa_rank(qa), audio, sr, spans, native, timing, qa, None)
+        for name, make_text, f in RETRY_VARIANTS:
+            t1 = time.time()
+            trial = list(clips)
+            for i in bad:
+                trial[i] = provider.synth(make_text(texts[i], bad_in.get(i, ()),
+                                                    lex),
+                                          max(spd[i] * f, 0.5))
+            synth_s += time.time() - t1
+            a2, sr2, sp2, nat2 = _join(trial, roles, cfg)
+            _write_wav(out_wav, a2, sr2)
+            tm2, q2 = _asr_timing(out_wav, script, cfg, lex, nat2, asr_fn,
+                                  counts, sp2)
+            if _qa_rank(q2) < best[0]:
+                best = (_qa_rank(q2), a2, sr2, sp2, nat2, tm2, q2, name)
+            if q2["verdict"] == "PASS":
+                break
+        _, audio, sr, spans, native, timing, qa, used = best
+        _write_wav(out_wav, audio, sr)   # the best take, not the last trial
         qa["retried_sentences"] = bad
+        qa["retry_variant"] = used
         qa["first_pass"] = {k: first[k] for k in ("wer", "hard_missed")}
         if qa["verdict"] == "FAIL":
             qa["verdict"] = "HOLD"
@@ -246,6 +262,52 @@ def synthesize(sentences: list, cfg: dict, out_wav, *, provider=None,
                        rtf=round(synth_s / max(dur, 1e-6), 3), qa=qa,
                        duration=round(dur, 3), sentence_spans=spans,
                        **_voice_meta(cfg, voice_id))
+
+
+def _isolate(text: str, idxs) -> str:
+    """A comma (a short prosodic break) right before each misheard word, so
+    it is articulated on its own instead of run into its neighbour. The
+    script, captions and QA reference are untouched -- synthesis input
+    only."""
+    words = text.split()
+    for j in sorted(set(idxs)):
+        if 0 < j < len(words) and not re.search(r"[,.;:!?—-]$", words[j - 1]):
+            words[j - 1] += ","
+    return " ".join(words)
+
+
+def _qa_rank(q: dict) -> tuple:
+    return (q.get("verdict") != "PASS", len(q.get("hard_missed") or []),
+            q.get("wer", 1.0))
+
+
+# 2026-10-17: the ONE retry (lexicon respelling at 0.95x) rescued 8 of 47
+# held beats in stories/*/audio; in 36 the WER did not move at all. Kokoro
+# is deterministic for a given phoneme string, and speed is not the lever:
+# 15 recent misread sentences x 1.0/0.95/0.9/1.05x of base -> 1 rescue
+# (small.en replay). Isolating the misheard word with a short break
+# rescued 2/9 ("stellar remnant" no longer heard "remnants", "descendants
+# finish" no longer "finished") where no speed did. Variants run in order
+# until one PASSES; the best-ranked take (pass, hard misses, WER) is kept.
+# The bar (max_wer, hard tokens) is unchanged.
+RETRY_VARIANTS = (
+    ("respell_slow", lambda t, idx, lex: lex.respell(t), 0.95),
+    ("isolate", lambda t, idx, lex: lex.respell(_isolate(t, idx)), 1.0),
+    ("isolate_slow", lambda t, idx, lex: lex.respell(_isolate(t, idx)), 0.92),
+)
+
+
+def _bad_words_by_sentence(texts: list, qa: dict) -> dict:
+    """{sentence index: [word index within it]} for the misheard words
+    (qa bad_word_idx indexes the joined script's words)."""
+    out, start, n = {}, [], 0
+    for t in texts:
+        start.append(n)
+        n += len(t.split())
+    for i in qa.get("bad_word_idx") or []:
+        k = max(j for j, s0 in enumerate(start) if s0 <= i)
+        out.setdefault(k, []).append(i - start[k])
+    return out
 
 
 def _bad_sentences(script: str, texts: list, qa: dict) -> list:
@@ -269,7 +331,7 @@ def _sidecar_key(voice_id: str, cfg: dict, text: str, role: str,
     v = json.dumps(cfg["voices"][voice_id], sort_keys=True)
     # TRIM_VERSION: a beat cached with the old 20 ms tail trim (clipped
     # final consonants) must be re-synthesised, not reused
-    return hashlib.sha256(f"{TRIM_VERSION}|{v}|{cfg['gaps_ms']}|{cfg['speed_by_role']}|{role}"
+    return hashlib.sha256(f"{TRIM_VERSION}|{SPEAK_VERSION}|{v}|{cfg['gaps_ms']}|{cfg['speed_by_role']}|{role}"
                           f"|{speed}|{text}".encode()).hexdigest()[:16]
 
 

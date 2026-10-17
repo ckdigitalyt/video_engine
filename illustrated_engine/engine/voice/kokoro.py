@@ -36,8 +36,10 @@ class KokoroProvider:
 
     def synth(self, text: str, speed: float):
         from engine.voice import Clip
-        ph = self.lexicon.to_phonemes(text, self.model.tokenizer.phonemize,
-                                      self.lang)
+        from engine.voice.text import speakable_years
+        # years spoken as years, not "one thousand eight hundred ninety one"
+        ph = self.lexicon.to_phonemes(speakable_years(text),
+                                      self.model.tokenizer.phonemize, self.lang)
         audio, sr = self.model.create(ph, voice=self.voice, speed=speed,
                                       lang=self.lang, is_phonemes=True)
         return Clip(np.asarray(audio, dtype=np.float32).reshape(-1), sr, None)

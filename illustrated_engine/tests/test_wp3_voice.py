@@ -298,13 +298,16 @@ def test_qa_failure_retries_only_bad_sentence_with_respelling():
     assert prov.calls[2][0] == "Tie-ran-uh-SAWR-us, gone."
     assert prov.calls[2][1] < prov.calls[1][1]  # retried slower
 
-    # still wrong after the one retry -> HOLD, no second retry
+    # still wrong after every retry variant -> HOLD (2026-10-17: a bounded
+    # set of RETRY_VARIANTS, each re-synthesising only the bad sentence)
     prov2 = FakeProvider()
     with tempfile.TemporaryDirectory() as d:
         r2 = V.synthesize(sents, cfg, Path(d) / "v.wav", provider=prov2,
                           lexicon=lex, asr_fn=lambda w: _asr(
                               script.replace("Tyrannosaurus", "terenasaurus")))
-    assert r2.qa["verdict"] == "HOLD" and len(prov2.calls) == 3
+    assert r2.qa["verdict"] == "HOLD"
+    assert len(prov2.calls) == 2 + len(V.RETRY_VARIANTS)
+    assert all(c[0].startswith("Tie-ran-uh-SAWR-us") for c in prov2.calls[2:])
 
 
 # ------------------------------------------------------- whole-video switch --
