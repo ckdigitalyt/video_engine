@@ -381,6 +381,7 @@ def test_lexicon_carries_the_misread_words():
     assert lex.entries["winds"]["phonemes"] == "wˈɪndz"       # noun, not wind-up
     assert lex.entries["supernovae"]["phonemes"].endswith("viː")
     assert "laetoli" in lex.entries and "salar de uyuni" in lex.entries
+    assert lex.entries["indohyus"]["phonemes"] == "ˌɪndoʊhˈaɪəs"
 
 
 # ------------------------------------------------------- plate info floor --
@@ -419,3 +420,18 @@ def test_low_information_steering_asks_for_a_lit_detailed_frame(monkeypatch):
                         "composition": "centered"}, "low_information", 1)
     assert "Brightly lit" in seen["subj"] and "no large empty" in seen["subj"]
     assert seen["view"] == "medium"
+
+
+# -------------------------------------------------------------- captions --
+
+def test_short_mid_sentence_cue_folds_back_when_forward_merge_is_too_long():
+    # live_20261017_181106 t_a_whale_s_fin B4 word timing (whisper)
+    ws = [("Picture", .02, .32), ("Indohyus,", .32, .98), ("a", 1.44, 1.52),
+          ("little", 1.52, 1.66), ("deer-like", 1.66, 2.22),
+          ("animal", 2.24, 2.62), ("walking", 2.62, 3.08),
+          ("around", 3.08, 3.38), ("on", 3.38, 3.62), ("land.", 3.62, 3.88)]
+    cues = P.caption_cues({"words": [{"w": w, "t0": a, "t1": b}
+                                     for w, a, b in ws]}, 0.0)
+    assert " ".join(c["text"] for c in cues).split() == [w for w, *_ in ws]
+    assert all(c["t1"] - c["t0"] >= 0.30 for c in cues)
+    assert cues[0]["text"] == "Picture Indohyus, a little"

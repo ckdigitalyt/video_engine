@@ -179,6 +179,20 @@ def _merge_short_groups(groups: list, lead: float) -> list:
         if same_sentence and short and _chars(g, nxt) <= CUE_MERGE_MAX_CHARS:
             out[i:i + 2] = [g + nxt]
             continue
+        # 2026-10-17: a short mid-sentence cue whose forward merge is too
+        # long was left alone and the caption state machine dropped it:
+        # live_20261017_181106 t_a_whale_s_fin B4 "a little" (0.16 s, after
+        # a 0.46 s pause) vanished -> caption_identity FAIL. Fold it back
+        # into the previous cue of its sentence; if that is too long as
+        # well, merge forward anyway -- a long caption beats a missing one.
+        if same_sentence and short:
+            if i > 0 and not _SENT_END.search(out[i - 1][-1]["w"]) \
+                    and _chars(out[i - 1], g) <= CUE_MERGE_MAX_CHARS:
+                out[i - 1:i + 1] = [out[i - 1] + g]
+                i -= 1
+                continue
+            out[i:i + 2] = [g + nxt]
+            continue
         # a short sentence-FINAL cue folds back into its own sentence
         if short and not same_sentence and i > 0 \
                 and not _SENT_END.search(out[i - 1][-1]["w"]) \
