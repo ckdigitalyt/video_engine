@@ -33,6 +33,9 @@ from __future__ import annotations
 import base64
 import json
 import os
+import random
+import re
+import threading
 import subprocess
 import sys
 import time
@@ -254,6 +257,13 @@ class NvidiaNimProvider(ImageGenProvider):
         "https://ai.api.nvidia.com/v1/genai/black-forest-labs/flux.1-schnell",
     ]
 
+    # 2026-10-17: was 180 s per endpoint x 3 endpoints. Every NIM plate in
+    # build/cache/v15_plates over the last 3 days landed in <= 17 s (median
+    # 9 s, 36 plates), while the live_20261017_* batches logged "The read
+    # operation timed out" on every first-pass plate of 3 stories -- up to
+    # 9 minutes per plate spent waiting on a hung request before descending.
+    READ_TIMEOUT_S = 60
+
     def __init__(self, api_key: Optional[str] = None):
         self._api_key = api_key or os.environ.get("NVIDIA_API_KEY", "")
 
@@ -314,7 +324,7 @@ class NvidiaNimProvider(ImageGenProvider):
                         "Accept": "application/json",
                     },
                 )
-                with urllib.request.urlopen(req, timeout=180) as resp:
+                with urllib.request.urlopen(req, timeout=self.READ_TIMEOUT_S) as resp:
                     body = json.loads(resp.read().decode())
                 b64 = (
                     body.get("artifacts", [{}])[0].get("base64")
@@ -902,6 +912,14 @@ class CloudflareWorkersAIProvider(ImageGenProvider):
 
     name = "cloudflare_workers_ai"
     MODEL = "@cf/black-forest-labs/flux-2-klein-4b"
+    # back-off before each retry of a rate-limited (429) / transient 5xx call
+    RETRY_429_S = (6, 15, 30)
+
+    @staticmethod
+    def quota_exhausted(detail: str) -> bool:
+        """True for the DAILY neuron allocation 429 (not worth retrying)."""
+        low = (detail or "").lower()
+        return "4006" in low or "daily free allocation" in low or "neurons" in low
 
     def __init__(self, account_id: Optional[str] = None,
                  api_token: Optional[str] = None):
@@ -924,10 +942,34 @@ class CloudflareWorkersAIProvider(ImageGenProvider):
         fields = {"prompt": prompt, "width": width, "height": height}
         if seed is not None:
             fields["seed"] = seed
-        body, ctype = _multipart_post(
-            url, fields,
-            headers={"Authorization": f"Bearer {self._api_token}"},
-            timeout=120)
+        # 2026-10-17: a 429 here is usually the per-minute RATE limit, not
+        # the daily neuron allocation. Evidence: live_20261017_015400
+        # t_your_finger_is_this_globe_s_favorite_tar -- 6/12 first-pass plates
+        # got "HTTP Error 429" from Cloudflare (3 concurrent workers), fell
+        # through every other provider (402/429/timeouts) to sdcpp_local's
+        # 1800 s timeout and ended as PROCEDURAL shots; minutes later the
+        # same story's regen rounds got Cloudflare plates in ~20 s each.
+        # Back off and retry a rate limit; a daily-allocation 429 (Cloudflare
+        # error 4006 / "daily free allocation") is final and raised at once.
+        body = None
+        for attempt in range(len(self.RETRY_429_S) + 1):
+            try:
+                body, ctype = _multipart_post(
+                    url, fields,
+                    headers={"Authorization": f"Bearer {self._api_token}"},
+                    timeout=120)
+                break
+            except urllib.error.HTTPError as e:
+                if e.code not in (429, 502, 503, 504) or attempt == len(self.RETRY_429_S):
+                    raise
+                try:
+                    detail = e.read().decode("utf-8", "replace")
+                except Exception:  # noqa: BLE001
+                    detail = ""
+                if e.code == 429 and self.quota_exhausted(detail):
+                    raise RuntimeError(
+                        f"cloudflare_workers_ai: daily allocation used up: {detail[:160]}") from None
+                time.sleep(self.RETRY_429_S[attempt] * (0.75 + 0.5 * random.random()))
         payload = json.loads(body)
         if not payload.get("success", True) and not payload.get("result"):
             raise RuntimeError(f"cloudflare_workers_ai: {payload.get('errors')}")
@@ -951,6 +993,9 @@ class CloudflareWorkersAIProvider(ImageGenProvider):
 # ═══════════════════════════════════════════════════════════════════════ #
 # Local stable-diffusion.cpp (FLUX.2-klein-4B) — WP8, owned floor
 # ═══════════════════════════════════════════════════════════════════════ #
+
+
+_SDCPP_LOCK = threading.Lock()
 
 
 class SDCppLocalProvider(ImageGenProvider):
@@ -1013,8 +1058,15 @@ class SDCppLocalProvider(ImageGenProvider):
               "-W", str(width), "-H", str(height),
               "-s", str(seed if seed is not None else 42),
               "-o", str(output_path)]
-        proc = subprocess.run(cmd, capture_output=True, text=True,
-                              timeout=self._timeout_s)
+        # 2026-10-17: ONE sd-cli at a time per process. The plate pipeline
+        # runs 3 generation workers; three CPU-bound FLUX runs on this 4-core
+        # box each took ~3x the ~1240 s solo time and ALL hit the 1800 s
+        # timeout (live_20261017_015400 t_your_finger: 6 sdcpp attempts, 6
+        # timeouts, plates_s 6570; build/cache/v15_plates holds exactly one
+        # sdcpp plate in 3 days, 1725 s). Serialised, a run can finish.
+        with _SDCPP_LOCK:
+            proc = subprocess.run(cmd, capture_output=True, text=True,
+                                  timeout=self._timeout_s)
         if proc.returncode != 0 or not _looks_like_image(output_path):
             raise RuntimeError(
                 f"sdcpp_local generation failed (rc={proc.returncode}): "
@@ -1069,17 +1121,70 @@ class ArchiveProvider(ImageGenProvider):
     def is_available(self) -> bool:
         return True  # keyless public APIs
 
+    # 2026-10-17: the plate prompt's 2nd sentence is "<view phrase>: <subject>
+    # (<recurring-subject look>)" (engine.v15_style.image_prompt). The old
+    # query took the first 6 long words of that sentence -- i.e. the VIEW
+    # phrase. Every archive attempt in the live_20261017_* batches searched
+    # NASA/Met for camera boilerplate: "no PD/CC0 match for 'extreme
+    # close-up surface detail filling whole'", "... 'cutaway cross-section
+    # view: clearly unmistakably showing'", "... 'scroll-stopping opening
+    # close dramatic angle: subject'". It never searched for the subject.
+    _STOP = frozenset((
+        "about", "above", "against", "along", "among", "around", "before",
+        "behind", "below", "beneath", "beside", "between", "beyond", "clearly",
+        "during", "every", "filling", "frame", "from", "inside", "large",
+        "under", "showing", "single", "their", "there", "these", "those",
+        "through", "toward", "towards", "unmistakably", "whole", "with",
+        "within", "where", "which", "while", "richly", "detailed"))
+
+    # A found photo can stand in for a plain establishing/medium shot of a
+    # real object, never for a drawn cutaway, a macro crop, a comparison or
+    # the hook's composed framing -- those views go to generation.
+    _PHOTO_VIEWS = ("wide establishing view", "medium view")
+    _USED: set = set()                       # one archive photo, one plate
+    _USED_LOCK = threading.Lock()
+
+    def _view(self, prompt: str) -> str:
+        seg = prompt.split(". ")[1] if ". " in prompt else prompt
+        return seg.split(": ", 1)[0].strip().lower() if ": " in seg else ""
+
     def _subject(self, prompt: str) -> str:
-        return prompt.split(". ")[1] if ". " in prompt else prompt
+        seg = prompt.split(". ")[1] if ". " in prompt else prompt
+        if ": " in seg:                      # drop the view / hook framing
+            seg = seg.split(": ", 1)[1]
+        seg = re.sub(r"\([^)]*\)", " ", seg)   # drop the identity look
+        return " ".join(seg.split())
 
     def _looks_archival(self, subject: str) -> bool:
         low = subject.lower()
         return any(h in low for h in self._hints)
 
     def _query_terms(self, subject: str) -> str:
-        words = [w for w in subject.lower().replace(",", " ").split()
-                if w in self._hints or len(w) > 4]
-        return " ".join(words[:6]) or subject
+        words = [w.strip(".,;:'\"") for w in subject.lower().split()]
+        words = [w for w in words if w.isalpha() and w not in self._STOP
+                 and (w in self._hints or len(w) > 3)]
+        return " ".join(words[:4]) or subject
+
+    @classmethod
+    def _claim(cls, url: str) -> bool:
+        """First caller gets the photo; a later shot (another view of the
+        same subject) gets the next relevant hit or descends to generation
+        -- never the same photo on two shots (v16 gate internal_reuse)."""
+        with cls._USED_LOCK:
+            if url in cls._USED:
+                return False
+            cls._USED.add(url)
+            return True
+
+    @staticmethod
+    def _relevant(query: str, text: str) -> bool:
+        """A search hit is used only if its own title/description names
+        most of the query terms (a search engine's best effort for a
+        4-word query is often about something else entirely)."""
+        terms = [t for t in query.split() if len(t) > 3]
+        low = (text or "").lower()
+        hits = sum(1 for t in terms if t.rstrip("s") in low)
+        return bool(terms) and hits >= max(2, (len(terms) + 1) // 2)
 
     def _search_nasa(self, query: str) -> Optional[str]:
         url = ("https://images-api.nasa.gov/search?media_type=image&q="
@@ -1090,13 +1195,17 @@ class ArchiveProvider(ImageGenProvider):
         except Exception:
             return None
         for item in (data.get("collection", {}).get("items") or [])[:self._max_results]:
+            meta = (item.get("data") or [{}])[0]
+            if not self._relevant(query, f"{meta.get('title', '')} "
+                                         f"{meta.get('description', '')}"):
+                continue
             best = None
             for link in item.get("links") or []:
                 if link.get("render") != "image":
                     continue
                 if best is None or (link.get("width") or 0) > (best.get("width") or 0):
                     best = link
-            if best:
+            if best and self._claim(best["href"]):
                 return best["href"]  # NASA media: not copyrighted (NASA media guidelines)
         return None
 
@@ -1116,13 +1225,20 @@ class ArchiveProvider(ImageGenProvider):
                     obj = json.loads(resp.read())
             except Exception:
                 continue
-            if obj.get("isPublicDomain") and obj.get("primaryImage"):
+            if (obj.get("isPublicDomain") and obj.get("primaryImage")
+                    and self._relevant(query, f"{obj.get('title', '')} "
+                                              f"{obj.get('objectName', '')} "
+                                              f"{' '.join(t.get('term', '') for t in obj.get('tags') or [])}")
+                    and self._claim(obj["primaryImage"])):
                 return obj["primaryImage"]
         return None
 
     def generate(self, prompt: str, output_path: str,
                  width: int = 1024, height: int = 576,
                  seed: Optional[int] = None) -> str:
+        view = self._view(prompt)
+        if view and view not in self._PHOTO_VIEWS:
+            raise RuntimeError(f"archive: view {view[:40]!r} needs a drawn plate")
         subject = self._subject(prompt)
         if not self._looks_archival(subject):
             raise RuntimeError(
