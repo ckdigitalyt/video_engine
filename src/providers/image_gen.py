@@ -260,8 +260,10 @@ class NvidiaNimProvider(ImageGenProvider):
     # 2026-10-17: was 180 s per endpoint x 3 endpoints. Every NIM plate in
     # build/cache/v15_plates over the last 3 days landed in <= 17 s (median
     # 9 s, 36 plates), while the live_20261017_* batches logged "The read
-    # operation timed out" on every first-pass plate of 3 stories -- up to
-    # 9 minutes per plate spent waiting on a hung request before descending.
+    # operation timed out" -- up to 9 minutes per plate before descending.
+    # (Most of those were not hangs on flux.2-klein but its instant 422 for
+    # an over-long prompt, then the fallback endpoints timing out -- see
+    # PROMPT_MAX_CHARS. The shorter timeout still bounds a real hang.)
     READ_TIMEOUT_S = 60
 
     def __init__(self, api_key: Optional[str] = None):
@@ -299,7 +301,9 @@ class NvidiaNimProvider(ImageGenProvider):
         # flux.1-dev/schnell take per-axis multiples.  Snap per endpoint.
         _w0, _h0 = width, height
         per_axis = (self._snap(_w0), self._snap(int(round(_h0 * self._snap(_w0) / max(1, _w0)))))
+        prompt = self.fit_prompt(prompt)
         last_err: Optional[Exception] = None
+        first_err: Optional[str] = None
         for i, url in enumerate(self.ENDPOINTS):
             try:
                 if i == 0:
@@ -366,12 +370,69 @@ class NvidiaNimProvider(ImageGenProvider):
                 last_err = RuntimeError(f"unexpected NIM response shape: {list(body)[:5]}")
             except urllib.error.HTTPError as e:
                 last_err = e
+                if first_err is None:
+                    try:
+                        detail = e.read().decode("utf-8", "replace")[:160]
+                    except Exception:  # noqa: BLE001
+                        detail = ""
+                    first_err = f"{url.rsplit('/', 1)[-1]}: HTTP {e.code} {detail}"
                 # 422 = schema error on this endpoint (e.g. bad dims) — try next
                 continue
             except Exception as e:  # noqa: BLE001
                 last_err = e
+                if first_err is None:
+                    first_err = f"{url.rsplit('/', 1)[-1]}: {e}"
                 continue
-        raise RuntimeError(f"NVIDIA NIM generation failed: {last_err}")
+        # the FIRST endpoint's error is the informative one: the fallbacks'
+        # timeouts used to mask flux.2-klein's 422 (see PROMPT_MAX_CHARS)
+        raise RuntimeError(f"NVIDIA NIM generation failed: {first_err}; "
+                           f"last: {last_err}")
+
+    # 2026-10-17: flux.2-klein-4b rejects prompts over 800 characters
+    # (422 string_too_long, measured). Plate prompts with an injected
+    # subject look are often longer: in 4 days of build/cache/v15_plates,
+    # prompts > 800 chars got a NIM plate 5 times and failed NIM 36 times
+    # (all fell to pollinations/sdcpp; hero prompts may not use pollinations
+    # -> procedural shots once Cloudflare's daily quota was gone), while
+    # <= 800-char prompts failed NIM 5 times in 71. The failure was logged
+    # as "The read operation timed out": after the instant 422, flux.1-dev
+    # answered 500 after 65 s and flux.1-schnell hung past 90 s.
+    PROMPT_MAX_CHARS = 800
+
+    @classmethod
+    def fit_prompt(cls, prompt: str, limit: Optional[int] = None) -> str:
+        """Shorten an over-long prompt by whole sentences: the style (first)
+        and subject (second) sentences and the closing one are kept; the
+        sentences in between (composition / framing guidance) are dropped
+        from the last inward; only then is the subject cut at a word."""
+        limit = limit or cls.PROMPT_MAX_CHARS
+        if len(prompt) <= limit:
+            return prompt
+        parts, depth, start = [], 0, 0      # ". " outside parentheses only
+        for i, ch in enumerate(prompt):
+            depth += (ch == "(") - (ch == ")" and depth > 0)
+            if depth == 0 and prompt.startswith(". ", i):
+                parts.append(prompt[start:i])
+                start = i + 2
+        parts.append(prompt[start:])
+        if depth:                           # unbalanced "(": plain split
+            parts = prompt.split(". ")
+        if len(parts) >= 4:
+            head, mid, tail = parts[:2], parts[2:-1], parts[-1:]
+            while mid and len(". ".join(head + mid + tail)) > limit:
+                mid.pop()
+            prompt = ". ".join(head + mid + tail)
+            if len(prompt) <= limit:
+                return prompt
+            parts = head + tail
+            room = limit - len(". ".join([parts[0], "", parts[-1]]))
+            if room > 40:
+                subj = parts[1][:room].rsplit(" ", 1)[0].rstrip(" ,;:(")
+                if subj.count("(") > subj.count(")"):
+                    subj += ")"
+                    subj = subj if len(subj) <= room else subj[:room - 1] + ")"
+                return ". ".join([parts[0], subj, parts[-1]])
+        return prompt[:limit].rsplit(" ", 1)[0]
 
     # ── V13 M1a: image editing (FLUX.1-Kontext-dev, hosted NIM) ─────────
     #

@@ -435,3 +435,43 @@ def test_short_mid_sentence_cue_folds_back_when_forward_merge_is_too_long():
     assert " ".join(c["text"] for c in cues).split() == [w for w, *_ in ws]
     assert all(c["t1"] - c["t0"] >= 0.30 for c in cues)
     assert cues[0]["text"] == "Picture Indohyus, a little"
+
+
+# ------------------------------------------------------ NIM prompt length --
+
+LONG = ("vivid cinematic digital painting, glowing rim light against deep "
+        "shadow, crisp detail. Medium view: the superconducting disk (A flat "
+        "grey-black ceramic disk, 76mm wide. Matte crystalline surface "
+        "stippled with " + "countless glowing thread-thin filaments, " * 8 +
+        "piercing straight through it) being shoved sideways off a magnet. "
+        "main subject large, filling the lower two thirds. avoid an isolated "
+        "close-up of just a limb or torso with nothing else in frame; show "
+        "the whole subject in its setting. Pure image, full-bleed, edge to "
+        "edge, vertical 9:16")
+
+
+def test_nim_prompt_is_fitted_under_klein_limit_keeping_subject_and_close():
+    assert len(LONG) > 800
+    q = G.NvidiaNimProvider.fit_prompt(LONG)
+    assert len(q) <= 800
+    assert q.startswith("vivid cinematic") and q.endswith("vertical 9:16")
+    assert "superconducting disk (A flat" in q and "through it)" in q
+    assert "avoid an isolated" not in q          # guidance goes first
+    assert G.NvidiaNimProvider.fit_prompt("short. prompt") == "short. prompt"
+
+
+def test_nim_reports_the_first_endpoint_error(monkeypatch, tmp_path):
+    seen = []
+
+    def urlopen(req, timeout):
+        seen.append(len(__import__("json").loads(req.data)["prompt"]))
+        if len(seen) == 1:
+            raise _http(422, b'{"detail":"String should have at most 800"}')
+        raise TimeoutError("The read operation timed out")
+    monkeypatch.setattr(G.urllib.request, "urlopen", urlopen)
+    try:
+        G.NvidiaNimProvider("k").generate(LONG, str(tmp_path / "o.png"))
+        raise AssertionError("expected RuntimeError")
+    except RuntimeError as e:
+        assert "HTTP 422" in str(e) and "flux.2-klein-4b" in str(e)
+    assert max(seen) <= 800
