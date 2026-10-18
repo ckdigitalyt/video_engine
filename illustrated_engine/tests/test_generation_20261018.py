@@ -45,3 +45,29 @@ def test_lexicon_daedalus():
            for i, w in enumerate("and dedalus still aimed".split())]
     assert qa.round_trip("and Daedalus still aimed", asr, lex,
                          0.03)["verdict"] == "PASS"
+
+
+def test_ice_alias_does_not_fail_a_script_that_says_eyes():
+    lex = V.load_lexicon(V.load_config())
+
+    def rt(script, heard):
+        asr = [{"w": w, "t0": 0.3 * i, "t1": 0.3 * i + 0.25}
+               for i, w in enumerate(heard.split())]
+        return qa.round_trip(script, asr, lex, 0.03)
+    assert rt("curves back up to your eyes.",
+              "curves back up to your eyes")["verdict"] == "PASS"
+    # the original alias still rescues a correctly read "ice"
+    assert rt("slippery ice.", "slippery eyes")["verdict"] == "PASS"
+    assert rt("slippery ice.", "slippery dice")["verdict"] == "FAIL"
+
+
+def test_resubject_plates_of_one_beat_get_distinct_variants():
+    from engine.v15_pipeline import (RESUBJECT_VARIANTS, resubject_prompt,
+                                     resubject_slots)
+    nth = resubject_slots(["a", "b", "c"], {"a": "B1", "b": "B1", "c": "B2"})
+    assert nth == {"a": 0, "b": 1, "c": 0}
+    bible = {"illustration_style": "painted"}
+    seen = {resubject_prompt(bible, "A hot road turns into a mirror.", None,
+                             (), variant=k + RESUBJECT_VARIANTS * nth[p])[0]
+            for p in ("a", "b") for k in range(RESUBJECT_VARIANTS)}
+    assert len(seen) == 2 * RESUBJECT_VARIANTS

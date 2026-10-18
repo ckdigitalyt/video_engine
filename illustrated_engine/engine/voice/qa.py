@@ -14,6 +14,7 @@ def round_trip(script: str, asr_words: list, lex: Lexicon,
                max_wer: float = 0.03) -> dict:
     words = script.split()
     ref, owner = join_letter_runs(*flat_tokens(words))
+    ref = lex.canonical_ref(ref)
     hyp = restore_d_elision(ref, rejoin_compounds(ref, join_letter_runs(
         lex.canonical(flat_tokens([w["w"] for w in asr_words])[0]))[0]))
     ops = edit_align(ref, hyp)

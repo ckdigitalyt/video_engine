@@ -83,6 +83,17 @@ class Lexicon:
                 i += 1
         return out
 
+    def canonical_ref(self, tokens: list) -> list:
+        """The SCRIPT side of the comparison: one-word aliases only, token
+        for token (owner indices stay valid). An alias that is itself a
+        common word is then harmless when the script really says it:
+        live_20261018_073528 t_that_road_puddle B4 "...to your eyes" was
+        read correctly, heard "eyes", canonicalised to "ice" (the ice
+        entry's heard_as) and FAILed against the script's "eyes"."""
+        one = {a[0]: w[0] for a, w in self._alias
+               if len(a) == 1 and len(w) == 1}
+        return [one.get(t, t) for t in tokens]
+
     def words(self) -> set:
         return set(self.entries)
 
