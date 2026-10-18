@@ -276,6 +276,19 @@ def _isolate(text: str, idxs) -> str:
     return " ".join(words)
 
 
+def _isolate_after(text: str, idxs) -> str:
+    """A comma right AFTER each misheard word. _isolate can't help a
+    sentence-initial word, nor one whose final consonant runs into the next
+    word's onset: live_20261018_073528 t_fusion_rockets B4 "Burn deuterium
+    and tritium" was heard "burned deuterium" at every speed/variant
+    (bad_word_idx [0]). Synthesis input only, like _isolate."""
+    words = text.split()
+    for j in sorted(set(idxs)):
+        if 0 <= j < len(words) - 1 and not re.search(r"[,.;:!?—-]$", words[j]):
+            words[j] += ","
+    return " ".join(words)
+
+
 def _qa_rank(q: dict) -> tuple:
     return (q.get("verdict") != "PASS", len(q.get("hard_missed") or []),
             q.get("wer", 1.0))
@@ -294,6 +307,8 @@ RETRY_VARIANTS = (
     ("respell_slow", lambda t, idx, lex: lex.respell(t), 0.95),
     ("isolate", lambda t, idx, lex: lex.respell(_isolate(t, idx)), 1.0),
     ("isolate_slow", lambda t, idx, lex: lex.respell(_isolate(t, idx)), 0.92),
+    ("isolate_after", lambda t, idx, lex: lex.respell(_isolate_after(t, idx)),
+     1.0),
 )
 
 
