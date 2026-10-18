@@ -699,6 +699,17 @@ def resubject_prompt(bible: dict, narration: str, identity: dict | None,
             subj)
 
 
+def resubject_slots(resub: list, beat_of_prompt: dict) -> dict:
+    """{prompt: n} -- the n-th resubjected plate of its beat, so each plate
+    of a beat draws its own variant block (views and seeds)."""
+    nth, seen = {}, {}
+    for p in resub:
+        b = beat_of_prompt.get(p)
+        nth[p] = seen.get(b, 0)
+        seen[b] = nth[p] + 1
+    return nth
+
+
 # 2026-10-17 (zero passes in ~6 batches since the first publish): a plate
 # whose generation FAILED outright (every provider errored) was never
 # retried -- plate QA and its regen rounds only see plates that exist -- so
@@ -1192,13 +1203,22 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
                  and reason_of.get(p) in RESUBJECT_REASONS
                  and prompt_narration.get(p)]
         if resub:
+            # 2026-10-18: two failing plates of ONE beat share its narration,
+            # so variant k of each was the same prompt + seed -- the same
+            # (cached) image: live_20261018_073528 t_that_road_puddle B1_S1
+            # passed resubject, B1_S2's two variants were judged "same road
+            # mirage puddle view as plate 1" -> plates FAIL. Each plate of a
+            # beat takes its own block of views.
+            nth = resubject_slots(resub, beat_of_prompt)
+
             def _resub(job):
                 p, k = job
+                v = k + RESUBJECT_VARIANTS * nth[p]
                 sp, subj = resubject_prompt(
                     bible, prompt_narration[p], identity,
-                    beat_views.get(beat_of_prompt.get(p), ()), variant=k)
+                    beat_views.get(beat_of_prompt.get(p), ()), variant=v)
                 return p, k, subj, generate_plate(
-                    sp, _seed(sp, MAX_PLATE_REGEN + 1 + k), log=fail_log,
+                    sp, _seed(sp, MAX_PLATE_REGEN + 1 + v), log=fail_log,
                     providers=_providers(p))
             jobs = [(p, k) for p in resub for k in range(RESUBJECT_VARIANTS)]
             with ThreadPoolExecutor(max_workers=3) as ex:
