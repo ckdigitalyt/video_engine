@@ -7,7 +7,8 @@ from __future__ import annotations
 
 from engine.voice.lexicon import Lexicon, hard_words
 from engine.voice.text import (edit_align, flat_tokens, join_letter_runs,
-                               rejoin_compounds, restore_d_elision)
+                               join_split_numbers, rejoin_compounds,
+                               restore_d_elision, restore_number_words)
 
 
 def round_trip(script: str, asr_words: list, lex: Lexicon,
@@ -16,7 +17,9 @@ def round_trip(script: str, asr_words: list, lex: Lexicon,
     ref, owner = join_letter_runs(*flat_tokens(words))
     ref = lex.canonical_ref(ref)
     hyp = restore_d_elision(ref, rejoin_compounds(ref, join_letter_runs(
-        lex.canonical(flat_tokens([w["w"] for w in asr_words])[0]))[0]))
+        lex.canonical(flat_tokens(join_split_numbers(
+            [w["w"] for w in asr_words]))[0]))[0]))
+    hyp = restore_number_words(ref, hyp)
     ops = edit_align(ref, hyp)
     errors = sum(1 for _, _, op in ops if op != "C")
     wer = errors / max(len(ref), 1)

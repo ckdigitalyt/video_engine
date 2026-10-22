@@ -3,6 +3,7 @@ and the word-level edit alignment used for both QA (WER) and caption timing."""
 from __future__ import annotations
 
 import re
+import unicodedata
 
 _ONES = ("zero one two three four five six seven eight nine ten eleven twelve "
          "thirteen fourteen fifteen sixteen seventeen eighteen nineteen").split()
@@ -126,7 +127,7 @@ def split_sentences(text: str) -> list:
 def norm_tokens(word: str) -> list:
     """One spoken token as a list of normalised sub-tokens ('66' -> sixty six,
     'Sixty-six' -> sixty six)."""
-    w = word.lower().replace("’", "'").replace("%", " percent ")
+    w = ascii_fold(word).lower().replace("’", "'").replace("%", " percent ")
     # 2026-10-16 replay of every held beat's stored transcript: spelling-
     # only differences no re-synthesis can fix (see also _ae_digraph):
     #  - "they're" scripted, "they are" heard (t_humans_closer_trex B6, WER
@@ -150,6 +151,16 @@ def norm_tokens(word: str) -> list:
             t = _SPELLING[t[:-1]] + "s"
         out.append(_ae_digraph(t))
     return out
+
+
+def ascii_fold(s: str) -> str:
+    """Drop diacritics (ü -> u, é -> e) instead of deleting the letter.
+    norm_tokens keeps [a-z0-9] only, so a scripted "Bücks" used to become
+    "bcks" -- a token no transcript can ever produce (ASR writes plain
+    ASCII): live t_sound_can_make_gravity_let_go B4 HELD, WER 0.0435,
+    bad_word_idx [0], on a sentence read correctly. Applied to both sides."""
+    return "".join(c for c in unicodedata.normalize("NFKD", s)
+                   if not unicodedata.combining(c))
 
 
 _CONTRACTION = re.compile(r"(?<=[a-z])'(re|ve|ll)\b|(?<=\bi)'(m)\b")
@@ -201,6 +212,26 @@ def flat_tokens(words: list) -> tuple:
             toks.append(t)
             owner.append(i)
     return toks, owner
+
+
+_GROUP_TAIL = re.compile(r"^,\d{3}(?:[,.]\d+)*\b")
+
+
+def join_split_numbers(words: list) -> list:
+    """faster-whisper can emit one figure as two words, "70" + ",000."
+    (t_this_rock_still_points_to_earth_s_old_no B6 "...as long as seventy
+    thousand." HELD, WER 0.125: the tail ",000" normalised on its own to
+    "zero" -> heard "seventy zero"). Glue a word that starts with a comma +
+    3-digit group back onto a preceding word ending in a digit. ASR words
+    only; a real "70, 000" cannot arise -- whisper never writes a bare
+    leading-comma digit group as its own number."""
+    out = []
+    for w in words:
+        if out and _GROUP_TAIL.match(w) and out[-1][-1:].isdigit():
+            out[-1] += w
+        else:
+            out.append(w)
+    return out
 
 
 def edit_align(ref: list, hyp: list) -> list:
@@ -301,6 +332,46 @@ def restore_d_elision(ref: list, hyp: list) -> list:
             d = _edit_dist(ref, cand)
             if d < dist:
                 out, dist = cand, d
+    return out
+
+
+_SCALE_TOKENS = ("hundred", "thousand", "million", "billion")
+
+
+def restore_number_words(ref: list, hyp: list) -> list:
+    """faster-whisper writes a spoken figure as DIGITS ("100", "501",
+    "780,000"), and digits normalise to the bare cardinal ("one hundred",
+    "five hundred one"). Two words of a scripted figure can therefore never
+    come back, however well it was read:
+     - "a hundred" / "a thousand" -> "one hundred": t_a_sail_made_of_nothing
+       B2 ("Fifty to a hundred wires", heard "100"), t_this_isn_t_floating
+       B3 ("around a hundred billion"), t_this_ship_has_no_farmland B4
+       ("over a hundred thousand") -- all HELD, WER 0.06-0.07;
+     - "hundred and one" -> "hundred one": t_no_train_beat_this_maglev B4
+       ("it hit five hundred and one", heard "501") HELD, WER 0.0588.
+    Map hyp "one" before a scale word to "a", and put back an "and" between
+    a scale word and the next number word, only where the script has that
+    exact pair/triple and it strictly lowers the edit distance (the same
+    guard as restore_d_elision): a wrong figure ("two hundred" for "a
+    hundred", "five hundred two" for "five hundred and one") still counts."""
+    pairs = {(a, b) for a, b in zip(ref, ref[1:])
+             if a == "a" and b in _SCALE_TOKENS}
+    triples = {(a, c) for a, b, c in zip(ref, ref[1:], ref[2:])
+               if a in _SCALE_TOKENS and b == "and" and c in NUMBER_WORDS}
+    if not pairs and not triples:
+        return list(hyp)
+    out, dist, j = list(hyp), _edit_dist(ref, hyp), 0
+    while j < len(out) - 1:
+        cand = None
+        if out[j] == "one" and ("a", out[j + 1]) in pairs:
+            cand = out[:j] + ["a"] + out[j + 1:]
+        elif (out[j], out[j + 1]) in triples:
+            cand = out[:j + 1] + ["and"] + out[j + 1:]
+        if cand is not None:
+            d = _edit_dist(ref, cand)
+            if d < dist:
+                out, dist = cand, d
+        j += 1
     return out
 
 

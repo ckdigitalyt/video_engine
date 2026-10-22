@@ -16,7 +16,7 @@ from pathlib import Path
 
 import yaml
 
-from engine.voice.text import NUMBER_WORDS, norm_tokens
+from engine.voice.text import NUMBER_WORDS, ascii_fold, norm_tokens
 
 
 class Lexicon:
@@ -103,16 +103,17 @@ def hard_words(text: str, lex: Lexicon) -> list:
     round trip: lexicon entries, numbers, and proper names (capitalised
     mid-sentence words / acronyms)."""
     words = text.split()
+    lex_words = {ascii_fold(k) for k in lex.words()}
     hard, sent_start = [], True
     for i, w in enumerate(words):
-        bare = re.sub(r"[^A-Za-z0-9']", "", w)
+        bare = re.sub(r"[^A-Za-z0-9']", "", ascii_fold(w))
         toks = norm_tokens(w)
         is_num = any(c.isdigit() for c in w) or any(
             t in NUMBER_WORDS and t != "one" for t in toks)
         cap = bare[:1].isupper() and bare != "I" and not bare.startswith("I'")
         # a long capitalised sentence opener is a name too (Tyrannosaurus, gone.)
         is_name = cap and (not sent_start or len(bare) >= 9)
-        if toks and (bare.lower() in lex.words() or is_num or is_name
+        if toks and (bare.lower() in lex_words or is_num or is_name
                      or (len(bare) > 1 and bare.isupper())):
             hard.append(i)
         sent_start = bool(re.search(r"[.!?][\"'”’)]*$", w))
