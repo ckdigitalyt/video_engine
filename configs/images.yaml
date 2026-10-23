@@ -44,25 +44,36 @@ image_gen:
     # of gemini_image/nvidia_nim/pollinations so a paid, good-quality
     # image wins over the free-tier-exhausted/slow fallbacks.
     #
-    # together added 2026-10-23 (owner's "slowest step" investigation):
-    # nvidia_nim, this chain's main fallback once the above all miss, was
-    # the single biggest driver of worst-case render time (up to ~5000s
-    # of plates_s on some stories, nvidia_nim-heavy every time — it can
-    # burn 60s x 3 endpoints per image before giving up). Together's
-    # FLUX.1-schnell-Free tier is free and uncapped (confirmed live
-    # 2026-10-23), same FLUX family, so it goes ahead of nvidia_nim as a
-    # fast free fallback.
+    # together added 2026-10-23, then demoted to benchmark_only the same
+    # day: the "free and uncapped" claim (live docs check) turned out
+    # stale — Together's July 2025 billing change requires a one-time $5
+    # account deposit before ANY API call, FLUX.1-schnell-Free included.
+    # Owner declined the deposit ("looking for free options"). Code stays
+    # (TogetherProvider, tests/test_together_image_provider.py) in case
+    # the owner funds it later; see benchmark_only below.
+    #
+    # pollinations moved ahead of nvidia_nim 2026-10-23 (same "slowest
+    # step" investigation): nvidia_nim was the single biggest driver of
+    # worst-case render time (up to ~5000s of plates_s on some stories,
+    # nvidia_nim-heavy every time — it can burn 60s x 3 endpoints per
+    # image before giving up) and previously sat AHEAD of pollinations,
+    # so even ordinary (non-hero) shots hit the slow NIM fallback first.
+    # `engine.v15_plates.providers_for_beat_function` strips pollinations
+    # from the chain by name for HOOK/PAYOFF beats regardless of its
+    # position here, so this reorder only speeds up the non-hero shots
+    # (typically 8-11 of a video's ~10-13 plates) — hero shots still skip
+    # straight past it to nvidia_nim, unaffected.
     production:
       - archive
       - cloudflare_workers_ai
       - openrouter_image
       - gemini_image
-      - together
-      - nvidia_nim
       - pollinations
+      - nvidia_nim
       - sdcpp_local
     benchmark_only:
       - siliconflow
+      - together
       - hf_serverless
 
   cloudflare:

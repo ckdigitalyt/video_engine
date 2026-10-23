@@ -39,18 +39,29 @@ class TestProviderOrder:
         # (PROGRESS.md 2026-09-27).
         assert "nvidia_nim" in plates.PROVIDER_ORDER
 
-    def test_archive_before_cloudflare_before_gemini_before_nim_before_pollinations_before_sdcpp(self):
+    def test_archive_before_cloudflare_before_gemini_before_pollinations_before_nim_before_sdcpp(self):
         # Owner directive 2026-10-10 (configs/images.yaml): pollinations
         # moved ahead of sdcpp_local for speed while cloudflare/gemini's
         # free-tier image quotas are exhausted -- sdcpp_local is ~60-90x
         # slower (~1700-1800s/image vs. pollinations' ~20-30s). nvidia_nim
         # added 2026-10-11, ahead of pollinations (faster, better quality).
+        #
+        # Owner's "slowest step" investigation, 2026-10-23: nvidia_nim was
+        # the single biggest driver of worst-case render time (up to
+        # ~5000s of plates_s on some stories, nvidia_nim-heavy every
+        # time -- it can burn 60s x 3 endpoints per image before giving
+        # up) and sitting ahead of pollinations meant even non-hero shots
+        # hit that slow path first. Reordered: pollinations now goes
+        # ahead of nvidia_nim (engine.v15_plates.providers_for_beat_
+        # function still strips pollinations by name for HOOK/PAYOFF
+        # beats regardless of position here, so hero shots are
+        # unaffected and still reach nvidia_nim unchanged).
         order = plates.PROVIDER_ORDER
         idx = {name: order.index(name) for name in
               ("archive", "cloudflare_workers_ai", "gemini_image",
                "nvidia_nim", "sdcpp_local", "pollinations")}
         assert idx["archive"] < idx["cloudflare_workers_ai"] < idx["gemini_image"] \
-            < idx["nvidia_nim"] < idx["pollinations"] < idx["sdcpp_local"]
+            < idx["pollinations"] < idx["nvidia_nim"] < idx["sdcpp_local"]
 
     def test_matches_configs_images_yaml(self):
         """WP1 principle carried into WP8: "switching providers is a config

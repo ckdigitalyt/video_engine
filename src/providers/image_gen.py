@@ -836,19 +836,22 @@ class TogetherProvider(ImageGenProvider):
     single biggest driver of worst-case render time — some stories spent
     up to ~5000s in `plates_s` with most plates landing on nvidia_nim,
     which can burn up to 60s x 3 endpoints per image before giving up.
-    FLUX.1-schnell-Free is Together's no-cost, uncapped tier (confirmed
-    live 2026-10-23: "does not consume any credits... unlimited use",
-    https://together.ai/blog/flux-api-is-now-available-on-together-ai-new-pro-free-access-to-flux-schnell)
-    of the same FLUX family, placed ahead of nvidia_nim in the chain so a
-    fast free fallback is tried first.
 
-    schnell is a distilled model meant for few-step inference (4 steps is
-    the model card's own recommendation) — more steps cost more time for
-    no quality gain on this specific checkpoint, unlike the full FLUX.1/2
-    dev/pro models.
+    Demoted to benchmark_only the same day: the "FLUX.1-schnell-Free does
+    not consume any credits... unlimited use" claim (a live docs check)
+    turned out stale. Together's actual July 2025 billing change requires
+    a one-time $5 account deposit before any API call at all, schnell
+    included — confirmed live when the owner tried to sign up, and in
+    Together's own support article ("changes-to-free-tier-and-billing-
+    july-2025": "Together AI does not currently offer free trials...
+    requires a minimum $5 credit purchase"). Owner declined the deposit
+    ("looking for free options"). Left implemented (not deleted) in case
+    the owner funds it later — set TOGETHER_API_KEY and move "together"
+    from configs/images.yaml's benchmark_only list back into production.
     """
 
     name = "together"
+    benchmark_only = True
     MODEL = "black-forest-labs/FLUX.1-schnell-Free"
     URL = "https://api.together.ai/v1/images/generations"
     STEPS = 4
