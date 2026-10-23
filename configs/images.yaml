@@ -43,11 +43,21 @@ image_gen:
     # after the two free tiers so free quota is used first, but ahead
     # of gemini_image/nvidia_nim/pollinations so a paid, good-quality
     # image wins over the free-tier-exhausted/slow fallbacks.
+    #
+    # together added 2026-10-23 (owner's "slowest step" investigation):
+    # nvidia_nim, this chain's main fallback once the above all miss, was
+    # the single biggest driver of worst-case render time (up to ~5000s
+    # of plates_s on some stories, nvidia_nim-heavy every time — it can
+    # burn 60s x 3 endpoints per image before giving up). Together's
+    # FLUX.1-schnell-Free tier is free and uncapped (confirmed live
+    # 2026-10-23), same FLUX family, so it goes ahead of nvidia_nim as a
+    # fast free fallback.
     production:
       - archive
       - cloudflare_workers_ai
       - openrouter_image
       - gemini_image
+      - together
       - nvidia_nim
       - pollinations
       - sdcpp_local

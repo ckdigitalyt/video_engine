@@ -823,6 +823,82 @@ class OpenRouterImageProvider(ImageGenProvider):
 
 
 # ═══════════════════════════════════════════════════════════════════════ #
+# Together.ai (FLUX.1-schnell-Free)
+# ═══════════════════════════════════════════════════════════════════════ #
+
+
+class TogetherProvider(ImageGenProvider):
+    """Together.ai hosted FLUX.1-schnell-Free image generation.
+
+    2026-10-23: added per owner directive, after the "slowest step"
+    investigation found NVIDIA NIM (the fallback this chain reaches most
+    often once archive/cloudflare/openrouter/gemini are exhausted) is the
+    single biggest driver of worst-case render time — some stories spent
+    up to ~5000s in `plates_s` with most plates landing on nvidia_nim,
+    which can burn up to 60s x 3 endpoints per image before giving up.
+    FLUX.1-schnell-Free is Together's no-cost, uncapped tier (confirmed
+    live 2026-10-23: "does not consume any credits... unlimited use",
+    https://together.ai/blog/flux-api-is-now-available-on-together-ai-new-pro-free-access-to-flux-schnell)
+    of the same FLUX family, placed ahead of nvidia_nim in the chain so a
+    fast free fallback is tried first.
+
+    schnell is a distilled model meant for few-step inference (4 steps is
+    the model card's own recommendation) — more steps cost more time for
+    no quality gain on this specific checkpoint, unlike the full FLUX.1/2
+    dev/pro models.
+    """
+
+    name = "together"
+    MODEL = "black-forest-labs/FLUX.1-schnell-Free"
+    URL = "https://api.together.ai/v1/images/generations"
+    STEPS = 4
+    READ_TIMEOUT_S = 60
+
+    def __init__(self, api_key: Optional[str] = None):
+        self._api_key = api_key or os.environ.get("TOGETHER_API_KEY", "")
+
+    def is_available(self) -> bool:
+        return bool(self._api_key)
+
+    @staticmethod
+    def _snap(v: int) -> int:
+        # FLUX dimensions must be multiples of 16; clamp to a sane range.
+        return max(512, min(1536, round(v / 16) * 16))
+
+    def generate(self, prompt: str, output_path: str,
+                 width: int = 1024, height: int = 576,
+                 seed: Optional[int] = None) -> str:
+        if not self._api_key:
+            raise RuntimeError("TOGETHER_API_KEY not set")
+        payload = {
+            "model": self.MODEL,
+            "prompt": prompt,
+            "width": self._snap(width),
+            "height": self._snap(height),
+            "steps": self.STEPS,
+            "n": 1,
+            "response_format": "base64",
+        }
+        if seed is not None:
+            payload["seed"] = int(seed)
+        req = urllib.request.Request(
+            self.URL, data=json.dumps(payload).encode(),
+            headers={
+                "Authorization": f"Bearer {self._api_key}",
+                "Content-Type": "application/json",
+            },
+        )
+        with urllib.request.urlopen(req, timeout=self.READ_TIMEOUT_S) as resp:
+            body = json.loads(resp.read().decode())
+        try:
+            b64 = body["data"][0]["b64_json"]
+        except (KeyError, IndexError, TypeError):
+            raise RuntimeError(f"together: no image in response (keys={list(body)[:5]})")
+        raw = base64.b64decode(b64)
+        return _write_verified(raw, output_path, self.name)
+
+
+# ═══════════════════════════════════════════════════════════════════════ #
 # Hugging Face serverless
 # ═══════════════════════════════════════════════════════════════════════ #
 
@@ -1334,6 +1410,7 @@ _PROVIDERS: dict[str, type[ImageGenProvider]] = {
     "pollinations": PollinationsProvider,
     "gemini_image": GeminiImageProvider,
     "openrouter_image": OpenRouterImageProvider,
+    "together": TogetherProvider,
     "cloudflare_workers_ai": CloudflareWorkersAIProvider,
     "sdcpp_local": SDCppLocalProvider,
     "archive": ArchiveProvider,
