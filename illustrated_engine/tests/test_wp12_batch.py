@@ -216,15 +216,17 @@ def _fake_report(story_id: str) -> dict:
     }
 
 
-def test_resume_after_simulated_quota_at_s6_visual_plan(tmp_path, monkeypatch):
-    """DESIGN §15.2 WP12 test proof: 'resume after a simulated quota at
-    S6' (S6 = visual_plan, DESIGN §1.2's stage graph). Simulates a real
-    Claude-CLI quota cooldown (the same `llm_state.json` the adapter
-    itself writes on a real quota hit, WP1) landing while story A is
-    still pending, proves the batch pauses BEFORE running story A (never
-    silently degrades to a fallback plan), then proves `--resume` behaves
-    correctly once the cooldown clears: story A and B both complete, in
-    order, with nothing re-run twice."""
+def test_a_recorded_cooldown_no_longer_pauses_the_batch_before_trying(
+        tmp_path, monkeypatch):
+    """Owner directive 2026-10-23: the pre-video `_llm_blocked()` gate used
+    to refuse to even attempt story A whenever `llm_state.json` had an
+    active cooldown recorded — including a STALE one, once the account's
+    actual session limit no longer applied. The gate is removed: a
+    recorded cooldown must not stop the batch from trying. Both stories
+    below run straight through despite the cooldown entry, exactly as if
+    it were never there (contrast with
+    `test_quota_landing_mid_video_keeps_that_story_pending`, which still
+    pauses on a REAL degraded run detected after the fact)."""
     _env(tmp_path, monkeypatch)
     work = tmp_path / "batch"
     calls = []
@@ -236,11 +238,10 @@ def test_resume_after_simulated_quota_at_s6_visual_plan(tmp_path, monkeypatch):
     import engine.v15_pipeline as v15p
     monkeypatch.setattr(v15p, "run_pipeline", fake_run_pipeline)
 
-    # 1. simulate a quota hit at S6 (visual_plan's only configured provider,
-    #    claude_cli) — the exact state file engine.director.text_ask's own
-    #    LLMUnavailable("quota") path writes on a real outage (llm/client.py
-    #    `_set_cooldown`), written directly here per the existing adapter
-    #    test convention (tests/test_llm_adapter.py).
+    # a cooldown recorded before the batch even starts (the exact state
+    # file engine.director.text_ask's own LLMUnavailable("quota") path
+    # writes on a real outage, llm/client.py `_set_cooldown`) must not
+    # block anything now.
     retry_at = datetime.now(timezone.utc) + timedelta(hours=2)
     (tmp_path / "llm_state.json").write_text(json.dumps(
         {"cooldown": {"claude_cli": retry_at.isoformat()}}))
@@ -249,27 +250,14 @@ def test_resume_after_simulated_quota_at_s6_visual_plan(tmp_path, monkeypatch):
     story_a, story_b = STORIES_DIR / "ice_slippery", STORIES_DIR / "tunguska_1908"
     rep1 = B.run_batch([story_a, story_b], work, resume=False, package=False, use_llm=True)
 
-    assert rep1["paused"] is True
-    assert rep1["exit_code"] == 75
-    assert rep1["retry_at"] is not None
-    assert calls == [], "must pause BEFORE calling run_pipeline, not after"
-    assert rep1["pending"] == [str(story_a), str(story_b)]
-    assert (work / "batch_state.json").exists()
-
-    # 2. quota resets — clear the cooldown, exactly like a real `retry_at` elapsing
-    (tmp_path / "llm_state.json").write_text(json.dumps({"cooldown": {}}))
-    client.reset()
-
-    rep2 = B.run_batch([], work, resume=True, package=False, use_llm=True)
-
-    assert rep2.get("paused") is False
-    assert calls == ["ice_slippery", "tunguska_1908"], "resume must not re-run a done story"
-    assert rep2["pending"] == []
-    assert len(rep2["rows"]) == 2
-    assert [r["story"] for r in rep2["rows"]] == ["ice_slippery", "tunguska_1908"]
-    assert all(r["verdict"] == "PASS" for r in rep2["rows"])
-    assert rep2["totals"]["llm_calls"] == 2
-    assert rep2["lanes_overlap"] is False   # DESIGN §13.3, deferred — see module docstring
+    assert rep1.get("paused") is False
+    assert calls == ["ice_slippery", "tunguska_1908"]
+    assert rep1["pending"] == []
+    assert len(rep1["rows"]) == 2
+    assert [r["story"] for r in rep1["rows"]] == ["ice_slippery", "tunguska_1908"]
+    assert all(r["verdict"] == "PASS" for r in rep1["rows"])
+    assert rep1["totals"]["llm_calls"] == 2
+    assert rep1["lanes_overlap"] is False   # DESIGN §13.3, deferred — see module docstring
 
 
 def test_quota_landing_mid_video_keeps_that_story_pending(tmp_path, monkeypatch):

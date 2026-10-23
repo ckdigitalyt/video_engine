@@ -30,14 +30,18 @@ report is always `False` so this is visible, not papered over.
 `LLMUnavailable` and degrades to a cached/deterministic fallback — a
 load-bearing reliability path per AGENTS.md, landed in WP1, never
 raised out of `run_pipeline`. So the batch cannot "catch LLMUnavailable
-from a video run" (it would never fire) — instead, before starting each
-video, `_llm_blocked()` checks `llm.client.available(...)` for the
-stages a real (non-degraded) render needs. A genuine quota outage (every
-provider for every such stage in cooldown) pauses the batch *before* that
-video would silently render in degraded-fallback mode, writes a resumable
-checkpoint, prints `retry_at`, and the process exits 75. `--resume`
-reloads the checkpoint and continues with whatever stories are still
-pending — already-completed ones are not re-run.
+from a video run" (it would never fire) — instead it just tries each
+story (owner directive 2026-10-23: a pre-video `_llm_blocked()` gate used
+to refuse to even attempt a story on a recorded cooldown, which also
+fired on a STALE cooldown entry once the account's actual session limit
+no longer applied — don't pre-judge, just try). If a story genuinely
+degrades mid-run (every provider for a stage really is in cooldown),
+`_llm_blocked()` after that story classifies it as interrupted rather
+than a judged HOLD, writes a resumable checkpoint, prints `retry_at`, and
+the process exits 75, so a real outage still doesn't get silently
+recorded as "done" in degraded-fallback mode. `--resume` reloads the
+checkpoint and continues with whatever stories are still pending —
+already-completed ones are not re-run.
 """
 from __future__ import annotations
 
@@ -499,13 +503,15 @@ def run_batch(story_dirs: list, work: Path, *, resume: bool = False,
     use_llm = kw.get("use_llm", True)
     while state["pending"]:
         sd = Path(state["pending"][0])
-        if use_llm:
-            blocked = _llm_blocked()
-            if blocked:
-                cp.write_text(json.dumps(state, indent=1))
-                return {**state, "wall_s": round(time.time() - t0, 1), "paused": True,
-                       "retry_at": blocked["retry_at"], "blocked_stages": blocked["stages"],
-                       "exit_code": 75}
+        # Owner directive 2026-10-23: the pre-video `_llm_blocked()` gate
+        # paused the whole batch on a recorded cooldown even when the
+        # account's actual session limit no longer applied -- a stale
+        # cooldown entry in llm_state.json should not refuse to even
+        # attempt a story. Just try it; `run_pipeline`'s own LLM calls
+        # degrade to cached/fallback behaviour on a genuine outage (see
+        # module docstring), and the mid-video check below still exists to
+        # correctly classify (not silently record as "done") a story that
+        # really did degrade, so a real outage still resumes cleanly.
         ts = time.time()
         row = {"story": sd.name}
         try:
