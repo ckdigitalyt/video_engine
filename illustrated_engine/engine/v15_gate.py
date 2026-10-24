@@ -513,13 +513,15 @@ in the large on-screen typography). "watermark" means a provider stamp, logo
 or website name anywhere in the picture. "overlap" means on-screen text
 colliding with other text or hiding the subject.
 Issue codes: {issues}.
-Then judge the whole: first frame would stop a scroll? ending resolves the
-opening question? would the scenes work unchanged for another topic by only
-swapping nouns (template feel)?
+Then judge the whole: first frame would stop a scroll? does frame 1 LITERALLY
+show the concrete thing its narration line states (hook_frame_concrete=true),
+or only an abstract, symbolic, mood or generic image of it (false)? ending
+resolves the opening question? would the scenes work unchanged for another
+topic by only swapping nouns (template feel)?
 Return ONLY JSON:
 {{"frames":[{{"n":1,"ok":true,"issue":"none"}}],
- "hook_stops_scroll":true,"ending_resolves":true,"template_feel":false,
- "notes":"<one sentence>"}}"""
+ "hook_stops_scroll":true,"hook_frame_concrete":true,"ending_resolves":true,
+ "template_feel":false,"notes":"<one sentence>"}}"""
 
 
 def _judge_sheet(video: Path, story: dict, beat_windows: dict, out: Path,
@@ -603,11 +605,19 @@ def run_judge(video: Path, story: dict, beat_windows: dict, work: Path,
     soft_fails = []
     if ans.get("template_feel") is True:
         soft_fails.append("judge: scenes feel templated (noun-swap reusable)")
+    # 2026-10-24 analytics review: most lost viewers bail in the first 2-3 s,
+    # and the abstract-opening uploads lost them fastest. Recorded and scored
+    # (v16_gate._score_hook), not HOLD-causing: one vision call is too noisy
+    # to throw away a finished render on, and hook_stops_scroll=False
+    # already holds.
+    if ans.get("hook_frame_concrete") is False:
+        soft_fails.append("judge: first frame is abstract/symbolic, not the literal hook claim")
     return {"ok": not fails, "fails": fails, "soft_fails": soft_fails,
             "critical": bool(hard),
             "frames_flagged": [
         {"n": f.get("n"), "issue": f.get("issue")} for f in bad],
         "hook_stops_scroll": ans.get("hook_stops_scroll"),
+        "hook_frame_concrete": ans.get("hook_frame_concrete"),
         "ending_resolves": ans.get("ending_resolves"),
         "template_feel": ans.get("template_feel"),
         "notes": ans.get("notes"), "sheet": str(sheet)}

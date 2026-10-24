@@ -40,7 +40,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 CACHE_DIR = ROOT / "build" / "cache" / "v15_plans"
-PROMPT_VERSION = "bvp/1.9"  # 2026-10-15: subject lock, era/place, one-frame comparison
+PROMPT_VERSION = "bvp/1.10"  # 2026-10-24: hook shot = the literal picture sentence 1 states
+# (bvp/1.9 2026-10-15: subject lock, era/place, one-frame comparison)
 
 SHOT_KINDS = ("plate", "zoom_through", "process")
 CAMERAS = ("push_in", "pull_out", "pan_left", "pan_right", "rise", "descend")
@@ -218,7 +219,11 @@ in frame 0 (not just one) — the contradiction IS the hook. The hook shot
 must stop a scroll on its own: never the recurring subject shown whole and
 floating in empty space (that is the reusable template shot); show it close,
 from a dramatic angle, at the moment something is happening to it, or right
-beside what contradicts it. Its view is "medium" (framed close and dramatic
+beside what contradicts it. Its subject is the LITERAL picture the first
+sentence states, shown happening (narration "a live frog floats inside a
+magnet" -> that frog, floating inside that magnet), never a symbol, metaphor,
+mood image or diagram of the idea: viewers decide in the first two seconds
+from what this frame literally shows. Its view is "medium" (framed close and dramatic
 automatically), "comparison", "surface" or "cutaway" — not "wide". The last beat
 should resolve it with a headline that echoes the hook's own wording or
 imagery (the viewer should recognize the hook again, now resolved).

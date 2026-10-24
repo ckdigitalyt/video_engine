@@ -71,7 +71,8 @@ def check_hook(meta: dict, specs: dict, timing: dict, lead: float,
         fails.append("judge: first frame would not stop a scroll")
     return {"ok": not fails, "fails": fails, "first_word_s": first_word_s,
             "headline_at_frame0": headline_present,
-            "hook_stops_scroll": stops_scroll}
+            "hook_stops_scroll": stops_scroll,
+            "hook_frame_concrete": judge.get("hook_frame_concrete")}
 
 
 # --------------------------------------------------------- distinctness --
@@ -314,7 +315,14 @@ def _score_hook(hook: dict) -> float:
     fw_c = 0.0 if fw is None else _clamp(
         100.0 - max(0.0, fw - HOOK_MAX_FIRST_WORD_S) * 400.0)
     hl_c = 100.0 if hook.get("headline_at_frame0") else 0.0
-    return round((judge_c + fw_c + hl_c) / 3, 1)
+    parts = [judge_c, fw_c, hl_c]
+    # 2026-10-24 analytics review: does frame 1 literally show the hook's
+    # concrete claim? Counted only when the judge answered it, so judge
+    # results from before the question existed score exactly as before.
+    concrete = hook.get("hook_frame_concrete")
+    if concrete is not None:
+        parts.append(100.0 if concrete else 0.0)
+    return round(sum(parts) / len(parts), 1)
 
 
 def _score_story(story: dict) -> float:

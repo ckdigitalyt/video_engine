@@ -17,6 +17,7 @@
       }
     },
     "hook_stops_scroll": {"type": "boolean"},
+    "hook_frame_concrete": {"type": "boolean"},
     "ending_resolves": {"type": "boolean"},
     "template_feel": {"type": "boolean"},
     "notes": {"type": "string"}

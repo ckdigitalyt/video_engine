@@ -120,6 +120,57 @@ def check_prompt_echo(script: dict) -> list:
             f"specific to this topic"] if hits else []
 
 
+# 2026-10-24 analytics review: most lost viewers leave in the first 2-3
+# seconds. The two highest-initial-view uploads opened on an ABSTRACT STATE
+# ("These ghost-white trees can't feed themselves" -> 44% retention; "A
+# black hole engine burns hotter as its fuel runs out" -> 47%). They got a
+# big test push and then died. Openers showing something concrete and
+# visible ("A live frog can float in midair inside a magnet" -> 82%; "Sound
+# ... can hold objects in mid-air" -> 72%) kept being re-pushed. Code-level
+# backstop (same convention as the other check_script rules): the hook's
+# FIRST CLAUSE may not hinge on an abstract-state predicate unless it also
+# carries a visible action/state word. Deliberately narrow. Replayed on
+# all ~130 shipped auto-story hooks it flags 3: the two above plus "...left
+# a wound Europe couldn't close". "Sound you can't even hear can hold
+# objects" passes because "hear" is not an abstract-state verb here.
+# The broader judgment ("is this concrete?") is the critic's hook_strength
+# rubric (script_critic v3), which already has a hard floor.
+ABSTRACT_HOOK_RE = re.compile(
+    r"\b(?:can'?t|cannot|can\s+not|couldn'?t|won'?t|doesn'?t|don'?t|didn'?t|isn'?t|"
+    r"aren'?t|hasn'?t|haven'?t|never)\s+(?:even\s+|ever\s+|actually\s+|really\s+|"
+    r"quite\s+|fully\s+)?(?:feed|eat|survive|live|exist|die|breathe|grow|age|work|"
+    r"function|stop|end|close|finish|heal|explain|matter|last)\w*\b"
+    r"|\b(?:burn|run|get|grow|become|turn|stay)s?\s+(?:ever\s+|even\s+|much\s+)?"
+    r"(?:hotter|colder|older|younger|faster|slower|heavier|lighter|brighter|dimmer|"
+    r"bigger|smaller|stronger|weaker|denser)\b"
+    r"|\b(?:dies|dying)\b", re.I)
+VISIBLE_HOOK_RE = re.compile(
+    r"\b(?:float|hover|levitat|midair|mid-air|hang|spin|glow|crack|split|shatter|"
+    r"explod|erupt|melt|freez|frozen|fall|rain|fly|flies|flying|burst|collaps|sink|"
+    r"drip|spike|danc|bend|swallow|tear|rip|lift|hold|knock|crush|sprout|flash|"
+    r"spark|boil|bounc|slid|roll|launch|shoot|stretch|pinned|blaz|smash|crumpl|"
+    r"plow|swing|jump|leap|hunt|tower)\w*", re.I)
+_CLAUSE_BREAK = re.compile(r"[,;:.!?—–]|\s-\s|\b(?:yet|but|while|because)\b", re.I)
+
+
+def hook_first_clause(text: str) -> str:
+    return _CLAUSE_BREAK.split(text, maxsplit=1)[0].strip()
+
+
+def check_hook_concrete(script: dict) -> list:
+    """The hook's first clause must open on something the first frame can
+    literally show, not an abstract state (see ABSTRACT_HOOK_RE)."""
+    first = (script.get("sentences") or [{}])[0].get("text", "")
+    clause = hook_first_clause(first)
+    m = ABSTRACT_HOOK_RE.search(clause)
+    if not m or VISIBLE_HOOK_RE.search(clause):
+        return []
+    return [f"hook: the first clause hinges on an abstract state ({m.group(0)!r}); viewers "
+            f"leave in the first seconds on these. Open on the concrete, visible thing the "
+            f"first frame will show (a named subject doing something you could photograph) "
+            f"and move the abstract claim after it"]
+
+
 def words(text: str) -> list:
     return text.split()
 
@@ -143,6 +194,7 @@ def check_script(script: dict) -> list:
         errs.append("hook: first sentence is a bare question; state a concrete claim")
     if BAD_OPENERS.match(first):
         errs.append("hook: filler opener (Did you know / Imagine / Let's ...)")
+    errs += check_hook_concrete(script)
     if not HEADLINE_WORDS[0] <= len(words(script["hook_headline"])) <= HEADLINE_WORDS[1]:
         errs.append(f"hook_headline: must be {HEADLINE_WORDS[0]}-{HEADLINE_WORDS[1]} words")
     roles = [s["role"] for s in sents]
@@ -540,15 +592,30 @@ def _rank_key(crit: dict) -> tuple:
     return (not critic_floor_misses(s), sum(s.values()) / len(s))
 
 
+# Targeted rewrite instruction per CRITIC_HARD_FLOORS dimension. 2026-10-24
+# analytics review: the old hook advice ("a specific number or
+# impossible-sounding claim in its first six words") produced the abstract
+# openers that lost viewers in the first seconds. It now asks for a
+# concrete, visible opening.
+FLOOR_ADVICE = {
+    "hook_strength": "Open sentence 1 on the concrete, visible thing the first frame will "
+                     "show: a named subject doing something you could photograph, within "
+                     "its first six words, not an abstract state like \"can't feed "
+                     "itself\" or \"burns hotter\".",
+    "payoff_clarity": "Make the last line answer the hook's question directly, in one "
+                      "complete sentence.",
+}
+
+
 def _critic_bar(crit: dict) -> str:
     bar = (f"Critic scores: {crit['scores']}. The bar is a mean of {CRITIC_MEAN_MIN} or "
            f"better with no score below {CRITIC_FLOOR}; lift every score under 4.")
     misses = critic_floor_misses(crit["scores"])
     if misses:
+        missed = [m.split("=", 1)[0] for m in misses]
         bar += (" HARD REQUIREMENT (the script is rejected otherwise): "
-                + ", ".join(misses) + ". Make sentence 1 a specific number or "
-                "impossible-sounding claim in its first six words, and make the "
-                "last line answer the hook's question directly.")
+                + ", ".join(misses) + ". "
+                + " ".join(FLOOR_ADVICE[d] for d in missed if d in FLOOR_ADVICE))
     return crit["critique"] + "\n" + bar
 
 
