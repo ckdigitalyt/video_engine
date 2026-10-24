@@ -33,12 +33,48 @@ STORIES_DIR = REPO / "illustrated_engine" / "stories"
 
 # ------------------------------------------------------------- clusters --
 
-CLUSTER_PRIORS = {                  # DESIGN Sec.9.1, relative to the channel's real views
-    "deep_time": 1.00,
-    "spectacle_physics": 0.85,
-    "exotic_space_travel": 0.70,
+# 2026-10-24 analytics review (28-day YouTube Analytics joined to each
+# upload's topic_history cluster, ~15 videos with real data): the DESIGN
+# Sec.9.1 priors were set from the OLD channel's view counts and ranked
+# deep_time first. Real retention of the V16 uploads says otherwise --
+# median averageViewPercentage per cluster: spectacle_physics ~77% (sound
+# levitation 72%, magnet frog 82%; 16 of the window's 21 subscribers came
+# from one of them), deep_time ~65%, space_discovery ~60%,
+# exotic_space_travel ~57% (its one strong video, "pilots train to black
+# out", is a human-body topic, not space travel), general_explainer 44%.
+# Yet the last 60 queued topics were 24 deep_time / 22 space_discovery /
+# 8 spectacle_physics. Priors now follow retention (x25 points each, see
+# score_candidate); CLUSTER_TARGET_SHARE below then shapes the queue order.
+CLUSTER_PRIORS = {
+    "spectacle_physics": 1.00,
+    "deep_time": 0.80,
+    "exotic_space_travel": 0.50,
     "space_discovery": 0.50,
     "general_explainer": 0.20,
+}
+# What each cluster means, shown to the ideation prompt. "spectacle_physics"
+# is the channel's human-scale physics / human-body cluster: the pilots/g-force
+# video was tagged exotic_space_travel only because a centrifuge "trains
+# astronauts" -- the description routes such topics here instead.
+CLUSTER_DESCRIPTIONS = {
+    "spectacle_physics": "human-scale physics and the human body: one striking thing you "
+                         "could see or feel at human scale (an object or animal floating in "
+                         "midair, a magnet doing the impossible, sound or pressure moving "
+                         "things, what g-force, cold or pressure does to a body)",
+    "deep_time": "Earth's deep past: extinctions, fossils, early Earth, rocks that record history",
+    "exotic_space_travel": "hypothetical spacecraft, propulsion and far-future travel (honest framing)",
+    "space_discovery": "a specific astronomical discovery: a planet, star, moon or galaxy",
+    "general_explainer": "an everyday-science explainer that fits none of the above",
+}
+# Target share of the ranked queue (rank_by_share). The review's retention
+# split asks for ~40% human-scale physics and caps the two space-heavy /
+# deep-time clusters near 25% each. Clusters missing here (general_explainer)
+# get 0: they only fill slots once every targeted cluster is exhausted.
+CLUSTER_TARGET_SHARE = {
+    "spectacle_physics": 0.40,
+    "deep_time": 0.25,
+    "space_discovery": 0.25,
+    "exotic_space_travel": 0.10,
 }
 EXCLUDED_CLUSTERS = {"quiz", "crypto", "ai_policy", "asmr"}   # dilute the channel's topical signal
 
@@ -179,12 +215,77 @@ def score_candidate(candidate: dict, score_row: dict) -> tuple:
     return min(round(sum(pts.values())), 100), pts
 
 
+# ------------------------------------------------------- share ranking --
+
+def _entry_cluster(entry: dict):
+    parts = entry["parts"] if "parts" in entry else [entry]
+    return parts[0].get("cluster")
+
+
+def _entry_score(entry: dict) -> float:
+    return entry["score"] if "score" in entry else max(p["score"] for p in entry["parts"])
+
+
+def rank_by_share(entries: list, shares: dict | None = None) -> list:
+    """Order scored queue entries so each prefix of the queue tracks
+    CLUSTER_TARGET_SHARE (deficit round-robin): position k goes to the
+    cluster whose `share * (k + 1) - already_placed` is largest, and within
+    a cluster to its best-scoring entry. Ties go to the cluster holding the
+    higher-scoring entry. A cluster with no target share only fills
+    positions once every targeted cluster has run out of entries.
+
+    Callers take queue prefixes (v16_batch.select_topics picks the first N,
+    materialize_candidates' fallback pool reads on in order), so the share
+    holds for any batch size, while score still decides WHICH topic of a
+    cluster goes first. Pure function; a single-cluster queue keeps its
+    plain score order."""
+    shares = CLUSTER_TARGET_SHARE if shares is None else shares
+    pools: dict = {}
+    for e in sorted(entries, key=_entry_score, reverse=True):
+        pools.setdefault(_entry_cluster(e), []).append(e)
+    placed = dict.fromkeys(pools, 0)
+    out = []
+    for k in range(len(entries)):
+        live = [c for c, p in pools.items() if p]
+
+        def want(c):
+            return (shares.get(c, 0.0) > 0, shares.get(c, 0.0) * (k + 1) - placed[c],
+                    _entry_score(pools[c][0]))
+        c = max(live, key=want)
+        out.append(pools[c].pop(0))
+        placed[c] += 1
+    return out
+
+
+def queue_share(queue: list) -> dict:
+    """cluster -> fraction of queue entries (reporting/tests)."""
+    if not queue:
+        return {}
+    n = len(queue)
+    out: dict = {}
+    for e in queue:
+        c = _entry_cluster(e)
+        out[c] = out.get(c, 0) + 1
+    return {c: round(v / n, 3) for c, v in out.items()}
+
+
 # ----------------------------------------------------------- LLM calls --
+
+def clusters_prompt_block() -> str:
+    """The ALLOWED CLUSTERS block of topic_ideate: prior, target share of
+    the candidates and what the cluster means."""
+    rows = []
+    for k, v in CLUSTER_PRIORS.items():
+        share = CLUSTER_TARGET_SHARE.get(k, 0.0)
+        aim = f"aim for ~{round(share * 100)}% of candidates" if share else "use sparingly"
+        rows.append(f"- {k} (prior {v:.2f}; {aim}): {CLUSTER_DESCRIPTIONS.get(k, '')}")
+    return "\n".join(rows)
+
 
 def ideate(n: int = 20, *, avoid_titles: list = (), ask=None) -> list:
     """One `topic_ideate` call -> `n` candidates, each given a stable `id`."""
     ask = ask or llm.ask
-    clusters_block = "\n".join(f"- {k} (prior {v:.2f})" for k, v in CLUSTER_PRIORS.items())
+    clusters_block = clusters_prompt_block()
     avoid_block = "\n".join(f"- {t}" for t in avoid_titles) or "(none)"
     prompt, ver = render("topic_ideate", clusters=clusters_block, n=n, avoid_titles=avoid_block)
     res = ask("topic_ideate", prompt, schema="topic_ideate", prompt_version=ver)
@@ -325,7 +426,9 @@ def build_queue(*, n: int = 20, history_path: Path = DEFAULT_HISTORY_PATH, ask=N
     """Ideate -> dedupe vs history -> score -> filter (>=MIN_SCORE) -> series-group
     -> ranked queue. -> {"queue", "duplicates", "rejected", "raw_count"}. `queue`
     entries are either a scored candidate dict or a `{"series_id","parts":[...]}`
-    group, ranked by score (a group's score is its best-scoring part's)."""
+    group (a group's score is its best-scoring part's), ordered by
+    `rank_by_share`: score order within a cluster, CLUSTER_TARGET_SHARE
+    across clusters (2026-10-24 analytics review)."""
     ask = ask or llm.ask
     history = load_history(history_path)
     avoid_titles = [h["title"] for h in history[-50:]]      # keep the ideation prompt bounded
@@ -339,9 +442,7 @@ def build_queue(*, n: int = 20, history_path: Path = DEFAULT_HISTORY_PATH, ask=N
     rejected = [c for c in scored if c["id"] not in accepted_ids]
 
     groups, standalone = plan_series(accepted)
-    queue = sorted(standalone + groups,
-                   key=lambda e: e["score"] if "score" in e else max(p["score"] for p in e["parts"]),
-                   reverse=True)
+    queue = rank_by_share(standalone + groups)
 
     if persist:
         to_persist = [_history_row(c, "duplicate", "topic_ideate", {"reason": c["duplicate_reason"]})

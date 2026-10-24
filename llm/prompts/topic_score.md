@@ -1,9 +1,12 @@
-<!-- prompt_version: 2 -->
+<!-- prompt_version: 3 -->
 Score each topic candidate below on 5 rubrics, 0-5 each (0 weak, 5
-excellent). Anchor your scoring on these real channel outcomes: winners
-"Dinosaurs Were Thriving" (1,360 views) and "How Scientists Created a Time
-Crystal" (1,093 views); losers "Underwater rivers flowing across the ocean
-floor" (6 views) and "Blood Falls" (136 views).
+excellent). Anchor your scoring on these real channel outcomes (audience
+retention = share of the video the average viewer watched): winners
+"Sound Waves That Levitate Objects" (72% retention, most subscribers gained),
+"The Frog That Breaks Magnet Physics" (82%) and "Why Pilots Train To Black
+Out On Purpose" (67%, most views); losers "This White Redwood Can't Feed
+Itself" (44%) and "Why This Black Hole Burns Hotter Dying" (47%) -- both
+opened on an abstract state instead of something you can see.
 
 CANDIDATES:
 {{candidates}}
@@ -14,6 +17,6 @@ Rubrics:
 - hook_strength: pick the strongest of the 3 given hooks and score it (return it as `best_hook`).
 - series_potential: could this split into 2-3 standalone parts, each with its own payoff?
 - evidence_strength: would 2 or more reputable sources plausibly exist and mostly agree?
-- still_image_fit: is the core payoff something a SINGLE STILL IMAGE can clearly show (a static subject, creature, place, or object — this channel's actual niche: mysteries, natural wonders, animals, places, history)? Score LOW (0-1) if the core payoff is a dynamic physical process or mechanism that only makes sense in motion (a chemical reaction, something spinning/falling/exploding mid-action) and can't be conveyed by a still frame.
+- still_image_fit: is the core payoff something a SINGLE STILL IMAGE can clearly show (a static subject, creature, place, or object — this channel's actual niche: mysteries, natural wonders, animals, places, history)? Score LOW (0-1) if the core payoff is a dynamic physical process or mechanism that only makes sense in motion (a chemical reaction, something spinning/falling/exploding mid-action) and can't be conveyed by a still frame. A striking suspended or frozen STATE is still-image friendly and scores high (an object or frog hanging in midair, liquid frozen into spikes, a body pinned by g-force) -- those are this channel's best performers.
 
 Return only JSON: {"scores":[{"id","counter_intuitive","visualisability","hook_strength","series_potential","evidence_strength","still_image_fit","best_hook"}]}

@@ -85,7 +85,8 @@ def test_dedupe_series_exception_bypasses_entity_overlap():
 # ---------------------------------------------------------------- score --
 
 def test_score_candidate_is_reproducible_and_matches_the_weighted_sum():
-    cand = {"cluster": "deep_time", "evergreen": True}
+    # 2026-10-24: spectacle_physics is the 1.00-prior cluster now (was deep_time)
+    cand = {"cluster": "spectacle_physics", "evergreen": True}
     row = {"counter_intuitive": 5, "visualisability": 5, "hook_strength": 5,
            "series_potential": 5, "evidence_strength": 5, "still_image_fit": 5}
     score1, breakdown1 = T.score_candidate(cand, row)
@@ -190,7 +191,8 @@ def test_score_candidates_annotates_every_candidate():
            "best_hook": "the strongest hook"}
     f = Fake(topic_score=[{"scores": [{"id": "t_1", **row}, {"id": "t_2", **row}]}])
     out = T.score_candidates(cands, ask=f)
-    assert [c["score"] for c in out] == [86, 86]
+    # deep_time prior 0.80 since the 2026-10-24 analytics review: 20 + 61 rubric points
+    assert [c["score"] for c in out] == [81, 81]
     assert all(c["best_hook"] == "the strongest hook" for c in out)
 
 
