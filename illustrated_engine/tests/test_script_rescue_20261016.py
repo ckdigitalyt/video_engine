@@ -35,6 +35,11 @@ WARP = json.loads((ROOT / "tests" / "fixtures" / "warp_bubble_20261015.json").re
 WARP_FACTS = {"claims": [{**c, "evidence": c["quote"], "quote_verified": True,
                           "verified": True, "curated": False} for c in WARP["claims"]]}
 GOOD = dict.fromkeys(WARP["critic1"]["scores"], 4)
+# The real warp draft-1 critic had escalation=2. Under the 2026-10-24
+# escalation/emotional_charge >= 3 floor that draft now holds (see
+# tests/test_critic_gate_20261024.py). The draft-keeping mechanics below are
+# tested on the same scores with escalation lifted to the floor.
+WARP_C1 = {**WARP["critic1"], "scores": dict(WARP["critic1"]["scores"], escalation=3)}
 
 
 class Fake:
@@ -112,10 +117,10 @@ def test_warp_bubble_valid_draft_survives_a_rewrite_that_breaks_code_rules():
     d1, d2 = WARP["draft1"], WARP["draft2"]
     assert S.code_checks(d1, WARP_FACTS) == []           # the real draft 1 was clean
     assert S.code_checks(d2, WARP_FACTS)                 # the real rewrite was not
-    assert not S.critic_floor_misses(WARP["critic1"]["scores"])
-    assert not S.critic_pass(WARP["critic1"]["scores"])  # -> polish rewrite fires
+    assert not S.critic_floor_misses(WARP_C1["scores"])
+    assert not S.critic_pass(WARP_C1["scores"])  # -> polish rewrite fires
     # rewrite (d2) breaks rules, its code-fix (d2 again) still breaks them
-    f = Fake(script_write=[d1, d2, d2], script_critic=[WARP["critic1"]],
+    f = Fake(script_write=[d1, d2, d2], script_critic=[WARP_C1],
              fact_check=[_fc(d1)], metadata_pack=[META])
     res = S.rank_write_story([("Warp", WARP_FACTS)], ask=f)
     assert res["verdict"] == "PASS", res
@@ -137,8 +142,8 @@ def test_rewrite_that_breaks_rules_gets_its_own_code_fix():
 
 def test_lower_scoring_rewrite_does_not_replace_the_draft():
     d1 = WARP["draft1"]
-    worse = dict(WARP["critic1"]["scores"], hook_strength=2)
-    f = Fake(script_write=[d1, d1], script_critic=[WARP["critic1"],
+    worse = dict(WARP_C1["scores"], hook_strength=2)
+    f = Fake(script_write=[d1, d1], script_critic=[WARP_C1,
                                                    {"scores": worse, "critique": ""}],
              fact_check=[_fc(d1)], metadata_pack=[META])
     res = S.rank_write_story([("Warp", WARP_FACTS)], ask=f)

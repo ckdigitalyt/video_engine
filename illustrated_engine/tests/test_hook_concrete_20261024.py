@@ -73,13 +73,14 @@ def test_only_the_first_clause_is_judged():
 
 
 def test_critic_rewrite_asks_for_a_concrete_picture_not_a_number():
-    crit = {"scores": {"hook_strength": 2, "payoff_clarity": 4}, "critique": "weak open"}
+    ok4 = {"hook_strength": 4, "payoff_clarity": 4, "escalation": 4, "emotional_charge": 4}
+    crit = {"scores": {**ok4, "hook_strength": 2}, "critique": "weak open"}
     bar = S._critic_bar(crit)
     assert "HARD REQUIREMENT" in bar and "hook_strength=2 < 3" in bar
     assert "concrete, visible" in bar
     assert "impossible-sounding" not in bar
     assert "answer the hook's question" not in bar          # payoff advice only on a payoff miss
-    ok = S._critic_bar({"scores": {"hook_strength": 4, "payoff_clarity": 4}, "critique": "x"})
+    ok = S._critic_bar({"scores": ok4, "critique": "x"})
     assert "HARD REQUIREMENT" not in ok
 
 

@@ -126,4 +126,5 @@ def test_autostory_threads_critic_scores():
            "critic": {"scores": {"hook_strength": 4}, "critique": "ok"}}
     story = script_to_story({"title": "t"}, eng)
     assert story["critic"]["scores"] == {"hook_strength": 4}
-    assert g._score_story(story) == 80.0
+    # 2026-10-24: a 4 maps to 92 on the critic's own scale (v16_script.CRITIC_POINTS), was 4 x 20
+    assert g._score_story(story) == 92.0

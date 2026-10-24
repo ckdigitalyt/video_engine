@@ -176,10 +176,12 @@ def test_generate_story_ranked_picks_the_highest_scoring_of_three_and_finalizes_
 
 def test_generate_story_ranked_picks_the_lowest_scoring_candidate_when_it_is_the_only_one():
     # decision #17: the critic is a ranker -- a single scored candidate with weak
-    # scores is still picked and finalized, EXCEPT for the two 2026-10-15 review
-    # floors (hook_strength, payoff_clarity >= 3), which this candidate clears.
-    low = {"hook_strength": 3, "curiosity_gap": 1, "escalation": 1, "payoff_clarity": 3,
-          "loop_coherence": 1, "human_voice": 1, "emotional_charge": 1, "one_idea_only": 1}
+    # scores is still picked and finalized, EXCEPT for the CRITIC_HARD_FLOORS
+    # (hook_strength, payoff_clarity >= 3 from the 2026-10-15 review; escalation,
+    # emotional_charge >= 3 from the 2026-10-24 analytics review), which this
+    # candidate clears.
+    low = {"hook_strength": 3, "curiosity_gap": 1, "escalation": 3, "payoff_clarity": 3,
+          "loop_coherence": 1, "human_voice": 1, "emotional_charge": 3, "one_idea_only": 1}
     f = Fake(research_extract=[RESEARCH_CLAIMS],
             script_write=[GOOD_SCRIPT, GOOD_SCRIPT],
             script_critic=[{"scores": low, "critique": "weak"},
@@ -190,7 +192,7 @@ def test_generate_story_ranked_picks_the_lowest_scoring_candidate_when_it_is_the
     assert res["status"] == "ok", res
     assert res["picked_topic"] == "Topic A"
     scored = {c["topic"]: c for c in res["candidates"] if c["status"] == "scored"}
-    assert scored["Topic A"]["mean"] == 1.5
+    assert scored["Topic A"]["mean"] == 2.0
 
 
 def test_generate_story_ranked_rejects_weak_hook_or_payoff_after_rewrite():

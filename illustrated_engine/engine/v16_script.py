@@ -45,7 +45,33 @@ CRITIC_MEAN_MIN, CRITIC_FLOOR = 4.0, 3
 # names (0-5 scale, 3 = "acceptable" per the critic prompt). Below it, the
 # candidate gets its targeted rewrite; still below after that -> HOLD,
 # never picked. (Mean/other-dimension floors stay removed, per decision #17.)
-CRITIC_HARD_FLOORS = {"hook_strength": 3, "payoff_clarity": 3}
+#
+# 2026-10-24 analytics review: escalation (+0.59) and emotional_charge
+# (+0.55) are the critic dimensions most correlated with REAL retention
+# (n=8 uploads with critic scores). Their 3 floor is added the same way.
+# Calibration: 60 of 99 shipped auto-stories had escalation=2, and those
+# 2s included the two lowest-retention uploads (44%, 47%). The targeted
+# critic rewrite (FLOOR_ADVICE) now names these dimensions. Before, it
+# never asked for them, which is why so many final drafts sat at 2.
+CRITIC_HARD_FLOORS = {"hook_strength": 3, "payoff_clarity": 3,
+                      "escalation": 3, "emotional_charge": 3}
+# How much each critic dimension counts toward the story score (ranking
+# here, and v16_gate's 50-point story dimension). Weights follow each
+# dimension's correlation with real retention in the 2026-10-24 review:
+# escalation +0.59, emotional_charge +0.55, human_voice +0.52,
+# payoff_clarity +0.52, curiosity_gap +0.32, one_idea_only +0.27,
+# loop_coherence +0.06, hook_strength -0.32 (the old number-first rubric;
+# redefined in script_critic v3, so it keeps a small weight, not zero).
+STORY_DIM_WEIGHTS = {"escalation": 0.20, "emotional_charge": 0.20, "human_voice": 0.18,
+                     "payoff_clarity": 0.18, "curiosity_gap": 0.08, "one_idea_only": 0.06,
+                     "loop_coherence": 0.05, "hook_strength": 0.05}
+STORY_DIM_DEFAULT_WEIGHT = 0.125   # an unknown dimension name counts as 1/8
+# 0-5 critic points -> 0-100, anchored on the critic prompt's OWN scale
+# ("5 = channel-winning, 3 = acceptable, 0-2 = must fix"). The old linear
+# x20 mapping put "acceptable" at 60. That was harmless at the old 20%
+# story weight, but at 50% it would turn every current PASS (critic mean
+# ~3.1, scorecards 83-87) into a ~78 HOLD for no quality reason.
+CRITIC_POINTS = (0.0, 15.0, 40.0, 75.0, 92.0, 100.0)
 MAX_SCRIPT_REWRITES = 2  # decision #14: shared pool across code-error + critic rewrites
 RANK_REWRITE_BUDGET = 1  # decision #15 item 2: one CRITIC rewrite per topic in the rank-not-block flow
 # 2026-10-16: a code-rule fix no longer spends the critic rewrite (see
@@ -410,6 +436,25 @@ def critic_pass(scores: dict) -> bool:
     return sum(v) / len(v) >= CRITIC_MEAN_MIN and min(v) >= CRITIC_FLOOR
 
 
+def critic_points(v: float) -> float:
+    """One 0-5 critic score -> 0-100 on CRITIC_POINTS (linear in between)."""
+    v = max(0.0, min(5.0, float(v)))
+    lo = int(v)
+    hi = min(lo + 1, 5)
+    return CRITIC_POINTS[lo] + (CRITIC_POINTS[hi] - CRITIC_POINTS[lo]) * (v - lo)
+
+
+def critic_weighted_score(scores: dict) -> float | None:
+    """Retention-weighted story score 0-100 (STORY_DIM_WEIGHTS over
+    critic_points); None when there are no numeric scores."""
+    pairs = [(STORY_DIM_WEIGHTS.get(k, STORY_DIM_DEFAULT_WEIGHT), critic_points(v))
+             for k, v in (scores or {}).items()
+             if isinstance(v, (int, float)) and not isinstance(v, bool)]
+    if not pairs:
+        return None
+    return round(sum(w * p for w, p in pairs) / sum(w for w, _ in pairs), 1)
+
+
 def critic_floor_misses(scores: dict) -> list:
     """-> ["hook_strength=2 < 3", ...] for the CRITIC_HARD_FLOORS dimensions
     (a missing dimension counts as a miss: the critic schema requires it)."""
@@ -587,9 +632,10 @@ def _finalize(run: _Run, story: dict, topic: str, facts: dict, series_note: str,
 # ============================================= decision #15: rank, don't block
 
 def _rank_key(crit: dict) -> tuple:
-    """Draft preference: clears CRITIC_HARD_FLOORS first, then critic mean."""
+    """Draft preference: clears CRITIC_HARD_FLOORS first, then the
+    retention-weighted critic score (2026-10-24; was the plain mean)."""
     s = crit["scores"]
-    return (not critic_floor_misses(s), sum(s.values()) / len(s))
+    return (not critic_floor_misses(s), critic_weighted_score(s) or 0.0)
 
 
 # Targeted rewrite instruction per CRITIC_HARD_FLOORS dimension. 2026-10-24
@@ -604,6 +650,12 @@ FLOOR_ADVICE = {
                      "itself\" or \"burns hotter\".",
     "payoff_clarity": "Make the last line answer the hook's question directly, in one "
                       "complete sentence.",
+    "escalation": "Make every turn sentence raise the stakes about the SAME subject as "
+                  "the hook (a sharper number, a scale comparison, a consequence), and "
+                  "cut any sentence that restates background or plateaus.",
+    "emotional_charge": "Make the viewer FEEL it: name the wonder, dread or awe in plain "
+                        "spoken words tied to a concrete image (what it would do to you, "
+                        "what you would see), instead of a neutral summary.",
 }
 
 
@@ -688,12 +740,12 @@ def _rank_one(topic: str, facts: dict, series_note: str, ask) -> dict:
     mean = sum(scores.values()) / len(scores)
     misses = critic_floor_misses(scores)
     out = {"topic": topic, "critic": crit, "mean": mean, "min": min(scores.values()),
-           "rewrites": rewrites, "_run": run}
+           "weighted": critic_weighted_score(scores), "rewrites": rewrites, "_run": run}
     if notes:
         out["notes"] = notes
     if misses:
         return {**out, "status": "hold",
-                "reason": "critic floor (weak hook / unresolved payoff) "
+                "reason": "critic floor (hook / payoff / escalation / emotional charge) "
                           f"after {rewrites} rewrite(s): " + ", ".join(misses)}
     return {**out, "status": "scored", "script": script, "facts": facts}
 
@@ -709,7 +761,8 @@ def rank_write_story(topics_facts: list, *, series_note: str = "", batch_titles:
     (fact_check + metadata via `_finalize`) and returned as the producible
     story -- there is no mean floor on the critic score; the critic is a
     ranker, EXCEPT for the narrow CRITIC_HARD_FLOORS (hook_strength,
-    payoff_clarity >= 3; restored 2026-10-15 review): a candidate below
+    payoff_clarity >= 3, restored 2026-10-15 review; escalation,
+    emotional_charge >= 3, added 2026-10-24 analytics review): a candidate below
     either after its rewrite is a "hold", never picked. The only way this can come back
     with no pick (`picked_topic` None, verdict "HOLD") is if every topic's
     candidate never reaches "scored" status at all -- it HOLDs on a
@@ -727,7 +780,9 @@ def rank_write_story(topics_facts: list, *, series_note: str = "", batch_titles:
         candidates.append(_rank_one(topic, facts, series_note, ask or llm.ask))
 
     scored = [c for c in candidates if c["status"] == "scored"]
-    picked = max(scored, key=lambda c: c["mean"]) if scored else None
+    # 2026-10-24: pick on the retention-weighted score, not the plain mean
+    # (escalation/emotional_charge/human_voice/payoff_clarity count most).
+    picked = max(scored, key=lambda c: c["weighted"] or 0.0) if scored else None
     public_candidates = [{k: v for k, v in c.items() if k not in ("_run", "script", "facts")}
                          for c in candidates]
     result = {"verdict": "HOLD", "picked_topic": None, "story": None,

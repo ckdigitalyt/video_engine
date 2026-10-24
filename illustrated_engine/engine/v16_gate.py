@@ -35,8 +35,23 @@ HISTORY_CAP = 30
 HOOK_MAX_FIRST_WORD_S = 0.25
 
 # §10.2 weights (sum to 100).
-SCORE_WEIGHTS = {"hook": 20, "story": 20, "visuals": 15, "pacing": 15,
-                 "captions": 10, "audio": 10, "brand": 10}
+# 2026-10-24 analytics review (28-day YouTube Analytics vs each upload's
+# scorecard): the old weighting (hook 20, story 20, visuals 15, pacing 15,
+# captions/audio/brand 10 each) did NOT predict real performance:
+# scorecard-vs-retention -0.23 and scorecard-vs-views -0.33. Two of the
+# lowest-retention videos scored 81-82 and passed clean, while the best
+# subscriber converter scored 63.2. The critic's own dimensions did track
+# retention (+0.5 to +0.6 for escalation / emotional_charge / human_voice /
+# payoff_clarity), so story (the retention-weighted critic score,
+# v16_script.critic_weighted_score) now carries 50 points. Captions, audio
+# loudness and brand were near-constant (captions 100 and brand 100 on
+# every recorded render; audio 68-76 purely from LUFS -14.6..-14.8 vs a
+# -14.0 target). They are pass/fail GATES (SCORE_GATES): a video clears
+# each fixed bar or the scorecard HOLDs, and they add no variable points.
+SCORE_WEIGHTS = {"story": 50, "hook": 20, "visuals": 15, "pacing": 15}
+SCORE_GATES = ("captions", "audio", "brand")
+AUDIO_LUFS_TARGET = -14.0
+AUDIO_LUFS_TOLERANCE = 1.5     # gate bar: -15.5..-12.5 LUFS (v15_gate hard range is -16.5..-11.5)
 
 
 # --------------------------------------------------------------- hook --
@@ -346,9 +361,12 @@ def _score_story(story: dict) -> float:
     them caps at 40, i.e. it can't carry the scorecard on structure alone)."""
     crit = (story.get("critic") or {}).get("scores")
     if crit:
-        vals = [float(v) for v in crit.values() if isinstance(v, (int, float))]
-        if vals:
-            return round(_clamp(sum(vals) / len(vals) / 5 * 100), 1)
+        # 2026-10-24: retention-weighted, anchored on the critic's own scale
+        # (v16_script.STORY_DIM_WEIGHTS / CRITIC_POINTS), not a flat mean x20.
+        from engine.v16_script import critic_weighted_score
+        w = critic_weighted_score(crit)
+        if w is not None:
+            return round(_clamp(w), 1)
     beats = story.get("beats") or []
     if not beats:
         return 0.0
@@ -447,21 +465,71 @@ def _score_brand(checks: dict, plates: dict, brand: dict, sting_present: bool) -
     return round(100.0 * sum(components) / len(components), 1)
 
 
+_CAPTION_CHECKS = ("caption_identity", "text_bounds", "caption_safe",
+                   "caption_numerals", "caption_clause_breaks")
+
+
+def _gate_captions(checks: dict) -> dict:
+    """Pass when every caption check that ran is ok, or is a decision #13
+    warning (its severity is not raised here). Fails closed when none ran."""
+    ran = [n for n in _CAPTION_CHECKS if n in checks]
+    bad = [n for n in ran if not checks[n]["ok"] and not checks[n].get("warning")]
+    reason = "no caption checks ran" if not ran else (f"failed: {bad}" if bad else "")
+    return {"ok": bool(ran) and not bad, "value": _score_captions(checks), "reason": reason}
+
+
+def _gate_audio(checks: dict) -> dict:
+    lufs = (checks.get("audio") or {}).get("lufs")
+    if lufs is None:
+        return {"ok": False, "value": None, "reason": "loudness not measured"}
+    off = abs(float(lufs) - AUDIO_LUFS_TARGET)
+    return {"ok": off <= AUDIO_LUFS_TOLERANCE, "value": lufs,
+            "reason": "" if off <= AUDIO_LUFS_TOLERANCE else
+            f"{lufs} LUFS is {off:.1f} LU from {AUDIO_LUFS_TARGET} (max {AUDIO_LUFS_TOLERANCE})"}
+
+
+def _gate_brand(checks: dict, plates: dict, brand: dict, sting_present: bool) -> dict:
+    """Brand LUT on every recorded plate, the brand sting present, safe-area
+    text. No recorded plates means the LUT part is not checked (reported as
+    lut_checked=False), so a missing plate record cannot fail it."""
+    cube_sha = None
+    try:
+        from engine.brand import cube_sha256, cube_path
+        cube_sha = cube_sha256(cube_path(brand))
+    except Exception:
+        pass
+    graded = [r for r in (plates or {}).values() if r.get("ok")]
+    lut_ok = all(r.get("lut_sha256") == cube_sha for r in graded)
+    safe_ok = all(checks[n]["ok"] for n in ("text_bounds", "caption_safe") if n in checks)
+    missing = [k for k, ok in (("brand LUT", lut_ok), ("sting", sting_present),
+                               ("safe-area text", safe_ok)) if not ok]
+    return {"ok": not missing, "lut_checked": bool(graded),
+            "value": _score_brand(checks, plates, brand, sting_present),
+            "reason": f"missing: {missing}" if missing else ""}
+
+
 def compute_scorecard(*, checks: dict, meta: dict, specs: dict, story: dict,
                       plates: dict, brand: dict, sting_present: bool) -> dict:
     dims = {
-        "hook": _score_hook(checks.get("hook") or {}),
         "story": _score_story(story),
+        "hook": _score_hook(checks.get("hook") or {}),
         "visuals": _score_visuals(checks.get("judge")),
         "pacing": _score_pacing(meta, specs),
-        "captions": _score_captions(checks),
-        "audio": _score_audio(checks),
-        "brand": _score_brand(checks, plates, brand, sting_present),
+    }
+    gates = {
+        "captions": _gate_captions(checks),
+        "audio": _gate_audio(checks),
+        "brand": _gate_brand(checks, plates, brand, sting_present),
     }
     total = round(sum(dims[k] * SCORE_WEIGHTS[k] / 100 for k in SCORE_WEIGHTS), 1)
+    failed_gates = [k for k in SCORE_GATES if not gates[k]["ok"]]
+    # Thresholds unchanged (PASS >= 80, REJECT < 70). A failed pass/fail gate
+    # can only hold a would-be PASS. It never upgrades a REJECT.
     verdict = "PASS" if total >= 80 else ("HOLD" if total >= 70 else "REJECT")
+    if verdict == "PASS" and failed_gates:
+        verdict = "HOLD"
     return {"total": total, "verdict": verdict, "dimensions": dims,
-            "weights": SCORE_WEIGHTS}
+            "weights": SCORE_WEIGHTS, "gates": gates, "failed_gates": failed_gates}
 
 
 # ------------------------------------------------- duration / scorecard --
@@ -496,6 +564,10 @@ def check_scorecard(scorecard: dict) -> dict:
                      key=lambda kv: kv[1])[:3]
     msg = (f"scorecard {v} ({total}/100; PASS needs >=80) -- weakest: "
            + ", ".join(f"{k}={d}" for k, d in weakest))
+    if scorecard.get("failed_gates"):     # message only; ok/critical below unchanged
+        msg += "; failed pass/fail gates: " + ", ".join(
+            f"{k} ({(scorecard.get('gates') or {}).get(k, {}).get('reason', '')})"
+            for k in scorecard["failed_gates"])
     return {"ok": False, "fails": [msg], "total": total, "score_verdict": v,
             "critical": v == "REJECT"}
 
