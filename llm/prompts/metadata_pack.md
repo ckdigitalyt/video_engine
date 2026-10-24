@@ -1,4 +1,4 @@
-<!-- prompt_version: 2 -->
+<!-- prompt_version: 3 -->
 Write upload metadata for a 30-60 second vertical science short on @most.amazing.wonders.
 
 SCRIPT:
@@ -8,7 +8,7 @@ FACTS (id | claim):
 {{facts}}
 {{series_note}}
 Rules:
-1. `title`: 4-8 words (aim for 5-7) that open a SPECIFIC curiosity gap, not a topic label: a question about the surprising thing, or an incomplete claim that names it but withholds what happened. No parenthetical tags like "(It's Real)". No hashtags, no emoji, no ALL-CAPS words except acronyms. Do not start with How/Why/What unless nothing else works. Never use "shocked", "you won't believe", "scientists baffled", "mind-blowing", "gone wrong". The title must be true under the cited facts.
+1. `title`: 4-8 words (aim for 5-7) that open a SPECIFIC curiosity gap, never a bare topic label. Two shapes work: (a) the literal, searchable name of the subject (1-4 words, what someone would type into YouTube search), a colon, then a curiosity hook of 3+ words ("Acoustic Levitation: Sound That Holds Objects Up"); prefer this when the subject has a well-known searchable name, since a literal searchable title earned ~12% of its views from search vs 2-3% for pure curiosity-gap titles. (b) a question about the surprising thing, or an incomplete claim that names it but withholds what happened. No generic tails like "Explained". No parenthetical tags like "(It's Real)". No hashtags, no emoji, no ALL-CAPS words except acronyms. Do not start with How/Why/What unless nothing else works. Never use "shocked", "you won't believe", "scientists baffled", "mind-blowing", "gone wrong". The title must be true under the cited facts.
 2. `title_fact_ids`: ids of the facts that entail the title's claim (from the list only).
 3. `description`: 2 short sentences that add curiosity without spoiling the payoff and without new claims. Do not include hashtags, sources or AI notes; code appends them.
 4. `hashtags`: 3-5, each starting with #, no spaces.

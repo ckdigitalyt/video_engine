@@ -28,7 +28,13 @@ CACHE_DIR = ROOT / "build" / "cache" / "v16_metadata"
 # title paths disagreed before: this one only capped 70 characters), a
 # description that stops short of the answer, and real source URLs from the
 # research stage appended in code instead of an LLM-written source line.
-PROMPT_VERSION = "meta/3.0"
+# meta/3.1 (2026-10-24 analytics review): the plain searchable title "Sound
+# Waves That Levitate Objects" got 12% of its views from YouTube search vs
+# 2-3% for curiosity-gap titles, so a title may now lead with the literal,
+# searchable subject name + colon + a curiosity hook (hybrid). A bare topic
+# label is still not allowed. The shape is code-checked by
+# v16_script.check_title_lead_in.
+PROMPT_VERSION = "meta/3.1"
 MIN_TAGS, MAX_TAGS = 15, 30
 
 
@@ -61,13 +67,23 @@ Beats (the whole narration, in order):
 Fact IDs already verified upstream by the research stage: {', '.join(facts) or 'none recorded'}
 
 Write:
- title: 4-8 words, <= 70 characters. It must open a SPECIFIC curiosity gap,
-   not label the topic: either a question about the surprising thing, or an
-   incomplete claim that names the specific thing but withholds what
-   happened / what it means. A viewer should know exactly what they will
-   find out, but not the answer. No parenthetical tags like "(It's Real)",
-   no ALL-CAPS words (acronyms excepted), no "shocked", "you won't
-   believe", "mind-blowing", "baffled", "gone wrong". True to the beats.
+ title: 4-8 words, <= 70 characters. It must open a SPECIFIC curiosity gap
+   and must not label the topic and stop there. Two shapes work:
+   (a) searchable label + hook: the literal name someone would type into
+       YouTube search for this subject (1-4 words), a colon, then a
+       curiosity hook of 3+ words, e.g. "Acoustic Levitation: Sound That
+       Holds Objects Up". Prefer this when the subject has a well-known,
+       searchable name (a phenomenon, creature, place, object). On this
+       channel a literal, searchable title earned ~12% of its views from
+       search, against 2-3% for pure curiosity-gap titles.
+   (b) pure curiosity gap: a question about the surprising thing, or an
+       incomplete claim that names the specific thing but withholds what
+       happened / what it means.
+   Either way a viewer should know exactly what they will find out, but not
+   the answer. No generic tails ("Explained", "The Truth"), no
+   parenthetical tags like "(It's Real)", no ALL-CAPS words (acronyms
+   excepted), no "shocked", "you won't believe", "mind-blowing",
+   "baffled", "gone wrong". True to the beats.
  description: optimise for search AND click-through, in this order:
    1. ONE scroll-stopping opening line (shows before "...more" on mobile) that
       restates the hook's curiosity gap -- this line matters most for CTR.

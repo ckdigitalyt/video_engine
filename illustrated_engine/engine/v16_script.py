@@ -366,9 +366,45 @@ def _emoji(ch: str) -> bool:
     return unicodedata.category(ch) == "So" or ord(ch) >= 0x1F000
 
 
+# 2026-10-24 analytics review: the plain, literal, searchable title "Sound
+# Waves That Levitate Objects" earned 12% of its views from YouTube search,
+# against 2-3% for the curiosity-gap titles. meta/3.0 (2026-10-15) had
+# steered every title to pure curiosity-gap framing. Titles may now LEAD
+# with the literal, searchable name of the subject, followed by a colon and
+# a curiosity hook ("Acoustic Levitation: Sound That Holds Objects Up").
+# Code guards the shape: one colon, a short label (1-TITLE_LABEL_MAX_WORDS
+# words) and a hook of at least TITLE_HOOK_MIN_WORDS words that is not just
+# a generic tail ("Explained", "The Truth"). Whether the hook really opens
+# a gap is the prompt's job.
+TITLE_LABEL_MAX_WORDS = 4
+TITLE_HOOK_MIN_WORDS = 3
+_GENERIC_TITLE_TAIL = frozenset(
+    "the a an full real simple quick short whole true truth explained explanation "
+    "facts fact science documentary story answer reason secret secrets".split())
+
+
+def check_title_lead_in(title: str) -> list:
+    """Shape rules for a hybrid "Searchable Label: curiosity hook" title."""
+    if ":" not in title:
+        return []
+    if title.count(":") > 1:
+        return ["title: more than one colon; use one 'Label: hook' split at most"]
+    label, hook = (p.strip() for p in title.split(":", 1))
+    errs = []
+    if not 1 <= len(words(label)) <= TITLE_LABEL_MAX_WORDS:
+        errs.append(f"title: the lead-in before the colon must be the subject's searchable "
+                    f"name in 1-{TITLE_LABEL_MAX_WORDS} words")
+    hw = [x.lower().strip("?!.,'\"") for x in words(hook)]
+    if len(hw) < TITLE_HOOK_MIN_WORDS or all(x in _GENERIC_TITLE_TAIL for x in hw):
+        errs.append(f"title: after the colon, write a curiosity hook of at least "
+                    f"{TITLE_HOOK_MIN_WORDS} words, not a generic tail like 'Explained'")
+    return errs
+
+
 def check_title(title: str, fact_numbers: set | None = None) -> list:
     """DESIGN §9.4 title rules. `fact_numbers`: numbers of the title's cited facts."""
     errs, w = [], words(title)
+    errs += check_title_lead_in(title)
     if not TITLE_WORDS[0] <= len(w) <= TITLE_WORDS[1]:
         errs.append(f"title: {len(w)} words, need {TITLE_WORDS[0]}-{TITLE_WORDS[1]}")
     if "#" in title:
