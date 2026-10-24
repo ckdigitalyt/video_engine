@@ -115,7 +115,10 @@ def test_real_warp_draft_with_escalation_2_now_holds_after_its_targeted_rewrite(
     d1 = WARP["draft1"]
     c1 = WARP["critic1"]
     assert c1["scores"]["escalation"] == 2
-    f = Fake(script_write=[d1, d1], script_critic=[c1, c1])
+    # RANK_REWRITE_BUDGET=2 (raised 2026-10-24, same day escalation/
+    # emotional_charge joined CRITIC_HARD_FLOORS) -- a draft that never
+    # improves on escalation now gets 2 rewrite attempts before holding.
+    f = Fake(script_write=[d1, d1, d1], script_critic=[c1, c1, c1])
     res = S.rank_write_story([("Warp", WARP_FACTS)], ask=f)
     assert res["verdict"] == "HOLD"
     cand = res["candidates"][0]
@@ -126,11 +129,33 @@ def test_real_warp_draft_with_escalation_2_now_holds_after_its_targeted_rewrite(
     assert "raise the stakes about the SAME subject" in rewrite_prompt
 
 
+def test_second_rewrite_attempt_can_rescue_a_story_the_first_one_missed():
+    """2026-10-24 live evidence (first batch under the new escalation/
+    emotional_charge floors): two human-scale-physics topics -- G-Force
+    pilot, lung pressure, exactly the category topic selection just
+    boosted -- held on escalation=2 after their one rewrite attempt.
+    RANK_REWRITE_BUDGET went 1 -> 2 so a floor miss that the first
+    rewrite doesn't fix gets one more shot before holding."""
+    d1 = WARP["draft1"]
+    c1 = WARP["critic1"]
+    fixed = {"scores": dict.fromkeys(DIMS, 4), "critique": ""}
+    # 1st rewrite (index 1) still misses the floor (same c1 again); the
+    # 2nd rewrite (index 2) finally clears it -- only possible because
+    # the budget now allows a 2nd attempt.
+    f = Fake(script_write=[d1, d1, d1], script_critic=[c1, c1, fixed],
+             fact_check=[_fc(d1)], metadata_pack=[META])
+    res = S.rank_write_story([("Warp", WARP_FACTS)], ask=f)
+    assert res["verdict"] == "PASS", res
+    assert len([p for st_, p in f.prompts if st_ == "script_write"]) == 3
+
+
 def test_rewrite_that_lifts_escalation_and_emotion_is_picked():
     d1 = WARP["draft1"]
     weak = {"scores": dict(dict.fromkeys(DIMS, 4), escalation=2, emotional_charge=2),
             "critique": "flat"}
-    fixed = {"scores": dict.fromkeys(DIMS, 3), "critique": ""}
+    # mean 4 / min 4 clears critic_pass (mean>=4, min>=3) so the rewrite
+    # loop exits after this one attempt regardless of RANK_REWRITE_BUDGET.
+    fixed = {"scores": dict.fromkeys(DIMS, 4), "critique": ""}
     f = Fake(script_write=[d1, d1], script_critic=[weak, fixed],
              fact_check=[_fc(d1)], metadata_pack=[META])
     res = S.rank_write_story([("Warp", WARP_FACTS)], ask=f)
@@ -166,9 +191,11 @@ def test_rank_pick_prefers_escalation_and_emotion_over_hook_and_loop():
     assert st.mean(hooky.values()) > st.mean(moving.values())          # plain mean picks hooky
     assert S.critic_weighted_score(moving) > S.critic_weighted_score(hooky)
     d1 = WARP["draft1"]
-    f = Fake(script_write=[d1, d1, d1, d1],
-             script_critic=[{"scores": hooky, "critique": ""}, {"scores": hooky, "critique": ""},
-                            {"scores": moving, "critique": ""}, {"scores": moving, "critique": ""}],
+    # RANK_REWRITE_BUDGET=2: neither score ever reaches critic_pass's
+    # mean>=4 bar, so both topics now spend both rewrite attempts.
+    f = Fake(script_write=[d1] * 6,
+             script_critic=[{"scores": hooky, "critique": ""}] * 3
+                           + [{"scores": moving, "critique": ""}] * 3,
              fact_check=[_fc(d1)], metadata_pack=[META])
     res = S.rank_write_story([("Hooky", WARP_FACTS), ("Moving", WARP_FACTS)], ask=f)
     assert res["picked_topic"] == "Moving"

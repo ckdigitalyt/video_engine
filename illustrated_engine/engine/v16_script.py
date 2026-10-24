@@ -73,7 +73,17 @@ STORY_DIM_DEFAULT_WEIGHT = 0.125   # an unknown dimension name counts as 1/8
 # ~3.1, scorecards 83-87) into a ~78 HOLD for no quality reason.
 CRITIC_POINTS = (0.0, 15.0, 40.0, 75.0, 92.0, 100.0)
 MAX_SCRIPT_REWRITES = 2  # decision #14: shared pool across code-error + critic rewrites
-RANK_REWRITE_BUDGET = 1  # decision #15 item 2: one CRITIC rewrite per topic in the rank-not-block flow
+# 2026-10-24: raised 1 -> 2. CRITIC_HARD_FLOORS gained escalation/
+# emotional_charge the same day (scorecard re-weighting, commit 39f3efe) --
+# dimensions no rewrite instruction had ever targeted before. Confirmed
+# live same day: 2 of 3 held topics in the first post-upgrade batch were
+# human-scale-physics stories (G-Force pilot, lung pressure) -- exactly
+# the category just boosted in topic selection -- held on escalation=2
+# after only one rewrite attempt. The historical base rate (60/99
+# shipped stories at escalation=2) means a single attempt at a dimension
+# the writer was never told to fix before is often not enough; a second
+# attempt costs one more LLM call only when the first misses.
+RANK_REWRITE_BUDGET = 2  # decision #15 item 2: CRITIC rewrites per topic in the rank-not-block flow
 # 2026-10-16: a code-rule fix no longer spends the critic rewrite (see
 # _rank_one) -- one targeted code-fix per draft (first draft, critic rewrite).
 RANK_CODE_FIX_BUDGET = 1

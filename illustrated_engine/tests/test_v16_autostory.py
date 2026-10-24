@@ -182,9 +182,12 @@ def test_generate_story_ranked_picks_the_lowest_scoring_candidate_when_it_is_the
     # candidate clears.
     low = {"hook_strength": 3, "curiosity_gap": 1, "escalation": 3, "payoff_clarity": 3,
           "loop_coherence": 1, "human_voice": 1, "emotional_charge": 3, "one_idea_only": 1}
+    # RANK_REWRITE_BUDGET=2: mean 2.0 never clears critic_pass's mean>=4
+    # bar, so a 2nd rewrite attempt happens too (score never improves).
     f = Fake(research_extract=[RESEARCH_CLAIMS],
-            script_write=[GOOD_SCRIPT, GOOD_SCRIPT],
+            script_write=[GOOD_SCRIPT, GOOD_SCRIPT, GOOD_SCRIPT],
             script_critic=[{"scores": low, "critique": "weak"},
+                           {"scores": low, "critique": "still weak"},
                            {"scores": low, "critique": "still weak"}],
             fact_check=[_fact_check_ok(len(GOOD_SCRIPT["sentences"]))],
             metadata_pack=[GOOD_META])
@@ -201,9 +204,12 @@ def test_generate_story_ranked_rejects_weak_hook_or_payoff_after_rewrite():
     for dim in ("hook_strength", "payoff_clarity"):
         weak = dict.fromkeys(GOOD_CRITIC["scores"], 5)
         weak[dim] = 2
+        # RANK_REWRITE_BUDGET=2: min=2 never clears critic_pass's min>=3
+        # bar, so a 2nd rewrite attempt happens too (score never improves).
         f = Fake(research_extract=[RESEARCH_CLAIMS],
-                script_write=[GOOD_SCRIPT, GOOD_SCRIPT],
+                script_write=[GOOD_SCRIPT, GOOD_SCRIPT, GOOD_SCRIPT],
                 script_critic=[{"scores": weak, "critique": "weak"},
+                               {"scores": weak, "critique": "still weak"},
                                {"scores": weak, "critique": "still weak"}])
         res = A.generate_story_ranked([CAND_A], ask=f, fetch_sources=lambda q, n: GOOD_SOURCES)
         assert res["status"] == "hold", res

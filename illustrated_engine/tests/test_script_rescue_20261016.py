@@ -143,8 +143,12 @@ def test_rewrite_that_breaks_rules_gets_its_own_code_fix():
 def test_lower_scoring_rewrite_does_not_replace_the_draft():
     d1 = WARP["draft1"]
     worse = dict(WARP_C1["scores"], hook_strength=2)
-    f = Fake(script_write=[d1, d1], script_critic=[WARP_C1,
-                                                   {"scores": worse, "critique": ""}],
+    # RANK_REWRITE_BUDGET=2: WARP_C1 never clears critic_pass's mean>=4
+    # bar, so a 2nd rewrite attempt happens too (also rejected as lower-
+    # scoring) -- the kept draft is still the original either way.
+    f = Fake(script_write=[d1, d1, d1],
+             script_critic=[WARP_C1, {"scores": worse, "critique": ""},
+                            {"scores": worse, "critique": ""}],
              fact_check=[_fc(d1)], metadata_pack=[META])
     res = S.rank_write_story([("Warp", WARP_FACTS)], ask=f)
     assert res["verdict"] == "PASS"
@@ -172,7 +176,9 @@ def test_code_fix_no_longer_spends_the_critic_rewrite():
 def test_weak_hook_after_every_rewrite_still_holds():
     d1 = WARP["draft1"]
     weak = {"scores": dict(GOOD, hook_strength=2), "critique": "weak"}
-    f = Fake(script_write=[d1, d1], script_critic=[weak, weak])
+    # RANK_REWRITE_BUDGET=2: a draft that never improves spends both
+    # rewrite attempts before holding.
+    f = Fake(script_write=[d1, d1, d1], script_critic=[weak, weak, weak])
     res = S.rank_write_story([("Warp", WARP_FACTS)], ask=f)
     assert res["verdict"] == "HOLD"
     assert "hook_strength=2 < 3" in res["candidates"][0]["reason"]
