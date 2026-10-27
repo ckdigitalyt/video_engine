@@ -39,6 +39,8 @@ GOOD = dict.fromkeys(WARP["critic1"]["scores"], 4)
 # escalation/emotional_charge >= 3 floor that draft now holds (see
 # tests/test_critic_gate_20261024.py). The draft-keeping mechanics below are
 # tested on the same scores with escalation lifted to the floor.
+# (2026-10-27: that floor is now 2, so the real critic1 clears it again; the
+# lifted copy is kept so these mechanics tests do not depend on the floor.)
 WARP_C1 = {**WARP["critic1"], "scores": dict(WARP["critic1"]["scores"], escalation=3)}
 
 

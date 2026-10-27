@@ -4,8 +4,11 @@ better-weighted gate.
 - The scorecard's story dimension (retention-weighted critic score) carries
   50 of 100 points. Captions, audio loudness and brand are pass/fail gates
   that add no variable points.
-- escalation and emotional_charge get the same >= 3 hard floor as
-  hook_strength/payoff_clarity (0-5 critic scale).
+- escalation and emotional_charge got the same >= 3 hard floor as
+  hook_strength/payoff_clarity (0-5 critic scale). 2026-10-27: softened to
+  >= 2 and down-weighted after the n=20 re-check (see
+  tests/test_critic_floor_relax_20261027.py); the tests below were updated
+  for that policy.
 - The verdict PROPAGATION (check_scorecard -> v15_gate.verdict_of) is
   unchanged; only what feeds it changes.
 
@@ -69,25 +72,29 @@ def _corr(a, b):
 # ------------------------------------------------------------ floors --
 
 def test_floors_cover_the_four_dimensions_on_the_real_0_to_5_scale():
+    # 2026-10-27: escalation/emotional_charge softened 3 -> 2 (n=20 re-check)
     assert S.CRITIC_HARD_FLOORS == {"hook_strength": 3, "payoff_clarity": 3,
-                                    "escalation": 3, "emotional_charge": 3}
+                                    "escalation": 2, "emotional_charge": 2}
     props = client.load_schema("script_critic")["properties"]["scores"]["properties"]
     assert all(props[d]["minimum"] == 0 and props[d]["maximum"] == 5 for d in DIMS)
     ok = dict.fromkeys(DIMS, 3)
     assert S.critic_floor_misses(ok) == []
-    assert S.critic_floor_misses({**ok, "escalation": 2}) == ["escalation=2 < 3"]
-    assert S.critic_floor_misses({**ok, "emotional_charge": 2}) == ["emotional_charge=2 < 3"]
+    assert S.critic_floor_misses({**ok, "escalation": 2}) == []
+    assert S.critic_floor_misses({**ok, "emotional_charge": 2}) == []
+    assert S.critic_floor_misses({**ok, "escalation": 1}) == ["escalation=1 < 2"]
+    assert S.critic_floor_misses({**ok, "emotional_charge": 1}) == ["emotional_charge=1 < 2"]
+    assert S.critic_floor_misses({**ok, "payoff_clarity": 2}) == ["payoff_clarity=2 < 3"]
     # mean/other-dimension floors stay removed (decision #17)
     assert S.critic_floor_misses({**ok, "loop_coherence": 0, "curiosity_gap": 1}) == []
 
 
-def test_floor_would_have_held_the_two_worst_real_uploads():
-    held = [n for n, _, s in REAL if S.critic_floor_misses(s)]
-    assert {"ghost_tree", "black_hole"} <= set(held)
-    assert "pilots" not in held and "stone_tree" not in held
-    ret = {n: r for n, r, _ in REAL}
-    kept = [ret[n] for n in ret if n not in held]
-    assert st.mean(kept) > st.mean(ret[n] for n in held)
+def test_softened_floor_holds_none_of_the_eight_real_uploads():
+    """2026-10-24 this test asserted the >= 3 floor would hold ghost_tree and
+    black_hole (escalation=2). That rested on the n=8 escalation +0.59 /
+    emotional_charge +0.55 correlation, which fell to +0.06 / -0.05 at
+    n=20. None of the eight real uploads is a broken script (all have
+    escalation and emotional_charge >= 2, hook and payoff >= 3)."""
+    assert [n for n, _, s in REAL if S.critic_floor_misses(s)] == []
 
 
 class Fake:
@@ -111,21 +118,33 @@ META = {"title": "A Ship That Never Speeds Up", "title_fact_ids": ["f_warp_contr
         "series_tag": "", "pinned_comment": "?"}
 
 
-def test_real_warp_draft_with_escalation_2_now_holds_after_its_targeted_rewrite():
+def test_real_warp_draft_with_escalation_2_is_scored_again():
+    """2026-10-24 this real draft (escalation=2) held. Under the softened
+    2026-10-27 floor it is scored and produced."""
     d1 = WARP["draft1"]
     c1 = WARP["critic1"]
     assert c1["scores"]["escalation"] == 2
-    # RANK_REWRITE_BUDGET=2 (raised 2026-10-24, same day escalation/
-    # emotional_charge joined CRITIC_HARD_FLOORS) -- a draft that never
-    # improves on escalation now gets 2 rewrite attempts before holding.
+    f = Fake(script_write=[d1, d1, d1], script_critic=[c1, c1, c1],
+             fact_check=[_fc(d1)], metadata_pack=[META])
+    res = S.rank_write_story([("Warp", WARP_FACTS)], ask=f)
+    assert res["verdict"] == "PASS", res
+    assert res["candidates"][0]["status"] == "scored"
+    # escalation=2 is not a hard miss, so no HARD REQUIREMENT for it
+    rewrite_prompt = [p for st_, p in f.prompts if st_ == "script_write"][1]
+    assert "escalation=2 <" not in rewrite_prompt
+
+
+def test_genuinely_flat_draft_escalation_1_still_holds_after_its_targeted_rewrite():
+    d1 = WARP["draft1"]
+    c1 = {**WARP["critic1"], "scores": dict(WARP["critic1"]["scores"], escalation=1)}
     f = Fake(script_write=[d1, d1, d1], script_critic=[c1, c1, c1])
     res = S.rank_write_story([("Warp", WARP_FACTS)], ask=f)
     assert res["verdict"] == "HOLD"
     cand = res["candidates"][0]
-    assert cand["status"] == "hold" and "escalation=2 < 3" in cand["reason"]
+    assert cand["status"] == "hold" and "escalation=1 < 2" in cand["reason"]
     # the rewrite was told exactly what to fix
     rewrite_prompt = [p for st_, p in f.prompts if st_ == "script_write"][1]
-    assert "HARD REQUIREMENT" in rewrite_prompt and "escalation=2 < 3" in rewrite_prompt
+    assert "HARD REQUIREMENT" in rewrite_prompt and "escalation=1 < 2" in rewrite_prompt
     assert "raise the stakes about the SAME subject" in rewrite_prompt
 
 
@@ -137,7 +156,9 @@ def test_second_rewrite_attempt_can_rescue_a_story_the_first_one_missed():
     RANK_REWRITE_BUDGET went 1 -> 2 so a floor miss that the first
     rewrite doesn't fix gets one more shot before holding."""
     d1 = WARP["draft1"]
-    c1 = WARP["critic1"]
+    # 2026-10-27: escalation=2 no longer misses, so this uses a payoff_clarity
+    # miss (still a >= 3 floor) to exercise the same second-attempt rescue.
+    c1 = {**WARP["critic1"], "scores": dict(WARP["critic1"]["scores"], payoff_clarity=2)}
     fixed = {"scores": dict.fromkeys(DIMS, 4), "critique": ""}
     # 1st rewrite (index 1) still misses the floor (same c1 again); the
     # 2nd rewrite (index 2) finally clears it -- only possible because
@@ -151,7 +172,8 @@ def test_second_rewrite_attempt_can_rescue_a_story_the_first_one_missed():
 
 def test_rewrite_that_lifts_escalation_and_emotion_is_picked():
     d1 = WARP["draft1"]
-    weak = {"scores": dict(dict.fromkeys(DIMS, 4), escalation=2, emotional_charge=2),
+    # 2026-10-27: floor is now 2, so a hard miss (and its advice) needs a 1
+    weak = {"scores": dict(dict.fromkeys(DIMS, 4), escalation=1, emotional_charge=1),
             "critique": "flat"}
     # mean 4 / min 4 clears critic_pass (mean>=4, min>=3) so the rewrite
     # loop exits after this one attempt regardless of RANK_REWRITE_BUDGET.
@@ -175,30 +197,37 @@ def test_critic_points_follow_the_critic_prompts_own_anchors():
     assert S.critic_weighted_score({"hook": 5, "clarity": 5}) == 100.0     # unknown names count
     assert abs(sum(S.STORY_DIM_WEIGHTS.values()) - 1.0) < 1e-9
     top = sorted(S.STORY_DIM_WEIGHTS, key=S.STORY_DIM_WEIGHTS.get, reverse=True)[:4]
-    assert set(top) == {"escalation", "emotional_charge", "human_voice", "payoff_clarity"}
+    # 2026-10-27: escalation/emotional_charge dropped out of the top four
+    assert set(top) == {"payoff_clarity", "human_voice", "hook_strength", "curiosity_gap"}
 
 
 def test_weighted_story_tracks_real_retention_better_than_the_plain_mean():
     ret = [r for _, r, _ in REAL]
     plain = [st.mean(s.values()) for _, _, s in REAL]
     weighted = [S.critic_weighted_score(s) for _, _, s in REAL]
-    assert _corr(weighted, ret) > _corr(plain, ret) + 0.1     # 0.73 vs 0.60 (n=8, in-sample)
+    # 2026-10-24 weights: 0.73 vs 0.60 (n=8, in-sample -- the escalation/
+    # emotion weights were fit to these same 8). 2026-10-27 weights: 0.65.
+    # Still not worse than the plain mean on the old sample.
+    assert _corr(weighted, ret) >= _corr(plain, ret)
 
 
-def test_rank_pick_prefers_escalation_and_emotion_over_hook_and_loop():
-    hooky = dict(dict.fromkeys(DIMS, 3), hook_strength=5, loop_coherence=5, one_idea_only=5)
+def test_rank_pick_prefers_hook_payoff_curiosity_over_escalation_and_emotion():
+    """2026-10-24 this asserted the opposite (escalation/emotion won). After
+    the n=20 re-check (+0.06 / -0.05) they count less than hook/payoff/
+    curiosity, so equal lifts favour the hook/payoff/curiosity draft."""
     moving = dict(dict.fromkeys(DIMS, 3), escalation=4, emotional_charge=4)
-    assert st.mean(hooky.values()) > st.mean(moving.values())          # plain mean picks hooky
-    assert S.critic_weighted_score(moving) > S.critic_weighted_score(hooky)
+    hooky = dict(dict.fromkeys(DIMS, 3), hook_strength=4, payoff_clarity=4)
+    assert st.mean(hooky.values()) == st.mean(moving.values())         # plain mean: a tie
+    assert S.critic_weighted_score(hooky) > S.critic_weighted_score(moving)
     d1 = WARP["draft1"]
     # RANK_REWRITE_BUDGET=2: neither score ever reaches critic_pass's
     # mean>=4 bar, so both topics now spend both rewrite attempts.
     f = Fake(script_write=[d1] * 6,
-             script_critic=[{"scores": hooky, "critique": ""}] * 3
-                           + [{"scores": moving, "critique": ""}] * 3,
+             script_critic=[{"scores": moving, "critique": ""}] * 3
+                           + [{"scores": hooky, "critique": ""}] * 3,
              fact_check=[_fc(d1)], metadata_pack=[META])
-    res = S.rank_write_story([("Hooky", WARP_FACTS), ("Moving", WARP_FACTS)], ask=f)
-    assert res["picked_topic"] == "Moving"
+    res = S.rank_write_story([("Moving", WARP_FACTS), ("Hooky", WARP_FACTS)], ask=f)
+    assert res["picked_topic"] == "Hooky"
     assert all("weighted" in c for c in res["candidates"])
 
 

@@ -178,7 +178,8 @@ def test_generate_story_ranked_picks_the_lowest_scoring_candidate_when_it_is_the
     # decision #17: the critic is a ranker -- a single scored candidate with weak
     # scores is still picked and finalized, EXCEPT for the CRITIC_HARD_FLOORS
     # (hook_strength, payoff_clarity >= 3 from the 2026-10-15 review; escalation,
-    # emotional_charge >= 3 from the 2026-10-24 analytics review), which this
+    # emotional_charge >= 3 from the 2026-10-24 analytics review, softened to
+    # >= 2 on 2026-10-27), which this
     # candidate clears.
     low = {"hook_strength": 3, "curiosity_gap": 1, "escalation": 3, "payoff_clarity": 3,
           "loop_coherence": 1, "human_voice": 1, "emotional_charge": 3, "one_idea_only": 1}

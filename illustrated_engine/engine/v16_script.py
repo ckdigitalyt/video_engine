@@ -53,18 +53,45 @@ CRITIC_MEAN_MIN, CRITIC_FLOOR = 4.0, 3
 # 2s included the two lowest-retention uploads (44%, 47%). The targeted
 # critic rewrite (FLOOR_ADVICE) now names these dimensions. Before, it
 # never asked for them, which is why so many final drafts sat at 2.
+#
+# 2026-10-27 re-check: lowered escalation/emotional_charge 3 -> 2.
+# - On 20 uploads (the 8 above plus 12 more), the correlation with
+#   retention collapsed: escalation +0.59 -> +0.06, emotional_charge
+#   +0.55 -> -0.05. The n=8 numbers were noise.
+# - The 3 floor was rejecting most drafts. Across the 613 script_critic
+#   responses in the LLM cache, only 121 (20%) reach escalation >= 3.
+# - The 2026-10-24 batches (live_20261024_134200/_181000) rendered 0 of
+#   their 9 human-scale-physics candidates, the category 685a2d2 had just
+#   boosted. Five were held on escalation=2 alone after 2-5 rewrites: G-force
+#   pilot, boiling can, Tesla coil, water jet, lung pressure. Raising
+#   RANK_REWRITE_BUDGET (550b0c3) did not fix it.
+# - A floor of 2 still rejects scripts that are actually broken. The 38
+#   cached drafts at escalation=1 average 2.50 on their other seven
+#   dimensions, and 28 of them also miss hook/payoff.
+# The hook/payoff >= 3 floors (2026-10-15) are unchanged.
 CRITIC_HARD_FLOORS = {"hook_strength": 3, "payoff_clarity": 3,
-                      "escalation": 3, "emotional_charge": 3}
+                      "escalation": 2, "emotional_charge": 2}
 # How much each critic dimension counts toward the story score (ranking
-# here, and v16_gate's 50-point story dimension). Weights follow each
-# dimension's correlation with real retention in the 2026-10-24 review:
-# escalation +0.59, emotional_charge +0.55, human_voice +0.52,
-# payoff_clarity +0.52, curiosity_gap +0.32, one_idea_only +0.27,
-# loop_coherence +0.06, hook_strength -0.32 (the old number-first rubric;
-# redefined in script_critic v3, so it keeps a small weight, not zero).
-STORY_DIM_WEIGHTS = {"escalation": 0.20, "emotional_charge": 0.20, "human_voice": 0.18,
-                     "payoff_clarity": 0.18, "curiosity_gap": 0.08, "one_idea_only": 0.06,
-                     "loop_coherence": 0.05, "hook_strength": 0.05}
+# here, and v16_gate's 50-point story dimension).
+#
+# 2026-10-24 weights (n=8 retention correlations): escalation .20,
+# emotional_charge .20, human_voice .18, payoff_clarity .18, curiosity .08,
+# one_idea .06, loop .05, hook .05.
+#
+# 2026-10-27 re-weight:
+# - escalation and emotional_charge go to .08 each. At n=20 their
+#   correlation is noise (+0.06 / -0.05). On uploads with >= 50 views it
+#   is weakly positive (+0.26 / +0.19), so they keep some weight.
+# - They now rank below payoff_clarity, hook_strength and curiosity_gap,
+#   the dimensions behind the validated 2026-10-15 floors and the
+#   curiosity framing.
+# - payoff_clarity .20 and human_voice .18 are unchanged in spirit.
+# - hook_strength .15: script_critic v3 and the 0b2eb9a concrete-opening
+#   rubric redefined it, so the old -0.32 measured the old number-first
+#   rubric.
+STORY_DIM_WEIGHTS = {"payoff_clarity": 0.20, "human_voice": 0.18, "hook_strength": 0.15,
+                     "curiosity_gap": 0.15, "one_idea_only": 0.10, "escalation": 0.08,
+                     "emotional_charge": 0.08, "loop_coherence": 0.06}
 STORY_DIM_DEFAULT_WEIGHT = 0.125   # an unknown dimension name counts as 1/8
 # 0-5 critic points -> 0-100, anchored on the critic prompt's OWN scale
 # ("5 = channel-winning, 3 = acceptable, 0-2 = must fix"). The old linear
@@ -808,7 +835,8 @@ def rank_write_story(topics_facts: list, *, series_note: str = "", batch_titles:
     story -- there is no mean floor on the critic score; the critic is a
     ranker, EXCEPT for the narrow CRITIC_HARD_FLOORS (hook_strength,
     payoff_clarity >= 3, restored 2026-10-15 review; escalation,
-    emotional_charge >= 3, added 2026-10-24 analytics review): a candidate below
+    emotional_charge >= 2 -- added at 3 on 2026-10-24, softened to 2 on
+    2026-10-27 after the n=20 re-check): a candidate below
     either after its rewrite is a "hold", never picked. The only way this can come back
     with no pick (`picked_topic` None, verdict "HOLD") is if every topic's
     candidate never reaches "scored" status at all -- it HOLDs on a
@@ -826,8 +854,8 @@ def rank_write_story(topics_facts: list, *, series_note: str = "", batch_titles:
         candidates.append(_rank_one(topic, facts, series_note, ask or llm.ask))
 
     scored = [c for c in candidates if c["status"] == "scored"]
-    # 2026-10-24: pick on the retention-weighted score, not the plain mean
-    # (escalation/emotional_charge/human_voice/payoff_clarity count most).
+    # 2026-10-24: pick on the weighted score (STORY_DIM_WEIGHTS), not the
+    # plain mean. 2026-10-27: payoff/human_voice/hook/curiosity count most.
     picked = max(scored, key=lambda c: c["weighted"] or 0.0) if scored else None
     public_candidates = [{k: v for k, v in c.items() if k not in ("_run", "script", "facts")}
                          for c in candidates]
