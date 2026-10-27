@@ -95,7 +95,8 @@ def test_score_candidate_is_reproducible_and_matches_the_weighted_sum():
     assert breakdown1 == {"cluster_prior": 25.0, "counter_intuitive": 20.0,
                            "visualisability": 10.0, "hook_strength": 10.0,
                            "series_potential": 10.0, "evidence_strength": 10.0,
-                           "evergreen": 5.0, "still_image_fit": 10.0}
+                           "evergreen": 5.0, "still_image_fit": 10.0,
+                          "scale_comparison": 0.0}   # 2026-10-27 angle bonus; not a scale title
 
 
 def test_score_candidate_excluded_cluster_scores_zero():

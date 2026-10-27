@@ -102,9 +102,9 @@ def test_ideation_prompt_carries_shares_and_the_body_cluster_description():
     assert "g-force" in block and "human body" in block
     assert "general_explainer (prior 0.20; use sparingly)" in block
     prompt, ver = render("topic_ideate", clusters=block, n=10, avoid_titles="(none)")
-    assert ver == "2" and "target share" in prompt and "abstract state" in prompt
+    assert ver == "3" and "target share" in prompt and "abstract state" in prompt
     prompt, ver = render("topic_score", candidates="id: t_1\ntitle: x")
-    assert ver == "3" and "Sound Waves That Levitate Objects" in prompt
+    assert ver == "4" and "Sound Waves That Levitate Objects" in prompt
     assert "suspended or frozen STATE is still-image friendly" in prompt
 
 

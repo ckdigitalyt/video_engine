@@ -78,6 +78,50 @@ CLUSTER_TARGET_SHARE = {
 }
 EXCLUDED_CLUSTERS = {"quiz", "crypto", "ai_policy", "asmr"}   # dilute the channel's topical signal
 
+# Scale/comparison angle (2026-10-27): an angle that cuts across clusters,
+# not a new cluster.
+#
+# Evidence: an external study of 18 competitor channels (756 Shorts) found
+# that topics framed around size, depth or distance, or as a direct "X vs Y"
+# comparison ("We Are So TINY", "How Deep Does The Ocean Really Go", "Great
+# Pyramid vs Olympus Mons"), beat their own channel's baseline x1.63 on views
+# (p=0.009, n=51 across 14 channels). The effect held in 5 of the 7 closest
+# space/science analogs. Title wording (curiosity gap, question form,
+# numbers, caps) had no effect.
+#
+# Why not a new cluster: the angle applies to space ("rings 200x wider than
+# Saturn's"), deep time ("first horses were smaller than a dog") and
+# human-scale physics alike. A cluster would also take a slot from the
+# retention-based CLUSTER_PRIORS / CLUSTER_TARGET_SHARE (685a2d2), and the
+# topic_ideate schema enum, and the cluster-keyed analytics join on
+# topic_history.
+#
+# How it works: code detects the angle from the candidate's title + claim
+# (deterministic, so an LLM self-tag cannot inflate it). score_candidate
+# then adds SCALE_COMPARISON_BONUS points, the same size as the evergreen
+# bonus. That lifts a scale framing within its cluster and over MIN_SCORE
+# at the margin. It leaves the cluster share and the still-image floor
+# alone. topic_ideate v3 asks for the framing explicitly.
+SCALE_COMPARISON_BONUS = 5.0
+_SCALE_DIM = (r"(?:big|bigger|large|larger|small|smaller|tall|taller|deep|deeper|wide|wider|"
+              r"heavy|heavier|far|farther|further|long|longer|tiny|tinier|huge|vast|thick|"
+              r"thicker)")
+SCALE_COMPARISON_RE = re.compile(
+    r"\bvs\.?\s|\bversus\b|\bcompared\s+(?:to|with)\b"
+    r"|\b(?:bigger|larger|smaller|taller|deeper|wider|heavier|farther|further|longer|tinier|"
+    r"thicker)\s+than\b"
+    r"|\bsize\s+of\s+(?:a|an|the|\d)"
+    r"|\bas\s+" + _SCALE_DIM + r"\s+as\b"
+    r"|\btimes\s+(?:the\s+size|bigger|larger|smaller|taller|deeper|wider|heavier|farther|"
+    r"longer|thicker)\b"
+    r"|\bhow\s+(?:deep|big|tall|far|small|tiny|large|long|heavy|wide|vast|huge)\b"
+    r"|\bso\s+(?:tiny|small|big|huge|deep|vast)\b"
+    r"|\bif\s+(?:the\s+|a\s+|an\s+)?[a-z' -]{2,30}\s+were\s+(?:the\s+size|as\s+"
+    + _SCALE_DIM + r"|shrunk|scaled)"
+    r"|\bfits?\s+(?:inside|between|into)\b"
+    r"|\bto\s+scale\b",
+    re.I)
+
 MIN_SCORE = 65
 SERIES_PARTS = (2, 3)
 DUP_ENTITY_JACCARD = 0.5
@@ -178,13 +222,22 @@ def dedupe(candidates: list, history: list) -> tuple:
 
 _RUBRIC_FIELDS = ("cluster_prior", "counter_intuitive", "visualisability",
                   "hook_strength", "series_potential", "evidence_strength",
-                  "evergreen", "still_image_fit")
+                  "evergreen", "still_image_fit", "scale_comparison")
 # decision #13 item 4: a topic whose core payoff only reads correctly IN
 # MOTION (a dynamic physical process/mechanism) can't be carried by this
 # channel's still-image template library, no matter how good the idea is —
 # score_row["still_image_fit"] at or below this is hard-skipped, the same
 # way EXCLUDED_CLUSTERS is, rather than just lightly penalized.
 STILL_IMAGE_FIT_FLOOR = 1
+
+
+def is_scale_comparison(candidate: dict) -> bool:
+    """True when the topic is framed around size, depth or distance, or as a
+    direct comparison ("X vs Y", "bigger than", "the size of", "how deep").
+    Reads title + claim only; hooks are opening lines, not the topic's
+    framing. See SCALE_COMPARISON_RE."""
+    text = f"{candidate.get('title') or ''} || {candidate.get('claim') or ''}"
+    return bool(SCALE_COMPARISON_RE.search(text))
 
 
 def score_candidate(candidate: dict, score_row: dict) -> tuple:
@@ -211,6 +264,8 @@ def score_candidate(candidate: dict, score_row: dict) -> tuple:
         # places/history — static subjects and scenes) over a topic whose
         # core content is an action a still frame can't convey.
         "still_image_fit": round(still_fit / 5 * 10, 2),
+        # 2026-10-27 competitor study: scale/comparison framing x1.63 views
+        "scale_comparison": SCALE_COMPARISON_BONUS if is_scale_comparison(candidate) else 0.0,
     }
     return min(round(sum(pts.values())), 100), pts
 
@@ -352,6 +407,9 @@ def _history_row(candidate: dict, status: str, source: str, extra: dict | None =
         "entities": sorted(entity_set(candidate)),
         "claim_tokens": sorted(claim_tokens(candidate)),
         "series_id": candidate.get("series_id"),
+        # 2026-10-27: tag the angle so the analytics join (3e74cb9) can check
+        # the competitor x1.63 finding against this channel's own uploads.
+        "scale_comparison": is_scale_comparison(candidate),
         "status": status,
         "source": source,
     }
