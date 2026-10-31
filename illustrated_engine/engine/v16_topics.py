@@ -368,7 +368,17 @@ def score_candidates(candidates: list, *, ask=None) -> list:
     for c in candidates:
         row = by_id.get(c["id"])
         if row is None:
-            raise ValueError(f"topic_score omitted candidate {c['id']!r}")
+            # 2026-10-30: this used to raise, crashing the whole batch on
+            # one omitted candidate. Caught live: a cached topic_score
+            # response consistently omitted the same candidate
+            # (t_earth_s_oceans_were_once_boiling_hot_fro) on every retry
+            # -- an unattended retry loop hit this ~59,667 times in a few
+            # hours since the exception gave main() nothing to write, so
+            # every call looked like an instant crash-and-retry. Drop the
+            # one omitted candidate (it simply doesn't get scored/queued
+            # this round) instead of losing the whole batch over it.
+            llm.warn(f"topic_score omitted candidate {c['id']!r}, dropping it")
+            continue
         score, breakdown = score_candidate(c, row)
         out.append({**c, "score": score, "score_breakdown": breakdown,
                     "best_hook": row.get("best_hook") or (c["hooks"][0] if c["hooks"] else "")})

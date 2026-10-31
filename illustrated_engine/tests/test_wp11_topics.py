@@ -197,15 +197,20 @@ def test_score_candidates_annotates_every_candidate():
     assert all(c["best_hook"] == "the strongest hook" for c in out)
 
 
-def test_score_candidates_raises_on_omitted_id():
-    cands = [{**_cand(1), "id": "t_1"}]
-    f = Fake(topic_score=[{"scores": []}])
-    try:
-        T.score_candidates(cands, ask=f)
-    except ValueError as e:
-        assert "t_1" in str(e)
-    else:
-        raise AssertionError("expected ValueError for an omitted candidate id")
+def test_score_candidates_drops_an_omitted_id_instead_of_raising():
+    """2026-10-30: this used to raise, crashing the whole batch over one
+    omitted candidate -- caught live, a cached topic_score response
+    consistently omitted the same candidate on every retry, and an
+    unattended retry loop hit the resulting crash ~59,667 times in a few
+    hours. The omitted candidate is now dropped (not queued this round);
+    every other candidate still gets scored normally."""
+    cands = [{**_cand(1), "id": "t_1"}, {**_cand(2), "id": "t_2"}]
+    row = {"counter_intuitive": 4, "visualisability": 4, "hook_strength": 4,
+           "series_potential": 4, "evidence_strength": 4, "still_image_fit": 4,
+           "best_hook": "the strongest hook"}
+    f = Fake(topic_score=[{"scores": [{"id": "t_2", **row}]}])  # t_1 omitted
+    out = T.score_candidates(cands, ask=f)
+    assert [c["id"] for c in out] == ["t_2"]
 
 
 # ------------------------------------------------- build_queue end-to-end --
