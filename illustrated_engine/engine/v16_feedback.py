@@ -23,6 +23,13 @@ Matching, in priority order:
      title shared by two different stories is reported, not guessed.
 Then stories/<story>/story.json `topic_id` -> the topic_history row with
 that `id` (its latest "queued" row, else its latest row).
+
+After the history is written, engine.v16_autoweight recomputes the
+shrunk, capped cluster-weight override (data/cluster_weight_state.json,
+read by engine.v16_topics) from the now-updated rows, so one command does
+both (2026-11-09). --no-autoweight skips that step. --dry-run previews it
+without writing. An autoweight failure is reported, not raised: the
+analytics already written to history are kept.
 """
 from __future__ import annotations
 
@@ -235,7 +242,8 @@ def write_history(path: Path, rows: list, original_lines: list) -> int:
 def run(*, days: int = DEFAULT_DAYS, history_path: Path | None = None,
         stories_dir: Path | None = None, batches_dir: Path = BATCHES_DIR,
         build_dir: Path = BUILD_V16, services=None, dry_run: bool = False,
-        today: dt.date | None = None) -> dict:
+        today: dt.date | None = None, autoweight: bool = True,
+        weight_state_path: Path | None = None) -> dict:
     hp_default, sd_default = _defaults()
     history_path = Path(history_path or hp_default)
     stories_dir = Path(stories_dir or sd_default)
@@ -258,7 +266,23 @@ def run(*, days: int = DEFAULT_DAYS, history_path: Path | None = None,
             "updated_rows": len(updated), "dry_run": dry_run,
             "history_path": str(history_path), "late_rows_kept": late,
             "matches": [{k: v for k, v in mt.items()} for mt in matches],
-            "unmatched": unmatched + missing}
+            "unmatched": unmatched + missing,
+            "autoweight": _run_autoweight(history_path, weight_state_path, dry_run, rows)
+            if autoweight else None}
+
+
+def _run_autoweight(history_path: Path, state_path, dry_run: bool, rows: list) -> dict:
+    """Recompute cluster weights from the just-written history. In a dry run
+    the history on disk is unchanged, so preview from the in-memory rows."""
+    from engine import v16_autoweight as AW
+    try:
+        if not dry_run:
+            return AW.run(history_path=history_path, state_path=state_path)
+        sp = Path(state_path or AW.default_state_path(history_path))
+        return {"state_path": str(sp), "dry_run": True,
+                "state": AW.compute_state(rows, AW.load_state(sp))}
+    except Exception as e:          # never lose the analytics write over this step
+        return {"error": f"{type(e).__name__}: {e}"}
 
 
 def main(argv=None) -> int:
@@ -267,8 +291,11 @@ def main(argv=None) -> int:
     ap.add_argument("--history", default=None, help="topic_history.jsonl to update")
     ap.add_argument("--dry-run", action="store_true", help="match and report, write nothing")
     ap.add_argument("--json", action="store_true", help="print the full report as JSON")
+    ap.add_argument("--no-autoweight", action="store_true",
+                    help="skip recomputing data/cluster_weight_state.json")
     a = ap.parse_args(argv)
-    rep = run(days=a.days, history_path=a.history, dry_run=a.dry_run)
+    rep = run(days=a.days, history_path=a.history, dry_run=a.dry_run,
+              autoweight=not a.no_autoweight)
     if a.json:
         print(json.dumps(rep, indent=1, default=str))
         return 0
@@ -282,6 +309,12 @@ def main(argv=None) -> int:
               f"subs={m.get('subscribersGained')}  [{mt['matched_by']}] {mt['topic_id']}")
     for u in rep["unmatched"]:
         print(f"  unmatched {u['video_id']} {u.get('title', '')[:50]!r}: {u['reason']}")
+    aw = rep.get("autoweight")
+    if aw and "error" in aw:
+        print(f"  auto-weight FAILED (history update kept): {aw['error']}")
+    elif aw:
+        from engine import v16_autoweight as AW
+        print(AW.format_report(aw))
     return 0
 
 
