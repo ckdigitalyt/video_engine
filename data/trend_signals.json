@@ -1,0 +1,373 @@
+{
+ "version": 1,
+ "generated_at": "2026-11-09T20:21:57+00:00",
+ "method": "per-channel level + pooled within-channel ln(age) slope removed from ln(views+1); feature multiplier = exp(mean residual difference), Mann-Whitney p, per-channel direction count -- see engine/v16_trends.py",
+ "params": {
+  "shorts_max_s": 180,
+  "min_age_days": 7,
+  "max_age_days": 365
+ },
+ "n_channels": 18,
+ "n_shorts": 774,
+ "age_slope": 0.3104,
+ "length_vs_reach_r": 0.023,
+ "like_rate_vs_reach_r": -0.228,
+ "findings": [
+  {
+   "feature": "scale_comparison",
+   "multiplier": 1.959,
+   "p": 0.0015,
+   "n_with": 38,
+   "n_without": 736,
+   "channels_with": 8,
+   "channels_agree": 5,
+   "channels_tested": 5,
+   "verdict": "supported"
+  },
+  {
+   "feature": "topic_space",
+   "multiplier": 0.923,
+   "p": 0.104,
+   "n_with": 284,
+   "n_without": 490,
+   "channels_with": 13,
+   "channels_agree": 6,
+   "channels_tested": 11,
+   "verdict": "no effect"
+  },
+  {
+   "feature": "topic_deep_time",
+   "multiplier": 1.54,
+   "p": 0.18,
+   "n_with": 8,
+   "n_without": 766,
+   "channels_with": 5,
+   "channels_agree": 1,
+   "channels_tested": 2,
+   "verdict": "no effect"
+  },
+  {
+   "feature": "topic_physics",
+   "multiplier": 0.857,
+   "p": 0.2038,
+   "n_with": 36,
+   "n_without": 738,
+   "channels_with": 12,
+   "channels_agree": 7,
+   "channels_tested": 9,
+   "verdict": "no effect"
+  },
+  {
+   "feature": "caps_word",
+   "multiplier": 0.981,
+   "p": 0.2237,
+   "n_with": 152,
+   "n_without": 622,
+   "channels_with": 14,
+   "channels_agree": 5,
+   "channels_tested": 11,
+   "verdict": "no effect"
+  },
+  {
+   "feature": "topic_body",
+   "multiplier": 1.366,
+   "p": 0.2796,
+   "n_with": 27,
+   "n_without": 747,
+   "channels_with": 11,
+   "channels_agree": 5,
+   "channels_tested": 6,
+   "verdict": "no effect"
+  },
+  {
+   "feature": "question_title",
+   "multiplier": 1.287,
+   "p": 0.3491,
+   "n_with": 23,
+   "n_without": 751,
+   "channels_with": 3,
+   "channels_agree": 3,
+   "channels_tested": 3,
+   "verdict": "no effect"
+  },
+  {
+   "feature": "fear_word",
+   "multiplier": 1.216,
+   "p": 0.4365,
+   "n_with": 42,
+   "n_without": 732,
+   "channels_with": 11,
+   "channels_agree": 4,
+   "channels_tested": 9,
+   "verdict": "no effect"
+  },
+  {
+   "feature": "emoji",
+   "multiplier": 1.015,
+   "p": 0.621,
+   "n_with": 449,
+   "n_without": 325,
+   "channels_with": 12,
+   "channels_agree": 3,
+   "channels_tested": 3,
+   "verdict": "no effect"
+  },
+  {
+   "feature": "topic_animal",
+   "multiplier": 1.026,
+   "p": 0.7716,
+   "n_with": 30,
+   "n_without": 744,
+   "channels_with": 9,
+   "channels_agree": 3,
+   "channels_tested": 6,
+   "verdict": "no effect"
+  },
+  {
+   "feature": "length_30_45s",
+   "multiplier": 1.008,
+   "p": 0.7839,
+   "n_with": 239,
+   "n_without": 535,
+   "channels_with": 14,
+   "channels_agree": 6,
+   "channels_tested": 12,
+   "verdict": "no effect"
+  },
+  {
+   "feature": "number_in_title",
+   "multiplier": 0.999,
+   "p": 0.8256,
+   "n_with": 173,
+   "n_without": 601,
+   "channels_with": 18,
+   "channels_agree": 7,
+   "channels_tested": 16,
+   "verdict": "no effect"
+  },
+  {
+   "feature": "length_under_30s",
+   "multiplier": 0.992,
+   "p": 0.8605,
+   "n_with": 203,
+   "n_without": 571,
+   "channels_with": 9,
+   "channels_agree": 3,
+   "channels_tested": 7,
+   "verdict": "no effect"
+  },
+  {
+   "feature": "length_over_60s",
+   "multiplier": 0.984,
+   "p": 0.9727,
+   "n_with": 235,
+   "n_without": 539,
+   "channels_with": 12,
+   "channels_agree": 4,
+   "channels_tested": 5,
+   "verdict": "no effect"
+  }
+ ],
+ "channels": [
+  {
+   "name": "Science Of Infinity",
+   "channel_id": "UCKWe3mXbIf4KtETT2mvUBdg",
+   "group": "analog",
+   "subs": 1550000,
+   "shorts_analysed": 44,
+   "posts_per_day": 0.93,
+   "median_length_s": 32.0,
+   "median_views": 596006.0
+  },
+  {
+   "name": "Minute of Mystery",
+   "channel_id": "UCOoj8IuW2dXbUAHccI7vGoQ",
+   "group": "analog",
+   "subs": 33100,
+   "shorts_analysed": 47,
+   "posts_per_day": 0.69,
+   "median_length_s": 30,
+   "median_views": 277808
+  },
+  {
+   "name": "Zap Facts",
+   "channel_id": "UCTbW_SfiOHpvNyrAa-GYgNQ",
+   "group": "analog",
+   "subs": 37900,
+   "shorts_analysed": 48,
+   "posts_per_day": 0.4,
+   "median_length_s": 40.0,
+   "median_views": 74105.5
+  },
+  {
+   "name": "Cosmos Captures",
+   "channel_id": "UCSrSd8XW_hQ349ShnQ9-WkQ",
+   "group": "analog",
+   "subs": 72600,
+   "shorts_analysed": 47,
+   "posts_per_day": 0.57,
+   "median_length_s": 39,
+   "median_views": 100393
+  },
+  {
+   "name": "CosmicDropz",
+   "channel_id": "UCkiDuh3-Gawlodboiyw-3gw",
+   "group": "analog",
+   "subs": 34500,
+   "shorts_analysed": 45,
+   "posts_per_day": 0.53,
+   "median_length_s": 17,
+   "median_views": 63277
+  },
+  {
+   "name": "QuirkScience",
+   "channel_id": "UC7mtBSkTRpVHnk2I7zltYpw",
+   "group": "analog",
+   "subs": 4750,
+   "shorts_analysed": 30,
+   "posts_per_day": 0.89,
+   "median_length_s": 65.5,
+   "median_views": 16888.0
+  },
+  {
+   "name": "Beyond Earth",
+   "channel_id": "UCHApHRwamenKgu7HOn7uLxw",
+   "group": "analog",
+   "subs": 31200,
+   "shorts_analysed": 36,
+   "posts_per_day": 2.1,
+   "median_length_s": 5.0,
+   "median_views": 128883.0
+  },
+  {
+   "name": "KnowYourUniverse",
+   "channel_id": "UCrE9A07ZBzrvPDcqsQzke-Q",
+   "group": "analog",
+   "subs": 58000,
+   "shorts_analysed": 47,
+   "posts_per_day": 0.45,
+   "median_length_s": 8,
+   "median_views": 17963
+  },
+  {
+   "name": "Zack D. Films",
+   "channel_id": "UCvz84_Q0BbvZThy75mbd-Dg",
+   "group": "adjacent",
+   "subs": 29600000,
+   "shorts_analysed": 16,
+   "posts_per_day": 5.26,
+   "median_length_s": 36.0,
+   "median_views": 10068380.5
+  },
+  {
+   "name": "FactoHolic",
+   "channel_id": "UCS4uc8cHDqcwwro8lGChaQQ",
+   "group": "adjacent",
+   "subs": 23400000,
+   "shorts_analysed": 48,
+   "posts_per_day": 0.32,
+   "median_length_s": 69.0,
+   "median_views": 25911174.0
+  },
+  {
+   "name": "Facts' Mine",
+   "channel_id": "UCC6gbNO098rkQKCU0ZaLITQ",
+   "group": "adjacent",
+   "subs": 19400000,
+   "shorts_analysed": 45,
+   "posts_per_day": 0.42,
+   "median_length_s": 49,
+   "median_views": 6729996
+  },
+  {
+   "name": "Hoodie Guy",
+   "channel_id": "UCL3rV5PZK_5UYAwmwvyuSqw",
+   "group": "adjacent",
+   "subs": 2230000,
+   "shorts_analysed": 49,
+   "posts_per_day": 0.27,
+   "median_length_s": 65,
+   "median_views": 13107575
+  },
+  {
+   "name": "Dr Ben Miles",
+   "channel_id": "UCUeZBocfxALSUdOgNJB5ySA",
+   "group": "adjacent",
+   "subs": 2670000,
+   "shorts_analysed": 42,
+   "posts_per_day": 0.3,
+   "median_length_s": 114.5,
+   "median_views": 1900745.0
+  },
+  {
+   "name": "FGtheexplainer",
+   "channel_id": "UCS3k3REGEKMNp9FeErKOlDA",
+   "group": "adjacent",
+   "subs": 336000,
+   "shorts_analysed": 46,
+   "posts_per_day": 0.52,
+   "median_length_s": 56.0,
+   "median_views": 1434881.0
+  },
+  {
+   "name": "Why Guy",
+   "channel_id": "UC5epkgKdOu7NolxXuj2yylQ",
+   "group": "adjacent",
+   "subs": 215000,
+   "shorts_analysed": 46,
+   "posts_per_day": 0.23,
+   "median_length_s": 42.0,
+   "median_views": 1783436.0
+  },
+  {
+   "name": "James Films",
+   "channel_id": "UCm0dvC19ILPjHDi5sN5P9AQ",
+   "group": "adjacent",
+   "subs": 222000,
+   "shorts_analysed": 46,
+   "posts_per_day": 0.44,
+   "median_length_s": 47.0,
+   "median_views": 706007.5
+  },
+  {
+   "name": "Atharv Explains Why",
+   "channel_id": "UCmDcEeZbiAle33qODw6D_wg",
+   "group": "adjacent",
+   "subs": 193000,
+   "shorts_analysed": 48,
+   "posts_per_day": 0.56,
+   "median_length_s": 136.5,
+   "median_views": 301152.5
+  },
+  {
+   "name": "Curiosity Clips",
+   "channel_id": "UC6UZwJO-2is2b4EMcZeO1Fw",
+   "group": "adjacent",
+   "subs": 23700,
+   "shorts_analysed": 44,
+   "posts_per_day": 0.96,
+   "median_length_s": 19.0,
+   "median_views": 34191.0
+  }
+ ],
+ "baseline_2026_10_26": {
+  "scale_comparison": {
+   "multiplier": 1.63,
+   "p": 0.009,
+   "n_with": 51,
+   "channels": 14
+  },
+  "length_vs_reach_r": 0.03,
+  "n_shorts": 756,
+  "n_channels": 18
+ },
+ "how_to_use": [
+  "This is a lead list, not a weighting input. Nothing reads this file automatically.",
+  "Act only on verdict == 'supported' (p < 0.01, n_with >= 30, >= 60% of tested channels agree). 'weak' findings are watch-list items: re-run in 2-4 weeks and see if they hold.",
+  "Before changing code, check the lead against our own uploads: topic_history rows carry real_* analytics and tags such as scale_comparison. The scale/comparison angle went this way: competitor finding (2026-10-26), then a +5 score bonus (8a072a0) plus a history tag so it can be verified on our data.",
+  "Prefer score bonuses or ideation guidance over hard filters. Never add a gate from a trend signal (28955f3: an 8-video signal collapsed at n=20).",
+  "Compare with the previous run (git log -p data/trend_signals.json). A pattern that flips between runs is noise.",
+  "Competitor data is public views only. There is no retention, CTR or subscriber data. Our own retention (engine.v16_autoweight) remains the primary signal.",
+  "Like and comment rate run inversely with reach (14/14 channels on 2026-10-26). Never use them as a quality signal. like_rate_vs_reach tracks this."
+ ]
+}
