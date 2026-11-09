@@ -16,6 +16,8 @@ from __future__ import annotations
 
 import csv
 import json
+import math
+import os
 import re
 import sys
 from pathlib import Path
@@ -77,6 +79,27 @@ CLUSTER_TARGET_SHARE = {
     "exotic_space_travel": 0.10,
 }
 EXCLUDED_CLUSTERS = {"quiz", "crypto", "ai_policy", "asmr"}   # dilute the channel's topical signal
+
+# Auto-weight override layer (2026-11-09). CLUSTER_PRIORS and
+# CLUSTER_TARGET_SHARE above stay the hand-set baseline. engine.v16_autoweight
+# (run by engine.v16_feedback after it writes real_* analytics onto
+# topic_history) writes small, sample-size-shrunk adjustments to
+# data/cluster_weight_state.json. score_candidate, rank_by_share and
+# clusters_prompt_block read the effective values through cluster_priors() /
+# cluster_target_share(), which re-validate the file on every read:
+#   - only clusters already in the baseline count. The file can never add a
+#     cluster, and a cluster with no target share (general_explainer) stays at 0;
+#   - every value is clamped to AUTOWEIGHT_BAND x its baseline, so no prior or
+#     share can reach 0. Lesson of 28955f3: an automatically computed weight
+#     must never turn into a hard gate;
+#   - if the file was computed against different baseline constants (a human
+#     re-baselined the dicts above), it is ignored. The human edit wins until
+#     the next autoweight run re-anchors on the new baseline;
+#   - a missing, unreadable or malformed file, or V16_CLUSTER_WEIGHT_STATE=off,
+#     means the baseline is used unchanged.
+CLUSTER_WEIGHT_STATE_PATH = REPO / "data" / "cluster_weight_state.json"
+WEIGHT_STATE_ENV = "V16_CLUSTER_WEIGHT_STATE"     # alternate path, or "off" to disable
+AUTOWEIGHT_BAND = (0.7, 1.3)                       # lifetime bound, x the hand-set baseline
 
 # Scale/comparison angle (2026-10-27): an angle that cuts across clusters,
 # not a new cluster.
@@ -218,6 +241,113 @@ def dedupe(candidates: list, history: list) -> tuple:
     return unique, dupes
 
 
+# ------------------------------------------------ auto-weight override --
+
+_weight_state_cache: dict = {}
+_weight_state_warned: set = set()
+
+
+def _warn_once(msg: str) -> None:
+    if msg not in _weight_state_warned:
+        _weight_state_warned.add(msg)
+        print(f"[v16_topics] {msg}", file=sys.stderr, flush=True)
+
+
+def weight_state_path():
+    """-> the override file to read, or None when disabled by env."""
+    env = os.environ.get(WEIGHT_STATE_ENV, "").strip()
+    if env.lower() in ("off", "0", "none", "false", "disabled"):
+        return None
+    return Path(env) if env else CLUSTER_WEIGHT_STATE_PATH
+
+
+def _finite(v) -> bool:
+    return isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v)
+
+
+def _same_base(recorded, base: dict) -> bool:
+    return (isinstance(recorded, dict) and set(recorded) == set(base)
+            and all(_finite(recorded[k]) and abs(recorded[k] - base[k]) < 1e-9 for k in base))
+
+
+def band_clamp(value: float, base: float) -> float:
+    lo, hi = AUTOWEIGHT_BAND
+    return min(max(value, base * lo), base * hi)
+
+
+def normalize_shares(raw: dict, base: dict, iters: int = 20) -> dict:
+    """Clamp each share to AUTOWEIGHT_BAND x its baseline, then renormalize
+    so the shares sum to 1. Repeats clamp-and-renormalize until both hold,
+    because renormalizing can push a value back past its band. Clusters with
+    a zero baseline share stay 0."""
+    out = {c: band_clamp(float(raw.get(c, b)), b) for c, b in base.items() if b > 0}
+    for _ in range(iters):
+        total = sum(out.values())
+        if total <= 0:
+            return {c: b for c, b in base.items() if b > 0}
+        out = {c: v / total for c, v in out.items()}
+        clamped = {c: band_clamp(v, base[c]) for c, v in out.items()}
+        if all(abs(clamped[c] - out[c]) < 1e-12 for c in out):
+            break
+        out = clamped
+    return out
+
+
+def load_weight_state() -> dict | None:
+    """The validated override state, or None (-> baseline). Cached on the
+    file's (mtime, size, inode), so the per-candidate score_candidate calls
+    cost one stat each, and a rewrite by a concurrent autoweight run (atomic
+    os.replace) is picked up on the next call."""
+    path = weight_state_path()
+    if path is None:
+        return None
+    try:
+        st = path.stat()
+    except OSError:
+        return None
+    key = (str(path), st.st_mtime_ns, st.st_size, st.st_ino)
+    if key in _weight_state_cache:
+        return _weight_state_cache[key]
+    state = None
+    try:
+        data = json.loads(path.read_text())
+        if not isinstance(data, dict):
+            raise ValueError("not a JSON object")
+        if not (_same_base(data.get("base_priors"), CLUSTER_PRIORS)
+                and _same_base(data.get("base_shares"), CLUSTER_TARGET_SHARE)):
+            _warn_once(f"{path.name} was computed against different CLUSTER_PRIORS/"
+                       "CLUSTER_TARGET_SHARE baselines; ignoring it (re-run engine.v16_autoweight)")
+        else:
+            state = data
+    except (OSError, ValueError) as e:
+        _warn_once(f"{path} unreadable ({e}); using hand-set cluster weights")
+    _weight_state_cache.clear()
+    _weight_state_cache[key] = state
+    return state
+
+
+def cluster_priors() -> dict:
+    """Effective cluster -> prior: CLUSTER_PRIORS overlaid with the validated,
+    band-clamped auto-weight state. Same keys as CLUSTER_PRIORS, always."""
+    state = load_weight_state()
+    over = (state or {}).get("priors")
+    over = over if isinstance(over, dict) else {}
+    return {c: band_clamp(float(over[c]), b) if _finite(over.get(c)) else b
+            for c, b in CLUSTER_PRIORS.items()}
+
+
+def cluster_target_share() -> dict:
+    """Effective cluster -> target queue share (sums to 1). Same targeted
+    clusters as CLUSTER_TARGET_SHARE, each within AUTOWEIGHT_BAND x baseline."""
+    state = load_weight_state()
+    over = (state or {}).get("shares")
+    if not isinstance(over, dict):
+        return dict(CLUSTER_TARGET_SHARE)
+    raw = {c: (float(over[c]) if _finite(over.get(c)) else b)
+           for c, b in CLUSTER_TARGET_SHARE.items()}
+    return normalize_shares(raw, CLUSTER_TARGET_SHARE)
+
+
 # ---------------------------------------------------------------- score --
 
 _RUBRIC_FIELDS = ("cluster_prior", "counter_intuitive", "visualisability",
@@ -241,8 +371,10 @@ def is_scale_comparison(candidate: dict) -> bool:
 
 
 def score_candidate(candidate: dict, score_row: dict) -> tuple:
-    """-> (score 0-100 int, breakdown dict). Pure function of its inputs: same
-    candidate + same rubric scores always reproduce the same score (DESIGN Sec.9.3)."""
+    """-> (score 0-100 int, breakdown dict). Pure function of its inputs and
+    the effective cluster priors (cluster_priors(): CLUSTER_PRIORS plus the
+    validated auto-weight state). The same candidate, rubric scores and
+    weight state always reproduce the same score (DESIGN Sec.9.3)."""
     cluster = candidate.get("cluster")
     excluded_cluster = cluster not in CLUSTER_PRIORS or cluster in EXCLUDED_CLUSTERS
     if excluded_cluster:
@@ -253,7 +385,7 @@ def score_candidate(candidate: dict, score_row: dict) -> tuple:
         zero = dict.fromkeys(_RUBRIC_FIELDS, 0.0)
         return 0, {**zero, "excluded_still_unfriendly": True}
     pts = {
-        "cluster_prior": round(CLUSTER_PRIORS[cluster] * 25, 2),
+        "cluster_prior": round(cluster_priors()[cluster] * 25, 2),
         "counter_intuitive": round(score_row["counter_intuitive"] / 5 * 20, 2),
         "visualisability": round(score_row["visualisability"] / 5 * 10, 2),
         "hook_strength": round(score_row["hook_strength"] / 5 * 10, 2),
@@ -293,8 +425,9 @@ def rank_by_share(entries: list, shares: dict | None = None) -> list:
     materialize_candidates' fallback pool reads on in order), so the share
     holds for any batch size, while score still decides WHICH topic of a
     cluster goes first. Pure function; a single-cluster queue keeps its
-    plain score order."""
-    shares = CLUSTER_TARGET_SHARE if shares is None else shares
+    plain score order. shares=None -> cluster_target_share() (the hand-set
+    CLUSTER_TARGET_SHARE plus the validated auto-weight state)."""
+    shares = cluster_target_share() if shares is None else shares
     pools: dict = {}
     for e in sorted(entries, key=_entry_score, reverse=True):
         pools.setdefault(_entry_cluster(e), []).append(e)
@@ -330,8 +463,9 @@ def clusters_prompt_block() -> str:
     """The ALLOWED CLUSTERS block of topic_ideate: prior, target share of
     the candidates and what the cluster means."""
     rows = []
-    for k, v in CLUSTER_PRIORS.items():
-        share = CLUSTER_TARGET_SHARE.get(k, 0.0)
+    shares = cluster_target_share()
+    for k, v in cluster_priors().items():
+        share = shares.get(k, 0.0)
         aim = f"aim for ~{round(share * 100)}% of candidates" if share else "use sparingly"
         rows.append(f"- {k} (prior {v:.2f}; {aim}): {CLUSTER_DESCRIPTIONS.get(k, '')}")
     return "\n".join(rows)
