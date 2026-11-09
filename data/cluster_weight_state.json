@@ -1,7 +1,7 @@
 {
  "version": 1,
- "updated_at": "2026-11-09T20:17:44+00:00",
- "checked_at": "2026-11-09T20:17:44+00:00",
+ "updated_at": "2026-11-09T21:02:16+00:00",
+ "checked_at": "2026-11-09T21:02:16+00:00",
  "changed_on_last_check": true,
  "method": "empirical-Bayes shrinkage of per-cluster relative retention toward the hand-set baseline (confidence n/(n+pseudo_n), 0 below min_n), non-compounding target, per-update step cap, lifetime band -- see engine/v16_autoweight.py",
  "params": {
@@ -31,79 +31,79 @@
   "exotic_space_travel": 0.1
  },
  "priors": {
-  "spectacle_physics": 1.0,
-  "deep_time": 0.785354,
-  "exotic_space_travel": 0.505313,
-  "space_discovery": 0.506783,
+  "spectacle_physics": 1.008436,
+  "deep_time": 0.787683,
+  "exotic_space_travel": 0.499992,
+  "space_discovery": 0.513917,
   "general_explainer": 0.2
  },
  "shares": {
-  "spectacle_physics": 0.400049,
-  "deep_time": 0.245453,
-  "space_discovery": 0.253423,
-  "exotic_space_travel": 0.101075
+  "spectacle_physics": 0.400776,
+  "deep_time": 0.244566,
+  "space_discovery": 0.255304,
+  "exotic_space_travel": 0.099354
  },
- "n_videos": 21,
+ "n_videos": 39,
  "excluded_videos": {
   "implausible_retention": 1,
-  "low_views": 3
+  "low_views": 4
  },
- "channel_mean_retention": 67.61,
+ "channel_mean_retention": 70.03,
  "clusters": {
   "spectacle_physics": {
-   "n": 2,
-   "confidence": 0.0,
-   "factor": 1.0,
-   "mean_retention": 76.53,
-   "median_views": 410.0,
-   "subs_per_1k_views": 19.51,
-   "rel_retention": 1.1321,
-   "prior": 1.0,
-   "share": 0.400049
+   "n": 9,
+   "confidence": 0.3103,
+   "factor": 1.008436,
+   "mean_retention": 71.3,
+   "median_views": 62.0,
+   "subs_per_1k_views": 10.73,
+   "rel_retention": 1.0181,
+   "prior": 1.008436,
+   "share": 0.400776
   },
   "deep_time": {
-   "n": 7,
-   "confidence": 0.2593,
-   "factor": 0.981692,
-   "mean_retention": 64.42,
-   "median_views": 78.0,
-   "subs_per_1k_views": 5.57,
-   "rel_retention": 0.9529,
-   "prior": 0.785354,
-   "share": 0.245453
+   "n": 14,
+   "confidence": 0.4118,
+   "factor": 0.984604,
+   "mean_retention": 68.28,
+   "median_views": 113.0,
+   "subs_per_1k_views": 2.93,
+   "rel_retention": 0.9751,
+   "prior": 0.787683,
+   "share": 0.244566
   },
   "exotic_space_travel": {
    "n": 5,
    "confidence": 0.2,
-   "factor": 1.010627,
-   "mean_retention": 70.0,
-   "median_views": 418.0,
+   "factor": 0.999984,
+   "mean_retention": 70.02,
+   "median_views": 420.0,
    "subs_per_1k_views": 0.73,
-   "rel_retention": 1.0354,
-   "prior": 0.505313,
-   "share": 0.101075
+   "rel_retention": 0.9999,
+   "prior": 0.499992,
+   "share": 0.099354
   },
   "space_discovery": {
-   "n": 6,
-   "confidence": 0.2308,
-   "factor": 1.013566,
-   "mean_retention": 70.26,
-   "median_views": 58.0,
-   "subs_per_1k_views": 2.18,
-   "rel_retention": 1.0392,
-   "prior": 0.506783,
-   "share": 0.253423
+   "n": 10,
+   "confidence": 0.3333,
+   "factor": 1.027834,
+   "mean_retention": 73.93,
+   "median_views": 87.5,
+   "subs_per_1k_views": 4.63,
+   "rel_retention": 1.0557,
+   "prior": 0.513917,
+   "share": 0.255304
   },
   "general_explainer": {
    "n": 1,
    "confidence": 0.0,
    "factor": 1.0,
-   "mean_retention": 44.16,
-   "median_views": 1104.0,
+   "mean_retention": 44.08,
+   "median_views": 1112.0,
    "subs_per_1k_views": 0.0,
-   "rel_retention": 0.6532,
+   "rel_retention": 0.6295,
    "prior": 0.2
   }
  },
- "data_fingerprint": "07eeeaa1505551e3"
+ "data_fingerprint": "cd558ef99812e48b"
 }
