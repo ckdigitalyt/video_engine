@@ -68,10 +68,15 @@ promoting. So:
 
 Secondary signals: real_views and real_subs_gained are reported per cluster
 in the state file, but they do not move weights. Views over a rolling 28-day
-window are confounded by upload age (topic_history rows carry no publish
-date), they are heavy-tailed (12 to 1,189 on the 2026-10-26 sample), and
-22 of 25 annotated videos gained 0-2 subscribers. Using them needs
-age-adjusted views first. Retention is age-robust.
+window are confounded by upload age, they are heavy-tailed (12 to 1,189 on
+the 2026-10-26 sample), and 22 of 25 annotated videos gained 0-2
+subscribers. Using them needs age-adjusted views first.
+
+Retention was assumed age-robust, which held only while every video was
+younger than the 28-day analytics window. 2026-11-11: v16_feedback reads
+lifetime numbers (window from the earliest publish date) and stores
+`real_published_at`; a row whose window starts after its publish date is
+excluded as "truncated_window" (see `truncated_window`).
 """
 from __future__ import annotations
 
@@ -154,6 +159,8 @@ def video_samples(rows: list) -> tuple:
         ret, views = _num(r.get("real_retention_pct")), _num(r.get("real_views")) or 0.0
         if ret is None or ret <= 0:
             drop("bad_retention")
+        elif truncated_window(r):
+            drop("truncated_window")
         elif ret > RETENTION_IMPLAUSIBLE:
             drop("implausible_retention")
         elif views < MIN_VIEWS:
@@ -163,6 +170,23 @@ def video_samples(rows: list) -> tuple:
                             "retention": min(ret, RETENTION_CAP), "retention_raw": ret,
                             "views": views, "subs": _num(r.get("real_subs_gained")) or 0.0})
     return samples, excluded
+
+
+def truncated_window(row: dict) -> bool:
+    """True when the row's analytics window started after the video was
+    published (2026-11-11 review: a 28-day window gave one video 35 of its
+    420 lifetime views, and a 36.7% retention measured on late long-tail
+    viewers only). v16_feedback now reads lifetime numbers and records
+    `real_published_at`; a row that has the publish date but a window
+    starting more than a day later is not a lifetime sample. Legacy rows
+    without the publish date are kept: the next feedback run rewrites every
+    active video with lifetime numbers."""
+    pub = str(row.get("real_published_at") or "")[:10]
+    win = str(row.get("real_window") or "").split("..")[0]
+    try:
+        return dt.date.fromisoformat(win) > dt.date.fromisoformat(pub) + dt.timedelta(days=1)
+    except ValueError:
+        return False
 
 
 def confidence(n: int) -> float:

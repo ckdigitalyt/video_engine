@@ -24,6 +24,11 @@ Matching, in priority order:
 Then stories/<story>/story.json `topic_id` -> the topic_history row with
 that `id` (its latest "queued" row, else its latest row).
 
+Lifetime numbers (2026-11-11): `--days` picks which videos are active; the
+metrics themselves are read from the earliest known upload's publish date,
+and each row records `real_published_at`, so retention is not truncated to
+late long-tail viewers once a video ages past the window.
+
 After the history is written, engine.v16_autoweight recomputes the
 shrunk, capped cluster-weight override (data/cluster_weight_state.json,
 read by engine.v16_topics) from the now-updated rows, so one command does
@@ -111,6 +116,19 @@ def fetch_video_titles(data_api, ids: list) -> dict:
             out[it["id"]] = {"title": sn.get("title", ""),
                              "published_at": sn.get("publishedAt", "")}
     return out
+
+
+def earliest_publish(titles: dict):
+    """-> the earliest publish date (dt.date) among fetch_video_titles'
+    results, or None."""
+    dates = []
+    for t in titles.values():
+        d = str((t or {}).get("published_at") or "")[:10]
+        try:
+            dates.append(dt.date.fromisoformat(d))
+        except ValueError:
+            continue
+    return min(dates) if dates else None
 
 
 # --------------------------------------------------------------- matching --
@@ -210,6 +228,8 @@ def apply_to_history(rows: list, matches: list, *, window: str, now: str) -> tup
                 row[field] = mt["metrics"][metric]
         row.update(real_video_id=mt["video_id"], real_story_id=mt["story_id"],
                    real_title=mt["title"], real_window=window, real_updated_at=now)
+        if mt.get("published_at"):
+            row["real_published_at"] = mt["published_at"]
         updated.append({"topic_id": mt["topic_id"], "row_index": i,
                         "video_id": mt["video_id"]})
     return updated, missing
@@ -251,11 +271,24 @@ def run(*, days: int = DEFAULT_DAYS, history_path: Path | None = None,
     end = today or dt.date.today()
     start = end - dt.timedelta(days=days)
     metrics = fetch_video_metrics(analytics, start, end)
-    titles = fetch_video_titles(data_api, list(metrics))
-    matches, unmatched = match_videos(metrics, titles, index_uploads(batches_dir),
-                                      index_titles(build_dir), stories_dir)
     lines = read_history_lines(history_path)
     rows = [json.loads(ln) for ln in lines]
+    known = [r["real_video_id"] for r in rows if r.get("real_video_id")]
+    titles = fetch_video_titles(data_api, list(dict.fromkeys(list(metrics) + known)))
+    # 2026-11-11 review: a rolling `days` window truncates older videos'
+    # data -- one video had 420 lifetime views but 35 in-window, and its
+    # 36.7% "retention" described only late long-tail viewers. The window
+    # query above still decides which videos are active; when any known
+    # upload predates it, the metrics are re-read from the earliest publish
+    # date, so every video's numbers are lifetime numbers.
+    lifetime_start = earliest_publish(titles)
+    if lifetime_start and lifetime_start < start:
+        start = lifetime_start
+        metrics = fetch_video_metrics(analytics, start, end)
+    matches, unmatched = match_videos(metrics, titles, index_uploads(batches_dir),
+                                      index_titles(build_dir), stories_dir)
+    for mt in matches:
+        mt["published_at"] = (titles.get(mt["video_id"]) or {}).get("published_at") or None
     window = f"{start.isoformat()}..{end.isoformat()}"
     now = dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")
     updated, missing = apply_to_history(rows, matches, window=window, now=now)

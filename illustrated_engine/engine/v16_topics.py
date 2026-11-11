@@ -100,6 +100,17 @@ EXCLUDED_CLUSTERS = {"quiz", "crypto", "ai_policy", "asmr"}   # dilute the chann
 CLUSTER_WEIGHT_STATE_PATH = REPO / "data" / "cluster_weight_state.json"
 WEIGHT_STATE_ENV = "V16_CLUSTER_WEIGHT_STATE"     # alternate path, or "off" to disable
 AUTOWEIGHT_BAND = (0.7, 1.3)                       # lifetime bound, x the hand-set baseline
+# 2026-11-11 review, deliberately unchanged: with baselines 0.5 vs 1.0 the
+# band means space_discovery (max 0.65) can never out-rank spectacle_physics
+# (min 0.70) on the prior alone. Not loosened because (1) the band does not
+# bind today -- data/cluster_weight_state.json (39 clean videos) has every
+# factor inside 0.99-1.04; the n/(n+20) shrinkage is what limits movement;
+# (2) the largest gap, space_discovery 73.9% vs spectacle_physics 67.2%
+# (n=8 vs 10, per-video sigma ~20 pts), has a standard error of ~9.5 pts,
+# i.e. noise; (3) those retentions were read over a rolling 28-day window
+# that truncated older videos -- v16_feedback now reads lifetime numbers,
+# so re-check after a few feedback runs on clean data. Revisit if a factor
+# actually sits at the band edge with confidence >= 0.5 (n >= 20).
 
 # Scale/comparison angle (2026-10-27): an angle that cuts across clusters,
 # not a new cluster.
