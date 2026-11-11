@@ -111,6 +111,7 @@ MAX_SCRIPT_REWRITES = 2  # decision #14: shared pool across code-error + critic 
 # the writer was never told to fix before is often not enough; a second
 # attempt costs one more LLM call only when the first misses.
 RANK_REWRITE_BUDGET = 2  # decision #15 item 2: CRITIC rewrites per topic in the rank-not-block flow
+# (2026-11-11: spent only on CRITIC_HARD_FLOORS misses; the mean-bar polish rewrite is cut)
 # 2026-10-16: a code-rule fix no longer spends the critic rewrite (see
 # _rank_one) -- one targeted code-fix per draft (first draft, critic rewrite).
 RANK_CODE_FIX_BUDGET = 1
@@ -781,7 +782,9 @@ def _rank_one(topic: str, facts: dict, series_note: str, ask) -> dict:
          rewrite added "never" and an unspoken "Zero g-force"). The rewrite
          now gets its own code-fix; if it still fails, or scores lower, the
          previous valid draft is kept. Floors and code checks are unchanged:
-         only a draft that clears both can be "scored"."""
+         only a draft that clears both can be "scored".
+    2026-11-11 (owner decision): the optional polish rewrite in point 2 is
+    gone -- critic rewrites fire only on a CRITIC_HARD_FLOORS miss."""
     run = _Run(ask)
     rewrites = 0
 
@@ -809,8 +812,17 @@ def _rank_one(topic: str, facts: dict, series_note: str, ask) -> dict:
 
     crit = _critic(script)
     notes = []
+    # 2026-11-11 owner decision: the "polish" rewrite (fired whenever the
+    # draft missed critic_pass's mean >= CRITIC_MEAN_MIN bar) is cut. Only 2
+    # of 282 final scripts ever reached that bar, yet it was ~40% of all
+    # script-stage LLM calls and a large share of the quota-cooldown
+    # sleep-outs. A critic rewrite now fires ONLY for a CRITIC_HARD_FLOORS
+    # miss -- the targeted floor rewrite (same RANK_REWRITE_BUDGET, same
+    # _critic_bar / FLOOR_ADVICE instruction, same keep-the-better-draft
+    # rule) is unchanged. critic_pass itself stays for write_story's legacy
+    # CLI path.
     for _ in range(RANK_REWRITE_BUDGET):
-        if critic_pass(crit["scores"]):
+        if not critic_floor_misses(crit["scores"]):
             break
         draft = _write(run, topic, facts, series_note, _critic_bar(crit), script)
         rewrites += 1

@@ -148,12 +148,14 @@ def test_lung_pressure_keeps_its_payoff_3_draft_over_the_payoff_2_rewrite():
     """Lung pressure held on payoff_clarity=2 AND escalation=2. Its FIRST
     draft had payoff 3 and escalation 2. The rewrite, chasing the old
     escalation floor, broke the payoff. Now the first draft clears every
-    floor and _rank_key keeps it."""
+    floor and is kept. (2026-11-11: with the polish rewrite cut, a draft
+    that clears every floor is not rewritten at all, so the payoff-breaking
+    rewrite never happens.)"""
     seq = ESCALATION_KILLED[2][3]
     c = _rank(seq)
     assert c["status"] == "scored"
     assert c["critic"]["scores"] == seq[0]
-    assert any("scored lower" in n for n in c.get("notes", []))
+    assert c["rewrites"] == 0
 
 
 @pytest.mark.parametrize("topic,seq", PAYOFF_KILLED, ids=[t[0][:24] for t in PAYOFF_KILLED])

@@ -129,9 +129,10 @@ def test_real_warp_draft_with_escalation_2_is_scored_again():
     res = S.rank_write_story([("Warp", WARP_FACTS)], ask=f)
     assert res["verdict"] == "PASS", res
     assert res["candidates"][0]["status"] == "scored"
-    # escalation=2 is not a hard miss, so no HARD REQUIREMENT for it
-    rewrite_prompt = [p for st_, p in f.prompts if st_ == "script_write"][1]
-    assert "escalation=2 <" not in rewrite_prompt
+    # escalation=2 is not a hard miss, and since 2026-11-11 a draft that
+    # clears every floor gets no (polish) rewrite at all
+    assert [st_ for st_, _ in f.prompts].count("script_write") == 1
+    assert res["candidates"][0]["rewrites"] == 0
 
 
 def test_genuinely_flat_draft_escalation_1_still_holds_after_its_targeted_rewrite():
@@ -220,11 +221,10 @@ def test_rank_pick_prefers_hook_payoff_curiosity_over_escalation_and_emotion():
     assert st.mean(hooky.values()) == st.mean(moving.values())         # plain mean: a tie
     assert S.critic_weighted_score(hooky) > S.critic_weighted_score(moving)
     d1 = WARP["draft1"]
-    # RANK_REWRITE_BUDGET=2: neither score ever reaches critic_pass's
-    # mean>=4 bar, so both topics now spend both rewrite attempts.
-    f = Fake(script_write=[d1] * 6,
-             script_critic=[{"scores": moving, "critique": ""}] * 3
-                           + [{"scores": hooky, "critique": ""}] * 3,
+    # both clear every floor -> no rewrite (2026-11-11: polish rewrite cut)
+    f = Fake(script_write=[d1] * 2,
+             script_critic=[{"scores": moving, "critique": ""},
+                            {"scores": hooky, "critique": ""}],
              fact_check=[_fc(d1)], metadata_pack=[META])
     res = S.rank_write_story([("Moving", WARP_FACTS), ("Hooky", WARP_FACTS)], ask=f)
     assert res["picked_topic"] == "Hooky"

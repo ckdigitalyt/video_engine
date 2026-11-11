@@ -115,26 +115,39 @@ def test_only_as_exclusivity_or_count_is_still_flagged():
 
 # ------------------------------------------- rank: keep the valid draft --
 
-def test_warp_bubble_valid_draft_survives_a_rewrite_that_breaks_code_rules():
+def test_warp_bubble_valid_draft_above_the_floors_is_not_rewritten():
+    """2026-11-11 owner decision: the polish rewrite (below critic_pass's
+    mean-4 bar) is cut, so the real warp draft 1 -- code-clean, above every
+    floor -- ships as-is instead of risking the rule-breaking rewrite."""
     d1, d2 = WARP["draft1"], WARP["draft2"]
     assert S.code_checks(d1, WARP_FACTS) == []           # the real draft 1 was clean
     assert S.code_checks(d2, WARP_FACTS)                 # the real rewrite was not
     assert not S.critic_floor_misses(WARP_C1["scores"])
-    assert not S.critic_pass(WARP_C1["scores"])  # -> polish rewrite fires
-    # rewrite (d2) breaks rules, its code-fix (d2 again) still breaks them
-    f = Fake(script_write=[d1, d2, d2], script_critic=[WARP_C1],
+    assert not S.critic_pass(WARP_C1["scores"])          # used to trigger the polish
+    f = Fake(script_write=[d1], script_critic=[WARP_C1],
              fact_check=[_fc(d1)], metadata_pack=[META])
     res = S.rank_write_story([("Warp", WARP_FACTS)], ask=f)
     assert res["verdict"] == "PASS", res
-    c = res["candidates"][0]
-    assert c["status"] == "scored" and "kept the previous valid draft" in c["notes"][0]
+    assert res["candidates"][0]["rewrites"] == 0
     assert res["story"]["script"] == d1
+
+
+def test_floor_rewrite_that_breaks_code_rules_keeps_the_previous_valid_draft():
+    d1, d2 = WARP["draft1"], WARP["draft2"]
+    weak = {**WARP_C1, "scores": dict(WARP_C1["scores"], hook_strength=2)}
+    # floor rewrite (d2) breaks rules, its code-fix (d2 again) still breaks them
+    f = Fake(script_write=[d1, d2, d2], script_critic=[weak])
+    res = S.rank_write_story([("Warp", WARP_FACTS)], ask=f)
+    c = res["candidates"][0]
+    assert "kept the previous valid draft" in c["notes"][0]
+    assert c["status"] == "hold" and "hook_strength=2 < 3" in c["reason"]
 
 
 def test_rewrite_that_breaks_rules_gets_its_own_code_fix():
     d1, d2 = WARP["draft1"], WARP["draft2"]
     better = {"scores": GOOD, "critique": ""}
-    f = Fake(script_write=[d1, d2, d1], script_critic=[WARP["critic1"], better],
+    weak = {**WARP["critic1"], "scores": dict(WARP["critic1"]["scores"], hook_strength=2)}
+    f = Fake(script_write=[d1, d2, d1], script_critic=[weak, better],
              fact_check=[_fc(d1)], metadata_pack=[META])
     res = S.rank_write_story([("Warp", WARP_FACTS)], ask=f)
     assert res["verdict"] == "PASS"
@@ -145,9 +158,8 @@ def test_rewrite_that_breaks_rules_gets_its_own_code_fix():
 def test_lower_scoring_rewrite_does_not_replace_the_draft():
     d1 = WARP["draft1"]
     worse = dict(WARP_C1["scores"], hook_strength=2)
-    # RANK_REWRITE_BUDGET=2: WARP_C1 never clears critic_pass's mean>=4
-    # bar, so a 2nd rewrite attempt happens too (also rejected as lower-
-    # scoring) -- the kept draft is still the original either way.
+    # 2026-11-11: WARP_C1 clears every floor, so no rewrite happens at all
+    # (polish rewrite cut); the draft is trivially kept.
     f = Fake(script_write=[d1, d1, d1],
              script_critic=[WARP_C1, {"scores": worse, "critique": ""},
                             {"scores": worse, "critique": ""}],
