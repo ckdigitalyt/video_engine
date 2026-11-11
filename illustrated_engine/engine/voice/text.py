@@ -50,6 +50,19 @@ _SPELLING = {
     # t_the_rain_that_should_ve_erased B6 "rock called tuff" heard "tough".
     "tonne": "ton", "tuff": "tough",
 }
+# Unit abbreviations faster-whisper writes for a spoken unit ("twenty
+# hertz" heard "twenty hz": live t_infrasound_the_sound_that_made_them_sick
+# B4 HELD, WER 0.0909). An abbreviation has no phonetic word of its own
+# (espeak spells "hz" as letters), so it is expanded literally, on both
+# sides, to the singular full word; qa.round_trip accepts the plural.
+_UNIT_ABBR = {
+    "hz": ["hertz"], "khz": ["kilohertz"], "mhz": ["megahertz"], "ghz": ["gigahertz"],
+    "km": ["kilometer"], "kms": ["kilometer"], "cm": ["centimeter"],
+    "mm": ["millimeter"], "nm": ["nanometer"], "kg": ["kilogram"], "kgs": ["kilogram"],
+    "mph": ["miles", "per", "hour"], "kph": ["kilometers", "per", "hour"],
+    "db": ["decibel"],
+}
+UNIT_WORDS = frozenset(w for v in _UNIT_ABBR.values() if len(v) == 1 for w in v)
 _SENT_SPLIT = re.compile(r"(?<=[.!?])[\"'”’)]*\s+(?=[\"'“‘(]*[A-Z0-9])")
 # A trailing ordinal suffix (30th, 1st, 2nd, 3rd) is matched here so
 # _num_words (below) can convert it to the ordinal WORD ("thirtieth") --
@@ -144,6 +157,9 @@ def norm_tokens(word: str) -> list:
     for t in w.split():
         t = re.sub(r"[^a-z0-9]", "", t)
         if not t:
+            continue
+        if t in _UNIT_ABBR:
+            out.extend(_UNIT_ABBR[t])
             continue
         if t in _SPELLING:
             t = _SPELLING[t]
