@@ -258,8 +258,12 @@ def check_script(script: dict) -> list:
     if BAD_OPENERS.match(first):
         errs.append("hook: filler opener (Did you know / Imagine / Let's ...)")
     errs += check_hook_concrete(script)
-    if not HEADLINE_WORDS[0] <= len(words(script["hook_headline"])) <= HEADLINE_WORDS[1]:
-        errs.append(f"hook_headline: must be {HEADLINE_WORDS[0]}-{HEADLINE_WORDS[1]} words")
+    # 2026-11-11 review: `hook_headline` (and per-sentence `on_screen`, see
+    # check_digits) are no longer gated here. v16_autostory.script_to_story
+    # never carries them into story.json -- the frame-0 headline and every
+    # on-screen label come from the visual planner (engine.v15_plan, which
+    # validates its own copy digits against the narration, _spoken_digits)
+    # -- so a hold on them judged text no viewer would ever see.
     roles = [s["role"] for s in sents]
     if roles[0] != "hook" or roles.count("hook") != 1:
         errs.append("roles: exactly one hook role, on the first sentence")
@@ -300,9 +304,11 @@ def _fact_numbers(f: dict) -> set:
 
 def check_digits(script: dict, facts: dict) -> list:
     """Narration numbers must appear in the facts the sentence cites (spelled 1-10
-    are idiom and skipped); on-screen numbers must be spoken (V15 guard)."""
+    are idiom and skipped). The script's `on_screen` labels are not checked:
+    they never reach the video (see check_script); the planner's real
+    on-screen copy is checked against the narration in engine.v15_plan."""
     by_id = {f["id"]: f for f in facts["claims"]}
-    errs, spoken = [], numbers_in(narration(script))
+    errs = []
     for i, s in enumerate(script["sentences"], 1):
         allowed = set()
         for fid in s["fact_ids"]:
@@ -311,10 +317,6 @@ def check_digits(script: dict, facts: dict) -> list:
         extra = numbers_in(s["text"], min_spelled=11) - allowed
         if extra:
             errs.append(f"sentence {i}: numbers {sorted(extra)} are not in its cited facts")
-        for label in s.get("on_screen", []):
-            miss = numbers_in(label) - spoken
-            if miss:
-                errs.append(f"sentence {i}: on-screen '{label}' shows {sorted(miss)} never spoken")
     return errs
 
 
@@ -674,6 +676,20 @@ def _finalize(run: _Run, story: dict, topic: str, facts: dict, series_note: str,
     if probs:
         script = story["script"] = _write(run, topic, facts, series_note, "\n".join(probs), script)
         errs = code_checks(script, facts)
+        # 2026-11-11 review: 5 of 14 on-disk script-stage holds were code
+        # rules broken BY this rewrite (overcorrections like "only"/"every
+        # time", a mangled "HD 189733 b" reference) on a draft that had
+        # been code-clean. The fact-check rewrite now gets the same
+        # targeted code-fix the critic rewrite gets (RANK_CODE_FIX_BUDGET);
+        # the re-run fact_check below still judges the fixed draft.
+        for _ in range(RANK_CODE_FIX_BUDGET):
+            if not errs:
+                break
+            script = story["script"] = _write(run, topic, facts, series_note,
+                                              "\n".join(errs), script)
+            story.setdefault("fact_check_code_fixes", 0)
+            story["fact_check_code_fixes"] += 1
+            errs = code_checks(script, facts)
         if errs:
             hold("script rules failing after the fact-check rewrite: " + "; ".join(errs))
             return
@@ -853,32 +869,48 @@ def rank_write_story(topics_facts: list, *, series_note: str = "", batch_titles:
     for topic, facts in topics_facts:
         candidates.append(_rank_one(topic, facts, series_note, ask or llm.ask))
 
-    scored = [c for c in candidates if c["status"] == "scored"]
     # 2026-10-24: pick on the weighted score (STORY_DIM_WEIGHTS), not the
     # plain mean. 2026-10-27: payoff/human_voice/hook/curiosity count most.
-    picked = max(scored, key=lambda c: c["weighted"] or 0.0) if scored else None
-    public_candidates = [{k: v for k, v in c.items() if k not in ("_run", "script", "facts")}
-                         for c in candidates]
-    result = {"verdict": "HOLD", "picked_topic": None, "story": None,
-              "candidates": public_candidates}
-
-    if picked is not None:
+    # 2026-11-11 review: only the top candidate used to be finalized; when
+    # its fact-check/metadata tail HELD, the slot held with a second scored
+    # candidate never tried. Scored candidates are now finalized in rank
+    # order until one passes. An LLM outage stops the walk (the next
+    # candidate would only degrade the same way).
+    scored = sorted((c for c in candidates if c["status"] == "scored"),
+                    key=lambda c: c["weighted"] or 0.0, reverse=True)
+    result = {"verdict": "HOLD", "picked_topic": None, "story": None}
+    first = None
+    for picked in scored:
         story = {"topic": picked["topic"], "verdict": "HOLD", "holds": [],
                  "script": picked["script"], "critic": picked["critic"], "fact_check": None,
                  "metadata": None, "calls": picked["_run"].calls,
                  "drafts": [{"script": picked["script"], "critic": picked["critic"]}]}
+        outage = False
         try:
             _finalize(picked["_run"], story, picked["topic"], picked["facts"], series_note,
                      list(batch_titles))
         except (LLMUnavailable, LLMSchemaError) as e:
             story["holds"].append(f"llm: {type(e).__name__}: {str(e)[:200]}")
-            if isinstance(e, LLMUnavailable) and e.retry_at:
+            outage = isinstance(e, LLMUnavailable)
+            if outage and e.retry_at:
                 story["retry_at"] = e.retry_at.isoformat()
         story["verdict"] = "PASS" if not story["holds"] else "HOLD"
         story["llm_calls"] = len(picked["_run"].calls)
-        result["picked_topic"] = picked["topic"]
-        result["story"] = story
-        result["verdict"] = story["verdict"]
+        picked["finalize"] = story["verdict"]
+        if story["holds"]:
+            picked["finalize_holds"] = list(story["holds"])
+        if first is None or story["verdict"] == "PASS":
+            first = (picked, story)
+        if story["verdict"] == "PASS" or outage:
+            break
+    if first is not None:
+        # PASS -> the passing candidate; all held -> the top-ranked one (as before)
+        result["picked_topic"] = first[0]["topic"]
+        result["story"] = first[1]
+        result["verdict"] = first[1]["verdict"]
+    result["candidates"] = [{k: v for k, v in c.items()
+                             if k not in ("_run", "script", "facts")}
+                            for c in candidates]
     return result
 
 

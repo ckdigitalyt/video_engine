@@ -174,9 +174,9 @@ def generate_story_ranked(candidates: list, *, ask=None, fetch_sources=None,
     for c in result["candidates"]:
         if c["status"] == "hold":
             reasons.append(f"{c['topic']}: {c['reason']}")
-        elif result.get("picked_topic") == c["topic"] and result.get("story"):
+        elif c.get("finalize_holds"):
             reasons.append(f"{c['topic']}: mean {c['mean']:.2f} min {c['min']} picked but "
-                           f"finalize held: {'; '.join(result['story']['holds'])}")
+                           f"finalize held: {'; '.join(c['finalize_holds'])}")
     return {"status": "hold",
            "reason": "rank-not-block: all candidates failed a hard check: " + "; ".join(reasons),
            "candidates": all_candidates}

@@ -168,9 +168,11 @@ def test_hook_rules():
     sc = good_script()
     sc["sentences"][0]["text"] = "One cold morning in 1908 something flattened a Siberian forest and left no crater."
     assert any("hook: first sentence has" in e for e in S.check_script(sc))
+    # 2026-11-11: hook_headline never reaches story.json (script_to_story
+    # drops it; the planner writes the frame-0 headline) -> not gated
     sc = good_script()
     sc["hook_headline"] = "The"
-    assert any("hook_headline" in e for e in S.check_script(sc))
+    assert not any("hook_headline" in e for e in S.check_script(sc))
 
 
 def test_narration_digits_are_voice_safe():
@@ -232,12 +234,12 @@ def test_digit_guard_narration_vs_cited_facts():
     assert S.check_digits(sc, f) == []
 
 
-def test_on_screen_digits_must_be_spoken():
+def test_script_on_screen_labels_are_not_gated():
+    """2026-11-11: the script's on_screen labels are dropped by
+    script_to_story; the planner's real copy is checked in engine.v15_plan."""
     sc = good_script()
-    sc["sentences"][3]["on_screen"] = ["65 km"]
-    assert S.check_digits(sc, FACTS) == []
     sc["sentences"][3]["on_screen"] = ["650 km"]
-    assert any("never spoken" in e for e in S.check_digits(sc, FACTS))
+    assert S.check_digits(sc, FACTS) == []
 
 
 def test_duration_gate():
