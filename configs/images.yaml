@@ -91,7 +91,12 @@ image_gen:
     steps: 4
     cfg_scale: 1.0
     timeout_s: 1800          # RESEARCH.md §5.3: ~1,237s measured at 576x1024
-    max_plates_per_video: 3  # DESIGN §6.1 tier 5: "owned floor: <=3 plates/video"
+    # 2026-11-11 (pipeline review): lowered 3 -> 1. At cap=3, sdcpp_local was
+    # used on 7/27 recent renders at ~1,237s/plate (2,000-6,800s total) and
+    # only 1 of those 7 renders ever PASSed -- the time cost vastly outweighs
+    # the rare rescue. 1 plate still gives a last-resort fallback without
+    # the multi-plate time sink.
+    max_plates_per_video: 1  # DESIGN §6.1 tier 5 floor was "<=3/video"
 
   archive:
     max_results: 5
