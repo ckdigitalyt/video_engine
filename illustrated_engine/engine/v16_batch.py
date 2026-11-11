@@ -471,12 +471,25 @@ def package_video(story_dir: Path, work_dir: Path, out_dir: Path, *, report: dic
 
 # ============================================================= batch runner
 
+def _record_published(story_dir: Path, row: dict, history_path=None) -> bool:
+    """Never raises: a history write failure must not fail the batch row."""
+    try:
+        from engine import v16_topics as T
+        yt = ((row.get("package") or {}).get("youtube")) or {}
+        extra = {"youtube_video_id": yt["video_id"]} if yt.get("video_id") else None
+        return T.record_published(story_dir, Path(history_path or T.DEFAULT_HISTORY_PATH),
+                                  extra=extra) is not None
+    except Exception:
+        return False
+
+
 def _checkpoint_path(work: Path) -> Path:
     return Path(work) / "batch_state.json"
 
 
 def run_batch(story_dirs: list, work: Path, *, resume: bool = False,
-             package: bool = True, upload: bool = True, **kw) -> dict:
+             package: bool = True, upload: bool = True, history_path=None,
+             **kw) -> dict:
     """-> batch report dict, also written to `<work>/batch_report.json`
     after every video (so a kill mid-batch loses at most one in-flight
     video's row). A story that HOLDs or errors never stops the batch — it
@@ -487,7 +500,12 @@ def run_batch(story_dirs: list, work: Path, *, resume: bool = False,
     `upload`: forwarded to `package_video` — PASS videos auto-upload to
     YouTube as private (owner directive 2026-10-10). Defaults on here
     since this is the real batch-production entrypoint; pass False to
-    render without publishing."""
+    render without publishing.
+
+    `history_path`: topic_history.jsonl that a PASS story's topic is
+    recorded in as status "published" (v16_topics.record_published, the
+    durable dedupe record, 2026-11-11). None -> the production file; only
+    stories carrying a `topic_id` (topic-engine stories) are recorded."""
     from engine.v15_pipeline import run_pipeline
     work = Path(work)
     work.mkdir(parents=True, exist_ok=True)
@@ -552,6 +570,8 @@ def run_batch(story_dirs: list, work: Path, *, resume: bool = False,
                 row["package"] = package_video(
                     sd, work / sd.name, work / sd.name / "package", report=rep,
                     upload=upload)
+            if rep["publish_gate"] == "PASS":
+                row["history_recorded"] = _record_published(sd, row, history_path)
         except Exception as e:  # never stop the batch on a per-story error
             row.update(verdict="ERROR", error=f"{type(e).__name__}: {e}"[:400],
                       trace=traceback.format_exc()[-1200:])

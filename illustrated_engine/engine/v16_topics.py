@@ -202,6 +202,82 @@ def claim_tokens(candidate: dict) -> set:
     return key_terms(candidate.get("claim") or candidate.get("title") or "")
 
 
+# ------------------------------------------------- similarity normalizing --
+#
+# 2026-11-11 review (108 batches): plain token Jaccard missed near-identical
+# subjects worded differently -- "fulgurite" was PUBLISHED TWICE
+# (JR53-E2EOio 2026-11-05, yvjF7jSO8b4 2026-11-09): the second candidate's
+# entities {fulgurite, lightning-fused, sand} vs the published {fulgurite,
+# fused, glass, sand} scored 2/5 = 0.40 < 0.5 because "fused" !=
+# "lightning-fused"; "fossil"/"fossilized"/"fossils" and "raindrop"/
+# "raindrops" never matched either. Comparison now runs on normalized
+# terms: hyphen/apostrophe-split, light hand-rolled stemming (no NLP
+# dependency is installed, DESIGN Sec.9.2 stays stdlib-only), and generic
+# deep-time filler ("ancient", "years", "billion") dropped so it can't
+# dilute the subject overlap. Stored history rows keep their raw
+# entities/claim_tokens; both sides are normalized at compare time.
+
+_STEM_RULES = (
+    # longest first; (suffix, replacement)
+    ("ifications", "if"), ("ification", "if"), ("ified", "if"), ("ifies", "if"),
+    ("ifying", "if"), ("ify", "if"),
+    ("izations", ""), ("isations", ""), ("ization", ""), ("isation", ""),
+    ("izing", ""), ("ising", ""), ("ized", ""), ("ised", ""), ("izes", ""), ("ize", ""),
+    ("ies", "y"), ("ied", "y"),
+    ("ing", ""), ("ed", ""),
+)
+_GENERIC_TERMS = frozenset("""
+ancient deep time era eon epoch period age year ago billion million thousand hundred
+earth early old record preserve today modern scientist astronomer found discover show
+reveal turn make form exist still once
+""".split())
+
+
+def stem_term(word: str) -> str:
+    """Light suffix-stripping stemmer (plural/tense/derivation variants only):
+    fossils/fossilized/fossilization -> fossil, petrified/petrification ->
+    petrif, raindrops -> raindrop, galaxies -> galaxy, fused/fuse -> fus.
+    Deterministic and only ever applied to BOTH sides of a comparison, so
+    an imperfect stem (striking -> strik) still matches its own variants."""
+    w = str(word or "").lower().strip("'")
+    if w.endswith("'s"):
+        w = w[:-2]
+    for suf, rep in _STEM_RULES:
+        if w.endswith(suf) and len(w) - len(suf) + len(rep) >= 3:
+            w = w[: -len(suf)] + rep
+            if suf in ("ing", "ed") and len(w) >= 4 and w[-1] == w[-2] and w[-1] not in "lsz":
+                w = w[:-1]                                   # stopped -> stop
+            break
+    else:
+        if w.endswith(("sses", "xes", "zes", "ches", "shes")) and len(w) > 5:
+            w = w[:-2]                                       # glasses -> glass
+        elif w.endswith("s") and not w.endswith(("ss", "us", "is")) and len(w) > 3:
+            w = w[:-1]                                       # raindrops -> raindrop
+    if w.endswith("e") and len(w) >= 4:
+        w = w[:-1]                                           # fuse -> fus (= fused)
+    return w
+
+
+def norm_terms(tokens, *, drop_generic: bool = True) -> set:
+    """Raw key terms (stored entities / claim_tokens, or key_terms output)
+    -> the normalized set the dedupe comparison runs on. Falls back to the
+    unfiltered stems when every term is generic, so a row is never emptied."""
+    stems = set()
+    for t in tokens or ():
+        for part in re.split(r"[-'\s/]+", str(t).lower()):
+            if len(part) >= 3 and part not in _STOPWORDS:
+                s = stem_term(part)
+                if len(s) >= 3:
+                    stems.add(s)
+    if not drop_generic:
+        return stems
+    specific = {s for s in stems if s not in _GENERIC_STEMS}
+    return specific or stems
+
+
+_GENERIC_STEMS = frozenset(stem_term(w) for w in _GENERIC_TERMS)
+
+
 def entity_jaccard(a: set, b: set) -> float:
     if not a or not b:
         return 0.0
@@ -218,27 +294,186 @@ def claim_overlap(a: set, b: set) -> float:
 
 def is_duplicate(candidate: dict, history_row: dict) -> str | None:
     """-> a reason string if `candidate` duplicates `history_row`, else None.
-    A shared `series_id` is the DESIGN Sec.9.2 exception for a planned series part."""
+    A shared `series_id` is the DESIGN Sec.9.2 exception for a planned series part.
+    Pure comparator: WHICH history rows may block is decided by dedupe()."""
     if candidate.get("series_id") and candidate["series_id"] == history_row.get("series_id"):
         return None
-    ej = entity_jaccard(entity_set(candidate), set(history_row.get("entities") or ()))
-    if ej >= DUP_ENTITY_JACCARD:
+    ea = norm_terms(entity_set(candidate))
+    eb = norm_terms(history_row.get("entities") or ())
+    ej = entity_jaccard(ea, eb)
+    # one shared term out of two ({rock} vs {rock, missing}) is a broad
+    # subject word, not the same story: >=2 shared terms, or identical sets
+    if ej >= DUP_ENTITY_JACCARD and (len(ea & eb) >= 2 or ea == eb):
         return (f"entity overlap {ej:.2f} >= {DUP_ENTITY_JACCARD} with "
                 f"{history_row.get('id') or history_row.get('title')!r}")
-    co = claim_overlap(claim_tokens(candidate), set(history_row.get("claim_tokens") or ()))
-    if co >= DUP_CLAIM_OVERLAP:
+    a = norm_terms(claim_tokens(candidate))
+    b = norm_terms(history_row.get("claim_tokens") or ())
+    co = claim_overlap(a, b)
+    # Containment on a 2-3 term claim is noise once terms are stemmed
+    # (seed row "How Galaxies form - finally Revealed" -> {galaxy, form,
+    # reveal} would contain every "galaxy formed..." claim), so the claim
+    # rule also needs DUP_CLAIM_MIN_SHARED terms in common.
+    if co >= DUP_CLAIM_OVERLAP and len(a & b) >= DUP_CLAIM_MIN_SHARED:
         return (f"claim overlap {co:.2f} >= {DUP_CLAIM_OVERLAP} with "
                 f"{history_row.get('id') or history_row.get('title')!r}")
     return None
 
 
-def dedupe(candidates: list, history: list) -> tuple:
-    """-> (unique, duplicates). Duplicates carry a `duplicate_reason`."""
+# ------------------------------------------------- which rows may block --
+#
+# 2026-11-11 review: of 920 duplicate matches in recent cycles, 872 were
+# against rows that were only ever "queued" (then HELD at research/script
+# and never rendered) and only 24 against published videos. Duplicate
+# rows also blocked (a copy of a copy), as did "rejected" rows. Ideation's
+# ~18 raw candidates/cycle lost ~16 (89%) to dedupe, leaving ~1.56 queued
+# per cycle instead of the 3 per slot materialize_candidates assumes.
+# Now only these rows block a new candidate:
+#   - a real published outcome, any age: status "published" (channel/V15
+#     seeds, and v16_batch's PASS record_published rows), a `real_video_id`
+#     (v16_feedback matched an upload to it), or an id in `published_ids`
+#     (PASS rows of build/v16/batches/*/batch_report.json);
+#   - a "queued" row from the last RECENT_QUEUED_BLOCK_DAYS (in flight, or
+#     just tried), by its `ts`, or for legacy rows written before `ts`
+#     existed, its id appearing in a recent batch's topics_queued.json.
+# Older held/queued, rejected and duplicate rows no longer block forever.
+RECENT_QUEUED_BLOCK_DAYS = 3.0
+PUBLISHED_STATUSES = frozenset({"published"})
+DUP_CLAIM_MIN_SHARED = 3
+BATCHES_DIR = REPO / "illustrated_engine" / "build" / "v16" / "batches"
+
+
+def _now() -> float:
+    import time
+    return time.time()
+
+
+def _row_epoch(row: dict):
+    ts = row.get("ts")
+    if not ts:
+        return None
+    import datetime as _dt
+    try:
+        d = _dt.datetime.fromisoformat(str(ts).replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if d.tzinfo is None:
+        d = d.replace(tzinfo=_dt.timezone.utc)
+    return d.timestamp()
+
+
+def is_published_row(row: dict, published_ids=()) -> bool:
+    return (row.get("status") in PUBLISHED_STATUSES or bool(row.get("real_video_id"))
+            or (row.get("id") in published_ids if published_ids else False))
+
+
+def is_blocking_row(row: dict, *, now: float | None = None, recent_queued_ids=(),
+                    published_ids=(), recent_days: float = RECENT_QUEUED_BLOCK_DAYS) -> bool:
+    """True when `row` may block a new candidate (see the block comment above).
+    A row with no `status` at all (a hand-built row, not a topic_history
+    line) is treated as blocking, the conservative pre-2026-11-11 behaviour."""
+    if "status" not in row:
+        return True
+    if is_published_row(row, published_ids):
+        return True
+    if row.get("status") != "queued":
+        return False
+    epoch = _row_epoch(row)
+    if epoch is not None:
+        return ((now if now is not None else _now()) - epoch) <= recent_days * 86400
+    return row.get("id") in recent_queued_ids
+
+
+def blocking_rows(history: list, **kw) -> list:
+    return [h for h in history if is_blocking_row(h, **kw)]
+
+
+def _story_topic_id(story_name: str):
+    try:
+        return json.loads((STORIES_DIR / Path(str(story_name)).name / "story.json")
+                          .read_text()).get("topic_id")
+    except (OSError, ValueError):
+        return None
+
+
+def batch_outcome_ids(batches_dir: Path = BATCHES_DIR, *, now: float | None = None,
+                      recent_days: float = RECENT_QUEUED_BLOCK_DAYS) -> tuple:
+    """-> (published_ids, recent_queued_ids) read from batch work dirs:
+    PASS rows of every batch_report.json (-> story.json topic_id), and
+    every topic id in a topics_queued.json written in the last
+    `recent_days`. Never raises; a missing dir gives two empty sets."""
+    published, recent = set(), set()
+    now = now if now is not None else _now()
+    try:
+        dirs = [d for d in Path(batches_dir).iterdir() if d.is_dir()]
+    except OSError:
+        return published, recent
+    for d in dirs:
+        try:
+            rep = json.loads((d / "batch_report.json").read_text())
+            for r in rep.get("rows") or []:
+                if r.get("verdict") == "PASS" and r.get("story"):
+                    tid = _story_topic_id(r["story"])
+                    if tid:
+                        published.add(tid)
+        except (OSError, ValueError, AttributeError):
+            pass
+        tq = d / "topics_queued.json"
+        try:
+            if now - tq.stat().st_mtime <= recent_days * 86400:
+                sel = json.loads(tq.read_text())
+                for e in (sel.get("queue") or []) + (sel.get("picked") or []):
+                    for p in (e.get("parts") if isinstance(e, dict) and "parts" in e else [e]):
+                        if isinstance(p, dict) and p.get("id"):
+                            recent.add(p["id"])
+        except (OSError, ValueError, AttributeError):
+            pass
+    return published, recent
+
+
+def dedupe(candidates: list, history: list, *, now: float | None = None,
+           recent_queued_ids=(), published_ids=()) -> tuple:
+    """-> (unique, duplicates). Duplicates carry a `duplicate_reason`.
+    Only blocking rows (is_blocking_row) are compared against."""
+    blockers = blocking_rows(history, now=now, recent_queued_ids=set(recent_queued_ids),
+                             published_ids=set(published_ids))
     unique, dupes = [], []
     for c in candidates:
-        reason = next((r for h in history if (r := is_duplicate(c, h))), None)
+        reason = next((r for h in blockers if (r := is_duplicate(c, h))), None)
         (dupes if reason else unique).append({**c, "duplicate_reason": reason} if reason else c)
     return unique, dupes
+
+
+AVOID_TITLES_MAX = 80
+
+
+def avoid_titles_for_prompt(history: list, *, published_ids=(), now: float | None = None,
+                            recent_queued_ids=(), limit: int = AVOID_TITLES_MAX) -> list:
+    """The ideation prompt's "don't repeat" list. 2026-11-11 review: it was
+    the last 50 rows by insertion order, 44/50 of them duplicate-status
+    rows -- nearly useless. Now: every published topic first (newest
+    first, real_title too when the upload title differs), then recently
+    queued in-flight topics, de-duplicated, capped at `limit`."""
+    out, seen = [], set()
+
+    def add(t):
+        k = " ".join(sorted(norm_terms(key_terms(t), drop_generic=False)))
+        if t and k not in seen:
+            seen.add(k)
+            out.append(t)
+
+    pub = [h for h in history if is_published_row(h, published_ids)]
+    # V16 uploads (newest last in the file) before the old channel/V15 seeds
+    v16 = [h for h in pub if h.get("source") not in ("channel_csv", "v15_story")]
+    seeds = [h for h in pub if h.get("source") in ("channel_csv", "v15_story")]
+    for h in reversed(v16):
+        add(h.get("title"))
+    for h in reversed(history):
+        if (h.get("status") == "queued" and not is_published_row(h, published_ids)
+                and is_blocking_row(h, now=now, recent_queued_ids=recent_queued_ids)):
+            add(h.get("title"))
+    for h in reversed(seeds):
+        add(h.get("title"))
+    return out[:limit]
 
 
 # ------------------------------------------------ auto-weight override --
@@ -556,9 +791,48 @@ def _history_row(candidate: dict, status: str, source: str, extra: dict | None =
         "scale_comparison": is_scale_comparison(candidate),
         "status": status,
         "source": source,
+        # 2026-11-11: when the row was written, so dedupe can tell an
+        # in-flight queued topic from one held weeks ago (is_blocking_row)
+        "ts": _utc_iso(),
     }
     if extra:
         row.update(extra)
+    return row
+
+
+def _utc_iso(epoch: float | None = None) -> str:
+    import datetime as _dt
+    t = _now() if epoch is None else epoch
+    return _dt.datetime.fromtimestamp(t, _dt.timezone.utc).isoformat(timespec="seconds")
+
+
+def record_published(story_dir, history_path: Path = DEFAULT_HISTORY_PATH,
+                     extra: dict | None = None) -> dict | None:
+    """Append a status="published" row for a story that PASSed the gate
+    (v16_batch.run_batch calls this; a PASS auto-uploads). Durable record
+    for dedupe: batch work dirs get cleaned (61 of 108 live batches already
+    were) and v16_feedback only tags a row once analytics arrive, which for
+    a private or very new upload may be never/days. Copies the topic's
+    latest history row (entities, claim tokens, cluster) so the dedupe
+    comparison sees the same subject. -> the row written, or None for a
+    hand-authored story (no topic_id) or an unreadable story.json."""
+    try:
+        story = json.loads((Path(story_dir) / "story.json").read_text())
+    except (OSError, ValueError):
+        return None
+    tid = story.get("topic_id")
+    if not tid:
+        return None
+    base = next((h for h in reversed(load_history(history_path)) if h.get("id") == tid), None)
+    if base is None:
+        base = _history_row({"id": tid, "title": story.get("title", ""),
+                             "claim": story.get("title", ""),
+                             "cluster": story.get("subject")}, "published", "v16_batch")
+    row = {k: v for k, v in base.items() if not k.startswith("real_")
+           and k not in ("reason", "score")}
+    row.update(status="published", source="v16_batch", ts=_utc_iso(),
+               story_id=story.get("story_id") or Path(story_dir).name, **(extra or {}))
+    append_history([row], history_path)
     return row
 
 
@@ -624,19 +898,30 @@ def seed_history_file(path: Path = DEFAULT_HISTORY_PATH) -> int:
 # ----------------------------------------------------------- orchestration --
 
 def build_queue(*, n: int = 20, history_path: Path = DEFAULT_HISTORY_PATH, ask=None,
-                persist: bool = True) -> dict:
+                persist: bool = True, batches_dir: Path | None = None) -> dict:
     """Ideate -> dedupe vs history -> score -> filter (>=MIN_SCORE) -> series-group
     -> ranked queue. -> {"queue", "duplicates", "rejected", "raw_count"}. `queue`
     entries are either a scored candidate dict or a `{"series_id","parts":[...]}`
     group (a group's score is its best-scoring part's), ordered by
     `rank_by_share`: score order within a cluster, CLUSTER_TARGET_SHARE
-    across clusters (2026-10-24 analytics review)."""
+    across clusters (2026-10-24 analytics review).
+
+    `batches_dir`: batch work dirs scanned for PASS outcomes and recently
+    queued legacy topics (batch_outcome_ids). Defaults to BATCHES_DIR only
+    for the production history file, so a test history stays isolated."""
     ask = ask or llm.ask
     history = load_history(history_path)
-    avoid_titles = [h["title"] for h in history[-50:]]      # keep the ideation prompt bounded
+    now = _now()
+    if batches_dir is None and Path(history_path) == DEFAULT_HISTORY_PATH:
+        batches_dir = BATCHES_DIR
+    published_ids, recent_ids = (batch_outcome_ids(batches_dir, now=now)
+                                 if batches_dir else (set(), set()))
+    avoid_titles = avoid_titles_for_prompt(history, published_ids=published_ids, now=now,
+                                           recent_queued_ids=recent_ids)
     raw = ideate(n, avoid_titles=avoid_titles, ask=ask)
 
-    unique, dupes = dedupe(raw, history)
+    unique, dupes = dedupe(raw, history, now=now, recent_queued_ids=recent_ids,
+                           published_ids=published_ids)
     scored = score_candidates(unique, ask=ask)
 
     accepted_ids = {c["id"] for c in scored if c["score"] >= MIN_SCORE}
