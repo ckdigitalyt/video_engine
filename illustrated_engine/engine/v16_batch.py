@@ -592,6 +592,26 @@ def run_batch(story_dirs: list, work: Path, *, resume: bool = False,
 
 # ===================================================================== CLI
 
+def selection_summary(sel: dict, mat: dict) -> list:
+    """Log lines for the --n path. 2026-11-11 review: "0 topics selected by
+    the topic engine" (everything deduped / below MIN_SCORE / no ideation)
+    used to print the same "every selected topic held during
+    research/script generation" line as "topics selected, all held
+    downstream" -- two different failures with different fixes."""
+    picked, dirs, holds = len(sel["picked"]), len(mat["dirs"]), len(mat["holds"])
+    if not picked:
+        return [f"nothing renderable this run: the topic engine selected 0 topics "
+                f"({sel.get('raw_count', 0)} raw candidates, {len(sel.get('queue') or [])} "
+                f"left in the queue after dedupe/scoring) — nothing reached "
+                f"research/script generation"]
+    lines = [f"materialized {dirs}/{picked} slots into story dirs ({holds} held during "
+             f"research/script generation — see materialize_report.json)"]
+    if not dirs:
+        lines.append(f"nothing renderable this run: all {picked} selected slots held "
+                     f"during research/script generation — see materialize_report.json")
+    return lines
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(prog="engine.v16_batch")
     ap.add_argument("--stories", default="")
@@ -621,12 +641,9 @@ def main() -> int:
         # used to flag here (research+script engine wired live).
         mat = materialize_candidates(sel["picked"], work, queue=sel["queue"])
         materialized_dirs = mat["dirs"]
-        print(f"materialized {len(materialized_dirs)}/{len(sel['picked'])} "
-             f"topics into story dirs ({len(mat['holds'])} held during "
-             f"research/script generation — see materialize_report.json)")
+        for line in selection_summary(sel, mat):
+            print(line)
         if not a.stories and not a.all and not materialized_dirs:
-            print("nothing renderable this run: every selected topic held "
-                 "during research/script generation — see materialize_report.json")
             return 0
 
     pf = preflight(work, n_videos=max(a.n, 1))
