@@ -37,7 +37,7 @@ def run_batch(story_dirs: list, work: Path, **kw) -> dict:
             rep = run_pipeline(sd, work / sd.name, **kw)
             row.update(verdict=rep["publish_gate"],
                        failures=rep["gate"]["failures"],
-                       duration_s=rep["gate"]["checks"]["av"].get("duration_s"),
+                       duration_s=(rep["gate"]["checks"].get("av") or {}).get("duration_s"),
                        plan=rep["plan"]["source"], deck=rep.get("deck"),
                        plates=rep.get("plate_providers"),
                        costs=rep["costs"], timings=rep["timings"])

@@ -534,13 +534,18 @@ def run_batch(story_dirs: list, work: Path, *, resume: bool = False,
         row = {"story": sd.name}
         try:
             rep = run_pipeline(sd, work / sd.name, **kw)
+            checks = rep["gate"]["checks"]
+            # an early-exit HOLD (v15_pipeline.early_hold_report) has no av /
+            # distinctness checks: duration then comes from the projection
             row.update(verdict=rep["publish_gate"], failures=rep["gate"]["failures"],
-                      duration_s=rep["gate"]["checks"]["av"].get("duration_s"),
+                      duration_s=((checks.get("av") or {}).get("duration_s")
+                                  or (checks.get("duration") or {}).get("duration_s")),
                       plan=rep["plan"]["source"], plates=rep.get("plate_providers"),
                       costs=rep["costs"], timings=rep["timings"],
                       scorecard=(rep["gate"].get("scorecard") or {}).get("total"),
-                      distinctness_ok=rep["gate"]["checks"]["distinctness"]["ok"],
-                      manifest_complete=rep["manifest"]["completeness"]["ok"])
+                      distinctness_ok=(checks.get("distinctness") or {}).get("ok"),
+                      manifest_complete=rep["manifest"]["completeness"]["ok"],
+                      early_exit=rep["gate"].get("early_exit"))
             for k in state["totals"]:
                 state["totals"][k] += rep["costs"].get(k, 0)
             # The pre-video `_llm_blocked()` check can't see a quota that

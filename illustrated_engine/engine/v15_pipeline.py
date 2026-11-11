@@ -392,6 +392,92 @@ def split_margin(max_hold_s: float) -> float:
     return max(1.2, min(1.5, max_hold_s / 3))
 
 
+# 2026-11-11 review, early exit: the final timeline is exactly
+# sum(LEAD_S + tts + tail) over the beats (shot_timeline pins each beat's last
+# shot to that span; split/merge/drop_unfixable_shots only move cuts inside
+# it), so the gate's duration verdict is known as soon as the voice exists.
+# One story HELD only for "duration: 24.3s < 25s" after 4,343 s of plates,
+# render and assembly. A small shortfall is closed by lengthening beat tails
+# (silence after the line); a larger one, or an over-length cut, HOLDs before
+# any image is generated.
+DURATION_PAD_MARGIN_S = 0.15   # aim this far over the floor (av probe is +-0.1 s)
+DURATION_PAD_MAX_PER_BEAT_S = 0.25  # at most this much extra silence per beat
+DURATION_MEASURE_TOL_S = 0.1   # v15_gate check_av's scene-sum tolerance
+
+
+def plan_duration(beats: list, tts: dict, tails: dict,
+                  story: dict | None = None) -> dict:
+    """-> {"projected_s", "pad": {beat_id: +s}, "padded_s", "fails"}.
+    `fails` uses v16_script.check_duration (the gate's own rule) and is
+    non-empty only when the outcome is certain: under the floor even with
+    the maximum tail padding, or over the ceiling by more than the
+    measurement tolerance. The HOOK tail is never padded (it rolls straight
+    into the story by design, TAIL_AFTER_HOOK_S)."""
+    from engine.v16_script import DURATION_S, check_duration
+    lo, hi = DURATION_S
+    projected = round(sum(LEAD_S + float(tts[b["beat_id"]])
+                          + float(tails[b["beat_id"]]) for b in beats), 3)
+    out = {"projected_s": projected, "pad": {}, "padded_s": projected,
+           "fails": []}
+    if projected > hi + DURATION_MEASURE_TOL_S:
+        out["fails"] = check_duration(projected, story)
+        return out
+    gap = (lo + DURATION_PAD_MARGIN_S) - projected
+    if gap <= 0:
+        return out
+    paddable = [b["beat_id"] for b in beats
+                if (b.get("function") or "").upper() != "HOOK"]
+    capacity = DURATION_PAD_MAX_PER_BEAT_S * len(paddable)
+    if projected + capacity < lo:
+        out["fails"] = check_duration(projected, story)
+        return out
+    add = min(gap, capacity) / len(paddable)
+    out["pad"] = {bid: round(add, 3) for bid in paddable}
+    out["padded_s"] = round(projected + add * len(paddable), 3)
+    return out
+
+
+def voice_early_hold(voice: dict) -> list:
+    """-> HOLD reasons when the voice result alone already guarantees the
+    gate cannot PASS AND the case is not borderline: the voice is not
+    cleared for commercial use, or >= 2 beats failed round-trip QA. A
+    single held beat (often one word) still runs the full pipeline so the
+    report carries every other check; beats whose ASR did not run
+    (infrastructure, retryable) never trigger the early exit."""
+    from engine.v15_gate import check_voice
+    qa = (voice or {}).get("qa") or {}
+    unchecked = set(qa.get("unchecked_beats") or [])
+    held = [b for b in qa.get("held_beats") or [] if b not in unchecked]
+    if (voice or {}).get("publishable") is False or len(held) >= 2:
+        return check_voice(voice)["fails"]
+    return []
+
+
+def early_hold_report(report: dict, checks: dict, stage: str, work: Path,
+                      t_start: float) -> dict:
+    """Package a HOLD decided before plates/render/assembly. Same keys the
+    batch runner reads (publish_gate, gate.failures/checks, plan, costs,
+    timings, manifest.completeness); the verdict comes from the gate's own
+    v15_gate.verdict_of on the real check(s) that failed."""
+    from engine.v15_gate import verdict_of
+    verdict = verdict_of(checks)
+    report.setdefault("plan", {"source": "skipped", "key": None, "errors": []})
+    report["gate"] = {"verdict": verdict, "checks": checks,
+                      "failures": {k: v["fails"] for k, v in checks.items()
+                                   if not v["ok"]},
+                      "scorecard": None, "early_exit": stage}
+    report["publish_gate"] = verdict
+    report["early_exit"] = {"stage": stage,
+                            "skipped": ["plates", "render", "assembly",
+                                        "final_gate", "manifest"]}
+    report["manifest"] = {"completeness": {"ok": False,
+                                           "reason": f"early exit ({stage})"}}
+    report["timings"]["total_s"] = round(time.time() - t_start, 1)
+    (Path(work) / "pipeline_report.json").write_text(json.dumps(report,
+                                                                indent=1))
+    return report
+
+
 def _split_one(s: dict, wt: list, bt: list, max_hold_s: float,
                margin_s: float, frac: float = 0.5,
                words: list | None = None) -> list | None:
@@ -905,6 +991,32 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
                               "boundaries": t["boundaries"]}
                         for bid, t in timing.items()}
 
+    # 1a. early exit (2026-11-11 review): a voice result that already
+    #     guarantees a HOLD, or a duration that fails regardless of images,
+    #     stops here -- before the subject bible / plan LLM calls, image
+    #     generation, render and assembly.
+    early = voice_early_hold(report["voice"])
+    if early:
+        return early_hold_report(
+            report, {"voice": {"ok": False, "fails": early,
+                               "unverified": True}},
+            "voice", work, t_start)
+    tails = {b["beat_id"]: beat_tail(story["beats"], bi, sid)
+             for bi, b in enumerate(story["beats"])}
+    dplan = plan_duration(story["beats"], tts, tails, story)
+    report["duration_plan"] = dplan
+    if dplan["fails"]:
+        return early_hold_report(
+            report, {"duration": {"ok": False, "fails": dplan["fails"],
+                                  "duration_s": dplan["projected_s"]}},
+            "duration", work, t_start)
+    for bid, add in dplan["pad"].items():
+        tails[bid] = round(tails[bid] + add, 3)
+    if dplan["pad"]:
+        report["warnings"].append({"warning": "duration_padded",
+                                   "detail": {"projected_s": dplan["projected_s"],
+                                              "padded_s": dplan["padded_s"]}})
+
     # decision #13 item 3 / #18 item 2: one reusable identity description
     # for the video's recurring subject — story["concepts"]' busiest entry,
     # or (auto-generated stories, no concepts) derived from title+narration.
@@ -936,8 +1048,6 @@ def run_pipeline(story_dir: Path, work: Path, *, backend: str = "auto",
     #    story_id so a re-run reproduces the same cut list.
     shots = []  # flat: {beat, idx, shot, t0, t1, prompts}
     n_beats = len(story["beats"])
-    tails = {b["beat_id"]: beat_tail(story["beats"], bi, sid)
-             for bi, b in enumerate(story["beats"])}
     report["rhythm"] = {"tails": tails, "max_hold": {}}
     for bi, b in enumerate(story["beats"]):
         hold = beat_max_hold(b, bi, n_beats, sid)
